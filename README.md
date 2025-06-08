@@ -20,6 +20,10 @@ $ npm install
 $ npm run dev
 ```
 
+```bash
+$ npm run dev:web
+```
+
 ### Build
 
 ```bash
@@ -31,4 +35,7 @@ $ npm run build:mac
 
 # For Linux
 $ npm run build:linux
+
+# For Web
+$ npm run build:web
 ```
