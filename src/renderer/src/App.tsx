@@ -3,5 +3,4 @@ function App(): React.JSX.Element {
 
   return <div className="text-xl">Hello World</div>
 }
-
 export default App
