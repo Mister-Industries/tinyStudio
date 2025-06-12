@@ -27,7 +27,8 @@
     "@electron-toolkit/utils": "^4.0.0",
     "@tailwindcss/vite": "^4.1.8",
     "electron-updater": "^6.3.9",
-    "tailwindcss": "^4.1.8"
+    "tailwindcss": "^4.1.8",
+    "tw-animate-css": "^1.3.4"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
