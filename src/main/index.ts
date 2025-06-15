@@ -10,6 +10,7 @@ function createWindow(): void {
     height: 1080,
     show: false,
     autoHideMenuBar: true,
+    frame: false,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -52,6 +53,52 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  // Window control events
+  ipcMain.on('window:minimize', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    if (window) window.minimize()
+  })
+
+  ipcMain.on('window:maximize', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    if (window) {
+      if (window.isMaximized()) {
+        window.unmaximize()
+      } else {
+        window.maximize()
+      }
+    }
+  })
+  ipcMain.handle('window:getIsMaximized', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    return window ? window.isMaximized() : false
+  })
+
+  ipcMain.on('window:requestMaximizeState', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    if (window) {
+      if (window.isMaximized()) {
+        event.sender.send('window:maximized')
+      } else {
+        event.sender.send('window:unmaximized')
+      }
+    }
+  })
+
+  app.on('browser-window-created', (_, window) => {
+    window.on('maximize', () => {
+      window.webContents.send('window:maximized')
+    })
+    window.on('unmaximize', () => {
+      window.webContents.send('window:unmaximized')
+    })
+  })
+
+  ipcMain.on('window:close', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    if (window) window.close()
+  })
 
   createWindow()
 
