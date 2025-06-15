@@ -25,6 +25,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
+    "@monaco-editor/react": "^4.7.0-rc.0",
     "@tailwindcss/vite": "^4.1.8",
     "class-variance-authority": "^0.7.1",
     "electron-updater": "^6.3.9",
