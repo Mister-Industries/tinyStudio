@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import * as monaco from 'monaco-editor'
 import Editor, { Monaco, OnMount } from '@monaco-editor/react'
 import { loader } from '@monaco-editor/react'
+import { useTheme } from '@renderer/lib/ThemeProvider'
 
 loader.config({ monaco })
 
@@ -38,9 +39,53 @@ export function EditorPanel(): React.JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const editorRef = useRef<any>(null)
   const monacoRef = useRef<Monaco | null>(null)
+  const { theme } = useTheme()
 
   const handleFileSelect = (file): void => {
     setViewingFile(file)
+  }
+
+  function handleBeforeMount(monaco): void {
+    monaco.editor.defineTheme('tiny-dark-theme', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [{ background: '1e1e1e' }],
+      colors: {
+        'editor.background': '#1e1e1e',
+        'editor.lineHighlightBackground': '#263c33',
+        'editorCursor.foreground': '#359766',
+        'editorLineNumber.foreground': '#6aaf8c',
+        'editorLineNumber.activeForeground': '#359766',
+        'editor.selectionBackground': '#35976644',
+        'editor.selectionHighlightBackground': '#35976622',
+        'editorBracketMatch.background': '#35976633',
+        'editorBracketMatch.border': '#359766',
+        'editorIndentGuide.background': '#2c2c2c',
+        'editorIndentGuide.activeBackground': '#359766',
+        'editorGutter.background': '#1e1e1e',
+        'editor.foreground': '#d4d4d4'
+      }
+    })
+    monaco.editor.defineTheme('tiny-light-theme', {
+      base: 'vs',
+      inherit: true,
+      rules: [{ background: '#ffffff' }],
+      colors: {
+        'editor.background': '#ffffff',
+        'editor.lineHighlightBackground': '#e6f4ee',
+        'editorCursor.foreground': '#359766',
+        'editorLineNumber.foreground': '#a3cdb7',
+        'editorLineNumber.activeForeground': '#359766',
+        'editor.selectionBackground': '#35976633',
+        'editor.selectionHighlightBackground': '#35976618',
+        'editorBracketMatch.background': '#35976622',
+        'editorBracketMatch.border': '#359766',
+        'editorIndentGuide.background': '#f0f0f0',
+        'editorIndentGuide.activeBackground': '#359766',
+        'editorGutter.background': '#ffffff',
+        'editor.foreground': '#222222'
+      }
+    })
   }
 
   const handleEditorMounted: OnMount = (editor, monaco) => {
@@ -127,10 +172,11 @@ export function EditorPanel(): React.JSX.Element {
         defaultLanguage="arduino"
         defaultValue={sampleContent}
         // language="arduino"
-        // theme="light"
+        theme={theme === 'light' ? 'tiny-light-theme' : 'tiny-dark-theme'}
         // value={sampleContent}
         // onChange={handleContentChange}
         onMount={handleEditorMounted}
+        beforeMount={handleBeforeMount}
         // options={{
         //   fontFamily: '"Fira Code", "JetBrains Mono", monospace',
         //   fontSize: 14,
