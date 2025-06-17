@@ -11,8 +11,8 @@ export function DocsPanel(): React.JSX.Element {
         <Lightbulb size={16} />
         Help and Documentation
       </div>
-      <div className="flex w-full h-full justify-center py-2">
-        <Tabs defaultValue="ai" className="w-[400px]">
+      <div className="flex w-full h-full justify-center px-4 py-2">
+        <Tabs defaultValue="ai" className="w-min-[400px] w-full">
           <TabsList className="flex justify-center w-full px-2">
             <TabsTrigger value="ai">
               <MessageCircle />
