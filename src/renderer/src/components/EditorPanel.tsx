@@ -106,6 +106,8 @@ export function EditorPanel(): React.JSX.Element {
     // }
   }
 
+  // TODO: Implement better logic for the tabs
+  // TODO: Make this a controlled component so that we can manage via state
   return (
     <div className="flex size-full flex-col">
       <div className="flex w-full border-b border-border">
@@ -123,7 +125,7 @@ export function EditorPanel(): React.JSX.Element {
       <Editor
         height="100%"
         defaultLanguage="arduino"
-        defaultValue="// Start coding in Arduino!"
+        defaultValue={sampleContent}
         // language="arduino"
         // theme="light"
         // value={sampleContent}

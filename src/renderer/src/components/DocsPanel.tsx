@@ -1,0 +1,43 @@
+import { BookOpen, CodeXml, Lightbulb, MessageCircle } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs'
+import { AIAssistant } from './AIAssistant'
+import { ExamplesContent } from './ExamplesContent'
+import { ReferenceContent } from './ReferenceContent'
+
+export function DocsPanel(): React.JSX.Element {
+  return (
+    <div className="size-full flex flex-col">
+      <div className="flex items-center gap-2 px-4 py-4 bg-muted text-xs font-semibold border-b border-border">
+        <Lightbulb size={16} />
+        Help and Documentation
+      </div>
+      <div className="flex w-full h-full justify-center py-2">
+        <Tabs defaultValue="ai" className="w-[400px]">
+          <TabsList className="flex justify-center w-full px-2">
+            <TabsTrigger value="ai">
+              <MessageCircle />
+              AI Chat
+            </TabsTrigger>
+            <TabsTrigger value="examples">
+              <BookOpen />
+              Examples
+            </TabsTrigger>
+            <TabsTrigger value="reference">
+              <CodeXml />
+              Reference
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent className="h-full" value="ai">
+            <AIAssistant />
+          </TabsContent>
+          <TabsContent className="h-full" value="examples">
+            <ExamplesContent />
+          </TabsContent>
+          <TabsContent className="h-full" value="reference">
+            <ReferenceContent />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  )
+}

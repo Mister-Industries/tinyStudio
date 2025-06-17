@@ -19,7 +19,7 @@ export function Toolbar(): React.JSX.Element {
       <div className="flex items-center gap-2 h-full">
         <Tooltip>
           <TooltipTrigger>
-            <Button variant="muted" size="icon">
+            <Button variant="ghost" size="icon">
               <File />
             </Button>
           </TooltipTrigger>
@@ -27,7 +27,7 @@ export function Toolbar(): React.JSX.Element {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger>
-            <Button variant="muted" size="icon">
+            <Button variant="ghost" size="icon">
               <Folder />
             </Button>
           </TooltipTrigger>
@@ -35,7 +35,7 @@ export function Toolbar(): React.JSX.Element {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger>
-            <Button variant="muted" size="icon">
+            <Button variant="ghost" size="icon">
               <Save />
             </Button>
           </TooltipTrigger>

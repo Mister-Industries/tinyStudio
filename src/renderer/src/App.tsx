@@ -1,6 +1,9 @@
+import { DocsPanel } from './components/DocsPanel'
 import { EditorPanel } from './components/EditorPanel'
 import { FileExplorer } from './components/FileExplorer'
 import { Header } from './components/Header'
+import { SerialMonitor } from './components/SerialMonitor'
+import { StatusBar } from './components/StatusBar'
 import { Toolbar } from './components/Toolbar'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './components/ui/Resizable'
 
@@ -23,16 +26,17 @@ export default function App(): React.JSX.Element {
             <>
               <ResizableHandle />
               <ResizablePanel defaultSize={30} minSize={15} className="bg-muted">
-                {/* <SerialMonitor /> */}
+                <SerialMonitor />
               </ResizablePanel>
             </>
           </ResizablePanelGroup>
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={15} minSize={15} maxSize={40}>
-          {/* <AIAssistant /> */}
+          <DocsPanel />
         </ResizablePanel>
       </ResizablePanelGroup>
+      <StatusBar />
     </div>
   )
 }

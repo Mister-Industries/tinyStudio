@@ -51,12 +51,13 @@ const projects = [
 export function FileExplorer(): React.JSX.Element {
   const [openTab, setOpenTab] = useState<'file-explorer' | 'source-control'>('file-explorer')
 
+  // TODO: Implement better logic for the tabs
   return (
     <div className="size-full flex flex-col">
       <div className="flex w-full text-xs font-semibold border-b-2 border-border">
         <div
           data-active={openTab == 'file-explorer'}
-          className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-4 data-[active=true]:bg-primary-foreground data-[active=true]:text-foreground data-[active=true]:border-primary"
+          className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-4 data-[active=true]:bg-primary-foreground data-[active=true]:text-foreground data-[active=true]:border-primary cursor-pointer"
           onClick={() => setOpenTab('file-explorer')}
         >
           <Folder size={14} />
@@ -64,7 +65,7 @@ export function FileExplorer(): React.JSX.Element {
         </div>
         <div
           data-active={openTab == 'source-control'}
-          className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-4 data-[active=true]:bg-primary-foreground data-[active=true]:text-foreground data-[active=true]:border-primary"
+          className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-4 data-[active=true]:bg-primary-foreground data-[active=true]:text-foreground data-[active=true]:border-primary cursor-pointer"
           onClick={() => setOpenTab('source-control')}
         >
           <GitBranch size={14} />
