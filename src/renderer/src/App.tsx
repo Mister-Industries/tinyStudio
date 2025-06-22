@@ -32,7 +32,7 @@ export default function App(): React.JSX.Element {
           </ResizablePanelGroup>
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel defaultSize={15} minSize={15} maxSize={40}>
+        <ResizablePanel defaultSize={20} minSize={20} maxSize={40}>
           <DocsPanel />
         </ResizablePanel>
       </ResizablePanelGroup>
