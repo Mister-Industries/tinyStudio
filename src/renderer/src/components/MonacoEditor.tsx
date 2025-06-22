@@ -1,25 +1,9 @@
 import { Editor, Monaco, OnMount } from '@monaco-editor/react'
 import { useTheme } from '@renderer/lib/ThemeProvider'
+import { EditorFile } from '@renderer/redux'
 import { useRef } from 'react'
 
-const sampleContent = `const int ledPin = 13;  // the pin for the LED
-
-void setup() {
-  pinMode(ledPin, OUTPUT);  // initialize the LED pin as an output
-  Serial.begin(9600);     // initialize serial communication at 9600 bits per second
-  Serial.println("Blink example initialized");
-}
-
-void loop() {
-  digitalWrite(ledPin, HIGH);  // turn the LED on (HIGH is the voltage level)
-  Serial.println("LED ON");
-  delay(1000);                 // wait for a second
-  digitalWrite(ledPin, LOW);   // turn the LED off by making the voltage LOW
-  Serial.println("LED OFF");
-  delay(1000);                 // wait for a second
-}`
-
-export function MonacoEditor(): React.JSX.Element {
+export function MonacoEditor({ activeFile }: { activeFile: EditorFile }): React.JSX.Element {
   const editorRef = useRef<unknown>(null)
   const monacoRef = useRef<Monaco | null>(null)
   const { theme } = useTheme()
@@ -120,7 +104,7 @@ export function MonacoEditor(): React.JSX.Element {
     <Editor
       height="100%"
       defaultLanguage="arduino"
-      defaultValue={sampleContent}
+      defaultValue={activeFile.content || ''}
       // language="arduino"
       theme={theme === 'light' ? 'tiny-light-theme' : 'tiny-dark-theme'}
       // value={sampleContent}

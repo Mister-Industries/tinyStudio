@@ -22,7 +22,6 @@ export default function App(): React.JSX.Element {
             <ResizablePanel defaultSize={70} className="flex flex-col">
               <EditorPanel />
             </ResizablePanel>
-
             <>
               <ResizableHandle />
               <ResizablePanel defaultSize={30} minSize={15} className="bg-muted">

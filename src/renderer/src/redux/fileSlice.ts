@@ -1,7 +1,7 @@
 import { createEntityAdapter, EntityState, PayloadAction } from '@reduxjs/toolkit'
 import { createAppSlice } from './createAppSlice'
 
-interface File {
+export interface EditorFile {
   id: string
   name: string
   content: string
@@ -12,10 +12,10 @@ interface File {
 
 export type FileSliceState = {
   status: 'idle' | 'loading' | 'failed'
-  openFiles: EntityState<File, string>
+  openFiles: EntityState<EditorFile, string>
 }
 
-const editorObjectAdapter = createEntityAdapter<File>()
+const editorObjectAdapter = createEntityAdapter<EditorFile>()
 
 const initialState: FileSliceState = {
   status: 'idle',
@@ -27,7 +27,7 @@ export const fileSlice = createAppSlice({
   initialState,
   reducers: (create) => ({
     createNewFile: create.reducer((state, payload: PayloadAction<string>) => {
-      const newFile: File = {
+      const newFile: EditorFile = {
         id: crypto.randomUUID(),
         name: payload.payload,
         content: '',
@@ -37,7 +37,7 @@ export const fileSlice = createAppSlice({
       }
       state.openFiles = editorObjectAdapter.addOne(state.openFiles, newFile)
     }),
-    openFile: create.reducer((state, payload: PayloadAction<File>) => {
+    openFile: create.reducer((state, payload: PayloadAction<EditorFile>) => {
       const file = payload.payload
       state.openFiles = editorObjectAdapter.upsertOne(state.openFiles, {
         ...file,

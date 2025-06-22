@@ -1,30 +1,50 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import * as monaco from 'monaco-editor'
 import { loader } from '@monaco-editor/react'
 import { Blocks, Code } from 'lucide-react'
 import { BlocklyEditor } from './BlocklyEditor'
 import { MonacoEditor } from './MonacoEditor'
+import { selectOpenFiles, useAppSelector } from '@renderer/redux'
+import { EditorFile } from '@renderer/redux/fileSlice'
 
 loader.config({ monaco })
 
-export interface ArduinoFile {
-  id: string
-  name: string
-  content: string
-  fileHandle?: FileSystemFileHandle
-  modified: boolean
-  createdAt: string
-  updatedAt: string
-}
+// export interface ArduinoFile {
+//   id: string
+//   name: string
+//   content: string
+//   fileHandle?: FileSystemFileHandle
+//   modified: boolean
+//   createdAt: string
+//   updatedAt: string
+// }
 
 export function EditorPanel(): React.JSX.Element {
-  const openFiles = ['file1.txt', 'file2.txt', 'file3.txt']
-  const [viewingFile, setViewingFile] = useState<string>(openFiles[0])
-
+  const openFiles = useAppSelector(selectOpenFiles)
+  const [viewingFile, setViewingFile] = useState<EditorFile | null>(openFiles[0] ?? null)
   const [isBlocks, setIsBlocks] = useState<boolean>(false)
 
-  const handleFileSelect = (file): void => {
+  // Update viewingFile when openFiles changes
+  useEffect(() => {
+    if (openFiles.length === 0) {
+      setViewingFile(null)
+    } else if (viewingFile === null || !openFiles.find((file) => file.id === viewingFile.id)) {
+      // If no file is selected or the current file is no longer open, select the first one
+      setViewingFile(openFiles[0])
+    }
+  }, [openFiles, viewingFile])
+
+  const handleFileSelect = (file: EditorFile): void => {
     setViewingFile(file)
+  }
+
+  // If no files are open, show a placeholder
+  if (openFiles.length === 0) {
+    return (
+      <div className="flex size-full items-center justify-center text-muted-foreground">
+        <p>No files open</p>
+      </div>
+    )
   }
 
   // TODO: Implement better logic for the tabs
@@ -35,12 +55,12 @@ export function EditorPanel(): React.JSX.Element {
         <div className="flex w-full">
           {openFiles.map((file) => (
             <div
-              data-active={viewingFile === file}
-              key={file}
+              data-active={viewingFile?.id === file.id}
+              key={file.id}
               className="text-xs justify-start px-4 py-2 border-b border-transparent data-[active=true]:bg-muted data-[active=true]:border-b data-[active=true]:border-primary hover:bg-muted/50 transition-colors cursor-pointer"
               onClick={() => handleFileSelect(file)}
             >
-              {file}
+              {file.name}
             </div>
           ))}
         </div>
@@ -63,7 +83,15 @@ export function EditorPanel(): React.JSX.Element {
           </button>
         </div>
       </div>
-      {isBlocks ? <BlocklyEditor /> : <MonacoEditor />}
+      {isBlocks && viewingFile !== null ? (
+        <BlocklyEditor />
+      ) : viewingFile !== null ? (
+        <MonacoEditor activeFile={viewingFile} />
+      ) : (
+        <div className="flex size-full items-center justify-center text-muted-foreground">
+          <p>Select a file to edit</p>
+        </div>
+      )}
     </div>
   )
 }
