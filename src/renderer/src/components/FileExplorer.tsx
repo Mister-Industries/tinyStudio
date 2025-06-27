@@ -11,38 +11,6 @@ const projects = [
     files: ['index.tsx', 'App.tsx', 'styles.css']
   },
   {
-    name: 'Project Alpha',
-    files: ['index.tsx', 'App.tsx', 'styles.css']
-  },
-  {
-    name: 'Project Alpha',
-    files: ['index.tsx', 'App.tsx', 'styles.css']
-  },
-  {
-    name: 'Project Alpha',
-    files: ['index.tsx', 'App.tsx', 'styles.css']
-  },
-  {
-    name: 'Project Alpha',
-    files: ['index.tsx', 'App.tsx', 'styles.css']
-  },
-  {
-    name: 'Project Alpha',
-    files: ['index.tsx', 'App.tsx', 'styles.css']
-  },
-  {
-    name: 'Project Alpha',
-    files: ['index.tsx', 'App.tsx', 'styles.css']
-  },
-  {
-    name: 'Project Alpha',
-    files: ['index.tsx', 'App.tsx', 'styles.css']
-  },
-  {
-    name: 'Project Alpha',
-    files: ['index.tsx', 'App.tsx', 'styles.css']
-  },
-  {
     name: 'Project Beta',
     files: ['main.py', 'requirements.txt']
   }

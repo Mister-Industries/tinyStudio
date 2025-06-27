@@ -1,10 +1,12 @@
 import type { Action, ThunkAction } from '@reduxjs/toolkit'
 import { configureStore } from '@reduxjs/toolkit'
 import { fileSlice } from './fileSlice'
+import { editorSlice } from './editorSlice'
 
 export const store = configureStore({
   reducer: {
-    file: fileSlice.reducer
+    file: fileSlice.reducer,
+    editor: editorSlice.reducer
   }
 })
 
