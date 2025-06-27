@@ -5,21 +5,25 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/Accordion'
 import { ScrollArea } from './ui/ScrollArea'
 
-const projects = [
-  {
-    name: 'Project Alpha',
-    files: ['index.tsx', 'App.tsx', 'styles.css']
-  },
-  {
-    name: 'Project Beta',
-    files: ['main.py', 'requirements.txt']
-  }
+type ProjectType = {
+  name: string
+  files: string[]
+}
+
+const projects: ProjectType[] = [
+  // {
+  //   name: 'Project Alpha',
+  //   files: ['index.tsx', 'App.tsx', 'styles.css']
+  // },
+  // {
+  //   name: 'Project Beta',
+  //   files: ['main.py', 'requirements.txt']
+  // }
 ]
 
 export function FileExplorer(): React.JSX.Element {
   const [openTab, setOpenTab] = useState<'file-explorer' | 'source-control'>('file-explorer')
 
-  // TODO: Implement better logic for the tabs
   return (
     <div className="size-full flex flex-col">
       <div className="flex w-full text-xs font-semibold border-b-2 border-border">
@@ -69,6 +73,11 @@ export function FileExplorerContent(): React.JSX.Element {
       </div>
       <ScrollArea className="h-full">
         <Accordion type="multiple">
+          {projects.length === 0 && (
+            <div className="flex items-center justify-center text-muted-foreground py-4">
+              <Button className="px-12">Open a Project</Button>
+            </div>
+          )}
           {projects.map((project, idx) => (
             <AccordionItem value={`project-${idx}`} key={project.name} className="px-4 group">
               <AccordionTrigger>
