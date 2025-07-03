@@ -30,18 +30,20 @@ import { useAppDispatch } from '../redux/hooks'
 import { openFile, type EditorFile } from '../redux/fileSlice'
 
 // File icon mapping
-function getFileIcon(fileName: string, isDirectory: boolean): React.ReactNode {
+function getFileIcon(fileName: string, isDirectory: boolean, isSelected = false): React.ReactNode {
   if (isDirectory) return null
 
   if (fileSystem.isImageFile(fileName)) {
-    return <Image size={14} className="text-blue-500" />
+    return <Image size={14} className={isSelected ? 'text-accent-foreground' : 'text-blue-500'} />
   }
 
   if (fileSystem.isCodeFile(fileName)) {
-    return <Code size={14} className="text-green-500" />
+    return <Code size={14} className={isSelected ? 'text-accent-foreground' : 'text-green-500'} />
   }
 
-  return <File size={14} className="text-muted-foreground" />
+  return (
+    <File size={14} className={isSelected ? 'text-accent-foreground' : 'text-muted-foreground'} />
+  )
 }
 
 // Tree item component
@@ -87,7 +89,7 @@ function FileTreeItem({
   return (
     <div
       className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent/50 group ${
-        isSelected ? 'bg-accent' : ''
+        isSelected ? 'bg-accent text-accent-foreground' : ''
       }`}
       style={{ paddingLeft: `${level * 12 + 8}px` }}
       onClick={handleClick}
@@ -109,10 +111,11 @@ function FileTreeItem({
       ) : (
         <>
           <span className="w-[14px]" />
-          {getFileIcon(item.name, item.isDirectory)}
+          {getFileIcon(item.name, item.isDirectory, isSelected)}
         </>
       )}
       <span className="flex-1 truncate">{item.name}</span>
+      {/* // TODO: implement this dropdown to be useful */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
