@@ -12,13 +12,17 @@ import {
 } from './ui/Select'
 import React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
+import { selectPanelState, setPanelOpen, useAppDispatch, useAppSelector } from '@renderer/redux'
 
 export function Toolbar(): React.JSX.Element {
+  const dispatch = useAppDispatch()
+  const { isDocsPanelOpen, isSerialMonitorOpen } = useAppSelector(selectPanelState)
+
   return (
     <div className="px-4 py-3 h-14 flex items-center justify-between shadow-sm bg-primary text-primary-foreground">
       <div className="flex items-center gap-2 h-full">
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
               <File />
             </Button>
@@ -26,7 +30,7 @@ export function Toolbar(): React.JSX.Element {
           <TooltipContent side="bottom">New File</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
               <Folder />
             </Button>
@@ -34,7 +38,7 @@ export function Toolbar(): React.JSX.Element {
           <TooltipContent side="bottom">New Folder</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
               <Save />
             </Button>
@@ -52,16 +56,30 @@ export function Toolbar(): React.JSX.Element {
         </Button>
         <Separator orientation="vertical" />
         <Tooltip>
-          <TooltipTrigger>
-            <Button variant="ghost" size="icon">
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              data-active={isSerialMonitorOpen}
+              className="data-[active=true]:bg-popover data-[active=true]:text-popover-foreground"
+              onClick={() =>
+                dispatch(setPanelOpen({ panel: 'monitor', isOpen: !isSerialMonitorOpen }))
+              }
+            >
               <Monitor />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">Monitor</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger>
-            <Button variant="ghost" size="icon">
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              data-active={isDocsPanelOpen}
+              className="data-[active=true]:bg-popover data-[active=true]:text-popover-foreground"
+              onClick={() => dispatch(setPanelOpen({ panel: 'docs', isOpen: !isDocsPanelOpen }))}
+            >
               <Library />
             </Button>
           </TooltipTrigger>

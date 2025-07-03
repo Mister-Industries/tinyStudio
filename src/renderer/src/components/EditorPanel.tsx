@@ -9,16 +9,6 @@ import { EditorFile } from '@renderer/redux/fileSlice'
 
 loader.config({ monaco })
 
-// export interface ArduinoFile {
-//   id: string
-//   name: string
-//   content: string
-//   fileHandle?: FileSystemFileHandle
-//   modified: boolean
-//   createdAt: string
-//   updatedAt: string
-// }
-
 export function EditorPanel(): React.JSX.Element {
   const openFiles = useAppSelector(selectOpenFiles)
   const [viewingFile, setViewingFile] = useState<EditorFile | null>(openFiles[0] ?? null)
@@ -57,10 +47,13 @@ export function EditorPanel(): React.JSX.Element {
             <div
               data-active={viewingFile?.id === file.id}
               key={file.id}
-              className="text-xs justify-start px-4 py-2 border-b border-transparent data-[active=true]:bg-muted data-[active=true]:border-b data-[active=true]:border-primary hover:bg-muted/50 transition-colors cursor-pointer"
+              className="text-xs justify-start px-4 py-2 border-b border-transparent data-[active=true]:bg-muted data-[active=true]:border-b data-[active=true]:border-primary hover:bg-muted/50 transition-colors cursor-pointer flex items-center gap-2"
               onClick={() => handleFileSelect(file)}
             >
-              {file.name}
+              <span>{file.name}</span>
+              {file.modified && (
+                <span className="w-2 h-2 bg-orange-500 rounded-full" title="Unsaved changes" />
+              )}
             </div>
           ))}
         </div>

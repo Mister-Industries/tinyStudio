@@ -1,13 +1,5 @@
 import { Zap } from 'lucide-react'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from './ui/Card'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/Card'
 import { ScrollArea } from './ui/ScrollArea'
 import { Button } from './ui/Button'
 

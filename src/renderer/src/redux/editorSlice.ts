@@ -1,4 +1,4 @@
-import { PayloadAction } from '@reduxjs/toolkit'
+import { PayloadAction, createSelector } from '@reduxjs/toolkit'
 import { createAppSlice } from './createAppSlice'
 
 export type EditorSliceState = {
@@ -39,11 +39,18 @@ export const editorSlice = createAppSlice({
     )
   }),
   selectors: {
-    selectPanelState: (state) => ({
-      isFileExplorerOpen: state.isFileExplorerOpen,
-      isSerialMonitorOpen: state.isSerialMonitorOpen,
-      isDocsPanelOpen: state.isDocsPanelOpen
-    })
+    selectPanelState: createSelector(
+      [
+        (state) => state.isFileExplorerOpen,
+        (state) => state.isSerialMonitorOpen,
+        (state) => state.isDocsPanelOpen
+      ],
+      (isFileExplorerOpen, isSerialMonitorOpen, isDocsPanelOpen) => ({
+        isFileExplorerOpen,
+        isSerialMonitorOpen,
+        isDocsPanelOpen
+      })
+    )
   }
 })
 

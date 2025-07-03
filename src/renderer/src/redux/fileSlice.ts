@@ -1,9 +1,10 @@
-import { createEntityAdapter, EntityState, PayloadAction } from '@reduxjs/toolkit'
+import { createEntityAdapter, EntityState, PayloadAction, createSelector } from '@reduxjs/toolkit'
 import { createAppSlice } from './createAppSlice'
 
 export interface EditorFile {
   id: string
   name: string
+  path?: string
   content: string
   modified: boolean
   createdAt: string
@@ -12,6 +13,7 @@ export interface EditorFile {
 
 export type FileSliceState = {
   status: 'idle' | 'loading' | 'failed'
+  openProjects: string[]
   openFiles: EntityState<EditorFile, string>
 }
 
@@ -19,6 +21,7 @@ const editorObjectAdapter = createEntityAdapter<EditorFile>()
 
 const initialState: FileSliceState = {
   status: 'idle',
+  openProjects: [],
   openFiles: editorObjectAdapter.getInitialState()
 }
 
@@ -43,13 +46,44 @@ export const fileSlice = createAppSlice({
         ...file,
         updatedAt: new Date().toISOString()
       })
+    }),
+    updateFileContent: create.reducer(
+      (state, payload: PayloadAction<{ id: string; content: string }>) => {
+        const { id, content } = payload.payload
+        const existingFile = state.openFiles.entities[id]
+        if (existingFile) {
+          state.openFiles = editorObjectAdapter.updateOne(state.openFiles, {
+            id,
+            changes: {
+              content,
+              modified: content !== existingFile.content,
+              updatedAt: new Date().toISOString()
+            }
+          })
+        }
+      }
+    ),
+    saveFile: create.reducer((state, payload: PayloadAction<string>) => {
+      const fileId = payload.payload
+      const existingFile = state.openFiles.entities[fileId]
+      if (existingFile) {
+        state.openFiles = editorObjectAdapter.updateOne(state.openFiles, {
+          id: fileId,
+          changes: {
+            modified: false,
+            updatedAt: new Date().toISOString()
+          }
+        })
+      }
     })
   }),
   selectors: {
-    selectOpenFiles: (state) => editorObjectAdapter.getSelectors().selectAll(state.openFiles)
+    selectOpenFiles: createSelector([(state) => state.openFiles], (openFiles) =>
+      editorObjectAdapter.getSelectors().selectAll(openFiles)
+    )
   }
 })
 
-export const { createNewFile, openFile } = fileSlice.actions
+export const { createNewFile, openFile, updateFileContent, saveFile } = fileSlice.actions
 
 export const { selectOpenFiles } = fileSlice.selectors

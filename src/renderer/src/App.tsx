@@ -19,13 +19,13 @@ export default function App(): React.JSX.Element {
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         {isFileExplorerOpen && (
           <>
-            <ResizablePanel defaultSize={18} minSize={18} maxSize={40} className="bg-muted">
+            <ResizablePanel defaultSize={20} minSize={18} maxSize={40} className="bg-muted">
               <FileExplorer />
             </ResizablePanel>
             <ResizableHandle />
           </>
         )}
-        <ResizablePanel defaultSize={65} className="flex flex-col">
+        <ResizablePanel defaultSize={55} className="flex flex-col">
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={70} className="flex flex-col">
               <EditorPanel />

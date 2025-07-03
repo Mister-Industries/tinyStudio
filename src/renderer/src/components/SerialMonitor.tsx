@@ -11,9 +11,12 @@ import {
   SelectValue
 } from './ui/Select'
 import { Button } from './ui/Button'
+import { setPanelOpen } from '@renderer/redux/editorSlice'
+import { useAppDispatch } from '@renderer/redux'
 
 export function SerialMonitor(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'serial' | 'problems' | 'output'>('serial')
+  const dispatch = useAppDispatch()
 
   // TODO: Implement the logic for each tab
   // TODO: implement this as a Tabs component for proper focus
@@ -47,7 +50,11 @@ export function SerialMonitor(): React.JSX.Element {
             Output
           </div>
         </div>
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => dispatch(setPanelOpen({ panel: 'monitor', isOpen: false }))}
+        >
           <X />
         </Button>
       </div>

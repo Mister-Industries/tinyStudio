@@ -1,12 +1,15 @@
 import { Editor, Monaco, OnMount } from '@monaco-editor/react'
 import { useTheme } from '@renderer/lib/ThemeProvider'
-import { EditorFile } from '@renderer/redux'
-import { useRef } from 'react'
+import { EditorFile, updateFileContent, saveFile } from '@renderer/redux'
+import { useAppDispatch } from '@renderer/redux/hooks'
+import { useRef, useCallback } from 'react'
+import { fileSystem } from '../lib/fileSystem'
 
 export function MonacoEditor({ activeFile }: { activeFile: EditorFile }): React.JSX.Element {
-  const editorRef = useRef<unknown>(null)
+  const editorRef = useRef<ReturnType<typeof import('monaco-editor').editor.create> | null>(null)
   const monacoRef = useRef<Monaco | null>(null)
   const { theme } = useTheme()
+  const dispatch = useAppDispatch()
 
   function handleBeforeMount(monaco): void {
     monaco.editor.defineTheme('tiny-dark-theme', {
@@ -55,6 +58,11 @@ export function MonacoEditor({ activeFile }: { activeFile: EditorFile }): React.
     editorRef.current = editor
     monacoRef.current = monaco
 
+    // Add save command (Ctrl+S)
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+      handleSaveFile()
+    })
+
     // Set Arduino language configuration
     monaco.languages.register({ id: 'arduino' })
 
@@ -100,44 +108,66 @@ export function MonacoEditor({ activeFile }: { activeFile: EditorFile }): React.
     })
   }
 
+  const handleContentChange = (value: string | undefined): void => {
+    if (value !== undefined) {
+      dispatch(updateFileContent({ id: activeFile.id, content: value }))
+    }
+  }
+
+  const handleSaveFile = useCallback(async () => {
+    if (activeFile.path && editorRef.current) {
+      try {
+        // Get current content directly from the Monaco editor
+        const currentContent = editorRef.current.getValue() || ''
+        await fileSystem.writeFile(activeFile.path, currentContent)
+
+        // Update Redux with the current content and mark as saved
+        dispatch(updateFileContent({ id: activeFile.id, content: currentContent }))
+        dispatch(saveFile(activeFile.id))
+      } catch (error) {
+        console.error('Failed to save file:', error)
+      }
+    }
+  }, [activeFile, dispatch])
+
   return (
     <Editor
       height="100%"
       defaultLanguage="arduino"
       defaultValue={activeFile.content || ''}
-      // language="arduino"
+      language="arduino"
       theme={theme === 'light' ? 'tiny-light-theme' : 'tiny-dark-theme'}
-      // value={sampleContent}
-      // onChange={handleContentChange}
+      value={activeFile.content || ''}
+      onChange={handleContentChange}
       onMount={handleEditorMounted}
       beforeMount={handleBeforeMount}
-      // options={{
-      //   fontFamily: '"Fira Code", "JetBrains Mono", monospace',
-      //   fontSize: 14,
-      //   minimap: { enabled: false },
-      //   scrollBeyondLastLine: false,
-      //   automaticLayout: true,
-      //   wordWrap: 'on',
-      //   tabSize: 2,
-      //   renderLineHighlight: 'line',
-      //   lineNumbers: 'on',
-      //   glyphMargin: true,
-      //   folding: true,
-      //   padding: { top: 16, bottom: 16 },
-      //   lineDecorationsWidth: 10,
-      //   lineNumbersMinChars: 3,
-      //   scrollbar: {
-      //     verticalScrollbarSize: 8,
-      //     horizontalScrollbarSize: 8,
-      //     useShadows: false
-      //   },
-      //   bracketPairColorization: {
-      //     enabled: true
-      //   },
-      //   guides: {
-      //     bracketPairs: 'active'
-      //   }
-      // }}
+      options={{
+        fontFamily: '"Fira Code", "JetBrains Mono", monospace',
+        fontSize: 14,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        wordWrap: 'on',
+        tabSize: 2,
+        renderLineHighlight: 'line',
+        lineNumbers: 'on',
+        glyphMargin: true,
+        folding: true,
+        padding: { top: 16, bottom: 16 },
+        lineDecorationsWidth: 10,
+        lineNumbersMinChars: 3,
+        scrollbar: {
+          verticalScrollbarSize: 8,
+          horizontalScrollbarSize: 8,
+          useShadows: false
+        },
+        bracketPairColorization: {
+          enabled: true
+        },
+        guides: {
+          bracketPairs: 'active'
+        }
+      }}
     />
   )
 }
