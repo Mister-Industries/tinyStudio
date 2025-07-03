@@ -13,7 +13,9 @@ import {
   Trash2,
   Edit3,
   Download,
-  AlertCircle
+  AlertCircle,
+  RefreshCcw,
+  FolderSync
 } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
@@ -411,7 +413,7 @@ export function FileExplorerContent(): React.JSX.Element {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="size-4" onClick={refreshFiles}>
-                <Download size={12} />
+                <FolderSync size={12} />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Refresh files</TooltipContent>
