@@ -3,6 +3,8 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { fileSystem, type FileSystemItem } from '../lib/fileSystem'
+import { useAppDispatch, useAppSelector } from '../redux/hooks'
+import { selectOpenFiles, refreshFileContentFromDisk } from '../redux/fileSlice'
 
 export interface UseFileSystemOptions {
   autoLoadWorkspace?: boolean
@@ -22,6 +24,7 @@ export interface FileSystemActions {
   selectWorkspace: () => Promise<void>
   openWorkspace: (workspacePath: string) => Promise<void>
   refreshFiles: () => Promise<void>
+  refreshOpenFileContents: () => Promise<void>
   loadDirectory: (dirPath: string) => Promise<FileSystemItem[]>
   openFile: (filePath: string) => Promise<string>
   saveFile: (filePath: string, content: string) => Promise<void>
@@ -40,6 +43,10 @@ export interface UseFileSystemReturn extends FileSystemState, FileSystemActions 
 export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystemReturn {
   const { autoLoadWorkspace = false, watchChanges = false } = options
 
+  // Redux integration
+  const dispatch = useAppDispatch()
+  const openFiles = useAppSelector(selectOpenFiles)
+
   // State
   const [state, setState] = useState<FileSystemState>({
     workspace: null,
@@ -57,6 +64,31 @@ export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystem
     setState((prev) => ({ ...prev, error: message, isLoading: false }))
   }, [])
 
+  // Refresh open file contents in Redux
+  const refreshOpenFileContents = useCallback(async () => {
+    if (openFiles.length === 0) return
+
+    try {
+      // Update content for all currently open files
+      for (const file of openFiles) {
+        if (file.path) {
+          try {
+            const currentContent = await fileSystem.readFile(file.path)
+            // Only update if content has changed to avoid unnecessary re-renders
+            if (currentContent !== file.content) {
+              dispatch(refreshFileContentFromDisk({ id: file.id, content: currentContent }))
+            }
+          } catch (error) {
+            console.warn(`Failed to refresh content for file ${file.path}:`, error)
+            // Continue with other files even if one fails
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing open file contents:', error)
+    }
+  }, [openFiles, dispatch])
+
   // Refresh file list
   const refreshFiles = useCallback(async () => {
     if (!state.workspace) {
@@ -69,10 +101,13 @@ export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystem
     try {
       const files = await fileSystem.readDirectory(state.workspace, false)
       setState((prev) => ({ ...prev, files, isLoading: false }))
+
+      // Also refresh content of currently open files
+      await refreshOpenFileContents()
     } catch (error) {
       handleError(error, 'file refresh')
     }
-  }, [state.workspace, handleError])
+  }, [state.workspace, handleError, refreshOpenFileContents])
 
   // Select workspace folder
   const selectWorkspace = useCallback(async () => {
@@ -332,6 +367,7 @@ export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystem
     selectWorkspace,
     openWorkspace,
     refreshFiles,
+    refreshOpenFileContents,
     openFile,
     saveFile,
     createFile,

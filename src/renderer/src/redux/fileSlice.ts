@@ -67,6 +67,23 @@ export const fileSlice = createAppSlice({
         }
       }
     ),
+    refreshFileContentFromDisk: create.reducer(
+      (state, payload: PayloadAction<{ id: string; content: string }>) => {
+        const { id, content } = payload.payload
+        const existingFile = state.openFiles.entities[id]
+        if (existingFile) {
+          state.openFiles = editorObjectAdapter.updateOne(state.openFiles, {
+            id,
+            changes: {
+              content,
+              // Don't mark as modified when refreshing from disk - the disk version is the "saved" version
+              modified: false,
+              updatedAt: new Date().toISOString()
+            }
+          })
+        }
+      }
+    ),
     saveFile: create.reducer((state, payload: PayloadAction<string>) => {
       const fileId = payload.payload
       const existingFile = state.openFiles.entities[fileId]
@@ -109,7 +126,14 @@ export const fileSlice = createAppSlice({
   }
 })
 
-export const { createNewFile, openFile, updateFileContent, saveFile, closeFile, setViewingFile } =
-  fileSlice.actions
+export const {
+  createNewFile,
+  openFile,
+  updateFileContent,
+  refreshFileContentFromDisk,
+  saveFile,
+  closeFile,
+  setViewingFile
+} = fileSlice.actions
 
 export const { selectOpenFiles, selectViewingFile, selectViewingFileId } = fileSlice.selectors
