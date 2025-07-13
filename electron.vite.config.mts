@@ -16,6 +16,18 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
-    plugins: [react(), tailwindcss()]
+    plugins: [react(), tailwindcss()],
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'monaco-editor': ['monaco-editor']
+          }
+        }
+      }
+    }
   }
 })

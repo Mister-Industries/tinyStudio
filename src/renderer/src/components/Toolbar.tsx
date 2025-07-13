@@ -18,7 +18,7 @@ export function Toolbar(): React.JSX.Element {
     <div className="px-4 py-3 h-14 flex items-center justify-between shadow-sm bg-primary text-primary-foreground">
       <div className="flex items-center gap-2 h-full">
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
               <File />
             </Button>
@@ -26,7 +26,7 @@ export function Toolbar(): React.JSX.Element {
           <TooltipContent side="bottom">New File</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
               <Folder />
             </Button>
@@ -34,7 +34,7 @@ export function Toolbar(): React.JSX.Element {
           <TooltipContent side="bottom">New Folder</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
               <Save />
             </Button>
@@ -52,7 +52,7 @@ export function Toolbar(): React.JSX.Element {
         </Button>
         <Separator orientation="vertical" />
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
               <Monitor />
             </Button>
@@ -60,7 +60,7 @@ export function Toolbar(): React.JSX.Element {
           <TooltipContent side="bottom">Monitor</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
               <Library />
             </Button>

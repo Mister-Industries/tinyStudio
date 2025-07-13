@@ -1,34 +1,24 @@
 import { Editor, Monaco, OnMount } from '@monaco-editor/react'
 import { useTheme } from '@renderer/lib/ThemeProvider'
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 
-const sampleContent = `const int ledPin = 13;  // the pin for the LED
-
-void setup() {
-  pinMode(ledPin, OUTPUT);  // initialize the LED pin as an output
-  Serial.begin(9600);     // initialize serial communication at 9600 bits per second
-  Serial.println("Blink example initialized");
+interface MonacoEditorProps {
+  content: string
+  onContentChange: (content: string) => void
 }
 
-void loop() {
-  digitalWrite(ledPin, HIGH);  // turn the LED on (HIGH is the voltage level)
-  Serial.println("LED ON");
-  delay(1000);                 // wait for a second
-  digitalWrite(ledPin, LOW);   // turn the LED off by making the voltage LOW
-  Serial.println("LED OFF");
-  delay(1000);                 // wait for a second
-}`
-
-export function MonacoEditor(): React.JSX.Element {
+export function MonacoEditor({ content, onContentChange }: MonacoEditorProps): React.JSX.Element {
   const editorRef = useRef<unknown>(null)
   const monacoRef = useRef<Monaco | null>(null)
   const { theme } = useTheme()
 
   function handleBeforeMount(monaco): void {
+    // Disable web workers in Electron environment
+    // Configure Monaco to not use web workers
     monaco.editor.defineTheme('tiny-dark-theme', {
       base: 'vs-dark',
       inherit: true,
-      rules: [{ background: '1e1e1e' }],
+      rules: [{ token: '', background: '1e1e1e' }],
       colors: {
         'editor.background': '#1e1e1e',
         'editor.lineHighlightBackground': '#263c33',
@@ -48,7 +38,7 @@ export function MonacoEditor(): React.JSX.Element {
     monaco.editor.defineTheme('tiny-light-theme', {
       base: 'vs',
       inherit: true,
-      rules: [{ background: '#ffffff' }],
+      rules: [{ token: '', background: '#ffffff' }],
       colors: {
         'editor.background': '#ffffff',
         'editor.lineHighlightBackground': '#e6f4ee',
@@ -114,46 +104,61 @@ export function MonacoEditor(): React.JSX.Element {
         ]
       }
     })
+
+    // Set up change listener
+    editor.onDidChangeModelContent(() => {
+      const value = editor.getValue()
+      onContentChange(value)
+    })
   }
+
+  // Update editor content when prop changes
+  useEffect(() => {
+    if (editorRef.current) {
+      const editor = editorRef.current as { getValue: () => string; setValue: (value: string) => void }
+      const currentValue = editor.getValue()
+      if (currentValue !== content) {
+        editor.setValue(content)
+      }
+    }
+  }, [content])
 
   return (
     <Editor
       height="100%"
       defaultLanguage="arduino"
-      defaultValue={sampleContent}
-      // language="arduino"
+      defaultValue={content}
       theme={theme === 'light' ? 'tiny-light-theme' : 'tiny-dark-theme'}
-      // value={sampleContent}
-      // onChange={handleContentChange}
       onMount={handleEditorMounted}
       beforeMount={handleBeforeMount}
-      // options={{
-      //   fontFamily: '"Fira Code", "JetBrains Mono", monospace',
-      //   fontSize: 14,
-      //   minimap: { enabled: false },
-      //   scrollBeyondLastLine: false,
-      //   automaticLayout: true,
-      //   wordWrap: 'on',
-      //   tabSize: 2,
-      //   renderLineHighlight: 'line',
-      //   lineNumbers: 'on',
-      //   glyphMargin: true,
-      //   folding: true,
-      //   padding: { top: 16, bottom: 16 },
-      //   lineDecorationsWidth: 10,
-      //   lineNumbersMinChars: 3,
-      //   scrollbar: {
-      //     verticalScrollbarSize: 8,
-      //     horizontalScrollbarSize: 8,
-      //     useShadows: false
-      //   },
-      //   bracketPairColorization: {
-      //     enabled: true
-      //   },
-      //   guides: {
-      //     bracketPairs: 'active'
-      //   }
-      // }}
+      options={{
+        fontFamily: '"Fira Code", "JetBrains Mono", monospace',
+        fontSize: 14,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        wordWrap: 'on',
+        tabSize: 2,
+        renderLineHighlight: 'line',
+        lineNumbers: 'on',
+        glyphMargin: true,
+        folding: true,
+        padding: { top: 16, bottom: 16 },
+        lineDecorationsWidth: 10,
+        lineNumbersMinChars: 3,
+        scrollbar: {
+          verticalScrollbarSize: 8,
+          horizontalScrollbarSize: 8,
+          useShadows: false
+        },
+        bracketPairColorization: {
+          enabled: true
+        },
+        guides: {
+          bracketPairs: 'active'
+        },
+
+      }}
     />
   )
 }
