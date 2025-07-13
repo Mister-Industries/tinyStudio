@@ -29,6 +29,7 @@
     "@monaco-editor/react": "^4.7.0-rc.0",
     "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/vite": "^4.1.8",
+    "blockly": "^12.1.0",
     "class-variance-authority": "^0.7.1",
     "electron-updater": "^6.3.9",
     "lucide-react": "^0.515.0",
