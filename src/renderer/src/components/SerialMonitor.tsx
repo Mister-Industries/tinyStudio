@@ -33,7 +33,7 @@ export function SerialMonitor(): React.JSX.Element {
             <Monitor size={14} />
             Serial Monitor
           </div>
-          <div
+          {/* <div
             data-active={activeTab === 'problems'}
             onClick={() => setActiveTab('problems')}
             className="flex gap-2 px-4 py-2 bg-muted items-center border-b-3 border-transparent data-[active=true]:bg-background data-[active=true]:border-secondary cursor-pointer"
@@ -48,7 +48,7 @@ export function SerialMonitor(): React.JSX.Element {
           >
             <FileText size={14} />
             Output
-          </div>
+          </div> */}
         </div>
         <Button
           variant="ghost"
