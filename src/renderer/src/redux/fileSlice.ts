@@ -15,6 +15,7 @@ export type FileSliceState = {
   status: 'idle' | 'loading' | 'failed'
   openProjects: string[]
   openFiles: EntityState<EditorFile, string>
+  viewingFileId: string | null
 }
 
 const editorObjectAdapter = createEntityAdapter<EditorFile>()
@@ -22,7 +23,8 @@ const editorObjectAdapter = createEntityAdapter<EditorFile>()
 const initialState: FileSliceState = {
   status: 'idle',
   openProjects: [],
-  openFiles: editorObjectAdapter.getInitialState()
+  openFiles: editorObjectAdapter.getInitialState(),
+  viewingFileId: null
 }
 
 export const fileSlice = createAppSlice({
@@ -46,6 +48,8 @@ export const fileSlice = createAppSlice({
         ...file,
         updatedAt: new Date().toISOString()
       })
+      // Automatically set this file as the viewing file
+      state.viewingFileId = file.id
     }),
     updateFileContent: create.reducer(
       (state, payload: PayloadAction<{ id: string; content: string }>) => {
@@ -79,15 +83,33 @@ export const fileSlice = createAppSlice({
     closeFile: create.reducer((state, payload: PayloadAction<string>) => {
       const fileId = payload.payload
       state.openFiles = editorObjectAdapter.removeOne(state.openFiles, fileId)
+
+      // If the closed file was the viewing file, switch to another file or null
+      if (state.viewingFileId === fileId) {
+        const remainingFiles = editorObjectAdapter.getSelectors().selectAll(state.openFiles)
+        state.viewingFileId = remainingFiles.length > 0 ? remainingFiles[0].id : null
+      }
+    }),
+    setViewingFile: create.reducer((state, payload: PayloadAction<string | null>) => {
+      state.viewingFileId = payload.payload
     })
   }),
   selectors: {
     selectOpenFiles: createSelector([(state) => state.openFiles], (openFiles) =>
       editorObjectAdapter.getSelectors().selectAll(openFiles)
-    )
+    ),
+    selectViewingFile: createSelector(
+      [(state) => state.openFiles, (state) => state.viewingFileId],
+      (openFiles, viewingFileId) => {
+        if (!viewingFileId) return null
+        return editorObjectAdapter.getSelectors().selectById(openFiles, viewingFileId) || null
+      }
+    ),
+    selectViewingFileId: (state) => state.viewingFileId
   }
 })
 
-export const { createNewFile, openFile, updateFileContent, saveFile, closeFile } = fileSlice.actions
+export const { createNewFile, openFile, updateFileContent, saveFile, closeFile, setViewingFile } =
+  fileSlice.actions
 
-export const { selectOpenFiles } = fileSlice.selectors
+export const { selectOpenFiles, selectViewingFile, selectViewingFileId } = fileSlice.selectors

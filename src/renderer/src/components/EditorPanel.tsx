@@ -1,41 +1,26 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import * as monaco from 'monaco-editor'
 import { loader } from '@monaco-editor/react'
 import { Blocks, Code, X } from 'lucide-react'
 import { BlocklyEditor } from './BlocklyEditor'
 import { MonacoEditor } from './MonacoEditor'
-import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
-import { closeFile, EditorFile } from '@renderer/redux/fileSlice'
+import { selectOpenFiles, selectViewingFile, useAppDispatch, useAppSelector } from '@renderer/redux'
+import { closeFile, setViewingFile, EditorFile } from '@renderer/redux/fileSlice'
 import { Button } from './ui/Button'
 
 loader.config({ monaco })
 
 export function EditorPanel(): React.JSX.Element {
   const openFiles = useAppSelector(selectOpenFiles)
-  const [viewingFile, setViewingFile] = useState<EditorFile | null>(openFiles[0] ?? null)
+  const viewingFile = useAppSelector(selectViewingFile)
   const [isBlocks, setIsBlocks] = useState<boolean>(false)
   const dispatch = useAppDispatch()
 
-  // Update viewingFile when openFiles changes
-  useEffect(() => {
-    if (openFiles.length === 0) {
-      setViewingFile(null)
-    } else if (viewingFile === null || !openFiles.find((file) => file.id === viewingFile.id)) {
-      // If no file is selected or the current file is no longer open, select the first one
-      setViewingFile(openFiles[0])
-    }
-  }, [openFiles, viewingFile])
-
   const handleFileSelect = (file: EditorFile): void => {
-    setViewingFile(file)
+    dispatch(setViewingFile(file.id))
   }
 
   const handleFileClose = (file: EditorFile): void => {
-    // Close the file and update the viewingFile if necessary
-    const updatedFiles = openFiles.filter((f) => f.id !== file.id)
-    if (viewingFile?.id === file.id) {
-      setViewingFile(updatedFiles[0] ?? null)
-    }
     dispatch(closeFile(file.id))
   }
 

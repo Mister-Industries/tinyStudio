@@ -20,6 +20,7 @@ export interface FileSystemState {
 
 export interface FileSystemActions {
   selectWorkspace: () => Promise<void>
+  openWorkspace: (workspacePath: string) => Promise<void>
   refreshFiles: () => Promise<void>
   loadDirectory: (dirPath: string) => Promise<FileSystemItem[]>
   openFile: (filePath: string) => Promise<string>
@@ -96,6 +97,34 @@ export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystem
       handleError(error, 'workspace selection')
     }
   }, [handleError])
+
+  // Open workspace programmatically
+  const openWorkspace = useCallback(
+    async (workspacePath: string) => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }))
+
+      try {
+        // Verify the path exists
+        const exists = await fileSystem.pathExists(workspacePath)
+        if (!exists) {
+          throw new Error('Workspace path does not exist')
+        }
+
+        setState((prev) => ({ ...prev, workspace: workspacePath }))
+
+        // Load files for the new workspace immediately
+        try {
+          const files = await fileSystem.readDirectory(workspacePath, false)
+          setState((prev) => ({ ...prev, files, isLoading: false }))
+        } catch (fileError) {
+          handleError(fileError, 'file loading after workspace open')
+        }
+      } catch (error) {
+        handleError(error, 'workspace open')
+      }
+    },
+    [handleError]
+  )
 
   // Open and read file
   const openFile = useCallback(
@@ -301,6 +330,7 @@ export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystem
 
     // Actions
     selectWorkspace,
+    openWorkspace,
     refreshFiles,
     openFile,
     saveFile,

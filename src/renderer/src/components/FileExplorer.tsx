@@ -354,6 +354,7 @@ export function FileExplorerContent(): React.JSX.Element {
     isLoading,
     error,
     selectWorkspace,
+    openWorkspace,
     refreshFiles,
     createFile,
     setCurrentFile,
@@ -459,7 +460,7 @@ export function FileExplorerContent(): React.JSX.Element {
             <Button onClick={selectWorkspace} className="px-6">
               Open Folder
             </Button>
-            <CreateProjectDialog />
+            <CreateProjectDialog openWorkspace={openWorkspace} />
           </div>
         ) : isLoading ? (
           <div className="flex items-center justify-center py-8">
@@ -500,7 +501,11 @@ const createProjectSchema = z.object({
 
 type CreateProjectFormData = z.infer<typeof createProjectSchema>
 
-export function CreateProjectDialog(): React.JSX.Element {
+export function CreateProjectDialog({
+  openWorkspace
+}: {
+  openWorkspace: (workspacePath: string) => Promise<void>
+}): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false)
 
   const form = useForm<CreateProjectFormData>({
@@ -601,6 +606,9 @@ void loop() {
         form.reset()
 
         console.log('Arduino project created successfully at:', projectPath)
+
+        // Automatically open the created project in the file explorer
+        await openWorkspace(projectPath)
       } catch (error) {
         console.error('Failed to create project:', error)
         form.setError('root', {
@@ -609,7 +617,7 @@ void loop() {
         })
       }
     },
-    [form]
+    [form, openWorkspace]
   )
 
   return (
