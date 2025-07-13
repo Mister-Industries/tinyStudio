@@ -75,6 +75,10 @@ export const fileSlice = createAppSlice({
           }
         })
       }
+    }),
+    closeFile: create.reducer((state, payload: PayloadAction<string>) => {
+      const fileId = payload.payload
+      state.openFiles = editorObjectAdapter.removeOne(state.openFiles, fileId)
     })
   }),
   selectors: {
@@ -84,6 +88,6 @@ export const fileSlice = createAppSlice({
   }
 })
 
-export const { createNewFile, openFile, updateFileContent, saveFile } = fileSlice.actions
+export const { createNewFile, openFile, updateFileContent, saveFile, closeFile } = fileSlice.actions
 
 export const { selectOpenFiles } = fileSlice.selectors

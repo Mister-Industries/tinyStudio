@@ -14,7 +14,6 @@ import {
   Edit3,
   Download,
   AlertCircle,
-  RefreshCcw,
   FolderSync
 } from 'lucide-react'
 import { Button } from './ui/Button'
@@ -30,6 +29,19 @@ import { useFileSystem } from '../lib/useFileSystem'
 import { fileSystem, type FileSystemItem } from '../lib/fileSystem'
 import { useAppDispatch } from '../redux/hooks'
 import { openFile, type EditorFile } from '../redux/fileSlice'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from './ui/Dialog'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/Form'
+import { Input } from './ui/Input'
 
 // File icon mapping
 function getFileIcon(fileName: string, isDirectory: boolean, isSelected = false): React.ReactNode {
@@ -447,6 +459,7 @@ export function FileExplorerContent(): React.JSX.Element {
             <Button onClick={selectWorkspace} className="px-6">
               Open Folder
             </Button>
+            <CreateProjectDialog />
           </div>
         ) : isLoading ? (
           <div className="flex items-center justify-center py-8">
@@ -462,5 +475,207 @@ export function FileExplorerContent(): React.JSX.Element {
         )}
       </ScrollArea>
     </div>
+  )
+}
+
+// Schema for project creation form
+const createProjectSchema = z.object({
+  projectTitle: z
+    .string()
+    .min(1, 'Arduino project name is required')
+    .min(3, 'Project name must be at least 3 characters')
+    .max(50, 'Project name must not exceed 50 characters')
+    .regex(
+      /^[a-zA-Z0-9\s\-_]+$/,
+      'Project name can only contain letters, numbers, spaces, hyphens, and underscores'
+    ),
+  projectLocation: z
+    .string()
+    .min(1, 'Project location is required')
+    .refine(
+      (path) => path.length > 0 && !path.includes('<') && !path.includes('>'),
+      'Please select a valid directory path'
+    )
+})
+
+type CreateProjectFormData = z.infer<typeof createProjectSchema>
+
+export function CreateProjectDialog(): React.JSX.Element {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const form = useForm<CreateProjectFormData>({
+    resolver: zodResolver(createProjectSchema),
+    defaultValues: {
+      projectTitle: '',
+      projectLocation: ''
+    }
+  })
+
+  const handleSelectLocation = useCallback(async () => {
+    try {
+      // Use the fileSystem API to select a directory
+      const selectedPath = await fileSystem.selectFolder()
+      if (selectedPath) {
+        form.setValue('projectLocation', selectedPath)
+      }
+    } catch (error) {
+      console.error('Failed to select directory:', error)
+    }
+  }, [form])
+
+  const handleSubmit = useCallback(
+    async (data: CreateProjectFormData) => {
+      try {
+        console.log('Creating project with data:', data)
+
+        // Create the project directory path
+        const projectPath = fileSystem.joinPath(data.projectLocation, data.projectTitle)
+
+        // Check if directory already exists
+        const exists = await fileSystem.pathExists(projectPath)
+        if (exists) {
+          form.setError('projectTitle', {
+            type: 'manual',
+            message: 'An Arduino project with this name already exists in the selected location'
+          })
+          return
+        }
+
+        // Create the project directory
+        await fileSystem.createFolder(projectPath)
+
+        // Create basic Arduino project structure
+        const defaultFiles = [
+          {
+            path: 'README.md',
+            content: `# ${data.projectTitle}\n\nAn Arduino project created with TinyStudio.\n\n## Getting Started\n\n1. Open this project in Arduino IDE or TinyStudio\n2. Connect your Arduino board\n3. Upload the sketch to your board\n\n## Hardware Requirements\n\n- Arduino Uno (or compatible board)\n- USB cable\n- Additional components as needed\n\n## Circuit Diagram\n\nAdd your circuit diagram and connections here.\n`
+          },
+          {
+            path: `${data.projectTitle.replace(/\s+/g, '_')}.ino`,
+            content: `/*
+  ${data.projectTitle}
+  
+  Created with TinyStudio
+  Date: ${new Date().toLocaleDateString()}
+  
+  Description:
+  A basic Arduino sketch template. Customize this code for your project needs.
+*/
+
+// Pin definitions
+const int LED_PIN = 13;  // Built-in LED pin
+
+void setup() {
+  // Initialize serial communication
+  Serial.begin(9600);
+  
+  // Initialize digital pin LED_PIN as an output
+  pinMode(LED_PIN, OUTPUT);
+  
+  Serial.println("${data.projectTitle} - Setup complete!");
+}
+
+void loop() {
+  // Turn the LED on
+  digitalWrite(LED_PIN, HIGH);
+  Serial.println("LED ON");
+  delay(1000);  // Wait for a second
+  
+  // Turn the LED off
+  digitalWrite(LED_PIN, LOW);
+  Serial.println("LED OFF");
+  delay(1000);  // Wait for a second
+}
+`
+          }
+        ]
+
+        // Create default files
+        for (const file of defaultFiles) {
+          const filePath = fileSystem.joinPath(projectPath, file.path)
+          await fileSystem.createFile(filePath, file.content)
+        }
+
+        // Close the dialog and reset form
+        setIsOpen(false)
+        form.reset()
+
+        console.log('Arduino project created successfully at:', projectPath)
+      } catch (error) {
+        console.error('Failed to create project:', error)
+        form.setError('root', {
+          type: 'manual',
+          message: 'Failed to create project. Please try again.'
+        })
+      }
+    },
+    [form]
+  )
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button className="px-6">Create Arduino Project</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Build Cool Shit</DialogTitle>
+          <DialogDescription>
+            Just give this project a title and a location and we can handle the rest.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="projectTitle"
+              render={({ field }) => (
+                <>
+                  <FormLabel htmlFor="project-title">Project Title</FormLabel>
+                  <FormControl>
+                    <Input id="project-title" placeholder="My Project" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="projectLocation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="project-location">Project Location</FormLabel>
+                  <FormControl>
+                    <div className="flex gap-2">
+                      <Input
+                        id="project-location"
+                        placeholder="Select a location..."
+                        readOnly
+                        {...field}
+                      />
+                      <Button type="button" variant="outline" onClick={handleSelectLocation}>
+                        Browse
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {form.formState.errors.root && (
+              <div className="text-destructive text-sm">{form.formState.errors.root.message}</div>
+            )}
+            <div className="flex justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Creating...' : 'Create Project'}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   )
 }

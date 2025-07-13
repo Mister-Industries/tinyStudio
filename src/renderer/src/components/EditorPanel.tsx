@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import * as monaco from 'monaco-editor'
 import { loader } from '@monaco-editor/react'
-import { Blocks, Code } from 'lucide-react'
+import { Blocks, Code, X } from 'lucide-react'
 import { BlocklyEditor } from './BlocklyEditor'
 import { MonacoEditor } from './MonacoEditor'
-import { selectOpenFiles, useAppSelector } from '@renderer/redux'
-import { EditorFile } from '@renderer/redux/fileSlice'
+import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
+import { closeFile, EditorFile } from '@renderer/redux/fileSlice'
+import { Button } from './ui/Button'
 
 loader.config({ monaco })
 
@@ -13,6 +14,7 @@ export function EditorPanel(): React.JSX.Element {
   const openFiles = useAppSelector(selectOpenFiles)
   const [viewingFile, setViewingFile] = useState<EditorFile | null>(openFiles[0] ?? null)
   const [isBlocks, setIsBlocks] = useState<boolean>(false)
+  const dispatch = useAppDispatch()
 
   // Update viewingFile when openFiles changes
   useEffect(() => {
@@ -26,6 +28,15 @@ export function EditorPanel(): React.JSX.Element {
 
   const handleFileSelect = (file: EditorFile): void => {
     setViewingFile(file)
+  }
+
+  const handleFileClose = (file: EditorFile): void => {
+    // Close the file and update the viewingFile if necessary
+    const updatedFiles = openFiles.filter((f) => f.id !== file.id)
+    if (viewingFile?.id === file.id) {
+      setViewingFile(updatedFiles[0] ?? null)
+    }
+    dispatch(closeFile(file.id))
   }
 
   // If no files are open, show a placeholder
@@ -54,6 +65,9 @@ export function EditorPanel(): React.JSX.Element {
               {file.modified && (
                 <span className="w-2 h-2 bg-orange-500 rounded-full" title="Unsaved changes" />
               )}
+              <Button variant="ghost" className="size-4 p-0" onClick={() => handleFileClose(file)}>
+                <X size={10} />
+              </Button>
             </div>
           ))}
         </div>
