@@ -14,8 +14,7 @@ import {
   Edit3,
   Download,
   AlertCircle,
-  FolderSync,
-  Zap
+  FolderSync
 } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
@@ -455,12 +454,11 @@ export function FileExplorerContent(): React.JSX.Element {
 
       <ScrollArea className="flex-1">
         {!workspace ? (
-          <div className="flex flex-col items-center justify-center text-muted-foreground py-8 px-4 gap-2">
+          <div className="flex flex-col items-center justify-center text-muted-foreground py-8 px-4">
             <Folder size={48} className="mb-4 opacity-50" />
             <p className="text-sm mb-4 text-center">Open a folder to start working with files</p>
-            <Button onClick={selectWorkspace} className="w-40">
+            <Button onClick={selectWorkspace} className="px-6">
               Open Folder
-              <FolderOpen size={14} />
             </Button>
             <CreateProjectDialog openWorkspace={openWorkspace} />
           </div>
@@ -503,21 +501,12 @@ const createProjectSchema = z.object({
 
 type CreateProjectFormData = z.infer<typeof createProjectSchema>
 
-const projectPlaceholders = [
-  'Long Distance Message Box',
-  'fNIRS Headset',
-  'Punch-It!',
-  'CyberJacket',
-  'Smart Graduation Cap'
-]
-
 export function CreateProjectDialog({
   openWorkspace
 }: {
   openWorkspace: (workspacePath: string) => Promise<void>
 }): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false)
-  const [dialogOpenCount, setDialogOpenCount] = useState(0)
 
   const form = useForm<CreateProjectFormData>({
     resolver: zodResolver(createProjectSchema),
@@ -526,14 +515,6 @@ export function CreateProjectDialog({
       projectLocation: ''
     }
   })
-
-  // Track when dialog opens to regenerate placeholder
-  const handleOpenChange = useCallback((open: boolean) => {
-    setIsOpen(open)
-    if (open) {
-      setDialogOpenCount((prev) => prev + 1)
-    }
-  }, [])
 
   const handleSelectLocation = useCallback(async () => {
     try {
@@ -621,7 +602,7 @@ void loop() {
         }
 
         // Close the dialog and reset form
-        handleOpenChange(false)
+        setIsOpen(false)
         form.reset()
 
         console.log('Arduino project created successfully at:', projectPath)
@@ -636,22 +617,13 @@ void loop() {
         })
       }
     },
-    [form, openWorkspace, handleOpenChange]
+    [form, openWorkspace]
   )
 
-  // Memoize the random placeholder to prevent it from changing during dialog close animation
-  // Only recalculate when dialog is opened (not closed)
-  const randomPlaceholder = useMemo(() => {
-    return projectPlaceholders[Math.floor(Math.random() * projectPlaceholders.length)]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dialogOpenCount])
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="w-40">
-          Create Project <Zap />
-        </Button>
+        <Button className="px-6">Create Arduino Project</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -669,7 +641,7 @@ void loop() {
                 <>
                   <FormLabel htmlFor="project-title">Project Title</FormLabel>
                   <FormControl>
-                    <Input id="project-title" placeholder={randomPlaceholder} {...field} />
+                    <Input id="project-title" placeholder="My Project" {...field} />
                   </FormControl>
                   <FormMessage />
                 </>
@@ -702,7 +674,7 @@ void loop() {
               <div className="text-destructive text-sm">{form.formState.errors.root.message}</div>
             )}
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
