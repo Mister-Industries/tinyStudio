@@ -39,7 +39,7 @@ export function Header(): React.JSX.Element {
       <div className="flex items-center gap-8 pl-4">
         <h1 className="flex font-semibold text-lg">
           <p>tiny</p>
-          <p className="text-accent">Studio</p>
+          <p className="text-accent">Forge</p>
         </h1>
         <p>by MR.INDUSTRIES</p>
       </div>

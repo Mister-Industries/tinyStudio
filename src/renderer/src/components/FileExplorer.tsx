@@ -14,7 +14,8 @@ import {
   Edit3,
   Download,
   AlertCircle,
-  FolderSync
+  FolderSync,
+  Zap
 } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
@@ -454,11 +455,12 @@ export function FileExplorerContent(): React.JSX.Element {
 
       <ScrollArea className="flex-1">
         {!workspace ? (
-          <div className="flex flex-col items-center justify-center text-muted-foreground py-8 px-4">
+          <div className="flex flex-col items-center justify-center text-muted-foreground py-8 px-4 gap-2">
             <Folder size={48} className="mb-4 opacity-50" />
             <p className="text-sm mb-4 text-center">Open a folder to start working with files</p>
-            <Button onClick={selectWorkspace} className="px-6">
+            <Button onClick={selectWorkspace} className="w-40">
               Open Folder
+              <FolderOpen size={14} />
             </Button>
             <CreateProjectDialog openWorkspace={openWorkspace} />
           </div>
@@ -501,12 +503,21 @@ const createProjectSchema = z.object({
 
 type CreateProjectFormData = z.infer<typeof createProjectSchema>
 
+const projectPlaceholders = [
+  'Long Distance Message Box',
+  'fNIRS Headset',
+  'Punch-It!',
+  'CyberJacket',
+  'Smart Graduation Cap'
+]
+
 export function CreateProjectDialog({
   openWorkspace
 }: {
   openWorkspace: (workspacePath: string) => Promise<void>
 }): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false)
+  const [dialogOpenCount, setDialogOpenCount] = useState(0)
 
   const form = useForm<CreateProjectFormData>({
     resolver: zodResolver(createProjectSchema),
@@ -515,6 +526,14 @@ export function CreateProjectDialog({
       projectLocation: ''
     }
   })
+
+  // Track when dialog opens to regenerate placeholder
+  const handleOpenChange = useCallback((open: boolean) => {
+    setIsOpen(open)
+    if (open) {
+      setDialogOpenCount((prev) => prev + 1)
+    }
+  }, [])
 
   const handleSelectLocation = useCallback(async () => {
     try {
@@ -553,14 +572,14 @@ export function CreateProjectDialog({
         const defaultFiles = [
           {
             path: 'README.md',
-            content: `# ${data.projectTitle}\n\nAn Arduino project created with TinyStudio.\n\n## Getting Started\n\n1. Open this project in Arduino IDE or TinyStudio\n2. Connect your Arduino board\n3. Upload the sketch to your board\n\n## Hardware Requirements\n\n- Arduino Uno (or compatible board)\n- USB cable\n- Additional components as needed\n\n## Circuit Diagram\n\nAdd your circuit diagram and connections here.\n`
+            content: `# ${data.projectTitle}\n\nAn Arduino project created with TinyForge.\n\n## Getting Started\n\n1. Open this project in Arduino IDE or TinyForge\n2. Connect your Arduino board\n3. Upload the sketch to your board\n\n## Hardware Requirements\n\n- Arduino Uno (or compatible board)\n- USB cable\n- Additional components as needed\n\n## Circuit Diagram\n\nAdd your circuit diagram and connections here.\n`
           },
           {
             path: `${data.projectTitle.replace(/\s+/g, '_')}.ino`,
             content: `/*
   ${data.projectTitle}
   
-  Created with TinyStudio
+  Created with TinyForge
   Date: ${new Date().toLocaleDateString()}
   
   Description:
@@ -602,7 +621,7 @@ void loop() {
         }
 
         // Close the dialog and reset form
-        setIsOpen(false)
+        handleOpenChange(false)
         form.reset()
 
         console.log('Arduino project created successfully at:', projectPath)
@@ -617,13 +636,22 @@ void loop() {
         })
       }
     },
-    [form, openWorkspace]
+    [form, openWorkspace, handleOpenChange]
   )
 
+  // Memoize the random placeholder to prevent it from changing during dialog close animation
+  // Only recalculate when dialog is opened (not closed)
+  const randomPlaceholder = useMemo(() => {
+    return projectPlaceholders[Math.floor(Math.random() * projectPlaceholders.length)]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dialogOpenCount])
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className="px-6">Create Arduino Project</Button>
+        <Button className="w-40">
+          Create Project <Zap />
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -641,7 +669,7 @@ void loop() {
                 <>
                   <FormLabel htmlFor="project-title">Project Title</FormLabel>
                   <FormControl>
-                    <Input id="project-title" placeholder="My Project" {...field} />
+                    <Input id="project-title" placeholder={randomPlaceholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </>
@@ -674,7 +702,7 @@ void loop() {
               <div className="text-destructive text-sm">{form.formState.errors.root.message}</div>
             )}
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
