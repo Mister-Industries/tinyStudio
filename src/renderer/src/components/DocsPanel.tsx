@@ -24,7 +24,7 @@ export function DocsPanel(): React.JSX.Element {
         </Button>
       </div>
       <div className="flex w-full h-full justify-center px-4 py-2">
-        <Tabs defaultValue="ai" className="w-min-[400px] w-full">
+        <Tabs defaultValue="examples" className="w-min-[400px] w-full">
           <TabsList className="flex justify-center w-full px-2">
             <TabsTrigger value="ai">
               <MessageCircle />

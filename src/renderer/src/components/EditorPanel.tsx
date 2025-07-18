@@ -1,19 +1,27 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import * as monaco from 'monaco-editor'
 import { loader } from '@monaco-editor/react'
-import { Blocks, Code, X } from 'lucide-react'
+import { Blocks, CircuitBoard, Code, X } from 'lucide-react'
 import { BlocklyEditor } from './BlocklyEditor'
 import { MonacoEditor } from './MonacoEditor'
 import { selectOpenFiles, selectViewingFile, useAppDispatch, useAppSelector } from '@renderer/redux'
-import { closeFile, setViewingFile, EditorFile } from '@renderer/redux/fileSlice'
+import {
+  closeFile,
+  setViewingFile,
+  EditorFile,
+  updateFileContent,
+  saveFileWithContent
+} from '@renderer/redux/fileSlice'
 import { Button } from './ui/Button'
+import { fileSystem } from '../lib/fileSystem'
+import { CircuitEditor } from './CircuitEditor'
 
 loader.config({ monaco })
 
 export function EditorPanel(): React.JSX.Element {
   const openFiles = useAppSelector(selectOpenFiles)
   const viewingFile = useAppSelector(selectViewingFile)
-  const [isBlocks, setIsBlocks] = useState<boolean>(false)
+  const [editorMode, setEditorMode] = useState<'code' | 'blocks' | 'circuit'>('code')
   const dispatch = useAppDispatch()
 
   const handleFileSelect = (file: EditorFile): void => {
@@ -23,6 +31,34 @@ export function EditorPanel(): React.JSX.Element {
   const handleFileClose = (file: EditorFile): void => {
     dispatch(closeFile(file.id))
   }
+
+  const handleContentChange = useCallback(
+    (content: string) => {
+      if (viewingFile) {
+        console.log(`Content changed for: ${viewingFile.name} (${viewingFile.id})`)
+        dispatch(updateFileContent({ id: viewingFile.id, content }))
+      }
+    },
+    [viewingFile, dispatch]
+  )
+
+  const handleSaveFile = useCallback(
+    async (content: string) => {
+      if (viewingFile?.path) {
+        try {
+          console.log(`Saving file: ${viewingFile.name} (${viewingFile.id}) to ${viewingFile.path}`)
+          console.log(`Content length: ${content.length}`)
+          await fileSystem.writeFile(viewingFile.path, content)
+          // Save with content to ensure state is properly synced
+          dispatch(saveFileWithContent({ id: viewingFile.id, content }))
+          console.log(`Successfully saved: ${viewingFile.name}`)
+        } catch (error) {
+          console.error('Failed to save file:', error)
+        }
+      }
+    },
+    [viewingFile, dispatch]
+  )
 
   // If no files are open, show a placeholder
   if (openFiles.length === 0) {
@@ -58,16 +94,24 @@ export function EditorPanel(): React.JSX.Element {
         </div>
         <div className="flex">
           <button
-            data-active={isBlocks == false}
-            onClick={() => setIsBlocks(false)}
+            data-active={editorMode === 'circuit'}
+            onClick={() => setEditorMode('circuit')}
+            className="flex items-center gap-2 p-2 hover:bg-accent/50 hover:text-accent-foreground data-[active=true]:bg-accent/50 data-[active=true]:text-accent-foreground data-[active=true]:border-b data-[active=true]:border-primary"
+          >
+            <CircuitBoard />
+            Circuit
+          </button>
+          <button
+            data-active={editorMode === 'code'}
+            onClick={() => setEditorMode('code')}
             className="flex items-center gap-2 p-2 hover:bg-accent/50 hover:text-accent-foreground data-[active=true]:bg-accent/50 data-[active=true]:text-accent-foreground data-[active=true]:border-b data-[active=true]:border-primary"
           >
             <Code />
             Code
           </button>
           <button
-            data-active={isBlocks == true}
-            onClick={() => setIsBlocks(true)}
+            data-active={editorMode === 'blocks'}
+            onClick={() => setEditorMode('blocks')}
             className="flex items-center gap-2 p-2 hover:bg-accent/50 hover:text-accent-foreground data-[active=true]:bg-accent/50 data-[active=true]:text-accent-foreground data-[active=true]:border-b data-[active=true]:border-primary"
           >
             <Blocks />
@@ -75,10 +119,16 @@ export function EditorPanel(): React.JSX.Element {
           </button>
         </div>
       </div>
-      {isBlocks && viewingFile !== null ? (
+      {editorMode === 'blocks' && viewingFile !== null ? (
         <BlocklyEditor />
+      ) : editorMode === 'circuit' && viewingFile !== null ? (
+        <CircuitEditor />
       ) : viewingFile !== null ? (
-        <MonacoEditor activeFile={viewingFile} />
+        <MonacoEditor
+          activeFile={viewingFile}
+          onContentChange={handleContentChange}
+          onSaveFile={handleSaveFile}
+        />
       ) : (
         <div className="flex size-full items-center justify-center text-muted-foreground">
           <p>Select a file to edit</p>

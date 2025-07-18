@@ -97,6 +97,22 @@ export const fileSlice = createAppSlice({
         })
       }
     }),
+    saveFileWithContent: create.reducer(
+      (state, payload: PayloadAction<{ id: string; content: string }>) => {
+        const { id, content } = payload.payload
+        const existingFile = state.openFiles.entities[id]
+        if (existingFile) {
+          state.openFiles = editorObjectAdapter.updateOne(state.openFiles, {
+            id,
+            changes: {
+              content,
+              modified: false,
+              updatedAt: new Date().toISOString()
+            }
+          })
+        }
+      }
+    ),
     closeFile: create.reducer((state, payload: PayloadAction<string>) => {
       const fileId = payload.payload
       state.openFiles = editorObjectAdapter.removeOne(state.openFiles, fileId)
@@ -132,6 +148,7 @@ export const {
   updateFileContent,
   refreshFileContentFromDisk,
   saveFile,
+  saveFileWithContent,
   closeFile,
   setViewingFile
 } = fileSlice.actions

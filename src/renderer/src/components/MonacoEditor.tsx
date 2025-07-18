@@ -1,15 +1,22 @@
 import { Editor, Monaco, OnMount } from '@monaco-editor/react'
 import { useTheme } from '@renderer/lib/ThemeProvider'
-import { EditorFile, updateFileContent, saveFile } from '@renderer/redux'
-import { useAppDispatch } from '@renderer/redux/hooks'
-import { useRef, useCallback } from 'react'
-import { fileSystem } from '../lib/fileSystem'
+import { EditorFile } from '@renderer/redux'
+import { useRef } from 'react'
 
-export function MonacoEditor({ activeFile }: { activeFile: EditorFile }): React.JSX.Element {
+interface MonacoEditorProps {
+  activeFile: EditorFile
+  onContentChange: (content: string) => void
+  onSaveFile: (content: string) => Promise<void>
+}
+
+export function MonacoEditor({
+  activeFile,
+  onContentChange,
+  onSaveFile
+}: MonacoEditorProps): React.JSX.Element {
   const editorRef = useRef<ReturnType<typeof import('monaco-editor').editor.create> | null>(null)
   const monacoRef = useRef<Monaco | null>(null)
   const { theme } = useTheme()
-  const dispatch = useAppDispatch()
 
   function handleBeforeMount(monaco): void {
     monaco.editor.defineTheme('tiny-dark-theme', {
@@ -60,7 +67,8 @@ export function MonacoEditor({ activeFile }: { activeFile: EditorFile }): React.
 
     // Add save command (Ctrl+S)
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-      handleSaveFile()
+      const currentContent = editor.getValue() || ''
+      onSaveFile(currentContent)
     })
 
     // Set Arduino language configuration
@@ -110,31 +118,13 @@ export function MonacoEditor({ activeFile }: { activeFile: EditorFile }): React.
 
   const handleContentChange = (value: string | undefined): void => {
     if (value !== undefined) {
-      dispatch(updateFileContent({ id: activeFile.id, content: value }))
+      onContentChange(value)
     }
   }
-
-  const handleSaveFile = useCallback(async () => {
-    if (activeFile.path && editorRef.current) {
-      try {
-        // Get current content directly from the Monaco editor
-        const currentContent = editorRef.current.getValue() || ''
-        await fileSystem.writeFile(activeFile.path, currentContent)
-
-        // Update Redux with the current content and mark as saved
-        dispatch(updateFileContent({ id: activeFile.id, content: currentContent }))
-        dispatch(saveFile(activeFile.id))
-      } catch (error) {
-        console.error('Failed to save file:', error)
-      }
-    }
-  }, [activeFile, dispatch])
 
   return (
     <Editor
       height="100%"
-      defaultLanguage="arduino"
-      defaultValue={activeFile.content || ''}
       language="arduino"
       theme={theme === 'light' ? 'tiny-light-theme' : 'tiny-dark-theme'}
       value={activeFile.content || ''}
