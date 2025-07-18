@@ -96,9 +96,6 @@ class WebFileSystemService {
         targetHandle = await this.getDirectoryHandle(dirPath)
       }
 
-      console.log('Reading directory:', dirPath)
-      console.log('Reading target Handle:', targetHandle)
-
       if (!targetHandle) {
         throw new Error('Directory not found')
       }
@@ -180,11 +177,8 @@ class WebFileSystemService {
   // Write file content
   async writeFile(filePath: string, content: string): Promise<void> {
     try {
-      console.log(`Writing file: ${filePath}`)
-
       // Normalize the file path
       const normalizedPath = this.normalizePath(filePath)
-      console.log(`Normalized path: ${normalizedPath}`)
 
       let fileHandle = this.fileHandles.get(normalizedPath) || this.fileHandles.get(filePath)
 
@@ -193,8 +187,6 @@ class WebFileSystemService {
         const pathParts = normalizedPath.split('/')
         const fileName = pathParts.pop()!
         const dirPath = pathParts.join('/')
-
-        console.log(`Creating file "${fileName}" in directory "${dirPath}"`)
 
         const dirHandle = await this.resolveDirectoryHandle(dirPath)
         fileHandle = await dirHandle.getFileHandle(fileName, { create: true })
@@ -205,8 +197,6 @@ class WebFileSystemService {
       const writable = await fileHandle.createWritable()
       await writable.write(content)
       await writable.close()
-
-      console.log(`Successfully wrote file: ${filePath}`)
     } catch (error) {
       console.error('Error writing file:', error)
       throw error
@@ -216,8 +206,9 @@ class WebFileSystemService {
   // Create new file
   async createFile(filePath: string, content = ''): Promise<void> {
     try {
-      // Check if file already exists
-      if (this.fileHandles.has(filePath)) {
+      const normalizedPath = this.normalizePath(filePath)
+      // Check if file already exists using both paths
+      if (this.fileHandles.has(normalizedPath) || this.fileHandles.has(filePath)) {
         throw new Error('File already exists')
       }
 
@@ -231,7 +222,8 @@ class WebFileSystemService {
   // Create new folder
   async createFolder(folderPath: string): Promise<void> {
     try {
-      const pathParts = folderPath.split('/')
+      const normalizedPath = this.normalizePath(folderPath)
+      const pathParts = normalizedPath.split('/')
       const folderName = pathParts.pop()!
       const parentPath = pathParts.join('/')
 
@@ -246,12 +238,16 @@ class WebFileSystemService {
   // Delete file or directory
   async deleteFile(targetPath: string): Promise<void> {
     try {
-      const pathParts = targetPath.split('/')
+      const normalizedPath = this.normalizePath(targetPath)
+      const pathParts = normalizedPath.split('/')
       const name = pathParts.pop()!
       const parentPath = pathParts.join('/')
 
       const parentHandle = await this.resolveDirectoryHandle(parentPath)
       await parentHandle.removeEntry(name, { recursive: true })
+
+      // Delete from file handles using both paths
+      this.fileHandles.delete(normalizedPath)
       this.fileHandles.delete(targetPath)
     } catch (error) {
       console.error('Error deleting file/folder:', error)
@@ -264,7 +260,15 @@ class WebFileSystemService {
     try {
       if (!this.directoryHandle) return false
 
-      const pathParts = targetPath.split('/')
+      // Normalize the path first
+      const normalizedPath = this.normalizePath(targetPath)
+
+      // If the normalized path is empty, it means we're checking for the root directory
+      if (!normalizedPath) {
+        return true // Root directory always exists
+      }
+
+      const pathParts = normalizedPath.split('/').filter(Boolean)
       let currentHandle: FileSystemDirectoryHandle = this.directoryHandle
 
       for (const part of pathParts.slice(0, -1)) {
@@ -287,7 +291,8 @@ class WebFileSystemService {
           return false
         }
       }
-    } catch {
+    } catch (error) {
+      console.error('Error in pathExists:', error)
       return false
     }
   }
@@ -295,7 +300,11 @@ class WebFileSystemService {
   // Get file stats
   async getFileStats(filePath: string): Promise<FileStats> {
     try {
-      const fileHandle = this.fileHandles.get(filePath) || (await this.getFileHandle(filePath))
+      const normalizedPath = this.normalizePath(filePath)
+      const fileHandle =
+        this.fileHandles.get(normalizedPath) ||
+        this.fileHandles.get(filePath) ||
+        (await this.getFileHandle(normalizedPath))
 
       if (!fileHandle) {
         throw new Error('File not found')
@@ -319,8 +328,6 @@ class WebFileSystemService {
   private normalizePath(path: string): string {
     if (!path || !this.directoryHandle) return path
 
-    const originalPath = path
-
     // If path starts with the root directory name, remove it
     // This handles cases where paths are constructed with workspace name included
     if (path.startsWith(this.directoryHandle.name + '/')) {
@@ -330,10 +337,6 @@ class WebFileSystemService {
     // If path is exactly the root directory name, return empty string
     if (path === this.directoryHandle.name) {
       path = ''
-    }
-
-    if (originalPath !== path) {
-      console.log(`Path normalized: "${originalPath}" -> "${path}"`)
     }
 
     return path
