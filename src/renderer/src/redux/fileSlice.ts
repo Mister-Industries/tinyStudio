@@ -16,6 +16,7 @@ export type FileSliceState = {
   openProjects: string[]
   openFiles: EntityState<EditorFile, string>
   viewingFileId: string | null
+  readmeContent?: string
 }
 
 const editorObjectAdapter = createEntityAdapter<EditorFile>()
@@ -67,6 +68,9 @@ export const fileSlice = createAppSlice({
         }
       }
     ),
+    updateReadmeContent: create.reducer((state, payload: PayloadAction<string>) => {
+      state.readmeContent = payload.payload
+    }),
     refreshFileContentFromDisk: create.reducer(
       (state, payload: PayloadAction<{ id: string; content: string }>) => {
         const { id, content } = payload.payload
@@ -139,6 +143,7 @@ export const {
   createNewFile,
   openFile,
   updateFileContent,
+  updateReadmeContent,
   refreshFileContentFromDisk,
   saveFile,
   saveFileWithContent,

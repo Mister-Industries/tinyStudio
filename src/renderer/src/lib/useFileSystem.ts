@@ -4,7 +4,11 @@
 import { useState, useCallback, useEffect } from 'react'
 import { fileSystem, type FileSystemItem } from '../lib/fileSystem'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { selectOpenFiles, refreshFileContentFromDisk } from '../redux/fileSlice'
+import {
+  selectOpenFiles,
+  refreshFileContentFromDisk,
+  updateReadmeContent
+} from '../redux/fileSlice'
 
 export interface UseFileSystemOptions {
   autoLoadWorkspace?: boolean
@@ -64,6 +68,20 @@ export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystem
     setState((prev) => ({ ...prev, error: message, isLoading: false }))
   }, [])
 
+  // Update README content for a workspace
+  const updateWorkspaceReadme = useCallback(
+    async (workspacePath: string) => {
+      try {
+        const readmeContent = await fileSystem.findAndReadReadme(workspacePath)
+        dispatch(updateReadmeContent(readmeContent || ''))
+      } catch (error) {
+        console.error('Failed to update README content:', error)
+        // Don't throw error, just log it as this is not critical
+      }
+    },
+    [dispatch]
+  )
+
   // Refresh open file contents in Redux
   const refreshOpenFileContents = useCallback(async () => {
     if (openFiles.length === 0) return
@@ -104,10 +122,13 @@ export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystem
 
       // Also refresh content of currently open files
       await refreshOpenFileContents()
+
+      // Update README content for the workspace
+      await updateWorkspaceReadme(state.workspace)
     } catch (error) {
       handleError(error, 'file refresh')
     }
-  }, [state.workspace, handleError, refreshOpenFileContents])
+  }, [state.workspace, handleError, refreshOpenFileContents, updateWorkspaceReadme])
 
   // Select workspace folder
   const selectWorkspace = useCallback(async () => {
@@ -122,6 +143,9 @@ export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystem
         try {
           const files = await fileSystem.readDirectory(workspacePath, false)
           setState((prev) => ({ ...prev, files, isLoading: false }))
+
+          // Update README content for the new workspace
+          await updateWorkspaceReadme(workspacePath)
         } catch (fileError) {
           handleError(fileError, 'file loading after workspace selection')
         }
@@ -131,7 +155,7 @@ export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystem
     } catch (error) {
       handleError(error, 'workspace selection')
     }
-  }, [handleError])
+  }, [handleError, updateWorkspaceReadme])
 
   // Open workspace programmatically
   const openWorkspace = useCallback(
@@ -151,6 +175,9 @@ export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystem
         try {
           const files = await fileSystem.readDirectory(workspacePath, false)
           setState((prev) => ({ ...prev, files, isLoading: false }))
+
+          // Update README content for the new workspace
+          await updateWorkspaceReadme(workspacePath)
         } catch (fileError) {
           handleError(fileError, 'file loading after workspace open')
         }
@@ -158,7 +185,7 @@ export function useFileSystem(options: UseFileSystemOptions = {}): UseFileSystem
         handleError(error, 'workspace open')
       }
     },
-    [handleError]
+    [handleError, updateWorkspaceReadme]
   )
 
   // Open and read file

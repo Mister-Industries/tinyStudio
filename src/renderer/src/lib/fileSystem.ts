@@ -288,6 +288,43 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     ]
     return codeExtensions.includes(this.getFileExtension(fileName))
   }
+
+  // Find and read README file from a directory
+  async findAndReadReadme(dirPath: string): Promise<string | null> {
+    try {
+      const files = await this.readDirectory(dirPath, false)
+
+      // Common README file patterns
+      const readmePatterns = [
+        'README.md',
+        'readme.md',
+        'README.txt',
+        'readme.txt',
+        'README',
+        'readme',
+        'ReadMe.md',
+        'ReadMe.txt',
+        'ReadMe'
+      ]
+
+      // Find the first matching README file
+      const readmeFile = files.find(
+        (file) =>
+          !file.isDirectory &&
+          readmePatterns.some((pattern) => file.name.toLowerCase() === pattern.toLowerCase())
+      )
+
+      if (readmeFile) {
+        const readmeContent = await this.readFile(readmeFile.path)
+        return readmeContent
+      }
+
+      return null
+    } catch (error) {
+      console.error('Error finding/reading README:', error)
+      return null
+    }
+  }
 }
 
 // Create singleton instance
