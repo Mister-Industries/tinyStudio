@@ -131,13 +131,6 @@ export const fileSlice = createAppSlice({
     selectOpenFiles: createSelector([(state) => state.openFiles], (openFiles) =>
       editorObjectAdapter.getSelectors().selectAll(openFiles)
     ),
-    selectViewingFile: createSelector(
-      [(state) => state.openFiles, (state) => state.viewingFileId],
-      (openFiles, viewingFileId) => {
-        if (!viewingFileId) return null
-        return editorObjectAdapter.getSelectors().selectById(openFiles, viewingFileId) || null
-      }
-    ),
     selectViewingFileId: (state) => state.viewingFileId
   }
 })
@@ -153,4 +146,4 @@ export const {
   setViewingFile
 } = fileSlice.actions
 
-export const { selectOpenFiles, selectViewingFile, selectViewingFileId } = fileSlice.selectors
+export const { selectOpenFiles, selectViewingFileId } = fileSlice.selectors

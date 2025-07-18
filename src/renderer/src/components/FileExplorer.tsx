@@ -28,8 +28,8 @@ import {
 } from './ui/DropdownMenu'
 import { useFileSystem } from '../lib/useFileSystem'
 import { fileSystem, type FileSystemItem } from '../lib/fileSystem'
-import { useAppDispatch } from '../redux/hooks'
-import { openFile, type EditorFile } from '../redux/fileSlice'
+import { useAppDispatch, useAppSelector } from '../redux/hooks'
+import { openFile, setViewingFile, selectOpenFiles, type EditorFile } from '../redux/fileSlice'
 import {
   Dialog,
   DialogContent,
@@ -348,6 +348,7 @@ export function FileExplorer(): React.JSX.Element {
 // File explorer content component
 export function FileExplorerContent(): React.JSX.Element {
   const dispatch = useAppDispatch()
+  const openFiles = useAppSelector(selectOpenFiles)
   const {
     workspace,
     files,
@@ -367,11 +368,20 @@ export function FileExplorerContent(): React.JSX.Element {
     async (filePath: string) => {
       try {
         setCurrentFile(filePath)
+
+        // Check if file is already open
+        const existingFile = openFiles.find((file) => file.path === filePath)
+        if (existingFile) {
+          // File is already open, just set it as the viewing file
+          dispatch(setViewingFile(existingFile.id))
+          return
+        }
+
         const content = await fileSystem.readFile(filePath)
 
         // Create EditorFile object and dispatch to Redux
         const editorFile: EditorFile = {
-          id: filePath,
+          id: crypto.randomUUID(),
           name: fileSystem.getFileName(filePath),
           path: filePath,
           content,
@@ -385,7 +395,7 @@ export function FileExplorerContent(): React.JSX.Element {
         console.error('Failed to open file:', err)
       }
     },
-    [setCurrentFile, dispatch]
+    [setCurrentFile, dispatch, openFiles]
   )
 
   const handleNewFile = useCallback(async () => {
@@ -398,9 +408,18 @@ export function FileExplorerContent(): React.JSX.Element {
       const filePath = fileSystem.joinPath(workspace, fileName)
       await createFile(filePath, '// New file\n')
 
+      // Check if file is already open
+      const existingFile = openFiles.find((file) => file.path === filePath)
+      if (existingFile) {
+        // File is already open, just set it as the viewing file
+        dispatch(setViewingFile(existingFile.id))
+        setCurrentFile(filePath)
+        return
+      }
+
       // Auto-open the new file
       const editorFile: EditorFile = {
-        id: filePath,
+        id: crypto.randomUUID(),
         name: fileName,
         path: filePath,
         content: '// New file\n',
@@ -414,7 +433,7 @@ export function FileExplorerContent(): React.JSX.Element {
     } catch (err) {
       console.error('Failed to create file:', err)
     }
-  }, [workspace, createFile, dispatch, setCurrentFile])
+  }, [workspace, createFile, dispatch, setCurrentFile, openFiles])
 
   return (
     <div className="h-full flex flex-col">
