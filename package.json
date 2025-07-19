@@ -36,6 +36,7 @@
     "monaco-editor": "^0.52.2",
     "radix-ui": "^1.4.2",
     "react-hook-form": "^7.60.0",
+    "react-markdown": "^10.1.0",
     "react-redux": "^9.2.0",
     "react-resizable-panels": "^3.0.3",
     "react-zoom-pan-pinch": "^3.7.0",

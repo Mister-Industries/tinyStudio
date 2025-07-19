@@ -11,7 +11,7 @@ export function StatusBar(): React.JSX.Element {
         </div>
         <div className="flex items-center gap-1">
           <Circle size={10} className="text-destructive fill-destructive" />
-          Arduino Agent Not Found
+          Teeny™ Not Found
         </div>
         <div className="flex items-center gap-3">
           <Button variant="link" className="p-0 h-fit text-xs text-blue-400">

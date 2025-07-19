@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import * as Blockly from 'blockly'
 import { useTheme } from '@renderer/lib/ThemeProvider'
-import { defineArduinoBlocks, defineArduinoGenerators, ArduinoGenerator } from '@renderer/lib/arduinoBlocks'
+import {
+  defineArduinoBlocks,
+  defineArduinoGenerators,
+  ArduinoGenerator
+} from '@renderer/lib/arduinoBlocks'
 
 export function BlocklyEditor(): React.JSX.Element {
   const blocklyDivRef = useRef<HTMLDivElement>(null)
@@ -15,13 +19,9 @@ export function BlocklyEditor(): React.JSX.Element {
       const xml = Blockly.Xml.workspaceToDom(workspaceRef.current)
       const xmlText = Blockly.Xml.domToText(xml)
       setWorkspaceContent(xmlText)
-      
+
       // Generate Arduino code from blocks
       const code = ArduinoGenerator.workspaceToCode(workspaceRef.current)
-      console.log('Generated Arduino code:', code)
-      
-      // TODO: Your co-worker can hook into this function to save state
-      // This is the single point for state management integration
     }
   }
 

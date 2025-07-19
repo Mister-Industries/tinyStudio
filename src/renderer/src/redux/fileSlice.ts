@@ -135,7 +135,8 @@ export const fileSlice = createAppSlice({
     selectOpenFiles: createSelector([(state) => state.openFiles], (openFiles) =>
       editorObjectAdapter.getSelectors().selectAll(openFiles)
     ),
-    selectViewingFileId: (state) => state.viewingFileId
+    selectViewingFileId: (state) => state.viewingFileId,
+    selectIsReadmeFile: (state, id: string) => state.openFiles.entities[id]?.name === 'README.md'
   }
 })
 

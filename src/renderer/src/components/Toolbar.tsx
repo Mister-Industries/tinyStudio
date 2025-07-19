@@ -95,11 +95,8 @@ export function Toolbar(): React.JSX.Element {
 }
 
 const BOARDS = [
-  { label: 'Arduino Uno', value: 'uno' },
-  { label: 'Arduino Nano', value: 'nano' },
-  { label: 'Arduino Mega', value: 'mega' },
-  { label: 'ESP32', value: 'esp' },
-  { label: 'Arduino Leonardo', value: 'leo' }
+  { label: 'tinyCore', value: 'tiny' },
+  { label: 'ESP32', value: 'esp' }
 ]
 
 const PORTS = [

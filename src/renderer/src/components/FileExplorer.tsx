@@ -15,7 +15,9 @@ import {
   Download,
   AlertCircle,
   FolderSync,
-  Zap
+  Zap,
+  Construction,
+  Github
 } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
@@ -337,8 +339,17 @@ export function FileExplorer(): React.JSX.Element {
       </div>
       {openTab === 'file-explorer' && <FileExplorerContent />}
       {openTab === 'source-control' && (
-        <div className="px-4 flex-1 flex justify-center text-muted-foreground">
-          Source Control is under construction
+        <div className="flex-1 flex flex-col gap-2 items-center text-muted-foreground">
+          <div className="flex w-full justify-between items-center px-4 py-3 text-xs font-semibold border-b border-border">
+            <div className="flex items-center gap-2">
+              <Github size={14} />
+              SOURCE CONTROL
+            </div>
+          </div>
+          <div className="flex flex-col items-center justify-center text-muted-foreground py-8 px-4 gap-2">
+            <Construction size={48} className="mb-4 opacity-50" />
+            <p className="text-sm mb-4 text-center">Source Control is under construction</p>
+          </div>
         </div>
       )}
     </div>
@@ -504,7 +515,7 @@ export function FileExplorerContent(): React.JSX.Element {
 const createProjectSchema = z.object({
   projectTitle: z
     .string()
-    .min(1, 'Arduino project name is required')
+    .min(1, 'Project name is required')
     .min(3, 'Project name must be at least 3 characters')
     .max(50, 'Project name must not exceed 50 characters')
     .regex(
@@ -579,7 +590,7 @@ export function CreateProjectDialog({
         if (exists) {
           form.setError('projectTitle', {
             type: 'manual',
-            message: 'An Arduino project with this name already exists in the selected location'
+            message: 'A tinyForge project with this name already exists in the selected location'
           })
           return
         }
@@ -591,7 +602,7 @@ export function CreateProjectDialog({
         const defaultFiles = [
           {
             path: 'README.md',
-            content: `# ${data.projectTitle}\n\nAn Arduino project created with TinyForge.\n\n## Getting Started\n\n1. Open this project in Arduino IDE or TinyForge\n2. Connect your Arduino board\n3. Upload the sketch to your board\n\n## Hardware Requirements\n\n- Arduino Uno (or compatible board)\n- USB cable\n- Additional components as needed\n\n## Circuit Diagram\n\nAdd your circuit diagram and connections here.\n`
+            content: `# ${data.projectTitle}\n\nA tinyCore project created with TinyForge.\n\n## Getting Started\n\n1. Open this project in TinyForge\n2. Connect your tinyCore\n3. Upload the sketch to your board\n\n## Hardware Requirements\n\n- tinyCore (or compatible board)\n- USB cable\n- Additional components as needed\n\n## Circuit Diagram\n\nAdd your circuit diagram and connections here.\n`
           },
           {
             path: `${data.projectTitle.replace(/\s+/g, '_')}.ino`,
@@ -602,7 +613,7 @@ export function CreateProjectDialog({
   Date: ${new Date().toLocaleDateString()}
   
   Description:
-  A basic Arduino sketch template. Customize this code for your project needs.
+  A basic sketch template. Customize this code for your project needs.
 */
 
 // Pin definitions
@@ -642,8 +653,6 @@ void loop() {
         // Close the dialog and reset form
         handleOpenChange(false)
         form.reset()
-
-        console.log('Arduino project created successfully at:', projectPath)
 
         // Automatically open the created project in the file explorer
         await openWorkspace(projectPath)

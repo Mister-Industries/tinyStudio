@@ -7,12 +7,12 @@ export function AIAssistant(): React.JSX.Element {
     <div className="h-full flex flex-col">
       <ScrollArea className="h-5/6">
         <div className="flex flex-col gap-4">
-          <AiChatBubble text="Hello! I'm your Arduino coding assistant. How can I help you today?" />
-          <UserChatBubble text="What is the pinout for the Arduino Uno?" />
+          <AiChatBubble text="Hello! I'm your coding assistant Teeny! How can I help you today?" />
+          <UserChatBubble text="What is the pinout for the tinyCore?" />
         </div>
       </ScrollArea>
       <div className="w-full h-fit border-t border-border p-4 flex gap-2">
-        <Input placeholder="Ask about Arduino code..." />
+        <Input placeholder="Ask about tinyCore code..." />
         <Button>Send</Button>
       </div>
     </div>

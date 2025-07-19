@@ -10,7 +10,8 @@ import {
   setViewingFile,
   updateFileContent,
   saveFileWithContent,
-  selectViewingFileId
+  selectViewingFileId,
+  updateReadmeContent
 } from '@renderer/redux/fileSlice'
 import { CircuitEditor } from './CircuitEditor'
 import { FileTabs, FileTabsList, FileTabTrigger, FileTabContent } from './ui/FileTab'
@@ -45,6 +46,9 @@ export function EditorPanel(): React.JSX.Element {
       const file = openFiles.find((f) => f.id === fileId)
       if (file) {
         dispatch(updateFileContent({ id: file.id, content }))
+        if (file.name === 'README.md') {
+          dispatch(updateReadmeContent(content))
+        }
       }
     },
     [openFiles, dispatch]

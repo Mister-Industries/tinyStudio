@@ -63,7 +63,7 @@ export function ExamplesContent(): React.JSX.Element {
     <>
       <div className="flex items-center gap-2 px-4 py-4 text-primary text-sm font-semibold border-b border-border mb-4">
         <Zap size={16} />
-        Arduino Examples
+        tinyCore Examples
       </div>
       <ScrollArea className="h-5/6">
         <div className="flex flex-col gap-4">
