@@ -22,9 +22,9 @@ export function MonacoEditor({
     monaco.editor.defineTheme('tiny-dark-theme', {
       base: 'vs-dark',
       inherit: true,
-      rules: [{ background: '1e1e1e' }],
+      rules: [{ background: '14161a' }],
       colors: {
-        'editor.background': '#1e1e1e',
+        'editor.background': '#14161a',
         'editor.lineHighlightBackground': '#263c33',
         'editorCursor.foreground': '#359766',
         'editorLineNumber.foreground': '#6aaf8c',
@@ -35,7 +35,7 @@ export function MonacoEditor({
         'editorBracketMatch.border': '#359766',
         'editorIndentGuide.background': '#2c2c2c',
         'editorIndentGuide.activeBackground': '#359766',
-        'editorGutter.background': '#1e1e1e',
+        'editorGutter.background': '#14161a',
         'editor.foreground': '#d4d4d4'
       }
     })
