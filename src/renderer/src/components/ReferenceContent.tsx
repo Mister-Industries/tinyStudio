@@ -1,6 +1,7 @@
 import { useAppSelector } from '@renderer/redux'
 import ReactMarkdown from 'react-markdown'
 import { ScrollArea } from './ui/ScrollArea'
+import { Folder } from 'lucide-react'
 
 export function ReadmeContent(): React.JSX.Element {
   const readmeContent = useAppSelector((state) => state.file.readmeContent)
@@ -32,6 +33,15 @@ export function ReadmeContent(): React.JSX.Element {
       <a {...props} className="text-blue-600 hover:text-blue-800 underline">
         {children}
       </a>
+    )
+  }
+  console.log(readmeContent)
+  if (readmeContent === null || readmeContent === '' || readmeContent === undefined) {
+    return (
+      <div className="size-full flex flex-col justify-center items-center gap-2">
+        <Folder size={48} className="mb-4 opacity-50" />
+        Open a project to view its documentation
+      </div>
     )
   }
   return (

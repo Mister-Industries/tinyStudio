@@ -106,7 +106,7 @@ const PORTS = [
 ]
 
 export function BoardSelect(): React.JSX.Element {
-  const [board, setBoard] = React.useState('uno')
+  const [board, setBoard] = React.useState('tiny')
 
   return (
     <Select value={board} onValueChange={setBoard}>

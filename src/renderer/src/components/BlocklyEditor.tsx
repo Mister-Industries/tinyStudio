@@ -3,8 +3,8 @@ import * as Blockly from 'blockly'
 import { useTheme } from '@renderer/lib/ThemeProvider'
 import {
   defineArduinoBlocks,
-  defineArduinoGenerators,
-  ArduinoGenerator
+  defineArduinoGenerators
+  // ArduinoGenerator
 } from '@renderer/lib/arduinoBlocks'
 
 export function BlocklyEditor(): React.JSX.Element {
@@ -21,7 +21,7 @@ export function BlocklyEditor(): React.JSX.Element {
       setWorkspaceContent(xmlText)
 
       // Generate Arduino code from blocks
-      const code = ArduinoGenerator.workspaceToCode(workspaceRef.current)
+      // const code = ArduinoGenerator.workspaceToCode(workspaceRef.current)
     }
   }
 

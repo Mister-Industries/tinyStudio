@@ -1,4 +1,4 @@
-import { FileText, Monitor, Trash, TriangleAlert, X } from 'lucide-react'
+import { Monitor, Trash, X } from 'lucide-react'
 import { useState } from 'react'
 import { Input } from './ui/Input'
 import {
