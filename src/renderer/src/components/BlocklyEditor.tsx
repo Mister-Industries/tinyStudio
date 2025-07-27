@@ -13,7 +13,6 @@ export function BlocklyEditor(): React.JSX.Element {
   const { theme } = useTheme()
   const [workspaceContent, setWorkspaceContent] = useState<string>('')
 
-  // Handle workspace updates - this is the single point your co-worker can use
   const handleWorkspaceUpdate = (): void => {
     if (workspaceRef.current) {
       const xml = Blockly.Xml.workspaceToDom(workspaceRef.current)
