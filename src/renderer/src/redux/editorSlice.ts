@@ -6,13 +6,15 @@ export type EditorSliceState = {
   isFileExplorerOpen: boolean
   isSerialMonitorOpen: boolean
   isDocsPanelOpen: boolean
+  editorMode: 'code' | 'blocks'
 }
 
 const initialState: EditorSliceState = {
   status: 'idle',
   isFileExplorerOpen: true,
   isSerialMonitorOpen: true,
-  isDocsPanelOpen: true
+  isDocsPanelOpen: true,
+  editorMode: 'code'
 }
 
 // If you are not using async thunks you can use the standalone `createSlice`.
@@ -36,7 +38,10 @@ export const editorSlice = createAppSlice({
             break
         }
       }
-    )
+    ),
+    setEditorMode: create.reducer((state, payload: PayloadAction<'code' | 'blocks'>) => {
+      state.editorMode = payload.payload
+    })
   }),
   selectors: {
     selectPanelState: createSelector(
@@ -55,7 +60,7 @@ export const editorSlice = createAppSlice({
 })
 
 // Action creators are generated for each case reducer function.
-export const { setPanelOpen } = editorSlice.actions
+export const { setPanelOpen, setEditorMode } = editorSlice.actions
 
 // Selectors returned by `slice.selectors` take the root state as their first argument.
 export const { selectPanelState } = editorSlice.selectors

@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import * as monaco from 'monaco-editor'
 import { loader } from '@monaco-editor/react'
-import { Blocks, CircuitBoard, Code } from 'lucide-react'
+import { CircuitBoard } from 'lucide-react'
 import { BlocklyEditor } from './BlocklyEditor'
 import { MonacoEditor } from './MonacoEditor'
 import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
@@ -23,9 +23,10 @@ loader.config({ monaco })
 export function EditorPanel(): React.JSX.Element {
   const openFiles = useAppSelector(selectOpenFiles)
   const viewingFileId = useAppSelector(selectViewingFileId)
-  const [editorMode, setEditorMode] = useState<'code' | 'blocks' | 'circuit'>('code')
+  const editorMode = useAppSelector((state) => state.editor.editorMode)
   const dispatch = useAppDispatch()
   const { setCurrentFile } = useFileSystem()
+  const [showCircuit, setShowCircuit] = useState(false)
 
   const handleFileSelect = (fileId: string): void => {
     dispatch(setViewingFile(fileId))
@@ -100,37 +101,21 @@ export function EditorPanel(): React.JSX.Element {
           </div>
           <div className="flex">
             <button
-              data-active={editorMode === 'circuit'}
-              onClick={() => setEditorMode('circuit')}
+              data-active={showCircuit}
+              onClick={() => setShowCircuit(!showCircuit)}
               className="flex items-center gap-2 p-2 hover:bg-accent/50 hover:text-accent-foreground data-[active=true]:bg-accent/50 data-[active=true]:text-accent-foreground data-[active=true]:border-b data-[active=true]:border-primary"
             >
               <CircuitBoard />
               Circuit
             </button>
-            <button
-              data-active={editorMode === 'code'}
-              onClick={() => setEditorMode('code')}
-              className="flex items-center gap-2 p-2 hover:bg-accent/50 hover:text-accent-foreground data-[active=true]:bg-accent/50 data-[active=true]:text-accent-foreground data-[active=true]:border-b data-[active=true]:border-primary"
-            >
-              <Code />
-              Code
-            </button>
-            <button
-              data-active={editorMode === 'blocks'}
-              onClick={() => setEditorMode('blocks')}
-              className="flex items-center gap-2 p-2 hover:bg-accent/50 hover:text-accent-foreground data-[active=true]:bg-accent/50 data-[active=true]:text-accent-foreground data-[active=true]:border-b data-[active=true]:border-primary"
-            >
-              <Blocks />
-              Blocks
-            </button>
           </div>
         </FileTabsList>
         {openFiles.map((file) => (
           <FileTabContent key={`content-${file.id}`} value={file.id}>
-            {editorMode === 'blocks' ? (
-              <BlocklyEditor />
-            ) : editorMode === 'circuit' ? (
+            {showCircuit ? (
               <CircuitEditor />
+            ) : editorMode === 'blocks' ? (
+              <BlocklyEditor />
             ) : (
               <MonacoEditor
                 activeFile={file}

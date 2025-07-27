@@ -1,4 +1,15 @@
-import { Check, File, Folder, Library, Monitor, Save, Upload } from 'lucide-react'
+import {
+  Blocks,
+  Check,
+  Code,
+  File,
+  Folder,
+  Library,
+  Lightbulb,
+  Monitor,
+  Save,
+  Upload
+} from 'lucide-react'
 import { Button } from './ui/Button'
 import { Separator } from './ui/Separator'
 import {
@@ -12,11 +23,19 @@ import {
 } from './ui/Select'
 import React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
-import { selectPanelState, setPanelOpen, useAppDispatch, useAppSelector } from '@renderer/redux'
+import {
+  selectPanelState,
+  setEditorMode,
+  setPanelOpen,
+  useAppDispatch,
+  useAppSelector
+} from '@renderer/redux'
+import { Switch } from './ui/Switch'
 
 export function Toolbar(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const { isDocsPanelOpen, isSerialMonitorOpen } = useAppSelector(selectPanelState)
+  const isBlocksMode = useAppSelector((state) => state.editor.editorMode === 'blocks')
 
   return (
     <div className="px-4 py-3 h-14 flex items-center justify-between shadow-sm bg-primary text-primary-foreground">
@@ -44,6 +63,18 @@ export function Toolbar(): React.JSX.Element {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">Save</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="data-[active=true]:bg-popover data-[active=true]:text-popover-foreground"
+            >
+              <Library />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Add Libraries</TooltipContent>
         </Tooltip>
         <Separator orientation="vertical" />
         <Button variant="muted">
@@ -80,13 +111,21 @@ export function Toolbar(): React.JSX.Element {
               className="data-[active=true]:bg-popover data-[active=true]:text-popover-foreground"
               onClick={() => dispatch(setPanelOpen({ panel: 'docs', isOpen: !isDocsPanelOpen }))}
             >
-              <Library />
+              <Lightbulb />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">Library</TooltipContent>
+          <TooltipContent side="bottom">Documentation</TooltipContent>
         </Tooltip>
       </div>
       <div className="flex gap-2">
+        <div className="flex items-center gap-2 pr-4">
+          <Code />
+          <Switch
+            checked={isBlocksMode}
+            onCheckedChange={(checked) => dispatch(setEditorMode(checked ? 'blocks' : 'code'))}
+          />
+          <Blocks />
+        </div>
         <BoardSelect />
         <PortSelect />
       </div>
