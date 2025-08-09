@@ -18,7 +18,7 @@ import { fileSystem } from '../../lib/fileSystem'
 export function FileExplorerContent(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const openFiles = useAppSelector(selectOpenFiles)
-  
+
   // File system hook for workspace and file operations
   const {
     workspace,
