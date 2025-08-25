@@ -1,5 +1,6 @@
 import { createEntityAdapter, createSelector, EntityState, PayloadAction } from '@reduxjs/toolkit'
 import { createAppSlice } from './createAppSlice'
+import { FileSystemItem } from '@renderer/lib/fileSystem'
 
 export interface EditorFile {
   id: string
@@ -11,7 +12,7 @@ export interface EditorFile {
   updatedAt: string
 }
 
-interface Workspace {
+export interface Workspace {
   id: string
   name: string
   path: string
@@ -62,6 +63,9 @@ export const fileSlice = createAppSlice({
         updatedAt: new Date().toISOString()
       }
       state.openFiles = editorObjectAdapter.addOne(state.openFiles, newFile)
+    }),
+    openWorkspace: create.reducer((state, payload: PayloadAction<Workspace>) => {
+      state.workspace = payload.payload
     }),
     openFile: create.reducer((state, payload: PayloadAction<EditorFile>) => {
       const file = payload.payload
@@ -169,7 +173,8 @@ export const {
   saveFile,
   saveFileWithContent,
   closeFile,
-  setViewingFile
+  setViewingFile,
+  openWorkspace
 } = fileSlice.actions
 
 export const { selectOpenFiles, selectViewingFileId } = fileSlice.selectors

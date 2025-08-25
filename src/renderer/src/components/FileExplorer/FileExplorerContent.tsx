@@ -3,25 +3,31 @@
  * Main content area for the file explorer with workspace management
  */
 
-import { useAppSelector } from '@renderer/redux'
+import { useAppDispatch, useAppSelector } from '@renderer/redux'
 import { Folder, FolderOpen, FolderPlus, FolderSync, Plus } from 'lucide-react'
 import React from 'react'
 import { Button } from '../ui/Button'
 import { ScrollArea } from '../ui/ScrollArea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/Tooltip'
 import { CreateProjectDialog } from './CreateProjectDialog'
+import { OpenWorkspaceCommand } from '@renderer/commands/fileCommands'
+import { FileTreeItem } from './FileTreeItem'
 
 export function FileExplorerContent(): React.JSX.Element {
   const isLoading = false
   const workspace = useAppSelector((state) => state.file.workspace)
+  const dispatch = useAppDispatch()
 
   const handleSelectWorkspace = (): void => {
     // Logic to select a workspace
+    const command = new OpenWorkspaceCommand(undefined, dispatch)
+    command.execute()
   }
 
   const handleOpenWorkspace = (workspacePath: string): Promise<void> => {
     // Logic to open a workspace
-    console.log(workspacePath)
+    const command = new OpenWorkspaceCommand(workspacePath, dispatch)
+    command.execute()
     return Promise.resolve()
   }
 
@@ -106,7 +112,11 @@ export function FileExplorerContent(): React.JSX.Element {
         ) : (
           // File tree display
           // TODO map through the open files
-          <></>
+          <>
+            {workspace.root.map((item) => (
+              <FileTreeItem key={item.id} item={item} />
+            ))}
+          </>
         )}
       </ScrollArea>
     </div>
