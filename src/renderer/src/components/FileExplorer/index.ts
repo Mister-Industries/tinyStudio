@@ -7,26 +7,12 @@
 export { FileExplorer } from './FileExplorer'
 
 // Sub-components (exported for potential reuse)
-export { FileTree } from './FileTree'
-export { FileTreeItem } from './FileTreeItem'
-export { FileExplorerContent } from './FileExplorerContent'
 export { CreateProjectDialog } from './CreateProjectDialog'
+export { FileExplorerContent } from './FileExplorerContent'
+export { FileTreeItem } from './FileTreeItem'
 
-// Hooks
-export { useFileTree } from './useFileTree'
-
-// Types and schemas
-export type {
-  FileTreeProps,
-  FileTreeItemProps,
-  TreeNode,
-  CreatingItemState,
-  FileExplorerTab,
-  CreateProjectDialogProps,
-  CreateProjectFormData
-} from './types'
-
+// Schemas
 export { createProjectSchema } from './schemas'
 
 // Utilities
-export { getFileIconType, createDefaultProjectFiles, getRandomProjectPlaceholder } from './utils'
+export { createDefaultProjectFiles, getFileIconType, getRandomProjectPlaceholder } from './utils'

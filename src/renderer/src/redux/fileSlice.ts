@@ -1,4 +1,4 @@
-import { createEntityAdapter, EntityState, PayloadAction, createSelector } from '@reduxjs/toolkit'
+import { createEntityAdapter, createSelector, EntityState, PayloadAction } from '@reduxjs/toolkit'
 import { createAppSlice } from './createAppSlice'
 
 export interface EditorFile {
@@ -11,9 +11,26 @@ export interface EditorFile {
   updatedAt: string
 }
 
+interface Workspace {
+  id: string
+  name: string
+  path: string
+  root: BaseFileItem[]
+}
+
+export interface BaseFileItem {
+  id: string
+  name: string
+  type: 'file' | 'folder'
+  children?: BaseFileItem[]
+}
+
 export type FileSliceState = {
   status: 'idle' | 'loading' | 'failed'
   openProjects: string[]
+  workspace: Workspace | null
+  expandedDirectoryIds: string[]
+  highlightedFileId: string | null
   openFiles: EntityState<EditorFile, string>
   viewingFileId: string | null
   readmeContent?: string
@@ -24,6 +41,9 @@ const editorObjectAdapter = createEntityAdapter<EditorFile>()
 const initialState: FileSliceState = {
   status: 'idle',
   openProjects: [],
+  workspace: null,
+  expandedDirectoryIds: [],
+  highlightedFileId: null,
   openFiles: editorObjectAdapter.getInitialState(),
   viewingFileId: null
 }

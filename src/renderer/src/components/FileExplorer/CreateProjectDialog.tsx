@@ -3,10 +3,11 @@
  * Modal dialog for creating new Arduino projects with validation
  */
 
-import React, { useState, useCallback, useMemo } from 'react'
-import { Zap } from 'lucide-react'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Zap } from 'lucide-react'
+import React, { useCallback, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { fileSystem } from '../../lib/fileSystem'
 import { Button } from '../ui/Button'
 import {
   Dialog,
@@ -18,10 +19,13 @@ import {
 } from '../ui/Dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/Form'
 import { Input } from '../ui/Input'
-import { CreateProjectDialogProps } from './types'
-import { createProjectSchema, CreateProjectFormData } from './schemas'
+import { CreateProjectFormData, createProjectSchema } from './schemas'
 import { createDefaultProjectFiles, getRandomProjectPlaceholder } from './utils'
-import { fileSystem } from '../../lib/fileSystem'
+
+// Create project dialog props
+export interface CreateProjectDialogProps {
+  openWorkspace: (workspacePath: string) => Promise<void>
+}
 
 export function CreateProjectDialog({
   openWorkspace

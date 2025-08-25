@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 'use client'
 
-import * as React from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { X } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
+import { X } from 'lucide-react'
+import * as React from 'react'
 
 export interface FileTabData {
   id: string
@@ -88,4 +88,4 @@ function FileTabContent({
   )
 }
 
-export { FileTabs, FileTabsList, FileTabTrigger, FileTabContent }
+export { FileTabContent, FileTabs, FileTabsList, FileTabTrigger }

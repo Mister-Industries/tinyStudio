@@ -1,22 +1,21 @@
-import { useCallback, useState } from 'react'
-import * as monaco from 'monaco-editor'
 import { loader } from '@monaco-editor/react'
-import { CircuitBoard } from 'lucide-react'
-import { BlocklyEditor } from './BlocklyEditor'
-import { MonacoEditor } from './MonacoEditor'
+import { fileSystem } from '@renderer/lib/fileSystem'
 import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
 import {
   closeFile,
-  setViewingFile,
-  updateFileContent,
   saveFileWithContent,
   selectViewingFileId,
+  setViewingFile,
+  updateFileContent,
   updateReadmeContent
 } from '@renderer/redux/fileSlice'
+import { CircuitBoard } from 'lucide-react'
+import * as monaco from 'monaco-editor'
+import { useCallback, useState } from 'react'
+import { BlocklyEditor } from './BlocklyEditor'
 import { CircuitEditor } from './CircuitEditor'
-import { FileTabs, FileTabsList, FileTabTrigger, FileTabContent } from './ui/FileTab'
-import { fileSystem } from '@renderer/lib/fileSystem'
-import { useFileSystem } from '@renderer/lib/useFileSystem'
+import { MonacoEditor } from './MonacoEditor'
+import { FileTabContent, FileTabs, FileTabsList, FileTabTrigger } from './ui/FileTab'
 
 loader.config({ monaco })
 
@@ -25,7 +24,6 @@ export function EditorPanel(): React.JSX.Element {
   const viewingFileId = useAppSelector(selectViewingFileId)
   const editorMode = useAppSelector((state) => state.editor.editorMode)
   const dispatch = useAppDispatch()
-  const { setCurrentFile } = useFileSystem()
   const [showCircuit, setShowCircuit] = useState(false)
 
   const handleFileSelect = (fileId: string): void => {
@@ -34,7 +32,7 @@ export function EditorPanel(): React.JSX.Element {
     // Find the file by ID to get its path and synchronize with FileExplorer
     const file = openFiles.find((f) => f.id === fileId)
     if (file && file.path) {
-      setCurrentFile(file.path)
+      // setCurrentFile(file.path)
     }
   }
 

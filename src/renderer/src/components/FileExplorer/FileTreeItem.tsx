@@ -3,37 +3,36 @@
  * Renders individual items in the file tree with support for creation, renaming, and context menus
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { BaseFileItem, useAppSelector } from '@renderer/redux'
 import {
   ChevronDown,
   ChevronRight,
+  Code,
+  Download,
+  Edit3,
+  File,
   Folder,
   FolderOpen,
-  File,
   Image,
-  Code,
   MoreHorizontal,
   Plus,
-  Edit3,
-  Download,
   Trash2
 } from 'lucide-react'
+import React from 'react'
 import { Button } from '../ui/Button'
-import { Input } from '../ui/Input'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '../ui/DropdownMenu'
-import { FileTreeItemProps } from './types'
 import { getFileIconType } from './utils'
 
 /**
  * Get the appropriate file icon based on file type and selection state
  */
-function getFileIcon(fileName: string, isDirectory: boolean, isSelected = false): React.ReactNode {
-  const iconType = getFileIconType(fileName, isDirectory)
+function getFileIcon(fileName: string, isSelected = false): React.ReactNode {
+  const iconType = getFileIconType(fileName)
 
   switch (iconType) {
     case 'image':
@@ -52,102 +51,39 @@ function getFileIcon(fileName: string, isDirectory: boolean, isSelected = false)
   }
 }
 
-export function FileTreeItem({
-  item,
-  level,
-  isExpanded,
-  isSelected,
-  onToggle,
-  onSelect,
-  onContextMenu,
-  onCreateFile,
-  onCreateFolder,
-  onDeleteItem,
-  onRenameItem,
-  onConfirmCreate,
-  onCancelCreate,
-  onConfirmRename,
-  onCancelRename,
-  isCreating = false,
-  creationType,
-  isRenaming = false
-}: FileTreeItemProps): React.JSX.Element {
-  const [fileName, setFileName] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
+interface FileTreeItemProps {
+  level?: number
+  item: BaseFileItem
+}
 
-  // Focus input when creating or renaming
-  useEffect(() => {
-    if ((isCreating || isRenaming) && inputRef.current) {
-      if (isRenaming) {
-        // Pre-populate with current name for renaming
-        setFileName(item.name)
-      }
-      inputRef.current.focus()
-      if (isRenaming) {
-        inputRef.current.select()
-      }
-    }
-  }, [isCreating, isRenaming, item.name])
+export function FileTreeItem({ item, level = 0 }: FileTreeItemProps): React.JSX.Element {
+  const isSelected = useAppSelector((state) => state.file.highlightedFileId === item.id)
+  const isExpanded = false
 
-  // Handle keyboard events for input field
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        e.preventDefault()
-        if (fileName.trim()) {
-          if (isCreating && onConfirmCreate && creationType) {
-            onConfirmCreate(item.path, fileName.trim(), creationType)
-          } else if (isRenaming && onConfirmRename) {
-            onConfirmRename(item.path, fileName.trim())
-          }
-        }
-      } else if (e.key === 'Escape') {
-        e.preventDefault()
-        if (isCreating && onCancelCreate) {
-          onCancelCreate()
-        } else if (isRenaming && onCancelRename) {
-          onCancelRename()
-        }
-      }
-    },
-    [
-      fileName,
-      onConfirmCreate,
-      onCancelCreate,
-      onConfirmRename,
-      onCancelRename,
-      item.path,
-      creationType,
-      isCreating,
-      isRenaming
-    ]
-  )
+  const handleOpenFile = (): void => {
+    // Logic to open the file
+  }
 
-  // Handle click events on tree items
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault()
+  const handleContextMenu = (e: React.MouseEvent): void => {
+    e.preventDefault()
+    // Logic to open context menu
+  }
 
-      // Don't handle clicks on creating or renaming items
-      if (isCreating || isRenaming) return
+  const handleCreateFile = (): void => {
+    // Logic to create a new file
+  }
 
-      if (item.isDirectory) {
-        onToggle()
-      } else {
-        onSelect()
-      }
-    },
-    [item.isDirectory, onToggle, onSelect, isCreating, isRenaming]
-  )
+  const handleCreateFolder = (): void => {
+    // Logic to create a new folder
+  }
 
-  // Handle context menu events
-  const handleContextMenu = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault()
-      onContextMenu(item)
-    },
-    [onContextMenu, item]
-  )
+  const handleRenameItem = (): void => {
+    // Logic to rename the item
+  }
+
+  const handleDeleteItem = (): void => {
+    // Logic to delete the item
+  }
 
   return (
     <div
@@ -155,11 +91,11 @@ export function FileTreeItem({
         isSelected ? 'bg-accent text-accent-foreground' : ''
       }`}
       style={{ paddingLeft: `${level * 12 + 8}px` }}
-      onClick={handleClick}
+      onClick={handleOpenFile}
       onContextMenu={handleContextMenu}
     >
       {/* Folder icons and expansion indicators */}
-      {(item.isDirectory && !isRenaming) || (isCreating && creationType === 'folder') ? (
+      {item.type === 'folder' ? (
         <>
           {isExpanded ? (
             <ChevronDown size={14} className="text-muted-foreground" />
@@ -175,83 +111,69 @@ export function FileTreeItem({
       ) : (
         <>
           <span className="w-[14px]" />
-          {isCreating && creationType === 'file' ? (
-            <File size={14} className="text-muted-foreground" />
-          ) : (
-            getFileIcon(item.name, item.isDirectory, isSelected)
-          )}
+          {getFileIcon(item.name, isSelected)}
         </>
       )}
 
       {/* Input field for creating/renaming or display name */}
-      {isCreating || isRenaming ? (
+      {/* {isCreating || isRenaming ? (
         <Input
           ref={inputRef}
           value={fileName}
           onChange={(e) => setFileName(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={() => {
-            if (isCreating) {
-              onCancelCreate?.()
-            } else if (isRenaming) {
-              onCancelRename?.()
-            }
-          }}
           className="flex-1 h-5 px-1 text-xs rounded-xs"
           placeholder={isCreating ? (creationType === 'file' ? 'filename.txt' : 'folder name') : ''}
         />
-      ) : (
-        <span className="flex-1 truncate">{item.name}</span>
-      )}
+      ) : ( */}
+      <span className="flex-1 truncate">{item.name}</span>
+      {/* )} */}
 
       {/* Context menu dropdown */}
-      {!isCreating && !isRenaming && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-4 opacity-0 group-hover:opacity-100"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <MoreHorizontal size={12} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {item.isDirectory ? (
-              <>
-                <DropdownMenuItem onClick={() => onCreateFile(item.path)}>
-                  <Plus size={14} className="mr-2" />
-                  New File
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onCreateFolder(item.path)}>
-                  <Folder size={14} className="mr-2" />
-                  New Folder
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onRenameItem(item.path)}>
-                  <Edit3 size={14} className="mr-2" />
-                  Rename
-                </DropdownMenuItem>
-              </>
-            ) : (
-              <>
-                <DropdownMenuItem>
-                  <Download size={14} className="mr-2" />
-                  Download
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onRenameItem(item.path)}>
-                  <Edit3 size={14} className="mr-2" />
-                  Rename
-                </DropdownMenuItem>
-              </>
-            )}
-            <DropdownMenuItem className="text-destructive" onClick={() => onDeleteItem(item.path)}>
-              <Trash2 size={14} className="mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-4 opacity-0 group-hover:opacity-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoreHorizontal size={12} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {item.type ? (
+            <>
+              <DropdownMenuItem onClick={handleCreateFile}>
+                <Plus size={14} className="mr-2" />
+                New File
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleCreateFolder}>
+                <Folder size={14} className="mr-2" />
+                New Folder
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleRenameItem}>
+                <Edit3 size={14} className="mr-2" />
+                Rename
+              </DropdownMenuItem>
+            </>
+          ) : (
+            <>
+              <DropdownMenuItem>
+                <Download size={14} className="mr-2" />
+                Download
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleRenameItem}>
+                <Edit3 size={14} className="mr-2" />
+                Rename
+              </DropdownMenuItem>
+            </>
+          )}
+          <DropdownMenuItem className="text-destructive" onClick={handleDeleteItem}>
+            <Trash2 size={14} className="mr-2" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }
