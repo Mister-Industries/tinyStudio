@@ -210,3 +210,15 @@ export class RenameFileCommand implements UndoableCommand {
     await fileSystem.renameFile(newPath, originalPath)
   }
 }
+
+export class DeleteFileCommand implements Command {
+  private item: BaseFileItem
+
+  constructor(item: BaseFileItem) {
+    this.item = item
+  }
+
+  async execute(): Promise<void> {
+    await fileSystem.deleteFile(this.item.path)
+  }
+}

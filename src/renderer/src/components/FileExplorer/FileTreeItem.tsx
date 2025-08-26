@@ -26,11 +26,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '../ui/DropdownMenu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '../ui/AlertDialog'
 import { getFileIconType } from './utils'
 import { Input } from '../ui/Input'
 import {
   CreateFileCommand,
   CreateFolderCommand,
+  DeleteFileCommand,
   RefreshWorkspaceCommand,
   RenameFileCommand
 } from '@renderer/commands/fileCommands'
@@ -68,6 +79,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   const isExpanded = false
   const [namingValue, setNamingValue] = useState('')
   const [isRenaming, setIsRenaming] = useState(false)
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false)
   const dispatch = useAppDispatch()
   const workspace = useAppSelector((state) => state.file.workspace)
   const [cursorPosition, setCursorPosition] = useState<number>(0)
@@ -159,7 +171,16 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   }
 
   const handleDeleteItem = (): void => {
+    setShowDeleteAlert(true)
+  }
+
+  const confirmDeleteItem = async (): Promise<void> => {
     // Logic to delete the item
+    const command = new DeleteFileCommand(item)
+    await command.execute()
+    const refreshCommand = new RefreshWorkspaceCommand(dispatch, workspace!)
+    await refreshCommand.execute()
+    setShowDeleteAlert(false)
   }
 
   if (!item.name || isRenaming) {
@@ -264,6 +285,28 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Delete confirmation alert dialog */}
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {item.type === 'folder' ? 'Folder' : 'File'}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{item.name}&quot;? This action cannot be undone.
+              {item.type === 'folder' && ' All contents of this folder will also be deleted.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteItem}
+              className="bg-destructive text-secondary-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
