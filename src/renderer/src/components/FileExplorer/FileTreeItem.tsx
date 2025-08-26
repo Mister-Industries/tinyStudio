@@ -170,7 +170,8 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   }
 
   // Folder only, creates a sub folder
-  const handleCreateSubFolder = async (): Promise<void> => {
+  const handleCreateSubFolder = async (e: React.MouseEvent): Promise<void> => {
+    e.stopPropagation()
     if (item.type !== 'folder') {
       return
     }
@@ -189,7 +190,8 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   }
 
   // Folder only, creates a sub file
-  const handleCreateSubFile = async (): Promise<void> => {
+  const handleCreateSubFile = async (e: React.MouseEvent): Promise<void> => {
+    e.stopPropagation()
     if (item.type !== 'folder') {
       return
     }
@@ -254,7 +256,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
             if (e.key === 'Enter') {
               isRenaming ? handleRenameItem() : handleCreateFileOrDirectory()
             } else if (e.key === 'Escape') {
-              cancelCreation()
+              isRenaming ? setIsRenaming(false) : cancelCreation()
             }
           }}
           onBlur={cancelCreation}

@@ -1,7 +1,7 @@
 // Unified File System Service
 // Provides consistent API for both Electron and web environments
 
-import { webFileSystem, type FileSystemItem, type FileStats } from './webFileSystem'
+import { webFileSystem, type FileStats, type FileSystemItem } from './webFileSystem'
 
 // Environment detection
 const isElectron = (): boolean => {
@@ -297,7 +297,8 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
       'css',
       'scss',
       'sass',
-      'less'
+      'less',
+      'ino'
     ]
     return codeExtensions.includes(this.getFileExtension(fileName))
   }
@@ -344,4 +345,4 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
 export const fileSystem = new UnifiedFileSystemService()
 
 // Export types
-export type { FileSystemItem, FileStats }
+export type { FileStats, FileSystemItem }

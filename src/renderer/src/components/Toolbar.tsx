@@ -1,24 +1,12 @@
 import {
   BaseFileItem,
   selectPanelState,
-  setEditorMode,
   setPanelOpen,
   startCreateItem,
   useAppDispatch,
   useAppSelector
 } from '@renderer/redux'
-import {
-  Blocks,
-  Check,
-  Code,
-  File,
-  Folder,
-  Library,
-  Lightbulb,
-  Monitor,
-  Save,
-  Upload
-} from 'lucide-react'
+import { Check, File, Folder, Library, Lightbulb, Monitor, Save, Upload } from 'lucide-react'
 import React from 'react'
 import { Button } from './ui/Button'
 import {
@@ -31,13 +19,11 @@ import {
   SelectValue
 } from './ui/Select'
 import { Separator } from './ui/Separator'
-import { Switch } from './ui/Switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
 
 export function Toolbar(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const { isDocsPanelOpen, isSerialMonitorOpen } = useAppSelector(selectPanelState)
-  const isBlocksMode = useAppSelector((state) => state.editor.editorMode === 'blocks')
   const workspace = useAppSelector((state) => state.file.workspace)
 
   const handleNewFolder = (): void => {
@@ -146,14 +132,14 @@ export function Toolbar(): React.JSX.Element {
         </Tooltip>
       </div>
       <div className="flex gap-2">
-        <div className="flex items-center gap-2 pr-4">
+        {/* <div className="flex items-center gap-2 pr-4">
           <Code />
           <Switch
             checked={isBlocksMode}
             onCheckedChange={(checked) => dispatch(setEditorMode(checked ? 'blocks' : 'code'))}
           />
           <Blocks />
-        </div>
+        </div> */}
         <BoardSelect />
         <PortSelect />
       </div>

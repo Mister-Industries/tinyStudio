@@ -61,6 +61,7 @@ export const fileSlice = createAppSlice({
       if (!state.workspace) return
 
       const item = payload.payload
+      state.highlightedFileId = null
 
       // If parentId matches workspace id, add to root
       if (item.parentId === 'root') {

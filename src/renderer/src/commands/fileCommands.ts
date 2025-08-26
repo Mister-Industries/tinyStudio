@@ -8,6 +8,7 @@ import {
   openFile,
   openWorkspace,
   setFolderOpen,
+  updateReadmeContent,
   Workspace
 } from '@renderer/redux/fileSlice'
 import { store } from '@renderer/redux/store'
@@ -156,6 +157,16 @@ export class OpenWorkspaceCommand implements Command {
     }
 
     this.dispatch(openWorkspace(workspace))
+
+    if (fileItems.some((file: BaseFileItem) => file.name === 'README.md')) {
+      // Open the README.md file if it exists
+      const readmeFile = fileItems.find((file: BaseFileItem) => file.name === 'README.md')
+      if (readmeFile) {
+        fileSystem.readFile(readmeFile.path).then((content) => {
+          this.dispatch(updateReadmeContent(content))
+        })
+      }
+    }
   }
 }
 
