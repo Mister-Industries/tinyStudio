@@ -3,7 +3,7 @@
  * Renders individual items in the file tree with support for creation, renaming, and context menus
  */
 
-import { BaseFileItem, useAppSelector } from '@renderer/redux'
+import { BaseFileItem, useAppDispatch, useAppSelector } from '@renderer/redux'
 import {
   ChevronDown,
   ChevronRight,
@@ -18,7 +18,7 @@ import {
   Plus,
   Trash2
 } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
 import { Button } from '../ui/Button'
 import {
   DropdownMenu,
@@ -27,11 +27,17 @@ import {
   DropdownMenuTrigger
 } from '../ui/DropdownMenu'
 import { getFileIconType } from './utils'
+import { Input } from '../ui/Input'
+import {
+  CreateFileCommand,
+  CreateFolderCommand,
+  RefreshWorkspaceCommand
+} from '@renderer/commands/fileCommands'
 
 /**
  * Get the appropriate file icon based on file type and selection state
  */
-function getFileIcon(fileName: string, isSelected = false): React.ReactNode {
+function getFileIcon(fileName: string | null, isSelected = false): React.ReactNode {
   const iconType = getFileIconType(fileName)
 
   switch (iconType) {
@@ -59,6 +65,10 @@ interface FileTreeItemProps {
 export function FileTreeItem({ item, level = 0 }: FileTreeItemProps): React.JSX.Element {
   const isSelected = useAppSelector((state) => state.file.highlightedFileId === item.id)
   const isExpanded = false
+  const [namingValue, setNamingValue] = useState('')
+  const [isRenaming, setIsRenaming] = useState(false)
+  const dispatch = useAppDispatch()
+  const workspace = useAppSelector((state) => state.file.workspace)
 
   const handleOpenFile = (): void => {
     // Logic to open the file
@@ -69,13 +79,27 @@ export function FileTreeItem({ item, level = 0 }: FileTreeItemProps): React.JSX.
     // Logic to open context menu
   }
 
-  const handleCreateFile = (): void => {
-    // Logic to create a new file
+  // Finishes creating myself as a real file or directory
+  const handleCreateFileOrDirectory = async (): Promise<void> => {
+    if (item.type === 'file') {
+      // Logic to create a new file
+      const command = new CreateFileCommand(dispatch, item, namingValue)
+      await command.execute()
+      const refreshCommand = new RefreshWorkspaceCommand(dispatch, workspace!)
+      await refreshCommand.execute()
+    } else if (item.type === 'folder') {
+      const command = new CreateFolderCommand(dispatch, item, namingValue)
+      await command.execute()
+      const refreshCommand = new RefreshWorkspaceCommand(dispatch, workspace!)
+      await refreshCommand.execute()
+    }
   }
 
-  const handleCreateFolder = (): void => {
-    // Logic to create a new folder
-  }
+  // Folder only, creates a sub folder
+  const handleCreateSubFolder = (): void => {}
+
+  // Folder only, creates a sub file
+  const handleCreateSubFile = (): void => {}
 
   const handleRenameItem = (): void => {
     // Logic to rename the item
@@ -83,6 +107,25 @@ export function FileTreeItem({ item, level = 0 }: FileTreeItemProps): React.JSX.
 
   const handleDeleteItem = (): void => {
     // Logic to delete the item
+  }
+
+  if (!item.name || isRenaming) {
+    return (
+      <div
+        className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent/50 group bg-accent text-accent-foreground`}
+        style={{ paddingLeft: `${level * 12 + 8}px` }}
+      >
+        <Input
+          value={namingValue}
+          onChange={(e) => setNamingValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              isRenaming ? handleRenameItem() : handleCreateFileOrDirectory()
+            }
+          }}
+        />
+      </div>
+    )
   }
 
   return (
@@ -141,13 +184,13 @@ export function FileTreeItem({ item, level = 0 }: FileTreeItemProps): React.JSX.
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {item.type ? (
+          {item.type === 'folder' ? (
             <>
-              <DropdownMenuItem onClick={handleCreateFile}>
+              <DropdownMenuItem onClick={handleCreateSubFile}>
                 <Plus size={14} className="mr-2" />
                 New File
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCreateFolder}>
+              <DropdownMenuItem onClick={handleCreateSubFolder}>
                 <Folder size={14} className="mr-2" />
                 New Folder
               </DropdownMenuItem>

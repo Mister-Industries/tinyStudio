@@ -11,7 +11,9 @@ import { fileSystem } from '../../lib/fileSystem'
  * @param isDirectory - Whether the item is a directory
  * @returns Icon type identifier
  */
-export function getFileIconType(fileName: string): 'image' | 'code' | 'file' {
+export function getFileIconType(fileName: string | null): 'image' | 'code' | 'file' {
+  if (!fileName) return 'file'
+
   // Check if file is an image
   if (fileSystem.isImageFile(fileName)) {
     return 'image'

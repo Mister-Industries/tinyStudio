@@ -3,14 +3,14 @@
  * Main content area for the file explorer with workspace management
  */
 
-import { useAppDispatch, useAppSelector } from '@renderer/redux'
+import { BaseFileItem, startCreateItem, useAppDispatch, useAppSelector } from '@renderer/redux'
 import { Folder, FolderOpen, FolderPlus, FolderSync, Plus } from 'lucide-react'
 import React from 'react'
 import { Button } from '../ui/Button'
 import { ScrollArea } from '../ui/ScrollArea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/Tooltip'
 import { CreateProjectDialog } from './CreateProjectDialog'
-import { OpenWorkspaceCommand } from '@renderer/commands/fileCommands'
+import { OpenWorkspaceCommand, RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
 import { FileTreeItem } from './FileTreeItem'
 
 export function FileExplorerContent(): React.JSX.Element {
@@ -25,22 +25,38 @@ export function FileExplorerContent(): React.JSX.Element {
   }
 
   const handleOpenWorkspace = (workspacePath: string): Promise<void> => {
-    // Logic to open a workspace
     const command = new OpenWorkspaceCommand(workspacePath, dispatch)
     command.execute()
     return Promise.resolve()
   }
 
   const handleRefreshWorkspace = (): void => {
-    // Logic to refresh the workspace
+    if (!workspace) return
+    const command = new RefreshWorkspaceCommand(dispatch, workspace)
+    command.execute()
   }
 
   const handleNewFolder = (): void => {
-    // Logic to create a new folder
+    dispatch(
+      startCreateItem({
+        id: crypto.randomUUID(),
+        name: null,
+        path: workspace!.path,
+        type: 'folder',
+        children: []
+      } as BaseFileItem)
+    )
   }
 
   const handleNewFile = (): void => {
-    // Logic to create a new file
+    dispatch(
+      startCreateItem({
+        id: crypto.randomUUID(),
+        name: null,
+        path: workspace!.path,
+        type: 'file'
+      } as BaseFileItem)
+    )
   }
 
   return (

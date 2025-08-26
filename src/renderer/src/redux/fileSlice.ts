@@ -1,6 +1,5 @@
 import { createEntityAdapter, createSelector, EntityState, PayloadAction } from '@reduxjs/toolkit'
 import { createAppSlice } from './createAppSlice'
-import { FileSystemItem } from '@renderer/lib/fileSystem'
 
 export interface EditorFile {
   id: string
@@ -21,7 +20,8 @@ export interface Workspace {
 
 export interface BaseFileItem {
   id: string
-  name: string
+  name: string | null
+  path: string
   type: 'file' | 'folder'
   children?: BaseFileItem[]
 }
@@ -53,6 +53,31 @@ export const fileSlice = createAppSlice({
   name: 'file',
   initialState,
   reducers: (create) => ({
+    openWorkspace: create.reducer((state, payload: PayloadAction<Workspace>) => {
+      state.workspace = payload.payload
+    }),
+    startCreateItem: create.reducer((state, payload: PayloadAction<BaseFileItem>) => {
+      if (state.workspace) {
+        state.workspace.root.push(payload.payload)
+      }
+    }),
+    finishCreateItem: create.reducer((state, payload: PayloadAction<BaseFileItem>) => {
+      if (state.workspace) {
+        const findAndReplace = (items: BaseFileItem[]): boolean => {
+          for (let i = 0; i < items.length; i++) {
+            if (items[i].id === payload.payload.id) {
+              items[i] = payload.payload
+              return true
+            }
+            if (items[i].children && findAndReplace(items[i].children!)) {
+              return true
+            }
+          }
+          return false
+        }
+        findAndReplace(state.workspace.root)
+      }
+    }),
     createNewFile: create.reducer((state, payload: PayloadAction<string>) => {
       const newFile: EditorFile = {
         id: crypto.randomUUID(),
@@ -63,9 +88,6 @@ export const fileSlice = createAppSlice({
         updatedAt: new Date().toISOString()
       }
       state.openFiles = editorObjectAdapter.addOne(state.openFiles, newFile)
-    }),
-    openWorkspace: create.reducer((state, payload: PayloadAction<Workspace>) => {
-      state.workspace = payload.payload
     }),
     openFile: create.reducer((state, payload: PayloadAction<EditorFile>) => {
       const file = payload.payload
@@ -174,7 +196,9 @@ export const {
   saveFileWithContent,
   closeFile,
   setViewingFile,
-  openWorkspace
+  openWorkspace,
+  startCreateItem,
+  finishCreateItem
 } = fileSlice.actions
 
 export const { selectOpenFiles, selectViewingFileId } = fileSlice.selectors
