@@ -74,10 +74,7 @@ export class OpenWorkspaceCommand implements Command {
   private filePath: string | undefined
   private dispatch: Dispatch
 
-  constructor(
-    private file: string | undefined,
-    dispatch: Dispatch
-  ) {
+  constructor(file: string | undefined, dispatch: Dispatch) {
     this.filePath = file
     this.dispatch = dispatch
   }
@@ -174,5 +171,42 @@ export class CreateFileCommand implements UndoableCommand {
   async undo(): Promise<void> {
     const fullPath = combinePathAndFileName(this.item.path, this.fileName)
     fileSystem.deleteFile(fullPath)
+  }
+}
+
+export class RenameFileCommand implements UndoableCommand {
+  private dispatch: Dispatch
+  private item: BaseFileItem
+  private newName: string
+
+  constructor(dispatch: Dispatch, item: BaseFileItem, newName: string) {
+    this.dispatch = dispatch
+    this.item = item
+    this.newName = newName
+  }
+
+  async execute(): Promise<void> {
+    const oldPath = this.item.path
+    // Get the directory path by removing the filename
+    const lastSlashIndex = this.item.path.lastIndexOf('/')
+    const directoryPath = lastSlashIndex >= 0 ? this.item.path.substring(0, lastSlashIndex) : ''
+
+    // Create new path with the new filename
+    const newPath = directoryPath ? `${directoryPath}/${this.newName}` : this.newName
+
+    await fileSystem.renameFile(oldPath, newPath)
+    this.dispatch(finishCreateItem(this.item))
+  }
+
+  async undo(): Promise<void> {
+    const originalPath = this.item.path
+    // Get the directory path by removing the filename
+    const lastSlashIndex = this.item.path.lastIndexOf('/')
+    const directoryPath = lastSlashIndex >= 0 ? this.item.path.substring(0, lastSlashIndex) : ''
+
+    // Create new path with the new filename
+    const newPath = directoryPath ? `${directoryPath}/${this.newName}` : this.newName
+
+    await fileSystem.renameFile(newPath, originalPath)
   }
 }

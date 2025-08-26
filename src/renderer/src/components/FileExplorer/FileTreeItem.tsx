@@ -3,7 +3,7 @@
  * Renders individual items in the file tree with support for creation, renaming, and context menus
  */
 
-import { BaseFileItem, useAppDispatch, useAppSelector } from '@renderer/redux'
+import { BaseFileItem, cancelCreateItem, useAppDispatch, useAppSelector } from '@renderer/redux'
 import {
   ChevronDown,
   ChevronRight,
@@ -18,7 +18,7 @@ import {
   Plus,
   Trash2
 } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button } from '../ui/Button'
 import {
   DropdownMenu,
@@ -31,7 +31,8 @@ import { Input } from '../ui/Input'
 import {
   CreateFileCommand,
   CreateFolderCommand,
-  RefreshWorkspaceCommand
+  RefreshWorkspaceCommand,
+  RenameFileCommand
 } from '@renderer/commands/fileCommands'
 
 /**
@@ -62,13 +63,43 @@ interface FileTreeItemProps {
   item: BaseFileItem
 }
 
-export function FileTreeItem({ item, level = 0 }: FileTreeItemProps): React.JSX.Element {
+export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.Element {
   const isSelected = useAppSelector((state) => state.file.highlightedFileId === item.id)
   const isExpanded = false
   const [namingValue, setNamingValue] = useState('')
   const [isRenaming, setIsRenaming] = useState(false)
   const dispatch = useAppDispatch()
   const workspace = useAppSelector((state) => state.file.workspace)
+  const [cursorPosition, setCursorPosition] = useState<number>(0)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Helper function to get cursor position before file extension
+  const getCursorPositionBeforeExtension = (fileName: string): number => {
+    if (!fileName) return 0
+    const lastDotIndex = fileName.lastIndexOf('.')
+    // If no extension found or extension is at the beginning, place cursor at end
+    if (lastDotIndex === -1 || lastDotIndex === 0) {
+      return fileName.length
+    }
+    return lastDotIndex
+  }
+
+  // Effect to set cursor position when renaming starts
+  useEffect(() => {
+    if (isRenaming && inputRef.current) {
+      const input = inputRef.current
+      // Use setTimeout to ensure the input is fully rendered
+      setTimeout(() => {
+        // For files, select everything before the extension; for folders, select all
+        if (item.type === 'file' && cursorPosition > 0) {
+          input.setSelectionRange(0, cursorPosition)
+        } else {
+          input.setSelectionRange(0, input.value.length)
+        }
+        input.focus()
+      }, 0)
+    }
+  }, [isRenaming, cursorPosition, item.type])
 
   const handleOpenFile = (): void => {
     // Logic to open the file
@@ -95,14 +126,36 @@ export function FileTreeItem({ item, level = 0 }: FileTreeItemProps): React.JSX.
     }
   }
 
+  const cancelCreation = (): void => {
+    dispatch(cancelCreateItem(item.id))
+    setIsRenaming(false)
+    setCursorPosition(0)
+  }
+
   // Folder only, creates a sub folder
   const handleCreateSubFolder = (): void => {}
 
   // Folder only, creates a sub file
   const handleCreateSubFile = (): void => {}
 
-  const handleRenameItem = (): void => {
-    // Logic to rename the item
+  const handleStartRenameItem = (): void => {
+    setIsRenaming(true)
+    setNamingValue(item.name || '')
+    // Set cursor position before file extension for files, at end for folders
+    const cursorPos =
+      item.type === 'file'
+        ? getCursorPositionBeforeExtension(item.name || '')
+        : item.name?.length || 0
+    setCursorPosition(cursorPos)
+  }
+
+  const handleRenameItem = async (): Promise<void> => {
+    const command = new RenameFileCommand(dispatch, item, namingValue)
+    await command.execute()
+    const refreshCommand = new RefreshWorkspaceCommand(dispatch, workspace!)
+    await refreshCommand.execute()
+    setIsRenaming(false)
+    setCursorPosition(0)
   }
 
   const handleDeleteItem = (): void => {
@@ -116,13 +169,19 @@ export function FileTreeItem({ item, level = 0 }: FileTreeItemProps): React.JSX.
         style={{ paddingLeft: `${level * 12 + 8}px` }}
       >
         <Input
+          ref={inputRef}
+          className="flex-1 h-5 px-1 text-xs rounded-xs text-foreground"
           value={namingValue}
           onChange={(e) => setNamingValue(e.target.value)}
+          autoFocus
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               isRenaming ? handleRenameItem() : handleCreateFileOrDirectory()
+            } else if (e.key === 'Escape') {
+              cancelCreation()
             }
           }}
+          onBlur={cancelCreation}
         />
       </div>
     )
@@ -157,19 +216,7 @@ export function FileTreeItem({ item, level = 0 }: FileTreeItemProps): React.JSX.
           {getFileIcon(item.name, isSelected)}
         </>
       )}
-
-      {/* Input field for creating/renaming or display name */}
-      {/* {isCreating || isRenaming ? (
-        <Input
-          ref={inputRef}
-          value={fileName}
-          onChange={(e) => setFileName(e.target.value)}
-          className="flex-1 h-5 px-1 text-xs rounded-xs"
-          placeholder={isCreating ? (creationType === 'file' ? 'filename.txt' : 'folder name') : ''}
-        />
-      ) : ( */}
       <span className="flex-1 truncate">{item.name}</span>
-      {/* )} */}
 
       {/* Context menu dropdown */}
       <DropdownMenu>
@@ -194,7 +241,7 @@ export function FileTreeItem({ item, level = 0 }: FileTreeItemProps): React.JSX.
                 <Folder size={14} className="mr-2" />
                 New Folder
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleRenameItem}>
+              <DropdownMenuItem onClick={handleStartRenameItem}>
                 <Edit3 size={14} className="mr-2" />
                 Rename
               </DropdownMenuItem>
@@ -205,7 +252,7 @@ export function FileTreeItem({ item, level = 0 }: FileTreeItemProps): React.JSX.
                 <Download size={14} className="mr-2" />
                 Download
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleRenameItem}>
+              <DropdownMenuItem onClick={handleStartRenameItem}>
                 <Edit3 size={14} className="mr-2" />
                 Rename
               </DropdownMenuItem>

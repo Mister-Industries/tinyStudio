@@ -251,6 +251,38 @@ async function setupFileSystemHandlers(): Promise<void> {
     }
   })
 
+  // Rename file or directory
+  ipcMain.handle('rename-file', async (_, oldPath: string, newPath: string): Promise<void> => {
+    try {
+      // Normalize paths for the current platform
+      const normalizedOldPath = oldPath.replace(/\//g, path.sep)
+      const normalizedNewPath = newPath.replace(/\//g, path.sep)
+
+      // Check if source exists
+      await fs.access(normalizedOldPath, constants.F_OK)
+
+      // Check if destination already exists
+      try {
+        await fs.access(normalizedNewPath, constants.F_OK)
+        throw new Error('Destination already exists')
+      } catch (accessError) {
+        // Destination doesn't exist, proceed with rename
+        if ((accessError as NodeJS.ErrnoException).code !== 'ENOENT') {
+          throw accessError
+        }
+      }
+
+      // Ensure destination directory exists
+      await fs.mkdir(path.dirname(normalizedNewPath), { recursive: true })
+
+      // Perform the rename
+      await fs.rename(normalizedOldPath, normalizedNewPath)
+    } catch (error) {
+      console.error('Error renaming file/folder:', error)
+      throw error
+    }
+  })
+
   // Delete file or directory
   ipcMain.handle('delete-file', async (_, targetPath: string): Promise<void> => {
     try {

@@ -30,6 +30,8 @@ const api = {
       ipcRenderer.invoke('write-file', filePath, content),
     createFile: (filePath: string, content = ''): Promise<void> =>
       ipcRenderer.invoke('create-file', filePath, content),
+    renameFile: (oldPath: string, newPath: string): Promise<void> =>
+      ipcRenderer.invoke('rename-file', oldPath, newPath),
     createFolder: (folderPath: string): Promise<void> =>
       ipcRenderer.invoke('create-folder', folderPath),
     deleteFile: (targetPath: string): Promise<void> =>

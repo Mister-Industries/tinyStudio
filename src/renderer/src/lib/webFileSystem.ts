@@ -235,6 +235,39 @@ class WebFileSystemService {
     }
   }
 
+  async renameFile(oldPath: string, newPath: string): Promise<void> {
+    try {
+      const normalizedOldPath = this.normalizePath(oldPath)
+
+      // Get the old file handle
+      let fileHandle = this.fileHandles.get(normalizedOldPath) || this.fileHandles.get(oldPath)
+      if (!fileHandle) {
+        const handle = await this.getFileHandle(normalizedOldPath)
+        if (!handle) {
+          throw new Error('File not found')
+        }
+        fileHandle = handle
+      }
+
+      // Read the content of the old file
+      const file = await fileHandle.getFile()
+      const content = await file.text()
+
+      // Create the new file with the content
+      await this.writeFile(newPath, content)
+
+      // Delete the old file
+      await this.deleteFile(oldPath)
+
+      // Update file handles - remove old entries
+      this.fileHandles.delete(normalizedOldPath)
+      this.fileHandles.delete(oldPath)
+    } catch (error) {
+      console.error('Error renaming file:', error)
+      throw error
+    }
+  }
+
   // Delete file or directory
   async deleteFile(targetPath: string): Promise<void> {
     try {

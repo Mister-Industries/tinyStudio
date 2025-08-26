@@ -78,6 +78,24 @@ export const fileSlice = createAppSlice({
         findAndReplace(state.workspace.root)
       }
     }),
+    cancelCreateItem: create.reducer((state, payload: PayloadAction<string>) => {
+      if (state.workspace) {
+        const findAndRemove = (items: BaseFileItem[]): boolean => {
+          for (let i = 0; i < items.length; i++) {
+            if (items[i].id === payload.payload) {
+              items.splice(i, 1)
+              return true
+            }
+            if (items[i].children && findAndRemove(items[i].children!)) {
+              return true
+            }
+          }
+          return false
+        }
+        findAndRemove(state.workspace.root)
+      }
+    }),
+
     createNewFile: create.reducer((state, payload: PayloadAction<string>) => {
       const newFile: EditorFile = {
         id: crypto.randomUUID(),
@@ -198,7 +216,8 @@ export const {
   setViewingFile,
   openWorkspace,
   startCreateItem,
-  finishCreateItem
+  finishCreateItem,
+  cancelCreateItem
 } = fileSlice.actions
 
 export const { selectOpenFiles, selectViewingFileId } = fileSlice.selectors

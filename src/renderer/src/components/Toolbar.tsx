@@ -24,9 +24,11 @@ import {
 import React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
 import {
+  BaseFileItem,
   selectPanelState,
   setEditorMode,
   setPanelOpen,
+  startCreateItem,
   useAppDispatch,
   useAppSelector
 } from '@renderer/redux'
@@ -36,13 +38,37 @@ export function Toolbar(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const { isDocsPanelOpen, isSerialMonitorOpen } = useAppSelector(selectPanelState)
   const isBlocksMode = useAppSelector((state) => state.editor.editorMode === 'blocks')
+  const workspace = useAppSelector((state) => state.file.workspace)
+
+  const handleNewFolder = (): void => {
+    dispatch(
+      startCreateItem({
+        id: crypto.randomUUID(),
+        name: null,
+        path: workspace!.path,
+        type: 'folder',
+        children: []
+      } as BaseFileItem)
+    )
+  }
+
+  const handleNewFile = (): void => {
+    dispatch(
+      startCreateItem({
+        id: crypto.randomUUID(),
+        name: null,
+        path: workspace!.path,
+        type: 'file'
+      } as BaseFileItem)
+    )
+  }
 
   return (
     <div className="px-4 py-3 h-14 flex items-center justify-between shadow-sm bg-primary text-primary-foreground">
       <div className="flex items-center gap-2 h-full">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={handleNewFile}>
               <File />
             </Button>
           </TooltipTrigger>
@@ -50,7 +76,7 @@ export function Toolbar(): React.JSX.Element {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={handleNewFolder}>
               <Folder />
             </Button>
           </TooltipTrigger>

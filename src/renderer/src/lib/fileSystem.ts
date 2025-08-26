@@ -112,6 +112,19 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     }
   }
 
+  async renameFile(oldPath: string, newPath: string): Promise<void> {
+    try {
+      if (this.isElectron()) {
+        await window.api.fs.renameFile(oldPath, newPath)
+      } else {
+        await webFileSystem.renameFile(oldPath, newPath)
+      }
+    } catch (error) {
+      console.error('Error renaming file:', error)
+      throw new Error(`Failed to rename file: ${(error as Error).message}`)
+    }
+  }
+
   // Create new folder
   async createFolder(folderPath: string): Promise<void> {
     try {
