@@ -3,6 +3,7 @@
  * Main content area for the file explorer with workspace management
  */
 
+import { OpenWorkspaceCommand, RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
 import { BaseFileItem, startCreateItem, useAppDispatch, useAppSelector } from '@renderer/redux'
 import { Folder, FolderOpen, FolderPlus, FolderSync, Plus } from 'lucide-react'
 import React from 'react'
@@ -10,7 +11,6 @@ import { Button } from '../ui/Button'
 import { ScrollArea } from '../ui/ScrollArea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/Tooltip'
 import { CreateProjectDialog } from './CreateProjectDialog'
-import { OpenWorkspaceCommand, RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
 import { FileTreeItem } from './FileTreeItem'
 
 export function FileExplorerContent(): React.JSX.Element {
@@ -20,19 +20,19 @@ export function FileExplorerContent(): React.JSX.Element {
 
   const handleSelectWorkspace = (): void => {
     // Logic to select a workspace
-    const command = new OpenWorkspaceCommand(undefined, dispatch)
+    const command = new OpenWorkspaceCommand(undefined)
     command.execute()
   }
 
   const handleOpenWorkspace = (workspacePath: string): Promise<void> => {
-    const command = new OpenWorkspaceCommand(workspacePath, dispatch)
+    const command = new OpenWorkspaceCommand(workspacePath)
     command.execute()
     return Promise.resolve()
   }
 
   const handleRefreshWorkspace = (): void => {
     if (!workspace) return
-    const command = new RefreshWorkspaceCommand(dispatch, workspace)
+    const command = new RefreshWorkspaceCommand(workspace)
     command.execute()
   }
 
@@ -40,6 +40,7 @@ export function FileExplorerContent(): React.JSX.Element {
     dispatch(
       startCreateItem({
         id: crypto.randomUUID(),
+        parentId: 'root',
         name: null,
         path: workspace!.path,
         type: 'folder',

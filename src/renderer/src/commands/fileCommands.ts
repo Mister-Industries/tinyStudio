@@ -1,25 +1,71 @@
-import { fileSystem, FileSystemItem } from '@renderer/lib/fileSystem'
-import { Command, UndoableCommand } from './command'
 import { Dispatch } from '@reduxjs/toolkit'
-import { BaseFileItem, finishCreateItem, openWorkspace, Workspace } from '@renderer/redux/fileSlice'
+import { fileSystem, FileSystemItem } from '@renderer/lib/fileSystem'
+import {
+  BaseFileItem,
+  closeFile,
+  EditorFile,
+  finishCreateItem,
+  openFile,
+  openWorkspace,
+  setFolderOpen,
+  Workspace
+} from '@renderer/redux/fileSlice'
+import { store } from '@renderer/redux/store'
+import { Command, UndoableCommand } from './command'
 
 // Helper function to convert FileSystemItem to BaseFileItem
 const convertToBaseFileItem = (item: FileSystemItem): BaseFileItem => ({
   id: crypto.randomUUID(),
+  parentId: '',
   name: item.name,
   path: item.path,
   type: item.isDirectory ? 'folder' : 'file',
   children: item.isDirectory ? [] : undefined
 })
 
-// Build nested structure from flat array
-const buildNestedStructure = (items: FileSystemItem[]): BaseFileItem[] => {
+// Helper function to find existing item by path in the current workspace structure
+const findExistingItemByPath = (items: BaseFileItem[], path: string): BaseFileItem | null => {
+  for (const item of items) {
+    if (item.path === path) {
+      return item
+    }
+    if (item.children) {
+      const found = findExistingItemByPath(item.children, path)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+// Build nested structure from flat array, preserving existing IDs where possible
+const buildNestedStructure = (
+  items: FileSystemItem[],
+  existingStructure?: BaseFileItem[]
+): BaseFileItem[] => {
   const itemMap = new Map<string, BaseFileItem>()
   const rootItems: BaseFileItem[] = []
 
-  // First pass: create all items
+  // First pass: create all items, preserving existing IDs where possible
   items.forEach((item) => {
-    const baseItem = convertToBaseFileItem(item)
+    let baseItem: BaseFileItem
+
+    // Try to find existing item with same path to preserve its ID
+    const existingItem = existingStructure
+      ? findExistingItemByPath(existingStructure, item.path)
+      : null
+
+    if (existingItem && existingItem.type === (item.isDirectory ? 'folder' : 'file')) {
+      // Preserve existing item's ID and parentId, but update other properties
+      baseItem = {
+        ...convertToBaseFileItem(item),
+        id: existingItem.id,
+        parentId: existingItem.parentId
+      }
+    } else {
+      // Create new item with new ID
+      baseItem = convertToBaseFileItem(item)
+    }
+
     itemMap.set(item.path, baseItem)
   })
 
@@ -30,12 +76,14 @@ const buildNestedStructure = (items: FileSystemItem[]): BaseFileItem[] => {
 
     if (parentPath && itemMap.has(parentPath)) {
       // This item has a parent
+      baseItem.parentId = itemMap.get(parentPath)!.id
       const parent = itemMap.get(parentPath)!
       if (parent.children) {
         parent.children.push(baseItem)
       }
     } else {
       // This is a root item
+      baseItem.parentId = 'root'
       rootItems.push(baseItem)
     }
   })
@@ -72,11 +120,12 @@ const combinePathAndFileName = (dirPath: string, fileName: string): string => {
 
 export class OpenWorkspaceCommand implements Command {
   private filePath: string | undefined
-  private dispatch: Dispatch
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
 
-  constructor(file: string | undefined, dispatch: Dispatch) {
+  constructor(file: string | undefined) {
     this.filePath = file
-    this.dispatch = dispatch
   }
 
   async execute(): Promise<void> {
@@ -111,18 +160,19 @@ export class OpenWorkspaceCommand implements Command {
 }
 
 export class RefreshWorkspaceCommand implements Command {
-  private dispatch: Dispatch
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
   private workspace: Workspace
 
-  constructor(dispatch: Dispatch, workspace: Workspace) {
-    this.dispatch = dispatch
+  constructor(workspace: Workspace) {
     this.workspace = workspace
   }
 
   async execute(): Promise<void> {
     // Logic to refresh the workspace
     const fileSystemItems = await fileSystem.readDirectory(this.workspace.path, true)
-    const fileItems = buildNestedStructure(fileSystemItems)
+    const fileItems = buildNestedStructure(fileSystemItems, this.workspace.root)
 
     // Update the workspace with the new file structure
     this.dispatch(openWorkspace({ ...this.workspace, root: fileItems }))
@@ -130,12 +180,13 @@ export class RefreshWorkspaceCommand implements Command {
 }
 
 export class CreateFolderCommand implements UndoableCommand {
-  private dispatch: Dispatch
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
   private item: BaseFileItem
   private folderName: string
 
-  constructor(dispatch: Dispatch, item: BaseFileItem, folderName: string) {
-    this.dispatch = dispatch
+  constructor(item: BaseFileItem, folderName: string) {
     this.item = item
     this.folderName = folderName
   }
@@ -152,12 +203,13 @@ export class CreateFolderCommand implements UndoableCommand {
   }
 }
 export class CreateFileCommand implements UndoableCommand {
-  private dispatch: Dispatch
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
   private item: BaseFileItem
   private fileName: string
 
-  constructor(dispatch: Dispatch, item: BaseFileItem, fileName: string) {
-    this.dispatch = dispatch
+  constructor(item: BaseFileItem, fileName: string) {
     this.item = item
     this.fileName = fileName
   }
@@ -174,13 +226,64 @@ export class CreateFileCommand implements UndoableCommand {
   }
 }
 
+export class OpenFileCommand implements Command {
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
+  private item: BaseFileItem
+
+  constructor(item: BaseFileItem) {
+    this.item = item
+  }
+
+  async execute(): Promise<void> {
+    if (this.item.type !== 'file') {
+      return
+    }
+    const content = await fileSystem.readFile(this.item.path)
+    if (this.item.name) {
+      const file: EditorFile = {
+        id: this.item.id,
+        name: this.item.name,
+        content,
+        modified: false,
+        createdAt: '',
+        updatedAt: ''
+      }
+      this.dispatch(openFile(file))
+    }
+  }
+}
+
+export class SetFolderOpenCommand implements Command {
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
+  private item: BaseFileItem
+  private isOpen: boolean
+
+  constructor(item: BaseFileItem, isOpen: boolean) {
+    this.item = item
+    this.isOpen = isOpen
+  }
+
+  async execute(): Promise<void> {
+    if (this.item.type !== 'folder') {
+      return
+    }
+    this.dispatch(setFolderOpen({ id: this.item.id, isOpen: this.isOpen }))
+  }
+}
+
 export class RenameFileCommand implements UndoableCommand {
-  private dispatch: Dispatch
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
   private item: BaseFileItem
   private newName: string
 
-  constructor(dispatch: Dispatch, item: BaseFileItem, newName: string) {
-    this.dispatch = dispatch
+  constructor(item: BaseFileItem, newName: string) {
+    this.item = item
     this.item = item
     this.newName = newName
   }
@@ -212,6 +315,9 @@ export class RenameFileCommand implements UndoableCommand {
 }
 
 export class DeleteFileCommand implements Command {
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
   private item: BaseFileItem
 
   constructor(item: BaseFileItem) {
@@ -220,5 +326,6 @@ export class DeleteFileCommand implements Command {
 
   async execute(): Promise<void> {
     await fileSystem.deleteFile(this.item.path)
+    this.dispatch(closeFile(this.item.id))
   }
 }

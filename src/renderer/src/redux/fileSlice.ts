@@ -20,6 +20,7 @@ export interface Workspace {
 
 export interface BaseFileItem {
   id: string
+  parentId: string
   name: string | null
   path: string
   type: 'file' | 'folder'
@@ -57,8 +58,63 @@ export const fileSlice = createAppSlice({
       state.workspace = payload.payload
     }),
     startCreateItem: create.reducer((state, payload: PayloadAction<BaseFileItem>) => {
-      if (state.workspace) {
-        state.workspace.root.push(payload.payload)
+      if (!state.workspace) return
+
+      const item = payload.payload
+
+      // If parentId matches workspace id, add to root
+      if (item.parentId === 'root') {
+        state.workspace.root.push(item)
+        return
+      }
+
+      // Find parent by parentId in the tree
+      const findParentById = (items: BaseFileItem[]): BaseFileItem | null => {
+        for (const currentItem of items) {
+          if (currentItem.id === item.parentId) {
+            return currentItem
+          }
+          if (currentItem.children) {
+            const found = findParentById(currentItem.children)
+            if (found) return found
+          }
+        }
+        return null
+      }
+
+      const parent = findParentById(state.workspace.root)
+      if (parent && parent.type === 'folder') {
+        if (!parent.children) {
+          parent.children = []
+        }
+        parent.children.push(item)
+      } else {
+        // Fallback: if parent not found by ID, try to find by path
+        const parentPath = item.path.substring(0, item.path.lastIndexOf('/'))
+
+        const findParentByPath = (items: BaseFileItem[]): BaseFileItem | null => {
+          for (const currentItem of items) {
+            if (currentItem.type === 'folder' && currentItem.path === parentPath) {
+              return currentItem
+            }
+            if (currentItem.children) {
+              const found = findParentByPath(currentItem.children)
+              if (found) return found
+            }
+          }
+          return null
+        }
+
+        const parentByPath = findParentByPath(state.workspace.root)
+        if (parentByPath) {
+          if (!parentByPath.children) {
+            parentByPath.children = []
+          }
+          parentByPath.children.push(item)
+        } else {
+          // Final fallback: add to root
+          state.workspace.root.push(item)
+        }
       }
     }),
     finishCreateItem: create.reducer((state, payload: PayloadAction<BaseFileItem>) => {
@@ -115,7 +171,20 @@ export const fileSlice = createAppSlice({
       })
       // Automatically set this file as the viewing file
       state.viewingFileId = file.id
+      state.highlightedFileId = file.id
     }),
+    setFolderOpen: create.reducer(
+      (state, payload: PayloadAction<{ id: string; isOpen: boolean }>) => {
+        const { id, isOpen } = payload.payload
+        if (isOpen && !state.expandedDirectoryIds.includes(id)) {
+          state.expandedDirectoryIds.push(id)
+        } else if (!isOpen) {
+          state.expandedDirectoryIds = state.expandedDirectoryIds.filter(
+            (folderId) => folderId !== id
+          )
+        }
+      }
+    ),
     updateFileContent: create.reducer(
       (state, payload: PayloadAction<{ id: string; content: string }>) => {
         const { id, content } = payload.payload
@@ -200,7 +269,8 @@ export const fileSlice = createAppSlice({
       editorObjectAdapter.getSelectors().selectAll(openFiles)
     ),
     selectViewingFileId: (state) => state.viewingFileId,
-    selectIsReadmeFile: (state, id: string) => state.openFiles.entities[id]?.name === 'README.md'
+    selectIsReadmeFile: (state, id: string) => state.openFiles.entities[id]?.name === 'README.md',
+    selectIsExpanded: (state, id: string) => state.expandedDirectoryIds.includes(id)
   }
 })
 
@@ -217,7 +287,8 @@ export const {
   openWorkspace,
   startCreateItem,
   finishCreateItem,
-  cancelCreateItem
+  cancelCreateItem,
+  setFolderOpen
 } = fileSlice.actions
 
-export const { selectOpenFiles, selectViewingFileId } = fileSlice.selectors
+export const { selectOpenFiles, selectViewingFileId, selectIsExpanded } = fileSlice.selectors

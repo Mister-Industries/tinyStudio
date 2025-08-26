@@ -3,7 +3,25 @@
  * Renders individual items in the file tree with support for creation, renaming, and context menus
  */
 
-import { BaseFileItem, cancelCreateItem, useAppDispatch, useAppSelector } from '@renderer/redux'
+import {
+  CreateFileCommand,
+  CreateFolderCommand,
+  DeleteFileCommand,
+  OpenFileCommand,
+  RefreshWorkspaceCommand,
+  RenameFileCommand,
+  SetFolderOpenCommand
+} from '@renderer/commands/fileCommands'
+import {
+  BaseFileItem,
+  cancelCreateItem,
+  selectIsExpanded,
+  selectOpenFiles,
+  setViewingFile,
+  startCreateItem,
+  useAppDispatch,
+  useAppSelector
+} from '@renderer/redux'
 import {
   ChevronDown,
   ChevronRight,
@@ -18,14 +36,7 @@ import {
   Plus,
   Trash2
 } from 'lucide-react'
-import React, { useState, useEffect, useRef } from 'react'
-import { Button } from '../ui/Button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '../ui/DropdownMenu'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,15 +47,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '../ui/AlertDialog'
-import { getFileIconType } from './utils'
-import { Input } from '../ui/Input'
+import { Button } from '../ui/Button'
 import {
-  CreateFileCommand,
-  CreateFolderCommand,
-  DeleteFileCommand,
-  RefreshWorkspaceCommand,
-  RenameFileCommand
-} from '@renderer/commands/fileCommands'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '../ui/DropdownMenu'
+import { Input } from '../ui/Input'
+import { getFileIconType } from './utils'
 
 /**
  * Get the appropriate file icon based on file type and selection state
@@ -76,10 +87,12 @@ interface FileTreeItemProps {
 
 export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.Element {
   const isSelected = useAppSelector((state) => state.file.highlightedFileId === item.id)
-  const isExpanded = false
+  const isExpanded = useAppSelector((state) => selectIsExpanded(state, item.id))
+  const isOpen = useAppSelector(selectOpenFiles).some((openFile) => openFile.id === item.id)
   const [namingValue, setNamingValue] = useState('')
   const [isRenaming, setIsRenaming] = useState(false)
   const [showDeleteAlert, setShowDeleteAlert] = useState(false)
+  const [showContextMenu, setShowContextMenu] = useState(false)
   const dispatch = useAppDispatch()
   const workspace = useAppSelector((state) => state.file.workspace)
   const [cursorPosition, setCursorPosition] = useState<number>(0)
@@ -114,26 +127,38 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   }, [isRenaming, cursorPosition, item.type])
 
   const handleOpenFile = (): void => {
+    if (isOpen) {
+      dispatch(setViewingFile(item.id))
+      return
+    }
+
     // Logic to open the file
+    if (item.type === 'file') {
+      const command = new OpenFileCommand(item)
+      command.execute()
+    } else if (item.type === 'folder') {
+      const command = new SetFolderOpenCommand(item, !isExpanded)
+      command.execute()
+    }
   }
 
   const handleContextMenu = (e: React.MouseEvent): void => {
     e.preventDefault()
-    // Logic to open context menu
+    setShowContextMenu(true)
   }
 
   // Finishes creating myself as a real file or directory
   const handleCreateFileOrDirectory = async (): Promise<void> => {
     if (item.type === 'file') {
       // Logic to create a new file
-      const command = new CreateFileCommand(dispatch, item, namingValue)
+      const command = new CreateFileCommand(item, namingValue)
       await command.execute()
-      const refreshCommand = new RefreshWorkspaceCommand(dispatch, workspace!)
+      const refreshCommand = new RefreshWorkspaceCommand(workspace!)
       await refreshCommand.execute()
     } else if (item.type === 'folder') {
-      const command = new CreateFolderCommand(dispatch, item, namingValue)
+      const command = new CreateFolderCommand(item, namingValue)
       await command.execute()
-      const refreshCommand = new RefreshWorkspaceCommand(dispatch, workspace!)
+      const refreshCommand = new RefreshWorkspaceCommand(workspace!)
       await refreshCommand.execute()
     }
   }
@@ -145,10 +170,40 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   }
 
   // Folder only, creates a sub folder
-  const handleCreateSubFolder = (): void => {}
+  const handleCreateSubFolder = async (): Promise<void> => {
+    if (item.type !== 'folder') {
+      return
+    }
+    const command = new SetFolderOpenCommand(item, true)
+    await command.execute()
+    dispatch(
+      startCreateItem({
+        id: crypto.randomUUID(),
+        parentId: item.id,
+        name: null,
+        path: item.path,
+        type: 'folder',
+        children: []
+      } as BaseFileItem)
+    )
+  }
 
   // Folder only, creates a sub file
-  const handleCreateSubFile = (): void => {}
+  const handleCreateSubFile = async (): Promise<void> => {
+    if (item.type !== 'folder') {
+      return
+    }
+    const command = new SetFolderOpenCommand(item, true)
+    await command.execute()
+    dispatch(
+      startCreateItem({
+        id: crypto.randomUUID(),
+        name: null,
+        path: item.path,
+        type: 'file'
+      } as BaseFileItem)
+    )
+  }
 
   const handleStartRenameItem = (): void => {
     setIsRenaming(true)
@@ -162,9 +217,9 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   }
 
   const handleRenameItem = async (): Promise<void> => {
-    const command = new RenameFileCommand(dispatch, item, namingValue)
+    const command = new RenameFileCommand(item, namingValue)
     await command.execute()
-    const refreshCommand = new RefreshWorkspaceCommand(dispatch, workspace!)
+    const refreshCommand = new RefreshWorkspaceCommand(workspace!)
     await refreshCommand.execute()
     setIsRenaming(false)
     setCursorPosition(0)
@@ -178,7 +233,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
     // Logic to delete the item
     const command = new DeleteFileCommand(item)
     await command.execute()
-    const refreshCommand = new RefreshWorkspaceCommand(dispatch, workspace!)
+    const refreshCommand = new RefreshWorkspaceCommand(workspace!)
     await refreshCommand.execute()
     setShowDeleteAlert(false)
   }
@@ -209,104 +264,116 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   }
 
   return (
-    <div
-      className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent/50 group ${
-        isSelected ? 'bg-accent text-accent-foreground' : ''
-      }`}
-      style={{ paddingLeft: `${level * 12 + 8}px` }}
-      onClick={handleOpenFile}
-      onContextMenu={handleContextMenu}
-    >
-      {/* Folder icons and expansion indicators */}
-      {item.type === 'folder' ? (
+    <>
+      <div
+        className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent/50 group ${
+          isSelected ? 'bg-accent text-accent-foreground' : isExpanded ? 'bg-accent/20' : ''
+        }`}
+        style={{ paddingLeft: `${level * 12 + 8}px` }}
+        onClick={handleOpenFile}
+        onContextMenu={handleContextMenu}
+      >
+        {/* Folder icons and expansion indicators */}
+        {item.type === 'folder' ? (
+          <>
+            {isExpanded ? (
+              <ChevronDown size={14} className="text-muted-foreground" />
+            ) : (
+              <ChevronRight size={14} className="text-muted-foreground" />
+            )}
+            {isExpanded ? (
+              <FolderOpen size={14} className="text-accent" />
+            ) : (
+              <Folder size={14} className="text-accent" />
+            )}
+          </>
+        ) : (
+          <>
+            <span className="w-[14px]" />
+            {getFileIcon(item.name, isSelected)}
+          </>
+        )}
+        <span className="flex-1 truncate">{item.name}</span>
+
+        {/* Context menu dropdown */}
+        <DropdownMenu open={showContextMenu} onOpenChange={setShowContextMenu}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-4 opacity-0 group-hover:opacity-100"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreHorizontal size={12} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {item.type === 'folder' ? (
+              <>
+                <DropdownMenuItem onClick={handleCreateSubFile}>
+                  <Plus size={14} className="mr-2" />
+                  New File
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleCreateSubFolder}>
+                  <Folder size={14} className="mr-2" />
+                  New Folder
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleStartRenameItem}>
+                  <Edit3 size={14} className="mr-2" />
+                  Rename
+                </DropdownMenuItem>
+              </>
+            ) : (
+              <>
+                <DropdownMenuItem>
+                  <Download size={14} className="mr-2" />
+                  Download
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleStartRenameItem}>
+                  <Edit3 size={14} className="mr-2" />
+                  Rename
+                </DropdownMenuItem>
+              </>
+            )}
+            <DropdownMenuItem className="text-destructive" onClick={handleDeleteItem}>
+              <Trash2 size={14} className="mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Delete confirmation alert dialog */}
+        <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Delete {item.type === 'folder' ? 'Folder' : 'File'}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete &quot;{item.name}&quot;? This action cannot be
+                undone.
+                {item.type === 'folder' && ' All contents of this folder will also be deleted.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteItem}
+                className="bg-destructive text-secondary-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+      {item.type === 'folder' && isExpanded && item.children && (
         <>
-          {isExpanded ? (
-            <ChevronDown size={14} className="text-muted-foreground" />
-          ) : (
-            <ChevronRight size={14} className="text-muted-foreground" />
-          )}
-          {isExpanded ? (
-            <FolderOpen size={14} className="text-accent" />
-          ) : (
-            <Folder size={14} className="text-accent" />
-          )}
-        </>
-      ) : (
-        <>
-          <span className="w-[14px]" />
-          {getFileIcon(item.name, isSelected)}
+          {item.children.map((child) => (
+            <FileTreeItem key={child.id} item={child} level={level + 1} />
+          ))}
         </>
       )}
-      <span className="flex-1 truncate">{item.name}</span>
-
-      {/* Context menu dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-4 opacity-0 group-hover:opacity-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreHorizontal size={12} />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {item.type === 'folder' ? (
-            <>
-              <DropdownMenuItem onClick={handleCreateSubFile}>
-                <Plus size={14} className="mr-2" />
-                New File
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCreateSubFolder}>
-                <Folder size={14} className="mr-2" />
-                New Folder
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleStartRenameItem}>
-                <Edit3 size={14} className="mr-2" />
-                Rename
-              </DropdownMenuItem>
-            </>
-          ) : (
-            <>
-              <DropdownMenuItem>
-                <Download size={14} className="mr-2" />
-                Download
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleStartRenameItem}>
-                <Edit3 size={14} className="mr-2" />
-                Rename
-              </DropdownMenuItem>
-            </>
-          )}
-          <DropdownMenuItem className="text-destructive" onClick={handleDeleteItem}>
-            <Trash2 size={14} className="mr-2" />
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Delete confirmation alert dialog */}
-      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete {item.type === 'folder' ? 'Folder' : 'File'}</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete &quot;{item.name}&quot;? This action cannot be undone.
-              {item.type === 'folder' && ' All contents of this folder will also be deleted.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteItem}
-              className="bg-destructive text-secondary-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+    </>
   )
 }

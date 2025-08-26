@@ -1,4 +1,13 @@
 import {
+  BaseFileItem,
+  selectPanelState,
+  setEditorMode,
+  setPanelOpen,
+  startCreateItem,
+  useAppDispatch,
+  useAppSelector
+} from '@renderer/redux'
+import {
   Blocks,
   Check,
   Code,
@@ -10,8 +19,8 @@ import {
   Save,
   Upload
 } from 'lucide-react'
+import React from 'react'
 import { Button } from './ui/Button'
-import { Separator } from './ui/Separator'
 import {
   Select,
   SelectContent,
@@ -21,18 +30,9 @@ import {
   SelectTrigger,
   SelectValue
 } from './ui/Select'
-import React from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
-import {
-  BaseFileItem,
-  selectPanelState,
-  setEditorMode,
-  setPanelOpen,
-  startCreateItem,
-  useAppDispatch,
-  useAppSelector
-} from '@renderer/redux'
+import { Separator } from './ui/Separator'
 import { Switch } from './ui/Switch'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
 
 export function Toolbar(): React.JSX.Element {
   const dispatch = useAppDispatch()
@@ -44,6 +44,7 @@ export function Toolbar(): React.JSX.Element {
     dispatch(
       startCreateItem({
         id: crypto.randomUUID(),
+        parentId: 'root',
         name: null,
         path: workspace!.path,
         type: 'folder',
@@ -56,6 +57,7 @@ export function Toolbar(): React.JSX.Element {
     dispatch(
       startCreateItem({
         id: crypto.randomUUID(),
+        parentId: 'root',
         name: null,
         path: workspace!.path,
         type: 'file'
