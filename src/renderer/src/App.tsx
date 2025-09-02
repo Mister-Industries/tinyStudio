@@ -19,7 +19,7 @@ export default function App(): React.JSX.Element {
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         {isFileExplorerOpen && (
           <>
-            <ResizablePanel defaultSize={20} minSize={18} maxSize={40} className="bg-muted">
+            <ResizablePanel defaultSize={20} minSize={5} maxSize={40} className="bg-muted">
               <FileExplorer />
             </ResizablePanel>
             <ResizableHandle />

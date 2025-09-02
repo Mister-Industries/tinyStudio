@@ -3,7 +3,7 @@
  * Main file explorer with tabs for file browser and source control
  */
 
-import { Construction, Folder, GitBranch, Github } from 'lucide-react'
+import { Construction, Folder, GitBranch } from 'lucide-react'
 import React, { useState } from 'react'
 import { FileExplorerContent } from './FileExplorerContent'
 
@@ -44,7 +44,7 @@ export function FileExplorer(): React.JSX.Element {
           {/* Source Control Header */}
           <div className="flex w-full justify-between items-center px-4 py-3 text-xs font-semibold border-b border-border">
             <div className="flex items-center gap-2">
-              <Github size={14} />
+              <GitBranch size={14} />
               SOURCE CONTROL
             </div>
           </div>

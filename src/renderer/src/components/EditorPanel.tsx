@@ -11,10 +11,10 @@ import {
 } from '@renderer/redux/fileSlice'
 import { CircuitBoard } from 'lucide-react'
 import * as monaco from 'monaco-editor'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { BlocklyEditor } from './BlocklyEditor'
 import { CircuitEditor } from './CircuitEditor'
-import { MonacoEditor } from './MonacoEditor'
+import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
 import { FileTabContent, FileTabs, FileTabsList, FileTabTrigger } from './ui/FileTab'
 
 loader.config({ monaco })
@@ -25,6 +25,7 @@ export function EditorPanel(): React.JSX.Element {
   const editorMode = useAppSelector((state) => state.editor.editorMode)
   const dispatch = useAppDispatch()
   const [showCircuit, setShowCircuit] = useState(false)
+  const monacoEditorRef = useRef<MonacoEditorRef>(null)
 
   const handleFileClose = useCallback(
     (fileId: string): void => {
@@ -33,13 +34,49 @@ export function EditorPanel(): React.JSX.Element {
     [dispatch]
   )
 
-  // Add keyboard listener for Ctrl/Cmd + W to close current file
+  const handleFileSelect = useCallback(
+    (fileId: string): void => {
+      dispatch(setViewingFile(fileId))
+      // Focus the Monaco editor after a short delay to ensure it's rendered
+      setTimeout(() => {
+        if (monacoEditorRef.current && !showCircuit && editorMode !== 'blocks') {
+          monacoEditorRef.current.focus()
+        }
+      }, 50)
+    },
+    [dispatch, showCircuit, editorMode]
+  )
+
+  // Add keyboard listeners for file navigation and closing
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
+      // Ctrl/Cmd + W to close current file
       if ((event.metaKey || event.ctrlKey) && event.key === 'w') {
         event.preventDefault()
         if (viewingFileId) {
           handleFileClose(viewingFileId)
+        }
+      }
+
+      // Ctrl + Tab to focus next tab, Ctrl + Shift + Tab to focus previous tab
+      if (event.ctrlKey && event.key === 'Tab') {
+        event.preventDefault()
+        if (openFiles.length > 1) {
+          const currentIndex = openFiles.findIndex((file) => file.id === viewingFileId)
+          let nextIndex: number
+
+          if (event.shiftKey) {
+            // Go to previous tab
+            nextIndex = currentIndex <= 0 ? openFiles.length - 1 : currentIndex - 1
+          } else {
+            // Go to next tab
+            nextIndex = (currentIndex + 1) % openFiles.length
+          }
+
+          const targetFile = openFiles[nextIndex]
+          if (targetFile) {
+            handleFileSelect(targetFile.id)
+          }
         }
       }
     }
@@ -48,17 +85,7 @@ export function EditorPanel(): React.JSX.Element {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [viewingFileId, handleFileClose])
-
-  const handleFileSelect = (fileId: string): void => {
-    dispatch(setViewingFile(fileId))
-
-    // Find the file by ID to get its path and synchronize with FileExplorer
-    const file = openFiles.find((f) => f.id === fileId)
-    if (file && file.path) {
-      // setCurrentFile(file.path)
-    }
-  }
+  }, [viewingFileId, handleFileClose, openFiles, handleFileSelect])
 
   const handleContentChange = useCallback(
     (content: string, fileId: string) => {
@@ -137,6 +164,7 @@ export function EditorPanel(): React.JSX.Element {
               <BlocklyEditor />
             ) : (
               <MonacoEditor
+                ref={monacoEditorRef}
                 activeFile={file}
                 onContentChange={(content) => handleContentChange(content, file.id)}
                 onSaveFile={(content) => handleSaveFile(content, file.id)}
