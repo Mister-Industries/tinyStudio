@@ -1,10 +1,9 @@
+import { isElectron } from '@renderer/lib/utils'
 import { Maximize, Minimize, Minus, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Button } from './ui/Button'
 import { Separator } from './ui/Separator'
 import { ThemeToggle } from './ui/ThemeToggle'
-import { isElectron } from '@renderer/lib/utils'
-import { useState, useEffect } from 'react'
-import { UserMenu } from './UserMenu'
 
 export function Header(): React.JSX.Element {
   const [isMaximized, setIsMaximized] = useState(false)
@@ -52,7 +51,7 @@ export function Header(): React.JSX.Element {
           Help
         </Button>
         <ThemeToggle />
-        <UserMenu />
+        {/* <UserMenu /> */}
         {isElectron() && (
           <div className="h-full flex">
             <Separator orientation="vertical" className="h-6 w-px bg-border" />

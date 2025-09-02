@@ -4,7 +4,7 @@ import { createAppSlice } from './createAppSlice'
 export interface EditorFile {
   id: string
   name: string
-  path?: string
+  path: string
   content: string
   modified: boolean
   createdAt: string
@@ -158,6 +158,7 @@ export const fileSlice = createAppSlice({
         id: crypto.randomUUID(),
         name: payload.payload,
         content: '',
+        path: `${state.workspace!.path}/${payload.payload}`,
         modified: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -263,6 +264,54 @@ export const fileSlice = createAppSlice({
     }),
     setViewingFile: create.reducer((state, payload: PayloadAction<string | null>) => {
       state.viewingFileId = payload.payload
+      state.highlightedFileId = payload.payload
+
+      // If highlighting a file, expand all parent directories
+      if (payload.payload && state.workspace) {
+        const findFileInTree = (items: BaseFileItem[], targetId: string): BaseFileItem | null => {
+          for (const item of items) {
+            if (item.id === targetId) {
+              return item
+            }
+            if (item.children) {
+              const found = findFileInTree(item.children, targetId)
+              if (found) return found
+            }
+          }
+          return null
+        }
+
+        const collectParentIds = (
+          items: BaseFileItem[],
+          targetId: string,
+          parentIds: string[] = []
+        ): string[] => {
+          for (const item of items) {
+            if (item.id === targetId) {
+              return parentIds
+            }
+            if (item.children) {
+              const found = collectParentIds(item.children, targetId, [...parentIds, item.id])
+              if (found.length > parentIds.length) {
+                return found
+              }
+            }
+          }
+          return []
+        }
+
+        const highlightedFile = findFileInTree(state.workspace.root, payload.payload)
+        if (highlightedFile) {
+          const parentIds = collectParentIds(state.workspace.root, payload.payload)
+
+          // Add parent directory IDs to expandedDirectoryIds if not already present
+          for (const parentId of parentIds) {
+            if (!state.expandedDirectoryIds.includes(parentId)) {
+              state.expandedDirectoryIds.push(parentId)
+            }
+          }
+        }
+      }
     })
   }),
   selectors: {

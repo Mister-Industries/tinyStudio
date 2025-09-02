@@ -14,7 +14,7 @@ export interface FileTabData {
 
 export interface FileTabTriggerProps extends React.ComponentProps<typeof TabsPrimitive.Trigger> {
   file: FileTabData
-  onFileClose?: (fileId: string) => void
+  onFileClose: (fileId: string) => void
 }
 
 function FileTabs({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {

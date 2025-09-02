@@ -11,7 +11,7 @@ import {
 } from '@renderer/redux/fileSlice'
 import { CircuitBoard } from 'lucide-react'
 import * as monaco from 'monaco-editor'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { BlocklyEditor } from './BlocklyEditor'
 import { CircuitEditor } from './CircuitEditor'
 import { MonacoEditor } from './MonacoEditor'
@@ -26,6 +26,30 @@ export function EditorPanel(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const [showCircuit, setShowCircuit] = useState(false)
 
+  const handleFileClose = useCallback(
+    (fileId: string): void => {
+      dispatch(closeFile(fileId))
+    },
+    [dispatch]
+  )
+
+  // Add keyboard listener for Ctrl/Cmd + W to close current file
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'w') {
+        event.preventDefault()
+        if (viewingFileId) {
+          handleFileClose(viewingFileId)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [viewingFileId, handleFileClose])
+
   const handleFileSelect = (fileId: string): void => {
     dispatch(setViewingFile(fileId))
 
@@ -34,10 +58,6 @@ export function EditorPanel(): React.JSX.Element {
     if (file && file.path) {
       // setCurrentFile(file.path)
     }
-  }
-
-  const handleFileClose = (fileId: string): void => {
-    dispatch(closeFile(fileId))
   }
 
   const handleContentChange = useCallback(
@@ -55,6 +75,7 @@ export function EditorPanel(): React.JSX.Element {
 
   const handleSaveFile = async (content: string, fileId: string): Promise<void> => {
     const file = openFiles.find((f) => f.id === fileId)
+    console.log(file)
     if (file && file.path) {
       try {
         console.log(`Saving file: ${file.name} (${file.id}) to ${file.path}`)

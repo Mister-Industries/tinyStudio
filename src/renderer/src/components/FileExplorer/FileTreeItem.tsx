@@ -202,7 +202,8 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
         id: crypto.randomUUID(),
         name: null,
         path: item.path,
-        type: 'file'
+        type: 'file',
+        parentId: item.id
       } as BaseFileItem)
     )
   }
@@ -244,7 +245,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
     return (
       <div
         className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent/50 group bg-accent text-accent-foreground`}
-        style={{ paddingLeft: `${level * 12 + 8}px` }}
+        style={{ paddingLeft: `${level * 12 + 24}px` }}
       >
         <Input
           ref={inputRef}

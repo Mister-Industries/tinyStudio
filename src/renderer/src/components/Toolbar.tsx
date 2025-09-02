@@ -1,5 +1,8 @@
+import { fileSystem } from '@renderer/lib/fileSystem'
 import {
   BaseFileItem,
+  saveFileWithContent,
+  selectOpenFiles,
   selectPanelState,
   setPanelOpen,
   startCreateItem,
@@ -25,6 +28,8 @@ export function Toolbar(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const { isDocsPanelOpen, isSerialMonitorOpen } = useAppSelector(selectPanelState)
   const workspace = useAppSelector((state) => state.file.workspace)
+  const openFiles = useAppSelector(selectOpenFiles)
+  const viewingFileId = useAppSelector((state) => state.file.viewingFileId)
 
   const handleNewFolder = (): void => {
     dispatch(
@@ -51,6 +56,23 @@ export function Toolbar(): React.JSX.Element {
     )
   }
 
+  const handleSaveFile = async (): Promise<void> => {
+    const file = openFiles.find((f) => f.id === viewingFileId)
+    if (file && file.path) {
+      try {
+        console.log(`Saving file: ${file.name} (${file.id}) to ${file.path}`)
+        await fileSystem.writeFile(file.path, file.content)
+        // Save with content to ensure state is properly synced
+        dispatch(saveFileWithContent({ id: file.id, content: file.content }))
+        console.log(`Successfully saved: ${file.name}`)
+      } catch (error) {
+        console.error('Failed to save file:', error)
+      }
+    } else {
+      console.error('Cannot save file: file path is undefined')
+    }
+  }
+
   return (
     <div className="px-4 py-3 h-14 flex items-center justify-between shadow-sm bg-primary text-primary-foreground">
       <div className="flex items-center gap-2 h-full">
@@ -72,7 +94,7 @@ export function Toolbar(): React.JSX.Element {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={handleSaveFile}>
               <Save />
             </Button>
           </TooltipTrigger>

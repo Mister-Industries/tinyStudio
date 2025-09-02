@@ -257,6 +257,7 @@ export class OpenFileCommand implements Command {
         id: this.item.id,
         name: this.item.name,
         content,
+        path: this.item.path,
         modified: false,
         createdAt: '',
         updatedAt: ''
