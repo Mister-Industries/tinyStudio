@@ -1,4 +1,5 @@
 /**
+ *
  * FileExplorerContent Component
  * Main content area for the file explorer with workspace management
  */

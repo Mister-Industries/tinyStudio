@@ -97,6 +97,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   const workspace = useAppSelector((state) => state.file.workspace)
   const [cursorPosition, setCursorPosition] = useState<number>(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const itemRef = useRef<HTMLDivElement>(null)
 
   // Helper function to get cursor position before file extension
   const getCursorPositionBeforeExtension = (fileName: string): number => {
@@ -126,6 +127,58 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
     }
   }, [isRenaming, cursorPosition, item.type])
 
+  // Helper function to find next/previous focusable tree item
+  const findNextFocusableItem = (direction: 'up' | 'down'): HTMLElement | null => {
+    if (!itemRef.current) return null
+
+    const allTreeItems = Array.from(
+      document.querySelectorAll('[data-tree-item="true"]')
+    ) as HTMLElement[]
+
+    const currentIndex = allTreeItems.indexOf(itemRef.current)
+    if (currentIndex === -1) return null
+
+    const nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+    return allTreeItems[nextIndex] || null
+  }
+
+  // Handle keyboard events for focus navigation and actions
+  const handleKeyDown = (e: React.KeyboardEvent): void => {
+    if (isRenaming) return // Don't handle navigation when renaming
+
+    switch (e.key) {
+      case 'ArrowUp': {
+        e.preventDefault()
+        const prevItem = findNextFocusableItem('up')
+        if (prevItem) prevItem.focus()
+        break
+      }
+
+      case 'ArrowDown': {
+        e.preventDefault()
+        const nextItem = findNextFocusableItem('down')
+        if (nextItem) nextItem.focus()
+        break
+      }
+
+      case 'Enter':
+        e.preventDefault()
+        if (e.ctrlKey || e.metaKey) {
+          // Ctrl/Cmd + Enter: Open file and focus editor
+          handleOpenFile()
+        } else {
+          // Enter: Start rename
+          handleStartRenameItem()
+        }
+        break
+
+      case ' ':
+        e.preventDefault()
+        handleOpenFile()
+        break
+    }
+  }
+
   const handleOpenFile = (): void => {
     if (isOpen) {
       dispatch(setViewingFile(item.id))
@@ -145,6 +198,10 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   const handleContextMenu = (e: React.MouseEvent): void => {
     e.preventDefault()
     setShowContextMenu(true)
+  }
+
+  const handleContextMenuOpenChange = (open: boolean): void => {
+    setShowContextMenu(open)
   }
 
   // Finishes creating myself as a real file or directory
@@ -269,12 +326,16 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   return (
     <>
       <div
-        className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent/50 group ${
+        ref={itemRef}
+        className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent/50 group focus:ring-accent focus:ring-1 focus:outline-none ${
           isSelected ? 'bg-accent text-accent-foreground' : isExpanded ? 'bg-accent/20' : ''
         }`}
         style={{ paddingLeft: `${level * 12 + 8}px` }}
         onClick={handleOpenFile}
         onContextMenu={handleContextMenu}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        data-tree-item="true"
       >
         {/* Folder icons and expansion indicators */}
         {item.type === 'folder' ? (
@@ -299,13 +360,14 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
         <span className="flex-1 truncate">{item.name}</span>
 
         {/* Context menu dropdown */}
-        <DropdownMenu open={showContextMenu} onOpenChange={setShowContextMenu}>
-          <DropdownMenuTrigger asChild>
+        <DropdownMenu open={showContextMenu} onOpenChange={handleContextMenuOpenChange}>
+          <DropdownMenuTrigger asChild tabIndex={-1}>
             <Button
               variant="ghost"
               size="icon"
               className="size-4 opacity-0 group-hover:opacity-100"
               onClick={(e) => e.stopPropagation()}
+              tabIndex={-1}
             >
               <MoreHorizontal size={12} />
             </Button>
