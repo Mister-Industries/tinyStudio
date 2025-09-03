@@ -149,7 +149,7 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
         </FileTabsList>
         {showCircuit ? (
           <CircuitEditor />
-        ) : (
+        ) : openFiles.length > 0 ? (
           openFiles.map((file) => (
             <FileTabContent key={`content-${file.id}`} value={file.id}>
               {editorMode === 'blocks' ? (
@@ -164,6 +164,10 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
               )}
             </FileTabContent>
           ))
+        ) : (
+          <div className="size-full flex items-center justify-center text-sm">
+            Open a file from the sidebar
+          </div>
         )}
       </FileTabs>
     </div>
