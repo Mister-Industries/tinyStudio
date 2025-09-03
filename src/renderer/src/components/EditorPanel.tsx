@@ -19,7 +19,7 @@ import { FileTabContent, FileTabs, FileTabsList, FileTabTrigger } from './ui/Fil
 
 loader.config({ monaco })
 
-export function EditorPanel(): React.JSX.Element {
+export function EditorPanel({ size }: { size: number }): React.JSX.Element {
   const openFiles = useAppSelector(selectOpenFiles)
   const viewingFileId = useAppSelector(selectViewingFileId)
   const editorMode = useAppSelector((state) => state.editor.editorMode)
@@ -128,7 +128,7 @@ export function EditorPanel(): React.JSX.Element {
   }
 
   return (
-    <div className="flex size-full flex-col">
+    <div className="flex flex-col" style={{ height: `${size}%` }}>
       <FileTabs
         value={viewingFileId || undefined}
         onValueChange={handleFileSelect}

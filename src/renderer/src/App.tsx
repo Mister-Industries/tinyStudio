@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { DocsPanel } from './components/DocsPanel'
 import { EditorPanel } from './components/EditorPanel'
 import { FileExplorer } from './components/FileExplorer'
@@ -11,6 +12,7 @@ import { selectPanelState, useAppSelector } from './redux'
 export default function App(): React.JSX.Element {
   const { isFileExplorerOpen, isSerialMonitorOpen, isDocsPanelOpen } =
     useAppSelector(selectPanelState)
+  const [editorSize, setEditorSize] = useState(50)
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
@@ -27,8 +29,12 @@ export default function App(): React.JSX.Element {
         )}
         <ResizablePanel defaultSize={55} className="flex flex-col">
           <ResizablePanelGroup direction="vertical">
-            <ResizablePanel defaultSize={70} className="flex flex-col">
-              <EditorPanel />
+            <ResizablePanel
+              defaultSize={70}
+              className="flex flex-col"
+              onResize={(size) => setEditorSize(size)}
+            >
+              <EditorPanel size={editorSize} />
             </ResizablePanel>
             {isSerialMonitorOpen && (
               <>
