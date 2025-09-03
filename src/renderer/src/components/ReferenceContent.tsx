@@ -1,7 +1,7 @@
 import { useAppSelector } from '@renderer/redux'
+import { Folder } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { ScrollArea } from './ui/ScrollArea'
-import { Folder } from 'lucide-react'
 
 export function ReadmeContent(): React.JSX.Element {
   const readmeContent = useAppSelector((state) => state.file.readmeContent)
@@ -35,7 +35,6 @@ export function ReadmeContent(): React.JSX.Element {
       </a>
     )
   }
-  console.log(readmeContent)
   if (readmeContent === null || readmeContent === '' || readmeContent === undefined) {
     return (
       <div className="size-full flex flex-col justify-center items-center gap-2">

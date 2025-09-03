@@ -24,8 +24,9 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
   const viewingFileId = useAppSelector(selectViewingFileId)
   const editorMode = useAppSelector((state) => state.editor.editorMode)
   const dispatch = useAppDispatch()
-  const [showCircuit, setShowCircuit] = useState(false)
+  const [showCircuit, setShowCircuit] = useState(true)
   const monacoEditorRef = useRef<MonacoEditorRef>(null)
+  const pixelSize = Math.round((size / 100) * (window.innerHeight - 92))
 
   const handleFileClose = useCallback(
     (fileId: string): void => {
@@ -102,7 +103,6 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
 
   const handleSaveFile = async (content: string, fileId: string): Promise<void> => {
     const file = openFiles.find((f) => f.id === fileId)
-    console.log(file)
     if (file && file.path) {
       try {
         console.log(`Saving file: ${file.name} (${file.id}) to ${file.path}`)
@@ -118,21 +118,12 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
     }
   }
 
-  // If no files are open, show a placeholder
-  if (openFiles.length === 0) {
-    return (
-      <div className="flex size-full items-center justify-center text-muted-foreground">
-        <p>No files open</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="flex flex-col" style={{ height: `${size}%` }}>
+    <div className="flex flex-col" style={{ height: `${pixelSize}px` }}>
       <FileTabs
         value={viewingFileId || undefined}
         onValueChange={handleFileSelect}
-        className="flex-1"
+        className="h-full"
       >
         <FileTabsList>
           <div className="flex">
@@ -156,22 +147,24 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
             </button>
           </div>
         </FileTabsList>
-        {openFiles.map((file) => (
-          <FileTabContent key={`content-${file.id}`} value={file.id}>
-            {showCircuit ? (
-              <CircuitEditor />
-            ) : editorMode === 'blocks' ? (
-              <BlocklyEditor />
-            ) : (
-              <MonacoEditor
-                ref={monacoEditorRef}
-                activeFile={file}
-                onContentChange={(content) => handleContentChange(content, file.id)}
-                onSaveFile={(content) => handleSaveFile(content, file.id)}
-              />
-            )}
-          </FileTabContent>
-        ))}
+        {showCircuit ? (
+          <CircuitEditor />
+        ) : (
+          openFiles.map((file) => (
+            <FileTabContent key={`content-${file.id}`} value={file.id}>
+              {editorMode === 'blocks' ? (
+                <BlocklyEditor />
+              ) : (
+                <MonacoEditor
+                  ref={monacoEditorRef}
+                  activeFile={file}
+                  onContentChange={(content) => handleContentChange(content, file.id)}
+                  onSaveFile={(content) => handleSaveFile(content, file.id)}
+                />
+              )}
+            </FileTabContent>
+          ))
+        )}
       </FileTabs>
     </div>
   )

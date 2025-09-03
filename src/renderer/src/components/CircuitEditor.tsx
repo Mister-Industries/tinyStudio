@@ -8,7 +8,7 @@ export function CircuitEditor(): React.JSX.Element {
 
   const diagramElement = diagramSvgContent ? (
     <div
-      className="size-full p-60 flex items-center justify-center [&>svg]:w-auto [&>svg]:h-auto [&>svg]:max-w-full [&>svg]:max-h-full"
+      className="size-1/2 z-30 flex items-center justify-center [&>svg]:w-auto [&>svg]:h-auto [&>svg]:max-w-full [&>svg]:max-h-full"
       dangerouslySetInnerHTML={{ __html: diagramSvgContent }}
     />
   ) : (
@@ -16,10 +16,13 @@ export function CircuitEditor(): React.JSX.Element {
   )
 
   return (
-    <div className="size-full flex items-center justify-center bg-background overflow-hidden">
+    <div className="size-full flex items-center justify-center bg-background-grid overflow-hidden">
       <TransformWrapper
         centerOnInit
-        initialScale={1}
+        centerZoomedOut
+        initialScale={1.8}
+        maxScale={5}
+        minScale={1.8}
         wheel={{
           smoothStep: 0.01, // Changes the zoom speed
           touchPadDisabled: false // Enable pinch zoom on touchpads
@@ -29,8 +32,25 @@ export function CircuitEditor(): React.JSX.Element {
       >
         <TransformComponent
           wrapperStyle={{ width: '100%', height: '100%' }}
-          contentStyle={{ width: '100%', height: '100%' }}
+          contentStyle={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
         >
+          <div
+            className="absolute -inset-20"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, rgba(75, 95, 90, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(75, 95, 90, 0.1) 1px, transparent 1px)
+              `,
+              backgroundSize: '10px 10px',
+              backgroundColor: 'var(--background-grid)'
+            }}
+          ></div>
           {diagramElement}
         </TransformComponent>
       </TransformWrapper>

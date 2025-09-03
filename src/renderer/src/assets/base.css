@@ -5,7 +5,9 @@
 :root {
   --radius: 0.625rem;
   --background: #ffffff;
+  --background-grid: #efefef;
   --foreground: #4b5f5a;
+  --foreground-grid: #4b5f5a;
   --card: #ffffff;
   --card-foreground: #4b5f5a;
   --popover: #ffffff;
@@ -63,7 +65,9 @@
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-grid: var(--background-grid);
   --color-foreground: var(--foreground);
+  --color-foreground-grid: var(--foreground-grid);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);

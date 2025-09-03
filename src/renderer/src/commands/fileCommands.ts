@@ -174,7 +174,6 @@ export class OpenWorkspaceCommand implements Command {
       const diagramFile = fileItems.find((file: BaseFileItem) => file.name === 'diagram.svg')
       if (diagramFile) {
         fileSystem.readFile(diagramFile.path).then((content) => {
-          console.log(content)
           this.dispatch(updateDiagramSvgContent(content))
         })
       }

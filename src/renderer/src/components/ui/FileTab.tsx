@@ -82,7 +82,7 @@ function FileTabContent({
   return (
     <TabsPrimitive.Content
       data-slot="file-tab-content"
-      className={cn('flex-1 outline-none', className)}
+      className={cn('flex-1 outline-none h-full', className)}
       {...props}
     />
   )
