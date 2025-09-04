@@ -168,7 +168,7 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
         ) : (
           <div className="size-full flex flex-col items-center justify-center text-sm">
             <div
-              className="size-24 mb-2"
+              className="size-48 mb-4"
               style={{
                 backgroundColor: 'var(--muted)',
                 mask: `url(${tinyLogo}) no-repeat center/contain`,
