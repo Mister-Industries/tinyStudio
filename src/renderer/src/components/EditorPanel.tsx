@@ -1,4 +1,5 @@
 import { loader } from '@monaco-editor/react'
+import tinyLogo from '@renderer/assets/tinyLogo.png'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
 import {
@@ -165,8 +166,16 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
             </FileTabContent>
           ))
         ) : (
-          <div className="size-full flex items-center justify-center text-sm">
-            Open a file from the sidebar
+          <div className="size-full flex flex-col items-center justify-center text-sm">
+            <div
+              className="size-24 mb-2 opacity-70"
+              style={{
+                backgroundColor: 'var(--foreground)',
+                mask: `url(${tinyLogo}) no-repeat center/contain`,
+                WebkitMask: `url(${tinyLogo}) no-repeat center/contain`
+              }}
+            />
+            <p>Open a file from the sidebar</p>
           </div>
         )}
       </FileTabs>
