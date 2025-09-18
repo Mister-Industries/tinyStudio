@@ -1,9 +1,380 @@
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
-import { join } from 'path'
-import { promises as fs, constants } from 'fs'
-import path from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { electronApp, is, optimizer } from '@electron-toolkit/utils'
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
+import { constants, promises as fs } from 'fs'
+import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
+
+// Arduino Types - duplicated from types file for main process
+interface AgentStatus {
+  connected: boolean
+  version?: string
+  lastCheck: number
+  error?: string
+}
+
+interface Board {
+  port: string
+  config: {
+    fqbn: string
+    name: string
+    architecture?: string
+    package?: string
+  }
+  protocol: 'serial' | 'network'
+  connected: boolean
+  metadata?: {
+    vendorId?: string
+    productId?: string
+    serialNumber?: string
+  }
+}
+
+interface BoardInfo extends Board {
+  description: string
+  uploadProtocols: string[]
+  capabilities: string[]
+}
+
+interface CompileResult {
+  success: boolean
+  output: string
+  errors?: Array<{
+    message: string
+    severity: 'error' | 'warning' | 'fatal'
+    file?: string
+    line?: number
+    column?: number
+  }>
+  metrics?: {
+    duration: number
+  }
+  binaryPath?: string
+}
+
+interface UploadResult {
+  success: boolean
+  output: string
+  error?: string
+  progress?: {
+    percentage: number
+    stage: string
+  }
+}
+
+interface FileMap {
+  [filePath: string]: string
+}
+
+interface InfoResponse {
+  http: string
+  https: string
+  origins: string
+  os: string
+  update_url: string
+  version: string
+  ws: string
+  wss: string
+}
+
+async function discoverAgent(): Promise<InfoResponse> {
+  for (let port = 8990; port <= 9000; port++) {
+    try {
+      const response = await fetch(`http://127.0.0.1:${port}/info`)
+      if (response.ok) {
+        const info = await response.json()
+        return info // Contains endpoints and version info
+      }
+    } catch {
+      // Port not available, continue
+    }
+  }
+  throw new Error('Arduino Cloud Agent not found')
+}
+
+// Arduino Create Agent service for main process using HTTP API directly
+/* eslint-disable @typescript-eslint/no-explicit-any */
+class MainArduinoService {
+  private agentInfo: InfoResponse | null = null
+  private currentStatus: AgentStatus = { connected: false, lastCheck: 0 }
+
+  constructor() {
+    // Don't initialize immediately - wait until first use
+    this.currentStatus = {
+      connected: false,
+      lastCheck: Date.now(),
+      error: 'Arduino Create Agent not initialized'
+    }
+  }
+
+  private async ensureAgentDiscovered(): Promise<void> {
+    if (this.agentInfo) {
+      return
+    }
+
+    try {
+      this.agentInfo = await discoverAgent()
+      this.currentStatus = {
+        connected: true,
+        lastCheck: Date.now(),
+        version: this.agentInfo.version
+      }
+    } catch (error) {
+      console.warn('Arduino Create Agent not available:', error)
+      this.currentStatus = {
+        connected: false,
+        lastCheck: Date.now(),
+        error: error instanceof Error ? error.message : 'Arduino Create Agent not available'
+      }
+      throw error
+    }
+  }
+
+  async checkStatus(): Promise<AgentStatus> {
+    try {
+      await this.ensureAgentDiscovered()
+      return { ...this.currentStatus }
+    } catch (error) {
+      return {
+        connected: false,
+        lastCheck: Date.now(),
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }
+  }
+
+  async listBoards(): Promise<Board[]> {
+    try {
+      await this.ensureAgentDiscovered()
+
+      if (!this.agentInfo) {
+        throw new Error('Arduino Create Agent not available')
+      }
+
+      // Make HTTP request to list devices - using the correct endpoint
+      const response = await fetch(`${this.agentInfo.http}/list`)
+
+      if (!response.ok) {
+        throw new Error(`Failed to list boards: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      const boards: Board[] = []
+
+      // Convert serial devices to Board objects
+      // The response should have a 'Ports' property with device list
+      if (data && data.Ports && Array.isArray(data.Ports)) {
+        boards.push(...data.Ports.map((device: any) => this.convertSerialDeviceToBoard(device)))
+      }
+
+      return boards
+    } catch (error) {
+      console.error('Error listing boards:', error)
+
+      // If Arduino Create Agent is not available, return empty array instead of throwing
+      if (
+        error instanceof Error &&
+        (error.message.includes('Arduino Create Agent not found') ||
+          error.message.includes('Failed to list boards: Not Found') ||
+          error.message.includes('Failed to list boards: Connection refused'))
+      ) {
+        console.warn('Arduino Create Agent not available, returning empty board list')
+        return []
+      }
+
+      throw new Error(
+        `Failed to list boards: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  async getBoardInfo(port: string): Promise<BoardInfo> {
+    try {
+      const boards = await this.listBoards()
+      const board = boards.find((b) => b.port === port)
+
+      if (!board) {
+        throw new Error(`Board not found on port ${port}`)
+      }
+
+      return {
+        ...board,
+        description: `${board.config.name} on ${port}`,
+        uploadProtocols: ['serial'],
+        capabilities: ['upload', 'compile']
+      }
+    } catch (error) {
+      console.error('Error getting board info:', error)
+      throw new Error(
+        `Failed to get board info: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  async compileAndUpload(
+    files: FileMap,
+    port: string,
+    boardConfig: { fqbn: string; name: string }
+  ): Promise<{ compile: CompileResult; upload: UploadResult }> {
+    const startTime = Date.now()
+
+    try {
+      await this.ensureAgentDiscovered()
+
+      if (!this.agentInfo) {
+        throw new Error('Arduino Create Agent not available')
+      }
+
+      // For now, return a mock successful result
+      // TODO: Implement actual compilation and upload via HTTP API
+      const duration = Date.now() - startTime
+
+      return {
+        compile: {
+          success: true,
+          output: 'Mock compilation successful',
+          metrics: { duration }
+        },
+        upload: {
+          success: true,
+          output: 'Mock upload successful'
+        }
+      }
+    } catch (error) {
+      const duration = Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+      return {
+        compile: {
+          success: false,
+          output: `Error: ${errorMessage}`,
+          errors: [{ message: errorMessage, severity: 'fatal' as const }],
+          metrics: { duration }
+        },
+        upload: {
+          success: false,
+          output: '',
+          error: errorMessage
+        }
+      }
+    }
+  }
+
+  private convertSerialDeviceToBoard(device: any): Board {
+    return {
+      port: device.Name || device.port || '/dev/unknown',
+      config: {
+        fqbn: this.inferFQBNFromDevice(device),
+        name: this.inferBoardNameFromDevice(device)
+      },
+      protocol: 'serial',
+      connected: !device.IsOpen,
+      metadata: {
+        vendorId: device.VendorID,
+        productId: device.ProductID,
+        serialNumber: device.SerialNumber
+      }
+    }
+  }
+
+  private inferFQBNFromDevice(device: any): string {
+    const vid = device.VendorID?.toLowerCase()
+    const pid = device.ProductID?.toLowerCase()
+
+    // Common Arduino board mappings
+    if (vid === '0x2341') {
+      switch (pid) {
+        case '0x0043':
+          return 'arduino:avr:uno'
+        case '0x8036':
+          return 'arduino:avr:leonardo'
+        case '0x0042':
+          return 'arduino:avr:mega'
+        case '0x804d':
+          return 'arduino:samd:mkr1000'
+        default:
+          return 'arduino:avr:uno'
+      }
+    }
+
+    // ESP32 boards
+    if (vid === '0x10c4' || vid === '0x1a86') {
+      return 'esp32:esp32:esp32'
+    }
+
+    // Default fallback
+    return 'arduino:avr:uno'
+  }
+
+  private inferBoardNameFromDevice(device: any): string {
+    const fqbn = this.inferFQBNFromDevice(device)
+
+    const nameMap: { [key: string]: string } = {
+      'arduino:avr:uno': 'Arduino Uno',
+      'arduino:avr:leonardo': 'Arduino Leonardo',
+      'arduino:avr:mega': 'Arduino Mega',
+      'arduino:samd:mkr1000': 'Arduino MKR1000',
+      'esp32:esp32:esp32': 'ESP32 Dev Module'
+    }
+
+    return nameMap[fqbn] || 'Unknown Arduino Board'
+  }
+}
+
+// Global Arduino service instance
+let arduinoService: MainArduinoService | null = null
+
+function setupArduinoHandlers(): void {
+  // Initialize Arduino service
+  arduinoService = new MainArduinoService()
+
+  // Arduino IPC handlers
+  ipcMain.handle('arduino:checkStatus', async (): Promise<AgentStatus> => {
+    try {
+      return await arduinoService!.checkStatus()
+    } catch (error) {
+      return {
+        connected: false,
+        lastCheck: Date.now(),
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }
+  })
+
+  ipcMain.handle('arduino:listBoards', async (): Promise<Board[]> => {
+    try {
+      return await arduinoService!.listBoards()
+    } catch (error) {
+      console.error('Error in arduino:listBoards:', error)
+      throw error
+    }
+  })
+
+  ipcMain.handle('arduino:getBoardInfo', async (_, port: string): Promise<BoardInfo> => {
+    try {
+      return await arduinoService!.getBoardInfo(port)
+    } catch (error) {
+      console.error('Error in arduino:getBoardInfo:', error)
+      throw error
+    }
+  })
+
+  ipcMain.handle(
+    'arduino:compileAndUpload',
+    async (
+      _,
+      files: FileMap,
+      port: string,
+      boardConfig: { fqbn: string; name: string }
+    ): Promise<{ compile: CompileResult; upload: UploadResult }> => {
+      try {
+        return await arduinoService!.compileAndUpload(files, port, boardConfig)
+      } catch (error) {
+        console.error('Error in arduino:compileAndUpload:', error)
+        throw error
+      }
+    }
+  )
+}
 
 function createWindow(): void {
   // Create the browser window.
@@ -48,6 +419,9 @@ app.whenReady().then(() => {
 
   // Setup file system handlers
   setupFileSystemHandlers()
+
+  // Setup Arduino handlers
+  setupArduinoHandlers()
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

@@ -1,9 +1,11 @@
+import { useArduino } from '@renderer/hooks/useArduino'
 import { useAppDispatch } from '@renderer/redux'
 import { setPanelOpen } from '@renderer/redux/editorSlice'
-import { Monitor, Trash, TriangleAlert, X } from 'lucide-react'
+import { FileText, Monitor, Trash, TriangleAlert, X } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
+import { ScrollArea } from './ui/ScrollArea'
 import {
   Select,
   SelectContent,
@@ -18,9 +20,6 @@ export function SerialMonitor(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'serial' | 'problems' | 'output'>('serial')
   const dispatch = useAppDispatch()
 
-  // TODO: Implement the logic for each tab
-  // TODO: implement this as a Tabs component for proper focus
-  // TODO: Implement the logic for closing the monitor
   return (
     <div className="size-full flex flex-col">
       <div className="w-full flex justify-between text-xs font-semibold border-b border-border">
@@ -41,7 +40,6 @@ export function SerialMonitor(): React.JSX.Element {
             <TriangleAlert size={14} />
             Problems
           </div>
-          {/*
           <div
             data-active={activeTab === 'output'}
             onClick={() => setActiveTab('output')}
@@ -49,7 +47,7 @@ export function SerialMonitor(): React.JSX.Element {
           >
             <FileText size={14} />
             Output
-          </div> */}
+          </div>
         </div>
         <Button
           variant="ghost"
@@ -61,6 +59,7 @@ export function SerialMonitor(): React.JSX.Element {
       </div>
       {activeTab === 'serial' && <SerialMonitorTab />}
       {activeTab === 'problems' && <ProblemsTab />}
+      {activeTab === 'output' && <OutputTab />}
     </div>
   )
 }
@@ -86,7 +85,107 @@ export function SerialMonitorTab(): React.JSX.Element {
 }
 
 export function ProblemsTab(): React.JSX.Element {
-  return <div>Implement the compilation problems here</div>
+  const { lastCompileResult } = useArduino()
+
+  return (
+    <div className="size-full gap-2 bg-background p-2 flex flex-col">
+      <ScrollArea className="size-full border rounded-xl bg-muted p-2 text-xs">
+        {lastCompileResult?.errors && lastCompileResult.errors.length > 0 ? (
+          <div className="space-y-2">
+            {lastCompileResult.errors.map((error, index) => (
+              <div
+                key={index}
+                className="p-2 bg-destructive/10 border-l-4 border-destructive rounded"
+              >
+                <div className="font-semibold text-destructive">{error.severity.toUpperCase()}</div>
+                <div className="text-sm">{error.message}</div>
+                {error.file && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {error.file}
+                    {error.line && `:${error.line}`}
+                    {error.column && `:${error.column}`}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-muted-foreground">No compilation problems</div>
+        )}
+      </ScrollArea>
+    </div>
+  )
+}
+
+export function OutputTab(): React.JSX.Element {
+  const { logs, clearLogs } = useArduino()
+
+  const formatTimestamp = (timestamp: number): string => {
+    return new Date(timestamp).toLocaleTimeString()
+  }
+
+  const getLogIcon = (type: string): string => {
+    switch (type) {
+      case 'compile':
+        return '🔨'
+      case 'upload':
+        return '📤'
+      case 'error':
+        return '❌'
+      case 'info':
+      default:
+        return 'ℹ️'
+    }
+  }
+
+  const getLogColor = (type: string): string => {
+    switch (type) {
+      case 'error':
+        return 'text-destructive'
+      case 'compile':
+        return 'text-blue-600'
+      case 'upload':
+        return 'text-green-600'
+      case 'info':
+      default:
+        return 'text-muted-foreground'
+    }
+  }
+
+  return (
+    <div className="size-full gap-2 bg-background p-2 flex flex-col">
+      <ScrollArea className="size-full border rounded-xl bg-muted p-2 text-xs">
+        {logs.length > 0 ? (
+          <div className="space-y-1">
+            {logs.map((log) => (
+              <div key={log.id} className="flex gap-2 items-start">
+                <span className="text-xs text-muted-foreground">
+                  {formatTimestamp(log.timestamp)}
+                </span>
+                <span>{getLogIcon(log.type)}</span>
+                <div className="flex-1">
+                  <div className={`${getLogColor(log.type)} font-medium`}>{log.message}</div>
+                  {log.details && (
+                    <div className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">
+                      {log.details}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-muted-foreground">No output yet</div>
+        )}
+      </ScrollArea>
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={clearLogs} disabled={logs.length === 0}>
+          <Trash size={14} />
+          Clear Output
+        </Button>
+      </div>
+    </div>
+  )
 }
 
 interface FrequencySelectProps {
