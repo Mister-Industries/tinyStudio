@@ -2,6 +2,7 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { constants, promises as fs } from 'fs'
 import path, { join } from 'path'
+import * as io from 'socket.io-client'
 import icon from '../../resources/icon.png?asset'
 
 // Arduino Types - duplicated from types file for main process
@@ -35,36 +36,6 @@ interface BoardInfo extends Board {
   capabilities: string[]
 }
 
-interface CompileResult {
-  success: boolean
-  output: string
-  errors?: Array<{
-    message: string
-    severity: 'error' | 'warning' | 'fatal'
-    file?: string
-    line?: number
-    column?: number
-  }>
-  metrics?: {
-    duration: number
-  }
-  binaryPath?: string
-}
-
-interface UploadResult {
-  success: boolean
-  output: string
-  error?: string
-  progress?: {
-    percentage: number
-    stage: string
-  }
-}
-
-interface FileMap {
-  [filePath: string]: string
-}
-
 interface InfoResponse {
   http: string
   https: string
@@ -91,14 +62,17 @@ async function discoverAgent(): Promise<InfoResponse> {
   throw new Error('Arduino Cloud Agent not found')
 }
 
-// Arduino Create Agent service for main process using HTTP API directly
+// Arduino Create Agent service for main process using Socket.IO
 /* eslint-disable @typescript-eslint/no-explicit-any */
 class MainArduinoService {
+  private socket: any | null = null
   private agentInfo: InfoResponse | null = null
   private currentStatus: AgentStatus = { connected: false, lastCheck: 0 }
+  private reconnectAttempts = 0
+  private maxReconnectAttempts = 5
+  private reconnectDelay = 1000
 
   constructor() {
-    // Don't initialize immediately - wait until first use
     this.currentStatus = {
       connected: false,
       lastCheck: Date.now(),
@@ -106,32 +80,119 @@ class MainArduinoService {
     }
   }
 
-  private async ensureAgentDiscovered(): Promise<void> {
-    if (this.agentInfo) {
+  private async ensureSocketConnected(): Promise<void> {
+    if (this.socket && this.socket.connected) {
       return
     }
 
-    try {
-      this.agentInfo = await discoverAgent()
+    // Discover agent if not already done
+    if (!this.agentInfo) {
+      try {
+        this.agentInfo = await discoverAgent()
+      } catch (error) {
+        console.warn('Arduino Create Agent not available:', error)
+        this.currentStatus = {
+          connected: false,
+          lastCheck: Date.now(),
+          error: error instanceof Error ? error.message : 'Arduino Create Agent not available'
+        }
+        throw error
+      }
+    }
+
+    // Create socket connection
+    if (!this.socket) {
+      this.socket = io.connect(this.agentInfo.ws, {
+        transports: ['websocket'],
+        timeout: 5000,
+        reconnection: true,
+        reconnectionAttempts: this.maxReconnectAttempts,
+        reconnectionDelay: this.reconnectDelay,
+        forceNew: true
+      })
+
+      this.setupSocketListeners()
+    }
+
+    // Wait for connection
+    return new Promise((resolve, reject) => {
+      if (this.socket!.connected) {
+        resolve()
+        return
+      }
+
+      const timeout = setTimeout(() => {
+        reject(new Error('Socket connection timeout'))
+      }, 10000)
+
+      this.socket!.once('connect', () => {
+        clearTimeout(timeout)
+        this.currentStatus = {
+          connected: true,
+          lastCheck: Date.now(),
+          version: this.agentInfo!.version
+        }
+        this.reconnectAttempts = 0
+        resolve()
+      })
+
+      this.socket!.once('connect_error', (error) => {
+        clearTimeout(timeout)
+        this.currentStatus = {
+          connected: false,
+          lastCheck: Date.now(),
+          error: `Socket connection error: ${error.message}`
+        }
+        reject(error)
+      })
+    })
+  }
+
+  private setupSocketListeners(): void {
+    if (!this.socket) return
+
+    this.socket.on('connect', () => {
+      console.log('Connected to Arduino Create Agent')
       this.currentStatus = {
         connected: true,
         lastCheck: Date.now(),
-        version: this.agentInfo.version
+        version: this.agentInfo?.version
       }
-    } catch (error) {
-      console.warn('Arduino Create Agent not available:', error)
+      this.reconnectAttempts = 0
+    })
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('Disconnected from Arduino Create Agent:', reason)
       this.currentStatus = {
         connected: false,
         lastCheck: Date.now(),
-        error: error instanceof Error ? error.message : 'Arduino Create Agent not available'
+        error: `Disconnected: ${reason}`
       }
-      throw error
-    }
+    })
+
+    this.socket.on('connect_error', (error) => {
+      console.error('Arduino Create Agent connection error:', error)
+      this.reconnectAttempts++
+      this.currentStatus = {
+        connected: false,
+        lastCheck: Date.now(),
+        error: `Connection error: ${error.message}`
+      }
+    })
+
+    this.socket.on('error', (error) => {
+      console.error('Arduino Create Agent socket error:', error)
+      this.currentStatus = {
+        connected: false,
+        lastCheck: Date.now(),
+        error: `Socket error: ${error}`
+      }
+    })
   }
 
   async checkStatus(): Promise<AgentStatus> {
     try {
-      await this.ensureAgentDiscovered()
+      await this.ensureSocketConnected()
       return { ...this.currentStatus }
     } catch (error) {
       return {
@@ -144,29 +205,49 @@ class MainArduinoService {
 
   async listBoards(): Promise<Board[]> {
     try {
-      await this.ensureAgentDiscovered()
+      await this.ensureSocketConnected()
 
-      if (!this.agentInfo) {
-        throw new Error('Arduino Create Agent not available')
-      }
+      return new Promise((resolve, reject) => {
+        if (!this.socket || !this.socket.connected) {
+          reject(new Error('Socket not connected'))
+          return
+        }
 
-      // Make HTTP request to list devices - using the correct endpoint
-      const response = await fetch(`${this.agentInfo.http}/list`)
+        const timeout = setTimeout(() => {
+          reject(new Error('Timeout waiting for board list'))
+        }, 10000)
 
-      if (!response.ok) {
-        throw new Error(`Failed to list boards: ${response.statusText}`)
-      }
+        // Set up listener for the response - Arduino Create Agent sends responses on 'message' events
+        const handleMessage = (data: any): void => {
+          try {
+            const decodedData = typeof data === 'string' ? JSON.parse(data) : data
+            // Check if this message contains ports data (response to our list command)
+            if (decodedData && typeof decodedData === 'object' && 'Ports' in decodedData) {
+              clearTimeout(timeout)
+              this.socket.off('message', handleMessage) // Remove the listener
 
-      const data = await response.json()
-      const boards: Board[] = []
+              const boards: Board[] = []
+              // Convert serial devices to Board objects
+              // The response should have a 'Ports' property with device list
+              if (decodedData.Ports && Array.isArray(decodedData.Ports)) {
+                boards.push(
+                  ...decodedData.Ports.map((device: any) => this.convertSerialDeviceToBoard(device))
+                )
+              }
+              // If Ports is null, return empty array (no boards connected)
+              resolve(boards)
+            }
+          } catch {
+            // Ignore messages that don't parse correctly
+            // This is expected for non-JSON messages from the Arduino Create Agent
+          }
+        }
 
-      // Convert serial devices to Board objects
-      // The response should have a 'Ports' property with device list
-      if (data && data.Ports && Array.isArray(data.Ports)) {
-        boards.push(...data.Ports.map((device: any) => this.convertSerialDeviceToBoard(device)))
-      }
+        this.socket.on('message', handleMessage)
 
-      return boards
+        // Send the command
+        this.socket.emit('command', 'list')
+      })
     } catch (error) {
       console.error('Error listing boards:', error)
 
@@ -174,8 +255,8 @@ class MainArduinoService {
       if (
         error instanceof Error &&
         (error.message.includes('Arduino Create Agent not found') ||
-          error.message.includes('Failed to list boards: Not Found') ||
-          error.message.includes('Failed to list boards: Connection refused'))
+          error.message.includes('Socket not connected') ||
+          error.message.includes('Socket connection timeout'))
       ) {
         console.warn('Arduino Create Agent not available, returning empty board list')
         return []
@@ -207,55 +288,6 @@ class MainArduinoService {
       throw new Error(
         `Failed to get board info: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
-    }
-  }
-
-  async compileAndUpload(
-    files: FileMap,
-    port: string,
-    boardConfig: { fqbn: string; name: string }
-  ): Promise<{ compile: CompileResult; upload: UploadResult }> {
-    const startTime = Date.now()
-
-    try {
-      await this.ensureAgentDiscovered()
-
-      if (!this.agentInfo) {
-        throw new Error('Arduino Create Agent not available')
-      }
-
-      // For now, return a mock successful result
-      // TODO: Implement actual compilation and upload via HTTP API
-      const duration = Date.now() - startTime
-
-      return {
-        compile: {
-          success: true,
-          output: 'Mock compilation successful',
-          metrics: { duration }
-        },
-        upload: {
-          success: true,
-          output: 'Mock upload successful'
-        }
-      }
-    } catch (error) {
-      const duration = Date.now() - startTime
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-
-      return {
-        compile: {
-          success: false,
-          output: `Error: ${errorMessage}`,
-          errors: [{ message: errorMessage, severity: 'fatal' as const }],
-          metrics: { duration }
-        },
-        upload: {
-          success: false,
-          output: '',
-          error: errorMessage
-        }
-      }
     }
   }
 
@@ -318,6 +350,24 @@ class MainArduinoService {
 
     return nameMap[fqbn] || 'Unknown Arduino Board'
   }
+
+  async disconnect(): Promise<void> {
+    if (this.socket) {
+      this.socket.disconnect()
+      this.socket = null
+    }
+    this.agentInfo = null
+    this.currentStatus = {
+      connected: false,
+      lastCheck: Date.now(),
+      error: 'Disconnected'
+    }
+  }
+
+  async reconnect(): Promise<void> {
+    await this.disconnect()
+    await this.ensureSocketConnected()
+  }
 }
 
 // Global Arduino service instance
@@ -358,22 +408,23 @@ function setupArduinoHandlers(): void {
     }
   })
 
-  ipcMain.handle(
-    'arduino:compileAndUpload',
-    async (
-      _,
-      files: FileMap,
-      port: string,
-      boardConfig: { fqbn: string; name: string }
-    ): Promise<{ compile: CompileResult; upload: UploadResult }> => {
-      try {
-        return await arduinoService!.compileAndUpload(files, port, boardConfig)
-      } catch (error) {
-        console.error('Error in arduino:compileAndUpload:', error)
-        throw error
-      }
+  ipcMain.handle('arduino:reconnect', async (): Promise<void> => {
+    try {
+      await arduinoService!.reconnect()
+    } catch (error) {
+      console.error('Error in arduino:reconnect:', error)
+      throw error
     }
-  )
+  })
+
+  ipcMain.handle('arduino:disconnect', async (): Promise<void> => {
+    try {
+      await arduinoService!.disconnect()
+    } catch (error) {
+      console.error('Error in arduino:disconnect:', error)
+      throw error
+    }
+  })
 }
 
 function createWindow(): void {
@@ -494,6 +545,17 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
+  }
+})
+
+// Clean up Arduino service connection before quitting
+app.on('before-quit', async () => {
+  if (arduinoService) {
+    try {
+      await arduinoService.disconnect()
+    } catch (error) {
+      console.error('Error disconnecting Arduino service:', error)
+    }
   }
 })
 

@@ -6,7 +6,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import Daemon from 'arduino-create-agent-js-client'
 import {
   AgentStatus,
   ArduinoService,
@@ -30,7 +29,6 @@ export class WebArduinoService implements ArduinoService {
 
   constructor(boardsIndexUrl: string = 'https://downloads.arduino.cc/packages/package_index.json') {
     this.boardsIndexUrl = boardsIndexUrl
-    this.daemon = new Daemon(this.boardsIndexUrl)
     this.initializeDaemon()
   }
 
