@@ -1,6 +1,7 @@
 import { Monitor, Trash, X } from 'lucide-react'
 import { useState } from 'react'
 import { Input } from './ui/Input'
+import { ScrollArea } from './ui/ScrollArea'
 import {
   Select,
   SelectContent,
@@ -18,9 +19,6 @@ export function SerialMonitor(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'serial' | 'problems' | 'output'>('serial')
   const dispatch = useAppDispatch()
 
-  // TODO: Implement the logic for each tab
-  // TODO: implement this as a Tabs component for proper focus
-  // TODO: Implement the logic for closing the monitor
   return (
     <div className="size-full flex flex-col">
       <div className="w-full flex justify-between text-xs font-semibold border-b border-border">
@@ -41,7 +39,6 @@ export function SerialMonitor(): React.JSX.Element {
             <TriangleAlert size={14} />
             Problems
           </div>
-          {/*
           <div
             data-active={activeTab === 'output'}
             onClick={() => setActiveTab('output')}
@@ -49,7 +46,7 @@ export function SerialMonitor(): React.JSX.Element {
           >
             <FileText size={14} />
             Output
-          </div> */}
+          </div>
         </div>
         <Button
           variant="ghost"

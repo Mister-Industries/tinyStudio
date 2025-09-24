@@ -1,5 +1,5 @@
-import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge, ipcRenderer } from 'electron'
 
 // File system API types
 interface FileSystemItem {
@@ -16,6 +16,67 @@ interface FileStats {
   size: number
   lastModified: number
   created: number
+}
+
+// Arduino API types
+interface AgentStatus {
+  connected: boolean
+  version?: string
+  lastCheck: number
+  error?: string
+}
+
+interface Board {
+  port: string
+  config: {
+    fqbn: string
+    name: string
+    architecture?: string
+    package?: string
+  }
+  protocol: 'serial' | 'network'
+  connected: boolean
+  metadata?: {
+    vendorId?: string
+    productId?: string
+    serialNumber?: string
+  }
+}
+
+interface BoardInfo extends Board {
+  description: string
+  uploadProtocols: string[]
+  capabilities: string[]
+}
+
+interface CompileResult {
+  success: boolean
+  output: string
+  errors?: Array<{
+    message: string
+    severity: 'error' | 'warning' | 'fatal'
+    file?: string
+    line?: number
+    column?: number
+  }>
+  metrics?: {
+    duration: number
+  }
+  binaryPath?: string
+}
+
+interface UploadResult {
+  success: boolean
+  output: string
+  error?: string
+  progress?: {
+    percentage: number
+    stage: string
+  }
+}
+
+interface FileMap {
+  [filePath: string]: string
 }
 
 // Custom APIs for renderer
@@ -40,6 +101,20 @@ const api = {
       ipcRenderer.invoke('path-exists', targetPath),
     getFileStats: (filePath: string): Promise<FileStats> =>
       ipcRenderer.invoke('get-file-stats', filePath)
+  },
+
+  // Arduino operations
+  arduino: {
+    checkStatus: (): Promise<AgentStatus> => ipcRenderer.invoke('arduino:checkStatus'),
+    listBoards: (): Promise<Board[]> => ipcRenderer.invoke('arduino:listBoards'),
+    getBoardInfo: (port: string): Promise<BoardInfo> =>
+      ipcRenderer.invoke('arduino:getBoardInfo', port),
+    compileAndUpload: (
+      files: FileMap,
+      port: string,
+      boardConfig: { fqbn: string; name: string }
+    ): Promise<{ compile: CompileResult; upload: UploadResult }> =>
+      ipcRenderer.invoke('arduino:compileAndUpload', files, port, boardConfig)
   }
 }
 
