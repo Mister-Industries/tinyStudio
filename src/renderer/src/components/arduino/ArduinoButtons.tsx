@@ -49,8 +49,8 @@ export function VerifyButton({
     }
 
     if (!isAgentConnected) {
-      toast.error('Arduino Agent not connected', {
-        description: 'Please ensure Arduino Create Agent is running'
+      toast.error('Arduino CLI not available', {
+        description: 'Please ensure arduino-cli is installed and available'
       })
       return
     }
@@ -143,8 +143,8 @@ export function UploadButton({
     }
 
     if (!isAgentConnected) {
-      toast.error('Arduino Agent not connected', {
-        description: 'Please ensure Arduino Create Agent is running'
+      toast.error('Arduino CLI not available', {
+        description: 'Please ensure arduino-cli is installed and available'
       })
       return
     }
@@ -234,10 +234,10 @@ export function ArduinoControls({ className }: { className?: string }): React.JS
           <TooltipTrigger asChild>
             <Button variant="muted" disabled className="opacity-50">
               <AlertCircle className="h-4 w-4" />
-              Agent Offline
+              CLI Offline
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">Arduino Create Agent is not connected</TooltipContent>
+          <TooltipContent side="bottom">Arduino CLI is not available</TooltipContent>
         </Tooltip>
       </div>
     )

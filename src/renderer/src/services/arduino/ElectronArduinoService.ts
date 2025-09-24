@@ -1,9 +1,7 @@
 /**
  * ElectronArduinoService - Arduino service implementation for Electron environment
- * Uses IPC to communicate with main process Arduino Create Agent client
+ * Uses IPC to communicate with main process arduino-cli
  */
-
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import {
   AgentStatus,
@@ -18,7 +16,7 @@ import {
 
 /**
  * Arduino service implementation for Electron applications
- * Communicates with main process via IPC for Arduino operations
+ * Communicates with main process via IPC for arduino-cli operations
  */
 export class ElectronArduinoService implements ArduinoService {
   constructor() {
@@ -29,7 +27,7 @@ export class ElectronArduinoService implements ArduinoService {
   }
 
   /**
-   * Check Arduino Create Agent status via IPC
+   * Check arduino-cli availability via IPC
    */
   async checkStatus(): Promise<AgentStatus> {
     try {
@@ -72,36 +70,59 @@ export class ElectronArduinoService implements ArduinoService {
   }
 
   /**
-   * Compile Arduino sketch - redirects to compileAndUpload
-   * Note: Arduino Create Agent client doesn't support compile-only
+   * Compile Arduino sketch via IPC
    */
-  async compileSketch(_files: FileMap, _boardConfig: BoardConfig): Promise<CompileResult> {
-    return {
-      success: false,
-      output:
-        'Compilation-only not supported by Arduino Create Agent. Use compileAndUpload instead.',
-      errors: [
-        {
-          message: 'Use compileAndUpload for compilation and upload together',
-          severity: 'error' as const
-        }
-      ],
-      metrics: { duration: 0 }
+  async compileSketch(files: FileMap, boardConfig: BoardConfig): Promise<CompileResult> {
+    try {
+      const result = await window.api.arduino.compileSketch(files, boardConfig)
+      // Cast to ensure type compatibility
+      return {
+        ...result,
+        errors: result.errors?.map((error) => ({
+          ...error,
+          severity: error.severity === 'warning' ? 'error' : error.severity
+        })) as CompileResult['errors']
+      }
+    } catch (error) {
+      console.error('Error compiling sketch via IPC:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      return {
+        success: false,
+        output: `Compilation failed: ${errorMessage}`,
+        errors: [{ message: errorMessage, severity: 'fatal' as const }],
+        metrics: { duration: 0 }
+      }
     }
   }
 
   /**
-   * Upload sketch - requires prior compilation
+   * Upload sketch via IPC
    */
   async uploadSketch(
-    _port: string,
-    _boardConfig: BoardConfig,
-    _binaryPath?: string
+    port: string,
+    boardConfig: BoardConfig,
+    binaryPath?: string
   ): Promise<UploadResult> {
-    return {
-      success: false,
-      output: '',
-      error: 'Upload requires compilation. Use compileAndUpload instead.'
+    try {
+      const result = await window.api.arduino.uploadSketch(port, boardConfig, binaryPath)
+      // Cast to ensure type compatibility
+      return {
+        ...result,
+        progress: result.progress
+          ? {
+              percentage: result.progress.percentage,
+              stage: result.progress.stage as 'preparing' | 'uploading' | 'verifying' | 'complete'
+            }
+          : undefined
+      }
+    } catch (error) {
+      console.error('Error uploading sketch via IPC:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      return {
+        success: false,
+        output: `Upload failed: ${errorMessage}`,
+        error: errorMessage
+      }
     }
   }
 

@@ -2,7 +2,7 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { constants, promises as fs } from 'fs'
 import path, { join } from 'path'
-import * as io from 'socket.io-client'
+import { spawn } from 'child_process'
 import icon from '../../resources/icon.png?asset'
 
 // Arduino Types - duplicated from types file for main process
@@ -36,337 +36,337 @@ interface BoardInfo extends Board {
   capabilities: string[]
 }
 
-interface InfoResponse {
-  http: string
-  https: string
-  origins: string
-  os: string
-  update_url: string
-  version: string
-  ws: string
-  wss: string
-}
-
-async function discoverAgent(): Promise<InfoResponse> {
-  for (let port = 8990; port <= 9000; port++) {
-    try {
-      const response = await fetch(`http://127.0.0.1:${port}/info`)
-      if (response.ok) {
-        const info = await response.json()
-        return info // Contains endpoints and version info
-      }
-    } catch {
-      // Port not available, continue
-    }
+interface CompileResult {
+  success: boolean
+  output: string
+  errors?: Array<{
+    message: string
+    severity: 'error' | 'warning' | 'fatal'
+    file?: string
+    line?: number
+    column?: number
+  }>
+  metrics?: {
+    duration: number
   }
-  throw new Error('Arduino Cloud Agent not found')
+  binaryPath?: string
 }
 
-// Arduino Create Agent service for main process using Socket.IO
-/* eslint-disable @typescript-eslint/no-explicit-any */
+interface UploadResult {
+  success: boolean
+  output: string
+  error?: string
+  progress?: {
+    percentage: number
+    stage: string
+  }
+}
+
+interface FileMap {
+  [filePath: string]: string
+}
+
+interface BoardConfig {
+  fqbn: string
+  name: string
+  architecture?: string
+  package?: string
+  properties?: { [key: string]: string }
+}
+
+// Arduino CLI service for main process
 class MainArduinoService {
-  private socket: any | null = null
-  private agentInfo: InfoResponse | null = null
+  private cliPath = 'arduino-cli' // Assume arduino-cli is in PATH
   private currentStatus: AgentStatus = { connected: false, lastCheck: 0 }
-  private reconnectAttempts = 0
-  private maxReconnectAttempts = 5
-  private reconnectDelay = 1000
 
   constructor() {
     this.currentStatus = {
       connected: false,
       lastCheck: Date.now(),
-      error: 'Arduino Create Agent not initialized'
+      error: 'Arduino CLI not initialized'
     }
+    this.checkArduinoCLI()
   }
 
-  private async ensureSocketConnected(): Promise<void> {
-    if (this.socket && this.socket.connected) {
-      return
-    }
-
-    // Discover agent if not already done
-    if (!this.agentInfo) {
-      try {
-        this.agentInfo = await discoverAgent()
-      } catch (error) {
-        console.warn('Arduino Create Agent not available:', error)
-        this.currentStatus = {
-          connected: false,
-          lastCheck: Date.now(),
-          error: error instanceof Error ? error.message : 'Arduino Create Agent not available'
-        }
-        throw error
-      }
-    }
-
-    // Create socket connection
-    if (!this.socket) {
-      this.socket = io.connect(this.agentInfo.ws, {
-        transports: ['websocket'],
-        timeout: 5000,
-        reconnection: true,
-        reconnectionAttempts: this.maxReconnectAttempts,
-        reconnectionDelay: this.reconnectDelay,
-        forceNew: true
-      })
-
-      this.setupSocketListeners()
-    }
-
-    // Wait for connection
-    return new Promise((resolve, reject) => {
-      if (this.socket!.connected) {
-        resolve()
-        return
-      }
-
-      const timeout = setTimeout(() => {
-        reject(new Error('Socket connection timeout'))
-      }, 10000)
-
-      this.socket!.once('connect', () => {
-        clearTimeout(timeout)
+  /**
+   * Check if arduino-cli is available and working
+   */
+  private async checkArduinoCLI(): Promise<void> {
+    try {
+      const result = await this.executeCommand(['version'])
+      if (result.success) {
         this.currentStatus = {
           connected: true,
           lastCheck: Date.now(),
-          version: this.agentInfo!.version
+          version: result.output.trim()
         }
-        this.reconnectAttempts = 0
-        resolve()
-      })
-
-      this.socket!.once('connect_error', (error) => {
-        clearTimeout(timeout)
-        this.currentStatus = {
-          connected: false,
-          lastCheck: Date.now(),
-          error: `Socket connection error: ${error.message}`
-        }
-        reject(error)
-      })
-    })
+      } else {
+        throw new Error('Arduino CLI version check failed')
+      }
+    } catch (error) {
+      this.currentStatus = {
+        connected: false,
+        lastCheck: Date.now(),
+        error: error instanceof Error ? error.message : 'Arduino CLI not available'
+      }
+    }
   }
 
-  private setupSocketListeners(): void {
-    if (!this.socket) return
+  /**
+   * Execute arduino-cli command
+   */
+  private async executeCommand(
+    args: string[],
+    options?: { cwd?: string; input?: string }
+  ): Promise<{ success: boolean; output: string; error?: string }> {
+    return new Promise((resolve) => {
+      const process = spawn(this.cliPath, args, {
+        cwd: options?.cwd,
+        stdio: ['pipe', 'pipe', 'pipe']
+      })
 
-    this.socket.on('connect', () => {
-      console.log('Connected to Arduino Create Agent')
-      this.currentStatus = {
-        connected: true,
-        lastCheck: Date.now(),
-        version: this.agentInfo?.version
-      }
-      this.reconnectAttempts = 0
-    })
+      let stdout = ''
+      let stderr = ''
 
-    this.socket.on('disconnect', (reason) => {
-      console.log('Disconnected from Arduino Create Agent:', reason)
-      this.currentStatus = {
-        connected: false,
-        lastCheck: Date.now(),
-        error: `Disconnected: ${reason}`
-      }
-    })
+      process.stdout?.on('data', (data) => {
+        stdout += data.toString()
+      })
 
-    this.socket.on('connect_error', (error) => {
-      console.error('Arduino Create Agent connection error:', error)
-      this.reconnectAttempts++
-      this.currentStatus = {
-        connected: false,
-        lastCheck: Date.now(),
-        error: `Connection error: ${error.message}`
-      }
-    })
+      process.stderr?.on('data', (data) => {
+        stderr += data.toString()
+      })
 
-    this.socket.on('error', (error) => {
-      console.error('Arduino Create Agent socket error:', error)
-      this.currentStatus = {
-        connected: false,
-        lastCheck: Date.now(),
-        error: `Socket error: ${error}`
+      if (options?.input) {
+        process.stdin?.write(options.input)
+        process.stdin?.end()
       }
+
+      process.on('close', (code) => {
+        resolve({
+          success: code === 0,
+          output: stdout,
+          error: code !== 0 ? stderr : undefined
+        })
+      })
+
+      process.on('error', (error) => {
+        resolve({
+          success: false,
+          output: '',
+          error: error.message
+        })
+      })
     })
   }
 
   async checkStatus(): Promise<AgentStatus> {
-    try {
-      await this.ensureSocketConnected()
-      return { ...this.currentStatus }
-    } catch (error) {
-      return {
-        connected: false,
-        lastCheck: Date.now(),
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }
-    }
+    await this.checkArduinoCLI()
+    return { ...this.currentStatus }
   }
 
   async listBoards(): Promise<Board[]> {
     try {
-      await this.ensureSocketConnected()
+      const result = await this.executeCommand(['board', 'list', '--format', 'json'])
 
-      return new Promise((resolve, reject) => {
-        if (!this.socket || !this.socket.connected) {
-          reject(new Error('Socket not connected'))
-          return
-        }
-
-        const timeout = setTimeout(() => {
-          reject(new Error('Timeout waiting for board list'))
-        }, 10000)
-
-        // Set up listener for the response - Arduino Create Agent sends responses on 'message' events
-        const handleMessage = (data: any): void => {
-          try {
-            const decodedData = typeof data === 'string' ? JSON.parse(data) : data
-            // Check if this message contains ports data (response to our list command)
-            if (decodedData && typeof decodedData === 'object' && 'Ports' in decodedData) {
-              clearTimeout(timeout)
-              this.socket.off('message', handleMessage) // Remove the listener
-
-              const boards: Board[] = []
-              // Convert serial devices to Board objects
-              // The response should have a 'Ports' property with device list
-              if (decodedData.Ports && Array.isArray(decodedData.Ports)) {
-                boards.push(
-                  ...decodedData.Ports.map((device: any) => this.convertSerialDeviceToBoard(device))
-                )
-              }
-              // If Ports is null, return empty array (no boards connected)
-              resolve(boards)
-            }
-          } catch {
-            // Ignore messages that don't parse correctly
-            // This is expected for non-JSON messages from the Arduino Create Agent
-          }
-        }
-
-        this.socket.on('message', handleMessage)
-
-        // Send the command
-        this.socket.emit('command', 'list')
-      })
-    } catch (error) {
-      console.error('Error listing boards:', error)
-
-      // If Arduino Create Agent is not available, return empty array instead of throwing
-      if (
-        error instanceof Error &&
-        (error.message.includes('Arduino Create Agent not found') ||
-          error.message.includes('Socket not connected') ||
-          error.message.includes('Socket connection timeout'))
-      ) {
-        console.warn('Arduino Create Agent not available, returning empty board list')
+      if (!result.success) {
+        console.error('Arduino CLI board list failed:', result.error)
         return []
       }
 
-      throw new Error(
-        `Failed to list boards: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      const boardData = JSON.parse(result.output)
+      const boards: Board[] = []
+
+      if (Array.isArray(boardData)) {
+        for (const item of boardData) {
+          if (item.matching_boards && Array.isArray(item.matching_boards)) {
+            for (const board of item.matching_boards) {
+              boards.push({
+                port: item.port?.address || item.port?.protocol || 'unknown',
+                config: {
+                  fqbn: board.fqbn || 'unknown',
+                  name: board.name || 'Unknown Board'
+                },
+                protocol: item.port?.protocol === 'network' ? 'network' : 'serial',
+                connected: true,
+                metadata: {
+                  vendorId: item.port?.properties?.vid,
+                  productId: item.port?.properties?.pid,
+                  serialNumber: item.port?.properties?.serialNumber
+                }
+              })
+            }
+          }
+        }
+      }
+
+      return boards
+    } catch (error) {
+      console.error('Error parsing board list:', error)
+      return []
     }
   }
 
   async getBoardInfo(port: string): Promise<BoardInfo> {
-    try {
-      const boards = await this.listBoards()
-      const board = boards.find((b) => b.port === port)
+    const boards = await this.listBoards()
+    const board = boards.find((b) => b.port === port)
 
-      if (!board) {
-        throw new Error(`Board not found on port ${port}`)
+    if (!board) {
+      throw new Error(`Board not found on port ${port}`)
+    }
+
+    return {
+      ...board,
+      description: `${board.config.name} on ${port}`,
+      uploadProtocols: ['serial'],
+      capabilities: ['compile', 'upload']
+    }
+  }
+
+  async compileSketch(files: FileMap, boardConfig: BoardConfig): Promise<CompileResult> {
+    const startTime = Date.now()
+
+    try {
+      // Create temporary directory for sketch
+      const tempDir = join(__dirname, 'temp', `sketch_${Date.now()}`)
+      await fs.mkdir(tempDir, { recursive: true })
+
+      // Write sketch files
+      for (const [filePath, content] of Object.entries(files)) {
+        const fullPath = join(tempDir, filePath)
+        await fs.mkdir(path.dirname(fullPath), { recursive: true })
+        await fs.writeFile(fullPath, content)
       }
 
-      return {
-        ...board,
-        description: `${board.config.name} on ${port}`,
-        uploadProtocols: ['serial'],
-        capabilities: ['upload', 'compile']
+      // Find main .ino file
+      const inoFile = Object.keys(files).find((f) => f.endsWith('.ino'))
+      if (!inoFile) {
+        throw new Error('No .ino file found in sketch')
+      }
+
+      const sketchPath = join(tempDir, inoFile)
+      const buildDir = join(tempDir, 'build')
+
+      // Compile the sketch
+      const result = await this.executeCommand([
+        'compile',
+        '--fqbn',
+        boardConfig.fqbn,
+        '--build-path',
+        buildDir,
+        sketchPath
+      ])
+
+      // Clean up temp directory
+      try {
+        await fs.rm(tempDir, { recursive: true, force: true })
+      } catch {
+        // Ignore cleanup errors
+      }
+
+      const duration = Date.now() - startTime
+
+      if (result.success) {
+        return {
+          success: true,
+          output: result.output,
+          metrics: { duration }
+        }
+      } else {
+        // Parse errors from arduino-cli output
+        const errors = this.parseCompileErrors(result.error || result.output)
+        return {
+          success: false,
+          output: result.output,
+          errors,
+          metrics: { duration }
+        }
       }
     } catch (error) {
-      console.error('Error getting board info:', error)
-      throw new Error(
-        `Failed to get board info: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
-    }
-  }
+      const duration = Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown compilation error'
 
-  private convertSerialDeviceToBoard(device: any): Board {
-    return {
-      port: device.Name || device.port || '/dev/unknown',
-      config: {
-        fqbn: this.inferFQBNFromDevice(device),
-        name: this.inferBoardNameFromDevice(device)
-      },
-      protocol: 'serial',
-      connected: !device.IsOpen,
-      metadata: {
-        vendorId: device.VendorID,
-        productId: device.ProductID,
-        serialNumber: device.SerialNumber
+      return {
+        success: false,
+        output: `Compilation failed: ${errorMessage}`,
+        errors: [{ message: errorMessage, severity: 'fatal' as const }],
+        metrics: { duration }
       }
     }
   }
 
-  private inferFQBNFromDevice(device: any): string {
-    const vid = device.VendorID?.toLowerCase()
-    const pid = device.ProductID?.toLowerCase()
+  async uploadSketch(
+    port: string,
+    boardConfig: BoardConfig,
+    binaryPath?: string
+  ): Promise<UploadResult> {
+    try {
+      if (!binaryPath) {
+        throw new Error('Binary path is required for upload')
+      }
 
-    // Common Arduino board mappings
-    if (vid === '0x2341') {
-      switch (pid) {
-        case '0x0043':
-          return 'arduino:avr:uno'
-        case '0x8036':
-          return 'arduino:avr:leonardo'
-        case '0x0042':
-          return 'arduino:avr:mega'
-        case '0x804d':
-          return 'arduino:samd:mkr1000'
-        default:
-          return 'arduino:avr:uno'
+      const result = await this.executeCommand([
+        'upload',
+        '--fqbn',
+        boardConfig.fqbn,
+        '--port',
+        port,
+        '--input-file',
+        binaryPath
+      ])
+
+      return {
+        success: result.success,
+        output: result.output,
+        error: result.success ? undefined : result.error
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown upload error'
+      return {
+        success: false,
+        output: '',
+        error: errorMessage
+      }
+    }
+  }
+
+  /**
+   * Parse compilation errors from arduino-cli output
+   */
+  private parseCompileErrors(
+    output: string
+  ): Array<{
+    message: string
+    severity: 'error' | 'warning' | 'fatal'
+    file?: string
+    line?: number
+  }> {
+    const errors: Array<{
+      message: string
+      severity: 'error' | 'warning' | 'fatal'
+      file?: string
+      line?: number
+    }> = []
+    const lines = output.split('\n')
+
+    for (const line of lines) {
+      // Match error patterns like "file.ino:10:5: error: message"
+      const errorMatch = line.match(/^(.+?):(\d+):(\d+):\s*(error|warning):\s*(.+)$/)
+      if (errorMatch) {
+        errors.push({
+          file: errorMatch[1],
+          line: parseInt(errorMatch[2]),
+          severity: errorMatch[4] as 'error' | 'warning',
+          message: errorMatch[5]
+        })
+      } else if (line.includes('error:') || line.includes('Error:')) {
+        errors.push({
+          message: line.trim(),
+          severity: 'error' as const
+        })
       }
     }
 
-    // ESP32 boards
-    if (vid === '0x10c4' || vid === '0x1a86') {
-      return 'esp32:esp32:esp32'
-    }
-
-    // Default fallback
-    return 'arduino:avr:uno'
-  }
-
-  private inferBoardNameFromDevice(device: any): string {
-    const fqbn = this.inferFQBNFromDevice(device)
-
-    const nameMap: { [key: string]: string } = {
-      'arduino:avr:uno': 'Arduino Uno',
-      'arduino:avr:leonardo': 'Arduino Leonardo',
-      'arduino:avr:mega': 'Arduino Mega',
-      'arduino:samd:mkr1000': 'Arduino MKR1000',
-      'esp32:esp32:esp32': 'ESP32 Dev Module'
-    }
-
-    return nameMap[fqbn] || 'Unknown Arduino Board'
-  }
-
-  async disconnect(): Promise<void> {
-    if (this.socket) {
-      this.socket.disconnect()
-      this.socket = null
-    }
-    this.agentInfo = null
-    this.currentStatus = {
-      connected: false,
-      lastCheck: Date.now(),
-      error: 'Disconnected'
-    }
-  }
-
-  async reconnect(): Promise<void> {
-    await this.disconnect()
-    await this.ensureSocketConnected()
+    return errors
   }
 }
 
@@ -408,23 +408,75 @@ function setupArduinoHandlers(): void {
     }
   })
 
-  ipcMain.handle('arduino:reconnect', async (): Promise<void> => {
-    try {
-      await arduinoService!.reconnect()
-    } catch (error) {
-      console.error('Error in arduino:reconnect:', error)
-      throw error
+  ipcMain.handle(
+    'arduino:compileSketch',
+    async (_, files: FileMap, boardConfig: BoardConfig): Promise<CompileResult> => {
+      try {
+        return await arduinoService!.compileSketch(files, boardConfig)
+      } catch (error) {
+        console.error('Error in arduino:compileSketch:', error)
+        throw error
+      }
     }
-  })
+  )
 
-  ipcMain.handle('arduino:disconnect', async (): Promise<void> => {
-    try {
-      await arduinoService!.disconnect()
-    } catch (error) {
-      console.error('Error in arduino:disconnect:', error)
-      throw error
+  ipcMain.handle(
+    'arduino:uploadSketch',
+    async (
+      _,
+      port: string,
+      boardConfig: BoardConfig,
+      binaryPath?: string
+    ): Promise<UploadResult> => {
+      try {
+        return await arduinoService!.uploadSketch(port, boardConfig, binaryPath)
+      } catch (error) {
+        console.error('Error in arduino:uploadSketch:', error)
+        throw error
+      }
     }
-  })
+  )
+
+  // Keep the compileAndUpload handler for backwards compatibility
+  ipcMain.handle(
+    'arduino:compileAndUpload',
+    async (_, files: FileMap, port: string, boardConfig: { fqbn: string; name: string }) => {
+      try {
+        const fullBoardConfig: BoardConfig = {
+          fqbn: boardConfig.fqbn,
+          name: boardConfig.name
+        }
+
+        // Compile first
+        const compileResult = await arduinoService!.compileSketch(files, fullBoardConfig)
+
+        let uploadResult: UploadResult
+
+        if (compileResult.success && compileResult.binaryPath) {
+          // Upload if compilation succeeded and we have a binary
+          uploadResult = await arduinoService!.uploadSketch(
+            port,
+            fullBoardConfig,
+            compileResult.binaryPath
+          )
+        } else {
+          uploadResult = {
+            success: false,
+            output: '',
+            error: 'Compilation failed, upload skipped'
+          }
+        }
+
+        return {
+          compile: compileResult,
+          upload: uploadResult
+        }
+      } catch (error) {
+        console.error('Error in arduino:compileAndUpload:', error)
+        throw error
+      }
+    }
+  )
 }
 
 function createWindow(): void {
@@ -455,7 +507,6 @@ function createWindow(): void {
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-    mainWindow.webContents.openDevTools({ mode: 'detach' })
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
@@ -468,12 +519,6 @@ app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
-  // Setup file system handlers
-  setupFileSystemHandlers()
-
-  // Setup Arduino handlers
-  setupArduinoHandlers()
-
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
@@ -482,53 +527,143 @@ app.whenReady().then(() => {
   })
 
   // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.handle('ping', () => 'pong')
 
-  // Window control events
-  ipcMain.on('window:minimize', (event) => {
-    const window = BrowserWindow.fromWebContents(event.sender)
-    if (window) window.minimize()
+  // File system handlers
+  ipcMain.handle('select-folder', async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openDirectory']
+    })
+    return result.canceled ? null : result.filePaths[0]
   })
 
-  ipcMain.on('window:maximize', (event) => {
-    const window = BrowserWindow.fromWebContents(event.sender)
-    if (window) {
-      if (window.isMaximized()) {
-        window.unmaximize()
-      } else {
-        window.maximize()
+  ipcMain.handle('read-directory', async (_, dirPath: string, recursive = false) => {
+    try {
+      const items = await fs.readdir(dirPath, { withFileTypes: true })
+      const result: Array<{
+        name: string
+        path: string
+        isDirectory: boolean
+        size?: number
+        lastModified: number
+      }> = []
+
+      for (const item of items) {
+        const itemPath = join(dirPath, item.name)
+        const stats = await fs.stat(itemPath)
+
+        result.push({
+          name: item.name,
+          path: itemPath,
+          isDirectory: item.isDirectory(),
+          size: item.isFile() ? stats.size : undefined,
+          lastModified: stats.mtime.getTime()
+        })
+
+        if (recursive && item.isDirectory()) {
+          const subItems = await fs.readdir(itemPath, { withFileTypes: true })
+          for (const subItem of subItems) {
+            const subItemPath = join(itemPath, subItem.name)
+            const subStats = await fs.stat(subItemPath)
+
+            result.push({
+              name: `${item.name}/${subItem.name}`,
+              path: subItemPath,
+              isDirectory: subItem.isDirectory(),
+              size: subItem.isFile() ? subStats.size : undefined,
+              lastModified: subStats.mtime.getTime()
+            })
+          }
+        }
       }
+
+      return result
+    } catch (error) {
+      throw new Error(`Failed to read directory: ${error}`)
     }
   })
-  ipcMain.handle('window:getIsMaximized', (event) => {
-    const window = BrowserWindow.fromWebContents(event.sender)
-    return window ? window.isMaximized() : false
-  })
 
-  ipcMain.on('window:requestMaximizeState', (event) => {
-    const window = BrowserWindow.fromWebContents(event.sender)
-    if (window) {
-      if (window.isMaximized()) {
-        event.sender.send('window:maximized')
-      } else {
-        event.sender.send('window:unmaximized')
-      }
+  ipcMain.handle('read-file', async (_, filePath: string) => {
+    try {
+      return await fs.readFile(filePath, 'utf-8')
+    } catch (error) {
+      throw new Error(`Failed to read file: ${error}`)
     }
   })
 
-  app.on('browser-window-created', (_, window) => {
-    window.on('maximize', () => {
-      window.webContents.send('window:maximized')
-    })
-    window.on('unmaximize', () => {
-      window.webContents.send('window:unmaximized')
-    })
+  ipcMain.handle('write-file', async (_, filePath: string, content: string) => {
+    try {
+      await fs.mkdir(path.dirname(filePath), { recursive: true })
+      await fs.writeFile(filePath, content, 'utf-8')
+    } catch (error) {
+      throw new Error(`Failed to write file: ${error}`)
+    }
   })
 
-  ipcMain.on('window:close', (event) => {
-    const window = BrowserWindow.fromWebContents(event.sender)
-    if (window) window.close()
+  ipcMain.handle('create-file', async (_, filePath: string, content = '') => {
+    try {
+      await fs.mkdir(path.dirname(filePath), { recursive: true })
+      await fs.writeFile(filePath, content, 'utf-8')
+    } catch (error) {
+      throw new Error(`Failed to create file: ${error}`)
+    }
   })
+
+  ipcMain.handle('rename-file', async (_, oldPath: string, newPath: string) => {
+    try {
+      await fs.rename(oldPath, newPath)
+    } catch (error) {
+      throw new Error(`Failed to rename file: ${error}`)
+    }
+  })
+
+  ipcMain.handle('create-folder', async (_, folderPath: string) => {
+    try {
+      await fs.mkdir(folderPath, { recursive: true })
+    } catch (error) {
+      throw new Error(`Failed to create folder: ${error}`)
+    }
+  })
+
+  ipcMain.handle('delete-file', async (_, targetPath: string) => {
+    try {
+      const stats = await fs.stat(targetPath)
+      if (stats.isDirectory()) {
+        await fs.rmdir(targetPath, { recursive: true })
+      } else {
+        await fs.unlink(targetPath)
+      }
+    } catch (error) {
+      throw new Error(`Failed to delete: ${error}`)
+    }
+  })
+
+  ipcMain.handle('path-exists', async (_, targetPath: string) => {
+    try {
+      await fs.access(targetPath, constants.F_OK)
+      return true
+    } catch {
+      return false
+    }
+  })
+
+  ipcMain.handle('get-file-stats', async (_, filePath: string) => {
+    try {
+      const stats = await fs.stat(filePath)
+      return {
+        isDirectory: stats.isDirectory(),
+        isFile: stats.isFile(),
+        size: stats.size,
+        lastModified: stats.mtime.getTime(),
+        created: stats.birthtime.getTime()
+      }
+    } catch (error) {
+      throw new Error(`Failed to get file stats: ${error}`)
+    }
+  })
+
+  // Setup Arduino handlers
+  setupArduinoHandlers()
 
   createWindow()
 
@@ -543,227 +678,8 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  if (process.platform !== 'darwin') app.quit()
 })
 
-// Clean up Arduino service connection before quitting
-app.on('before-quit', async () => {
-  if (arduinoService) {
-    try {
-      await arduinoService.disconnect()
-    } catch (error) {
-      console.error('Error disconnecting Arduino service:', error)
-    }
-  }
-})
-
-// File system types
-interface FileSystemItem {
-  name: string
-  path: string
-  isDirectory: boolean
-  size?: number
-  lastModified?: number
-}
-
-// File system IPC handlers
-let fileSystemHandlersSetup = false
-
-async function setupFileSystemHandlers(): Promise<void> {
-  if (fileSystemHandlersSetup) return
-  fileSystemHandlersSetup = true
-  // Select folder dialog
-  ipcMain.handle('select-folder', async () => {
-    try {
-      const result = await dialog.showOpenDialog({
-        properties: ['openDirectory']
-      })
-
-      if (result.canceled || !result.filePaths.length) {
-        return null
-      }
-
-      const selectedPath = result.filePaths[0].replace(/\\/g, '/') // Normalize to forward slashes
-      return selectedPath
-    } catch (error) {
-      console.error('Error selecting folder:', error)
-      throw error
-    }
-  })
-
-  // Read directory contents recursively
-  ipcMain.handle(
-    'read-directory',
-    async (_, dirPath: string, recursive = false): Promise<FileSystemItem[]> => {
-      try {
-        const items: FileSystemItem[] = []
-
-        async function readDir(currentPath: string): Promise<void> {
-          const entries = await fs.readdir(currentPath, { withFileTypes: true })
-
-          for (const entry of entries) {
-            const fullPath = path.join(currentPath, entry.name)
-            const stats = await fs.stat(fullPath)
-
-            const item: FileSystemItem = {
-              name: entry.name,
-              path: fullPath.replace(/\\/g, '/'), // Normalize to forward slashes
-              isDirectory: entry.isDirectory(),
-              size: entry.isFile() ? stats.size : undefined,
-              lastModified: stats.mtime.getTime()
-            }
-
-            items.push(item)
-
-            if (recursive && entry.isDirectory()) {
-              await readDir(fullPath)
-            }
-          }
-        }
-
-        await readDir(dirPath)
-        return items
-      } catch (error) {
-        console.error('Error reading directory:', error)
-        throw error
-      }
-    }
-  )
-
-  // Read file content
-  ipcMain.handle('read-file', async (_, filePath: string): Promise<string> => {
-    try {
-      return await fs.readFile(filePath, 'utf-8')
-    } catch (error) {
-      console.error('Error reading file:', error)
-      throw error
-    }
-  })
-
-  // Write file content
-  ipcMain.handle('write-file', async (_, filePath: string, content: string): Promise<void> => {
-    try {
-      // Ensure directory exists
-      await fs.mkdir(path.dirname(filePath), { recursive: true })
-      await fs.writeFile(filePath, content, 'utf-8')
-    } catch (error) {
-      console.error('Error writing file:', error)
-      throw error
-    }
-  })
-
-  // Create new file
-  ipcMain.handle('create-file', async (_, filePath: string, content = ''): Promise<void> => {
-    try {
-      // Check if file already exists
-      try {
-        await fs.access(filePath, constants.F_OK)
-        throw new Error('File already exists')
-      } catch (accessError) {
-        // File doesn't exist, proceed with creation
-        if ((accessError as NodeJS.ErrnoException).code !== 'ENOENT') {
-          throw accessError
-        }
-      }
-
-      // Ensure directory exists
-      await fs.mkdir(path.dirname(filePath), { recursive: true })
-      await fs.writeFile(filePath, content, 'utf-8')
-    } catch (error) {
-      console.error('Error creating file:', error)
-      throw error
-    }
-  })
-
-  // Create new folder
-  ipcMain.handle('create-folder', async (_, folderPath: string): Promise<void> => {
-    try {
-      await fs.mkdir(folderPath, { recursive: true })
-    } catch (error) {
-      console.error('Error creating folder:', error)
-      throw error
-    }
-  })
-
-  // Rename file or directory
-  ipcMain.handle('rename-file', async (_, oldPath: string, newPath: string): Promise<void> => {
-    try {
-      // Normalize paths for the current platform
-      const normalizedOldPath = oldPath.replace(/\//g, path.sep)
-      const normalizedNewPath = newPath.replace(/\//g, path.sep)
-
-      // Check if source exists
-      await fs.access(normalizedOldPath, constants.F_OK)
-
-      // Check if destination already exists
-      try {
-        await fs.access(normalizedNewPath, constants.F_OK)
-        throw new Error('Destination already exists')
-      } catch (accessError) {
-        // Destination doesn't exist, proceed with rename
-        if ((accessError as NodeJS.ErrnoException).code !== 'ENOENT') {
-          throw accessError
-        }
-      }
-
-      // Ensure destination directory exists
-      await fs.mkdir(path.dirname(normalizedNewPath), { recursive: true })
-
-      // Perform the rename
-      await fs.rename(normalizedOldPath, normalizedNewPath)
-    } catch (error) {
-      console.error('Error renaming file/folder:', error)
-      throw error
-    }
-  })
-
-  // Delete file or directory
-  ipcMain.handle('delete-file', async (_, targetPath: string): Promise<void> => {
-    try {
-      const stats = await fs.stat(targetPath)
-
-      if (stats.isDirectory()) {
-        await fs.rmdir(targetPath, { recursive: true })
-      } else {
-        await fs.unlink(targetPath)
-      }
-    } catch (error) {
-      console.error('Error deleting file/folder:', error)
-      throw error
-    }
-  })
-
-  // Check if path exists
-  ipcMain.handle('path-exists', async (_, targetPath: string): Promise<boolean> => {
-    try {
-      await fs.access(targetPath, constants.F_OK)
-      return true
-    } catch {
-      return false
-    }
-  })
-
-  // Get file stats
-  ipcMain.handle('get-file-stats', async (_, filePath: string) => {
-    try {
-      const stats = await fs.stat(filePath)
-      return {
-        isDirectory: stats.isDirectory(),
-        isFile: stats.isFile(),
-        size: stats.size,
-        lastModified: stats.mtime.getTime(),
-        created: stats.birthtime.getTime()
-      }
-    } catch (error) {
-      console.error('Error getting file stats:', error)
-      throw error
-    }
-  })
-}
-
-setupFileSystemHandlers()
-
-// In this file you can include the rest of your app's specific main process
+// In this file you can include the rest of your app"s main process
 // code. You can also put them in separate files and require them here.

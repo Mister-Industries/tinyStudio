@@ -26,14 +26,17 @@ interface AgentStatus {
   error?: string
 }
 
+interface BoardConfig {
+  fqbn: string
+  name: string
+  architecture?: string
+  package?: string
+  properties?: { [key: string]: string }
+}
+
 interface Board {
   port: string
-  config: {
-    fqbn: string
-    name: string
-    architecture?: string
-    package?: string
-  }
+  config: BoardConfig
   protocol: 'serial' | 'network'
   connected: boolean
   metadata?: {
@@ -109,6 +112,14 @@ const api = {
     listBoards: (): Promise<Board[]> => ipcRenderer.invoke('arduino:listBoards'),
     getBoardInfo: (port: string): Promise<BoardInfo> =>
       ipcRenderer.invoke('arduino:getBoardInfo', port),
+    compileSketch: (files: FileMap, boardConfig: BoardConfig): Promise<CompileResult> =>
+      ipcRenderer.invoke('arduino:compileSketch', files, boardConfig),
+    uploadSketch: (
+      port: string,
+      boardConfig: BoardConfig,
+      binaryPath?: string
+    ): Promise<UploadResult> =>
+      ipcRenderer.invoke('arduino:uploadSketch', port, boardConfig, binaryPath),
     compileAndUpload: (
       files: FileMap,
       port: string,

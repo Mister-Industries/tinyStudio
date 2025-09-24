@@ -12,7 +12,7 @@ import { ArduinoService, Environment } from './types'
  * Configuration options for Arduino service factory
  */
 export interface ArduinoServiceConfig {
-  /** Arduino Create Agent URL (default: http://localhost:8990) */
+  /** Arduino CLI path (not used in web environment) */
   agentUrl?: string
   /** Whether to prefer Arduino CLI in Electron (default: false) */
   useArduinoCLI?: boolean
@@ -55,14 +55,13 @@ export class ArduinoServiceFactory {
   /**
    * Create new Arduino service instance (for testing or manual creation)
    */
-  static createService(config?: ArduinoServiceConfig): ArduinoService {
-    const finalConfig = { ...this.config, ...config }
+  static createService(_config?: ArduinoServiceConfig): ArduinoService {
     const environment = this.detectEnvironment()
 
     if (environment === 'electron') {
       return new ElectronArduinoService()
     } else {
-      return new WebArduinoService(finalConfig.agentUrl)
+      return new WebArduinoService()
     }
   }
 
@@ -99,7 +98,7 @@ export class ArduinoServiceFactory {
     return {
       environment,
       supportsArduinoCLI: environment === 'electron',
-      supportsAgent: true, // Both environments can use Arduino Create Agent
+      supportsAgent: environment === 'electron', // Only Electron can use Arduino CLI
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined
     }
   }

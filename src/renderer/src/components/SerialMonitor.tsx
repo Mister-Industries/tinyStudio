@@ -14,6 +14,7 @@ import {
 import { Button } from './ui/Button'
 import { setPanelOpen } from '@renderer/redux/editorSlice'
 import { useAppDispatch } from '@renderer/redux'
+import { useArduino } from '@renderer/hooks/useArduino'
 
 export function SerialMonitor(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'serial' | 'problems' | 'output'>('serial')
@@ -46,7 +47,7 @@ export function SerialMonitor(): React.JSX.Element {
           >
             <FileText size={14} />
             Output
-          </div>
+          </div> */}
         </div>
         <Button
           variant="ghost"

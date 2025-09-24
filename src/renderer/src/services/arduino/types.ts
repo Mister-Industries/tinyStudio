@@ -57,7 +57,7 @@ export interface BoardInfo extends Board {
 }
 
 /**
- * Compilation result from Arduino Create Agent or CLI
+ * Compilation result from Arduino CLI
  */
 export interface CompileResult {
   /** Whether compilation was successful */
@@ -83,7 +83,7 @@ export interface CompileResult {
 }
 
 /**
- * Upload result from Arduino Create Agent or CLI
+ * Upload result from Arduino CLI
  */
 export interface UploadResult {
   /** Whether upload was successful */
@@ -132,12 +132,12 @@ export interface CompilationWarning {
 }
 
 /**
- * Arduino Create Agent status
+ * Arduino CLI status
  */
 export interface AgentStatus {
-  /** Whether the agent is running and reachable */
+  /** Whether arduino-cli is available and working */
   connected: boolean
-  /** Agent version */
+  /** Arduino CLI version */
   version?: string
   /** Last connection check timestamp */
   lastCheck: number
@@ -147,7 +147,7 @@ export interface AgentStatus {
 
 /**
  * Arduino service interface
- * Provides abstraction over Arduino Create Agent (web) and Arduino CLI (electron)
+ * Provides abstraction over Arduino CLI (electron) - web environment is not supported
  */
 export interface ArduinoService {
   /**
@@ -193,15 +193,8 @@ export interface ArduinoService {
 export type Environment = 'web' | 'electron'
 
 /**
- * Arduino Create Agent endpoints
- */
-export const AGENT_ENDPOINTS = {
-  BASE_URL: 'http://localhost:8990',
-  BOARDS: '/v2/boards',
-  UPLOAD: '/v2/upload',
-  STATUS: '/v2/pkgs/builtin/tools/installed',
-  WEBSOCKET: '/v2/board'
-} as const
+
+
 
 /**
  * Common Arduino board configurations

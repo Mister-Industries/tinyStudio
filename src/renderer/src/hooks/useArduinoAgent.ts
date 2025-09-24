@@ -1,5 +1,5 @@
 /**
- * useArduinoAgent - Hook for monitoring Arduino Create Agent connectivity
+ * useArduinoAgent - Hook for monitoring Arduino CLI connectivity
  */
 
 import { getArduinoService } from '@renderer/services/arduino/ArduinoServiceFactory'
@@ -7,7 +7,7 @@ import { AgentStatus } from '@renderer/services/arduino/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
- * Configuration for the Arduino Agent hook
+ * Configuration for the Arduino CLI hook
  */
 export interface UseArduinoAgentConfig {
   /** How often to check agent status (ms) */
@@ -52,7 +52,7 @@ const DEFAULT_CONFIG: Required<UseArduinoAgentConfig> = {
 }
 
 /**
- * Hook for monitoring Arduino Create Agent connectivity and status
+ * Hook for monitoring Arduino CLI connectivity and status
  */
 export function useArduinoAgent(config: UseArduinoAgentConfig = {}): UseArduinoAgentReturn {
   const finalConfig = { ...DEFAULT_CONFIG, ...config }

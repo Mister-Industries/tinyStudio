@@ -125,10 +125,24 @@ interface FileMap {
   [filePath: string]: string
 }
 
+interface BoardConfig {
+  fqbn: string
+  name: string
+  architecture?: string
+  package?: string
+  properties?: { [key: string]: string }
+}
+
 interface ArduinoAPI {
   checkStatus: () => Promise<AgentStatus>
   listBoards: () => Promise<Board[]>
   getBoardInfo: (port: string) => Promise<BoardInfo>
+  compileSketch: (files: FileMap, boardConfig: BoardConfig) => Promise<CompileResult>
+  uploadSketch: (
+    port: string,
+    boardConfig: BoardConfig,
+    binaryPath?: string
+  ) => Promise<UploadResult>
   compileAndUpload: (
     files: FileMap,
     port: string,
