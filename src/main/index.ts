@@ -174,24 +174,48 @@ class MainArduinoService {
       }
 
       const boardData = JSON.parse(result.output)
+      console.log('Board data:', boardData)
       const boards: Board[] = []
 
-      if (Array.isArray(boardData)) {
-        for (const item of boardData) {
-          if (item.matching_boards && Array.isArray(item.matching_boards)) {
-            for (const board of item.matching_boards) {
+      // Handle the actual structure: { "detected_ports": [...] }
+      if (boardData.detected_ports && Array.isArray(boardData.detected_ports)) {
+        for (const detectedPort of boardData.detected_ports) {
+          const port = detectedPort.port
+
+          if (port) {
+            // Check if there are matching boards for this port
+            if (detectedPort.matching_boards && Array.isArray(detectedPort.matching_boards)) {
+              // Add each matching board
+              for (const matchingBoard of detectedPort.matching_boards) {
+                boards.push({
+                  port: port.address || port.label || 'unknown',
+                  config: {
+                    fqbn: matchingBoard.fqbn || 'unknown',
+                    name: matchingBoard.name || 'Unknown Board'
+                  },
+                  protocol: port.protocol === 'network' ? 'network' : 'serial',
+                  connected: true,
+                  metadata: {
+                    vendorId: port.properties?.vid,
+                    productId: port.properties?.pid,
+                    serialNumber: port.properties?.serialNumber
+                  }
+                })
+              }
+            } else {
+              // No matching boards found, add port with generic info
               boards.push({
-                port: item.port?.address || item.port?.protocol || 'unknown',
+                port: port.address || port.label || 'unknown',
                 config: {
-                  fqbn: board.fqbn || 'unknown',
-                  name: board.name || 'Unknown Board'
+                  fqbn: 'unknown',
+                  name: port.protocol_label || 'Unknown Device'
                 },
-                protocol: item.port?.protocol === 'network' ? 'network' : 'serial',
+                protocol: port.protocol === 'network' ? 'network' : 'serial',
                 connected: true,
                 metadata: {
-                  vendorId: item.port?.properties?.vid,
-                  productId: item.port?.properties?.pid,
-                  serialNumber: item.port?.properties?.serialNumber
+                  vendorId: port.properties?.vid,
+                  productId: port.properties?.pid,
+                  serialNumber: port.properties?.serialNumber
                 }
               })
             }
@@ -332,9 +356,7 @@ class MainArduinoService {
   /**
    * Parse compilation errors from arduino-cli output
    */
-  private parseCompileErrors(
-    output: string
-  ): Array<{
+  private parseCompileErrors(output: string): Array<{
     message: string
     severity: 'error' | 'warning' | 'fatal'
     file?: string

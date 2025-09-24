@@ -17,8 +17,8 @@ export function Header(): React.JSX.Element {
     window.electron.ipcRenderer.on('window:maximized', handleMaximized)
     window.electron.ipcRenderer.on('window:unmaximized', handleUnmaximized)
 
-    // Optionally, request current state on mount
-    window.electron.ipcRenderer.invoke?.('window:getIsMaximized')?.then(setIsMaximized)
+    // // Optionally, request current state on mount
+    // window.electron.ipcRenderer.invoke?.('window:getIsMaximized')?.then(setIsMaximized)
 
     return () => {
       window.electron.ipcRenderer.removeListener('window:maximized', handleMaximized)
