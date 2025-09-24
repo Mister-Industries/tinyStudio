@@ -1,8 +1,5 @@
-import { useAppDispatch } from '@renderer/redux'
-import { setPanelOpen } from '@renderer/redux/editorSlice'
-import { Monitor, Trash, TriangleAlert, X } from 'lucide-react'
+import { Monitor, Trash, X } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import {
   Select,
@@ -13,6 +10,9 @@ import {
   SelectTrigger,
   SelectValue
 } from './ui/Select'
+import { Button } from './ui/Button'
+import { setPanelOpen } from '@renderer/redux/editorSlice'
+import { useAppDispatch } from '@renderer/redux'
 
 export function SerialMonitor(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'serial' | 'problems' | 'output'>('serial')
@@ -33,7 +33,7 @@ export function SerialMonitor(): React.JSX.Element {
             <Monitor size={14} />
             Serial Monitor
           </div>
-          <div
+          {/* <div
             data-active={activeTab === 'problems'}
             onClick={() => setActiveTab('problems')}
             className="flex gap-2 px-4 py-2 bg-muted items-center border-b-3 border-transparent data-[active=true]:bg-background data-[active=true]:border-secondary cursor-pointer"
@@ -41,7 +41,6 @@ export function SerialMonitor(): React.JSX.Element {
             <TriangleAlert size={14} />
             Problems
           </div>
-          {/*
           <div
             data-active={activeTab === 'output'}
             onClick={() => setActiveTab('output')}
@@ -60,7 +59,6 @@ export function SerialMonitor(): React.JSX.Element {
         </Button>
       </div>
       {activeTab === 'serial' && <SerialMonitorTab />}
-      {activeTab === 'problems' && <ProblemsTab />}
     </div>
   )
 }
@@ -83,10 +81,6 @@ export function SerialMonitorTab(): React.JSX.Element {
       </div>
     </div>
   )
-}
-
-export function ProblemsTab(): React.JSX.Element {
-  return <div>Implement the compilation problems here</div>
 }
 
 interface FrequencySelectProps {
