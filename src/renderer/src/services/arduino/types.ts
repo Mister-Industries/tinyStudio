@@ -152,11 +152,11 @@ export interface AgentStatus {
 export interface ArduinoService {
   /**
    * Compile an Arduino sketch
-   * @param files Map of file paths to content
+   * @param workspacePath Path to the workspace directory containing the sketch
    * @param boardConfig Target board configuration
    * @returns Promise resolving to compilation result
    */
-  compileSketch(files: FileMap, boardConfig: BoardConfig): Promise<CompileResult>
+  compileSketch(workspacePath: string, boardConfig: BoardConfig): Promise<CompileResult>
 
   /**
    * Upload compiled sketch to board

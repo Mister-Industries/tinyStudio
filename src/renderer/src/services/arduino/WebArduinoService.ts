@@ -12,7 +12,6 @@ import {
   BoardConfig,
   BoardInfo,
   CompileResult,
-  FileMap,
   UploadResult
 } from './types'
 
@@ -55,7 +54,7 @@ export class WebArduinoService implements ArduinoService {
   /**
    * Compile sketch - not supported in web environment
    */
-  async compileSketch(_files: FileMap, _boardConfig: BoardConfig): Promise<CompileResult> {
+  async compileSketch(_workspacePath: string, _boardConfig: BoardConfig): Promise<CompileResult> {
     throw new Error(
       'Arduino operations are not supported in web environment. Use Electron app for Arduino functionality.'
     )

@@ -25,7 +25,7 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
   const viewingFileId = useAppSelector(selectViewingFileId)
   const editorMode = useAppSelector((state) => state.editor.editorMode)
   const dispatch = useAppDispatch()
-  const [showCircuit, setShowCircuit] = useState(true)
+  const [showCircuit, setShowCircuit] = useState(false)
   const monacoEditorRef = useRef<MonacoEditorRef>(null)
   const pixelSize = Math.round((size / 100) * (window.innerHeight - 92))
 

@@ -1,8 +1,8 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
+import { spawn } from 'child_process'
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { constants, promises as fs } from 'fs'
 import path, { join } from 'path'
-import { spawn } from 'child_process'
 import icon from '../../resources/icon.png?asset'
 
 // Arduino Types - duplicated from types file for main process
@@ -60,10 +60,6 @@ interface UploadResult {
     percentage: number
     stage: string
   }
-}
-
-interface FileMap {
-  [filePath: string]: string
 }
 
 interface BoardConfig {
@@ -173,8 +169,36 @@ class MainArduinoService {
         return []
       }
 
-      const boardData = JSON.parse(result.output)
-      console.log('Board data:', boardData)
+      // ! remember to replace with the actual result from arduino-cli
+      const data = `{"detected_ports": [
+    {
+      "matching_boards": [
+        {
+          "name": "ESP32 Family Device",
+          "fqbn": "esp32:esp32:esp32_family",
+          "is_hidden": true
+        },
+        {
+          "name": "ESP32 Family Device",
+          "fqbn": "tinyCore:esp32:esp32_family",
+          "is_hidden": true
+        }
+      ],
+      "port": {
+        "address": "COM16",
+        "label": "COM16",
+        "protocol": "serial",
+        "protocol_label": "Serial Port (USB)",
+        "properties": {
+          "pid": "0x1001",
+          "serialNumber": "",
+          "vid": "0x303A"
+        }
+      }
+    }
+  ]
+}`
+      const boardData = JSON.parse(data)
       const boards: Board[] = []
 
       // Handle the actual structure: { "detected_ports": [...] }
@@ -202,22 +226,6 @@ class MainArduinoService {
                   }
                 })
               }
-            } else {
-              // No matching boards found, add port with generic info
-              boards.push({
-                port: port.address || port.label || 'unknown',
-                config: {
-                  fqbn: 'unknown',
-                  name: port.protocol_label || 'Unknown Device'
-                },
-                protocol: port.protocol === 'network' ? 'network' : 'serial',
-                connected: true,
-                metadata: {
-                  vendorId: port.properties?.vid,
-                  productId: port.properties?.pid,
-                  serialNumber: port.properties?.serialNumber
-                }
-              })
             }
           }
         }
@@ -246,31 +254,27 @@ class MainArduinoService {
     }
   }
 
-  async compileSketch(files: FileMap, boardConfig: BoardConfig): Promise<CompileResult> {
+  async compileSketch(workspacePath: string, boardConfig: BoardConfig): Promise<CompileResult> {
+    console.log('Compiling sketch for board:', boardConfig)
+    console.log('Workspace path:', workspacePath)
     const startTime = Date.now()
 
     try {
-      // Create temporary directory for sketch
-      const tempDir = join(__dirname, 'temp', `sketch_${Date.now()}`)
-      await fs.mkdir(tempDir, { recursive: true })
+      // Find main .ino file in the workspace
+      const files = await fs.readdir(workspacePath, { withFileTypes: true })
+      const inoFile = files.find((file) => file.isFile() && file.name.endsWith('.ino'))
 
-      // Write sketch files
-      for (const [filePath, content] of Object.entries(files)) {
-        const fullPath = join(tempDir, filePath)
-        await fs.mkdir(path.dirname(fullPath), { recursive: true })
-        await fs.writeFile(fullPath, content)
-      }
-
-      // Find main .ino file
-      const inoFile = Object.keys(files).find((f) => f.endsWith('.ino'))
       if (!inoFile) {
-        throw new Error('No .ino file found in sketch')
+        throw new Error('No .ino file found in workspace')
       }
 
-      const sketchPath = join(tempDir, inoFile)
-      const buildDir = join(tempDir, 'build')
+      const sketchPath = join(workspacePath, inoFile.name)
+      const buildDir = join(workspacePath, 'build')
 
-      // Compile the sketch
+      // Create build directory if it doesn't exist
+      await fs.mkdir(buildDir, { recursive: true })
+
+      // Compile the sketch using the workspace directory
       const result = await this.executeCommand([
         'compile',
         '--fqbn',
@@ -280,16 +284,11 @@ class MainArduinoService {
         sketchPath
       ])
 
-      // Clean up temp directory
-      try {
-        await fs.rm(tempDir, { recursive: true, force: true })
-      } catch {
-        // Ignore cleanup errors
-      }
-
       const duration = Date.now() - startTime
 
       if (result.success) {
+        console.log('Compilation successful')
+        console.log('Arduino CLI output:', result.output)
         return {
           success: true,
           output: result.output,
@@ -297,6 +296,8 @@ class MainArduinoService {
         }
       } else {
         // Parse errors from arduino-cli output
+        console.error('Compilation failed:', result.error)
+        console.error('Arduino CLI output:', result.output)
         const errors = this.parseCompileErrors(result.error || result.output)
         return {
           success: false,
@@ -308,6 +309,7 @@ class MainArduinoService {
     } catch (error) {
       const duration = Date.now() - startTime
       const errorMessage = error instanceof Error ? error.message : 'Unknown compilation error'
+      console.log('Compilation exception:', errorMessage)
 
       return {
         success: false,
@@ -323,6 +325,7 @@ class MainArduinoService {
     boardConfig: BoardConfig,
     binaryPath?: string
   ): Promise<UploadResult> {
+    console.log('Uploading sketch to port:', port, 'with board config:', boardConfig)
     try {
       if (!binaryPath) {
         throw new Error('Binary path is required for upload')
@@ -432,9 +435,9 @@ function setupArduinoHandlers(): void {
 
   ipcMain.handle(
     'arduino:compileSketch',
-    async (_, files: FileMap, boardConfig: BoardConfig): Promise<CompileResult> => {
+    async (_, workspacePath: string, boardConfig: BoardConfig): Promise<CompileResult> => {
       try {
-        return await arduinoService!.compileSketch(files, boardConfig)
+        return await arduinoService!.compileSketch(workspacePath, boardConfig)
       } catch (error) {
         console.error('Error in arduino:compileSketch:', error)
         throw error
@@ -462,7 +465,7 @@ function setupArduinoHandlers(): void {
   // Keep the compileAndUpload handler for backwards compatibility
   ipcMain.handle(
     'arduino:compileAndUpload',
-    async (_, files: FileMap, port: string, boardConfig: { fqbn: string; name: string }) => {
+    async (_, workspacePath: string, port: string, boardConfig: { fqbn: string; name: string }) => {
       try {
         const fullBoardConfig: BoardConfig = {
           fqbn: boardConfig.fqbn,
@@ -470,7 +473,7 @@ function setupArduinoHandlers(): void {
         }
 
         // Compile first
-        const compileResult = await arduinoService!.compileSketch(files, fullBoardConfig)
+        const compileResult = await arduinoService!.compileSketch(workspacePath, fullBoardConfig)
 
         let uploadResult: UploadResult
 

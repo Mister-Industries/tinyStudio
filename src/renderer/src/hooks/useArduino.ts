@@ -3,13 +3,7 @@
  */
 
 import { getArduinoService } from '@renderer/services/arduino/ArduinoServiceFactory'
-import {
-  Board,
-  BoardConfig,
-  CompileResult,
-  FileMap,
-  UploadResult
-} from '@renderer/services/arduino/types'
+import { Board, BoardConfig, CompileResult, UploadResult } from '@renderer/services/arduino/types'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useArduinoAgent } from './useArduinoAgent'
@@ -46,14 +40,14 @@ export interface UseArduinoReturn {
   isLoadingBoards: boolean
 
   // Compilation
-  compileSketch: (files: FileMap, boardConfig?: BoardConfig) => Promise<CompileResult>
+  compileSketch: (workspacePath: string, boardConfig?: BoardConfig) => Promise<CompileResult>
   isCompiling: boolean
   lastCompileResult: CompileResult | null
 
   // Upload
   uploadSketch: (port?: string, boardConfig?: BoardConfig) => Promise<UploadResult>
   compileAndUpload: (
-    files: FileMap,
+    workspacePath: string,
     port?: string,
     boardConfig?: BoardConfig
   ) => Promise<{
@@ -82,6 +76,7 @@ export function useArduino(): UseArduinoReturn {
   const [boards, setBoards] = useState<Board[]>([])
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null)
   const [isLoadingBoards, setIsLoadingBoards] = useState(false)
+  const [hasLoadedBoards, setHasLoadedBoards] = useState(false)
 
   const [isCompiling, setIsCompiling] = useState(false)
   const [lastCompileResult, setLastCompileResult] = useState<CompileResult | null>(null)
@@ -130,6 +125,7 @@ export function useArduino(): UseArduinoReturn {
     try {
       const boardsList = await arduinoService.listBoards()
       setBoards(boardsList)
+      setHasLoadedBoards(true) // Mark that we've completed at least one board scan
 
       addLog({
         type: 'info',
@@ -168,7 +164,7 @@ export function useArduino(): UseArduinoReturn {
    * Compile an Arduino sketch
    */
   const compileSketch = useCallback(
-    async (files: FileMap, boardConfig?: BoardConfig): Promise<CompileResult> => {
+    async (workspacePath: string, boardConfig?: BoardConfig): Promise<CompileResult> => {
       if (isCompiling) {
         throw new Error('Compilation already in progress')
       }
@@ -185,7 +181,7 @@ export function useArduino(): UseArduinoReturn {
       })
 
       try {
-        const result = await arduinoService.compileSketch(files, targetBoard)
+        const result = await arduinoService.compileSketch(workspacePath, targetBoard)
         setLastCompileResult(result)
 
         if (result.success) {
@@ -332,12 +328,12 @@ export function useArduino(): UseArduinoReturn {
    */
   const compileAndUpload = useCallback(
     async (
-      files: FileMap,
+      workspacePath: string,
       port?: string,
       boardConfig?: BoardConfig
     ): Promise<{ compile: CompileResult; upload: UploadResult }> => {
       // First compile
-      const compileResult = await compileSketch(files, boardConfig)
+      const compileResult = await compileSketch(workspacePath, boardConfig)
 
       // Only upload if compilation was successful
       if (compileResult.success) {
@@ -361,10 +357,21 @@ export function useArduino(): UseArduinoReturn {
    * Load boards on mount and when agent connects
    */
   useEffect(() => {
-    if (isAgentConnected && boards.length === 0) {
+    if (isAgentConnected && !hasLoadedBoards) {
       refreshBoards()
     }
-  }, [isAgentConnected, boards.length, refreshBoards])
+  }, [isAgentConnected, hasLoadedBoards, refreshBoards])
+
+  /**
+   * Reset board loading state when agent disconnects
+   */
+  useEffect(() => {
+    if (!isAgentConnected) {
+      setHasLoadedBoards(false)
+      setBoards([])
+      setSelectedBoard(null)
+    }
+  }, [isAgentConnected])
 
   return {
     // Board management

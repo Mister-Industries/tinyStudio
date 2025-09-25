@@ -78,10 +78,6 @@ interface UploadResult {
   }
 }
 
-interface FileMap {
-  [filePath: string]: string
-}
-
 // Custom APIs for renderer
 const api = {
   // File system operations
@@ -112,8 +108,8 @@ const api = {
     listBoards: (): Promise<Board[]> => ipcRenderer.invoke('arduino:listBoards'),
     getBoardInfo: (port: string): Promise<BoardInfo> =>
       ipcRenderer.invoke('arduino:getBoardInfo', port),
-    compileSketch: (files: FileMap, boardConfig: BoardConfig): Promise<CompileResult> =>
-      ipcRenderer.invoke('arduino:compileSketch', files, boardConfig),
+    compileSketch: (workspacePath: string, boardConfig: BoardConfig): Promise<CompileResult> =>
+      ipcRenderer.invoke('arduino:compileSketch', workspacePath, boardConfig),
     uploadSketch: (
       port: string,
       boardConfig: BoardConfig,
@@ -121,11 +117,11 @@ const api = {
     ): Promise<UploadResult> =>
       ipcRenderer.invoke('arduino:uploadSketch', port, boardConfig, binaryPath),
     compileAndUpload: (
-      files: FileMap,
+      workspacePath: string,
       port: string,
       boardConfig: { fqbn: string; name: string }
     ): Promise<{ compile: CompileResult; upload: UploadResult }> =>
-      ipcRenderer.invoke('arduino:compileAndUpload', files, port, boardConfig)
+      ipcRenderer.invoke('arduino:compileAndUpload', workspacePath, port, boardConfig)
   }
 }
 

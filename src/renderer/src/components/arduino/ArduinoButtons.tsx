@@ -5,8 +5,7 @@
 import { Button } from '@renderer/components/ui/Button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/Tooltip'
 import { useArduino } from '@renderer/hooks/useArduino'
-import { convertToFileMap } from '@renderer/lib/arduinoFileUtils'
-import { selectOpenFiles, useAppSelector } from '@renderer/redux'
+import { useAppSelector } from '@renderer/redux'
 import { AlertCircle, Check, Loader2, Upload } from 'lucide-react'
 import React from 'react'
 import { toast } from 'sonner'
@@ -38,7 +37,7 @@ export function VerifyButton({
 }: VerifyButtonProps): React.JSX.Element {
   const { compileSketch, isCompiling, selectedBoard, isAgentConnected } = useArduino()
 
-  const openFiles = useAppSelector(selectOpenFiles)
+  const workspace = useAppSelector((state) => state.file.workspace)
 
   const handleVerify = async (): Promise<void> => {
     if (!selectedBoard) {
@@ -55,16 +54,15 @@ export function VerifyButton({
       return
     }
 
-    if (openFiles.length === 0) {
-      toast.error('No files to compile', {
-        description: 'Please open some Arduino files first'
+    if (!workspace) {
+      toast.error('No workspace open', {
+        description: 'Please open a workspace containing Arduino files first'
       })
       return
     }
 
     try {
-      const fileMap = convertToFileMap(openFiles)
-      await compileSketch(fileMap, selectedBoard.config)
+      await compileSketch(workspace.path, selectedBoard.config)
     } catch (error) {
       console.error('Compilation error:', error)
       toast.error('Compilation failed', {
@@ -73,7 +71,14 @@ export function VerifyButton({
     }
   }
 
-  const isDisabled = isCompiling || !selectedBoard || !isAgentConnected || openFiles.length === 0
+  const isDisabled = isCompiling || !selectedBoard || !isAgentConnected || !workspace
+  // console.log('VerifyButton isDisabled conditions:', {
+  //   isCompiling,
+  //   selectedBoard: !selectedBoard,
+  //   isAgentConnected: !isAgentConnected,
+  //   openFilesLength: openFiles.length === 0,
+  //   isDisabled
+  // })
 
   return (
     <Tooltip>
@@ -104,8 +109,8 @@ export function VerifyButton({
             ? 'Select a board first'
             : !isAgentConnected
               ? 'Arduino Agent not connected'
-              : openFiles.length === 0
-                ? 'Open Arduino files first'
+              : !workspace
+                ? 'Open a workspace with Arduino files first'
                 : 'Compile the current sketch'}
       </TooltipContent>
     </Tooltip>
@@ -132,7 +137,7 @@ export function UploadButton({
     uploadProgress
   } = useArduino()
 
-  const openFiles = useAppSelector(selectOpenFiles)
+  const workspace = useAppSelector((state) => state.file.workspace)
 
   const handleUpload = async (): Promise<void> => {
     if (!selectedBoard) {
@@ -149,17 +154,16 @@ export function UploadButton({
       return
     }
 
-    if (openFiles.length === 0) {
-      toast.error('No files to upload', {
-        description: 'Please open some Arduino files first'
+    if (!workspace) {
+      toast.error('No workspace open', {
+        description: 'Please open a workspace containing Arduino files first'
       })
       return
     }
 
     try {
       if (compileFirst) {
-        const fileMap = convertToFileMap(openFiles)
-        await compileAndUpload(fileMap, selectedBoard.port, selectedBoard.config)
+        await compileAndUpload(workspace.path, selectedBoard.port, selectedBoard.config)
       } else {
         await uploadSketch(selectedBoard.port, selectedBoard.config)
       }
@@ -171,8 +175,7 @@ export function UploadButton({
     }
   }
 
-  const isDisabled =
-    isCompiling || isUploading || !selectedBoard || !isAgentConnected || openFiles.length === 0
+  const isDisabled = isCompiling || isUploading || !selectedBoard || !isAgentConnected || !workspace
   const isLoading = isCompiling || isUploading
 
   const getButtonText = (): string => {
@@ -190,7 +193,7 @@ export function UploadButton({
     if (isLoading) return getButtonText()
     if (!selectedBoard) return 'Select a board first'
     if (!isAgentConnected) return 'Arduino Agent not connected'
-    if (openFiles.length === 0) return 'Open Arduino files first'
+    if (!workspace) return 'Open a workspace with Arduino files first'
     return compileFirst ? 'Compile and upload to board' : 'Upload to board'
   }
 

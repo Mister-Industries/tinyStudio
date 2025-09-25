@@ -10,7 +10,6 @@ import {
   BoardConfig,
   BoardInfo,
   CompileResult,
-  FileMap,
   UploadResult
 } from './types'
 
@@ -72,9 +71,9 @@ export class ElectronArduinoService implements ArduinoService {
   /**
    * Compile Arduino sketch via IPC
    */
-  async compileSketch(files: FileMap, boardConfig: BoardConfig): Promise<CompileResult> {
+  async compileSketch(workspacePath: string, boardConfig: BoardConfig): Promise<CompileResult> {
     try {
-      const result = await window.api.arduino.compileSketch(files, boardConfig)
+      const result = await window.api.arduino.compileSketch(workspacePath, boardConfig)
       // Cast to ensure type compatibility
       return {
         ...result,
@@ -130,7 +129,7 @@ export class ElectronArduinoService implements ArduinoService {
    * Compile and upload sketch via IPC
    */
   async compileAndUpload(
-    files: FileMap,
+    workspacePath: string,
     port: string,
     boardConfig: BoardConfig
   ): Promise<{ compile: CompileResult; upload: UploadResult }> {
@@ -140,7 +139,7 @@ export class ElectronArduinoService implements ArduinoService {
         name: boardConfig.name
       }
 
-      const result = await window.api.arduino.compileAndUpload(files, port, config)
+      const result = await window.api.arduino.compileAndUpload(workspacePath, port, config)
 
       // Cast the result to match our service types
       return {
