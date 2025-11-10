@@ -66,7 +66,7 @@ export class WebArduinoService implements ArduinoService {
   async uploadSketch(
     _port: string,
     _boardConfig: BoardConfig,
-    _binaryPath?: string
+    _workspacePathOrBinary?: string
   ): Promise<UploadResult> {
     throw new Error(
       'Arduino operations are not supported in web environment. Use Electron app for Arduino functionality.'

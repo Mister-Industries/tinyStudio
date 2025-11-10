@@ -100,10 +100,10 @@ export class ElectronArduinoService implements ArduinoService {
   async uploadSketch(
     port: string,
     boardConfig: BoardConfig,
-    binaryPath?: string
+    workspacePathOrBinary?: string
   ): Promise<UploadResult> {
     try {
-      const result = await window.api.arduino.uploadSketch(port, boardConfig, binaryPath)
+      const result = await window.api.arduino.uploadSketch(port, boardConfig, workspacePathOrBinary)
       // Cast to ensure type compatibility
       return {
         ...result,

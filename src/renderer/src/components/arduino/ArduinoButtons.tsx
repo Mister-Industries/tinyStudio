@@ -165,7 +165,7 @@ export function UploadButton({
       if (compileFirst) {
         await compileAndUpload(workspace.path, selectedBoard.port, selectedBoard.config)
       } else {
-        await uploadSketch(selectedBoard.port, selectedBoard.config)
+        await uploadSketch(selectedBoard.port, selectedBoard.config, workspace.path)
       }
     } catch (error) {
       console.error('Upload error:', error)
@@ -174,6 +174,14 @@ export function UploadButton({
       })
     }
   }
+
+  console.log('UploadButton render conditions:', {
+    isCompiling,
+    isUploading,
+    selectedBoard: !selectedBoard,
+    isAgentConnected: !isAgentConnected,
+    workspace: !workspace
+  })
 
   const isDisabled = isCompiling || isUploading || !selectedBoard || !isAgentConnected || !workspace
   const isLoading = isCompiling || isUploading

@@ -162,10 +162,14 @@ export interface ArduinoService {
    * Upload compiled sketch to board
    * @param port Target port
    * @param boardConfig Target board configuration
-   * @param binaryPath Optional path to compiled binary
+   * @param workspacePathOrBinary Optional workspace path or compiled binary path
    * @returns Promise resolving to upload result
    */
-  uploadSketch(port: string, boardConfig: BoardConfig, binaryPath?: string): Promise<UploadResult>
+  uploadSketch(
+    port: string,
+    boardConfig: BoardConfig,
+    workspacePathOrBinary?: string
+  ): Promise<UploadResult>
 
   /**
    * List all connected Arduino boards

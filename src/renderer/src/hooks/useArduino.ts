@@ -45,7 +45,11 @@ export interface UseArduinoReturn {
   lastCompileResult: CompileResult | null
 
   // Upload
-  uploadSketch: (port?: string, boardConfig?: BoardConfig) => Promise<UploadResult>
+  uploadSketch: (
+    port?: string,
+    boardConfig?: BoardConfig,
+    workspacePath?: string
+  ) => Promise<UploadResult>
   compileAndUpload: (
     workspacePath: string,
     port?: string,
@@ -134,17 +138,23 @@ export function useArduino(): UseArduinoReturn {
       })
 
       // Auto-select first board if none selected
-      if (!selectedBoard && boardsList.length > 0) {
-        setSelectedBoard(boardsList[0])
-      }
-
-      // Update selected board if it's no longer available
-      if (selectedBoard && !boardsList.find((b) => b.port === selectedBoard.port)) {
-        setSelectedBoard(boardsList[0] || null)
-        if (boardsList.length === 0) {
-          toast.warning('Previously selected board is no longer connected')
+      setSelectedBoard((currentBoard) => {
+        // If no board is currently selected, select the first one
+        if (!currentBoard && boardsList.length > 0) {
+          return boardsList[0]
         }
-      }
+
+        // If current board is no longer available, select first available or null
+        if (currentBoard && !boardsList.find((b) => b.port === currentBoard.port)) {
+          if (boardsList.length === 0) {
+            toast.warning('Previously selected board is no longer connected')
+          }
+          return boardsList[0] || null
+        }
+
+        // Keep current selection
+        return currentBoard
+      })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       addLog({
@@ -158,7 +168,7 @@ export function useArduino(): UseArduinoReturn {
     } finally {
       setIsLoadingBoards(false)
     }
-  }, [isLoadingBoards, arduinoService, addLog, selectedBoard])
+  }, [isLoadingBoards, arduinoService, addLog])
 
   /**
    * Compile an Arduino sketch
@@ -231,7 +241,11 @@ export function useArduino(): UseArduinoReturn {
    * Upload compiled sketch to board
    */
   const uploadSketch = useCallback(
-    async (port?: string, boardConfig?: BoardConfig): Promise<UploadResult> => {
+    async (
+      port?: string,
+      boardConfig?: BoardConfig,
+      workspacePath?: string
+    ): Promise<UploadResult> => {
       if (isUploading) {
         throw new Error('Upload already in progress')
       }
@@ -269,7 +283,7 @@ export function useArduino(): UseArduinoReturn {
           })
         }, 200)
 
-        const result = await arduinoService.uploadSketch(targetPort, targetBoard)
+        const result = await arduinoService.uploadSketch(targetPort, targetBoard, workspacePath)
         clearInterval(progressTimer)
 
         setLastUploadResult(result)
@@ -337,7 +351,7 @@ export function useArduino(): UseArduinoReturn {
 
       // Only upload if compilation was successful
       if (compileResult.success) {
-        const uploadResult = await uploadSketch(port, boardConfig)
+        const uploadResult = await uploadSketch(port, boardConfig, workspacePath)
         return { compile: compileResult, upload: uploadResult }
       } else {
         return {
@@ -355,12 +369,14 @@ export function useArduino(): UseArduinoReturn {
 
   /**
    * Load boards on mount and when agent connects
+   * Note: refreshBoards is intentionally omitted from deps to prevent re-fetching when selectedBoard changes
    */
   useEffect(() => {
     if (isAgentConnected && !hasLoadedBoards) {
       refreshBoards()
     }
-  }, [isAgentConnected, hasLoadedBoards, refreshBoards])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAgentConnected, hasLoadedBoards])
 
   /**
    * Reset board loading state when agent disconnects

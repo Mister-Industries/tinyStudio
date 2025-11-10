@@ -1,65 +1,21 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { spawn } from 'child_process'
+import {
+  TinyServiceClient,
+  type CompleteData,
+  type OutgoingMessage,
+  type BoardInfo as SharedBoardInfo
+} from '@mister-industries/shared'
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { constants, promises as fs } from 'fs'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 
-// Arduino Types - duplicated from types file for main process
+// Local type definitions for IPC handlers (mapped from shared types)
 interface AgentStatus {
   connected: boolean
   version?: string
   lastCheck: number
   error?: string
-}
-
-interface Board {
-  port: string
-  config: {
-    fqbn: string
-    name: string
-    architecture?: string
-    package?: string
-  }
-  protocol: 'serial' | 'network'
-  connected: boolean
-  metadata?: {
-    vendorId?: string
-    productId?: string
-    serialNumber?: string
-  }
-}
-
-interface BoardInfo extends Board {
-  description: string
-  uploadProtocols: string[]
-  capabilities: string[]
-}
-
-interface CompileResult {
-  success: boolean
-  output: string
-  errors?: Array<{
-    message: string
-    severity: 'error' | 'warning' | 'fatal'
-    file?: string
-    line?: number
-    column?: number
-  }>
-  metrics?: {
-    duration: number
-  }
-  binaryPath?: string
-}
-
-interface UploadResult {
-  success: boolean
-  output: string
-  error?: string
-  progress?: {
-    percentage: number
-    stage: string
-  }
 }
 
 interface BoardConfig {
@@ -70,342 +26,164 @@ interface BoardConfig {
   properties?: { [key: string]: string }
 }
 
-// Arduino CLI service for main process
-class MainArduinoService {
-  private cliPath = 'arduino-cli' // Assume arduino-cli is in PATH
-  private currentStatus: AgentStatus = { connected: false, lastCheck: 0 }
-
-  constructor() {
-    this.currentStatus = {
-      connected: false,
-      lastCheck: Date.now(),
-      error: 'Arduino CLI not initialized'
-    }
-    this.checkArduinoCLI()
-  }
-
-  /**
-   * Check if arduino-cli is available and working
-   */
-  private async checkArduinoCLI(): Promise<void> {
-    try {
-      const result = await this.executeCommand(['version'])
-      if (result.success) {
-        this.currentStatus = {
-          connected: true,
-          lastCheck: Date.now(),
-          version: result.output.trim()
-        }
-      } else {
-        throw new Error('Arduino CLI version check failed')
-      }
-    } catch (error) {
-      this.currentStatus = {
-        connected: false,
-        lastCheck: Date.now(),
-        error: error instanceof Error ? error.message : 'Arduino CLI not available'
-      }
-    }
-  }
-
-  /**
-   * Execute arduino-cli command
-   */
-  private async executeCommand(
-    args: string[],
-    options?: { cwd?: string; input?: string }
-  ): Promise<{ success: boolean; output: string; error?: string }> {
-    return new Promise((resolve) => {
-      const process = spawn(this.cliPath, args, {
-        cwd: options?.cwd,
-        stdio: ['pipe', 'pipe', 'pipe']
-      })
-
-      let stdout = ''
-      let stderr = ''
-
-      process.stdout?.on('data', (data) => {
-        stdout += data.toString()
-      })
-
-      process.stderr?.on('data', (data) => {
-        stderr += data.toString()
-      })
-
-      if (options?.input) {
-        process.stdin?.write(options.input)
-        process.stdin?.end()
-      }
-
-      process.on('close', (code) => {
-        resolve({
-          success: code === 0,
-          output: stdout,
-          error: code !== 0 ? stderr : undefined
-        })
-      })
-
-      process.on('error', (error) => {
-        resolve({
-          success: false,
-          output: '',
-          error: error.message
-        })
-      })
-    })
-  }
-
-  async checkStatus(): Promise<AgentStatus> {
-    await this.checkArduinoCLI()
-    return { ...this.currentStatus }
-  }
-
-  async listBoards(): Promise<Board[]> {
-    try {
-      const result = await this.executeCommand(['board', 'list', '--format', 'json'])
-
-      if (!result.success) {
-        console.error('Arduino CLI board list failed:', result.error)
-        return []
-      }
-
-      // ! remember to replace with the actual result from arduino-cli
-      const data = `{"detected_ports": [
-    {
-      "matching_boards": [
-        {
-          "name": "ESP32 Family Device",
-          "fqbn": "esp32:esp32:esp32_family",
-          "is_hidden": true
-        },
-        {
-          "name": "ESP32 Family Device",
-          "fqbn": "tinyCore:esp32:esp32_family",
-          "is_hidden": true
-        }
-      ],
-      "port": {
-        "address": "COM16",
-        "label": "COM16",
-        "protocol": "serial",
-        "protocol_label": "Serial Port (USB)",
-        "properties": {
-          "pid": "0x1001",
-          "serialNumber": "",
-          "vid": "0x303A"
-        }
-      }
-    }
-  ]
-}`
-      const boardData = JSON.parse(data)
-      const boards: Board[] = []
-
-      // Handle the actual structure: { "detected_ports": [...] }
-      if (boardData.detected_ports && Array.isArray(boardData.detected_ports)) {
-        for (const detectedPort of boardData.detected_ports) {
-          const port = detectedPort.port
-
-          if (port) {
-            // Check if there are matching boards for this port
-            if (detectedPort.matching_boards && Array.isArray(detectedPort.matching_boards)) {
-              // Add each matching board
-              for (const matchingBoard of detectedPort.matching_boards) {
-                boards.push({
-                  port: port.address || port.label || 'unknown',
-                  config: {
-                    fqbn: matchingBoard.fqbn || 'unknown',
-                    name: matchingBoard.name || 'Unknown Board'
-                  },
-                  protocol: port.protocol === 'network' ? 'network' : 'serial',
-                  connected: true,
-                  metadata: {
-                    vendorId: port.properties?.vid,
-                    productId: port.properties?.pid,
-                    serialNumber: port.properties?.serialNumber
-                  }
-                })
-              }
-            }
-          }
-        }
-      }
-
-      return boards
-    } catch (error) {
-      console.error('Error parsing board list:', error)
-      return []
-    }
-  }
-
-  async getBoardInfo(port: string): Promise<BoardInfo> {
-    const boards = await this.listBoards()
-    const board = boards.find((b) => b.port === port)
-
-    if (!board) {
-      throw new Error(`Board not found on port ${port}`)
-    }
-
-    return {
-      ...board,
-      description: `${board.config.name} on ${port}`,
-      uploadProtocols: ['serial'],
-      capabilities: ['compile', 'upload']
-    }
-  }
-
-  async compileSketch(workspacePath: string, boardConfig: BoardConfig): Promise<CompileResult> {
-    console.log('Compiling sketch for board:', boardConfig)
-    console.log('Workspace path:', workspacePath)
-    const startTime = Date.now()
-
-    try {
-      // Find main .ino file in the workspace
-      const files = await fs.readdir(workspacePath, { withFileTypes: true })
-      const inoFile = files.find((file) => file.isFile() && file.name.endsWith('.ino'))
-
-      if (!inoFile) {
-        throw new Error('No .ino file found in workspace')
-      }
-
-      const sketchPath = join(workspacePath, inoFile.name)
-      const buildDir = join(workspacePath, 'build')
-
-      // Create build directory if it doesn't exist
-      await fs.mkdir(buildDir, { recursive: true })
-
-      // Compile the sketch using the workspace directory
-      const result = await this.executeCommand([
-        'compile',
-        '--fqbn',
-        boardConfig.fqbn,
-        '--build-path',
-        buildDir,
-        sketchPath
-      ])
-
-      const duration = Date.now() - startTime
-
-      if (result.success) {
-        console.log('Compilation successful')
-        console.log('Arduino CLI output:', result.output)
-        return {
-          success: true,
-          output: result.output,
-          metrics: { duration }
-        }
-      } else {
-        // Parse errors from arduino-cli output
-        console.error('Compilation failed:', result.error)
-        console.error('Arduino CLI output:', result.output)
-        const errors = this.parseCompileErrors(result.error || result.output)
-        return {
-          success: false,
-          output: result.output,
-          errors,
-          metrics: { duration }
-        }
-      }
-    } catch (error) {
-      const duration = Date.now() - startTime
-      const errorMessage = error instanceof Error ? error.message : 'Unknown compilation error'
-      console.log('Compilation exception:', errorMessage)
-
-      return {
-        success: false,
-        output: `Compilation failed: ${errorMessage}`,
-        errors: [{ message: errorMessage, severity: 'fatal' as const }],
-        metrics: { duration }
-      }
-    }
-  }
-
-  async uploadSketch(
-    port: string,
-    boardConfig: BoardConfig,
-    binaryPath?: string
-  ): Promise<UploadResult> {
-    console.log('Uploading sketch to port:', port, 'with board config:', boardConfig)
-    try {
-      if (!binaryPath) {
-        throw new Error('Binary path is required for upload')
-      }
-
-      const result = await this.executeCommand([
-        'upload',
-        '--fqbn',
-        boardConfig.fqbn,
-        '--port',
-        port,
-        '--input-file',
-        binaryPath
-      ])
-
-      return {
-        success: result.success,
-        output: result.output,
-        error: result.success ? undefined : result.error
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown upload error'
-      return {
-        success: false,
-        output: '',
-        error: errorMessage
-      }
-    }
-  }
-
-  /**
-   * Parse compilation errors from arduino-cli output
-   */
-  private parseCompileErrors(output: string): Array<{
-    message: string
-    severity: 'error' | 'warning' | 'fatal'
-    file?: string
-    line?: number
-  }> {
-    const errors: Array<{
-      message: string
-      severity: 'error' | 'warning' | 'fatal'
-      file?: string
-      line?: number
-    }> = []
-    const lines = output.split('\n')
-
-    for (const line of lines) {
-      // Match error patterns like "file.ino:10:5: error: message"
-      const errorMatch = line.match(/^(.+?):(\d+):(\d+):\s*(error|warning):\s*(.+)$/)
-      if (errorMatch) {
-        errors.push({
-          file: errorMatch[1],
-          line: parseInt(errorMatch[2]),
-          severity: errorMatch[4] as 'error' | 'warning',
-          message: errorMatch[5]
-        })
-      } else if (line.includes('error:') || line.includes('Error:')) {
-        errors.push({
-          message: line.trim(),
-          severity: 'error' as const
-        })
-      }
-    }
-
-    return errors
+interface Board {
+  port: string
+  config: BoardConfig
+  protocol?: string
+  connected: boolean
+  metadata?: {
+    vendorId?: string
+    productId?: string
+    serialNumber?: string
   }
 }
 
-// Global Arduino service instance
-let arduinoService: MainArduinoService | null = null
+interface BoardInfo extends Board {
+  description?: string
+  uploadProtocols?: string[]
+  capabilities?: string[]
+}
+
+interface CompileResult {
+  success: boolean
+  output: string
+  error?: string
+  binaryPath?: string
+}
+
+interface UploadResult {
+  success: boolean
+  output: string
+  error?: string
+}
+
+// Arduino service client instance
+let arduinoClient: TinyServiceClient | null = null
+
+// Throttle tracking for list-boards command
+let lastListBoardsCall = 0
+const LIST_BOARDS_THROTTLE_MS = 5000 // 5 seconds
+let cachedBoardList: Board[] = [] // Cache the last successful board list
+
+// Helper function to normalize tinyCore FQBN
+function normalizeTinyCoreFqbn(fqbn: string): string {
+  if (fqbn.startsWith('tinyCore:')) {
+    return 'tinyCore:esp32:tiny_core_esp32s3_nopsram'
+  }
+  return fqbn
+}
+
+// Initialize the Arduino service client
+function initializeArduinoClient(): void {
+  if (!arduinoClient) {
+    arduinoClient = new TinyServiceClient({
+      url: 'ws://localhost:3000', // Default URL, can be made configurable
+      autoReconnect: true,
+      reconnectInterval: 3000,
+      maxReconnectAttempts: 10,
+      debug: true
+    })
+
+    arduinoClient.connect()
+
+    // Set up global error handler
+    arduinoClient.onError((error) => {
+      console.error('Arduino service error:', error)
+    })
+  }
+}
+
+// Helper function to wrap Arduino service calls in a Promise
+function waitForArduinoResponse(
+  action: string,
+  timeout = 60000
+): Promise<{ success: boolean; output: string; error?: string }> {
+  return new Promise((resolve, reject) => {
+    if (!arduinoClient) {
+      reject(new Error('Arduino client not initialized'))
+      return
+    }
+
+    let output = ''
+    let hasError = false
+    let errorMessage = ''
+
+    const timeoutId = setTimeout(() => {
+      cleanup()
+      reject(new Error(`Operation timed out after ${timeout}ms`))
+    }, timeout)
+
+    const cleanup = (): void => {
+      clearTimeout(timeoutId)
+      if (messageUnsubscribe) messageUnsubscribe()
+      if (errorUnsubscribe) errorUnsubscribe()
+    }
+
+    const messageUnsubscribe = arduinoClient.onMessage((message: OutgoingMessage) => {
+      // Only handle messages for this action
+      if (message.action !== action) return
+
+      if (message.type === 'output') {
+        output += message.data.output + '\n'
+      } else if (message.type === 'error') {
+        hasError = true
+        errorMessage = message.data.error
+        if (message.data.details) {
+          errorMessage += '\n' + message.data.details
+        }
+      } else if (message.type === 'complete') {
+        console.log('Received message in wait:', message)
+        cleanup()
+
+        // Handle list-boards response differently
+        if (action === 'list-boards') {
+          const listBoardsData = message.data as { message: string; boards: SharedBoardInfo[] }
+          // Convert boards array to JSON string output (one per line)
+          const boardsOutput = listBoardsData.boards
+            .map((board) => JSON.stringify(board))
+            .join('\n')
+          resolve({
+            success: !hasError,
+            output: boardsOutput,
+            error: hasError ? errorMessage : undefined
+          })
+        } else {
+          // Default handling for other actions
+          const completeData = message.data as CompleteData
+          resolve({
+            success: completeData.success && !hasError,
+            output: completeData.output || output,
+            error: hasError ? errorMessage : completeData.error
+          })
+        }
+      }
+    })
+
+    const errorUnsubscribe = arduinoClient.onError((error) => {
+      cleanup()
+      reject(error instanceof Error ? error : new Error(String(error)))
+    })
+  })
+}
 
 function setupArduinoHandlers(): void {
-  // Initialize Arduino service
-  arduinoService = new MainArduinoService()
-
+  // Initialize the client when setting up handlers
+  initializeArduinoClient()
   // Arduino IPC handlers
   ipcMain.handle('arduino:checkStatus', async (): Promise<AgentStatus> => {
     try {
-      return await arduinoService!.checkStatus()
+      if (!arduinoClient || !arduinoClient.isConnected()) {
+        return {
+          connected: false,
+          lastCheck: Date.now(),
+          error: 'Arduino service not connected'
+        }
+      }
+
+      return {
+        connected: true,
+        lastCheck: Date.now()
+      }
     } catch (error) {
       return {
         connected: false,
@@ -417,7 +195,66 @@ function setupArduinoHandlers(): void {
 
   ipcMain.handle('arduino:listBoards', async (): Promise<Board[]> => {
     try {
-      return await arduinoService!.listBoards()
+      if (!arduinoClient) {
+        throw new Error('Arduino client not initialized')
+      }
+
+      // Throttle list-boards calls to once every 5 seconds
+      const now = Date.now()
+      const timeSinceLastCall = now - lastListBoardsCall
+
+      if (timeSinceLastCall < LIST_BOARDS_THROTTLE_MS) {
+        console.log(
+          `Throttling list-boards call. ${LIST_BOARDS_THROTTLE_MS - timeSinceLastCall}ms until next allowed call. Returning cached result.`
+        )
+        // Return cached result instead of making a new request
+        return cachedBoardList
+      }
+
+      lastListBoardsCall = now
+
+      // Request list of boards
+      arduinoClient.listBoards()
+
+      // Wait for response
+      const result = await waitForArduinoResponse('list-boards', 10000)
+
+      console.log(result)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to list boards')
+      }
+
+      // Parse board list from output
+      // The output should contain board information in JSON format or similar
+      // This is a simplified implementation - adjust based on actual format
+      const boards: Board[] = []
+      try {
+        const lines = result.output.split('\n').filter((line) => line.trim())
+        for (const line of lines) {
+          try {
+            const boardData = JSON.parse(line) as SharedBoardInfo
+            const normalizedFqbn = normalizeTinyCoreFqbn(boardData.fqbn)
+            boards.push({
+              port: boardData.port || '',
+              config: {
+                fqbn: normalizedFqbn,
+                name: boardData.name
+              },
+              connected: true
+            })
+          } catch {
+            // Skip invalid lines
+          }
+        }
+      } catch (parseError) {
+        console.error('Error parsing board list:', parseError)
+      }
+
+      // Cache the successful result
+      cachedBoardList = boards
+
+      return boards
     } catch (error) {
       console.error('Error in arduino:listBoards:', error)
       throw error
@@ -426,7 +263,54 @@ function setupArduinoHandlers(): void {
 
   ipcMain.handle('arduino:getBoardInfo', async (_, port: string): Promise<BoardInfo> => {
     try {
-      return await arduinoService!.getBoardInfo(port)
+      if (!arduinoClient) {
+        throw new Error('Arduino client not initialized')
+      }
+
+      // Check throttle for list-boards
+      const now = Date.now()
+      const timeSinceLastCall = now - lastListBoardsCall
+
+      if (timeSinceLastCall < LIST_BOARDS_THROTTLE_MS) {
+        console.log(
+          `Throttling getBoardInfo list-boards call. ${LIST_BOARDS_THROTTLE_MS - timeSinceLastCall}ms until next allowed call`
+        )
+        throw new Error('Board list request throttled. Please wait a moment and try again.')
+      }
+
+      lastListBoardsCall = now
+
+      // List all boards and find the one matching the port
+      arduinoClient.listBoards()
+      const result = await waitForArduinoResponse('list-boards', 10000)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to get board info')
+      }
+
+      // Parse and find the specific board
+      const lines = result.output.split('\n').filter((line) => line.trim())
+      for (const line of lines) {
+        try {
+          const boardData = JSON.parse(line) as SharedBoardInfo
+          if (boardData.port === port) {
+            const normalizedFqbn = normalizeTinyCoreFqbn(boardData.fqbn)
+            return {
+              port: boardData.port || '',
+              config: {
+                fqbn: normalizedFqbn,
+                name: boardData.name
+              },
+              connected: true,
+              description: boardData.name
+            }
+          }
+        } catch {
+          // Skip invalid lines
+        }
+      }
+
+      throw new Error(`Board not found on port ${port}`)
     } catch (error) {
       console.error('Error in arduino:getBoardInfo:', error)
       throw error
@@ -437,7 +321,21 @@ function setupArduinoHandlers(): void {
     'arduino:compileSketch',
     async (_, workspacePath: string, boardConfig: BoardConfig): Promise<CompileResult> => {
       try {
-        return await arduinoService!.compileSketch(workspacePath, boardConfig)
+        if (!arduinoClient) {
+          throw new Error('Arduino client not initialized')
+        }
+
+        // Compile the sketch
+        arduinoClient.compile(workspacePath, boardConfig.fqbn)
+
+        // Wait for response with longer timeout for compilation
+        const result = await waitForArduinoResponse('compile', 60000)
+
+        return {
+          success: result.success,
+          output: result.output,
+          error: result.error
+        }
       } catch (error) {
         console.error('Error in arduino:compileSketch:', error)
         throw error
@@ -454,7 +352,22 @@ function setupArduinoHandlers(): void {
       binaryPath?: string
     ): Promise<UploadResult> => {
       try {
-        return await arduinoService!.uploadSketch(port, boardConfig, binaryPath)
+        if (!arduinoClient) {
+          throw new Error('Arduino client not initialized')
+        }
+
+        // If binaryPath is provided, we assume it's already compiled
+        // Otherwise, we'll need to compile first (or the service handles it)
+        arduinoClient.upload(binaryPath || '', boardConfig.fqbn, port)
+
+        // Wait for response
+        const result = await waitForArduinoResponse('upload', 30000)
+
+        return {
+          success: result.success,
+          output: result.output,
+          error: result.error
+        }
       } catch (error) {
         console.error('Error in arduino:uploadSketch:', error)
         throw error
@@ -467,23 +380,31 @@ function setupArduinoHandlers(): void {
     'arduino:compileAndUpload',
     async (_, workspacePath: string, port: string, boardConfig: { fqbn: string; name: string }) => {
       try {
+        if (!arduinoClient) {
+          throw new Error('Arduino client not initialized')
+        }
+
         const fullBoardConfig: BoardConfig = {
           fqbn: boardConfig.fqbn,
           name: boardConfig.name
         }
 
         // Compile first
-        const compileResult = await arduinoService!.compileSketch(workspacePath, fullBoardConfig)
+        arduinoClient.compile(workspacePath, fullBoardConfig.fqbn)
+        const compileResult = await waitForArduinoResponse('compile', 60000)
 
         let uploadResult: UploadResult
 
-        if (compileResult.success && compileResult.binaryPath) {
-          // Upload if compilation succeeded and we have a binary
-          uploadResult = await arduinoService!.uploadSketch(
-            port,
-            fullBoardConfig,
-            compileResult.binaryPath
-          )
+        if (compileResult.success) {
+          // Upload if compilation succeeded
+          arduinoClient.upload(workspacePath, fullBoardConfig.fqbn, port)
+          const uploadResponse = await waitForArduinoResponse('upload', 30000)
+
+          uploadResult = {
+            success: uploadResponse.success,
+            output: uploadResponse.output,
+            error: uploadResponse.error
+          }
         } else {
           uploadResult = {
             success: false,
@@ -493,7 +414,11 @@ function setupArduinoHandlers(): void {
         }
 
         return {
-          compile: compileResult,
+          compile: {
+            success: compileResult.success,
+            output: compileResult.output,
+            error: compileResult.error
+          },
           upload: uploadResult
         }
       } catch (error) {
