@@ -1,8 +1,14 @@
 /**
  * ElectronArduinoService - Arduino service implementation for Electron environment
- * Uses IPC to communicate with main process arduino-cli
+ * Connects directly to the Arduino service via WebSocket using @mister-industries/shared
  */
 
+import {
+  TinyServiceClient,
+  type CompleteData,
+  type OutgoingMessage,
+  type BoardInfo as SharedBoardInfo
+} from '@mister-industries/shared'
 import {
   AgentStatus,
   ArduinoService,
@@ -13,41 +19,208 @@ import {
   UploadResult
 } from './types'
 
+// Helper function to normalize tinyCore FQBN
+function normalizeTinyCoreFqbn(fqbn: string): string {
+  if (fqbn.startsWith('tinyCore:')) {
+    return 'tinyCore:esp32:tiny_core_esp32s3_nopsram'
+  }
+  return fqbn
+}
+
 /**
  * Arduino service implementation for Electron applications
- * Communicates with main process via IPC for arduino-cli operations
+ * Connects directly to the Arduino service WebSocket from the renderer process
  */
 export class ElectronArduinoService implements ArduinoService {
+  private client: TinyServiceClient
+  private lastListBoardsCall = 0
+  private readonly LIST_BOARDS_THROTTLE_MS = 5000 // 5 seconds
+  private cachedBoardList: Board[] = []
+
   constructor() {
-    // Verify we're in Electron environment
-    if (typeof window === 'undefined' || !window.api?.arduino) {
-      throw new Error('ElectronArduinoService can only be used in Electron renderer process')
-    }
+    // Initialize the WebSocket client
+    this.client = new TinyServiceClient({
+      url: 'ws://localhost:3000',
+      autoReconnect: true,
+      reconnectInterval: 3000,
+      maxReconnectAttempts: 10,
+      debug: true
+    })
+
+    // Connect to the service
+    this.client.connect()
+
+    // Set up global error handler
+    this.client.onError((error) => {
+      console.error('Arduino service error:', error)
+    })
   }
 
   /**
-   * Check arduino-cli availability via IPC
+   * Helper method to wait for Arduino service responses
+   */
+  private waitForResponse(
+    action: string,
+    timeout = 60000
+  ): Promise<{ success: boolean; output: string; error?: string }> {
+    return new Promise((resolve, reject) => {
+      if (!this.client) {
+        reject(new Error('Arduino client not initialized'))
+        return
+      }
+
+      let output = ''
+      let hasError = false
+      let errorMessage = ''
+      let messageUnsubscribe: (() => void) | null = null
+      let errorUnsubscribe: (() => void) | null = null
+
+      const cleanup = (): void => {
+        clearTimeout(timeoutId)
+        if (messageUnsubscribe) messageUnsubscribe()
+        if (errorUnsubscribe) errorUnsubscribe()
+      }
+
+      const timeoutId = setTimeout(() => {
+        cleanup()
+        reject(new Error(`Operation timed out after ${timeout}ms`))
+      }, timeout)
+
+      messageUnsubscribe = this.client.onMessage((message: OutgoingMessage) => {
+        // Only handle messages for this action
+        if (message.action !== action) return
+
+        if (message.type === 'output') {
+          output += message.data.output + '\n'
+        } else if (message.type === 'error') {
+          hasError = true
+          errorMessage = message.data.error
+          if (message.data.details) {
+            errorMessage += '\n' + message.data.details
+          }
+        } else if (message.type === 'complete') {
+          cleanup()
+
+          // Handle list-boards response differently
+          if (action === 'list-boards') {
+            const listBoardsData = message.data as { message: string; boards: SharedBoardInfo[] }
+            // Convert boards array to JSON string output (one per line)
+            const boardsOutput = listBoardsData.boards
+              .map((board) => JSON.stringify(board))
+              .join('\n')
+            resolve({
+              success: !hasError,
+              output: boardsOutput,
+              error: hasError ? errorMessage : undefined
+            })
+          } else {
+            // Default handling for other actions
+            const completeData = message.data as CompleteData
+            resolve({
+              success: completeData.success && !hasError,
+              output: completeData.output || output,
+              error: hasError ? errorMessage : completeData.error
+            })
+          }
+        }
+      })
+
+      errorUnsubscribe = this.client.onError((error) => {
+        cleanup()
+        reject(error instanceof Error ? error : new Error(String(error)))
+      })
+    })
+  }
+
+  /**
+   * Check arduino-cli availability
    */
   async checkStatus(): Promise<AgentStatus> {
     try {
-      return await window.api.arduino.checkStatus()
+      if (!this.client || !this.client.isConnected()) {
+        return {
+          connected: false,
+          lastCheck: Date.now(),
+          error: 'Arduino service not connected'
+        }
+      }
+
+      return {
+        connected: true,
+        lastCheck: Date.now()
+      }
     } catch (error) {
       return {
         connected: false,
         lastCheck: Date.now(),
-        error: error instanceof Error ? error.message : 'IPC communication error'
+        error: error instanceof Error ? error.message : 'Unknown error'
       }
     }
   }
 
   /**
-   * List connected Arduino boards via IPC
+   * List connected Arduino boards
    */
   async listBoards(): Promise<Board[]> {
     try {
-      return await window.api.arduino.listBoards()
+      if (!this.client) {
+        throw new Error('Arduino client not initialized')
+      }
+
+      // Throttle list-boards calls to once every 5 seconds
+      const now = Date.now()
+      const timeSinceLastCall = now - this.lastListBoardsCall
+
+      if (timeSinceLastCall < this.LIST_BOARDS_THROTTLE_MS) {
+        console.log(
+          `Throttling list-boards call. ${this.LIST_BOARDS_THROTTLE_MS - timeSinceLastCall}ms until next allowed call. Returning cached result.`
+        )
+        // Return cached result instead of making a new request
+        return this.cachedBoardList
+      }
+
+      this.lastListBoardsCall = now
+
+      // Request list of boards
+      this.client.listBoards()
+
+      // Wait for response
+      const result = await this.waitForResponse('list-boards', 10000)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to list boards')
+      }
+
+      // Parse board list from output
+      const boards: Board[] = []
+      try {
+        const lines = result.output.split('\n').filter((line) => line.trim())
+        for (const line of lines) {
+          try {
+            const boardData = JSON.parse(line) as SharedBoardInfo
+            const normalizedFqbn = normalizeTinyCoreFqbn(boardData.fqbn)
+            boards.push({
+              port: boardData.port || '',
+              config: {
+                fqbn: normalizedFqbn,
+                name: boardData.name
+              },
+              connected: true
+            })
+          } catch {
+            // Skip invalid lines
+          }
+        }
+      } catch (parseError) {
+        console.error('Error parsing board list:', parseError)
+      }
+
+      // Cache the successful result
+      this.cachedBoardList = boards
+
+      return boards
     } catch (error) {
-      console.error('Error listing boards via IPC:', error)
+      console.error('Error listing boards:', error)
       throw new Error(
         `Failed to list boards: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
@@ -55,13 +228,60 @@ export class ElectronArduinoService implements ArduinoService {
   }
 
   /**
-   * Get board information via IPC
+   * Get board information
    */
   async getBoardInfo(port: string): Promise<BoardInfo> {
     try {
-      return await window.api.arduino.getBoardInfo(port)
+      if (!this.client) {
+        throw new Error('Arduino client not initialized')
+      }
+
+      // Check throttle for list-boards
+      const now = Date.now()
+      const timeSinceLastCall = now - this.lastListBoardsCall
+
+      if (timeSinceLastCall < this.LIST_BOARDS_THROTTLE_MS) {
+        console.log(
+          `Throttling getBoardInfo list-boards call. ${this.LIST_BOARDS_THROTTLE_MS - timeSinceLastCall}ms until next allowed call`
+        )
+        throw new Error('Board list request throttled. Please wait a moment and try again.')
+      }
+
+      this.lastListBoardsCall = now
+
+      // List all boards and find the one matching the port
+      this.client.listBoards()
+      const result = await this.waitForResponse('list-boards', 10000)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to get board info')
+      }
+
+      // Parse and find the specific board
+      const lines = result.output.split('\n').filter((line) => line.trim())
+      for (const line of lines) {
+        try {
+          const boardData = JSON.parse(line) as SharedBoardInfo
+          if (boardData.port === port) {
+            const normalizedFqbn = normalizeTinyCoreFqbn(boardData.fqbn)
+            return {
+              port: boardData.port || '',
+              config: {
+                fqbn: normalizedFqbn,
+                name: boardData.name
+              },
+              connected: true,
+              description: boardData.name
+            }
+          }
+        } catch {
+          // Skip invalid lines
+        }
+      }
+
+      throw new Error(`Board not found on port ${port}`)
     } catch (error) {
-      console.error('Error getting board info via IPC:', error)
+      console.error('Error getting board info:', error)
       throw new Error(
         `Failed to get board info: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
@@ -69,21 +289,27 @@ export class ElectronArduinoService implements ArduinoService {
   }
 
   /**
-   * Compile Arduino sketch via IPC
+   * Compile Arduino sketch
    */
   async compileSketch(workspacePath: string, boardConfig: BoardConfig): Promise<CompileResult> {
     try {
-      const result = await window.api.arduino.compileSketch(workspacePath, boardConfig)
-      // Cast to ensure type compatibility
+      if (!this.client) {
+        throw new Error('Arduino client not initialized')
+      }
+
+      // Compile the sketch
+      this.client.compile(workspacePath, boardConfig.fqbn)
+
+      // Wait for response with longer timeout for compilation
+      const result = await this.waitForResponse('compile', 60000)
+
       return {
-        ...result,
-        errors: result.errors?.map((error) => ({
-          ...error,
-          severity: error.severity === 'warning' ? 'error' : error.severity
-        })) as CompileResult['errors']
+        success: result.success,
+        output: result.output,
+        errors: result.error ? [{ message: result.error, severity: 'fatal' as const }] : undefined
       }
     } catch (error) {
-      console.error('Error compiling sketch via IPC:', error)
+      console.error('Error compiling sketch:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       return {
         success: false,
@@ -95,7 +321,7 @@ export class ElectronArduinoService implements ArduinoService {
   }
 
   /**
-   * Upload sketch via IPC
+   * Upload sketch
    */
   async uploadSketch(
     port: string,
@@ -103,19 +329,23 @@ export class ElectronArduinoService implements ArduinoService {
     workspacePathOrBinary?: string
   ): Promise<UploadResult> {
     try {
-      const result = await window.api.arduino.uploadSketch(port, boardConfig, workspacePathOrBinary)
-      // Cast to ensure type compatibility
+      if (!this.client) {
+        throw new Error('Arduino client not initialized')
+      }
+
+      // Upload the sketch
+      this.client.upload(workspacePathOrBinary || '', boardConfig.fqbn, port)
+
+      // Wait for response
+      const result = await this.waitForResponse('upload', 30000)
+
       return {
-        ...result,
-        progress: result.progress
-          ? {
-              percentage: result.progress.percentage,
-              stage: result.progress.stage as 'preparing' | 'uploading' | 'verifying' | 'complete'
-            }
-          : undefined
+        success: result.success,
+        output: result.output,
+        error: result.error
       }
     } catch (error) {
-      console.error('Error uploading sketch via IPC:', error)
+      console.error('Error uploading sketch:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       return {
         success: false,
@@ -126,7 +356,7 @@ export class ElectronArduinoService implements ArduinoService {
   }
 
   /**
-   * Compile and upload sketch via IPC
+   * Compile and upload sketch
    */
   async compileAndUpload(
     workspacePath: string,
@@ -134,35 +364,25 @@ export class ElectronArduinoService implements ArduinoService {
     boardConfig: BoardConfig
   ): Promise<{ compile: CompileResult; upload: UploadResult }> {
     try {
-      const config = {
-        fqbn: boardConfig.fqbn,
-        name: boardConfig.name
+      // Compile first
+      const compileResult = await this.compileSketch(workspacePath, boardConfig)
+
+      let uploadResult: UploadResult
+
+      if (compileResult.success) {
+        // Upload if compilation succeeded
+        uploadResult = await this.uploadSketch(port, boardConfig, workspacePath)
+      } else {
+        uploadResult = {
+          success: false,
+          output: '',
+          error: 'Compilation failed, upload skipped'
+        }
       }
 
-      const result = await window.api.arduino.compileAndUpload(workspacePath, port, config)
-
-      // Cast the result to match our service types
       return {
-        compile: {
-          ...result.compile,
-          errors: result.compile.errors?.map((error) => ({
-            ...error,
-            severity: error.severity === 'warning' ? 'error' : error.severity
-          })) as CompileResult['errors']
-        },
-        upload: {
-          ...result.upload,
-          progress: result.upload.progress
-            ? {
-                percentage: result.upload.progress.percentage,
-                stage: result.upload.progress.stage as
-                  | 'preparing'
-                  | 'uploading'
-                  | 'verifying'
-                  | 'complete'
-              }
-            : undefined
-        }
+        compile: compileResult,
+        upload: uploadResult
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'

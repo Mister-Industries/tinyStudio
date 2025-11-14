@@ -4,7 +4,7 @@
 
 import { Button } from '@renderer/components/ui/Button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/Tooltip'
-import { useArduino } from '@renderer/hooks/useArduino'
+import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { useAppSelector } from '@renderer/redux'
 import { AlertCircle, Check, Loader2, Upload } from 'lucide-react'
 import React from 'react'
@@ -35,7 +35,7 @@ export function VerifyButton({
   size = 'default',
   showIcon = true
 }: VerifyButtonProps): React.JSX.Element {
-  const { compileSketch, isCompiling, selectedBoard, isAgentConnected } = useArduino()
+  const { compileSketch, isCompiling, selectedBoard, isAgentConnected } = useArduinoContext()
 
   const workspace = useAppSelector((state) => state.file.workspace)
 
@@ -135,7 +135,7 @@ export function UploadButton({
     selectedBoard,
     isAgentConnected,
     uploadProgress
-  } = useArduino()
+  } = useArduinoContext()
 
   const workspace = useAppSelector((state) => state.file.workspace)
 
@@ -174,14 +174,6 @@ export function UploadButton({
       })
     }
   }
-
-  console.log('UploadButton render conditions:', {
-    isCompiling,
-    isUploading,
-    selectedBoard: !selectedBoard,
-    isAgentConnected: !isAgentConnected,
-    workspace: !workspace
-  })
 
   const isDisabled = isCompiling || isUploading || !selectedBoard || !isAgentConnected || !workspace
   const isLoading = isCompiling || isUploading
@@ -236,7 +228,7 @@ export function UploadButton({
  * Combined Verify and Upload button group
  */
 export function ArduinoControls({ className }: { className?: string }): React.JSX.Element {
-  const { selectedBoard, isAgentConnected } = useArduino()
+  const { selectedBoard, isAgentConnected } = useArduinoContext()
 
   if (!isAgentConnected) {
     return (

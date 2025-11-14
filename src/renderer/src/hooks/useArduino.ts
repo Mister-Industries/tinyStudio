@@ -93,7 +93,18 @@ export function useArduino(): UseArduinoReturn {
 
   // Services
   const arduinoService = getArduinoService()
-  const { isConnected: isAgentConnected, checkStatus: checkAgentStatus } = useArduinoAgent()
+  const {
+    isConnected: isAgentConnected,
+    checkStatus: checkAgentStatus,
+    startChecking
+  } = useArduinoAgent()
+
+  /**
+   * Start agent monitoring on mount (only once)
+   */
+  useEffect(() => {
+    startChecking()
+  }, [startChecking])
 
   /**
    * Add a log entry

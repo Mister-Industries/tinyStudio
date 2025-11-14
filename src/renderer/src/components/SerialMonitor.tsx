@@ -14,7 +14,7 @@ import {
 import { Button } from './ui/Button'
 import { setPanelOpen } from '@renderer/redux/editorSlice'
 import { useAppDispatch } from '@renderer/redux'
-import { useArduino } from '@renderer/hooks/useArduino'
+import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 
 export function SerialMonitor(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'serial' | 'problems' | 'output'>('serial')
@@ -85,7 +85,7 @@ export function SerialMonitorTab(): React.JSX.Element {
 }
 
 export function ProblemsTab(): React.JSX.Element {
-  const { lastCompileResult } = useArduino()
+  const { lastCompileResult } = useArduinoContext()
 
   return (
     <div className="size-full gap-2 bg-background p-2 flex flex-col">
@@ -118,7 +118,7 @@ export function ProblemsTab(): React.JSX.Element {
 }
 
 export function OutputTab(): React.JSX.Element {
-  const { logs, clearLogs } = useArduino()
+  const { logs, clearLogs } = useArduinoContext()
 
   const formatTimestamp = (timestamp: number): string => {
     return new Date(timestamp).toLocaleTimeString()

@@ -46,7 +46,7 @@ export interface UseArduinoAgentReturn {
 
 const DEFAULT_CONFIG: Required<UseArduinoAgentConfig> = {
   checkInterval: 5000, // 5 seconds
-  autoStart: true,
+  autoStart: false, // Changed to false to prevent multiple instances
   maxRetries: 3,
   retryDelay: 2000 // 2 seconds
 }
@@ -67,14 +67,17 @@ export function useArduinoAgent(config: UseArduinoAgentConfig = {}): UseArduinoA
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isCheckingRef = useRef(false)
   const arduinoService = getArduinoService()
 
   /**
    * Check agent status once
    */
   const checkStatus = useCallback(async (): Promise<void> => {
-    if (isChecking) return
+    // Use ref to prevent concurrent checks without causing re-renders
+    if (isCheckingRef.current) return
 
+    isCheckingRef.current = true
     setIsChecking(true)
 
     try {
@@ -98,9 +101,10 @@ export function useArduinoAgent(config: UseArduinoAgentConfig = {}): UseArduinoA
       })
       setRetryCount((prev) => prev + 1)
     } finally {
+      isCheckingRef.current = false
       setIsChecking(false)
     }
-  }, [isChecking, arduinoService])
+  }, [arduinoService])
 
   /**
    * Start automatic status checking
@@ -164,14 +168,15 @@ export function useArduinoAgent(config: UseArduinoAgentConfig = {}): UseArduinoA
         checkStatus()
       }, finalConfig.retryDelay)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     status.connected,
     retryCount,
     finalConfig.maxRetries,
     finalConfig.retryDelay,
     isRetrying,
-    isChecking,
-    checkStatus
+    isChecking
+    // checkStatus intentionally omitted - it's stable now
   ])
 
   /**

@@ -13,7 +13,7 @@ import {
   SelectValue
 } from '@renderer/components/ui/Select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/Tooltip'
-import { useArduino } from '@renderer/hooks/useArduino'
+import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { Board } from '@renderer/services/arduino/types'
 import { RefreshCw } from 'lucide-react'
 import React from 'react'
@@ -42,7 +42,7 @@ export function BoardSelect({
     refreshBoards,
     isLoadingBoards,
     isAgentConnected
-  } = useArduino()
+  } = useArduinoContext()
 
   const handleBoardChange = (value: string): void => {
     if (value === 'none') {
@@ -133,7 +133,7 @@ export function BoardSelect({
  * Simple port selector component (for backward compatibility)
  */
 export function PortSelect(): React.JSX.Element {
-  const { selectedBoard } = useArduino()
+  const { selectedBoard } = useArduinoContext()
 
   return (
     <Select value={selectedBoard?.port || ''} disabled>

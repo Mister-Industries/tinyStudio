@@ -18,66 +18,6 @@ interface FileStats {
   created: number
 }
 
-// Arduino API types
-interface AgentStatus {
-  connected: boolean
-  version?: string
-  lastCheck: number
-  error?: string
-}
-
-interface BoardConfig {
-  fqbn: string
-  name: string
-  architecture?: string
-  package?: string
-  properties?: { [key: string]: string }
-}
-
-interface Board {
-  port: string
-  config: BoardConfig
-  protocol: 'serial' | 'network'
-  connected: boolean
-  metadata?: {
-    vendorId?: string
-    productId?: string
-    serialNumber?: string
-  }
-}
-
-interface BoardInfo extends Board {
-  description: string
-  uploadProtocols: string[]
-  capabilities: string[]
-}
-
-interface CompileResult {
-  success: boolean
-  output: string
-  errors?: Array<{
-    message: string
-    severity: 'error' | 'warning' | 'fatal'
-    file?: string
-    line?: number
-    column?: number
-  }>
-  metrics?: {
-    duration: number
-  }
-  binaryPath?: string
-}
-
-interface UploadResult {
-  success: boolean
-  output: string
-  error?: string
-  progress?: {
-    percentage: number
-    stage: string
-  }
-}
-
 // Custom APIs for renderer
 const api = {
   // File system operations
@@ -100,28 +40,6 @@ const api = {
       ipcRenderer.invoke('path-exists', targetPath),
     getFileStats: (filePath: string): Promise<FileStats> =>
       ipcRenderer.invoke('get-file-stats', filePath)
-  },
-
-  // Arduino operations
-  arduino: {
-    checkStatus: (): Promise<AgentStatus> => ipcRenderer.invoke('arduino:checkStatus'),
-    listBoards: (): Promise<Board[]> => ipcRenderer.invoke('arduino:listBoards'),
-    getBoardInfo: (port: string): Promise<BoardInfo> =>
-      ipcRenderer.invoke('arduino:getBoardInfo', port),
-    compileSketch: (workspacePath: string, boardConfig: BoardConfig): Promise<CompileResult> =>
-      ipcRenderer.invoke('arduino:compileSketch', workspacePath, boardConfig),
-    uploadSketch: (
-      port: string,
-      boardConfig: BoardConfig,
-      binaryPath?: string
-    ): Promise<UploadResult> =>
-      ipcRenderer.invoke('arduino:uploadSketch', port, boardConfig, binaryPath),
-    compileAndUpload: (
-      workspacePath: string,
-      port: string,
-      boardConfig: { fqbn: string; name: string }
-    ): Promise<{ compile: CompileResult; upload: UploadResult }> =>
-      ipcRenderer.invoke('arduino:compileAndUpload', workspacePath, port, boardConfig)
   }
 }
 
