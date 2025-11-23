@@ -1,7 +1,4 @@
-import { BookOpen, CodeXml, Lightbulb, MessageCircle, X } from 'lucide-react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs'
-import { AIAssistant } from './AIAssistant'
-import { ExamplesContent } from './ExamplesContent'
+import { Lightbulb, X } from 'lucide-react'
 import { ReadmeContent } from './ReferenceContent'
 import { Button } from './ui/Button'
 import { setPanelOpen, useAppDispatch } from '@renderer/redux'
@@ -24,7 +21,7 @@ export function DocsPanel(): React.JSX.Element {
         </Button>
       </div>
       <div className="flex w-full h-full justify-center px-4 py-2">
-        <Tabs defaultValue="examples" className="w-min-[400px] w-full">
+        {/* <Tabs defaultValue="examples" className="w-min-[400px] w-full">
           <TabsList className="flex justify-center w-full px-2">
             <TabsTrigger value="reference">
               <CodeXml />
@@ -48,7 +45,8 @@ export function DocsPanel(): React.JSX.Element {
           <TabsContent className="h-full" value="examples">
             <ExamplesContent />
           </TabsContent>
-        </Tabs>
+        </Tabs> */}
+        <ReadmeContent />
       </div>
     </div>
   )

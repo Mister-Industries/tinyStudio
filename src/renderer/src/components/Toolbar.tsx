@@ -69,7 +69,7 @@ export function Toolbar(): React.JSX.Element {
   return (
     <div className="px-4 py-3 h-14 flex items-center justify-between shadow-sm bg-primary text-primary-foreground">
       <div className="flex items-center gap-2 h-full">
-        <Tooltip>
+        {/* <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" onClick={handleNewFile}>
               <File />
@@ -84,7 +84,7 @@ export function Toolbar(): React.JSX.Element {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">New Folder</TooltipContent>
-        </Tooltip>
+        </Tooltip> */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" onClick={handleSaveFile}>
@@ -93,7 +93,7 @@ export function Toolbar(): React.JSX.Element {
           </TooltipTrigger>
           <TooltipContent side="bottom">Save</TooltipContent>
         </Tooltip>
-        <Tooltip>
+        {/* <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
@@ -104,7 +104,7 @@ export function Toolbar(): React.JSX.Element {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">Add Libraries</TooltipContent>
-        </Tooltip>
+        </Tooltip> */}
         <Separator orientation="vertical" />
         <VerifyButton />
         <UploadButton />
@@ -149,8 +149,8 @@ export function Toolbar(): React.JSX.Element {
           />
           <Blocks />
         </div> */}
-        <BoardSelect />
-        <PortSelect />
+        {/* <BoardSelect />
+        <PortSelect /> */}
       </div>
     </div>
   )

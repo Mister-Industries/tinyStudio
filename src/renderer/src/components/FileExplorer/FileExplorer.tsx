@@ -16,8 +16,7 @@ export function FileExplorer(): React.JSX.Element {
   return (
     <div className="size-full flex flex-col">
       {/* Tab Navigation */}
-      <div className="flex w-full text-xs font-semibold border-b-2 border-border">
-        {/* File Explorer Tab */}
+      {/* <div className="flex w-full text-xs font-semibold border-b-2 border-border">
         <div
           data-active={openTab === 'file-explorer'}
           className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-4 data-[active=true]:bg-background data-[active=true]:text-foreground data-[active=true]:border-accent cursor-pointer"
@@ -26,7 +25,6 @@ export function FileExplorer(): React.JSX.Element {
           <Folder size={14} />
           File Explorer
         </div>
-        {/* Source Control Tab */}
         <div
           data-active={openTab === 'source-control'}
           className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-4 data-[active=true]:bg-background data-[active=true]:text-foreground data-[active=true]:border-accent cursor-pointer"
@@ -35,7 +33,7 @@ export function FileExplorer(): React.JSX.Element {
           <GitBranch size={14} />
           Source Control
         </div>
-      </div>
+      </div> */}
 
       {/* Tab Content */}
       {openTab === 'file-explorer' && <FileExplorerContent />}

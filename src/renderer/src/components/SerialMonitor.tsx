@@ -1,4 +1,4 @@
-import { Monitor, Trash, X } from 'lucide-react'
+import { FileText, Monitor, Trash, X } from 'lucide-react'
 import { useState } from 'react'
 import { Input } from './ui/Input'
 import { ScrollArea } from './ui/ScrollArea'
@@ -17,14 +17,14 @@ import { useAppDispatch } from '@renderer/redux'
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 
 export function SerialMonitor(): React.JSX.Element {
-  const [activeTab, setActiveTab] = useState<'serial' | 'problems' | 'output'>('serial')
+  const [activeTab, setActiveTab] = useState<'serial' | 'problems' | 'output'>('output')
   const dispatch = useAppDispatch()
 
   return (
     <div className="size-full flex flex-col">
       <div className="w-full flex justify-between text-xs font-semibold border-b border-border">
         <div className="flex">
-          <div
+          {/* <div
             data-active={activeTab === 'serial'}
             onClick={() => setActiveTab('serial')}
             className="flex gap-2 px-4 py-2 bg-muted items-center border-b-3 border-transparent data-[active=true]:bg-background data-[active=true]:border-secondary cursor-pointer"
@@ -32,14 +32,14 @@ export function SerialMonitor(): React.JSX.Element {
             <Monitor size={14} />
             Serial Monitor
           </div>
-          {/* <div
+          <div
             data-active={activeTab === 'problems'}
             onClick={() => setActiveTab('problems')}
             className="flex gap-2 px-4 py-2 bg-muted items-center border-b-3 border-transparent data-[active=true]:bg-background data-[active=true]:border-secondary cursor-pointer"
           >
             <TriangleAlert size={14} />
             Problems
-          </div>
+          </div> */}
           <div
             data-active={activeTab === 'output'}
             onClick={() => setActiveTab('output')}
@@ -47,7 +47,7 @@ export function SerialMonitor(): React.JSX.Element {
           >
             <FileText size={14} />
             Output
-          </div> */}
+          </div>
         </div>
         <Button
           variant="ghost"
@@ -153,8 +153,8 @@ export function OutputTab(): React.JSX.Element {
   }
 
   return (
-    <div className="size-full gap-2 bg-background p-2 flex flex-col">
-      <ScrollArea className="size-full border rounded-xl bg-muted p-2 text-xs">
+    <div className="size-full gap-2 bg-background flex p-2 flex-col">
+      <ScrollArea className="size-full border rounded-xl bg-muted text-xs">
         {logs.length > 0 ? (
           <div className="space-y-1">
             {logs.map((log) => (

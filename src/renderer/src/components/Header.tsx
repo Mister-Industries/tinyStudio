@@ -47,9 +47,9 @@ export function Header(): React.JSX.Element {
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
         {/* //TODO: link to documentation */}
-        <Button variant="link" className="p-0">
+        {/* <Button variant="link" className="p-0">
           Help
-        </Button>
+        </Button> */}
         <ThemeToggle />
         {/* <UserMenu /> */}
         {isElectron() && (

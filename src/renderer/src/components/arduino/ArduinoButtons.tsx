@@ -31,7 +31,7 @@ export interface UploadButtonProps extends VerifyButtonProps {
  */
 export function VerifyButton({
   className,
-  variant = 'muted',
+  variant = 'outline',
   size = 'default',
   showIcon = true
 }: VerifyButtonProps): React.JSX.Element {
@@ -122,7 +122,7 @@ export function VerifyButton({
  */
 export function UploadButton({
   className,
-  variant = 'secondary',
+  variant = 'outline',
   size = 'default',
   showIcon = true,
   compileFirst = true
