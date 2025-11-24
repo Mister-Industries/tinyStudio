@@ -145,7 +145,15 @@ export function useArduino(): UseArduinoReturn {
       addLog({
         type: 'info',
         message: `Found ${boardsList.length} board(s)`,
-        details: boardsList.map((b) => `${b.config.name} on ${b.port}`).join(', ')
+        details:
+          boardsList.length > 0
+            ? boardsList
+                .map((b, index) => {
+                  const status = b.connected ? '✓ Connected' : '✗ Disconnected'
+                  return `${index + 1}. ${b.config.name} on ${b.port} - ${status}`
+                })
+                .join('\n')
+            : 'No Arduino boards detected. Please ensure your board is connected via USB and drivers are installed.'
       })
 
       // Auto-select first board if none selected
@@ -201,22 +209,82 @@ export function useArduino(): UseArduinoReturn {
         message: `Starting compilation for ${targetBoard.name}...`
       })
 
+      // Add a log for the build process start
+      addLog({
+        type: 'info',
+        message: 'Initializing Arduino CLI build process...',
+        details: `Board: ${targetBoard.name} (${targetBoard.fqbn})\nWorkspace: ${workspacePath}`
+      })
+
       try {
+        // Add build progress logging
+        const buildStartTime = Date.now()
+
+        addLog({
+          type: 'info',
+          message: 'Running Arduino CLI compile command...'
+        })
+
         const result = await arduinoService.compileSketch(workspacePath, targetBoard)
+        const buildDuration = Date.now() - buildStartTime
         setLastCompileResult(result)
 
         if (result.success) {
+          // Log detailed build output for successful compilations
+          const buildDetails = []
+
+          // Include compilation output if available
+          if (result.output && result.output.trim()) {
+            buildDetails.push(result.output.trim())
+          }
+
+          // Include metrics information
+          if (result.metrics?.duration) {
+            buildDetails.push(`Build time: ${result.metrics.duration}ms`)
+          } else {
+            buildDetails.push(`Build time: ${buildDuration}ms`)
+          }
+
+          // Include memory usage if available
+          if (result.metrics?.memoryUsage) {
+            const { flash, ram } = result.metrics.memoryUsage
+            buildDetails.push(
+              `Memory: Flash ${flash.used}/${flash.total} bytes, RAM ${ram.used}/${ram.total} bytes`
+            )
+          }
+
           addLog({
             type: 'compile',
             message: 'Compilation successful',
-            details: `Completed in ${result.metrics?.duration}ms`
+            details: buildDetails.join('\n\n')
           })
           toast.success('Compilation successful')
         } else {
+          // Log detailed build output for failed compilations
+          const errorDetails = []
+
+          // Include compilation output
+          if (result.output && result.output.trim()) {
+            errorDetails.push('Build Output:')
+            errorDetails.push(result.output.trim())
+          }
+
+          // Include specific errors if available
+          if (result.errors && result.errors.length > 0) {
+            errorDetails.push('\nCompilation Errors:')
+            result.errors.forEach((error, index) => {
+              let errorLine = `${index + 1}. ${error.message}`
+              if (error.file) {
+                errorLine += ` (${error.file}${error.line ? `:${error.line}` : ''}${error.column ? `:${error.column}` : ''})`
+              }
+              errorDetails.push(errorLine)
+            })
+          }
+
           addLog({
             type: 'error',
             message: 'Compilation failed',
-            details: result.output
+            details: errorDetails.join('\n')
           })
           toast.error('Compilation failed', {
             description: result.errors?.[0]?.message || 'See output for details'
@@ -276,7 +344,20 @@ export function useArduino(): UseArduinoReturn {
         message: `Starting upload to ${targetBoard.name} on ${targetPort}...`
       })
 
+      // Add detailed upload initialization log
+      addLog({
+        type: 'info',
+        message: 'Preparing sketch for upload...',
+        details: `Target: ${targetBoard.name}\nPort: ${targetPort}\nFQBN: ${targetBoard.fqbn}\nWorkspace: ${workspacePath || 'Using compiled binary'}`
+      })
+
       try {
+        // Add upload progress step logging
+        addLog({
+          type: 'info',
+          message: 'Executing upload command via Arduino CLI...'
+        })
+
         // Simulate progress updates (real implementation would get these from service)
         const progressTimer = setInterval(() => {
           setUploadProgress((prev) => {
@@ -301,17 +382,40 @@ export function useArduino(): UseArduinoReturn {
         setUploadProgress({ percentage: 100, stage: 'complete' })
 
         if (result.success) {
+          // Log detailed upload output
+          const uploadDetails = []
+
+          if (result.output && result.output.trim()) {
+            uploadDetails.push('Upload Output:')
+            uploadDetails.push(result.output.trim())
+          }
+
+          uploadDetails.push(`Successfully uploaded to ${targetBoard.name} on ${targetPort}`)
+
           addLog({
             type: 'upload',
             message: 'Upload successful',
-            details: result.output
+            details: uploadDetails.join('\n\n')
           })
           toast.success('Upload successful')
         } else {
+          // Log detailed upload error information
+          const errorDetails = []
+
+          if (result.output && result.output.trim()) {
+            errorDetails.push('Upload Output:')
+            errorDetails.push(result.output.trim())
+          }
+
+          if (result.error && result.error.trim()) {
+            errorDetails.push('\nError Details:')
+            errorDetails.push(result.error.trim())
+          }
+
           addLog({
             type: 'error',
             message: 'Upload failed',
-            details: result.error || result.output
+            details: errorDetails.join('\n')
           })
           toast.error('Upload failed', {
             description: result.error || 'See output for details'

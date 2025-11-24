@@ -106,9 +106,6 @@ export function Toolbar(): React.JSX.Element {
           <TooltipContent side="bottom">Add Libraries</TooltipContent>
         </Tooltip> */}
         <Separator orientation="vertical" />
-        <VerifyButton />
-        <UploadButton />
-        <Separator orientation="vertical" />
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -151,6 +148,8 @@ export function Toolbar(): React.JSX.Element {
         </div> */}
         {/* <BoardSelect />
         <PortSelect /> */}
+        <VerifyButton />
+        <UploadButton />
       </div>
     </div>
   )

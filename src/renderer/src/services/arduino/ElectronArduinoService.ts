@@ -337,7 +337,7 @@ export class ElectronArduinoService implements ArduinoService {
       this.client.upload(workspacePathOrBinary || '', boardConfig.fqbn, port)
 
       // Wait for response
-      const result = await this.waitForResponse('upload', 30000)
+      const result = await this.waitForResponse('upload', 60000)
 
       return {
         success: result.success,
