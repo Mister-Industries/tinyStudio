@@ -69,11 +69,17 @@ export class ElectronArduinoService implements ArduinoService {
         return
       }
 
+      if (!this.client.isConnected()) {
+        reject(new Error('Arduino service not connected'))
+        return
+      }
+
       let output = ''
       let hasError = false
       let errorMessage = ''
       let messageUnsubscribe: (() => void) | null = null
       let errorUnsubscribe: (() => void) | null = null
+      let isResolved = false
 
       const cleanup = (): void => {
         clearTimeout(timeoutId)
@@ -81,14 +87,51 @@ export class ElectronArduinoService implements ArduinoService {
         if (errorUnsubscribe) errorUnsubscribe()
       }
 
-      const timeoutId = setTimeout(() => {
+      const safeResolve = (result: { success: boolean; output: string; error?: string }): void => {
+        if (isResolved) return
+        isResolved = true
         cleanup()
-        reject(new Error(`Operation timed out after ${timeout}ms`))
+        resolve(result)
+      }
+
+      const safeReject = (error: Error): void => {
+        if (isResolved) return
+        isResolved = true
+        cleanup()
+        reject(error)
+      }
+
+      const timeoutId = setTimeout(() => {
+        console.warn(`[${action}] Operation timed out after ${timeout}ms, output so far:`, output)
+
+        // Check if the operation might have succeeded based on output
+        if (action === 'compile' && output.includes('Sketch uses')) {
+          console.log(`[${action}] Detected successful compilation from output, resolving...`)
+          safeResolve({
+            success: !hasError,
+            output: output,
+            error: hasError ? errorMessage : undefined
+          })
+        } else if (
+          action === 'upload' &&
+          (output.includes('avrdude done') || output.includes('Upload complete'))
+        ) {
+          console.log(`[${action}] Detected successful upload from output, resolving...`)
+          safeResolve({
+            success: !hasError,
+            output: output,
+            error: hasError ? errorMessage : undefined
+          })
+        } else {
+          safeReject(new Error(`Operation timed out after ${timeout}ms`))
+        }
       }, timeout)
 
       messageUnsubscribe = this.client.onMessage((message: OutgoingMessage) => {
         // Only handle messages for this action
         if (message.action !== action) return
+
+        console.log(`[${action}] Received message:`, message.type, message.data) // Debug log
 
         if (message.type === 'output') {
           output += message.data.output + '\n'
@@ -99,6 +142,7 @@ export class ElectronArduinoService implements ArduinoService {
             errorMessage += '\n' + message.data.details
           }
         } else if (message.type === 'complete') {
+          console.log(`[${action}] Operation completed:`, message.data) // Debug log
           cleanup()
 
           // Handle list-boards response differently
@@ -108,7 +152,7 @@ export class ElectronArduinoService implements ArduinoService {
             const boardsOutput = listBoardsData.boards
               .map((board) => JSON.stringify(board))
               .join('\n')
-            resolve({
+            safeResolve({
               success: !hasError,
               output: boardsOutput,
               error: hasError ? errorMessage : undefined
@@ -116,7 +160,7 @@ export class ElectronArduinoService implements ArduinoService {
           } else {
             // Default handling for other actions
             const completeData = message.data as CompleteData
-            resolve({
+            safeResolve({
               success: completeData.success && !hasError,
               output: completeData.output || output,
               error: hasError ? errorMessage : completeData.error
@@ -126,8 +170,8 @@ export class ElectronArduinoService implements ArduinoService {
       })
 
       errorUnsubscribe = this.client.onError((error) => {
-        cleanup()
-        reject(error instanceof Error ? error : new Error(String(error)))
+        console.error(`[${action}] WebSocket error:`, error)
+        safeReject(error instanceof Error ? error : new Error(String(error)))
       })
     })
   }
@@ -298,10 +342,13 @@ export class ElectronArduinoService implements ArduinoService {
       }
 
       // Compile the sketch
+      console.log(
+        `Starting compile operation for workspace: ${workspacePath}, FQBN: ${boardConfig.fqbn}`
+      )
       this.client.compile(workspacePath, boardConfig.fqbn)
 
       // Wait for response with longer timeout for compilation
-      const result = await this.waitForResponse('compile', 60000)
+      const result = await this.waitForResponse('compile', 120000)
 
       return {
         success: result.success,
@@ -334,10 +381,13 @@ export class ElectronArduinoService implements ArduinoService {
       }
 
       // Upload the sketch
+      console.log(
+        `Starting upload operation to port: ${port}, FQBN: ${boardConfig.fqbn}, workspace: ${workspacePathOrBinary}`
+      )
       this.client.upload(workspacePathOrBinary || '', boardConfig.fqbn, port)
 
-      // Wait for response
-      const result = await this.waitForResponse('upload', 60000)
+      // Wait for response with longer timeout for upload
+      const result = await this.waitForResponse('upload', 90000)
 
       return {
         success: result.success,

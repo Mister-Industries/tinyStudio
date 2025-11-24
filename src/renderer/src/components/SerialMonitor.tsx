@@ -2,7 +2,7 @@ import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { useAppDispatch } from '@renderer/redux'
 import { setPanelOpen } from '@renderer/redux/editorSlice'
 import { FileText, Trash, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { ScrollArea } from './ui/ScrollArea'
@@ -119,6 +119,17 @@ export function ProblemsTab(): React.JSX.Element {
 
 export function OutputTab(): React.JSX.Element {
   const { logs, clearLogs, lastCompileResult, lastUploadResult } = useArduinoContext()
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to bottom when new logs are added
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+      if (scrollElement) {
+        scrollElement.scrollTop = scrollElement.scrollHeight
+      }
+    }
+  }, [logs])
 
   const formatTimestamp = (timestamp: number): string => {
     return new Date(timestamp).toLocaleTimeString()
@@ -192,7 +203,7 @@ export function OutputTab(): React.JSX.Element {
 
   return (
     <div className="size-full gap-2 bg-background flex p-2 pb-22 flex-col">
-      <ScrollArea className="size-full border rounded-xl bg-muted text-xs">
+      <ScrollArea ref={scrollAreaRef} className="size-full border rounded-xl bg-muted text-xs">
         {logs.length > 0 ? (
           <div className="space-y-1 p-2">
             {logs.map((log) => (

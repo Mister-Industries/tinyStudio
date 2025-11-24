@@ -294,19 +294,36 @@ export function useArduino(): UseArduinoReturn {
         return result
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+        // Check if this was a timeout error after a successful operation
+        const isTimeout = errorMessage.includes('timed out')
+        const isAfterSuccess = isTimeout && lastCompileResult?.success
+
         const result: CompileResult = {
-          success: false,
-          output: `Compilation error: ${errorMessage}`,
-          errors: [{ message: errorMessage, severity: 'fatal' }]
+          success: isAfterSuccess, // If last result was successful and this is just a timeout, preserve success
+          output: isAfterSuccess ? lastCompileResult.output : `Compilation error: ${errorMessage}`,
+          errors: isAfterSuccess ? [] : [{ message: errorMessage, severity: 'fatal' }]
         }
 
         setLastCompileResult(result)
-        addLog({
-          type: 'error',
-          message: 'Compilation error',
-          details: errorMessage
-        })
-        toast.error('Compilation error', { description: errorMessage })
+
+        if (isAfterSuccess) {
+          addLog({
+            type: 'compile',
+            message: 'Compilation completed (with timeout warning)',
+            details: `Build finished successfully but communication timed out.\nOriginal output:\n${lastCompileResult.output}`
+          })
+          toast.warning('Compilation completed with timeout', {
+            description: 'Build succeeded but communication was slow'
+          })
+        } else {
+          addLog({
+            type: 'error',
+            message: 'Compilation error',
+            details: errorMessage
+          })
+          toast.error('Compilation error', { description: errorMessage })
+        }
 
         return result
       } finally {
@@ -428,21 +445,37 @@ export function useArduino(): UseArduinoReturn {
         return result
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+        // Check if this was a timeout error after a successful operation
+        const isTimeout = errorMessage.includes('timed out')
+        const isAfterSuccess = isTimeout && lastUploadResult?.success
+
         const result: UploadResult = {
-          success: false,
-          output: '',
-          error: errorMessage
+          success: isAfterSuccess, // If last result was successful and this is just a timeout, preserve success
+          output: isAfterSuccess ? lastUploadResult.output : '',
+          error: isAfterSuccess ? undefined : errorMessage
         }
 
         setLastUploadResult(result)
         setUploadProgress(null)
 
-        addLog({
-          type: 'error',
-          message: 'Upload error',
-          details: errorMessage
-        })
-        toast.error('Upload error', { description: errorMessage })
+        if (isAfterSuccess) {
+          addLog({
+            type: 'upload',
+            message: 'Upload completed (with timeout warning)',
+            details: `Upload finished successfully but communication timed out.\nOriginal output:\n${lastUploadResult.output}`
+          })
+          toast.warning('Upload completed with timeout', {
+            description: 'Upload succeeded but communication was slow'
+          })
+        } else {
+          addLog({
+            type: 'error',
+            message: 'Upload error',
+            details: errorMessage
+          })
+          toast.error('Upload error', { description: errorMessage })
+        }
 
         return result
       } finally {

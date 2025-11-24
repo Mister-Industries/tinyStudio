@@ -1,18 +1,16 @@
+import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import {
-  BaseFileItem,
   saveFileWithContent,
   selectOpenFiles,
   selectPanelState,
   setPanelOpen,
-  startCreateItem,
   useAppDispatch,
   useAppSelector
 } from '@renderer/redux'
-import { File, Folder, Library, Lightbulb, Monitor, Save } from 'lucide-react'
+import { Lightbulb, Monitor, RefreshCw, Save } from 'lucide-react'
 import React from 'react'
 import { UploadButton, VerifyButton } from './arduino/ArduinoButtons'
-import { BoardSelect, PortSelect } from './arduino/BoardSelect'
 import { Button } from './ui/Button'
 import { Separator } from './ui/Separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
@@ -20,34 +18,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
 export function Toolbar(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const { isDocsPanelOpen, isSerialMonitorOpen } = useAppSelector(selectPanelState)
-  const workspace = useAppSelector((state) => state.file.workspace)
   const openFiles = useAppSelector(selectOpenFiles)
   const viewingFileId = useAppSelector((state) => state.file.viewingFileId)
+  const { selectedBoard, isAgentConnected, isLoadingBoards, refreshBoards } = useArduinoContext()
 
-  const handleNewFolder = (): void => {
-    dispatch(
-      startCreateItem({
-        id: crypto.randomUUID(),
-        parentId: 'root',
-        name: null,
-        path: workspace!.path,
-        type: 'folder',
-        children: []
-      } as BaseFileItem)
-    )
-  }
-
-  const handleNewFile = (): void => {
-    dispatch(
-      startCreateItem({
-        id: crypto.randomUUID(),
-        parentId: 'root',
-        name: null,
-        path: workspace!.path,
-        type: 'file'
-      } as BaseFileItem)
-    )
-  }
+  // Board is connected if we have an agent connection and a selected board
+  const isBoardConnected = isAgentConnected && selectedBoard !== null
 
   const handleSaveFile = async (): Promise<void> => {
     const file = openFiles.find((f) => f.id === viewingFileId)
@@ -148,9 +124,48 @@ export function Toolbar(): React.JSX.Element {
         </div> */}
         {/* <BoardSelect />
         <PortSelect /> */}
+        <BoardConnectionStatus isConnected={isBoardConnected} />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => refreshBoards()}
+              disabled={!isAgentConnected || isLoadingBoards}
+              className={`${!isAgentConnected ? 'opacity-50' : ''}`}
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoadingBoards ? 'animate-spin' : ''}`} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {isLoadingBoards ? 'Scanning...' : 'Refresh boards'}
+          </TooltipContent>
+        </Tooltip>
         <VerifyButton />
         <UploadButton />
       </div>
+    </div>
+  )
+}
+
+function BoardConnectionStatus({ isConnected }: { isConnected: boolean }): React.JSX.Element {
+  const { selectedBoard } = useArduinoContext()
+
+  if (!isConnected || !selectedBoard) {
+    return (
+      <div className="text-sm text-secondary-foreground px-2 py-1 rounded bg-background/10 text-center flex items-center">
+        No board connected
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="text-sm text-secondary-foreground
+     px-2 py-1 rounded bg-background/10 flex items-center gap-1"
+    >
+      <div className="w-2 h-2 rounded-full bg-green-400"></div>
+      tinyCore Connected
     </div>
   )
 }
