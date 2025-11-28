@@ -29,7 +29,7 @@ export default function App(): React.JSX.Element {
               <ResizableHandle />
             </>
           )}
-          <ResizablePanel defaultSize={55} className="flex flex-col">
+          <ResizablePanel defaultSize={80} className="flex flex-col">
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel
                 defaultSize={70}

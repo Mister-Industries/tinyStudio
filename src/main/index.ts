@@ -64,7 +64,6 @@ app.whenReady().then(() => {
 
   ipcMain.handle('read-directory', async (_, dirPath: string, recursive = false) => {
     try {
-      const items = await fs.readdir(dirPath, { withFileTypes: true })
       const result: Array<{
         name: string
         path: string
@@ -73,34 +72,28 @@ app.whenReady().then(() => {
         lastModified: number
       }> = []
 
-      for (const item of items) {
-        const itemPath = join(dirPath, item.name)
-        const stats = await fs.stat(itemPath)
+      async function readDirRecursive(currentPath: string): Promise<void> {
+        const items = await fs.readdir(currentPath, { withFileTypes: true })
 
-        result.push({
-          name: item.name,
-          path: itemPath,
-          isDirectory: item.isDirectory(),
-          size: item.isFile() ? stats.size : undefined,
-          lastModified: stats.mtime.getTime()
-        })
+        for (const item of items) {
+          const itemPath = join(currentPath, item.name)
+          const stats = await fs.stat(itemPath)
 
-        if (recursive && item.isDirectory()) {
-          const subItems = await fs.readdir(itemPath, { withFileTypes: true })
-          for (const subItem of subItems) {
-            const subItemPath = join(itemPath, subItem.name)
-            const subStats = await fs.stat(subItemPath)
+          result.push({
+            name: item.name,
+            path: itemPath,
+            isDirectory: item.isDirectory(),
+            size: item.isFile() ? stats.size : undefined,
+            lastModified: stats.mtime.getTime()
+          })
 
-            result.push({
-              name: `${item.name}/${subItem.name}`,
-              path: subItemPath,
-              isDirectory: subItem.isDirectory(),
-              size: subItem.isFile() ? subStats.size : undefined,
-              lastModified: subStats.mtime.getTime()
-            })
+          if (recursive && item.isDirectory()) {
+            await readDirRecursive(itemPath)
           }
         }
       }
+
+      await readDirRecursive(dirPath)
 
       return result
     } catch (error) {

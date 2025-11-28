@@ -137,7 +137,7 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
               />
             ))}
           </div>
-          <div className="flex">
+          {/* <div className="flex">
             <button
               data-active={showCircuit}
               onClick={() => setShowCircuit(!showCircuit)}
@@ -146,7 +146,7 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
               <CircuitBoard />
               Circuit
             </button>
-          </div>
+          </div> */}
         </FileTabsList>
         {showCircuit ? (
           <CircuitEditor />
@@ -175,7 +175,7 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
                 WebkitMask: `url(${tinyLogo}) no-repeat center/contain`
               }}
             />
-            <p>Open a file from the sidebar</p>
+            <p>Open a project from the sidebar</p>
           </div>
         )}
       </FileTabs>

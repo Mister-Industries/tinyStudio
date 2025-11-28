@@ -16,14 +16,22 @@ import { store } from '@renderer/redux/store'
 import { Command, UndoableCommand } from './command'
 
 // Helper function to convert FileSystemItem to BaseFileItem
-const convertToBaseFileItem = (item: FileSystemItem): BaseFileItem => ({
-  id: crypto.randomUUID(),
-  parentId: '',
-  name: item.name,
-  path: item.path,
-  type: item.isDirectory ? 'folder' : 'file',
-  children: item.isDirectory ? [] : undefined
-})
+const convertToBaseFileItem = (item: FileSystemItem): BaseFileItem => {
+  // Extract just the filename/folder name from the path
+  // Handle both forward and backward slashes
+  const normalizedPath = item.path.replace(/\\/g, '/')
+  const lastSlashIndex = normalizedPath.lastIndexOf('/')
+  const itemName = lastSlashIndex >= 0 ? normalizedPath.substring(lastSlashIndex + 1) : item.name
+
+  return {
+    id: crypto.randomUUID(),
+    parentId: '',
+    name: itemName,
+    path: item.path,
+    type: item.isDirectory ? 'folder' : 'file',
+    children: item.isDirectory ? [] : undefined
+  }
+}
 
 // Helper function to find existing item by path in the current workspace structure
 const findExistingItemByPath = (items: BaseFileItem[], path: string): BaseFileItem | null => {
@@ -47,34 +55,42 @@ const buildNestedStructure = (
   const itemMap = new Map<string, BaseFileItem>()
   const rootItems: BaseFileItem[] = []
 
-  // First pass: create all items, preserving existing IDs where possible
+  // Create a map of normalized paths to original items
+  const normalizedPathMap = new Map<string, FileSystemItem>()
   items.forEach((item) => {
+    const normalizedPath = item.path.replace(/\\/g, '/')
+    normalizedPathMap.set(normalizedPath, item)
+  })
+
+  // First pass: create all items, preserving existing IDs where possible
+  normalizedPathMap.forEach((originalItem, normalizedPath) => {
     let baseItem: BaseFileItem
 
     // Try to find existing item with same path to preserve its ID
     const existingItem = existingStructure
-      ? findExistingItemByPath(existingStructure, item.path)
+      ? findExistingItemByPath(existingStructure, normalizedPath)
       : null
 
-    if (existingItem && existingItem.type === (item.isDirectory ? 'folder' : 'file')) {
+    if (existingItem && existingItem.type === (originalItem.isDirectory ? 'folder' : 'file')) {
       // Preserve existing item's ID and parentId, but update other properties
       baseItem = {
-        ...convertToBaseFileItem(item),
+        ...convertToBaseFileItem({ ...originalItem, path: normalizedPath }),
         id: existingItem.id,
         parentId: existingItem.parentId
       }
     } else {
       // Create new item with new ID
-      baseItem = convertToBaseFileItem(item)
+      baseItem = convertToBaseFileItem({ ...originalItem, path: normalizedPath })
     }
 
-    itemMap.set(item.path, baseItem)
+    itemMap.set(normalizedPath, baseItem)
   })
 
   // Second pass: build the tree structure
-  items.forEach((item) => {
-    const baseItem = itemMap.get(item.path)!
-    const parentPath = item.path.substring(0, item.path.lastIndexOf('/'))
+  normalizedPathMap.forEach((_originalItem, normalizedPath) => {
+    const baseItem = itemMap.get(normalizedPath)!
+    const lastSlashIndex = normalizedPath.lastIndexOf('/')
+    const parentPath = lastSlashIndex > 0 ? normalizedPath.substring(0, lastSlashIndex) : ''
 
     if (parentPath && itemMap.has(parentPath)) {
       // This item has a parent
@@ -138,16 +154,23 @@ export class OpenWorkspaceCommand implements Command {
       const filePath = await fileSystem.selectFolder()
       if (filePath) {
         fileSystemItems = await fileSystem.readDirectory(filePath, true)
+      } else {
+        // User cancelled folder selection, don't create workspace
+        return
       }
     }
 
     const fileItems = buildNestedStructure(fileSystemItems)
 
     // Extract workspace path from the first item or use empty string
+    // Normalize path to use forward slashes
     const workspacePath =
       fileSystemItems.length > 0
-        ? fileSystemItems[0].path.substring(0, fileSystemItems[0].path.lastIndexOf('/')) ||
-          fileSystemItems[0].path
+        ? (() => {
+            const normalizedPath = fileSystemItems[0].path.replace(/\\/g, '/')
+            const lastSlashIndex = normalizedPath.lastIndexOf('/')
+            return lastSlashIndex > 0 ? normalizedPath.substring(0, lastSlashIndex) : normalizedPath
+          })()
         : ''
 
     const workspace: Workspace = {
