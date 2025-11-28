@@ -231,7 +231,7 @@ export function useArduino(): UseArduinoReturn {
 
         if (result.success) {
           // Log detailed build output for successful compilations
-          const buildDetails = []
+          const buildDetails: string[] = []
 
           // Include compilation output if available
           if (result.output && result.output.trim()) {
@@ -261,7 +261,7 @@ export function useArduino(): UseArduinoReturn {
           toast.success('Compilation successful')
         } else {
           // Log detailed build output for failed compilations
-          const errorDetails = []
+          const errorDetails: string[] = []
 
           // Include compilation output
           if (result.output && result.output.trim()) {
@@ -297,11 +297,13 @@ export function useArduino(): UseArduinoReturn {
 
         // Check if this was a timeout error after a successful operation
         const isTimeout = errorMessage.includes('timed out')
-        const isAfterSuccess = isTimeout && lastCompileResult?.success
+        const isAfterSuccess = isTimeout && (lastCompileResult?.success ?? false)
 
         const result: CompileResult = {
           success: isAfterSuccess, // If last result was successful and this is just a timeout, preserve success
-          output: isAfterSuccess ? lastCompileResult.output : `Compilation error: ${errorMessage}`,
+          output: isAfterSuccess
+            ? (lastCompileResult?.output ?? '')
+            : `Compilation error: ${errorMessage}`,
           errors: isAfterSuccess ? [] : [{ message: errorMessage, severity: 'fatal' }]
         }
 
@@ -311,7 +313,7 @@ export function useArduino(): UseArduinoReturn {
           addLog({
             type: 'compile',
             message: 'Compilation completed (with timeout warning)',
-            details: `Build finished successfully but communication timed out.\nOriginal output:\n${lastCompileResult.output}`
+            details: `Build finished successfully but communication timed out.\nOriginal output:\n${lastCompileResult?.output ?? ''}`
           })
           toast.warning('Compilation completed with timeout', {
             description: 'Build succeeded but communication was slow'
@@ -400,7 +402,7 @@ export function useArduino(): UseArduinoReturn {
 
         if (result.success) {
           // Log detailed upload output
-          const uploadDetails = []
+          const uploadDetails: string[] = []
 
           if (result.output && result.output.trim()) {
             uploadDetails.push('Upload Output:')
@@ -417,7 +419,7 @@ export function useArduino(): UseArduinoReturn {
           toast.success('Upload successful')
         } else {
           // Log detailed upload error information
-          const errorDetails = []
+          const errorDetails: string[] = []
 
           if (result.output && result.output.trim()) {
             errorDetails.push('Upload Output:')
@@ -448,11 +450,11 @@ export function useArduino(): UseArduinoReturn {
 
         // Check if this was a timeout error after a successful operation
         const isTimeout = errorMessage.includes('timed out')
-        const isAfterSuccess = isTimeout && lastUploadResult?.success
+        const isAfterSuccess = isTimeout && (lastUploadResult?.success ?? false)
 
         const result: UploadResult = {
           success: isAfterSuccess, // If last result was successful and this is just a timeout, preserve success
-          output: isAfterSuccess ? lastUploadResult.output : '',
+          output: isAfterSuccess ? (lastUploadResult?.output ?? '') : '',
           error: isAfterSuccess ? undefined : errorMessage
         }
 
@@ -463,7 +465,7 @@ export function useArduino(): UseArduinoReturn {
           addLog({
             type: 'upload',
             message: 'Upload completed (with timeout warning)',
-            details: `Upload finished successfully but communication timed out.\nOriginal output:\n${lastUploadResult.output}`
+            details: `Upload finished successfully but communication timed out.\nOriginal output:\n${lastUploadResult?.output ?? ''}`
           })
           toast.warning('Upload completed with timeout', {
             description: 'Upload succeeded but communication was slow'

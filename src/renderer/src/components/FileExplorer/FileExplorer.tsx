@@ -3,7 +3,7 @@
  * Main file explorer with tabs for file browser and source control
  */
 
-import { Construction, Folder, GitBranch } from 'lucide-react'
+import { Construction, GitBranch } from 'lucide-react'
 import React, { useState } from 'react'
 import { FileExplorerContent } from './FileExplorerContent'
 
@@ -11,7 +11,7 @@ import { FileExplorerContent } from './FileExplorerContent'
 export type FileExplorerTab = 'file-explorer' | 'source-control'
 
 export function FileExplorer(): React.JSX.Element {
-  const [openTab, setOpenTab] = useState<FileExplorerTab>('file-explorer')
+  const [openTab] = useState<FileExplorerTab>('file-explorer')
 
   return (
     <div className="size-full flex flex-col">
