@@ -10,13 +10,14 @@ import {
   updateFileContent,
   updateReadmeContent
 } from '@renderer/redux/fileSlice'
-import { CircuitBoard } from 'lucide-react'
+import { Code, Eye } from 'lucide-react'
 import * as monaco from 'monaco-editor'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { BlocklyEditor } from './BlocklyEditor'
 import { CircuitEditor } from './CircuitEditor'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
 import { FileTabContent, FileTabs, FileTabsList, FileTabTrigger } from './ui/FileTab'
+import { Switch } from './ui/Switch'
 
 loader.config({ monaco })
 
@@ -25,9 +26,10 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
   const viewingFileId = useAppSelector(selectViewingFileId)
   const editorMode = useAppSelector((state) => state.editor.editorMode)
   const dispatch = useAppDispatch()
-  const [showCircuit, setShowCircuit] = useState(false)
   const monacoEditorRef = useRef<MonacoEditorRef>(null)
   const pixelSize = Math.round((size / 100) * (window.innerHeight - 92))
+  // Track which SVG files should show visual editor (true) vs code editor (false)
+  const [svgViewMode, setSvgViewMode] = useState<Record<string, boolean>>({})
 
   const handleFileClose = useCallback(
     (fileId: string): void => {
@@ -41,13 +43,17 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
       dispatch(setViewingFile(fileId))
       // Focus the Monaco editor after a short delay to ensure it's rendered
       setTimeout(() => {
-        if (monacoEditorRef.current && !showCircuit && editorMode !== 'blocks') {
+        if (monacoEditorRef.current && editorMode !== 'blocks') {
           monacoEditorRef.current.focus()
         }
       }, 50)
     },
-    [dispatch, showCircuit, editorMode]
+    [dispatch, editorMode]
   )
+
+  const toggleSvgViewMode = useCallback((fileId: string) => {
+    setSvgViewMode((prev) => ({ ...prev, [fileId]: !prev[fileId] }))
+  }, [])
 
   // Add keyboard listeners for file navigation and closing
   useEffect(() => {
@@ -137,34 +143,45 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
               />
             ))}
           </div>
-          {/* <div className="flex">
-            <button
-              data-active={showCircuit}
-              onClick={() => setShowCircuit(!showCircuit)}
-              className="flex items-center gap-2 p-2 hover:bg-accent/50 hover:text-accent-foreground data-[active=true]:bg-accent/50 data-[active=true]:text-accent-foreground data-[active=true]:border-b data-[active=true]:border-primary"
-            >
-              <CircuitBoard />
-              Circuit
-            </button>
-          </div> */}
         </FileTabsList>
-        {showCircuit ? (
-          <CircuitEditor />
-        ) : openFiles.length > 0 ? (
-          openFiles.map((file) => (
-            <FileTabContent key={`content-${file.id}`} value={file.id}>
-              {editorMode === 'blocks' ? (
-                <BlocklyEditor />
-              ) : (
-                <MonacoEditor
-                  ref={monacoEditorRef}
-                  activeFile={file}
-                  onContentChange={(content) => handleContentChange(content, file.id)}
-                  onSaveFile={(content) => handleSaveFile(content, file.id)}
-                />
-              )}
-            </FileTabContent>
-          ))
+        {openFiles.length > 0 ? (
+          openFiles.map((file) => {
+            const isSvg = fileSystem.isSvgFile(file.name)
+            const showVisualEditor = isSvg && svgViewMode[file.id] !== false // Default to visual for SVG
+
+            return (
+              <FileTabContent key={`content-${file.id}`} value={file.id}>
+                {isSvg && (
+                  <div className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-background/95 backdrop-blur-sm border border-border rounded-lg px-3 py-2 shadow-lg">
+                    <Code
+                      size={16}
+                      className={!showVisualEditor ? 'text-primary' : 'text-muted-foreground'}
+                    />
+                    <Switch
+                      checked={showVisualEditor}
+                      onCheckedChange={() => toggleSvgViewMode(file.id)}
+                    />
+                    <Eye
+                      size={16}
+                      className={showVisualEditor ? 'text-primary' : 'text-muted-foreground'}
+                    />
+                  </div>
+                )}
+                {isSvg && showVisualEditor ? (
+                  <CircuitEditor svgContent={file.content} />
+                ) : editorMode === 'blocks' ? (
+                  <BlocklyEditor />
+                ) : (
+                  <MonacoEditor
+                    ref={monacoEditorRef}
+                    activeFile={file}
+                    onContentChange={(content) => handleContentChange(content, file.id)}
+                    onSaveFile={(content) => handleSaveFile(content, file.id)}
+                  />
+                )}
+              </FileTabContent>
+            )
+          })
         ) : (
           <div className="size-full flex flex-col items-center justify-center text-sm">
             <div

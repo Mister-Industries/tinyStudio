@@ -273,6 +273,10 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     return imageExtensions.includes(this.getFileExtension(fileName))
   }
 
+  isSvgFile(fileName: string): boolean {
+    return this.getFileExtension(fileName) === 'svg'
+  }
+
   isCodeFile(fileName: string): boolean {
     const codeExtensions = [
       'js',

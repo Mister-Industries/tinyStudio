@@ -3,13 +3,18 @@ import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
 import circuitDiagram from '../assets/circuitdiagram.png'
 import { RootState } from '../redux/store'
 
-export function CircuitEditor(): React.JSX.Element {
-  const diagramSvgContent = useSelector((state: RootState) => state.file.diagramSvgContent)
+interface CircuitEditorProps {
+  svgContent?: string
+}
 
-  const diagramElement = diagramSvgContent ? (
+export function CircuitEditor({ svgContent }: CircuitEditorProps): React.JSX.Element {
+  const diagramSvgContent = useSelector((state: RootState) => state.file.diagramSvgContent)
+  const activeSvgContent = svgContent || diagramSvgContent
+
+  const diagramElement = activeSvgContent ? (
     <div
       className="size-1/2 z-30 flex items-center justify-center [&>svg]:w-auto [&>svg]:h-auto [&>svg]:max-w-full [&>svg]:max-h-full"
-      dangerouslySetInnerHTML={{ __html: diagramSvgContent }}
+      dangerouslySetInnerHTML={{ __html: activeSvgContent }}
     />
   ) : (
     <img src={circuitDiagram} alt="Circuit diagram" className="size-fit object-contain" />
