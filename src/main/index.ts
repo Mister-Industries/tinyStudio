@@ -3,6 +3,13 @@ import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { constants, promises as fs } from 'fs'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
+import { ServiceManager } from './ServiceManager'
+
+// Initialize ServiceManager
+const serviceManager = new ServiceManager({
+  port: 3000,
+  allowedOrigins: ['*']
+})
 
 function createWindow(): void {
   // Create the browser window.
@@ -40,9 +47,16 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
+
+  // Start TinyService
+  try {
+    await serviceManager.start()
+  } catch (error) {
+    console.error('Failed to start TinyService during app initialization:', error)
+  }
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -194,6 +208,20 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
+})
+
+// Stop TinyService before the app quits
+app.on('before-quit', async (event) => {
+  if (serviceManager.isServiceRunning()) {
+    event.preventDefault()
+    try {
+      await serviceManager.stop()
+    } catch (error) {
+      console.error('Error stopping TinyService during app quit:', error)
+    } finally {
+      app.exit()
+    }
+  }
 })
 
 // In this file you can include the rest of your app"s main process

@@ -11,6 +11,27 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+extraResources:
+  - from: node_modules/@mister-industries/tinyservice/binaries/macos-x64/arduino-cli
+    to: arduino-cli/darwin-x64/arduino-cli
+    filter:
+      - '**/*'
+  - from: node_modules/@mister-industries/tinyservice/binaries/macos-arm64/arduino-cli
+    to: arduino-cli/darwin-arm64/arduino-cli
+    filter:
+      - '**/*'
+  - from: node_modules/@mister-industries/tinyservice/binaries/linux-x64/arduino-cli
+    to: arduino-cli/linux-x64/arduino-cli
+    filter:
+      - '**/*'
+  - from: node_modules/@mister-industries/tinyservice/binaries/linux-arm64/arduino-cli
+    to: arduino-cli/linux-arm64/arduino-cli
+    filter:
+      - '**/*'
+  - from: node_modules/@mister-industries/tinyservice/binaries/windows-x64/arduino-cli.exe
+    to: arduino-cli/win32-x64/arduino-cli.exe
+    filter:
+      - '**/*'
 win:
   executableName: tinyforge
 nsis:
