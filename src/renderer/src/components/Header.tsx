@@ -1,10 +1,9 @@
+import { isElectron } from '@renderer/lib/utils'
 import { Maximize, Minimize, Minus, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Button } from './ui/Button'
 import { Separator } from './ui/Separator'
 import { ThemeToggle } from './ui/ThemeToggle'
-import { isElectron } from '@renderer/lib/utils'
-import { useState, useEffect } from 'react'
-import { UserMenu } from './UserMenu'
 
 export function Header(): React.JSX.Element {
   const [isMaximized, setIsMaximized] = useState(false)
@@ -18,8 +17,8 @@ export function Header(): React.JSX.Element {
     window.electron.ipcRenderer.on('window:maximized', handleMaximized)
     window.electron.ipcRenderer.on('window:unmaximized', handleUnmaximized)
 
-    // Optionally, request current state on mount
-    window.electron.ipcRenderer.invoke?.('window:getIsMaximized')?.then(setIsMaximized)
+    // // Optionally, request current state on mount
+    // window.electron.ipcRenderer.invoke?.('window:getIsMaximized')?.then(setIsMaximized)
 
     return () => {
       window.electron.ipcRenderer.removeListener('window:maximized', handleMaximized)
@@ -39,7 +38,7 @@ export function Header(): React.JSX.Element {
       <div className="flex items-center gap-8 pl-4">
         <h1 className="flex font-semibold text-lg">
           <p>tiny</p>
-          <p className="text-accent">Studio</p>
+          <p className="text-accent">Forge</p>
         </h1>
         <p>by MR.INDUSTRIES</p>
       </div>
@@ -48,11 +47,11 @@ export function Header(): React.JSX.Element {
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
         {/* //TODO: link to documentation */}
-        <Button variant="link" className="p-0">
+        {/* <Button variant="link" className="p-0">
           Help
-        </Button>
+        </Button> */}
         <ThemeToggle />
-        <UserMenu />
+        {/* <UserMenu /> */}
         {isElectron() && (
           <div className="h-full flex">
             <Separator orientation="vertical" className="h-6 w-px bg-border" />

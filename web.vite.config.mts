@@ -11,5 +11,10 @@ export default defineConfig({
     outDir: path.resolve(__dirname, 'dist-web'),
     emptyOutDir: true
   },
-  root: 'src/renderer'
+  root: 'src/renderer',
+  resolve: {
+    alias: {
+      '@renderer': path.resolve(__dirname, 'src/renderer/src')
+    }
+  }
 })

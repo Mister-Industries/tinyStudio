@@ -5,7 +5,9 @@
 :root {
   --radius: 0.625rem;
   --background: #ffffff;
+  --background-grid: #efefef;
   --foreground: #4b5f5a;
+  --foreground-grid: #4b5f5a;
   --card: #ffffff;
   --card-foreground: #4b5f5a;
   --popover: #ffffff;
@@ -40,7 +42,7 @@
   --popover: #232b28;
   --popover-foreground: #e5f0ea;
   --primary: #14161a;
-  --primary-foreground: #232b28;
+  --primary-foreground: #e5f0ea;
   --secondary: #295c43;
   --secondary-foreground: #e5f0ea;
   --muted: #1b1d22;
@@ -63,7 +65,9 @@
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-grid: var(--background-grid);
   --color-foreground: var(--foreground);
+  --color-foreground-grid: var(--foreground-grid);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);

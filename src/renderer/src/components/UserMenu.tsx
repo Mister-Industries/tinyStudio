@@ -1,5 +1,5 @@
 import { FolderOpen, BookOpen, GraduationCap, Settings } from 'lucide-react'
-import { AvatarImage, AvatarFallback, Avatar } from './ui/Avatar'
+import { AvatarFallback, Avatar } from './ui/Avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,6 @@ export function UserMenu(): React.JSX.Element {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="hover:cursor-pointer">
-          <AvatarImage src="https://github.com/shadcn.png" />
           <AvatarFallback>EE</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

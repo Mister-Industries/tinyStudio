@@ -1,13 +1,5 @@
 import { Zap } from 'lucide-react'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from './ui/Card'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/Card'
 import { ScrollArea } from './ui/ScrollArea'
 import { Button } from './ui/Button'
 
@@ -71,7 +63,7 @@ export function ExamplesContent(): React.JSX.Element {
     <>
       <div className="flex items-center gap-2 px-4 py-4 text-primary text-sm font-semibold border-b border-border mb-4">
         <Zap size={16} />
-        Arduino Examples
+        tinyCore Examples
       </div>
       <ScrollArea className="h-5/6">
         <div className="flex flex-col gap-4">

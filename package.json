@@ -1,5 +1,5 @@
 {
-  "name": "tinystudio",
+  "name": "tinyforge",
   "version": "1.0.0",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
@@ -25,17 +25,29 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
+    "@hookform/resolvers": "^5.1.1",
+    "@mister-industries/shared": "^1.0.0",
+    "@mister-industries/tinyservice": "^1.0.0",
     "@monaco-editor/react": "^4.7.0-rc.0",
+    "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/vite": "^4.1.8",
+    "blockly": "^12.1.0",
     "class-variance-authority": "^0.7.1",
     "electron-updater": "^6.3.9",
     "lucide-react": "^0.515.0",
     "monaco-editor": "^0.52.2",
+    "next-themes": "^0.4.6",
     "radix-ui": "^1.4.2",
+    "react-hook-form": "^7.60.0",
+    "react-markdown": "^10.1.0",
+    "react-redux": "^9.2.0",
     "react-resizable-panels": "^3.0.3",
+    "react-zoom-pan-pinch": "^3.7.0",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.8",
-    "tw-animate-css": "^1.3.4"
+    "tw-animate-css": "^1.3.4",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",

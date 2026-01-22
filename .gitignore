@@ -1,6 +1,8 @@
 node_modules
 dist
+dist-web
 out
 .DS_Store
 .eslintcache
 *.log*
+.npmrc
