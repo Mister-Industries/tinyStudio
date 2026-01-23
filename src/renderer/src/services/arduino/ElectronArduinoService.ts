@@ -57,6 +57,16 @@ export class ElectronArduinoService implements ArduinoService {
   }
 
   /**
+   * Cleanup method to disconnect WebSocket client
+   */
+  public cleanup(): void {
+    if (this.client) {
+      console.log('Disconnecting Arduino service client...')
+      this.client.disconnect()
+    }
+  }
+
+  /**
    * Helper method to wait for Arduino service responses
    */
   private waitForResponse(

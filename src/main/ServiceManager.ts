@@ -1,9 +1,20 @@
-import { app } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import path from 'path'
 
 interface ServiceConfig {
   port: number
   allowedOrigins: string[]
+}
+
+interface HealthCheckResponse {
+  status: string
+  arduinoCli: {
+    available: boolean
+    path: string
+  }
+  service: {
+    port: number
+  }
 }
 
 interface TinyServiceInstance {
@@ -15,9 +26,32 @@ export class ServiceManager {
   private service: TinyServiceInstance | null = null
   private config: ServiceConfig
   private isRunning = false
+  private mainWindow: BrowserWindow | null = null
 
   constructor(config: ServiceConfig = { port: 3000, allowedOrigins: ['*'] }) {
     this.config = config
+  }
+
+  /**
+   * Set the main window for error reporting
+   */
+  setMainWindow(window: BrowserWindow): void {
+    this.mainWindow = window
+  }
+
+  /**
+   * Send error to renderer process
+   */
+  private sendErrorToRenderer(message: string, error: unknown): void {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error(`[ServiceManager] ${message}:`, errorMessage)
+    
+    if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+      this.mainWindow.webContents.send('service:error', {
+        message,
+        error: errorMessage
+      })
+    }
   }
 
   /**
@@ -64,11 +98,59 @@ export class ServiceManager {
   }
 
   /**
+   * Check service health via HTTP endpoint
+   */
+  private async checkServiceHealth(): Promise<HealthCheckResponse> {
+    const response = await fetch(`http://localhost:${this.config.port}/health`)
+    if (!response.ok) {
+      throw new Error(`Health check failed with status ${response.status}`)
+    }
+    return await response.json()
+  }
+
+  /**
+   * Verify service is running and configured correctly
+   */
+  private async verifyServiceHealth(maxRetries = 3, retryDelayMs = 1000): Promise<void> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`[ServiceManager] Health check attempt ${attempt}/${maxRetries}`)
+        const health = await this.checkServiceHealth()
+        
+        if (health.status !== 'ok') {
+          throw new Error(`Service health check returned status: ${health.status}`)
+        }
+
+        console.log('[ServiceManager] Service health check passed')
+        console.log(`[ServiceManager] Arduino CLI available: ${health.arduinoCli.available}`)
+        console.log(`[ServiceManager] Arduino CLI path: ${health.arduinoCli.path}`)
+
+        if (!health.arduinoCli.available) {
+          const warningMessage = 'Arduino CLI is not available on the service'
+          console.warn(`[ServiceManager] WARNING: ${warningMessage}`)
+          this.sendErrorToRenderer(warningMessage, new Error('Arduino CLI not found at configured path'))
+        }
+
+        return
+      } catch (error) {
+        console.warn(`[ServiceManager] Health check attempt ${attempt} failed:`, error)
+        
+        if (attempt === maxRetries) {
+          throw new Error(`Service health check failed after ${maxRetries} attempts: ${error instanceof Error ? error.message : String(error)}`)
+        }
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, retryDelayMs))
+      }
+    }
+  }
+
+  /**
    * Start the TinyService WebSocket server
    */
   async start(): Promise<void> {
     if (this.isRunning) {
-      console.log('TinyService is already running')
+      console.log('[ServiceManager] TinyService is already running')
       return
     }
 
@@ -76,8 +158,8 @@ export class ServiceManager {
       const TinyService = await this.importTinyService()
       const arduinoCliPath = this.resolveArduinoCliPath()
 
-      console.log(`Starting TinyService on port ${this.config.port}`)
-      console.log(`Arduino CLI path: ${arduinoCliPath}`)
+      console.log(`[ServiceManager] Starting TinyService on port ${this.config.port}`)
+      console.log(`[ServiceManager] Arduino CLI path: ${arduinoCliPath}`)
 
       this.service = new TinyService({
         port: this.config.port,
@@ -87,10 +169,13 @@ export class ServiceManager {
 
       await this.service.start()
 
+      // Verify service health after startup
+      await this.verifyServiceHealth()
+
       this.isRunning = true
-      console.log(`TinyService started successfully on ws://localhost:${this.config.port}`)
+      console.log(`[ServiceManager] TinyService started successfully on ws://localhost:${this.config.port}`)
     } catch (error) {
-      console.error('Failed to start TinyService:', error)
+      this.sendErrorToRenderer('Failed to start TinyService', error)
       throw error
     }
   }
@@ -100,18 +185,18 @@ export class ServiceManager {
    */
   async stop(): Promise<void> {
     if (!this.isRunning || !this.service) {
-      console.log('TinyService is not running')
+      console.log('[ServiceManager] TinyService is not running')
       return
     }
 
     try {
-      console.log('Stopping TinyService...')
+      console.log('[ServiceManager] Stopping TinyService...')
       await this.service.stop()
       this.service = null
       this.isRunning = false
-      console.log('TinyService stopped successfully')
+      console.log('[ServiceManager] TinyService stopped successfully')
     } catch (error) {
-      console.error('Failed to stop TinyService:', error)
+      this.sendErrorToRenderer('Failed to stop TinyService', error)
       throw error
     }
   }

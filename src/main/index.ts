@@ -26,8 +26,20 @@ function createWindow(): void {
     }
   })
 
+  // Set the main window for ServiceManager error reporting
+  serviceManager.setMainWindow(mainWindow)
+
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+  })
+
+  // Emit maximize/unmaximize events for renderer
+  mainWindow.on('maximize', () => {
+    mainWindow.webContents.send('window:maximized')
+  })
+
+  mainWindow.on('unmaximize', () => {
+    mainWindow.webContents.send('window:unmaximized')
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -67,6 +79,26 @@ app.whenReady().then(async () => {
 
   // IPC test
   ipcMain.handle('ping', () => 'pong')
+
+  // Window control handlers
+  ipcMain.on('window:minimize', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    window?.minimize()
+  })
+
+  ipcMain.on('window:maximize', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    if (window?.isMaximized()) {
+      window.unmaximize()
+    } else {
+      window?.maximize()
+    }
+  })
+
+  ipcMain.on('window:close', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    window?.close()
+  })
 
   // File system handlers
   ipcMain.handle('select-folder', async () => {
@@ -214,12 +246,23 @@ app.on('window-all-closed', () => {
 app.on('before-quit', async (event) => {
   if (serviceManager.isServiceRunning()) {
     event.preventDefault()
+
+    // Force exit after timeout if cleanup hangs
+    const cleanupTimeout = setTimeout(() => {
+      console.error('Cleanup timeout - forcing exit')
+      app.exit(0)
+    }, 3000)
+
     try {
+      console.log('Stopping TinyService...')
       await serviceManager.stop()
+      clearTimeout(cleanupTimeout)
+      console.log('TinyService stopped, exiting...')
+      app.exit()
     } catch (error) {
       console.error('Error stopping TinyService during app quit:', error)
-    } finally {
-      app.exit()
+      clearTimeout(cleanupTimeout)
+      app.exit(1)
     }
   }
 })

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DocsPanel } from './components/DocsPanel'
 import { EditorPanel } from './components/EditorPanel'
 import { FileExplorer } from './components/FileExplorer'
@@ -9,11 +9,20 @@ import { Toolbar } from './components/Toolbar'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './components/ui/Resizable'
 import { ArduinoProvider } from './contexts/ArduinoContext'
 import { selectPanelState, useAppSelector } from './redux'
+import { ArduinoServiceFactory } from './services/arduino/ArduinoServiceFactory'
 
 export default function App(): React.JSX.Element {
   const { isFileExplorerOpen, isSerialMonitorOpen, isDocsPanelOpen } =
     useAppSelector(selectPanelState)
   const [editorSize, setEditorSize] = useState(50)
+
+  // Cleanup Arduino service on unmount
+  useEffect(() => {
+    return () => {
+      console.log('Cleaning up Arduino service on app unmount')
+      ArduinoServiceFactory.cleanup()
+    }
+  }, [])
 
   return (
     <ArduinoProvider>

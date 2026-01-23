@@ -104,6 +104,21 @@ export class ArduinoServiceFactory {
   }
 
   /**
+   * Cleanup the Arduino service instance
+   */
+  static cleanup(): void {
+    if (
+      this.instance &&
+      'cleanup' in this.instance &&
+      typeof this.instance.cleanup === 'function'
+    ) {
+      console.log('Cleaning up Arduino service instance...')
+      this.instance.cleanup()
+    }
+    this.instance = null
+  }
+
+  /**
    * Reset the factory (for testing)
    */
   static reset(): void {
