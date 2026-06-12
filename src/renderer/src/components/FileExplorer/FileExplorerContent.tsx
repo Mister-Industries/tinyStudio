@@ -64,10 +64,10 @@ export function FileExplorerContent(): React.JSX.Element {
   return (
     <div className="h-full flex flex-col">
       {/* Header with workspace name and action buttons */}
-      <div className="flex justify-between items-center px-4 py-3 text-xs font-semibold border-b border-border">
-        <div className="flex items-center gap-2">
-          <Folder size={14} />
-          {workspace ? workspace.name.toUpperCase() : 'WORKSPACE'}
+      <div className="flex justify-between items-center px-4 py-3 text-[11px] font-semibold tracking-[0.16em] text-fg-3 border-b border-navy-600">
+        <div className="flex items-center gap-2 min-w-0">
+          <Folder size={14} className="shrink-0" />
+          <span className="truncate">{workspace ? workspace.name.toUpperCase() : 'WORKSPACE'}</span>
         </div>
         <div className="flex gap-1">
           {workspace && (

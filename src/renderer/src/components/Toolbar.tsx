@@ -8,11 +8,10 @@ import {
   useAppDispatch,
   useAppSelector
 } from '@renderer/redux'
-import { Lightbulb, Monitor, RefreshCw, Save } from 'lucide-react'
+import { ChevronDown, FileText, Monitor, RefreshCw, Save, Usb } from 'lucide-react'
 import React from 'react'
 import { UploadButton, VerifyButton } from './arduino/ArduinoButtons'
 import { Button } from './ui/Button'
-import { Separator } from './ui/Separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
 
 export function Toolbar(): React.JSX.Element {
@@ -43,106 +42,83 @@ export function Toolbar(): React.JSX.Element {
   }
 
   return (
-    <div className="px-4 py-3 h-14 flex items-center justify-between shadow-sm bg-primary text-primary-foreground">
-      <div className="flex items-center gap-2 h-full">
-        {/* <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={handleNewFile}>
-              <File />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">New File</TooltipContent>
-        </Tooltip>
+    <div className="px-3 py-2 h-13 shrink-0 flex items-center gap-2 bg-navy-800 border-b border-navy-600">
+      <VerifyButton
+        variant="ghost"
+        className="rounded-full h-9 px-4 border border-navy-400 bg-navy-700/60 text-fg-1 hover:bg-navy-500 hover:text-fg-1 text-[13px] font-semibold"
+      />
+      <UploadButton
+        variant="default"
+        className="rounded-full h-9 px-4 text-[13px] font-bold shadow-[0_0_18px_rgba(0,240,255,0.25)] hover:bg-cyan-bright"
+      />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full text-fg-3 hover:text-fg-1 hover:bg-navy-500"
+            onClick={handleSaveFile}
+          >
+            <Save />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">Save</TooltipContent>
+      </Tooltip>
+
+      <BoardConnectionStatus isConnected={isBoardConnected} />
+      <PortStatus />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => refreshBoards()}
+            disabled={!isAgentConnected || isLoadingBoards}
+            className={`rounded-full text-fg-3 hover:text-fg-1 hover:bg-navy-500 ${!isAgentConnected ? 'opacity-50' : ''}`}
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoadingBoards ? 'animate-spin' : ''}`} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          {isLoadingBoards ? 'Scanning...' : 'Refresh boards'}
+        </TooltipContent>
+      </Tooltip>
+
+      <div className="flex-1" />
+
+      <div className="flex items-center gap-1 p-1 rounded-full bg-navy-900 border border-navy-600">
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={handleNewFolder}>
-              <Folder />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">New Folder</TooltipContent>
-        </Tooltip> */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={handleSaveFile}>
-              <Save />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">Save</TooltipContent>
-        </Tooltip>
-        {/* <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
-              size="icon"
-              className="data-[active=true]:bg-popover data-[active=true]:text-popover-foreground"
-            >
-              <Library />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">Add Libraries</TooltipContent>
-        </Tooltip> */}
-        <Separator orientation="vertical" />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
+              size="sm"
               data-active={isSerialMonitorOpen}
-              className="data-[active=true]:bg-popover data-[active=true]:text-popover-foreground"
+              className="rounded-full h-7 px-3 text-xs text-fg-3 hover:bg-navy-500 hover:text-fg-1 data-[active=true]:bg-navy-500 data-[active=true]:text-fg-1"
               onClick={() =>
                 dispatch(setPanelOpen({ panel: 'monitor', isOpen: !isSerialMonitorOpen }))
               }
             >
-              <Monitor />
+              <Monitor size={14} />
+              Monitor
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">Monitor</TooltipContent>
+          <TooltipContent side="bottom">Serial monitor & output</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
-              size="icon"
+              size="sm"
               data-active={isDocsPanelOpen}
-              className="data-[active=true]:bg-popover data-[active=true]:text-popover-foreground"
+              className="rounded-full h-7 px-3 text-xs text-fg-3 hover:bg-navy-500 hover:text-fg-1 data-[active=true]:bg-navy-500 data-[active=true]:text-fg-1"
               onClick={() => dispatch(setPanelOpen({ panel: 'docs', isOpen: !isDocsPanelOpen }))}
             >
-              <Lightbulb />
+              <FileText size={14} />
+              Docs
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">Documentation</TooltipContent>
+          <TooltipContent side="bottom">Help and documentation</TooltipContent>
         </Tooltip>
-      </div>
-      <div className="flex gap-2">
-        {/* <div className="flex items-center gap-2 pr-4">
-          <Code />
-          <Switch
-            checked={isBlocksMode}
-            onCheckedChange={(checked) => dispatch(setEditorMode(checked ? 'blocks' : 'code'))}
-          />
-          <Blocks />
-        </div> */}
-        {/* <BoardSelect />
-        <PortSelect /> */}
-        <BoardConnectionStatus isConnected={isBoardConnected} />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => refreshBoards()}
-              disabled={!isAgentConnected || isLoadingBoards}
-              className={`${!isAgentConnected ? 'opacity-50' : ''}`}
-            >
-              <RefreshCw className={`h-4 w-4 ${isLoadingBoards ? 'animate-spin' : ''}`} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">
-            {isLoadingBoards ? 'Scanning...' : 'Refresh boards'}
-          </TooltipContent>
-        </Tooltip>
-        <VerifyButton />
-        <UploadButton />
       </div>
     </div>
   )
@@ -151,21 +127,41 @@ export function Toolbar(): React.JSX.Element {
 function BoardConnectionStatus({ isConnected }: { isConnected: boolean }): React.JSX.Element {
   const { selectedBoard } = useArduinoContext()
 
-  if (!isConnected || !selectedBoard) {
-    return (
-      <div className="text-sm text-secondary-foreground px-2 py-1 rounded bg-background/10 text-center flex items-center">
-        No board connected
-      </div>
-    )
-  }
+  return (
+    <div className="ml-2 h-9 flex items-center gap-2 px-3.5 rounded-full bg-navy-700/60 border border-navy-400 text-[13px] font-semibold text-fg-1">
+      <span
+        className="w-2 h-2 rounded-full shrink-0"
+        style={
+          isConnected
+            ? { background: 'var(--signal-success)', boxShadow: '0 0 8px var(--signal-success)' }
+            : { background: 'var(--fg-4)' }
+        }
+      />
+      {isConnected && selectedBoard ? (
+        <>
+          {selectedBoard.config.name}
+          {selectedBoard.config.architecture && (
+            <span className="text-[11px] font-medium text-fg-3">
+              {selectedBoard.config.architecture}
+            </span>
+          )}
+        </>
+      ) : (
+        <span className="text-fg-3 font-medium">No board connected</span>
+      )}
+      <ChevronDown size={14} className="text-fg-4" />
+    </div>
+  )
+}
+
+function PortStatus(): React.JSX.Element {
+  const { selectedBoard } = useArduinoContext()
 
   return (
-    <div
-      className="text-sm text-secondary-foreground
-     px-2 py-1 rounded bg-background/10 flex items-center gap-1"
-    >
-      <div className="w-2 h-2 rounded-full bg-green-400"></div>
-      tinyCore Connected
+    <div className="h-9 flex items-center gap-2 px-3.5 rounded-full bg-navy-700/60 border border-navy-400 text-[13px] font-semibold text-fg-1">
+      <Usb size={14} className="text-fg-3" />
+      {selectedBoard?.port || <span className="text-fg-3 font-medium">No port</span>}
+      <ChevronDown size={14} className="text-fg-4" />
     </div>
   )
 }

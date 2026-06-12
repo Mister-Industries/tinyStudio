@@ -28,46 +28,50 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
     }))
 
     function handleBeforeMount(monaco): void {
-      monaco.editor.defineTheme('tiny-dark-theme', {
-        base: 'vs-dark',
+      // tinyStudio "Studio Dark" — colors from the tinyForge token set.
+      // Both theme names resolve to the same navy theme: the design system is
+      // dark-first, so light mode stays on brand.
+      const studioDark = {
+        base: 'vs-dark' as const,
         inherit: true,
-        rules: [{ background: '14161a' }],
+        rules: [
+          { token: '', foreground: 'd7deff', background: '070b22' },
+          { token: 'keyword', foreground: 'ff3f8c' },
+          { token: 'keyword.type', foreground: '00f0ff' },
+          { token: 'predefined', foreground: '5cc8ff' },
+          { token: 'string', foreground: '3ddc97' },
+          { token: 'string.quote', foreground: '3ddc97' },
+          { token: 'string.escape', foreground: '3ddc97' },
+          { token: 'number', foreground: 'f7a400' },
+          { token: 'number.float', foreground: 'f7a400' },
+          { token: 'comment', foreground: '5f6aa0' },
+          { token: 'identifier', foreground: 'd7deff' },
+          { token: 'delimiter', foreground: '8b94c8' }
+        ],
         colors: {
-          'editor.background': '#14161a',
-          'editor.lineHighlightBackground': '#263c33',
-          'editorCursor.foreground': '#359766',
-          'editorLineNumber.foreground': '#6aaf8c',
-          'editorLineNumber.activeForeground': '#359766',
-          'editor.selectionBackground': '#35976644',
-          'editor.selectionHighlightBackground': '#35976622',
-          'editorBracketMatch.background': '#35976633',
-          'editorBracketMatch.border': '#359766',
-          'editorIndentGuide.background': '#2c2c2c',
-          'editorIndentGuide.activeBackground': '#359766',
-          'editorGutter.background': '#14161a',
-          'editor.foreground': '#d4d4d4'
+          'editor.background': '#070b22',
+          'editor.foreground': '#d7deff',
+          'editor.lineHighlightBackground': '#11173a',
+          'editorCursor.foreground': '#00f0ff',
+          'editorLineNumber.foreground': '#4a5296',
+          'editorLineNumber.activeForeground': '#00f0ff',
+          'editor.selectionBackground': '#00f0ff33',
+          'editor.selectionHighlightBackground': '#00f0ff1a',
+          'editorBracketMatch.background': '#00f0ff22',
+          'editorBracketMatch.border': '#00f0ff',
+          'editorIndentGuide.background': '#1a1f4d',
+          'editorIndentGuide.activeBackground': '#353c78',
+          'editorGutter.background': '#070b22',
+          'editorWidget.background': '#1a1f4d',
+          'editorWidget.border': '#353c78',
+          'editorSuggestWidget.background': '#1a1f4d',
+          'editorSuggestWidget.selectedBackground': '#262c5e',
+          'scrollbarSlider.background': '#353c7866',
+          'scrollbarSlider.hoverBackground': '#353c78aa'
         }
-      })
-      monaco.editor.defineTheme('tiny-light-theme', {
-        base: 'vs',
-        inherit: true,
-        rules: [{ background: '#ffffff' }],
-        colors: {
-          'editor.background': '#ffffff',
-          'editor.lineHighlightBackground': '#e6f4ee',
-          'editorCursor.foreground': '#359766',
-          'editorLineNumber.foreground': '#a3cdb7',
-          'editorLineNumber.activeForeground': '#359766',
-          'editor.selectionBackground': '#35976633',
-          'editor.selectionHighlightBackground': '#35976618',
-          'editorBracketMatch.background': '#35976622',
-          'editorBracketMatch.border': '#359766',
-          'editorIndentGuide.background': '#f0f0f0',
-          'editorIndentGuide.activeBackground': '#359766',
-          'editorGutter.background': '#ffffff',
-          'editor.foreground': '#222222'
-        }
-      })
+      }
+      monaco.editor.defineTheme('tiny-dark-theme', studioDark)
+      monaco.editor.defineTheme('tiny-light-theme', studioDark)
     }
 
     const handleEditorMounted: OnMount = (editor, monaco) => {
@@ -141,7 +145,7 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
         onMount={handleEditorMounted}
         beforeMount={handleBeforeMount}
         options={{
-          fontFamily: '"Fira Code", "JetBrains Mono", monospace',
+          fontFamily: '"JetBrains Mono", "Fira Code", monospace',
           fontSize: 14,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,

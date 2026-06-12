@@ -41,11 +41,11 @@ export function createDefaultProjectFiles(
       path: 'README.md',
       content: `# ${projectTitle}
 
-A tinyCore project created with TinyForge.
+A tinyCore project created with tinyStudio.
 
 ## Getting Started
 
-1. Open this project in TinyForge
+1. Open this project in tinyStudio
 2. Connect your tinyCore
 3. Upload the sketch to your board
 
@@ -65,7 +65,7 @@ Add your circuit diagram and connections here.
       content: `/*
   ${projectTitle}
   
-  Created with TinyForge
+  Created with tinyStudio
   Date: ${new Date().toLocaleDateString()}
   
   Description:

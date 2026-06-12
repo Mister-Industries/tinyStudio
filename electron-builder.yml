@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: tinyforge
+productName: tinyStudio
 directories:
   buildResources: build
 files:
@@ -33,7 +33,7 @@ extraResources:
     filter:
       - '**/*'
 win:
-  executableName: tinyforge
+  executableName: tinystudio
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

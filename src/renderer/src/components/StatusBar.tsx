@@ -1,11 +1,12 @@
-import { CheckCircle, Circle } from 'lucide-react'
+import { Cpu, Wifi, WifiOff } from 'lucide-react'
 import { useArduinoContext } from '../contexts/ArduinoContext'
 import { Button } from './ui/Button'
 
 export function StatusBar(): React.JSX.Element {
-  const { isAgentConnected, checkAgentStatus } = useArduinoContext()
+  const { isAgentConnected, checkAgentStatus, selectedBoard, isCompiling, isUploading } =
+    useArduinoContext()
 
-  const handleRetry = async () => {
+  const handleRetry = async (): Promise<void> => {
     try {
       await checkAgentStatus()
     } catch (error) {
@@ -13,32 +14,48 @@ export function StatusBar(): React.JSX.Element {
     }
   }
 
+  const busyLabel = isUploading ? 'Uploading…' : isCompiling ? 'Compiling…' : 'Ready'
+
   return (
-    <div className="flex items-center justify-between px-4 py-1 border-t border-border text-xs bg-muted">
+    <div className="flex items-center justify-between shrink-0 px-3 py-1 border-t border-navy-600 text-[11px] font-medium bg-navy-900 text-fg-3">
       <div className="flex items-center gap-4">
-        {isAgentConnected ? (
-          <div className="flex items-center gap-1">
-            <CheckCircle size={10} className="text-green-500" />
-            Arduino Service Connected
-          </div>
-        ) : (
-          <div className="flex items-center gap-1">
-            <Circle size={10} className="text-destructive fill-destructive" />
-            Arduino Service Disconnected
-          </div>
+        <span className="flex items-center gap-1.5">
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{
+              background:
+                isCompiling || isUploading ? 'var(--signal-warning)' : 'var(--signal-success)'
+            }}
+          />
+          {busyLabel}
+        </span>
+        {selectedBoard && (
+          <span className="flex items-center gap-1.5">
+            <Cpu size={12} />
+            {selectedBoard.config.name}
+          </span>
         )}
-        <div className="flex items-center gap-3">
-          <Button variant="link" className="p-0 h-fit text-xs text-blue-400" onClick={handleRetry}>
+        <span
+          className="flex items-center gap-1.5"
+          style={isAgentConnected ? {} : { color: 'var(--signal-error)' }}
+        >
+          {isAgentConnected ? <Wifi size={12} /> : <WifiOff size={12} />}
+          {isAgentConnected ? 'Connected' : 'Disconnected'}
+        </span>
+        {!isAgentConnected && (
+          <Button
+            variant="link"
+            className="p-0 h-fit text-[11px] text-cyan hover:text-cyan-bright"
+            onClick={handleRetry}
+          >
             Retry
           </Button>
-          {/* <Button variant="link" className="p-0 h-fit text-xs text-blue-400">
-            How to Install
-          </Button> */}
-        </div>
+        )}
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 font-mono">
         <p>UTF-8</p>
         <p>Arduino (C++)</p>
+        <p>tinyStudio 1.0</p>
       </div>
     </div>
   )

@@ -21,7 +21,10 @@ export function AIAssistant(): React.JSX.Element {
 
 export function AiChatBubble({ text }: { text: string }): React.JSX.Element {
   return (
-    <div className="self-start rounded-xl bg-primary text-primary-foreground py-2 px-4 mr-12 w-fit">
+    <div
+      className="self-start rounded-xl bg-navy-600 text-fg-1 py-2 px-4 mr-12 w-fit text-sm"
+      style={{ border: '1px solid var(--pink-line)' }}
+    >
       <p>{text}</p>
     </div>
   )
@@ -29,7 +32,7 @@ export function AiChatBubble({ text }: { text: string }): React.JSX.Element {
 
 export function UserChatBubble({ text }: { text: string }): React.JSX.Element {
   return (
-    <div className="self-end rounded-xl border border-border bg-background py-2 px-4 ml-12 w-fit">
+    <div className="self-end rounded-xl border border-navy-400 bg-navy-700 text-fg-2 py-2 px-4 ml-12 w-fit text-sm">
       <p>{text}</p>
     </div>
   )

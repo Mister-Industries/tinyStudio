@@ -21,8 +21,8 @@ export function SerialMonitor(): React.JSX.Element {
   const dispatch = useAppDispatch()
 
   return (
-    <div className="size-full flex flex-col">
-      <div className="w-full flex justify-between text-xs font-semibold border-b border-border">
+    <div className="size-full flex flex-col bg-navy-900">
+      <div className="w-full flex justify-between text-xs font-semibold border-b border-navy-600">
         <div className="flex">
           {/* <div
             data-active={activeTab === 'serial'}
@@ -43,7 +43,7 @@ export function SerialMonitor(): React.JSX.Element {
           <div
             data-active={activeTab === 'output'}
             onClick={() => setActiveTab('output')}
-            className="flex gap-2 px-4 py-2 bg-muted items-center border-b-3 border-transparent data-[active=true]:bg-background data-[active=true]:border-secondary cursor-pointer"
+            className="flex gap-2 px-4 py-2 items-center border-b-3 border-transparent text-fg-3 data-[active=true]:text-fg-1 data-[active=true]:border-cyan cursor-pointer"
           >
             <FileText size={14} />
             Output
@@ -70,8 +70,8 @@ export function SerialMonitorTab(): React.JSX.Element {
   // TODO: Implement the logic for the serial monitor
   // TODO: Implement the logic for sending commands
   return (
-    <div className="size-full gap-2 bg-background p-2 flex flex-col">
-      <div className="size-full border rounded-xl bg-muted text-xs"></div>
+    <div className="size-full gap-2 bg-navy-900 p-2 flex flex-col">
+      <div className="size-full border border-navy-600 rounded-xl bg-navy-1000 text-xs font-mono"></div>
       <div className="flex w-full gap-2">
         <Input placeholder="Send command..." className="text-xs dark:text-xs" />
         <FrequencySelect value={frequency} onChange={setFrequency} />
@@ -88,8 +88,8 @@ export function ProblemsTab(): React.JSX.Element {
   const { lastCompileResult } = useArduinoContext()
 
   return (
-    <div className="size-full gap-2 bg-background p-2 flex flex-col">
-      <ScrollArea className="size-full border rounded-xl bg-muted p-2 text-xs">
+    <div className="size-full gap-2 bg-navy-900 p-2 flex flex-col">
+      <ScrollArea className="size-full border border-navy-600 rounded-xl bg-navy-1000 p-2 text-xs">
         {lastCompileResult?.errors && lastCompileResult.errors.length > 0 ? (
           <div className="space-y-2">
             {lastCompileResult.errors.map((error, index) => (
@@ -202,8 +202,11 @@ export function OutputTab(): React.JSX.Element {
   }
 
   return (
-    <div className="size-full gap-2 bg-background flex p-2 pb-22 flex-col">
-      <ScrollArea ref={scrollAreaRef} className="size-full border rounded-xl bg-muted text-xs">
+    <div className="size-full gap-2 bg-navy-900 flex p-2 pb-22 flex-col">
+      <ScrollArea
+        ref={scrollAreaRef}
+        className="size-full border border-navy-600 rounded-xl bg-navy-1000 text-xs font-mono"
+      >
         {logs.length > 0 ? (
           <div className="space-y-1 p-2">
             {logs.map((log) => (
