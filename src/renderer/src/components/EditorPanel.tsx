@@ -10,11 +10,13 @@ import {
   updateFileContent,
   updateReadmeContent
 } from '@renderer/redux/fileSlice'
+import { OpenWorkspaceCommand } from '@renderer/commands/fileCommands'
 import { selectEditorView } from '@renderer/redux/editorSlice'
-import { Code, Eye } from 'lucide-react'
+import { Code, Eye, FolderOpen } from 'lucide-react'
 import * as monaco from 'monaco-editor'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { BlocklyEditor } from './BlocklyEditor'
+import { Button } from './ui/Button'
 import { CircuitEditor } from './CircuitEditor'
 import { DiagramEditor } from './DiagramEditor'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
@@ -199,16 +201,26 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
             )
           })
         ) : (
-          <div className="size-full flex flex-col items-center justify-center text-sm">
+          <div className="size-full flex flex-col items-center justify-center text-sm gap-5">
             <div
-              className="size-48 mb-4"
+              className="size-40"
               style={{
-                backgroundColor: 'var(--muted)',
+                backgroundColor: 'var(--navy-500)',
                 mask: `url(${tinyLogo}) no-repeat center/contain`,
                 WebkitMask: `url(${tinyLogo}) no-repeat center/contain`
               }}
             />
-            <p>Open a project from the sidebar</p>
+            <div className="text-center">
+              <div className="text-fg-1 text-base font-semibold">No project open</div>
+              <div className="text-fg-3 text-xs mt-1">Open a folder to start building.</div>
+            </div>
+            <Button
+              size="lg"
+              className="rounded-full px-6 shadow-[0_0_18px_rgba(0,240,255,0.25)]"
+              onClick={() => new OpenWorkspaceCommand(undefined).execute()}
+            >
+              <FolderOpen size={16} /> Open Folder
+            </Button>
           </div>
         )}
       </FileTabs>

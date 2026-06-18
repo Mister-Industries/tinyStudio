@@ -1,5 +1,5 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, screen, shell } from 'electron'
 import { constants, promises as fs } from 'fs'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
@@ -12,10 +12,19 @@ const serviceManager = new ServiceManager({
 })
 
 function createWindow(): void {
+  // Size to fit the monitor: cap the window to the available work area so the
+  // bottom is never cut off on smaller / lower-resolution screens.
+  const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize
+  const winW = Math.min(1280, screenW - 40)
+  const winH = Math.min(800, screenH - 40)
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1920,
-    height: 1080,
+    width: winW,
+    height: winH,
+    minWidth: 900,
+    minHeight: 560,
+    center: true,
     show: false,
     autoHideMenuBar: true,
     frame: false,

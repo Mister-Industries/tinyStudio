@@ -178,8 +178,8 @@ export function SourceControl(): React.JSX.Element {
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center gap-2 px-4 py-3 text-[11px] font-semibold tracking-[0.16em] text-fg-3 border-b border-navy-600">
-        <GitBranch size={14} />
-        SOURCE CONTROL
+        <Github size={14} />
+        GITHUB
       </div>
 
       {!workspace ? (

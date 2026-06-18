@@ -117,9 +117,9 @@ export function ReadmeContent(): React.JSX.Element {
   }
   if (readmeContent === null || readmeContent === '' || readmeContent === undefined) {
     return (
-      <div className="size-full flex flex-col justify-center items-center gap-2">
-        <Folder size={48} className="mb-4 opacity-50" />
-        Open a project to view its documentation
+      <div className="h-full w-full flex flex-col items-center justify-center gap-3 text-center text-fg-3 px-6">
+        <Folder size={40} className="opacity-40" />
+        <p className="text-sm">Open a project to view its documentation</p>
       </div>
     )
   }

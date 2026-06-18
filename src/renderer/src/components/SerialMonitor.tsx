@@ -1,7 +1,7 @@
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { useAppDispatch } from '@renderer/redux'
 import { setPanelOpen } from '@renderer/redux/editorSlice'
-import { FileText, Plug, PlugZap, Send, Terminal, Trash, X } from 'lucide-react'
+import { FileText, Send, Terminal, Trash, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './ui/Button'
 import { ScrollArea } from './ui/ScrollArea'
@@ -79,8 +79,16 @@ function pushToVisual(line: string): void {
 }
 
 export function SerialMonitorTab(): React.JSX.Element {
-  const { selectedBoard, isAgentConnected, openSerial, closeSerial, writeSerial, onSerialData, onSerialStatus } =
-    useArduinoContext()
+  const {
+    selectedBoard,
+    isAgentConnected,
+    isUploading,
+    openSerial,
+    closeSerial,
+    writeSerial,
+    onSerialData,
+    onSerialStatus
+  } = useArduinoContext()
   const [baud, setBaud] = useState<string>('9600')
   const [lines, setLines] = useState<string[]>([])
   const [connected, setConnected] = useState(false)
@@ -89,11 +97,9 @@ export function SerialMonitorTab(): React.JSX.Element {
   const scrollRef = useRef<HTMLDivElement>(null)
   const port = selectedBoard?.port
 
-  // Remember intent + latest port/baud so we can resume after an upload (which
-  // closes the monitor server-side to free the port for flashing).
-  const wantConnected = useRef(false)
-  const settings = useRef({ port, baud })
-  settings.current = { port, baud }
+  // Mirror connection state into a ref so the watchdog interval sees it live.
+  const connectedRef = useRef(false)
+  connectedRef.current = connected
 
   // Subscribe to streamed serial lines + open/close status for the lifetime of the tab.
   useEffect(() => {
@@ -103,39 +109,50 @@ export function SerialMonitorTab(): React.JSX.Element {
     })
     const offStatus = onSerialStatus((s) => {
       if (s.opened) setConnected(true)
-      if (s.closed) {
-        setConnected(false)
-        // Resume after an upload-triggered close once the port is released.
-        if (wantConnected.current && settings.current.port) {
-          setTimeout(() => {
-            if (wantConnected.current && settings.current.port) {
-              openSerial(settings.current.port, parseInt(settings.current.baud, 10))
-            }
-          }, 2500)
-        }
-      }
+      if (s.closed) setConnected(false)
     })
     return () => {
       offData()
       offStatus()
     }
-  }, [onSerialData, onSerialStatus, openSerial])
+  }, [onSerialData, onSerialStatus])
+
+  // Auto-connect to the selected programming port (like the Arduino IDE — no
+  // manual connect button). A watchdog reopens if we're not connected, which
+  // self-heals after a transient "port busy".
+  //
+  // CRITICAL: the serial port is exclusive, so the monitor MUST be released
+  // during an upload — otherwise the watchdog grabs the port back mid-flash and
+  // avrdude stalls at ~90% with "Serial port busy". We close the monitor while
+  // `isUploading` and only reopen (after a short settle) once it finishes.
+  const baudNum = parseInt(baud, 10)
+  useEffect(() => {
+    if (!isAgentConnected || !port) {
+      setConnected(false)
+      return
+    }
+    if (isUploading) {
+      closeSerial()
+      setConnected(false)
+      return
+    }
+    // Give the port a moment to settle after a just-finished upload/board reset.
+    const openTimer = setTimeout(() => openSerial(port, baudNum), 600)
+    const id = setInterval(() => {
+      if (!connectedRef.current) openSerial(port, baudNum)
+    }, 3000)
+    return () => {
+      clearTimeout(openTimer)
+      clearInterval(id)
+      closeSerial()
+    }
+  }, [isAgentConnected, port, baudNum, isUploading, openSerial, closeSerial])
 
   useEffect(() => {
     if (!autoscroll) return
     const el = scrollRef.current?.querySelector('[data-radix-scroll-area-viewport]')
     if (el) el.scrollTop = el.scrollHeight
   }, [lines, autoscroll])
-
-  const connect = (): void => {
-    if (!port) return
-    wantConnected.current = true
-    openSerial(port, parseInt(baud, 10))
-  }
-  const disconnect = (): void => {
-    wantConnected.current = false
-    closeSerial()
-  }
 
   const send = (): void => {
     if (!input.trim() || !connected) return
@@ -146,6 +163,25 @@ export function SerialMonitorTab(): React.JSX.Element {
 
   return (
     <div className="size-full flex flex-col gap-2 p-2">
+      <div className="flex items-center gap-2 px-1 text-[11px] text-fg-3">
+        <span
+          className="w-2 h-2 rounded-full shrink-0"
+          style={
+            connected
+              ? { background: 'var(--signal-success)', boxShadow: '0 0 8px var(--signal-success)' }
+              : { background: 'var(--fg-4)' }
+          }
+        />
+        {!isAgentConnected
+          ? 'Arduino service not connected'
+          : !port
+            ? 'Select a board/port to monitor'
+            : isUploading
+              ? 'Paused while flashing…'
+              : connected
+                ? `Connected · ${port} @ ${baud}`
+                : `Connecting to ${port}…`}
+      </div>
       <ScrollArea
         ref={scrollRef}
         className="flex-1 min-h-0 border border-navy-600 rounded-xl bg-navy-1000 text-xs font-mono p-2"
@@ -153,9 +189,9 @@ export function SerialMonitorTab(): React.JSX.Element {
         {lines.length === 0 ? (
           <div className="text-fg-4 p-2">
             {isAgentConnected
-              ? connected
+              ? port
                 ? 'Listening… (no data yet)'
-                : `Press Connect to open ${port || 'a port'} at ${baud} baud.`
+                : 'No port selected.'
               : 'Arduino service not connected.'}
           </div>
         ) : (
@@ -169,31 +205,17 @@ export function SerialMonitorTab(): React.JSX.Element {
       <div className="flex w-full gap-2">
         <input
           className="flex-1 bg-navy-900 border border-navy-400 rounded-lg px-3 py-1.5 text-xs font-mono text-fg-1 placeholder:text-fg-4 outline-none focus:border-cyan disabled:opacity-50"
-          placeholder={connected ? 'Send a line…' : 'Connect to send'}
+          placeholder={connected ? 'Send a line…' : 'Waiting for connection…'}
           value={input}
           disabled={!connected}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && send()}
         />
         <FrequencySelect value={baud} onChange={setBaud} />
-        {connected ? (
-          <Button variant="outline" size="sm" onClick={disconnect}>
-            <PlugZap size={14} /> Disconnect
-          </Button>
-        ) : (
-          <Button size="sm" onClick={connect} disabled={!isAgentConnected || !port}>
-            <Plug size={14} /> Connect
-          </Button>
-        )}
         <Button variant="ghost" size="sm" onClick={send} disabled={!connected || !input.trim()}>
           <Send size={14} />
         </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setLines([])}
-          title="Clear"
-        >
+        <Button variant="outline" size="icon" onClick={() => setLines([])} title="Clear">
           <Trash size={14} />
         </Button>
         <Button

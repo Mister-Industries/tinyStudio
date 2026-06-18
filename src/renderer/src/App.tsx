@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { OpenWorkspaceCommand } from './commands/fileCommands'
 import { DocsPanel } from './components/DocsPanel'
 import { EditorPanel } from './components/EditorPanel'
 import { FileExplorer } from './components/FileExplorer'
@@ -8,6 +9,7 @@ import { StatusBar } from './components/StatusBar'
 import { Toolbar } from './components/Toolbar'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './components/ui/Resizable'
 import { ArduinoProvider } from './contexts/ArduinoContext'
+import { fileSystem } from './lib/fileSystem'
 import { selectPanelState, useAppSelector } from './redux'
 import { ArduinoServiceFactory } from './services/arduino/ArduinoServiceFactory'
 
@@ -24,6 +26,22 @@ export default function App(): React.JSX.Element {
     }
   }, [])
 
+  // Reopen the last workspace on launch (if it still exists on disk).
+  useEffect(() => {
+    const last = localStorage.getItem('tinystudio.lastWorkspace')
+    if (!last) return
+    fileSystem
+      .pathExists(last)
+      .then((exists) => {
+        if (exists) {
+          void new OpenWorkspaceCommand(last).execute()
+        } else {
+          localStorage.removeItem('tinystudio.lastWorkspace')
+        }
+      })
+      .catch((e) => console.error('Failed to reopen last workspace:', e))
+  }, [])
+
   return (
     <ArduinoProvider>
       <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
@@ -32,13 +50,13 @@ export default function App(): React.JSX.Element {
         <ResizablePanelGroup direction="horizontal" className="flex-1">
           {isFileExplorerOpen && (
             <>
-              <ResizablePanel defaultSize={20} minSize={5} maxSize={40} className="bg-muted">
+              <ResizablePanel defaultSize={25} minSize={12} maxSize={40} className="bg-muted">
                 <FileExplorer />
               </ResizablePanel>
               <ResizableHandle />
             </>
           )}
-          <ResizablePanel defaultSize={80} className="flex flex-col">
+          <ResizablePanel defaultSize={50} className="flex flex-col">
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel
                 defaultSize={70}

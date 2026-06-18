@@ -3,7 +3,7 @@
  * Main file explorer with tabs for file browser and source control
  */
 
-import { Folder, GitBranch } from 'lucide-react'
+import { Folder, Github } from 'lucide-react'
 import React, { useState } from 'react'
 import { FileExplorerContent } from './FileExplorerContent'
 import { SourceControl } from './SourceControl'
@@ -31,8 +31,8 @@ export function FileExplorer(): React.JSX.Element {
           className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-3 text-fg-3 data-[active=true]:text-fg-1 data-[active=true]:border-cyan hover:text-fg-1 cursor-pointer transition-colors"
           onClick={() => setOpenTab('source-control')}
         >
-          <GitBranch size={14} />
-          Source Control
+          <Github size={14} />
+          GitHub
         </button>
       </div>
 
