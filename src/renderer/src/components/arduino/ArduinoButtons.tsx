@@ -6,13 +6,19 @@ import { Button } from '@renderer/components/ui/Button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/Tooltip'
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { fileSystem } from '@renderer/lib/fileSystem'
-import { saveFileWithContent, selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
+import {
+  BaseFileItem,
+  saveFileWithContent,
+  selectOpenFiles,
+  useAppDispatch,
+  useAppSelector
+} from '@renderer/redux'
 import { AlertCircle, Check, Loader2, Upload } from 'lucide-react'
 import React from 'react'
 import { toast } from 'sonner'
 
 /**
- * Flush all unsaved editor buffers to disk. Verify/Upload compile the workspace
+ * Flush all unsaved editor buffers to disk. Verify/Upload compile the sketch
  * folder straight off disk, so without this they'd build the last *saved*
  * version — meaning you'd flash stale code unless you remembered to save first.
  */
@@ -28,6 +34,33 @@ function useSaveAllBeforeBuild(): () => Promise<void> {
       })
     )
   }, [openFiles, dispatch])
+}
+
+function findIno(items: BaseFileItem[]): BaseFileItem | null {
+  for (const item of items) {
+    if (item.type === 'file' && item.name && /\.ino$/i.test(item.name)) return item
+    if (item.children) {
+      const found = findIno(item.children)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+/**
+ * The directory arduino-cli should compile: the folder that holds the project's
+ * .ino (a sketch lives in its own folder, which may be a subfolder of the
+ * workspace, e.g. "Blink Example/led_blink"). Falls back to the workspace root.
+ */
+function useSketchDir(): string | undefined {
+  const workspace = useAppSelector((state) => state.file.workspace)
+  if (!workspace) return undefined
+  const ino = findIno(workspace.root)
+  if (ino) {
+    const p = ino.path.replace(/\\/g, '/')
+    return p.slice(0, p.lastIndexOf('/'))
+  }
+  return workspace.path
 }
 
 export interface VerifyButtonProps {
@@ -58,6 +91,7 @@ export function VerifyButton({
   const { compileSketch, isCompiling, selectedBoard, isAgentConnected } = useArduinoContext()
 
   const workspace = useAppSelector((state) => state.file.workspace)
+  const sketchDir = useSketchDir()
   const saveAll = useSaveAllBeforeBuild()
 
   const handleVerify = async (): Promise<void> => {
@@ -84,7 +118,7 @@ export function VerifyButton({
 
     try {
       await saveAll() // compile the current code, not the last saved version
-      await compileSketch(workspace.path, selectedBoard.config)
+      await compileSketch(sketchDir || workspace.path, selectedBoard.config)
     } catch (error) {
       console.error('Compilation error:', error)
       toast.error('Compilation failed', {
@@ -160,6 +194,7 @@ export function UploadButton({
   } = useArduinoContext()
 
   const workspace = useAppSelector((state) => state.file.workspace)
+  const sketchDir = useSketchDir()
   const saveAll = useSaveAllBeforeBuild()
 
   const handleUpload = async (): Promise<void> => {
@@ -186,10 +221,11 @@ export function UploadButton({
 
     try {
       await saveAll() // flash the current code, not the last saved version
+      const dir = sketchDir || workspace.path
       if (compileFirst) {
-        await compileAndUpload(workspace.path, selectedBoard.port, selectedBoard.config)
+        await compileAndUpload(dir, selectedBoard.port, selectedBoard.config)
       } else {
-        await uploadSketch(selectedBoard.port, selectedBoard.config, workspace.path)
+        await uploadSketch(selectedBoard.port, selectedBoard.config, dir)
       }
     } catch (error) {
       console.error('Upload error:', error)

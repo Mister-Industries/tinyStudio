@@ -17,7 +17,7 @@ import {
   updateFileContent,
   updateReadmeContent
 } from '@renderer/redux/fileSlice'
-import { CircuitBoard, Code2, FolderOpen, Loader2, Share2 } from 'lucide-react'
+import { CircuitBoard, Code2, Download, FolderOpen, Loader2 } from 'lucide-react'
 import * as monaco from 'monaco-editor'
 import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
@@ -322,11 +322,14 @@ function VisualView(): React.JSX.Element {
   if (!file) return <LoadingHint label="Loading visual…" />
 
   const exportWeb = async (): Promise<void> => {
-    const projectName = workspace?.name || 'tinyStudio sketch'
+    // Title the page after the .ino project (not the workspace folder), and
+    // default to index.html in the project root — best practice for hosting.
+    const ino = workspace ? findInTree(workspace.root, (i) => /\.ino$/i.test(i.name!)) : null
+    const projectName = ino?.name?.replace(/\.ino$/i, '') || workspace?.name || 'tinyStudio sketch'
     const html = buildVisualExportHtml(projectName, file.content)
-    const suggested = `${projectName.replace(/[^a-z0-9_-]+/gi, '_')}.html`
+    const defaultPath = workspace ? `${workspace.path}/index.html` : 'index.html'
     try {
-      const saved = await window.api.fs.saveFileAs(suggested, html)
+      const saved = await window.api.fs.saveFileAs(defaultPath, html)
       if (saved) toast.success('Exported web page', { description: saved })
     } catch (e) {
       toast.error('Export failed', { description: e instanceof Error ? e.message : 'Unknown error' })
@@ -336,19 +339,26 @@ function VisualView(): React.JSX.Element {
   return (
     <div className="size-full relative">
       <div className="absolute top-3 right-3 z-10 flex gap-2">
-        <Button size="sm" variant="outline" className="rounded-full" onClick={exportWeb}>
-          <Share2 size={14} /> Export for web
-        </Button>
         <Button
-          size="sm"
+          size="icon"
           variant="outline"
           className="rounded-full"
+          title="Edit code"
           onClick={() => {
             dispatch(setViewingFile(file.id))
             dispatch(setEditorView('code'))
           }}
         >
-          <Code2 size={14} /> Edit code
+          <Code2 size={16} />
+        </Button>
+        <Button
+          size="icon"
+          variant="outline"
+          className="rounded-full"
+          title="Export for web"
+          onClick={exportWeb}
+        >
+          <Download size={16} />
         </Button>
       </div>
       <VisualPreview code={file.content} name={file.name} />
