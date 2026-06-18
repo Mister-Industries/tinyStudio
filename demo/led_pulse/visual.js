@@ -1,8 +1,9 @@
-// visual.js — live p5.js preview of the sketch's serial output.
-// tinyStudio feeds each Serial.println() line to serialEvent() and tracks the
-// latest numeric value via serialValue(). Open the Visual view to watch it.
+// visual.js — live p5.js mirror of the board's LED, driven by serial.
+// tinyStudio feeds each Serial.println() line to serialEvent(); this lights a
+// virtual LED on "On" and dims it on "Off", echoing the latest serial line.
 
-let pulse = 0;
+let on = false;
+let lastLine = '—';
 
 function setup() {
   createCanvas(520, 300);
@@ -12,33 +13,35 @@ function setup() {
 function draw() {
   background(7, 11, 34);
 
-  // fade the pulse triggered by incoming serial lines
-  pulse *= 0.92;
-
-  noStroke();
-  fill(235, 238, 255, 160);
-  textSize(12);
-  text('serial:', 24, 36);
-
-  // moving indicator dot driven by the latest serial value
-  const v = serialValue();
-  const x = map(v % 100, 0, 100, 40, width - 40);
-  fill(255, 63, 140);
-  circle(x, height - 40, 18 + pulse * 30);
-
-  fill(0, 240, 255);
-  textSize(14);
-  text('value: ' + v, 24, height - 70);
-  text('samples: ' + serialValues().length, 160, height - 70);
-
-  // glow ring scaled by the pulse
-  noFill();
-  stroke(0, 240, 255, 120);
+  // virtual LED
+  const cx = width / 2;
+  const cy = 130;
+  if (on) {
+    noStroke();
+    fill(255, 63, 140, 60);
+    circle(cx, cy, 150); // glow halo
+  }
+  stroke(53, 60, 120);
   strokeWeight(2);
-  circle(width / 2, height / 2 - 10, 60 + pulse * 120);
+  fill(on ? color(255, 63, 140) : color(26, 31, 77));
+  circle(cx, cy, 70);
+
+  // labels
+  noStroke();
+  fill(0, 240, 255);
+  textSize(20);
+  textAlign(CENTER);
+  text(on ? 'ON' : 'OFF', cx, cy + 7);
+
+  fill(235, 238, 255, 180);
+  textSize(13);
+  text('serial: ' + lastLine, cx, height - 40);
 }
 
 // fired by tinyStudio for every serial line received
 function serialEvent(line) {
-  if (line && line.indexOf('pulse') >= 0) pulse = 1;
+  if (!line) return;
+  lastLine = line.trim();
+  if (/^on$/i.test(lastLine)) on = true;
+  else if (/^off$/i.test(lastLine)) on = false;
 }

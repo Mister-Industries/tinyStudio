@@ -515,4 +515,39 @@ export class ElectronArduinoService implements ArduinoService {
     this.client.libUninstall(name)
     return this.waitForResponse('lib-uninstall', 60000)
   }
+
+  // ── serial monitor (streaming, not request/response) ─────────────────────────
+
+  openSerial(port: string, baud: number): void {
+    this.client?.serialOpen(port, baud)
+  }
+
+  closeSerial(): void {
+    this.client?.serialClose()
+  }
+
+  writeSerial(data: string): void {
+    this.client?.serialWrite(data)
+  }
+
+  /** Subscribe to streamed serial lines. Returns an unsubscribe function. */
+  onSerialData(cb: (line: string) => void): () => void {
+    if (!this.client) return () => {}
+    return this.client.onMessage((message: OutgoingMessage) => {
+      if (message.action === 'serial' && message.type === 'output') {
+        cb((message.data as { output: string }).output)
+      }
+    })
+  }
+
+  /** Subscribe to serial open/close status. Returns an unsubscribe function. */
+  onSerialStatus(cb: (status: { opened?: boolean; closed?: boolean }) => void): () => void {
+    if (!this.client) return () => {}
+    return this.client.onMessage((message: OutgoingMessage) => {
+      if (message.action !== 'serial') return
+      const d = message.data as { opened?: boolean; closed?: boolean }
+      if (message.type === 'status' && d.opened) cb({ opened: true })
+      if (message.type === 'complete' && d.closed) cb({ closed: true })
+    })
+  }
 }

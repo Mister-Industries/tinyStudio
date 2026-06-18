@@ -97,4 +97,24 @@ export class WebArduinoService implements ArduinoService {
   ): Promise<{ success: boolean; output: string; error?: string }> {
     throw new Error(WEB_UNSUPPORTED)
   }
+
+  openSerial(_port: string, _baud: number): void {
+    /* unsupported in web */
+  }
+
+  closeSerial(): void {
+    /* unsupported in web */
+  }
+
+  writeSerial(_data: string): void {
+    /* unsupported in web */
+  }
+
+  onSerialData(_cb: (line: string) => void): () => void {
+    return () => {}
+  }
+
+  onSerialStatus(_cb: (status: { opened?: boolean; closed?: boolean }) => void): () => void {
+    return () => {}
+  }
 }

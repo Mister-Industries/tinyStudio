@@ -1,10 +1,9 @@
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { useAppDispatch } from '@renderer/redux'
 import { setPanelOpen } from '@renderer/redux/editorSlice'
-import { FileText, Trash, X } from 'lucide-react'
+import { FileText, Plug, PlugZap, Send, Terminal, Trash, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './ui/Button'
-import { Input } from './ui/Input'
 import { ScrollArea } from './ui/ScrollArea'
 import {
   Select,
@@ -17,67 +16,195 @@ import {
 } from './ui/Select'
 
 export function SerialMonitor(): React.JSX.Element {
-  const [activeTab, setActiveTab] = useState<'serial' | 'problems' | 'output'>('output')
+  const [activeTab, setActiveTab] = useState<'serial' | 'output'>('serial')
   const dispatch = useAppDispatch()
+
+  const tab = (id: 'serial' | 'output', label: string, Icon: typeof Terminal): React.JSX.Element => (
+    <div
+      data-active={activeTab === id}
+      onClick={() => setActiveTab(id)}
+      className="flex gap-2 px-4 py-2 items-center border-b-2 border-transparent text-fg-3 data-[active=true]:text-fg-1 data-[active=true]:border-cyan cursor-pointer transition-colors"
+    >
+      <Icon size={14} />
+      {label}
+    </div>
+  )
 
   return (
     <div className="size-full flex flex-col bg-navy-900">
       <div className="w-full flex justify-between text-xs font-semibold border-b border-navy-600">
         <div className="flex">
-          {/* <div
-            data-active={activeTab === 'serial'}
-            onClick={() => setActiveTab('serial')}
-            className="flex gap-2 px-4 py-2 bg-muted items-center border-b-3 border-transparent data-[active=true]:bg-background data-[active=true]:border-secondary cursor-pointer"
-          >
-            <Monitor size={14} />
-            Serial Monitor
-          </div>
-          <div
-            data-active={activeTab === 'problems'}
-            onClick={() => setActiveTab('problems')}
-            className="flex gap-2 px-4 py-2 bg-muted items-center border-b-3 border-transparent data-[active=true]:bg-background data-[active=true]:border-secondary cursor-pointer"
-          >
-            <TriangleAlert size={14} />
-            Problems
-          </div> */}
-          <div
-            data-active={activeTab === 'output'}
-            onClick={() => setActiveTab('output')}
-            className="flex gap-2 px-4 py-2 items-center border-b-3 border-transparent text-fg-3 data-[active=true]:text-fg-1 data-[active=true]:border-cyan cursor-pointer"
-          >
-            <FileText size={14} />
-            Output
-          </div>
+          {tab('serial', 'Serial Monitor', Terminal)}
+          {tab('output', 'Output', FileText)}
         </div>
         <Button
           variant="ghost"
           size="icon"
+          className="text-fg-3 hover:text-fg-1 hover:bg-navy-500"
           onClick={() => dispatch(setPanelOpen({ panel: 'monitor', isOpen: false }))}
         >
           <X />
         </Button>
       </div>
-      {activeTab === 'serial' && <SerialMonitorTab />}
-      {activeTab === 'problems' && <ProblemsTab />}
-      {activeTab === 'output' && <OutputTab />}
+      {/* Both tabs stay mounted so the serial stream isn't dropped when you peek at Output. */}
+      <div className={activeTab === 'serial' ? 'flex-1 min-h-0' : 'hidden'}>
+        <SerialMonitorTab />
+      </div>
+      <div className={activeTab === 'output' ? 'flex-1 min-h-0' : 'hidden'}>
+        <OutputTab />
+      </div>
     </div>
   )
 }
 
-export function SerialMonitorTab(): React.JSX.Element {
-  const [frequency, setFrequency] = useState<string>('9600')
+// Mirror each serial line into window.__tinySerial + a 'tinyserial' event so the
+// Visual (p5) tab can react via serialEvent()/serialValue().
+function pushToVisual(line: string): void {
+  const m = line.match(/-?\d+(?:\.\d+)?/)
+  const value = m ? parseFloat(m[0]) : /(HIGH|\bON\b|true)/i.test(line) ? 1 : 0
+  const w = window as unknown as {
+    __tinySerial?: { lines: string[]; values: number[]; last: string; value: number }
+  }
+  const buf = w.__tinySerial || { lines: [], values: [], last: '', value: 0 }
+  buf.lines = [...buf.lines.slice(-300), line]
+  buf.values = [...buf.values.slice(-300), value]
+  buf.last = line
+  buf.value = value
+  w.__tinySerial = buf
+  try {
+    window.dispatchEvent(new CustomEvent('tinyserial', { detail: { line, value } }))
+  } catch {
+    /* ignore */
+  }
+}
 
-  // TODO: Implement the logic for the serial monitor
-  // TODO: Implement the logic for sending commands
+export function SerialMonitorTab(): React.JSX.Element {
+  const { selectedBoard, isAgentConnected, openSerial, closeSerial, writeSerial, onSerialData, onSerialStatus } =
+    useArduinoContext()
+  const [baud, setBaud] = useState<string>('9600')
+  const [lines, setLines] = useState<string[]>([])
+  const [connected, setConnected] = useState(false)
+  const [input, setInput] = useState('')
+  const [autoscroll, setAutoscroll] = useState(true)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const port = selectedBoard?.port
+
+  // Remember intent + latest port/baud so we can resume after an upload (which
+  // closes the monitor server-side to free the port for flashing).
+  const wantConnected = useRef(false)
+  const settings = useRef({ port, baud })
+  settings.current = { port, baud }
+
+  // Subscribe to streamed serial lines + open/close status for the lifetime of the tab.
+  useEffect(() => {
+    const offData = onSerialData((line) => {
+      setLines((prev) => [...prev.slice(-1000), line])
+      pushToVisual(line)
+    })
+    const offStatus = onSerialStatus((s) => {
+      if (s.opened) setConnected(true)
+      if (s.closed) {
+        setConnected(false)
+        // Resume after an upload-triggered close once the port is released.
+        if (wantConnected.current && settings.current.port) {
+          setTimeout(() => {
+            if (wantConnected.current && settings.current.port) {
+              openSerial(settings.current.port, parseInt(settings.current.baud, 10))
+            }
+          }, 2500)
+        }
+      }
+    })
+    return () => {
+      offData()
+      offStatus()
+    }
+  }, [onSerialData, onSerialStatus, openSerial])
+
+  useEffect(() => {
+    if (!autoscroll) return
+    const el = scrollRef.current?.querySelector('[data-radix-scroll-area-viewport]')
+    if (el) el.scrollTop = el.scrollHeight
+  }, [lines, autoscroll])
+
+  const connect = (): void => {
+    if (!port) return
+    wantConnected.current = true
+    openSerial(port, parseInt(baud, 10))
+  }
+  const disconnect = (): void => {
+    wantConnected.current = false
+    closeSerial()
+  }
+
+  const send = (): void => {
+    if (!input.trim() || !connected) return
+    writeSerial(input)
+    setLines((prev) => [...prev.slice(-1000), `→ ${input}`])
+    setInput('')
+  }
+
   return (
-    <div className="size-full gap-2 bg-navy-900 p-2 flex flex-col">
-      <div className="size-full border border-navy-600 rounded-xl bg-navy-1000 text-xs font-mono"></div>
+    <div className="size-full flex flex-col gap-2 p-2">
+      <ScrollArea
+        ref={scrollRef}
+        className="flex-1 min-h-0 border border-navy-600 rounded-xl bg-navy-1000 text-xs font-mono p-2"
+      >
+        {lines.length === 0 ? (
+          <div className="text-fg-4 p-2">
+            {isAgentConnected
+              ? connected
+                ? 'Listening… (no data yet)'
+                : `Press Connect to open ${port || 'a port'} at ${baud} baud.`
+              : 'Arduino service not connected.'}
+          </div>
+        ) : (
+          lines.map((l, i) => (
+            <div key={i} className={l.startsWith('→') ? 'text-cyan' : 'text-fg-2'}>
+              {l}
+            </div>
+          ))
+        )}
+      </ScrollArea>
       <div className="flex w-full gap-2">
-        <Input placeholder="Send command..." className="text-xs dark:text-xs" />
-        <FrequencySelect value={frequency} onChange={setFrequency} />
-        <Button>Send</Button>
-        <Button variant="outline" size="icon">
+        <input
+          className="flex-1 bg-navy-900 border border-navy-400 rounded-lg px-3 py-1.5 text-xs font-mono text-fg-1 placeholder:text-fg-4 outline-none focus:border-cyan disabled:opacity-50"
+          placeholder={connected ? 'Send a line…' : 'Connect to send'}
+          value={input}
+          disabled={!connected}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && send()}
+        />
+        <FrequencySelect value={baud} onChange={setBaud} />
+        {connected ? (
+          <Button variant="outline" size="sm" onClick={disconnect}>
+            <PlugZap size={14} /> Disconnect
+          </Button>
+        ) : (
+          <Button size="sm" onClick={connect} disabled={!isAgentConnected || !port}>
+            <Plug size={14} /> Connect
+          </Button>
+        )}
+        <Button variant="ghost" size="sm" onClick={send} disabled={!connected || !input.trim()}>
+          <Send size={14} />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setLines([])}
+          title="Clear"
+        >
           <Trash size={14} />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          data-active={autoscroll}
+          className="data-[active=true]:text-cyan"
+          onClick={() => setAutoscroll((a) => !a)}
+          title="Autoscroll"
+        >
+          Auto
         </Button>
       </div>
     </div>

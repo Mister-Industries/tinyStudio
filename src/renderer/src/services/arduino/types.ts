@@ -214,6 +214,21 @@ export interface ArduinoService {
 
   /** Uninstall a library by name */
   uninstallLibrary(name: string): Promise<{ success: boolean; output: string; error?: string }>
+
+  /** Open the serial monitor on a port at a baud rate */
+  openSerial(port: string, baud: number): void
+
+  /** Close the serial monitor */
+  closeSerial(): void
+
+  /** Send a line to the serial port */
+  writeSerial(data: string): void
+
+  /** Subscribe to streamed serial lines; returns an unsubscribe function */
+  onSerialData(cb: (line: string) => void): () => void
+
+  /** Subscribe to serial open/close status; returns an unsubscribe function */
+  onSerialStatus(cb: (status: { opened?: boolean; closed?: boolean }) => void): () => void
 }
 
 /**

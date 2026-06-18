@@ -87,6 +87,13 @@ export interface UseArduinoReturn {
   uninstallLibrary: (
     name: string
   ) => Promise<{ success: boolean; output: string; error?: string }>
+
+  // Serial monitor
+  openSerial: (port: string, baud: number) => void
+  closeSerial: () => void
+  writeSerial: (data: string) => void
+  onSerialData: (cb: (line: string) => void) => () => void
+  onSerialStatus: (cb: (status: { opened?: boolean; closed?: boolean }) => void) => () => void
 }
 
 /**
@@ -571,6 +578,23 @@ export function useArduino(): UseArduinoReturn {
     [arduinoService]
   )
 
+  // ── serial monitor ──────────────────────────────────────────────────────
+  const openSerial = useCallback(
+    (port: string, baud: number) => arduinoService.openSerial(port, baud),
+    [arduinoService]
+  )
+  const closeSerial = useCallback(() => arduinoService.closeSerial(), [arduinoService])
+  const writeSerial = useCallback((data: string) => arduinoService.writeSerial(data), [arduinoService])
+  const onSerialData = useCallback(
+    (cb: (line: string) => void) => arduinoService.onSerialData(cb),
+    [arduinoService]
+  )
+  const onSerialStatus = useCallback(
+    (cb: (status: { opened?: boolean; closed?: boolean }) => void) =>
+      arduinoService.onSerialStatus(cb),
+    [arduinoService]
+  )
+
   return {
     // Board management
     boards,
@@ -604,6 +628,13 @@ export function useArduino(): UseArduinoReturn {
     searchLibraries,
     listLibraries,
     installLibrary,
-    uninstallLibrary
+    uninstallLibrary,
+
+    // Serial monitor
+    openSerial,
+    closeSerial,
+    writeSerial,
+    onSerialData,
+    onSerialStatus
   }
 }

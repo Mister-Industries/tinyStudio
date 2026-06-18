@@ -18,8 +18,8 @@ export type EditorSliceState = {
 const initialState: EditorSliceState = {
   status: 'idle',
   isFileExplorerOpen: true,
-  isSerialMonitorOpen: false,
-  isDocsPanelOpen: false,
+  isSerialMonitorOpen: true,
+  isDocsPanelOpen: true,
   editorMode: 'code',
   editorView: 'code'
 }

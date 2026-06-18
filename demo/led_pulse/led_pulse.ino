@@ -1,22 +1,21 @@
-// blink_sig — pulse the onboard SIG LED when the D9 button is pressed.
-// Works on tinyCore (ESP32-S3) and Arduino Uno; the demo project for tinyStudio.
-//#include "tinyCore.h"
+// led_pulse — blink the onboard LED and report its state over serial.
+// The tinyStudio demo: prints "Hello World" once, then "On"/"Off" in step
+// with the LED so the Serial Monitor matches what the board is doing.
 
-const uint8_t LED = 13;  // Uno onboard LED / tinyCore SIG
-const uint8_t BTN = 8;   // button to GND (uses internal pull-up)
+const uint8_t LED = 13;  // Uno onboard LED (also fine on tinyCore)
 
 void setup() {
   pinMode(LED, OUTPUT);
-  pinMode(BTN, INPUT_PULLUP);
   Serial.begin(9600);
+  Serial.println("Hello World");
 }
 
 void loop() {
-  if (digitalRead(BTN) == LOW) {
-    digitalWrite(LED, HIGH);
-    Serial.println("pulse");
-  } else {
-    digitalWrite(LED, LOW);
-  }
-  delay(500);
+  digitalWrite(LED, HIGH);
+  Serial.println("On");
+  delay(1000);
+
+  digitalWrite(LED, LOW);
+  Serial.println("Off");
+  delay(1000);
 }

@@ -11,7 +11,6 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@renderer/components/ui/Dialog'
-import { ScrollArea } from '@renderer/components/ui/ScrollArea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/Tooltip'
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { LibraryEntry } from '@renderer/services/arduino/types'
@@ -100,7 +99,7 @@ export function LibraryManager(): React.JSX.Element {
         </TooltipTrigger>
         <TooltipContent side="bottom">Library manager</TooltipContent>
       </Tooltip>
-      <DialogContent className="bg-navy-700 border border-navy-500 text-fg-1 max-w-xl">
+      <DialogContent className="bg-navy-700 border border-navy-500 text-fg-1 max-w-xl max-h-[80vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Library size={18} className="text-cyan" />
@@ -113,7 +112,7 @@ export function LibraryManager(): React.JSX.Element {
             Arduino service not connected.
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 min-h-0">
             {/* Search */}
             <div className="flex gap-2">
               <div className="flex-1 flex items-center gap-2 bg-navy-900 border border-navy-400 rounded-lg px-3">
@@ -133,11 +132,11 @@ export function LibraryManager(): React.JSX.Element {
 
             {/* Results */}
             {results !== null && (
-              <div>
+              <div className="flex flex-col min-h-0">
                 <div className="text-[11px] font-semibold tracking-wider text-fg-3 mb-2">
                   SEARCH RESULTS
                 </div>
-                <ScrollArea className="max-h-48">
+                <div className="max-h-[30vh] overflow-y-auto">
                   {results.length === 0 && !searching ? (
                     <div className="text-xs text-fg-4 py-3">No libraries found.</div>
                   ) : (
@@ -179,16 +178,16 @@ export function LibraryManager(): React.JSX.Element {
                       ))}
                     </div>
                   )}
-                </ScrollArea>
+                </div>
               </div>
             )}
 
             {/* Installed */}
-            <div>
+            <div className="flex flex-col min-h-0">
               <div className="text-[11px] font-semibold tracking-wider text-fg-3 mb-2">
                 INSTALLED ({installed.length})
               </div>
-              <ScrollArea className="max-h-48">
+              <div className="max-h-[30vh] overflow-y-auto">
                 <div className="flex flex-col gap-1 pr-2">
                   {installed.map((lib) => (
                     <div
@@ -221,7 +220,7 @@ export function LibraryManager(): React.JSX.Element {
                     <div className="text-xs text-fg-4 py-3">No libraries installed yet.</div>
                   )}
                 </div>
-              </ScrollArea>
+              </div>
             </div>
           </div>
         )}
