@@ -4,8 +4,9 @@
  * The export runs anywhere (open the file locally, or host it on GitHub Pages)
  * and keeps live USB serial via the Web Serial API — the same serialValue() /
  * serialEvent() shims the in-app Visual view provides, so the sketch is dropped
- * in unchanged. Every export carries a "Made with tinyStudio" credit linking to
- * tinycore.cc, so projects are discoverable and the tool gets attribution.
+ * in unchanged. It's framed like a little hosted device/minigame: a fixed square
+ * screen with a titled header and a "Made with tinyStudio" credit linking to
+ * tinycore.cc, so projects look professional and the tool gets attribution.
  */
 
 export function buildVisualExportHtml(projectName: string, sketchCode: string): string {
@@ -19,44 +20,65 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${title} · tinyStudio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
 <style>
-  :root { --navy-900:#070b22; --navy-800:#0a0f2d; --navy-700:#11173a; --navy-600:#1a1f4d;
-    --navy-400:#353c78; --cyan:#00f0ff; --pink:#ff3f8c; --fg-1:#ffffff; --fg-3:rgba(214,220,255,.46); }
+  :root {
+    --navy-1000:#05081a; --navy-900:#070b22; --navy-800:#0a0f2d; --navy-700:#11173a;
+    --navy-600:#1a1f4d; --navy-500:#262c5e; --navy-400:#353c78;
+    --cyan:#00f0ff; --pink:#ff3f8c; --fg-1:#fff; --fg-2:rgba(235,238,255,.72); --fg-3:rgba(214,220,255,.46);
+    --grad: linear-gradient(45deg, var(--cyan), var(--pink));
+  }
   * { box-sizing: border-box; }
-  body { margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center;
-    justify-content:center; gap:22px; padding:32px 16px;
-    background: radial-gradient(1200px 600px at 50% -10%, #141a44 0%, var(--navy-800) 55%, var(--navy-900) 100%);
-    color: var(--fg-1); font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; }
-  h1 { margin:0; font-size:22px; font-weight:700; letter-spacing:-0.01em; }
-  .card { background: var(--navy-700); border:1px solid var(--navy-400); border-radius:16px;
-    padding:18px; display:flex; flex-direction:column; align-items:center; gap:14px;
-    box-shadow: 0 18px 50px rgba(0,0,0,.45); }
-  #stage { display:flex; align-items:center; justify-content:center;
-    background: var(--navy-900); border:1px solid var(--navy-600); border-radius:10px; overflow:hidden; }
-  #stage canvas { display:block; max-width:100%; height:auto; border-radius:8px; }
-  .row { display:flex; align-items:center; gap:12px; }
-  button { font:inherit; font-weight:600; font-size:13px; cursor:pointer; border:none; border-radius:999px;
-    padding:9px 18px; color:#04122b; background:var(--cyan); }
-  button:disabled { opacity:.5; cursor:default; }
-  .status { font-size:12px; color:var(--fg-3); font-family:'JetBrains Mono', ui-monospace, monospace; }
-  .dot { width:8px; height:8px; border-radius:50%; background:#4a5296; display:inline-block; }
-  .dot.on { background:#3ddc97; box-shadow:0 0 8px #3ddc97; }
-  footer { font-size:13px; color:var(--fg-3); }
-  footer a { color:var(--cyan); text-decoration:none; font-weight:600; }
-  footer a:hover { text-decoration:underline; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; display: flex; align-items: center; justify-content: center; padding: 24px;
+    background: radial-gradient(1100px 560px at 50% -8%, #16204d 0%, var(--navy-800) 55%, var(--navy-900) 100%);
+    color: var(--fg-1); font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .cabinet {
+    width: min(92vw, 540px); background: linear-gradient(180deg, var(--navy-700), var(--navy-800));
+    border: 1px solid var(--navy-400); border-radius: 20px; padding: 16px;
+    box-shadow: 0 24px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.04);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .bar { display: flex; align-items: center; gap: 12px; padding: 2px 4px; }
+  .title { flex: 1; min-width: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .connect { font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--navy-400);
+    background: var(--navy-600); color: var(--fg-1); border-radius: 999px; padding: 7px 14px; transition: .15s; }
+  .connect:hover:not(:disabled) { background: var(--navy-500); }
+  .connect:disabled { cursor: default; border-color: rgba(61,220,151,.4); color: #bff7df; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4a5296; flex: none; }
+  .dot.on { background: #3ddc97; box-shadow: 0 0 9px #3ddc97; }
+  /* The "screen": a fixed square the sketch is letterboxed into. */
+  .screen { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 14px;
+    background: var(--navy-1000); border: 1px solid var(--navy-600);
+    box-shadow: inset 0 0 0 1px rgba(0,240,255,.06), inset 0 18px 60px rgba(0,0,0,.5); overflow: hidden; }
+  .screen::before { content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none;
+    box-shadow: inset 0 1px 0 rgba(0,240,255,.14); }
+  #stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  #stage canvas { max-width: 100%; max-height: 100%; width: auto !important; height: auto !important; border-radius: 8px; }
+  .credit { text-align: center; font-size: 12px; color: var(--fg-3); padding-top: 2px; }
+  .credit a { font-weight: 700; text-decoration: none; background: var(--grad);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .credit a:hover { text-decoration: underline; -webkit-text-fill-color: var(--cyan); }
+  .spark { color: var(--cyan); }
 </style>
 </head>
 <body>
-  <h1>${title}</h1>
-  <div class="card">
-    <div id="stage"></div>
-    <div class="row">
-      <button id="connect">Connect device</button>
-      <span class="status"><span class="dot" id="dot"></span> <span id="status">Not connected</span></span>
+  <main class="cabinet">
+    <div class="bar">
+      <div class="title">${title}</div>
+      <button class="connect" id="connect"><span class="dot" id="dot"></span><span id="label">Connect</span></button>
     </div>
-  </div>
-  <footer>Made with <a href="https://tinycore.cc" target="_blank" rel="noreferrer">tinyStudio</a></footer>
+    <div class="screen"><div id="stage"></div></div>
+    <div class="credit">Made with <span class="spark">✦</span> <a href="https://tinycore.cc" target="_blank" rel="noreferrer">tinyStudio</a></div>
+  </main>
 
   <script>
   // ---- serial bus + Processing-style shims (match the tinyStudio Visual view) ----
@@ -78,13 +100,13 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
   function serialLines() { return window.__tinySerial.lines.slice(); }
 
   // ---- Web Serial connection (works on https / GitHub Pages and local file) ----
-  var statusEl = document.getElementById('status');
   var dotEl = document.getElementById('dot');
+  var labelEl = document.getElementById('label');
   var connectBtn = document.getElementById('connect');
-  function setStatus(text, on) { statusEl.textContent = text; dotEl.className = 'dot' + (on ? ' on' : ''); }
+  function setStatus(text, on) { labelEl.textContent = text; dotEl.className = 'dot' + (on ? ' on' : ''); }
 
   if (!('serial' in navigator)) {
-    setStatus('Web Serial unsupported — use Chrome or Edge', false);
+    setStatus('Use Chrome/Edge', false);
     connectBtn.disabled = true;
   }
 
@@ -93,7 +115,6 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
       var port = await navigator.serial.requestPort();
       await port.open({ baudRate: 9600 });
       setStatus('Connected', true);
-      connectBtn.textContent = 'Connected';
       connectBtn.disabled = true;
       var decoder = new TextDecoderStream();
       port.readable.pipeTo(decoder.writable);
@@ -108,9 +129,8 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
         for (var i = 0; i < parts.length; i++) if (parts[i]) __pushSerial(parts[i]);
       }
     } catch (e) {
-      setStatus('Connection failed: ' + e.message, false);
+      setStatus('Connect', false);
       connectBtn.disabled = false;
-      connectBtn.textContent = 'Connect device';
     }
   };
 
@@ -122,11 +142,16 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
     if (typeof serialEvent === 'function') { try { serialEvent(e.detail.line); } catch (err) {} }
   });
 
-  // p5 global mode appends the canvas to <body>; move it into the centered stage.
-  new MutationObserver(function (muts, obs) {
-    var c = document.querySelector('body > canvas');
-    if (c) { document.getElementById('stage').appendChild(c); obs.disconnect(); }
-  }).observe(document.body, { childList: true });
+  // p5 global mode appends the canvas to <body>; keep moving it into the framed
+  // screen until it lands there (covers timing + canvas recreation).
+  function placeCanvas() {
+    var c = document.querySelector('canvas');
+    var stage = document.getElementById('stage');
+    if (c && stage && c.parentElement !== stage) stage.appendChild(c);
+  }
+  new MutationObserver(placeCanvas).observe(document.body, { childList: true, subtree: true });
+  window.addEventListener('load', placeCanvas);
+  var __t = 0, __iv = setInterval(function () { placeCanvas(); if (++__t > 30) clearInterval(__iv); }, 100);
   </script>
 </body>
 </html>`
