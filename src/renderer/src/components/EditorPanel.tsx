@@ -1,7 +1,10 @@
 import { OpenFileCommand, OpenWorkspaceCommand, RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
 import { loader } from '@monaco-editor/react'
 import tinyLogo from '@renderer/assets/tinyLogo.png'
+import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { fileSystem } from '@renderer/lib/fileSystem'
+import { pushSerialLine } from '@renderer/lib/serialBus'
+import { buildVisualExportHtml } from '@renderer/lib/visualExport'
 import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
 import { selectEditorView, setEditorView } from '@renderer/redux/editorSlice'
 import {
@@ -14,9 +17,10 @@ import {
   updateFileContent,
   updateReadmeContent
 } from '@renderer/redux/fileSlice'
-import { CircuitBoard, Code2, FolderOpen, Loader2 } from 'lucide-react'
+import { CircuitBoard, Code2, FolderOpen, Loader2, Share2 } from 'lucide-react'
 import * as monaco from 'monaco-editor'
 import { useCallback, useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 import { BlocklyEditor } from './BlocklyEditor'
 import { DiagramEditor } from './DiagramEditor'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
@@ -31,11 +35,60 @@ const DEFAULT_DIAGRAM = JSON.stringify(
   null,
   2
 )
-const DEFAULT_VISUAL = `// visual.js — p5.js sketch. Use serialValue()/serialEvent(line) to react to
-// the board's serial output. Switch to Code to edit; Visual to run it.
-function setup() { createCanvas(480, 280) }
-function draw() { background(7, 11, 34); fill(0, 240, 255); noStroke();
-  circle(width / 2, height / 2, 60 + 20 * Math.sin(frameCount / 20)) }
+const DEFAULT_VISUAL = `// visual.js — Serial Plotter
+// Graphs the latest number printed over Serial (serialValue()) as a scrolling
+// line, auto-scaling to the data. Try Serial.println(analogRead(A0)) on the
+// board. Switch to Code to edit this sketch; Visual to run it.
+
+let data = [];
+const MAX = 240; // points kept on screen
+
+function setup() {
+  createCanvas(480, 280);
+  textFont('monospace');
+}
+
+function draw() {
+  background(7, 11, 34);
+
+  // pull the most recent serial value each frame
+  data.push(serialValue());
+  if (data.length > MAX) data.shift();
+
+  // auto-scale to the data range (with a little headroom)
+  let lo = Math.min(...data, 0);
+  let hi = Math.max(...data, 1);
+  if (hi === lo) hi = lo + 1;
+
+  // grid
+  stroke(26, 31, 77);
+  strokeWeight(1);
+  for (let i = 0; i <= 4; i++) {
+    let y = map(i, 0, 4, 20, height - 24);
+    line(40, y, width - 12, y);
+  }
+
+  // plotted line
+  noFill();
+  stroke(0, 240, 255);
+  strokeWeight(2);
+  beginShape();
+  for (let i = 0; i < data.length; i++) {
+    let x = map(i, 0, MAX - 1, 40, width - 12);
+    let y = map(data[i], lo, hi, height - 24, 20);
+    vertex(x, y);
+  }
+  endShape();
+
+  // readouts
+  noStroke();
+  fill(235, 238, 255);
+  textSize(12);
+  text('value: ' + serialValue().toFixed(2), 44, 16);
+  fill(120, 130, 170);
+  text(hi.toFixed(0), 8, 24);
+  text(lo.toFixed(0), 8, height - 24);
+}
 `
 
 function findInTree(items: BaseFileItem[], match: (i: BaseFileItem) => boolean): BaseFileItem | null {
@@ -247,22 +300,57 @@ function VisualView(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const file = useProjectFile('visual.js', () => DEFAULT_VISUAL)
 
+  // The Serial Monitor panel is closed in Visual view, so this view owns the
+  // serial connection while it's open — feeding the running p5 sketch live data
+  // via the shared serial bus. Suspended during uploads (port is exclusive).
+  const { selectedBoard, isAgentConnected, isUploading, openSerial, closeSerial, onSerialData } =
+    useArduinoContext()
+  const port = selectedBoard?.port
+  useEffect(() => {
+    if (!isAgentConnected || !port || isUploading) return
+    const off = onSerialData((line) => pushSerialLine(line))
+    openSerial(port, 9600)
+    const id = setInterval(() => openSerial(port, 9600), 4000) // resume if it drops
+    return () => {
+      clearInterval(id)
+      off()
+      closeSerial()
+    }
+  }, [isAgentConnected, port, isUploading, openSerial, closeSerial, onSerialData])
+
   if (!workspace) return <EmptyHint icon="circuit" label="Open a project to run its visual." />
   if (!file) return <LoadingHint label="Loading visual…" />
 
+  const exportWeb = async (): Promise<void> => {
+    const projectName = workspace?.name || 'tinyStudio sketch'
+    const html = buildVisualExportHtml(projectName, file.content)
+    const suggested = `${projectName.replace(/[^a-z0-9_-]+/gi, '_')}.html`
+    try {
+      const saved = await window.api.fs.saveFileAs(suggested, html)
+      if (saved) toast.success('Exported web page', { description: saved })
+    } catch (e) {
+      toast.error('Export failed', { description: e instanceof Error ? e.message : 'Unknown error' })
+    }
+  }
+
   return (
     <div className="size-full relative">
-      <Button
-        size="sm"
-        variant="outline"
-        className="absolute top-3 right-3 z-10 rounded-full"
-        onClick={() => {
-          dispatch(setViewingFile(file.id))
-          dispatch(setEditorView('code'))
-        }}
-      >
-        <Code2 size={14} /> Edit code
-      </Button>
+      <div className="absolute top-3 right-3 z-10 flex gap-2">
+        <Button size="sm" variant="outline" className="rounded-full" onClick={exportWeb}>
+          <Share2 size={14} /> Export for web
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="rounded-full"
+          onClick={() => {
+            dispatch(setViewingFile(file.id))
+            dispatch(setEditorView('code'))
+          }}
+        >
+          <Code2 size={14} /> Edit code
+        </Button>
+      </div>
       <VisualPreview code={file.content} name={file.name} />
     </div>
   )

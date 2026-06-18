@@ -39,7 +39,10 @@ const api = {
     pathExists: (targetPath: string): Promise<boolean> =>
       ipcRenderer.invoke('path-exists', targetPath),
     getFileStats: (filePath: string): Promise<FileStats> =>
-      ipcRenderer.invoke('get-file-stats', filePath)
+      ipcRenderer.invoke('get-file-stats', filePath),
+    // Show a Save dialog and write the given content; returns the saved path or null.
+    saveFileAs: (defaultName: string, content: string): Promise<string | null> =>
+      ipcRenderer.invoke('save-file-as', defaultName, content)
   }
 }
 

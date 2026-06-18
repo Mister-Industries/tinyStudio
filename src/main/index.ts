@@ -120,6 +120,21 @@ app.whenReady().then(async () => {
     window?.close()
   })
 
+  // Save a generated file (e.g. the Visual web export) via a Save dialog.
+  ipcMain.handle('save-file-as', async (event, defaultName: string, content: string) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    const result = await dialog.showSaveDialog(window!, {
+      defaultPath: defaultName,
+      filters: [
+        { name: 'HTML', extensions: ['html'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    })
+    if (result.canceled || !result.filePath) return null
+    await fs.writeFile(result.filePath, content, 'utf-8')
+    return result.filePath
+  })
+
   // File system handlers
   ipcMain.handle('select-folder', async () => {
     const result = await dialog.showOpenDialog({

@@ -10,13 +10,21 @@ import { Toolbar } from './components/Toolbar'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './components/ui/Resizable'
 import { ArduinoProvider } from './contexts/ArduinoContext'
 import { fileSystem } from './lib/fileSystem'
-import { selectPanelState, useAppSelector } from './redux'
+import { selectEditorView, selectPanelState, setPanelOpen, useAppDispatch, useAppSelector } from './redux'
 import { ArduinoServiceFactory } from './services/arduino/ArduinoServiceFactory'
 
 export default function App(): React.JSX.Element {
   const { isFileExplorerOpen, isSerialMonitorOpen, isDocsPanelOpen } =
     useAppSelector(selectPanelState)
+  const editorView = useAppSelector(selectEditorView)
+  const dispatch = useAppDispatch()
   const [editorSize, setEditorSize] = useState(50)
+
+  // The serial monitor / output dock only makes sense while coding — close it
+  // when switching to the full-window Circuit or Visual views, reopen on Code.
+  useEffect(() => {
+    dispatch(setPanelOpen({ panel: 'monitor', isOpen: editorView === 'code' }))
+  }, [editorView, dispatch])
 
   // Cleanup Arduino service on unmount
   useEffect(() => {

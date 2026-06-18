@@ -29,6 +29,7 @@ interface FileSystemAPI {
   deleteFile: (targetPath: string) => Promise<void>
   pathExists: (targetPath: string) => Promise<boolean>
   getFileStats: (filePath: string) => Promise<FileStats>
+  saveFileAs: (defaultName: string, content: string) => Promise<string | null>
 }
 
 import { ElectronAPI } from '@electron-toolkit/preload'
@@ -62,6 +63,7 @@ interface FileSystemAPI {
   deleteFile: (targetPath: string) => Promise<void>
   pathExists: (targetPath: string) => Promise<boolean>
   getFileStats: (filePath: string) => Promise<FileStats>
+  saveFileAs: (defaultName: string, content: string) => Promise<string | null>
 }
 
 // Arduino API types
