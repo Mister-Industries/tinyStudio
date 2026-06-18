@@ -3,7 +3,13 @@
  */
 
 import { getArduinoService } from '@renderer/services/arduino/ArduinoServiceFactory'
-import { Board, BoardConfig, CompileResult, UploadResult } from '@renderer/services/arduino/types'
+import {
+  Board,
+  BoardConfig,
+  CompileResult,
+  LibraryEntry,
+  UploadResult
+} from '@renderer/services/arduino/types'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useArduinoAgent } from './useArduinoAgent'
@@ -70,6 +76,17 @@ export interface UseArduinoReturn {
   // Agent connectivity
   isAgentConnected: boolean
   checkAgentStatus: () => Promise<void>
+
+  // Library manager
+  searchLibraries: (query: string) => Promise<LibraryEntry[]>
+  listLibraries: () => Promise<LibraryEntry[]>
+  installLibrary: (
+    name: string,
+    version?: string
+  ) => Promise<{ success: boolean; output: string; error?: string }>
+  uninstallLibrary: (
+    name: string
+  ) => Promise<{ success: boolean; output: string; error?: string }>
 }
 
 /**
@@ -539,6 +556,21 @@ export function useArduino(): UseArduinoReturn {
     }
   }, [isAgentConnected])
 
+  // ── library manager ─────────────────────────────────────────────────────
+  const searchLibraries = useCallback(
+    (query: string) => arduinoService.searchLibraries(query),
+    [arduinoService]
+  )
+  const listLibraries = useCallback(() => arduinoService.listLibraries(), [arduinoService])
+  const installLibrary = useCallback(
+    (name: string, version?: string) => arduinoService.installLibrary(name, version),
+    [arduinoService]
+  )
+  const uninstallLibrary = useCallback(
+    (name: string) => arduinoService.uninstallLibrary(name),
+    [arduinoService]
+  )
+
   return {
     // Board management
     boards,
@@ -566,6 +598,12 @@ export function useArduino(): UseArduinoReturn {
 
     // Agent
     isAgentConnected,
-    checkAgentStatus
+    checkAgentStatus,
+
+    // Library manager
+    searchLibraries,
+    listLibraries,
+    installLibrary,
+    uninstallLibrary
   }
 }

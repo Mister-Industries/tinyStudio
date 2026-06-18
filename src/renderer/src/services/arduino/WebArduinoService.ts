@@ -12,8 +12,12 @@ import {
   BoardConfig,
   BoardInfo,
   CompileResult,
+  LibraryEntry,
   UploadResult
 } from './types'
+
+const WEB_UNSUPPORTED =
+  'Arduino operations are not supported in web environment. Use Electron app for Arduino functionality.'
 
 /**
  * Arduino service implementation for web applications
@@ -71,5 +75,26 @@ export class WebArduinoService implements ArduinoService {
     throw new Error(
       'Arduino operations are not supported in web environment. Use Electron app for Arduino functionality.'
     )
+  }
+
+  async searchLibraries(_query: string): Promise<LibraryEntry[]> {
+    throw new Error(WEB_UNSUPPORTED)
+  }
+
+  async listLibraries(): Promise<LibraryEntry[]> {
+    throw new Error(WEB_UNSUPPORTED)
+  }
+
+  async installLibrary(
+    _name: string,
+    _version?: string
+  ): Promise<{ success: boolean; output: string; error?: string }> {
+    throw new Error(WEB_UNSUPPORTED)
+  }
+
+  async uninstallLibrary(
+    _name: string
+  ): Promise<{ success: boolean; output: string; error?: string }> {
+    throw new Error(WEB_UNSUPPORTED)
   }
 }

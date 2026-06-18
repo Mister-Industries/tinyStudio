@@ -1,12 +1,18 @@
 import { PayloadAction, createSelector } from '@reduxjs/toolkit'
 import { createAppSlice } from './createAppSlice'
 
+export type EditorView = 'code' | 'circuit' | 'visual'
+
 export type EditorSliceState = {
   status: 'idle' | 'loading' | 'failed'
   isFileExplorerOpen: boolean
   isSerialMonitorOpen: boolean
   isDocsPanelOpen: boolean
   editorMode: 'code' | 'blocks'
+  // How the active file renders: 'code' shows the text editor; 'circuit' renders
+  // diagram.json interactively; 'visual' runs a p5 sketch (.js). The toolbar
+  // segment sets this and auto-focuses the matching file.
+  editorView: EditorView
 }
 
 const initialState: EditorSliceState = {
@@ -14,7 +20,8 @@ const initialState: EditorSliceState = {
   isFileExplorerOpen: true,
   isSerialMonitorOpen: false,
   isDocsPanelOpen: false,
-  editorMode: 'code'
+  editorMode: 'code',
+  editorView: 'code'
 }
 
 // If you are not using async thunks you can use the standalone `createSlice`.
@@ -41,6 +48,9 @@ export const editorSlice = createAppSlice({
     ),
     setEditorMode: create.reducer((state, payload: PayloadAction<'code' | 'blocks'>) => {
       state.editorMode = payload.payload
+    }),
+    setEditorView: create.reducer((state, payload: PayloadAction<EditorView>) => {
+      state.editorView = payload.payload
     })
   }),
   selectors: {
@@ -55,12 +65,13 @@ export const editorSlice = createAppSlice({
         isSerialMonitorOpen,
         isDocsPanelOpen
       })
-    )
+    ),
+    selectEditorView: (state) => state.editorView
   }
 })
 
 // Action creators are generated for each case reducer function.
-export const { setPanelOpen, setEditorMode } = editorSlice.actions
+export const { setPanelOpen, setEditorMode, setEditorView } = editorSlice.actions
 
 // Selectors returned by `slice.selectors` take the root state as their first argument.
-export const { selectPanelState } = editorSlice.selectors
+export const { selectPanelState, selectEditorView } = editorSlice.selectors

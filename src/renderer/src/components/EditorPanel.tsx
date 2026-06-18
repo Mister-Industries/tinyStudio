@@ -10,14 +10,17 @@ import {
   updateFileContent,
   updateReadmeContent
 } from '@renderer/redux/fileSlice'
+import { selectEditorView } from '@renderer/redux/editorSlice'
 import { Code, Eye } from 'lucide-react'
 import * as monaco from 'monaco-editor'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { BlocklyEditor } from './BlocklyEditor'
 import { CircuitEditor } from './CircuitEditor'
+import { DiagramEditor } from './DiagramEditor'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
 import { FileTabContent, FileTabs, FileTabsList, FileTabTrigger } from './ui/FileTab'
 import { Switch } from './ui/Switch'
+import { VisualPreview } from './VisualPreview'
 
 loader.config({ monaco })
 
@@ -25,6 +28,7 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
   const openFiles = useAppSelector(selectOpenFiles)
   const viewingFileId = useAppSelector(selectViewingFileId)
   const editorMode = useAppSelector((state) => state.editor.editorMode)
+  const editorView = useAppSelector(selectEditorView)
   const dispatch = useAppDispatch()
   const monacoEditorRef = useRef<MonacoEditorRef>(null)
   const pixelSize = Math.round((size / 100) * (window.innerHeight - 92))
@@ -148,6 +152,11 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
           openFiles.map((file) => {
             const isSvg = fileSystem.isSvgFile(file.name)
             const showVisualEditor = isSvg && svgViewMode[file.id] !== false // Default to visual for SVG
+            const isDiagram = file.name === 'diagram.json'
+            const isJs = /\.js$/i.test(file.name)
+            // .js files render as a live p5 sketch when the Visual view is active;
+            // otherwise they're editable code.
+            const showVisual = isJs && editorView === 'visual'
 
             return (
               <FileTabContent key={`content-${file.id}`} value={file.id}>
@@ -167,7 +176,14 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
                     />
                   </div>
                 )}
-                {isSvg && showVisualEditor ? (
+                {isDiagram ? (
+                  <DiagramEditor
+                    content={file.content}
+                    onChange={(content) => handleContentChange(content, file.id)}
+                  />
+                ) : showVisual ? (
+                  <VisualPreview code={file.content} name={file.name} />
+                ) : isSvg && showVisualEditor ? (
                   <CircuitEditor svgContent={file.content} />
                 ) : editorMode === 'blocks' ? (
                   <BlocklyEditor />

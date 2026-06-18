@@ -16,6 +16,7 @@ import {
   BoardConfig,
   BoardInfo,
   CompileResult,
+  LibraryEntry,
   UploadResult
 } from './types'
 
@@ -165,6 +166,14 @@ export class ElectronArduinoService implements ArduinoService {
             safeResolve({
               success: !hasError,
               output: boardsOutput,
+              error: hasError ? errorMessage : undefined
+            })
+          } else if (Array.isArray((message.data as { libraries?: unknown[] }).libraries)) {
+            // Library search/list — serialize libraries to JSON lines
+            const libs = (message.data as { libraries: unknown[] }).libraries
+            safeResolve({
+              success: !hasError,
+              output: libs.map((l) => JSON.stringify(l)).join('\n'),
               error: hasError ? errorMessage : undefined
             })
           } else {
@@ -461,5 +470,49 @@ export class ElectronArduinoService implements ArduinoService {
         }
       }
     }
+  }
+
+  // ── library manager ────────────────────────────────────────────────────────
+
+  private parseLibraries(output: string): LibraryEntry[] {
+    return output
+      .split('\n')
+      .filter((l) => l.trim())
+      .map((l) => {
+        try {
+          return JSON.parse(l) as LibraryEntry
+        } catch {
+          return null
+        }
+      })
+      .filter((l): l is LibraryEntry => l !== null)
+  }
+
+  async searchLibraries(query: string): Promise<LibraryEntry[]> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.libSearch(query)
+    const result = await this.waitForResponse('lib-search', 60000)
+    if (!result.success) throw new Error(result.error || 'Library search failed')
+    return this.parseLibraries(result.output)
+  }
+
+  async listLibraries(): Promise<LibraryEntry[]> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.libList()
+    const result = await this.waitForResponse('lib-list', 30000)
+    if (!result.success) throw new Error(result.error || 'Library list failed')
+    return this.parseLibraries(result.output)
+  }
+
+  async installLibrary(name: string, version?: string): Promise<{ success: boolean; output: string; error?: string }> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.libInstall(name, version)
+    return this.waitForResponse('lib-install', 300000)
+  }
+
+  async uninstallLibrary(name: string): Promise<{ success: boolean; output: string; error?: string }> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.libUninstall(name)
+    return this.waitForResponse('lib-uninstall', 60000)
   }
 }

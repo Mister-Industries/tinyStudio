@@ -8,21 +8,21 @@ import {
   useAppDispatch,
   useAppSelector
 } from '@renderer/redux'
-import { ChevronDown, FileText, Monitor, RefreshCw, Save, Usb } from 'lucide-react'
+import { FileText, Monitor, RefreshCw, Save } from 'lucide-react'
 import React from 'react'
 import { UploadButton, VerifyButton } from './arduino/ArduinoButtons'
+import { BoardPicker, PortPicker } from './arduino/BoardControls'
+import { LibraryManager } from './arduino/LibraryManager'
 import { Button } from './ui/Button'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
+import { ViewSegment } from './ViewSegment'
 
 export function Toolbar(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const { isDocsPanelOpen, isSerialMonitorOpen } = useAppSelector(selectPanelState)
   const openFiles = useAppSelector(selectOpenFiles)
   const viewingFileId = useAppSelector((state) => state.file.viewingFileId)
-  const { selectedBoard, isAgentConnected, isLoadingBoards, refreshBoards } = useArduinoContext()
-
-  // Board is connected if we have an agent connection and a selected board
-  const isBoardConnected = isAgentConnected && selectedBoard !== null
+  const { isAgentConnected, isLoadingBoards, refreshBoards } = useArduinoContext()
 
   const handleSaveFile = async (): Promise<void> => {
     const file = openFiles.find((f) => f.id === viewingFileId)
@@ -65,26 +65,31 @@ export function Toolbar(): React.JSX.Element {
         <TooltipContent side="bottom">Save</TooltipContent>
       </Tooltip>
 
-      <BoardConnectionStatus isConnected={isBoardConnected} />
-      <PortStatus />
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => refreshBoards()}
-            disabled={!isAgentConnected || isLoadingBoards}
-            className={`rounded-full text-fg-3 hover:text-fg-1 hover:bg-navy-500 ${!isAgentConnected ? 'opacity-50' : ''}`}
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoadingBoards ? 'animate-spin' : ''}`} />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          {isLoadingBoards ? 'Scanning...' : 'Refresh boards'}
-        </TooltipContent>
-      </Tooltip>
+      <div className="ml-1 flex items-center gap-2">
+        <BoardPicker />
+        <PortPicker />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => refreshBoards()}
+              disabled={!isAgentConnected || isLoadingBoards}
+              className={`rounded-full text-fg-3 hover:text-fg-1 hover:bg-navy-500 ${!isAgentConnected ? 'opacity-50' : ''}`}
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoadingBoards ? 'animate-spin' : ''}`} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {isLoadingBoards ? 'Scanning...' : 'Refresh boards'}
+          </TooltipContent>
+        </Tooltip>
+        <LibraryManager />
+      </div>
 
       <div className="flex-1" />
+
+      <ViewSegment />
 
       <div className="flex items-center gap-1 p-1 rounded-full bg-navy-900 border border-navy-600">
         <Tooltip>
@@ -120,48 +125,6 @@ export function Toolbar(): React.JSX.Element {
           <TooltipContent side="bottom">Help and documentation</TooltipContent>
         </Tooltip>
       </div>
-    </div>
-  )
-}
-
-function BoardConnectionStatus({ isConnected }: { isConnected: boolean }): React.JSX.Element {
-  const { selectedBoard } = useArduinoContext()
-
-  return (
-    <div className="ml-2 h-9 flex items-center gap-2 px-3.5 rounded-full bg-navy-700/60 border border-navy-400 text-[13px] font-semibold text-fg-1">
-      <span
-        className="w-2 h-2 rounded-full shrink-0"
-        style={
-          isConnected
-            ? { background: 'var(--signal-success)', boxShadow: '0 0 8px var(--signal-success)' }
-            : { background: 'var(--fg-4)' }
-        }
-      />
-      {isConnected && selectedBoard ? (
-        <>
-          {selectedBoard.config.name}
-          {selectedBoard.config.architecture && (
-            <span className="text-[11px] font-medium text-fg-3">
-              {selectedBoard.config.architecture}
-            </span>
-          )}
-        </>
-      ) : (
-        <span className="text-fg-3 font-medium">No board connected</span>
-      )}
-      <ChevronDown size={14} className="text-fg-4" />
-    </div>
-  )
-}
-
-function PortStatus(): React.JSX.Element {
-  const { selectedBoard } = useArduinoContext()
-
-  return (
-    <div className="h-9 flex items-center gap-2 px-3.5 rounded-full bg-navy-700/60 border border-navy-400 text-[13px] font-semibold text-fg-1">
-      <Usb size={14} className="text-fg-3" />
-      {selectedBoard?.port || <span className="text-fg-3 font-medium">No port</span>}
-      <ChevronDown size={14} className="text-fg-4" />
     </div>
   )
 }
