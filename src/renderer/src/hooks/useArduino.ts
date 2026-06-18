@@ -553,6 +553,21 @@ export function useArduino(): UseArduinoReturn {
   }, [isAgentConnected, hasLoadedBoards])
 
   /**
+   * Auto-recognize boards: re-scan periodically while connected so a board
+   * plugged in later (or one that re-enumerates to a new COM port on reset)
+   * shows up without a manual refresh. The service throttles list-boards to
+   * 5s, so an 8s poll is safe.
+   */
+  useEffect(() => {
+    if (!isAgentConnected) return
+    const id = setInterval(() => {
+      refreshBoards()
+    }, 8000)
+    return () => clearInterval(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAgentConnected])
+
+  /**
    * Reset board loading state when agent disconnects
    */
   useEffect(() => {
