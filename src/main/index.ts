@@ -1,5 +1,5 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { app, BrowserWindow, dialog, ipcMain, screen, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu, screen, shell } from 'electron'
 import { constants, promises as fs } from 'fs'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
@@ -71,6 +71,17 @@ function createWindow(): void {
 app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
+
+  // Register standard edit/view accelerators (undo/redo/cut/copy/paste/select-all,
+  // reload, devtools). The window is frameless so this menu stays hidden, but
+  // without it those shortcuts never bind — e.g. Ctrl+Z wouldn't work in inputs.
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate([
+      { role: 'editMenu' },
+      { role: 'viewMenu' },
+      { role: 'windowMenu' }
+    ])
+  )
 
   // Start TinyService
   try {

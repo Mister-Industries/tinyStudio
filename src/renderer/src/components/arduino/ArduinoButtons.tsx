@@ -5,10 +5,30 @@
 import { Button } from '@renderer/components/ui/Button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/Tooltip'
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
-import { useAppSelector } from '@renderer/redux'
+import { fileSystem } from '@renderer/lib/fileSystem'
+import { saveFileWithContent, selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
 import { AlertCircle, Check, Loader2, Upload } from 'lucide-react'
 import React from 'react'
 import { toast } from 'sonner'
+
+/**
+ * Flush all unsaved editor buffers to disk. Verify/Upload compile the workspace
+ * folder straight off disk, so without this they'd build the last *saved*
+ * version — meaning you'd flash stale code unless you remembered to save first.
+ */
+function useSaveAllBeforeBuild(): () => Promise<void> {
+  const dispatch = useAppDispatch()
+  const openFiles = useAppSelector(selectOpenFiles)
+  return React.useCallback(async () => {
+    const dirty = openFiles.filter((f) => f.modified && f.path)
+    await Promise.all(
+      dirty.map(async (f) => {
+        await fileSystem.writeFile(f.path, f.content)
+        dispatch(saveFileWithContent({ id: f.id, content: f.content }))
+      })
+    )
+  }, [openFiles, dispatch])
+}
 
 export interface VerifyButtonProps {
   /** Custom className for styling */
@@ -38,6 +58,7 @@ export function VerifyButton({
   const { compileSketch, isCompiling, selectedBoard, isAgentConnected } = useArduinoContext()
 
   const workspace = useAppSelector((state) => state.file.workspace)
+  const saveAll = useSaveAllBeforeBuild()
 
   const handleVerify = async (): Promise<void> => {
     if (!selectedBoard) {
@@ -62,6 +83,7 @@ export function VerifyButton({
     }
 
     try {
+      await saveAll() // compile the current code, not the last saved version
       await compileSketch(workspace.path, selectedBoard.config)
     } catch (error) {
       console.error('Compilation error:', error)
@@ -138,6 +160,7 @@ export function UploadButton({
   } = useArduinoContext()
 
   const workspace = useAppSelector((state) => state.file.workspace)
+  const saveAll = useSaveAllBeforeBuild()
 
   const handleUpload = async (): Promise<void> => {
     if (!selectedBoard) {
@@ -162,6 +185,7 @@ export function UploadButton({
     }
 
     try {
+      await saveAll() // flash the current code, not the last saved version
       if (compileFirst) {
         await compileAndUpload(workspace.path, selectedBoard.port, selectedBoard.config)
       } else {

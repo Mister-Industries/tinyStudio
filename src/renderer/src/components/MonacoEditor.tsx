@@ -140,6 +140,11 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
         height="100%"
         language="arduino"
         theme={theme === 'light' ? 'tiny-light-theme' : 'tiny-dark-theme'}
+        // A stable per-file model (keyed by path) + keepCurrentModel preserves
+        // each file's undo history (Ctrl+Z) across tab switches and view
+        // changes, instead of resetting it on every remount.
+        path={activeFile.path || activeFile.id}
+        keepCurrentModel
         value={activeFile.content || ''}
         onChange={handleContentChange}
         onMount={handleEditorMounted}

@@ -152,6 +152,15 @@ export class ElectronArduinoService implements ArduinoService {
           if (message.data.details) {
             errorMessage += '\n' + message.data.details
           }
+          // For these request/response actions an error is terminal — the
+          // handler sends it instead of `complete`. Resolve now (with any
+          // streamed/compiler output) so the caller doesn't hang until timeout.
+          cleanup()
+          safeResolve({
+            success: false,
+            output: (message.data.output as string) || output,
+            error: errorMessage
+          })
         } else if (message.type === 'complete') {
           console.log(`[${action}] Operation completed:`, message.data) // Debug log
           cleanup()
