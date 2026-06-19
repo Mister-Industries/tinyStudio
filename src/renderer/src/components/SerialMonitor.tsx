@@ -63,7 +63,8 @@ export function SerialMonitorTab(): React.JSX.Element {
   const { isAgentConnected } = useArduinoContext()
   // The connection itself is owned by SerialProvider (app-level) so it persists
   // across view switches; this tab just displays it and sends lines.
-  const { lines, connected, port, baud, setBaud, send: sendLine, clear } = useSerial()
+  const { lines, connected, disconnected, port, baud, setBaud, send: sendLine, clear, reconnect } =
+    useSerial()
   const [input, setInput] = useState('')
   const [autoscroll, setAutoscroll] = useState(true)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -91,13 +92,22 @@ export function SerialMonitorTab(): React.JSX.Element {
               : { background: 'var(--fg-4)' }
           }
         />
-        {!isAgentConnected
-          ? 'Arduino service not connected'
-          : !port
-            ? 'Select a board/port to monitor'
-            : connected
-              ? `Connected · ${port} @ ${baud}`
-              : `Connecting to ${port}…`}
+        {!isAgentConnected ? (
+          'Arduino service not connected'
+        ) : !port ? (
+          'Select a board/port to monitor'
+        ) : disconnected ? (
+          <span className="flex items-center gap-2">
+            Disconnected · port free for the browser
+            <button className="text-cyan hover:text-cyan-bright underline" onClick={reconnect}>
+              reconnect
+            </button>
+          </span>
+        ) : connected ? (
+          `Connected · ${port} @ ${baud}`
+        ) : (
+          `Connecting to ${port}…`
+        )}
       </div>
       <ScrollArea
         ref={scrollRef}
