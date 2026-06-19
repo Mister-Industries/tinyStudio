@@ -1,102 +1,81 @@
-// visual.js — Qwiic Joystick X/Y grid visualizer
-// Plots the joystick's live position on a grid to match what the sketch streams.
-// The sketch prints one CSV line per sample:  x,y,button   (x,y in 0..1023)
-//
-//   serialRead()  -> latest raw line, e.g. "512,498,0"
-//   serialLines() -> recent raw lines (used to draw the trail)
+// visual.js — mirrors the board's LED and charts its On/Off history.
+// tinyStudio feeds each Serial.println() line to serialEvent(); this lights a
+// glowing bulb on "On" / dims it on "Off", and scrolls a square-wave timeline
+// of the recent state underneath. A little taste of what p5.js + serial can do.
 
-const RANGE = 1023;       // 10-bit ADC full scale
-const PAD = 46;           // grid margin
-let px = 512, py = 512;   // last good position (rest = centered)
-let pressed = false;
+let on = false;
+let history = []; // recent 1/0 samples
+const MAX = 180;
 
 function setup() {
-  createCanvas(440, 440);
+  createCanvas(420, 420);
   textFont('monospace');
 }
 
-// parse "x,y,button" -> {x,y,b} or null if the line has no numbers
-function parseLine(s) {
-  let m = String(s).match(/(-?\d+)\s*,\s*(-?\d+)(?:\s*,\s*(\d+))?/);
-  if (!m) return null;
-  return { x: int(m[1]), y: int(m[2]), b: m[3] ? int(m[3]) : 0 };
-}
-
-// joystick -> screen. Physical stick grows LEFT in X and UP in Y
-// (matching the SparkFun hookup directions), so X is inverted.
-function sx(x) { return map(x, RANGE, 0, PAD, width - PAD); }
-function sy(y) { return map(y, 0, RANGE, height - PAD, PAD); }
-
 function draw() {
-  background(10, 15, 45);
+  background(7, 11, 34);
+  history.push(on ? 1 : 0);
+  if (history.length > MAX) history.shift();
 
-  let p = parseLine(serialRead());
-  if (p) { px = p.x; py = p.y; pressed = p.b === 1; }
+  // ── glowing LED bulb ──
+  const cx = width / 2;
+  const cy = 138;
+  if (on) {
+    noStroke();
+    fill(255, 63, 140, 55);
+    circle(cx, cy, 210);
+    fill(255, 63, 140, 35);
+    circle(cx, cy, 150);
+  }
+  stroke(53, 60, 120);
+  strokeWeight(2);
+  fill(on ? color(255, 63, 140) : color(26, 31, 77));
+  circle(cx, cy, 96);
+  noStroke();
+  fill(on ? 255 : 120);
+  textAlign(CENTER);
+  textSize(22);
+  text(on ? 'ON' : 'OFF', cx, cy + 8);
 
-  drawGrid();
+  // latest serial line
+  fill(0, 240, 255);
+  textAlign(LEFT);
+  textSize(13);
+  const last = window.__tinySerial ? window.__tinySerial.last : '—';
+  text('serial: ' + (last || '—'), 22, 28);
 
-  // trail of recent samples
-  let lines = serialLines();
+  // ── scrolling square-wave timeline ──
+  const top = 264;
+  const bot = 384;
+  const left = 22;
+  const right = width - 22;
+  stroke(26, 31, 77);
+  strokeWeight(1);
+  line(left, top, right, top);
+  line(left, bot, right, bot);
+
   noFill();
-  stroke(0, 240, 255, 90);
+  stroke(0, 240, 255);
   strokeWeight(2);
   beginShape();
-  for (let i = max(0, lines.length - 60); i < lines.length; i++) {
-    let q = parseLine(lines[i]);
-    if (q) vertex(sx(q.x), sy(q.y));
+  for (let i = 0; i < history.length; i++) {
+    const x = map(i, 0, MAX - 1, left, right);
+    const y = history[i] ? top + 8 : bot - 8;
+    vertex(x, y);
   }
   endShape();
 
-  let gx = sx(px), gy = sy(py);
-
-  // crosshair through the live point
-  stroke(38, 48, 92);
-  strokeWeight(1);
-  line(PAD, gy, width - PAD, gy);
-  line(gx, PAD, gx, height - PAD);
-
-  // the joystick dot (glows gold while the button is pressed)
   noStroke();
-  let r = pressed ? 26 : 18;
-  fill(255, 63, 140, 60);
-  circle(gx, gy, r + 16);
-  fill(pressed ? color(255, 215, 0) : color(255, 63, 140));
-  circle(gx, gy, r);
-
-  drawReadout(gx, gy);
+  fill(120, 130, 170);
+  textSize(11);
+  text('HIGH', left, top - 6);
+  text('LOW', left, bot + 16);
 }
 
-function drawGrid() {
-  stroke(26, 34, 70);
-  strokeWeight(1);
-  const cells = 8;
-  for (let i = 0; i <= cells; i++) {
-    let x = map(i, 0, cells, PAD, width - PAD);
-    let y = map(i, 0, cells, PAD, height - PAD);
-    line(x, PAD, x, height - PAD);
-    line(PAD, y, width - PAD, y);
-  }
-  // center cross — the ~512,512 rest position
-  stroke(58, 70, 120);
-  strokeWeight(1.5);
-  let cx = sx(512), cy = sy(512);
-  line(cx - 8, cy, cx + 8, cy);
-  line(cx, cy - 8, cx, cy + 8);
+// fired by tinyStudio for every serial line received
+function serialEvent(line) {
+  if (!line) return;
+  const t = line.trim();
+  if (/^on$/i.test(t)) on = true;
+  else if (/^off$/i.test(t)) on = false;
 }
-
-function drawReadout() {
-  noStroke();
-  textSize(12);
-  fill(150, 162, 196);
-  textAlign(LEFT, TOP);
-  text('Qwiic Joystick', 12, 12);
-  fill(0, 240, 255);
-  textAlign(RIGHT, TOP);
-  text('X ' + nf(px, 4) + '   Y ' + nf(py, 4), width - 12, 12);
-  fill(pressed ? color(255, 215, 0) : color(90, 100, 140));
-  textAlign(RIGHT, BOTTOM);
-  text(pressed ? '\u25CF BUTTON' : '\u25CB button', width - 12, height - 12);
-}
-
-// fires on every new serial line (kept for parity with the harness)
-function serialEvent(line) {}

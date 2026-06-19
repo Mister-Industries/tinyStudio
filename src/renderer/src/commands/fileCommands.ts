@@ -3,6 +3,7 @@ import { fileSystem, FileSystemItem } from '@renderer/lib/fileSystem'
 import {
   BaseFileItem,
   closeFile,
+  closeWorkspace,
   EditorFile,
   finishCreateItem,
   openFile,
@@ -191,6 +192,10 @@ export class OpenWorkspaceCommand implements Command {
       root: fileItems
     }
 
+    // Clear any previously open project before showing the new one, so switching
+    // folders doesn't carry over the old workspace's tabs and tree state. Done
+    // only after a folder is confirmed above, so a cancelled picker is a no-op.
+    this.dispatch(closeWorkspace())
     this.dispatch(openWorkspace(workspace))
 
     if (fileItems.some((file: BaseFileItem) => file.name === 'README.md')) {
@@ -249,6 +254,24 @@ export class RefreshWorkspaceCommand implements Command {
 
     // Update the workspace with the new file structure
     this.dispatch(openWorkspace({ ...this.workspace, root: fileItems }))
+  }
+}
+
+export class CloseWorkspaceCommand implements Command {
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
+
+  async execute(): Promise<void> {
+    this.dispatch(closeWorkspace())
+
+    // Forget the remembered folder so the app starts on the empty state next
+    // launch instead of silently reopening the project the user just closed.
+    try {
+      localStorage.removeItem('tinystudio.lastWorkspace')
+    } catch {
+      /* ignore */
+    }
   }
 }
 

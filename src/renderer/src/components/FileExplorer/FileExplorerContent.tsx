@@ -4,9 +4,13 @@
  * Main content area for the file explorer with workspace management
  */
 
-import { OpenWorkspaceCommand, RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
+import {
+  CloseWorkspaceCommand,
+  OpenWorkspaceCommand,
+  RefreshWorkspaceCommand
+} from '@renderer/commands/fileCommands'
 import { BaseFileItem, startCreateItem, useAppDispatch, useAppSelector } from '@renderer/redux'
-import { Folder, FolderOpen, FolderPlus, FolderSync, Plus } from 'lucide-react'
+import { Folder, FolderOpen, FolderPlus, FolderSync, FolderX, Plus } from 'lucide-react'
 import React from 'react'
 import { Button } from '../ui/Button'
 import { ScrollArea } from '../ui/ScrollArea'
@@ -34,6 +38,11 @@ export function FileExplorerContent(): React.JSX.Element {
   const handleRefreshWorkspace = (): void => {
     if (!workspace) return
     const command = new RefreshWorkspaceCommand(workspace)
+    command.execute()
+  }
+
+  const handleCloseWorkspace = (): void => {
+    const command = new CloseWorkspaceCommand()
     command.execute()
   }
 
@@ -105,6 +114,34 @@ export function FileExplorerContent(): React.JSX.Element {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>New file</TooltipContent>
+              </Tooltip>
+              {/* Open a Different Folder Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-4"
+                    onClick={handleSelectWorkspace}
+                  >
+                    <FolderOpen size={12} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Open a different folder</TooltipContent>
+              </Tooltip>
+              {/* Close Workspace Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-4"
+                    onClick={handleCloseWorkspace}
+                  >
+                    <FolderX size={12} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Close workspace</TooltipContent>
               </Tooltip>
             </>
           )}

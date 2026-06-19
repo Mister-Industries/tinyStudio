@@ -58,6 +58,17 @@ export const fileSlice = createAppSlice({
     openWorkspace: create.reducer((state, payload: PayloadAction<Workspace>) => {
       state.workspace = payload.payload
     }),
+    closeWorkspace: create.reducer((state) => {
+      // Tear down all workspace-scoped state so switching folders doesn't leave
+      // stale tabs, expanded nodes, or the previous project's README/diagram.
+      state.workspace = null
+      state.openFiles = editorObjectAdapter.getInitialState()
+      state.viewingFileId = null
+      state.highlightedFileId = null
+      state.expandedDirectoryIds = []
+      state.readmeContent = undefined
+      state.diagramSvgContent = undefined
+    }),
     startCreateItem: create.reducer((state, payload: PayloadAction<BaseFileItem>) => {
       if (!state.workspace) return
 
@@ -340,6 +351,7 @@ export const {
   closeFile,
   setViewingFile,
   openWorkspace,
+  closeWorkspace,
   startCreateItem,
   finishCreateItem,
   cancelCreateItem,

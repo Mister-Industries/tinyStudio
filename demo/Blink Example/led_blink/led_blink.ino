@@ -1,39 +1,21 @@
-// qwiic_joystick — stream the SparkFun Qwiic Joystick X/Y over serial
-// generated & refined with Studio AI
-//
-// SparkFun Qwiic Joystick (COM-15168) is an I2C analog thumbstick. Plug it into
-// the tinyCore Qwiic port with a Qwiic cable — no soldering, no breadboard.
-// Install "SparkFun Qwiic Joystick Arduino Library" from the Library Manager.
+// led_blink — blink the onboard LED and report its state over serial.
+// The tinyStudio demo: prints "Hello World" once, then "On"/"Off" in step with
+// the LED so the Serial Monitor (and the Visual view) match the board.
 
-#include <Wire.h>
-#include "SparkFun_Qwiic_Joystick_Arduino_Library.h"
-
-JOYSTICK joystick;
-const uint8_t JOY_ADDR = 0x20;   // default Qwiic Joystick I2C address
+const uint8_t LED = 13;  // Uno onboard LED (also fine on tinyCore)
 
 void setup() {
-  Serial.begin(115200);
-  Wire.begin();                  // tinyCore Qwiic bus = I2C (SDA/SCL)
-
-  if (joystick.begin(Wire, JOY_ADDR) == false) {
-    Serial.println("Joystick not found on I2C — check the Qwiic cable. Halting.");
-    while (1) delay(10);
-  }
-  Serial.println("# Qwiic Joystick ready — streaming x,y,button");
+  pinMode(LED, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Hello World");
 }
 
 void loop() {
-  int x = joystick.getHorizontal();             // 0..1023, center ~512
-  int y = joystick.getVertical();               // 0..1023, center ~512
-  int b = (joystick.getButton() == 0) ? 1 : 0;  // 1 = pressed
+  digitalWrite(LED, HIGH);
+  Serial.println("ON");
+  delay(1000);
 
-  // CSV line the Visual tab parses:  x,y,button
-  Serial.print(x);
-  Serial.print(',');
-  Serial.print(y);
-  Serial.print(',');
-  Serial.println(b);
-
-  delay(50);   // ~20 Hz
+  digitalWrite(LED, LOW);
+  Serial.println("OFF");
+  delay(1000);
 }
-
