@@ -42,10 +42,10 @@ export function DocsPanel(): React.JSX.Element {
             <X />
           </Button>
         </div>
-        <TabsContent value="readme" className="flex-1 min-h-0 px-4 py-3 overflow-hidden">
+        <TabsContent value="readme" className="flex-1 min-h-0 min-w-0 overflow-hidden">
           <ReadmeContent />
         </TabsContent>
-        <TabsContent value="ai" className="flex-1 min-h-0 overflow-hidden">
+        <TabsContent value="ai" className="flex-1 min-h-0 min-w-0 overflow-hidden">
           <AIAssistant />
         </TabsContent>
       </Tabs>

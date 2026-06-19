@@ -144,7 +144,14 @@ export function SourceControl(): React.JSX.Element {
     if (!workspace || !account || !repoInput.trim()) return
     setBusy('Publishing…')
     try {
-      const repo = await ghCreateRepo(repoInput.trim(), account.token, true, `${workspace.name} — built with tinyStudio`)
+      // Create the repo PUBLIC so GitHub Pages works on the free plan (Pages on
+      // private repos needs a paid plan) and so the project can be shared.
+      const repo = await ghCreateRepo(
+        repoInput.trim(),
+        account.token,
+        false,
+        `${workspace.name} — built with tinyStudio`
+      )
       // Fresh repo → empty baseline so every file is pushed.
       const newLink: RepoLink = { remote: repo.fullName, branch: repo.branch, base: {} }
       const { base } = await pushWorkspace(workspace, newLink, account.token, 'Initial commit via tinyStudio', (msg) =>
@@ -217,10 +224,13 @@ export function SourceControl(): React.JSX.Element {
 
           {!link ? (
             <div className="p-4 flex flex-col gap-3">
-              <div className="text-xs text-fg-3">Link this project to a repository, or publish a new one.</div>
+              <div className="text-xs text-fg-3">
+                Link this project to a repository, or publish a new one. New repos are created{' '}
+                <span className="text-fg-2">public</span> so GitHub Pages works.
+              </div>
               <input
                 className={input}
-                placeholder="owner/name or github.com URL"
+                placeholder="new repo name (or owner/name to link)"
                 value={repoInput}
                 onChange={(e) => setRepoInput(e.target.value)}
               />

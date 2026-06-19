@@ -2,7 +2,6 @@ import { useAppSelector } from '@renderer/redux'
 import { Folder } from 'lucide-react'
 import type { Components } from 'react-markdown'
 import ReactMarkdown from 'react-markdown'
-import { ScrollArea } from './ui/ScrollArea'
 
 export function ReadmeContent(): React.JSX.Element {
   const readmeContent = useAppSelector((state) => state.file.readmeContent)
@@ -87,7 +86,7 @@ export function ReadmeContent(): React.JSX.Element {
     pre: ({ children, className, ...props }) => (
       <pre
         {...props}
-        className={[className, 'bg-navy-1000 border border-navy-600 p-4 rounded-lg overflow-x-auto mb-4']
+        className={[className, 'bg-navy-1000 border border-navy-600 p-3 rounded-lg overflow-x-auto max-w-full text-xs mb-4']
           .filter(Boolean)
           .join(' ')}
       >
@@ -124,8 +123,10 @@ export function ReadmeContent(): React.JSX.Element {
     )
   }
   return (
-    <ScrollArea className="h-full pb-24">
-      <ReactMarkdown components={components}>{readmeContent}</ReactMarkdown>
-    </ScrollArea>
+    <div className="h-full w-full min-w-0 overflow-y-auto overflow-x-hidden px-4 py-3 pb-10">
+      <div className="min-w-0 max-w-full break-words">
+        <ReactMarkdown components={components}>{readmeContent}</ReactMarkdown>
+      </div>
+    </div>
   )
 }

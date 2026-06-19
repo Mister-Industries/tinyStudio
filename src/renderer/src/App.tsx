@@ -9,6 +9,7 @@ import { StatusBar } from './components/StatusBar'
 import { Toolbar } from './components/Toolbar'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './components/ui/Resizable'
 import { ArduinoProvider } from './contexts/ArduinoContext'
+import { SerialProvider } from './contexts/SerialContext'
 import { fileSystem } from './lib/fileSystem'
 import { selectEditorView, selectPanelState, setPanelOpen, useAppDispatch, useAppSelector } from './redux'
 import { ArduinoServiceFactory } from './services/arduino/ArduinoServiceFactory'
@@ -52,6 +53,7 @@ export default function App(): React.JSX.Element {
 
   return (
     <ArduinoProvider>
+      <SerialProvider>
       <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
         <Header />
         <Toolbar />
@@ -94,6 +96,7 @@ export default function App(): React.JSX.Element {
         </ResizablePanelGroup>
         <StatusBar />
       </div>
+      </SerialProvider>
     </ArduinoProvider>
   )
 }

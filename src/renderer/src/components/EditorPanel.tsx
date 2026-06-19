@@ -1,10 +1,8 @@
 import { OpenFileCommand, OpenWorkspaceCommand, RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
 import { loader } from '@monaco-editor/react'
 import tinyLogo from '@renderer/assets/tinyLogo.png'
-import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { enablePages, loadAccount, loadLink, pushFile } from '@renderer/lib/github'
-import { pushSerialLine } from '@renderer/lib/serialBus'
 import { buildVisualExportHtml } from '@renderer/lib/visualExport'
 import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
 import { selectEditorView, setEditorView } from '@renderer/redux/editorSlice'
@@ -301,27 +299,9 @@ function VisualView(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const file = useProjectFile('visual.js', () => DEFAULT_VISUAL)
 
-  // The Serial Monitor panel is closed in Visual view, so this view owns the
-  // serial connection while it's open — feeding the running p5 sketch live data
-  // via the shared serial bus. Suspended during uploads (port is exclusive).
-  const { selectedBoard, isAgentConnected, isUploading, openSerial, closeSerial, onSerialData } =
-    useArduinoContext()
-  const port = selectedBoard?.port
-  useEffect(() => {
-    if (!isAgentConnected || !port || isUploading) return
-    const off = onSerialData((line) => pushSerialLine(line))
-    let cancelled = false
-    const t = setTimeout(() => {
-      if (!cancelled) openSerial(port, 9600)
-    }, 600)
-    return () => {
-      cancelled = true
-      clearTimeout(t)
-      off()
-      closeSerial()
-    }
-  }, [isAgentConnected, port, isUploading, openSerial, closeSerial, onSerialData])
-
+  // Serial is owned app-wide by SerialProvider and feeds the running sketch via
+  // the shared bus — the Visual view no longer opens the port itself, so
+  // switching to/from this view doesn't reset the board.
   const [publishing, setPublishing] = useState(false)
 
   if (!workspace) return <EmptyHint icon="circuit" label="Open a project to run its visual." />

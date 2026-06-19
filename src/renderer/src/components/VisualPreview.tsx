@@ -80,27 +80,29 @@ export function VisualPreview({ code, name }: { code: string; name: string }): R
             p.canvas.style.maxWidth = '100%'
             p.canvas.style.maxHeight = '100%'
           }
-          let k = 0
-          const kick = (): void => {
-            if (k++ > 6 || !p5ref.current) return
-            try {
-              p.redraw()
-            } catch {
-              /* ignore */
+        }
+        // Deliver serial lines to the sketch's serialEvent() deterministically:
+        // each frame, replay any lines that arrived since the last frame. This
+        // is reliable (no dependence on DOM-event timing) and stays in sync with
+        // the draw loop. `window.__tinySerial.lines` is the shared serial buffer.
+        let lastLen = window.__tinySerial ? window.__tinySerial.lines.length : 0
+        const origDraw = p.draw
+        p.draw = function () {
+          const buf = window.__tinySerial
+          if (buf && typeof p.serialEvent === 'function') {
+            // If the buffer was cleared/shrank, resync without replaying.
+            if (buf.lines.length < lastLen) lastLen = buf.lines.length
+            while (lastLen < buf.lines.length) {
+              try {
+                p.serialEvent(buf.lines[lastLen])
+              } catch {
+                /* ignore sketch errors */
+              }
+              lastLen++
             }
-            setTimeout(kick, 60)
           }
-          setTimeout(kick, 40)
+          if (origDraw) origDraw.call(p)
         }
-        p.__onSerial = (ev: CustomEvent): void => {
-          try {
-            if (typeof p.serialEvent === 'function') p.serialEvent(ev.detail.line)
-            p.redraw()
-          } catch {
-            /* ignore */
-          }
-        }
-        window.addEventListener('tinyserial', p.__onSerial as EventListener)
       }, holder.current)
       p5ref.current = inst
       setRunning(true)
@@ -108,14 +110,7 @@ export function VisualPreview({ code, name }: { code: string; name: string }): R
       setErr(String(e))
     }
     return () => {
-      if (inst) {
-        try {
-          window.removeEventListener('tinyserial', inst.__onSerial)
-        } catch {
-          /* ignore */
-        }
-        inst.remove()
-      }
+      if (inst) inst.remove()
     }
   }, [code, runId, hasP5])
 

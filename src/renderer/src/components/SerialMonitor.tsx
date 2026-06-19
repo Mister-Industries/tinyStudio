@@ -1,5 +1,5 @@
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
-import { pushSerialLine } from '@renderer/lib/serialBus'
+import { useSerial } from '@renderer/contexts/SerialContext'
 import { useAppDispatch } from '@renderer/redux'
 import { setPanelOpen } from '@renderer/redux/editorSlice'
 import { FileText, Send, Terminal, Trash, X } from 'lucide-react'
@@ -60,65 +60,13 @@ export function SerialMonitor(): React.JSX.Element {
 
 
 export function SerialMonitorTab(): React.JSX.Element {
-  const {
-    selectedBoard,
-    isAgentConnected,
-    isUploading,
-    openSerial,
-    closeSerial,
-    writeSerial,
-    onSerialData,
-    onSerialStatus
-  } = useArduinoContext()
-  const [baud, setBaud] = useState<string>('9600')
-  const [lines, setLines] = useState<string[]>([])
-  const [connected, setConnected] = useState(false)
+  const { isAgentConnected } = useArduinoContext()
+  // The connection itself is owned by SerialProvider (app-level) so it persists
+  // across view switches; this tab just displays it and sends lines.
+  const { lines, connected, port, baud, setBaud, send: sendLine, clear } = useSerial()
   const [input, setInput] = useState('')
   const [autoscroll, setAutoscroll] = useState(true)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const port = selectedBoard?.port
-
-  // Subscribe to streamed serial lines + open/close status for the lifetime of the tab.
-  useEffect(() => {
-    const offData = onSerialData((line) => {
-      setLines((prev) => [...prev.slice(-1000), line])
-      pushSerialLine(line)
-    })
-    const offStatus = onSerialStatus((s) => {
-      if (s.opened) setConnected(true)
-      if (s.closed) setConnected(false)
-    })
-    return () => {
-      offData()
-      offStatus()
-    }
-  }, [onSerialData, onSerialStatus])
-
-  // Auto-connect to the selected programming port (like the Arduino IDE — no
-  // manual connect button). Opens ONCE when we enter a connectable state; this
-  // effect also re-runs (and thus reconnects) when an upload finishes, because
-  // `isUploading` is a dependency. No polling watchdog — repeatedly reopening an
-  // exclusive port races the previous monitor and spams "port busy".
-  //
-  // CRITICAL: release the port while `isUploading` so avrdude can flash (else it
-  // stalls at ~90% with "Serial port busy"); we reopen after it settles.
-  const baudNum = parseInt(baud, 10)
-  useEffect(() => {
-    if (!isAgentConnected || !port || isUploading) {
-      setConnected(false)
-      return
-    }
-    let cancelled = false
-    // Settle delay covers a just-finished upload / board reset releasing the port.
-    const t = setTimeout(() => {
-      if (!cancelled) openSerial(port, baudNum)
-    }, 600)
-    return () => {
-      cancelled = true
-      clearTimeout(t)
-      closeSerial()
-    }
-  }, [isAgentConnected, port, baudNum, isUploading, openSerial, closeSerial])
 
   useEffect(() => {
     if (!autoscroll) return
@@ -128,8 +76,7 @@ export function SerialMonitorTab(): React.JSX.Element {
 
   const send = (): void => {
     if (!input.trim() || !connected) return
-    writeSerial(input)
-    setLines((prev) => [...prev.slice(-1000), `→ ${input}`])
+    sendLine(input)
     setInput('')
   }
 
@@ -148,11 +95,9 @@ export function SerialMonitorTab(): React.JSX.Element {
           ? 'Arduino service not connected'
           : !port
             ? 'Select a board/port to monitor'
-            : isUploading
-              ? 'Paused while flashing…'
-              : connected
-                ? `Connected · ${port} @ ${baud}`
-                : `Connecting to ${port}…`}
+            : connected
+              ? `Connected · ${port} @ ${baud}`
+              : `Connecting to ${port}…`}
       </div>
       <ScrollArea
         ref={scrollRef}
@@ -187,7 +132,7 @@ export function SerialMonitorTab(): React.JSX.Element {
         <Button variant="ghost" size="sm" onClick={send} disabled={!connected || !input.trim()}>
           <Send size={14} />
         </Button>
-        <Button variant="outline" size="icon" onClick={() => setLines([])} title="Clear">
+        <Button variant="outline" size="icon" onClick={clear} title="Clear">
           <Trash size={14} />
         </Button>
         <Button

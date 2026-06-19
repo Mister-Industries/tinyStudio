@@ -262,6 +262,13 @@ export async function enablePages(remote: string, branch: string, token: string)
   })
   if (!res.ok && res.status !== 409 && res.status !== 201) {
     const e = await res.json().catch(() => ({}))
+    // 422 here is almost always: Pages on a private repo isn't available on the
+    // free plan. Make the repo public (or upgrade) and try again.
+    if (res.status === 422) {
+      throw new Error(
+        'GitHub Pages needs a public repo on the free plan. Make this repository public on GitHub, then publish again.'
+      )
+    }
     throw new Error((e.message || 'Could not enable Pages') + ' (' + res.status + ')')
   }
   // Fetch the site to get its canonical URL (falls back to the conventional one).
