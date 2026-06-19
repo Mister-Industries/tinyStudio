@@ -3,6 +3,7 @@ import { selectOpenFiles, useAppSelector } from '@renderer/redux'
 import { ChevronRight, Maximize, Minimize, Minus, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from './ui/Button'
+import { GitHubAccountButton } from './GitHubAccountButton'
 
 export function Header(): React.JSX.Element {
   const [isMaximized, setIsMaximized] = useState(false)
@@ -50,9 +51,12 @@ export function Header(): React.JSX.Element {
         {!workspace && <span className="text-xs text-fg-3 pl-1">by MR.INDUSTRIES</span>}
       </div>
       <div
-        className="flex items-center h-full"
+        className="flex items-center gap-1 h-full"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
+        <div className="pr-1">
+          <GitHubAccountButton />
+        </div>
         {isElectron() && (
           <div className="h-full flex items-center">
             <Button

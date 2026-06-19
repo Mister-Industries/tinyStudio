@@ -5,20 +5,17 @@
  */
 
 import { RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
+import { useGitHubAccount } from '@renderer/hooks/useGitHubAccount'
 import { useAppSelector } from '@renderer/redux'
 import {
   changedPaths,
   collectWorkspaceFiles,
   ghCreateRepo,
   ghRepoMeta,
-  ghUser,
-  loadAccount,
   loadLink,
   pullWorkspace,
   pushWorkspace,
-  saveAccount,
   saveLink,
-  type GitHubAccount,
   type RepoLink
 } from '@renderer/lib/github'
 import {
@@ -38,7 +35,8 @@ import { ScrollArea } from '../ui/ScrollArea'
 
 export function SourceControl(): React.JSX.Element {
   const workspace = useAppSelector((state) => state.file.workspace)
-  const [account, setAccount] = React.useState<GitHubAccount | null>(loadAccount())
+  // Shared with the header sign-in, so connecting in either place updates both.
+  const { account, connect: connectAccount, signOut } = useGitHubAccount()
   const [token, setToken] = React.useState('')
   const [link, setLink] = React.useState<RepoLink | null>(null)
   const [changed, setChanged] = React.useState<string[]>([])
@@ -66,9 +64,7 @@ export function SourceControl(): React.JSX.Element {
     if (!token.trim()) return
     setBusy('connect')
     try {
-      const acct = await ghUser(token.trim())
-      saveAccount(acct)
-      setAccount(acct)
+      const acct = await connectAccount(token)
       setToken('')
       toast.success(`Signed in as ${acct.login}`)
     } catch (e) {
@@ -76,11 +72,6 @@ export function SourceControl(): React.JSX.Element {
     } finally {
       setBusy(null)
     }
-  }
-
-  const signOut = (): void => {
-    saveAccount(null)
-    setAccount(null)
   }
 
   const linkRepo = async (): Promise<void> => {

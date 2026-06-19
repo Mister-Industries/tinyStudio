@@ -78,10 +78,6 @@ export function SerialMonitorTab(): React.JSX.Element {
   const scrollRef = useRef<HTMLDivElement>(null)
   const port = selectedBoard?.port
 
-  // Mirror connection state into a ref so the watchdog interval sees it live.
-  const connectedRef = useRef(false)
-  connectedRef.current = connected
-
   // Subscribe to streamed serial lines + open/close status for the lifetime of the tab.
   useEffect(() => {
     const offData = onSerialData((line) => {
@@ -99,32 +95,27 @@ export function SerialMonitorTab(): React.JSX.Element {
   }, [onSerialData, onSerialStatus])
 
   // Auto-connect to the selected programming port (like the Arduino IDE — no
-  // manual connect button). A watchdog reopens if we're not connected, which
-  // self-heals after a transient "port busy".
+  // manual connect button). Opens ONCE when we enter a connectable state; this
+  // effect also re-runs (and thus reconnects) when an upload finishes, because
+  // `isUploading` is a dependency. No polling watchdog — repeatedly reopening an
+  // exclusive port races the previous monitor and spams "port busy".
   //
-  // CRITICAL: the serial port is exclusive, so the monitor MUST be released
-  // during an upload — otherwise the watchdog grabs the port back mid-flash and
-  // avrdude stalls at ~90% with "Serial port busy". We close the monitor while
-  // `isUploading` and only reopen (after a short settle) once it finishes.
+  // CRITICAL: release the port while `isUploading` so avrdude can flash (else it
+  // stalls at ~90% with "Serial port busy"); we reopen after it settles.
   const baudNum = parseInt(baud, 10)
   useEffect(() => {
-    if (!isAgentConnected || !port) {
+    if (!isAgentConnected || !port || isUploading) {
       setConnected(false)
       return
     }
-    if (isUploading) {
-      closeSerial()
-      setConnected(false)
-      return
-    }
-    // Give the port a moment to settle after a just-finished upload/board reset.
-    const openTimer = setTimeout(() => openSerial(port, baudNum), 600)
-    const id = setInterval(() => {
-      if (!connectedRef.current) openSerial(port, baudNum)
-    }, 3000)
+    let cancelled = false
+    // Settle delay covers a just-finished upload / board reset releasing the port.
+    const t = setTimeout(() => {
+      if (!cancelled) openSerial(port, baudNum)
+    }, 600)
     return () => {
-      clearTimeout(openTimer)
-      clearInterval(id)
+      cancelled = true
+      clearTimeout(t)
       closeSerial()
     }
   }, [isAgentConnected, port, baudNum, isUploading, openSerial, closeSerial])

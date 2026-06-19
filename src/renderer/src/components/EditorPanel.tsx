@@ -310,10 +310,13 @@ function VisualView(): React.JSX.Element {
   useEffect(() => {
     if (!isAgentConnected || !port || isUploading) return
     const off = onSerialData((line) => pushSerialLine(line))
-    openSerial(port, 9600)
-    const id = setInterval(() => openSerial(port, 9600), 4000) // resume if it drops
+    let cancelled = false
+    const t = setTimeout(() => {
+      if (!cancelled) openSerial(port, 9600)
+    }, 600)
     return () => {
-      clearInterval(id)
+      cancelled = true
+      clearTimeout(t)
       off()
       closeSerial()
     }
