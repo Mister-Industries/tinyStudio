@@ -6,3 +6,6 @@ out
 .eslintcache
 *.log*
 .npmrc
+
+# Generated web exports in the bundled demo project
+demo/**/index.html
