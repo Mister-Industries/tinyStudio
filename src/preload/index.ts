@@ -42,7 +42,11 @@ const api = {
       ipcRenderer.invoke('get-file-stats', filePath),
     // Show a Save dialog and write the given content; returns the saved path or null.
     saveFileAs: (defaultName: string, content: string): Promise<string | null> =>
-      ipcRenderer.invoke('save-file-as', defaultName, content)
+      ipcRenderer.invoke('save-file-as', defaultName, content),
+    // Open a local file with the OS default app (e.g. exported HTML in a browser).
+    openPath: (targetPath: string): Promise<string> => ipcRenderer.invoke('open-path', targetPath),
+    // Open an external URL in the default browser.
+    openExternal: (url: string): Promise<void> => ipcRenderer.invoke('open-external', url)
   }
 }
 

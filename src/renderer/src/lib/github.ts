@@ -234,6 +234,49 @@ export async function pullWorkspace(
   return base
 }
 
+/**
+ * Push a single file to the repo (used by Publish to drop index.html in).
+ */
+export async function pushFile(
+  remote: string,
+  branch: string,
+  path: string,
+  content: string,
+  token: string,
+  message: string
+): Promise<void> {
+  const [owner, repo] = remote.split('/')
+  await ghPutFile(owner, repo, path, content, branch, token, message)
+}
+
+/**
+ * Enable GitHub Pages for the repo (served from the branch root) and return the
+ * site URL. Safe to call repeatedly — a 409 means it's already enabled.
+ */
+export async function enablePages(remote: string, branch: string, token: string): Promise<string> {
+  const [owner, repo] = remote.split('/')
+  const res = await fetch(`${GH_API}/repos/${owner}/${repo}/pages`, {
+    method: 'POST',
+    headers: { ...ghHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ source: { branch, path: '/' } })
+  })
+  if (!res.ok && res.status !== 409 && res.status !== 201) {
+    const e = await res.json().catch(() => ({}))
+    throw new Error((e.message || 'Could not enable Pages') + ' (' + res.status + ')')
+  }
+  // Fetch the site to get its canonical URL (falls back to the conventional one).
+  try {
+    const get = await fetch(`${GH_API}/repos/${owner}/${repo}/pages`, { headers: ghHeaders(token) })
+    if (get.ok) {
+      const j = await get.json()
+      if (j.html_url) return j.html_url as string
+    }
+  } catch {
+    /* fall through */
+  }
+  return `https://${owner}.github.io/${repo}/`
+}
+
 export { ghRepoMeta }
 
 // ── persistence (localStorage) ───────────────────────────────────────────────

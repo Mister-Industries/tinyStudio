@@ -120,6 +120,17 @@ app.whenReady().then(async () => {
     window?.close()
   })
 
+  // Open a local file with the OS default app (e.g. the exported index.html in
+  // the browser). Returns '' on success or an error string.
+  ipcMain.handle('open-path', async (_, targetPath: string) => {
+    return shell.openPath(targetPath)
+  })
+
+  // Open an external URL (e.g. the GitHub Pages site) in the default browser.
+  ipcMain.handle('open-external', async (_, url: string) => {
+    await shell.openExternal(url)
+  })
+
   // Save a generated file (e.g. the Visual web export) via a Save dialog.
   ipcMain.handle('save-file-as', async (event, defaultName: string, content: string) => {
     const window = BrowserWindow.fromWebContents(event.sender)

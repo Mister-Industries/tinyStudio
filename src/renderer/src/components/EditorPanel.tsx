@@ -3,6 +3,7 @@ import { loader } from '@monaco-editor/react'
 import tinyLogo from '@renderer/assets/tinyLogo.png'
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { fileSystem } from '@renderer/lib/fileSystem'
+import { enablePages, loadAccount, loadLink, pushFile } from '@renderer/lib/github'
 import { pushSerialLine } from '@renderer/lib/serialBus'
 import { buildVisualExportHtml } from '@renderer/lib/visualExport'
 import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
@@ -17,9 +18,9 @@ import {
   updateFileContent,
   updateReadmeContent
 } from '@renderer/redux/fileSlice'
-import { CircuitBoard, Code2, Download, FolderOpen, Loader2 } from 'lucide-react'
+import { CircuitBoard, Code2, ExternalLink, FolderOpen, Loader2, UploadCloud } from 'lucide-react'
 import * as monaco from 'monaco-editor'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { BlocklyEditor } from './BlocklyEditor'
 import { DiagramEditor } from './DiagramEditor'
@@ -318,21 +319,62 @@ function VisualView(): React.JSX.Element {
     }
   }, [isAgentConnected, port, isUploading, openSerial, closeSerial, onSerialData])
 
+  const [publishing, setPublishing] = useState(false)
+
   if (!workspace) return <EmptyHint icon="circuit" label="Open a project to run its visual." />
   if (!file) return <LoadingHint label="Loading visual…" />
 
-  const exportWeb = async (): Promise<void> => {
-    // Title the page after the .ino project (not the workspace folder), and
-    // default to index.html in the project root — best practice for hosting.
-    const ino = workspace ? findInTree(workspace.root, (i) => /\.ino$/i.test(i.name!)) : null
-    const projectName = ino?.name?.replace(/\.ino$/i, '') || workspace?.name || 'tinyStudio sketch'
-    const html = buildVisualExportHtml(projectName, file.content)
-    const defaultPath = workspace ? `${workspace.path}/index.html` : 'index.html'
+  const ws = workspace
+  // Build the standalone page, titled after the .ino project (not the folder).
+  const buildHtml = (): string => {
+    const ino = findInTree(ws.root, (i) => /\.ino$/i.test(i.name!))
+    const projectName = ino?.name?.replace(/\.ino$/i, '') || ws.name || 'tinyStudio sketch'
+    return buildVisualExportHtml(projectName, file.content)
+  }
+
+  // Preview: write index.html into the project root and open it in the browser.
+  const preview = async (): Promise<void> => {
+    const path = `${ws.path}/index.html`
     try {
-      const saved = await window.api.fs.saveFileAs(defaultPath, html)
-      if (saved) toast.success('Exported web page', { description: saved })
+      await window.api.fs.writeFile(path, buildHtml())
+      await new RefreshWorkspaceCommand(ws).execute()
+      const err = await window.api.fs.openPath(path)
+      if (err) toast.error('Could not open preview', { description: err })
+      else toast.success('Preview opened in your browser', { description: path })
     } catch (e) {
-      toast.error('Export failed', { description: e instanceof Error ? e.message : 'Unknown error' })
+      toast.error('Preview failed', { description: e instanceof Error ? e.message : 'Unknown error' })
+    }
+  }
+
+  // Publish: push index.html to the linked repo and turn on GitHub Pages.
+  const publish = async (): Promise<void> => {
+    const account = loadAccount()
+    if (!account) {
+      toast.info('Connect GitHub first', { description: 'Open the GitHub tab in the sidebar to sign in.' })
+      return
+    }
+    const link = loadLink(ws.path)
+    if (!link) {
+      toast.info('Link this project to a repo first', {
+        description: 'Use the GitHub tab to link or publish a repository.'
+      })
+      return
+    }
+    setPublishing(true)
+    try {
+      const html = buildHtml()
+      await window.api.fs.writeFile(`${ws.path}/index.html`, html)
+      await new RefreshWorkspaceCommand(ws).execute()
+      await pushFile(link.remote, link.branch, 'index.html', html, account.token, 'Publish web export via tinyStudio')
+      const url = await enablePages(link.remote, link.branch, account.token)
+      toast.success('Published to GitHub Pages', {
+        description: `${url} — the first build can take a minute.`
+      })
+      window.api.fs.openExternal(url)
+    } catch (e) {
+      toast.error('Publish failed', { description: e instanceof Error ? e.message : 'Unknown error' })
+    } finally {
+      setPublishing(false)
     }
   }
 
@@ -355,10 +397,20 @@ function VisualView(): React.JSX.Element {
           size="icon"
           variant="outline"
           className="rounded-full"
-          title="Export for web"
-          onClick={exportWeb}
+          title="Preview in browser"
+          onClick={preview}
         >
-          <Download size={16} />
+          <ExternalLink size={16} />
+        </Button>
+        <Button
+          size="icon"
+          variant="outline"
+          className="rounded-full"
+          title="Publish to GitHub Pages"
+          disabled={publishing}
+          onClick={publish}
+        >
+          {publishing ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
         </Button>
       </div>
       <VisualPreview code={file.content} name={file.name} />
