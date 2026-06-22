@@ -1,4 +1,8 @@
-import { OpenFileCommand, OpenWorkspaceCommand, RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
+import {
+  OpenFileCommand,
+  OpenWorkspaceCommand,
+  RefreshWorkspaceCommand
+} from '@renderer/commands/fileCommands'
 import { loader } from '@monaco-editor/react'
 import tinyLogo from '@renderer/assets/tinyLogo.png'
 import { fileSystem } from '@renderer/lib/fileSystem'
@@ -90,7 +94,10 @@ function draw() {
 }
 `
 
-function findInTree(items: BaseFileItem[], match: (i: BaseFileItem) => boolean): BaseFileItem | null {
+function findInTree(
+  items: BaseFileItem[],
+  match: (i: BaseFileItem) => boolean
+): BaseFileItem | null {
   for (const item of items) {
     if (item.type === 'file' && item.name && match(item)) return item
     if (item.children) {
@@ -137,7 +144,16 @@ function useProjectFile(name: string, makeDefault?: () => string): EditorFile | 
 
 export function EditorPanel({ size }: { size: number }): React.JSX.Element {
   const editorView = useAppSelector(selectEditorView)
-  const pixelSize = Math.round((size / 100) * (window.innerHeight - 92))
+  // Track viewport height so the panel re-measures on resize / fullscreen toggle
+  // (otherwise the height is computed once from a stale window.innerHeight and
+  // the layout — and its buttons — break after going fullscreen).
+  const [winHeight, setWinHeight] = useState(window.innerHeight)
+  useEffect(() => {
+    const onResize = (): void => setWinHeight(window.innerHeight)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  const pixelSize = Math.round((size / 100) * (winHeight - 92))
 
   return (
     <div className="flex flex-col bg-navy-900" style={{ height: `${pixelSize}px` }}>
@@ -189,7 +205,11 @@ function CodeView(): React.JSX.Element {
         event.preventDefault()
         if (openFiles.length > 1) {
           const i = openFiles.findIndex((f) => f.id === viewingFileId)
-          const next = event.shiftKey ? (i <= 0 ? openFiles.length - 1 : i - 1) : (i + 1) % openFiles.length
+          const next = event.shiftKey
+            ? i <= 0
+              ? openFiles.length - 1
+              : i - 1
+            : (i + 1) % openFiles.length
           if (openFiles[next]) handleFileSelect(openFiles[next].id)
         }
       }
@@ -248,11 +268,20 @@ function CodeView(): React.JSX.Element {
   }
 
   return (
-    <FileTabs value={viewingFileId || undefined} onValueChange={handleFileSelect} className="h-full">
+    <FileTabs
+      value={viewingFileId || undefined}
+      onValueChange={handleFileSelect}
+      className="h-full"
+    >
       <FileTabsList>
         <div className="flex">
           {openFiles.map((file) => (
-            <FileTabTrigger key={file.id} value={file.id} file={file} onFileClose={handleFileClose} />
+            <FileTabTrigger
+              key={file.id}
+              value={file.id}
+              file={file}
+              onFileClose={handleFileClose}
+            />
           ))}
         </div>
       </FileTabsList>
@@ -325,7 +354,9 @@ function VisualView(): React.JSX.Element {
       if (err) toast.error('Could not open preview', { description: err })
       else toast.success('Preview opened in your browser', { description: path })
     } catch (e) {
-      toast.error('Preview failed', { description: e instanceof Error ? e.message : 'Unknown error' })
+      toast.error('Preview failed', {
+        description: e instanceof Error ? e.message : 'Unknown error'
+      })
     }
   }
 
@@ -333,7 +364,9 @@ function VisualView(): React.JSX.Element {
   const publish = async (): Promise<void> => {
     const account = loadAccount()
     if (!account) {
-      toast.info('Connect GitHub first', { description: 'Open the GitHub tab in the sidebar to sign in.' })
+      toast.info('Connect GitHub first', {
+        description: 'Open the GitHub tab in the sidebar to sign in.'
+      })
       return
     }
     const link = loadLink(ws.path)
@@ -348,14 +381,23 @@ function VisualView(): React.JSX.Element {
       const html = buildHtml()
       await window.api.fs.writeFile(`${ws.path}/index.html`, html)
       await new RefreshWorkspaceCommand(ws).execute()
-      await pushFile(link.remote, link.branch, 'index.html', html, account.token, 'Publish web export via tinyStudio')
+      await pushFile(
+        link.remote,
+        link.branch,
+        'index.html',
+        html,
+        account.token,
+        'Publish web export via tinyStudio'
+      )
       const url = await enablePages(link.remote, link.branch, account.token)
       toast.success('Published to GitHub Pages', {
         description: `${url} — the first build can take a minute.`
       })
       window.api.fs.openExternal(url)
     } catch (e) {
-      toast.error('Publish failed', { description: e instanceof Error ? e.message : 'Unknown error' })
+      toast.error('Publish failed', {
+        description: e instanceof Error ? e.message : 'Unknown error'
+      })
     } finally {
       setPublishing(false)
     }

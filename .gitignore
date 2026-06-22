@@ -9,3 +9,6 @@ out
 
 # Generated web exports in the bundled demo project
 demo/**/index.html
+
+# arduino-cli binaries fetched by scripts/fetch-arduino-cli.mjs
+vendor/

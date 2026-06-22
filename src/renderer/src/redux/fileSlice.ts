@@ -179,6 +179,34 @@ export const fileSlice = createAppSlice({
     }),
     openFile: create.reducer((state, payload: PayloadAction<EditorFile>) => {
       const file = payload.payload
+
+      // Enforce a single tab per file. Dedup on path (not id) because tree item
+      // ids are regenerated whenever the workspace is (re)loaded, so the same
+      // file can arrive under different ids — that's what produced duplicate tabs.
+      const alreadyOpen = editorObjectAdapter
+        .getSelectors()
+        .selectAll(state.openFiles)
+        .find((f) => f.path === file.path)
+
+      if (alreadyOpen) {
+        if (alreadyOpen.id !== file.id) {
+          // Same file under a freshly-rebuilt tree id: re-key the tab onto the
+          // new id so it stays in sync with the current tree (keeps highlight
+          // and close working), carrying over any unsaved edits.
+          state.openFiles = editorObjectAdapter.removeOne(state.openFiles, alreadyOpen.id)
+          state.openFiles = editorObjectAdapter.addOne(state.openFiles, {
+            ...file,
+            content: alreadyOpen.modified ? alreadyOpen.content : file.content,
+            modified: alreadyOpen.modified,
+            updatedAt: new Date().toISOString()
+          })
+        }
+        // Already open — just focus the existing tab, don't reload its buffer.
+        state.viewingFileId = file.id
+        state.highlightedFileId = file.id
+        return
+      }
+
       state.openFiles = editorObjectAdapter.upsertOne(state.openFiles, {
         ...file,
         updatedAt: new Date().toISOString()

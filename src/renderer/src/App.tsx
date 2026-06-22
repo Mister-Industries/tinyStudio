@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { OpenWorkspaceCommand } from './commands/fileCommands'
 import { DocsPanel } from './components/DocsPanel'
 import { EditorPanel } from './components/EditorPanel'
@@ -36,7 +36,13 @@ export default function App(): React.JSX.Element {
   }, [])
 
   // Reopen the last workspace on launch (if it still exists on disk).
+  // Guard against running twice — StrictMode double-invokes effects in dev,
+  // and a second OpenWorkspaceCommand rebuilds the tree with new ids, which
+  // previously opened a duplicate tab for the auto-opened sketch.
+  const reopenedRef = useRef(false)
   useEffect(() => {
+    if (reopenedRef.current) return
+    reopenedRef.current = true
     const last = localStorage.getItem('tinystudio.lastWorkspace')
     if (!last) return
     fileSystem

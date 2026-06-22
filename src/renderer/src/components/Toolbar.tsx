@@ -8,7 +8,7 @@ import {
   useAppDispatch,
   useAppSelector
 } from '@renderer/redux'
-import { FileText, Monitor, RefreshCw, Save } from 'lucide-react'
+import { BookOpen, Monitor, RefreshCw, Save } from 'lucide-react'
 import React from 'react'
 import { UploadButton, VerifyButton } from './arduino/ArduinoButtons'
 import { BoardPicker, PortPicker } from './arduino/BoardControls'
@@ -104,7 +104,6 @@ export function Toolbar(): React.JSX.Element {
               }
             >
               <Monitor size={14} />
-              Monitor
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">Serial monitor & output</TooltipContent>
@@ -118,8 +117,7 @@ export function Toolbar(): React.JSX.Element {
               className="rounded-full h-7 px-3 text-xs text-fg-3 hover:bg-navy-500 hover:text-fg-1 data-[active=true]:bg-navy-500 data-[active=true]:text-fg-1"
               onClick={() => dispatch(setPanelOpen({ panel: 'docs', isOpen: !isDocsPanelOpen }))}
             >
-              <FileText size={14} />
-              Docs
+              <BookOpen size={14} />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">Help and documentation</TooltipContent>

@@ -1,121 +1,119 @@
 /**
- * DiagramEditor — renders a project's `diagram.json` as a live, editable circuit
- * inside its own editor tab (not a separate window). Drag parts from the rail,
- * move them, click pins to wire them, toggle a Wokwi-style JSON view. Every edit
- * is serialized straight back to the file via onChange so it stays a normal tab
- * you can rearrange and edit alongside code.
+ * DiagramEditor — renders a project's `diagram.json` as a live, editable circuit.
+ * Parts come from the shared parts library (built-in tinyStudio boards + the
+ * Fritzing-imported catalogue), drawn from their real SVG with a palette that
+ * shows each part's icon. Draw orthogonal auto-routed wires pin-to-pin (with
+ * waypoints), drag wire bends to re-route, switch breadboard/schematic views,
+ * toggle a clean read-only view, and author/edit parts in the Parts Editor.
+ * Every edit serializes back to the file in Wokwi `diagram.json` format.
  */
 
-import { Braces, CircuitBoard, Grid3x3, Maximize, MousePointer2, X, Zap, ZoomIn, ZoomOut } from 'lucide-react'
+import {
+  Braces,
+  ChevronDown,
+  ChevronRight,
+  CircuitBoard,
+  Grid3x3,
+  Maximize,
+  MousePointer2,
+  Pencil,
+  Plus,
+  Eye,
+  Spline,
+  X,
+  Zap,
+  ZoomIn,
+  ZoomOut
+} from 'lucide-react'
 import React from 'react'
+import {
+  ensureParts,
+  getPart,
+  loadPart,
+  partsByFamily,
+  registerPart,
+  viewFor,
+  type PartDef,
+  type PartMeta,
+  type ViewKind
+} from '../lib/partsLibrary'
+import {
+  calculateOrthogonalPath,
+  getWirePoints,
+  instructionsFromPoints,
+  moveSegment,
+  ptsStr,
+  simplifyWirePoints,
+  type Connection,
+  type PinRef,
+  type Pt
+} from '../lib/wireRouting'
+import { PartsEditor } from './PartsEditor'
 
 const CANVAS_W = 1100
 const CANVAS_H = 640
+const GRID = 9.6 // 100 mil (0.1in) at 96 DPI — the standard breadboard pitch
 
 interface Part {
   id: string
   type: string
-  x: number
-  y: number
+  left: number
+  top: number
+  rotate?: number // 0 | 90 | 180 | 270 (Wokwi-compatible)
+  attrs?: Record<string, unknown>
 }
-type Connection = [string, string, string?]
+// Per-view overrides for the schematic layout. The top-level parts/connections
+// stay the Wokwi breadboard layout; the schematic view keeps its own positions
+// and wire routes here so the two diagrams can diverge. A part/wire with no
+// schematic entry falls back to its breadboard placement (until it's moved).
+interface SchematicLayout {
+  pos: Record<string, [number, number]> // partId -> [left, top]
+  routes: Record<string, string[]> // connKey -> h/v instructions
+}
 interface Diagram {
   parts: Part[]
   connections: Connection[]
   author?: string
+  schematic: SchematicLayout
 }
-
-// Part geometry: size + pin offsets (canvas units from the part's top-left).
-const PART_GEO: Record<
-  string,
-  { w: number; h: number; label: string; sub?: string; accent?: string; pins: Record<string, [number, number]> }
-> = {
-  tinycore: {
-    w: 150, h: 150, label: 'tinyCore', sub: 'ESP32-S3', accent: 'var(--cyan)',
-    pins: { '3V3': [8, 70], GND: [8, 96], SIG: [142, 58], D3: [142, 78], D4: [142, 98], D5: [142, 118], D9: [74, 142] }
-  },
-  tinyglow: { w: 104, h: 104, label: 'tinyGlow', accent: 'var(--pink)', pins: { VCC: [6, 40], GND: [6, 64], DIN: [98, 52] } },
-  tinyproto: { w: 120, h: 100, label: 'tinyProto', pins: { '+': [6, 30], '-': [6, 54], A: [114, 30], B: [114, 54] } },
-  tinydisplay: { w: 120, h: 100, label: 'tinyDisplay', pins: { VCC: [6, 24], GND: [6, 48], SDA: [114, 24], SCL: [114, 48] } },
-  tinysniff: { w: 110, h: 100, label: 'tinySniff', pins: { VCC: [6, 24], GND: [6, 48], SDA: [104, 24], SCL: [104, 48] } },
-  button: { w: 70, h: 70, label: 'Push button', pins: { '1': [4, 18], '2': [66, 18] } },
-  resistor: { w: 110, h: 36, label: '1 kΩ', pins: { a: [2, 18], b: [108, 18] } },
-  led: { w: 52, h: 70, label: 'LED', accent: 'var(--pink)', pins: { A: [16, 66], K: [36, 66] } }
-}
-
-const PALETTE = [
-  { id: 'tinycore', label: 'tinyCore', desc: 'ESP32-S3 board' },
-  { id: 'tinyglow', label: 'tinyGlow', desc: 'RGB LED · WS2812' },
-  { id: 'tinyproto', label: 'tinyProto', desc: 'Prototyping module' },
-  { id: 'tinydisplay', label: 'tinyDisplay', desc: 'OLED · I²C' },
-  { id: 'led', label: 'LED', desc: '5mm diffused' },
-  { id: 'resistor', label: 'Resistor', desc: '1 kΩ' },
-  { id: 'button', label: 'Push button', desc: 'Momentary' }
-]
 
 const WIRE_COLORS = ['#36c46b', '#ff4d6d', '#00f0ff', '#f7a400', '#ffffff', '#9b6cff']
 
-function pinPos(part: Part, pin: string): [number, number] {
-  const g = PART_GEO[part.type]
-  if (!g || !g.pins[pin]) return [part.x, part.y]
-  return [part.x + g.pins[pin][0], part.y + g.pins[pin][1]]
-}
-function routePts(a: [number, number], b: [number, number]): [number, number][] {
-  const mx = (a[0] + b[0]) / 2
-  return [a, [mx, a[1]], [mx, b[1]], b]
-}
-const ptsStr = (pts: [number, number][]): string => pts.map((p) => p.join(',')).join(' ')
 const uid = (): string => Math.random().toString(36).slice(2, 8)
+const snap = (v: number): number => Math.round(v / GRID) * GRID
 
-function VectorPart({ type }: { type: string }): React.JSX.Element | null {
-  if (type === 'button')
-    return (
-      <svg width="70" height="70" viewBox="0 0 70 70">
-        <rect x="8" y="8" width="54" height="54" rx="6" fill="#0e1320" stroke="#2b3346" strokeWidth="1.5" />
-        <circle cx="35" cy="35" r="15" fill="#cfd6e4" stroke="#9aa3b6" strokeWidth="2" />
-        <circle cx="35" cy="35" r="8" fill="#aeb7c9" />
-      </svg>
-    )
-  if (type === 'resistor')
-    return (
-      <svg width="110" height="36" viewBox="0 0 110 36">
-        <line x1="0" y1="18" x2="110" y2="18" stroke="#9a9a9a" strokeWidth="3" />
-        <rect x="30" y="8" width="50" height="20" rx="9" fill="#d8c7a0" stroke="#b7a578" />
-        <rect x="38" y="8" width="4" height="20" fill="#6b3f1d" />
-        <rect x="48" y="8" width="4" height="20" fill="#111" />
-        <rect x="58" y="8" width="4" height="20" fill="#c0392b" />
-        <rect x="70" y="8" width="4" height="20" fill="#caa53c" />
-      </svg>
-    )
-  if (type === 'led')
-    return (
-      <svg width="52" height="70" viewBox="0 0 52 70">
-        <line x1="16" y1="40" x2="16" y2="68" stroke="#caa53c" strokeWidth="2.5" />
-        <line x1="36" y1="40" x2="36" y2="68" stroke="#caa53c" strokeWidth="2.5" />
-        <path d="M10 38 A16 16 0 0 1 42 38 L42 40 L10 40 Z" fill="#ff5a6a" opacity="0.92" />
-        <circle cx="26" cy="26" r="16" fill="#ff6e7c" opacity="0.55" />
-        <circle cx="26" cy="26" r="16" fill="none" stroke="#c0392b" strokeWidth="1.5" />
-      </svg>
-    )
-  // module-style parts (tinyCore family): a labeled board
-  const g = PART_GEO[type]
-  if (!g) return null
+// read-compat: accept Wokwi left/top or the legacy x/y
+function readPart(p: Record<string, unknown>): Part {
+  return {
+    id: String(p.id),
+    type: String(p.type),
+    left: Number(p.left ?? p.x ?? 0),
+    top: Number(p.top ?? p.y ?? 0),
+    rotate: p.rotate ? Number(p.rotate) : undefined,
+    attrs: (p.attrs as Record<string, unknown>) || undefined
+  }
+}
+
+// rotate a local point (px,py) around a part's centre by `deg` (CSS-rotate space)
+function rotatePoint(px: number, py: number, w: number, h: number, deg: number): Pt {
+  const rad = (deg * Math.PI) / 180
+  const cos = Math.cos(rad)
+  const sin = Math.sin(rad)
+  const dx = px - w / 2
+  const dy = py - h / 2
+  return { x: w / 2 + dx * cos - dy * sin, y: h / 2 + dx * sin + dy * cos }
+}
+
+// A small SVG thumbnail for the palette / part chips. Fritzing icon art is dark
+// line-work meant for a light background, so we put it on a light chip (keeping
+// its real colors) rather than flattening it to a silhouette.
+function Thumb({ svg }: { svg?: string }): React.JSX.Element {
+  if (!svg) return <CircuitBoard size={24} className="text-fg-2 shrink-0" />
   return (
     <div
-      style={{
-        width: g.w,
-        height: g.h,
-        borderRadius: 12,
-        background: 'linear-gradient(160deg, var(--navy-600), var(--navy-800))',
-        border: `1.5px solid ${g.accent || 'var(--navy-400)'}`,
-        boxShadow: '0 8px 18px rgba(0,0,0,.45)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-    >
-      <CircuitBoard size={Math.min(g.w, g.h) * 0.4} color={g.accent || 'var(--fg-3)'} strokeWidth={1.25} />
-    </div>
+      className="size-10 shrink-0 rounded-md bg-[#eef1f7] p-1 grid place-items-center [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto"
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
   )
 }
 
@@ -129,43 +127,169 @@ export function DiagramEditor({
   const diagram: Diagram = React.useMemo(() => {
     try {
       const d = JSON.parse(content || '{}')
-      return { parts: d.parts || [], connections: d.connections || [], author: d.author }
+      const sch = d.schematic || {}
+      return {
+        parts: (d.parts || []).map(readPart),
+        connections: (d.connections || []) as Connection[],
+        author: d.author,
+        schematic: { pos: sch.pos || {}, routes: sch.routes || {} }
+      }
     } catch {
-      return { parts: [], connections: [] }
+      return { parts: [], connections: [], schematic: { pos: {}, routes: {} } }
     }
   }, [content])
 
+  const [view, setView] = React.useState<ViewKind>('breadboard')
+  const [editable, setEditable] = React.useState(false)
   const [grid, setGrid] = React.useState(true)
   const [showJson, setShowJson] = React.useState(false)
+  const [editorPart, setEditorPart] = React.useState<PartDef | null | undefined>(undefined) // undefined = closed
   const [selPart, setSelPart] = React.useState<string | null>(null)
-  const [armed, setArmed] = React.useState<{ id: string; pin: string } | null>(null)
+  const [selWire, setSelWire] = React.useState<number | null>(null)
   const [wireColor, setWireColor] = React.useState(WIRE_COLORS[0])
+  const [armed, setArmed] = React.useState<{ from: string; points: Pt[] } | null>(null)
+  const [hoverPin, setHoverPin] = React.useState<{ id: string; pin: string } | null>(null)
+  const [mouse, setMouse] = React.useState<Pt>({ x: 0, y: 0 })
+  const [collapsed, setCollapsed] = React.useState<Set<string>>(new Set())
+  const [editPts, setEditPts] = React.useState<Pt[] | null>(null) // selected-wire editing buffer
+  const [tick, force] = React.useReducer((n) => n + 1, 0)
+
   const viewRef = React.useRef<HTMLDivElement>(null)
   const innerRef = React.useRef<HTMLDivElement>(null)
   const drag = React.useRef<{ id: string; offX: number; offY: number } | null>(null)
   const pan = React.useRef<{ x: number; y: number } | null>(null)
+  const handleDrag = React.useRef<{ idx: number } | null>(null)
   const [cam, setCam] = React.useState({ scale: 0.62, tx: 0, ty: 0 })
   const scale = cam.scale
   const didInit = React.useRef(false)
 
+  React.useEffect(() => {
+    const types = diagram.parts.map((p) => p.type).filter((t) => !getPart(t))
+    if (types.length) ensureParts(types).then(force)
+  }, [diagram.parts])
+
   const write = (d: Partial<Diagram>): void => {
-    const next = { version: 1, editor: 'tinystudio', author: diagram.author, parts: diagram.parts, connections: diagram.connections, ...d }
+    const sch = d.schematic || diagram.schematic
+    const hasSch = Object.keys(sch.pos).length > 0 || Object.keys(sch.routes).length > 0
+    const next = {
+      version: 1,
+      editor: 'tinystudio',
+      author: diagram.author,
+      parts: (d.parts || diagram.parts).map((p) => ({
+        type: p.type,
+        id: p.id,
+        left: p.left,
+        top: p.top,
+        ...(p.rotate ? { rotate: p.rotate } : {}),
+        ...(p.attrs ? { attrs: p.attrs } : {})
+      })),
+      connections: d.connections || diagram.connections,
+      ...(hasSch ? { schematic: sch } : {})
+    }
     onChange(JSON.stringify(next, null, 2))
   }
 
+  // ── per-view layout helpers ─────────────────────────────────────────────────
+
+  const refStr = (r: PinRef): string => (typeof r === 'string' ? r : `${r.x},${r.y}`)
+  const connKey = (c: Connection): string => `${refStr(c[0])}>${refStr(c[1])}`
+  // position of a part in the *current* view (schematic falls back to breadboard)
+  const partXY = (part: Part): [number, number] =>
+    view === 'schematic'
+      ? diagram.schematic.pos[part.id] || [part.left, part.top]
+      : [part.left, part.top]
+  // wire route in the current view (schematic starts clean, then diverges)
+  const routeFor = (c: Connection): string[] =>
+    view === 'schematic' ? (diagram.schematic.routes[connKey(c)] ?? []) : c[3] || []
+  const wirePts = (c: Connection): Pt[] =>
+    getWirePoints([c[0], c[1], c[2], routeFor(c)] as Connection, resolve)
+
+  // ── geometry ──────────────────────────────────────────────────────────────
+
+  const pinAbs = (part: Part, pin: string): Pt | null => {
+    const def = getPart(part.type)
+    if (!def) return null
+    const v = viewFor(def, view)
+    const p = v?.pins[pin]
+    if (!p) return null
+    const [left, top] = partXY(part)
+    const rp = part.rotate ? rotatePoint(p[0], p[1], v!.w, v!.h, part.rotate) : { x: p[0], y: p[1] }
+    return { x: left + rp.x, y: top + rp.y }
+  }
+  const resolve = (ref: PinRef): Pt | null => {
+    if (typeof ref === 'object') return ref
+    const [id, pin] = ref.split(':')
+    const part = diagram.parts.find((p) => p.id === id)
+    return part ? pinAbs(part, pin) : null
+  }
+  const canvasPoint = (e: { clientX: number; clientY: number }): Pt => {
+    const r = innerRef.current!.getBoundingClientRect()
+    return { x: (e.clientX - r.left) / scale, y: (e.clientY - r.top) / scale }
+  }
+
+  // ── camera ──────────────────────────────────────────────────────────────────
+
+  // Fit to the actual content (parts + wires) with a little padding, not the
+  // whole 1100×640 canvas — so the circuit fills the viewport instead of floating
+  // tiny in the middle. Falls back to centering the canvas when empty.
   const fitView = (): void => {
     const el = viewRef.current
     if (!el) return
-    const f = Math.max(0.3, Math.min(1, Math.min(el.clientWidth / (CANVAS_W + 60), el.clientHeight / (CANVAS_H + 60))))
-    setCam({ scale: f, tx: (el.clientWidth - CANVAS_W * f) / 2, ty: (el.clientHeight - CANVAS_H * f) / 2 })
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+    for (const part of diagram.parts) {
+      const def = getPart(part.type)
+      const v = def && viewFor(def, view)
+      if (!v) continue
+      const [l, t] = partXY(part)
+      minX = Math.min(minX, l)
+      minY = Math.min(minY, t)
+      maxX = Math.max(maxX, l + v.w)
+      maxY = Math.max(maxY, t + v.h)
+    }
+    for (const c of diagram.connections) {
+      for (const p of wirePts(c)) {
+        minX = Math.min(minX, p.x)
+        minY = Math.min(minY, p.y)
+        maxX = Math.max(maxX, p.x)
+        maxY = Math.max(maxY, p.y)
+      }
+    }
+    if (!isFinite(minX)) {
+      // empty — center the canvas at a comfortable zoom
+      const f = Math.min(el.clientWidth / CANVAS_W, el.clientHeight / CANVAS_H, 1)
+      setCam({
+        scale: f,
+        tx: (el.clientWidth - CANVAS_W * f) / 2,
+        ty: (el.clientHeight - CANVAS_H * f) / 2
+      })
+      return
+    }
+    const pad = 40
+    minX -= pad
+    minY -= pad
+    maxX += pad
+    maxY += pad
+    const bw = maxX - minX
+    const bh = maxY - minY
+    const f = Math.max(0.25, Math.min(3, Math.min(el.clientWidth / bw, el.clientHeight / bh)))
+    setCam({
+      scale: f,
+      tx: (el.clientWidth - bw * f) / 2 - minX * f,
+      ty: (el.clientHeight - bh * f) / 2 - minY * f
+    })
   }
-
-  React.useLayoutEffect(() => {
-    if (!didInit.current) {
+  // initial fit, and one more once the referenced parts have loaded (so sizes are known)
+  React.useEffect(() => {
+    if (didInit.current) return
+    if (diagram.parts.length === 0 || diagram.parts.every((p) => getPart(p.type))) {
       fitView()
       didInit.current = true
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content, tick])
 
   const zoomAt = (factor: number, sx: number, sy: number): void => {
     setCam((c) => {
@@ -176,8 +300,7 @@ export function DiagramEditor({
   }
   const zoomCenter = (factor: number): void => {
     const el = viewRef.current
-    if (!el) return
-    zoomAt(factor, el.clientWidth / 2, el.clientHeight / 2)
+    if (el) zoomAt(factor, el.clientWidth / 2, el.clientHeight / 2)
   }
   const onWheel = (e: React.WheelEvent): void => {
     const rect = viewRef.current!.getBoundingClientRect()
@@ -193,10 +316,8 @@ export function DiagramEditor({
   const onPanMove = (e: PointerEvent): void => {
     const p = pan.current
     if (!p) return
-    const dx = e.clientX - p.x
-    const dy = e.clientY - p.y
+    setCam((c) => ({ ...c, tx: c.tx + (e.clientX - p.x), ty: c.ty + (e.clientY - p.y) }))
     pan.current = { x: e.clientX, y: e.clientY }
-    setCam((c) => ({ ...c, tx: c.tx + dx, ty: c.ty + dy }))
   }
   const onPanUp = (): void => {
     pan.current = null
@@ -204,148 +325,468 @@ export function DiagramEditor({
     window.removeEventListener('pointerup', onPanUp)
   }
 
+  // ── part drag ─────────────────────────────────────────────────────────────
+
   const onPartDown = (e: React.PointerEvent, part: Part): void => {
-    if ((e.target as HTMLElement).closest('.pin-hit')) return
+    if (!editable || (e.target as HTMLElement).closest('.pin-hit')) return
     e.stopPropagation()
     setSelPart(part.id)
+    selectWire(null)
     const r = innerRef.current!.getBoundingClientRect()
-    drag.current = { id: part.id, offX: (e.clientX - r.left) / scale - part.x, offY: (e.clientY - r.top) / scale - part.y }
-    window.addEventListener('pointermove', onMove)
-    window.addEventListener('pointerup', onUp)
+    const [left, top] = partXY(part)
+    drag.current = {
+      id: part.id,
+      offX: (e.clientX - r.left) / scale - left,
+      offY: (e.clientY - r.top) / scale - top
+    }
+    window.addEventListener('pointermove', onPartMove)
+    window.addEventListener('pointerup', onPartUp)
   }
-  const onMove = (e: PointerEvent): void => {
+  const onPartMove = (e: PointerEvent): void => {
     const d = drag.current
     if (!d) return
     const r = innerRef.current!.getBoundingClientRect()
-    const nx = Math.round((e.clientX - r.left) / scale - d.offX)
-    const ny = Math.round((e.clientY - r.top) / scale - d.offY)
-    write({ parts: diagram.parts.map((p) => (p.id === d.id ? { ...p, x: nx, y: ny } : p)) })
+    const nx = snap((e.clientX - r.left) / scale - d.offX)
+    const ny = snap((e.clientY - r.top) / scale - d.offY)
+    if (view === 'schematic') {
+      // schematic moves are independent — store in the overlay, leave breadboard alone
+      write({
+        schematic: { ...diagram.schematic, pos: { ...diagram.schematic.pos, [d.id]: [nx, ny] } }
+      })
+    } else {
+      write({ parts: diagram.parts.map((p) => (p.id === d.id ? { ...p, left: nx, top: ny } : p)) })
+    }
   }
-  const onUp = (): void => {
+  const onPartUp = (): void => {
     drag.current = null
-    window.removeEventListener('pointermove', onMove)
-    window.removeEventListener('pointerup', onUp)
+    window.removeEventListener('pointermove', onPartMove)
+    window.removeEventListener('pointerup', onPartUp)
+  }
+
+  // ── wiring ──────────────────────────────────────────────────────────────────
+
+  const selectWire = (i: number | null): void => {
+    setSelWire(i)
+    setEditPts(i == null ? null : wirePts(diagram.connections[i]))
   }
 
   const onPinClick = (e: React.MouseEvent, part: Part, pin: string): void => {
+    if (!editable) return
     e.stopPropagation()
+    const ref = `${part.id}:${pin}`
+    const pos = pinAbs(part, pin)
+    if (!pos) return
     if (!armed) {
-      setArmed({ id: part.id, pin })
+      setArmed({ from: ref, points: [pos] })
+      setSelPart(null)
+      selectWire(null)
       return
     }
-    if (armed.id === part.id && armed.pin === pin) {
+    if (armed.from === ref) {
       setArmed(null)
       return
     }
-    const from = armed.id + ':' + armed.pin
-    const to = part.id + ':' + pin
-    if (!diagram.connections.some((c) => (c[0] === from && c[1] === to) || (c[0] === to && c[1] === from))) {
-      write({ connections: [...diagram.connections, [from, to, wireColor]] })
+    // finalize using the SAME clean-entry routing the live preview showed, so the
+    // committed wire matches what you saw (no L→7 mirror flip on click)
+    const pts = [...armed.points]
+    const last = pts[pts.length - 1]
+    pts.push(...calculateOrthogonalPath(last.x, last.y, pos.x, pos.y, true).slice(1))
+    const instr = instructionsFromPoints(simplifyWirePoints(pts))
+    const exists = diagram.connections.some(
+      (c) => (c[0] === armed.from && c[1] === ref) || (c[0] === ref && c[1] === armed.from)
+    )
+    if (!exists) {
+      if (view === 'schematic') {
+        // store the route in the schematic overlay; the breadboard route stays empty
+        const conn: Connection = [armed.from, ref, wireColor]
+        write({
+          connections: [...diagram.connections, conn],
+          schematic: {
+            ...diagram.schematic,
+            routes: { ...diagram.schematic.routes, [connKey(conn)]: instr }
+          }
+        })
+      } else {
+        write({ connections: [...diagram.connections, [armed.from, ref, wireColor, instr]] })
+      }
     }
     setArmed(null)
   }
 
-  const addPart = (type: string): void => {
-    const g = PART_GEO[type]
-    if (!g) return
+  const onCanvasClick = (e: React.MouseEvent): void => {
+    if (armed) {
+      const cp = canvasPoint(e)
+      const target = { x: snap(cp.x), y: snap(cp.y) }
+      const last = armed.points[armed.points.length - 1]
+      const pts = [
+        ...armed.points,
+        ...calculateOrthogonalPath(last.x, last.y, target.x, target.y, false).slice(1)
+      ]
+      setArmed({ ...armed, points: pts })
+      return
+    }
+    setSelPart(null)
+    selectWire(null)
+  }
+  const onCanvasMove = (e: React.PointerEvent): void => {
+    if (armed) setMouse(canvasPoint(e))
+  }
+
+  // ── wire editing — drag a whole segment perpendicular (Fritzing-style) ───────
+
+  const startHandleDrag = (e: React.PointerEvent, idx: number): void => {
+    if (!editable || selWire == null || !editPts) return
+    e.stopPropagation()
+    const wireIdx = selWire
+    const original = editPts
+    const horizontal = Math.abs(original[idx].y - original[idx + 1].y) < 0.001
+    let live = original
+    handleDrag.current = { idx }
+    const move = (ev: PointerEvent): void => {
+      const cp = canvasPoint(ev)
+      // a horizontal segment moves in y, a vertical one in x — snapped to the grid
+      const perp = horizontal ? snap(cp.y) : snap(cp.x)
+      live = moveSegment(original, idx, perp)
+      setEditPts(live)
+    }
+    const up = (): void => {
+      handleDrag.current = null
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      // commit (outside any state updater): instructionsFromPoints orthogonalizes
+      // any diagonal drag into clean h/v moves
+      const c = diagram.connections[wireIdx]
+      if (!c) return
+      const instr = instructionsFromPoints(simplifyWirePoints(live))
+      if (view === 'schematic') {
+        write({
+          schematic: {
+            ...diagram.schematic,
+            routes: { ...diagram.schematic.routes, [connKey(c)]: instr }
+          }
+        })
+      } else {
+        const conns = diagram.connections.slice()
+        const nc = c.slice() as Connection
+        nc[3] = instr
+        conns[wireIdx] = nc
+        write({ connections: conns })
+      }
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
+  const rerouteWire = (i: number): void => {
+    // double-click: clear the route so it auto-routes cleanly (kills loops)
+    const c = diagram.connections[i]
+    if (!c) return
+    if (view === 'schematic') {
+      const routes = { ...diagram.schematic.routes }
+      delete routes[connKey(c)]
+      write({ schematic: { ...diagram.schematic, routes } })
+      setEditPts(wirePts([c[0], c[1], c[2]] as Connection))
+    } else {
+      const conns = diagram.connections.slice()
+      const nc = c.slice() as Connection
+      nc[3] = []
+      conns[i] = nc
+      write({ connections: conns })
+      setEditPts(getWirePoints(nc, resolve))
+    }
+  }
+
+  // keep the edit buffer in sync when the wire/route changes externally
+  React.useEffect(() => {
+    if (selWire != null && !handleDrag.current) {
+      const c = diagram.connections[selWire]
+      if (c) setEditPts(wirePts(c))
+      else selectWire(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content, view])
+
+  // ── palette / add / delete ──────────────────────────────────────────────────
+
+  const addPart = async (type: string, at?: Pt): Promise<void> => {
+    const def = getPart(type) || (await loadPart(type))
+    if (!def) return
+    force()
+    const v = viewFor(def, view)
+    const w = v?.w || 80
+    const h = v?.h || 40
+    const left = at ? Math.round(at.x - w / 2) : Math.round(CANVAS_W / 2 - w / 2)
+    const top = at ? Math.round(at.y - h / 2) : Math.round(CANVAS_H / 2 - h / 2)
     const pid = type + '_' + uid().slice(0, 3)
-    write({ parts: [...diagram.parts, { id: pid, type, x: Math.round(CANVAS_W / 2 - g.w / 2), y: Math.round(CANVAS_H / 2 - g.h / 2) }] })
+    const parts = [...diagram.parts, { id: pid, type, left, top }]
+    // when adding in schematic view, pin its schematic position to the drop point
+    write(
+      view === 'schematic'
+        ? {
+            parts,
+            schematic: {
+              ...diagram.schematic,
+              pos: { ...diagram.schematic.pos, [pid]: [left, top] }
+            }
+          }
+        : { parts }
+    )
     setSelPart(pid)
   }
   const onDrop = (e: React.DragEvent): void => {
     e.preventDefault()
-    const id = e.dataTransfer.getData('text/tinystudio-part')
-    if (!id || !PART_GEO[id]) return
-    const r = innerRef.current!.getBoundingClientRect()
-    const g = PART_GEO[id]
-    const x = Math.round((e.clientX - r.left) / scale - g.w / 2)
-    const y = Math.round((e.clientY - r.top) / scale - g.h / 2)
-    const pid = id + '_' + uid().slice(0, 3)
-    write({ parts: [...diagram.parts, { id: pid, type: id, x, y }] })
-    setSelPart(pid)
+    const type = e.dataTransfer.getData('text/tinystudio-part')
+    if (type) addPart(type, canvasPoint(e))
+  }
+
+  const editExisting = async (type: string): Promise<void> => {
+    const def = getPart(type) || (await loadPart(type))
+    if (def) setEditorPart(def)
+  }
+
+  // rotate a part 90° (shared orientation across views); works mid-drag too
+  const rotatePart = (id: string): void => {
+    write({
+      parts: diagram.parts.map((p) =>
+        p.id === id ? { ...p, rotate: ((p.rotate || 0) + 90) % 360 } : p
+      )
+    })
   }
 
   React.useEffect(() => {
     const h = (e: KeyboardEvent): void => {
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selPart) {
-        if (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return
-        write({
-          parts: diagram.parts.filter((p) => p.id !== selPart),
-          connections: diagram.connections.filter((c) => c[0].split(':')[0] !== selPart && c[1].split(':')[0] !== selPart)
-        })
-        setSelPart(null)
+      if (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return
+      // spacebar / R rotates the dragging or selected part
+      if (editable && (e.key === ' ' || e.key === 'r' || e.key === 'R')) {
+        const id = drag.current?.id || selPart
+        if (id) {
+          e.preventDefault()
+          rotatePart(id)
+          return
+        }
       }
       if (e.key === 'Escape') {
         setArmed(null)
         setSelPart(null)
+        selectWire(null)
+      }
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return
+        if (selWire != null) {
+          const gone = diagram.connections[selWire]
+          const routes = { ...diagram.schematic.routes }
+          if (gone) delete routes[connKey(gone)]
+          write({
+            connections: diagram.connections.filter((_, j) => j !== selWire),
+            schematic: { ...diagram.schematic, routes }
+          })
+          selectWire(null)
+        } else if (selPart) {
+          const keep = (c: Connection): boolean =>
+            (typeof c[0] !== 'string' || c[0].split(':')[0] !== selPart) &&
+            (typeof c[1] !== 'string' || c[1].split(':')[0] !== selPart)
+          const routes = { ...diagram.schematic.routes }
+          const pos = { ...diagram.schematic.pos }
+          delete pos[selPart]
+          diagram.connections.forEach((c) => {
+            if (!keep(c)) delete routes[connKey(c)]
+          })
+          write({
+            parts: diagram.parts.filter((p) => p.id !== selPart),
+            connections: diagram.connections.filter(keep),
+            schematic: { pos, routes }
+          })
+          setSelPart(null)
+        }
       }
     }
     window.addEventListener('keydown', h)
     return () => window.removeEventListener('keydown', h)
-  }, [selPart, diagram])
+  }, [selPart, selWire, diagram])
+
+  const previewPts = React.useMemo((): Pt[] | null => {
+    if (!armed) return null
+    const last = armed.points[armed.points.length - 1]
+    let target = { x: snap(mouse.x), y: snap(mouse.y) }
+    let clean = false
+    if (hoverPin) {
+      const part = diagram.parts.find((p) => p.id === hoverPin.id)
+      const pos = part && pinAbs(part, hoverPin.pin)
+      if (pos) {
+        target = pos
+        clean = true
+      }
+    }
+    return [
+      ...armed.points,
+      ...calculateOrthogonalPath(last.x, last.y, target.x, target.y, clean).slice(1)
+    ]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [armed, mouse, hoverPin, diagram.parts, view])
 
   const isAI = (diagram.author || '').includes('Studio AI')
   const tool =
     'h-8 px-2.5 flex items-center gap-1.5 rounded-lg bg-navy-700/80 border border-navy-500 text-fg-2 text-xs hover:bg-navy-500 hover:text-fg-1 transition-colors'
+  const families = partsByFamily()
+  const isOpen = (fam: string): boolean => !collapsed.has(fam)
+  const toggleFam = (fam: string): void =>
+    setCollapsed((s) => {
+      const n = new Set(s)
+      if (n.has(fam)) n.delete(fam)
+      else n.add(fam)
+      return n
+    })
 
   return (
     <div className="size-full relative flex bg-navy-900 overflow-hidden">
-      {/* components rail */}
-      <div className="w-44 shrink-0 border-r border-navy-600 bg-navy-800 flex flex-col">
-        <div className="px-3 py-2 text-[11px] font-semibold tracking-[0.16em] text-fg-3 border-b border-navy-600">
-          COMPONENTS
-        </div>
-        <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
-          {PALETTE.map((c) => (
-            <div
-              key={c.id}
-              draggable
-              onDragStart={(e) => e.dataTransfer.setData('text/tinystudio-part', c.id)}
-              onDoubleClick={() => addPart(c.id)}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-navy-600 bg-navy-700/50 hover:bg-navy-600 cursor-grab active:cursor-grabbing"
-              title="Drag onto the canvas (or double-click)"
+      {/* components rail (edit mode only) */}
+      {editable && (
+        <div className="w-52 shrink-0 min-h-0 relative z-20 border-r border-navy-600 bg-navy-800 flex flex-col">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-navy-600 shrink-0">
+            <span className="text-[11px] font-semibold tracking-[0.16em] text-fg-3">
+              COMPONENTS
+            </span>
+            <button
+              className="text-fg-3 hover:text-cyan"
+              title="New part…"
+              onClick={() => setEditorPart(null)}
             >
-              <CircuitBoard size={15} className="text-cyan shrink-0" />
-              <div className="min-w-0">
-                <div className="text-xs text-fg-1 truncate">{c.label}</div>
-                <div className="text-[10px] text-fg-4 truncate">{c.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="p-2 border-t border-navy-600">
-          <div className="text-[10px] text-fg-4 mb-1.5">Wire color</div>
-          <div className="flex gap-1.5 flex-wrap">
+              <Plus size={15} />
+            </button>
+          </div>
+          {/* wire color — kept at the top so it's always visible */}
+          <div className="flex items-center gap-1.5 px-3 py-2 border-b border-navy-600 shrink-0">
+            <span className="text-[10px] text-fg-4 mr-1">Wire</span>
             {WIRE_COLORS.map((c) => (
               <button
                 key={c}
                 onClick={() => setWireColor(c)}
-                className="w-5 h-5 rounded-full border-2"
-                style={{ background: c, borderColor: wireColor === c ? 'var(--fg-1)' : 'transparent' }}
+                className="w-4 h-4 rounded-full border-2"
+                style={{
+                  background: c,
+                  borderColor: wireColor === c ? 'var(--fg-1)' : 'transparent'
+                }}
               />
             ))}
           </div>
+          <div className="flex-1 min-h-0 overflow-y-auto p-2 flex flex-col gap-1">
+            {families.map((group) => (
+              <div key={group.family}>
+                <button
+                  className="w-full flex items-center gap-1 px-1 py-1 text-[10px] uppercase tracking-wider text-fg-4 hover:text-fg-2"
+                  onClick={() => toggleFam(group.family)}
+                >
+                  {isOpen(group.family) ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                  <span className="truncate">{group.family}</span>
+                  <span className="ml-auto text-fg-4/70">{group.parts.length}</span>
+                </button>
+                {isOpen(group.family) && (
+                  <div className="flex flex-col gap-1 pb-1">
+                    {group.parts.map((c: PartMeta) => (
+                      <div
+                        key={c.type}
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData('text/tinystudio-part', c.type)}
+                        onDoubleClick={() => addPart(c.type)}
+                        className="group flex items-center gap-2 px-2 py-1.5 rounded-lg border border-navy-600 bg-navy-700/50 hover:bg-navy-600 cursor-grab active:cursor-grabbing"
+                        title={`${c.label} — drag onto the canvas (or double-click)`}
+                      >
+                        <Thumb svg={c.icon} />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs text-fg-1 truncate">{c.label}</div>
+                          <div className="text-[10px] text-fg-4 truncate">{c.pins} pins</div>
+                        </div>
+                        <button
+                          className="opacity-0 group-hover:opacity-100 text-fg-4 hover:text-cyan"
+                          title="Edit this part"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            editExisting(c.type)
+                          }}
+                        >
+                          <Pencil size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* canvas + tools */}
-      <div className="flex-1 relative">
-        <div className="absolute top-3 z-10 flex gap-1.5" style={{ right: showJson ? 374 : 14 }}>
-          <button className={tool} onClick={() => zoomCenter(1.15)} title="Zoom in">
-            <ZoomIn size={15} />
+      <div className="flex-1 relative min-w-0 overflow-hidden">
+        <div className="absolute top-3 left-3 z-10 flex gap-1.5">
+          {/* view/edit — icon-only toggle (defaults to view) */}
+          <button
+            className={`${tool} w-8 justify-center px-0 ${editable ? 'text-cyan border-cyan/40' : ''}`}
+            onClick={() => {
+              setEditable((v) => !v)
+              setArmed(null)
+              setSelPart(null)
+              selectWire(null)
+            }}
+            title={editable ? 'Editing — click for view-only' : 'View-only — click to edit'}
+          >
+            {editable ? <Eye size={15} /> : <Pencil size={15} />}
           </button>
-          <button className={tool} onClick={() => zoomCenter(1 / 1.15)} title="Zoom out">
+          {/* breadboard / schematic — icon toggle */}
+          <button
+            className={`${tool} w-8 justify-center px-0`}
+            onClick={() => setView((v) => (v === 'breadboard' ? 'schematic' : 'breadboard'))}
+            title={
+              view === 'breadboard'
+                ? 'Breadboard view — click for schematic'
+                : 'Schematic view — click for breadboard'
+            }
+          >
+            {view === 'breadboard' ? <CircuitBoard size={15} /> : <Spline size={15} />}
+          </button>
+        </div>
+
+        <div className="absolute top-3 z-10 flex gap-1.5" style={{ right: showJson ? 374 : 14 }}>
+          <button
+            className={`${tool} w-8 justify-center px-0 ${grid ? 'text-cyan border-cyan/40' : ''}`}
+            onClick={() => setGrid((g) => !g)}
+            title="Toggle grid"
+          >
+            <Grid3x3 size={15} />
+          </button>
+          <button
+            className={`${tool} ${showJson ? 'text-cyan border-cyan/40' : ''}`}
+            onClick={() => setShowJson((s) => !s)}
+          >
+            <Braces size={15} /> JSON
+          </button>
+        </div>
+
+        {/* zoom / fit — bottom-right */}
+        <div className="absolute bottom-3 z-10 flex gap-1.5" style={{ right: showJson ? 374 : 14 }}>
+          <button
+            className={`${tool} w-8 justify-center px-0`}
+            onClick={() => zoomCenter(1 / 1.15)}
+            title="Zoom out"
+          >
             <ZoomOut size={15} />
           </button>
-          <span className={`${tool} pointer-events-none min-w-[52px] justify-center`}>{Math.round(scale * 100)}%</span>
-          <button className={tool} onClick={fitView}>
-            <Maximize size={15} /> Fit
+          <span className={`${tool} pointer-events-none min-w-[52px] justify-center`}>
+            {Math.round(scale * 100)}%
+          </span>
+          <button
+            className={`${tool} w-8 justify-center px-0`}
+            onClick={() => zoomCenter(1.15)}
+            title="Zoom in"
+          >
+            <ZoomIn size={15} />
           </button>
-          <button className={`${tool} ${grid ? 'text-cyan border-cyan/40' : ''}`} onClick={() => setGrid((g) => !g)}>
-            <Grid3x3 size={15} /> Grid
-          </button>
-          <button className={`${tool} ${showJson ? 'text-cyan border-cyan/40' : ''}`} onClick={() => setShowJson((s) => !s)}>
-            <Braces size={15} /> JSON
+          <button
+            className={`${tool} w-8 justify-center px-0`}
+            onClick={fitView}
+            title="Fit to view"
+          >
+            <Maximize size={15} />
           </button>
         </div>
 
@@ -354,23 +795,23 @@ export function DiagramEditor({
           className="size-full overflow-hidden"
           style={{
             touchAction: 'none',
+            cursor: armed ? 'crosshair' : 'default',
+            backgroundColor: '#1c2647',
             backgroundImage: grid
-              ? 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)'
+              ? 'radial-gradient(circle, rgba(255,255,255,0.10) 0.8px, transparent 1px)'
               : 'none',
             backgroundSize: `${22 * scale}px ${22 * scale}px`,
             backgroundPosition: `${cam.tx}px ${cam.ty}px`
           }}
           onWheel={onWheel}
           onPointerDown={onViewPointerDown}
+          onPointerMove={onCanvasMove}
           onDragOver={(e) => {
             e.preventDefault()
             e.dataTransfer.dropEffect = 'copy'
           }}
           onDrop={onDrop}
-          onClick={() => {
-            setSelPart(null)
-            setArmed(null)
-          }}
+          onClick={onCanvasClick}
         >
           <div
             ref={innerRef}
@@ -384,72 +825,213 @@ export function DiagramEditor({
               transformOrigin: '0 0'
             }}
           >
-            <svg width={CANVAS_W} height={CANVAS_H} style={{ position: 'absolute', inset: 0, overflow: 'visible', zIndex: 1 }}>
+            {/* wires render ABOVE part bodies (zIndex 5); the svg itself ignores
+                pointer events so clicks fall through to parts/pins, while each
+                wire <g> and the handles opt back in */}
+            <svg
+              width={CANVAS_W}
+              height={CANVAS_H}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                overflow: 'visible',
+                zIndex: 5,
+                pointerEvents: 'none'
+              }}
+            >
               {diagram.connections.map((c, i) => {
-                const [pa, pia] = c[0].split(':')
-                const [pb, pib] = c[1].split(':')
-                const A = diagram.parts.find((p) => p.id === pa)
-                const B = diagram.parts.find((p) => p.id === pb)
-                if (!A || !B) return null
-                const pts = routePts(pinPos(A, pia), pinPos(B, pib))
+                const pts = selWire === i && editPts ? editPts : wirePts(c)
+                if (pts.length < 2) return null
+                const sel = selWire === i
+                // schematic wires are all white; breadboard keeps the chosen color
+                const wcolor = view === 'schematic' ? '#ffffff' : (c[2] as string) || '#36c46b'
                 return (
                   <g
                     key={i}
-                    style={{ cursor: 'pointer' }}
+                    style={{
+                      cursor: editable ? 'pointer' : 'default',
+                      pointerEvents: editable ? 'stroke' : 'none'
+                    }}
                     onClick={(e) => {
+                      if (!editable) return
                       e.stopPropagation()
-                      write({ connections: diagram.connections.filter((_, j) => j !== i) })
+                      selectWire(i)
+                      setSelPart(null)
+                    }}
+                    onDoubleClick={(e) => {
+                      if (!editable) return
+                      e.stopPropagation()
+                      rerouteWire(i)
                     }}
                   >
-                    <polyline points={ptsStr(pts)} fill="none" stroke="#05081a" strokeWidth="8" strokeLinejoin="round" strokeLinecap="round" />
-                    <polyline points={ptsStr(pts)} fill="none" stroke={c[2] || '#36c46b'} strokeWidth="4.5" strokeLinejoin="round" strokeLinecap="round" />
+                    {/* thinner, glossy tube: dark edge → color → soft white sheen */}
+                    <polyline
+                      points={ptsStr(pts)}
+                      fill="none"
+                      stroke="rgba(0,0,0,0.35)"
+                      strokeWidth={4}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                    <polyline
+                      points={ptsStr(pts)}
+                      fill="none"
+                      stroke={wcolor}
+                      strokeWidth={2.8}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                    <polyline
+                      points={ptsStr(pts)}
+                      fill="none"
+                      stroke="rgba(255,255,255,0.45)"
+                      strokeWidth={0.9}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                    {sel && (
+                      <polyline
+                        points={ptsStr(pts)}
+                        fill="none"
+                        stroke="#ffffff"
+                        strokeWidth={1.5}
+                        strokeDasharray="5 5"
+                        strokeLinejoin="round"
+                      />
+                    )}
                   </g>
                 )
               })}
+
+              {previewPts && (
+                <polyline
+                  points={ptsStr(previewPts)}
+                  fill="none"
+                  stroke={view === 'schematic' ? '#ffffff' : wireColor}
+                  strokeWidth={2.8}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  opacity={0.6}
+                />
+              )}
+
+              {/* one handle per segment — drag it to slide the whole segment */}
+              {editable && selWire != null && editPts && (
+                <g style={{ pointerEvents: 'auto' }}>
+                  {editPts.slice(0, -1).map((p, i) => {
+                    const q = editPts[i + 1]
+                    const m = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 }
+                    const horizontal = Math.abs(p.y - q.y) < 0.001
+                    return (
+                      <rect
+                        key={`s${i}`}
+                        x={m.x - (horizontal ? 6 : 3)}
+                        y={m.y - (horizontal ? 3 : 6)}
+                        width={horizontal ? 12 : 6}
+                        height={horizontal ? 6 : 12}
+                        rx={2}
+                        fill="var(--cyan)"
+                        stroke="#fff"
+                        strokeWidth={1}
+                        style={{ cursor: horizontal ? 'ns-resize' : 'ew-resize' }}
+                        onPointerDown={(e) => startHandleDrag(e, i)}
+                      />
+                    )
+                  })}
+                </g>
+              )}
             </svg>
 
             {diagram.parts.map((part) => {
-              const g = PART_GEO[part.type]
-              if (!g) return null
+              const def = getPart(part.type)
+              const v = def && viewFor(def, view)
+              const [pLeft, pTop] = partXY(part)
+              if (!def || !v) {
+                return (
+                  <div
+                    key={part.id}
+                    style={{ position: 'absolute', left: pLeft, top: pTop, zIndex: 2 }}
+                    className="px-2 py-1 rounded bg-navy-700 border border-navy-500 text-[10px] text-fg-4"
+                  >
+                    {part.type}…
+                  </div>
+                )
+              }
               return (
                 <div
                   key={part.id}
                   style={{
                     position: 'absolute',
-                    left: part.x,
-                    top: part.y,
-                    width: g.w,
-                    height: g.h,
+                    left: pLeft,
+                    top: pTop,
+                    width: v.w,
+                    height: v.h,
                     zIndex: 2,
+                    transform: part.rotate ? `rotate(${part.rotate}deg)` : undefined,
+                    transformOrigin: 'center',
                     outline: selPart === part.id ? '2px solid var(--cyan)' : 'none',
                     outlineOffset: 4,
-                    borderRadius: 12
+                    borderRadius: 6,
+                    cursor: editable ? 'move' : 'default'
                   }}
                   onPointerDown={(e) => onPartDown(e, part)}
                   onClick={(e) => e.stopPropagation()}
+                  onContextMenu={(e) => {
+                    if (!editable) return
+                    e.preventDefault()
+                    rotatePart(part.id)
+                  }}
                 >
-                  <VectorPart type={part.type} />
-                  {Object.keys(g.pins).map((pin) => {
-                    const [px, py] = g.pins[pin]
-                    const on = armed && armed.id === part.id && armed.pin === pin
-                    return (
-                      <div
-                        key={pin}
-                        className="pin-hit"
-                        title={pin}
-                        style={{ position: 'absolute', left: px - 8, top: py - 8, width: 16, height: 16, zIndex: 3, cursor: 'crosshair' }}
-                        onPointerDown={(e) => e.stopPropagation()}
-                        onClick={(e) => onPinClick(e, part, pin)}
-                      >
-                        <svg width="16" height="16">
-                          <circle cx="8" cy="8" r="4.5" fill={on ? 'var(--cyan)' : 'var(--navy-300)'} stroke={on ? 'var(--cyan-bright)' : 'var(--navy-500)'} strokeWidth="1.5" />
-                        </svg>
-                      </div>
-                    )
-                  })}
-                  <div className="absolute text-[11px] text-fg-2 whitespace-nowrap" style={{ left: 0, top: g.h + 4 }}>
-                    {g.label}
-                    {g.sub && <span className="text-fg-4"> {g.sub}</span>}
+                  <div
+                    className="size-full [&>svg]:size-full [&>svg]:block pointer-events-none select-none"
+                    dangerouslySetInnerHTML={{ __html: v.svg }}
+                  />
+                  {editable &&
+                    Object.keys(v.pins).map((pin) => {
+                      const [px, py] = v.pins[pin]
+                      const on =
+                        (armed && armed.from === `${part.id}:${pin}`) ||
+                        (hoverPin?.id === part.id && hoverPin?.pin === pin)
+                      return (
+                        <div
+                          key={pin}
+                          className="pin-hit"
+                          title={pin}
+                          style={{
+                            position: 'absolute',
+                            left: px - 8,
+                            top: py - 8,
+                            width: 16,
+                            height: 16,
+                            zIndex: 3,
+                            cursor: 'crosshair'
+                          }}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onPointerEnter={() => setHoverPin({ id: part.id, pin })}
+                          onPointerLeave={() =>
+                            setHoverPin((h) => (h?.id === part.id && h?.pin === pin ? null : h))
+                          }
+                          onClick={(e) => onPinClick(e, part, pin)}
+                        >
+                          <svg width="16" height="16">
+                            <circle
+                              cx="8"
+                              cy="8"
+                              r={on ? 3 : 2.2}
+                              fill={on ? 'var(--cyan)' : '#ffffff'}
+                              fillOpacity={on ? 1 : 0.8}
+                              stroke={on ? 'var(--cyan-bright)' : 'rgba(255,255,255,0.4)'}
+                              strokeWidth="1"
+                            />
+                          </svg>
+                        </div>
+                      )
+                    })}
+                  <div
+                    className="absolute text-[11px] text-fg-2 whitespace-nowrap pointer-events-none"
+                    style={{ left: 0, top: v.h + 4 }}
+                  >
+                    {def.label}
                   </div>
                 </div>
               )
@@ -461,7 +1043,9 @@ export function DiagramEditor({
                 style={{ left: CANVAS_W / 2 - 160, top: CANVAS_H / 2 - 40, width: 320 }}
               >
                 <CircuitBoard size={42} />
-                <div>Drag parts from the Components rail — or double-click one to drop it here.</div>
+                <div>
+                  Drag parts from the Components rail — or double-click one to drop it here.
+                </div>
               </div>
             )}
           </div>
@@ -477,13 +1061,23 @@ export function DiagramEditor({
               Auto-wired by Studio AI
             </span>
           )}
-          {armed ? (
+          {!editable ? (
+            <span className="px-2.5 py-1 rounded-full bg-navy-700/80 border border-navy-500 text-fg-4 flex items-center gap-1">
+              <Eye size={12} /> View-only · click Edit to make changes
+            </span>
+          ) : armed ? (
             <span className="px-2.5 py-1 rounded-full bg-navy-700/80 border border-cyan/40 text-cyan flex items-center gap-1">
-              <Zap size={12} /> Click a pin to connect — Esc to cancel
+              <Zap size={12} /> Click a pin to connect · click empty space for a bend · Esc to
+              cancel
+            </span>
+          ) : selWire != null ? (
+            <span className="px-2.5 py-1 rounded-full bg-navy-700/80 border border-cyan/40 text-cyan flex items-center gap-1">
+              Drag a handle to slide that segment · double-click wire to auto-route · Del to remove
             </span>
           ) : (
             <span className="px-2.5 py-1 rounded-full bg-navy-700/80 border border-navy-500 text-fg-4 flex items-center gap-1">
-              <MousePointer2 size={12} /> Scroll to zoom · middle/Alt-drag to pan · click a pin to wire
+              <MousePointer2 size={12} /> Scroll to zoom · middle/Alt-drag to pan · click a pin to
+              wire
             </span>
           )}
         </div>
@@ -500,11 +1094,23 @@ export function DiagramEditor({
               </button>
             </div>
             <pre className="flex-1 overflow-auto p-3 text-[11px] font-mono text-fg-2 whitespace-pre-wrap">
-              {JSON.stringify({ version: 1, editor: 'tinystudio', parts: diagram.parts, connections: diagram.connections }, null, 2)}
+              {content}
             </pre>
           </div>
         )}
       </div>
+
+      {editorPart !== undefined && (
+        <PartsEditor
+          initial={editorPart}
+          onClose={() => setEditorPart(undefined)}
+          onSave={(def: PartDef) => {
+            registerPart(def)
+            force()
+            setEditorPart(undefined)
+          }}
+        />
+      )}
     </div>
   )
 }
