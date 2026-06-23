@@ -1,136 +1,423 @@
 /**
- * AIAssistant — Studio AI chat panel. Runs against a model when
- * window.claude.complete is provided by the host; otherwise falls back to
- * scripted, offline answers so the panel is always usable.
+ * AIAssistant — Studio AI agent panel.
+ *
+ * Talks to the agent running in the main process: sends a prompt, streams the
+ * reply, shows each tool call as it happens, and surfaces an Allow/Deny dialog
+ * whenever the agent wants to write, edit, or delete a file. The Anthropic API
+ * key is configured here but stored (encrypted) in the main process — it never
+ * lives in the renderer.
  */
 
+import {
+  refreshFileContentFromDisk,
+  selectOpenFiles,
+  useAppDispatch,
+  useAppSelector
+} from '@renderer/redux'
+import type { AgentEvent, AgentPermissionRequest } from '@renderer/lib/agentTypes'
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
-import { useAppSelector } from '@renderer/redux'
-import { Send, Sparkles } from 'lucide-react'
+import {
+  FileEdit,
+  FilePlus,
+  FileSearch,
+  FileX,
+  Folder,
+  KeyRound,
+  Loader2,
+  Search,
+  Send,
+  Settings,
+  Sparkles,
+  Square,
+  Trash2
+} from 'lucide-react'
 import React from 'react'
+import { Button } from './ui/Button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from './ui/Dialog'
+import { Input } from './ui/Input'
 import { ScrollArea } from './ui/ScrollArea'
 
-declare global {
-  interface Window {
-    claude?: { complete: (args: { messages: { role: string; content: string }[]; system?: string }) => Promise<string> }
-  }
-}
-
-interface Msg {
-  role: 'ai' | 'user'
-  text: string
-}
+type TimelineItem =
+  | { kind: 'user'; text: string }
+  | { kind: 'ai'; text: string }
+  | { kind: 'tool'; id: string; name: string; summary: string; ok: boolean; running: boolean }
+  | { kind: 'error'; text: string }
 
 const GREETING =
-  "I'm Studio AI ✦ — I can explain tinyCore pinouts, help wire your circuit, and read build errors. What are we making?"
+  "I'm Studio AI ✦ — I can read and edit the files in your open workspace. Ask me to explain code, wire a circuit, fix a build error, or write a sketch. I'll ask before changing any file."
 
-// Offline scripted replies, used when no model host is wired up.
-function scriptedReply(prompt: string, ctx: { board?: string; lastError?: string }): string {
-  const q = prompt.toLowerCase()
-  if (/pinout|pin|gpio/.test(q))
-    return 'The tinyCore (ESP32-S3) breaks out 3V3, GND, and signal pins SIG, D3, D4, D5 and D9. SIG is the onboard addressable LED; D9 has the user button with INPUT_PULLUP.'
-  if (/error|fail|won'?t compile|build/.test(q))
-    return ctx.lastError
-      ? `Looking at your last build: ${ctx.lastError.split('\n').slice(0, 2).join(' ')} — check that the matching library is installed (Library manager) and the right board is selected.`
-      : 'Compile first (Verify) and I can read the build output to explain any errors.'
-  if (/blink|led|light/.test(q))
-    return 'For a blink: pinMode(LED_BUILTIN, OUTPUT) in setup(), then digitalWrite HIGH/LOW with delay(500) in loop(). On tinyCore the SIG LED is addressable — use the FastLED or Adafruit NeoPixel library for color.'
-  if (/upload|flash|port/.test(q))
-    return `Pick your board and serial port in the toolbar, then hit Upload. ${ctx.board ? `You're targeting ${ctx.board}.` : 'Plug the board in and press Refresh if no port shows.'}`
-  return "I can help with tinyCore code, wiring the circuit, and build errors. Try asking about the pinout, a blink sketch, or paste an error."
+const TOOL_ICON: Record<string, React.ReactNode> = {
+  list_dir: <Folder size={13} />,
+  read_file: <FileSearch size={13} />,
+  grep: <Search size={13} />,
+  write_file: <FilePlus size={13} />,
+  edit_file: <FileEdit size={13} />,
+  delete_file: <FileX size={13} />
 }
 
 export function AIAssistant(): React.JSX.Element {
+  const dispatch = useAppDispatch()
+  const workspace = useAppSelector((s) => s.file.workspace)
+  const viewingFileId = useAppSelector((s) => s.file.viewingFileId)
+  const openFiles = useAppSelector(selectOpenFiles)
   const { selectedBoard, lastCompileResult } = useArduinoContext()
-  const workspaceName = useAppSelector((s) => s.file.workspace?.name)
-  const [messages, setMessages] = React.useState<Msg[]>([{ role: 'ai', text: GREETING }])
+
+  const [items, setItems] = React.useState<TimelineItem[]>([])
   const [input, setInput] = React.useState('')
-  const [thinking, setThinking] = React.useState(false)
+  const [busy, setBusy] = React.useState(false)
+  const [keyConfigured, setKeyConfigured] = React.useState<boolean | null>(null)
+  const [showSettings, setShowSettings] = React.useState(false)
+  const [permission, setPermission] = React.useState<AgentPermissionRequest | null>(null)
+
   const scrollRef = React.useRef<HTMLDivElement>(null)
+  // Latest open files, read inside the IPC callback without re-subscribing.
+  const openFilesRef = React.useRef(openFiles)
+  openFilesRef.current = openFiles
+
+  // Check whether an API key is configured.
+  React.useEffect(() => {
+    window.api.settings.getStatus().then((s) => setKeyConfigured(s.configured))
+  }, [])
+
+  // Subscribe to the agent's streamed events.
+  React.useEffect(() => {
+    const off = window.api.agent.onEvent((evt: AgentEvent) => {
+      setItems((prev) => applyEvent(prev, evt))
+      if (evt.type === 'done' || evt.type === 'error') setBusy(false)
+    })
+    return off
+  }, [])
+
+  // Surface permission prompts.
+  React.useEffect(() => {
+    return window.api.agent.onPermissionRequest((req) => setPermission(req))
+  }, [])
+
+  // When the agent changes a file that's open in the editor, reload it from disk.
+  React.useEffect(() => {
+    return window.api.agent.onFileChanged(({ path }) => {
+      const norm = path.replace(/\\/g, '/')
+      const match = openFilesRef.current.find((f) => f.path.replace(/\\/g, '/') === norm)
+      if (match) {
+        window.api.fs
+          .readFile(match.path)
+          .then((content) => dispatch(refreshFileContentFromDisk({ id: match.id, content })))
+      }
+    })
+  }, [dispatch])
 
   React.useEffect(() => {
     const el = scrollRef.current?.querySelector('[data-radix-scroll-area-viewport]')
     if (el) el.scrollTop = el.scrollHeight
-  }, [messages, thinking])
+  }, [items, busy])
 
-  const send = async (): Promise<void> => {
+  const send = (): void => {
     const text = input.trim()
-    if (!text || thinking) return
+    if (!text || busy) return
+    if (!keyConfigured) {
+      setShowSettings(true)
+      return
+    }
     setInput('')
-    setMessages((m) => [...m, { role: 'user', text }])
-    setThinking(true)
-    const ctx = {
-      board: selectedBoard?.config.name,
-      lastError: lastCompileResult && !lastCompileResult.success ? lastCompileResult.output : undefined
-    }
-    try {
-      let reply: string
-      if (window.claude?.complete) {
-        reply = await window.claude.complete({
-          system: `You are Studio AI, the assistant inside tinyStudio for the tinyCore ESP32-S3. Project: ${workspaceName || 'untitled'}. Board: ${ctx.board || 'none'}.`,
-          messages: [{ role: 'user', content: text }]
-        })
-      } else {
-        await new Promise((r) => setTimeout(r, 350))
-        reply = scriptedReply(text, ctx)
+    setItems((prev) => [...prev, { kind: 'user', text }])
+    setBusy(true)
+    const viewing = openFiles.find((f) => f.id === viewingFileId)
+    window.api.agent.send({
+      text,
+      workspaceRoot: workspace?.path ?? null,
+      context: {
+        board: selectedBoard?.config.name,
+        openFile: viewing?.name,
+        lastError:
+          lastCompileResult && !lastCompileResult.success ? lastCompileResult.output : undefined
       }
-      setMessages((m) => [...m, { role: 'ai', text: reply }])
-    } catch {
-      setMessages((m) => [...m, { role: 'ai', text: scriptedReply(text, ctx) }])
-    } finally {
-      setThinking(false)
-    }
+    })
+  }
+
+  const stop = (): void => {
+    window.api.agent.abort()
+    setBusy(false)
+  }
+
+  const newChat = (): void => {
+    window.api.agent.reset()
+    setItems([])
+  }
+
+  const respond = (allow: boolean): void => {
+    if (permission) window.api.agent.respondPermission(permission.id, allow)
+    setPermission(null)
   }
 
   return (
     <div className="h-full flex flex-col">
+      {/* Slim toolbar */}
+      <div className="flex items-center gap-1 px-3 py-1.5 border-b border-navy-600 text-xs text-fg-3">
+        <Sparkles size={13} className="text-pink" />
+        <span className="font-medium text-fg-2">Studio AI</span>
+        <span className="text-fg-4">· Claude Opus 4.8</span>
+        <div className="flex-1" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7 text-fg-3 hover:text-fg-1"
+          title="New chat"
+          onClick={newChat}
+        >
+          <Trash2 size={14} />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7 text-fg-3 hover:text-fg-1"
+          title="AI settings"
+          onClick={() => setShowSettings(true)}
+        >
+          <Settings size={14} />
+        </Button>
+      </div>
+
       <ScrollArea ref={scrollRef} className="flex-1 min-h-0">
         <div className="flex flex-col gap-3 p-4">
-          {messages.map((m, i) =>
-            m.role === 'ai' ? <AiChatBubble key={i} text={m.text} /> : <UserChatBubble key={i} text={m.text} />
+          <AiBubble text={GREETING} />
+          {keyConfigured === false && (
+            <button
+              onClick={() => setShowSettings(true)}
+              className="self-start flex items-center gap-2 rounded-lg border border-pink/40 bg-navy-600 px-3 py-2 text-xs text-fg-2 hover:border-pink"
+            >
+              <KeyRound size={14} className="text-pink" /> Add your Anthropic API key to get started
+            </button>
           )}
-          {thinking && (
+          {items.map((it, i) => (
+            <TimelineRow key={i} item={it} />
+          ))}
+          {busy && (
             <div className="self-start flex items-center gap-2 text-fg-3 text-xs px-2">
-              <Sparkles size={14} className="text-pink animate-pulse" /> Studio AI is thinking…
+              <Loader2 size={14} className="text-pink animate-spin" /> Working…
             </div>
           )}
         </div>
       </ScrollArea>
+
       <div className="w-full border-t border-navy-600 p-3 flex gap-2">
         <input
           className="flex-1 bg-navy-900 border border-navy-400 rounded-lg px-3 py-2 text-sm text-fg-1 placeholder:text-fg-4 outline-none focus:border-cyan"
-          placeholder="Ask about tinyCore code…"
+          placeholder={
+            workspace
+              ? 'Ask Studio AI to edit your project…'
+              : 'Open a workspace to let AI edit files…'
+          }
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && send()}
         />
-        <button
-          className="px-3 rounded-lg bg-cyan text-[var(--fg-on-cyan)] disabled:opacity-50"
-          onClick={send}
-          disabled={!input.trim() || thinking}
-        >
-          <Send size={16} />
-        </button>
+        {busy ? (
+          <button className="px-3 rounded-lg bg-navy-500 text-fg-1" onClick={stop} title="Stop">
+            <Square size={16} />
+          </button>
+        ) : (
+          <button
+            className="px-3 rounded-lg bg-cyan text-[var(--fg-on-cyan)] disabled:opacity-50"
+            onClick={send}
+            disabled={!input.trim()}
+          >
+            <Send size={16} />
+          </button>
+        )}
       </div>
+
+      <SettingsDialog
+        open={showSettings}
+        onOpenChange={setShowSettings}
+        configured={!!keyConfigured}
+        onSaved={() => setKeyConfigured(true)}
+        onCleared={() => setKeyConfigured(false)}
+      />
+      <PermissionDialog request={permission} onRespond={respond} />
     </div>
   )
 }
 
-export function AiChatBubble({ text }: { text: string }): React.JSX.Element {
+/** Fold a streamed agent event into the timeline. */
+function applyEvent(prev: TimelineItem[], evt: AgentEvent): TimelineItem[] {
+  switch (evt.type) {
+    case 'text_delta': {
+      const last = prev[prev.length - 1]
+      if (last && last.kind === 'ai') {
+        return [...prev.slice(0, -1), { ...last, text: last.text + evt.text }]
+      }
+      return [...prev, { kind: 'ai', text: evt.text }]
+    }
+    case 'tool_use':
+      return [
+        ...prev,
+        { kind: 'tool', id: evt.id, name: evt.name, summary: '', ok: true, running: true }
+      ]
+    case 'tool_result':
+      return prev.map((it) =>
+        it.kind === 'tool' && it.id === evt.id
+          ? { ...it, running: false, ok: evt.ok, summary: evt.summary }
+          : it
+      )
+    case 'error':
+      return [...prev, { kind: 'error', text: evt.message }]
+    case 'done':
+    default:
+      return prev
+  }
+}
+
+function TimelineRow({ item }: { item: TimelineItem }): React.JSX.Element {
+  if (item.kind === 'user') return <UserBubble text={item.text} />
+  if (item.kind === 'ai') return <AiBubble text={item.text} />
+  if (item.kind === 'error')
+    return (
+      <div className="self-start rounded-lg border border-red-500/50 bg-red-500/10 text-red-300 text-xs px-3 py-2">
+        {item.text}
+      </div>
+    )
+  // tool chip
+  return (
+    <div className="self-start flex items-center gap-2 rounded-full border border-navy-400 bg-navy-700 px-3 py-1 text-xs text-fg-3">
+      {item.running ? (
+        <Loader2 size={13} className="animate-spin text-cyan" />
+      ) : (
+        (TOOL_ICON[item.name] ?? <Folder size={13} />)
+      )}
+      <span className={item.ok ? 'text-fg-2' : 'text-red-300'}>
+        {item.running ? `${item.name}…` : item.summary || item.name}
+      </span>
+    </div>
+  )
+}
+
+function AiBubble({ text }: { text: string }): React.JSX.Element {
   return (
     <div
-      className="self-start rounded-xl bg-navy-600 text-fg-1 py-2 px-4 mr-8 w-fit text-sm leading-relaxed"
+      className="self-start rounded-xl bg-navy-600 text-fg-1 py-2 px-4 mr-8 w-fit text-sm leading-relaxed whitespace-pre-wrap"
       style={{ border: '1px solid var(--pink-line)' }}
     >
-      <p>{text}</p>
+      {text}
     </div>
   )
 }
 
-export function UserChatBubble({ text }: { text: string }): React.JSX.Element {
+function UserBubble({ text }: { text: string }): React.JSX.Element {
   return (
-    <div className="self-end rounded-xl border border-navy-400 bg-navy-700 text-fg-2 py-2 px-4 ml-8 w-fit text-sm">
-      <p>{text}</p>
+    <div className="self-end rounded-xl border border-navy-400 bg-navy-700 text-fg-2 py-2 px-4 ml-8 w-fit text-sm whitespace-pre-wrap">
+      {text}
     </div>
+  )
+}
+
+function PermissionDialog({
+  request,
+  onRespond
+}: {
+  request: AgentPermissionRequest | null
+  onRespond: (allow: boolean) => void
+}): React.JSX.Element {
+  return (
+    <Dialog open={!!request} onOpenChange={(o) => !o && onRespond(false)}>
+      <DialogContent showCloseButton={false}>
+        <DialogHeader>
+          <DialogTitle>
+            {request?.action}: <span className="font-mono text-sm">{request?.path}</span>
+          </DialogTitle>
+          <DialogDescription>Studio AI wants to change a file in your workspace.</DialogDescription>
+        </DialogHeader>
+        <pre className="max-h-64 overflow-auto rounded-md bg-navy-900 border border-navy-600 p-3 text-xs text-fg-2 whitespace-pre-wrap">
+          {request?.preview}
+        </pre>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onRespond(false)}>
+            Deny
+          </Button>
+          <Button onClick={() => onRespond(true)}>Allow</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function SettingsDialog({
+  open,
+  onOpenChange,
+  configured,
+  onSaved,
+  onCleared
+}: {
+  open: boolean
+  onOpenChange: (o: boolean) => void
+  configured: boolean
+  onSaved: () => void
+  onCleared: () => void
+}): React.JSX.Element {
+  const [key, setKey] = React.useState('')
+  const [saving, setSaving] = React.useState(false)
+
+  const save = async (): Promise<void> => {
+    if (!key.trim()) return
+    setSaving(true)
+    await window.api.settings.setApiKey(key.trim())
+    setSaving(false)
+    setKey('')
+    onSaved()
+    onOpenChange(false)
+  }
+
+  const clear = async (): Promise<void> => {
+    await window.api.settings.clearApiKey()
+    onCleared()
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Studio AI settings</DialogTitle>
+          <DialogDescription>
+            Your Anthropic API key is stored encrypted on this device and is only used by the main
+            process — it never leaves your machine except to call the Anthropic API.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-2">
+          <label className="text-xs text-fg-3">
+            API key {configured && <span className="text-green-400">· a key is configured</span>}
+          </label>
+          <Input
+            type="password"
+            placeholder="sk-ant-…"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+          />
+          <a
+            className="text-xs text-cyan hover:underline"
+            onClick={() =>
+              window.api.fs.openExternal('https://console.anthropic.com/settings/keys')
+            }
+          >
+            Get an API key →
+          </a>
+        </div>
+        <DialogFooter>
+          {configured && (
+            <Button variant="ghost" onClick={clear}>
+              Remove key
+            </Button>
+          )}
+          <Button onClick={save} disabled={!key.trim() || saving}>
+            {saving ? 'Saving…' : 'Save key'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

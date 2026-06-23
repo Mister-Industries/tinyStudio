@@ -1,4 +1,4 @@
-# qwiic_joystick
+# Qwiic Joystick Example
 
 Stream the SparkFun Qwiic Joystick's X/Y position (and button) over serial, then watch
 it move on a live grid in the **Visual** tab.

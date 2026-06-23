@@ -25,6 +25,7 @@
     "build:web": "vite build --config web.vite.config.mts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.105.0",
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "@hookform/resolvers": "^5.1.1",

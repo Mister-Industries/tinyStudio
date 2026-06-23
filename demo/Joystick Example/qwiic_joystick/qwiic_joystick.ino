@@ -9,13 +9,15 @@
 #include "SparkFun_Qwiic_Joystick_Arduino_Library.h"
 
 JOYSTICK joystick;
-const uint8_t JOY_ADDR = 0x20;   // default Qwiic Joystick I2C address
 
 void setup() {
   Serial.begin(115200);
-  Wire.begin();                  // tinyCore Qwiic bus = I2C (SDA/SCL)
+  
+  Wire.begin(3, 4);                  // tinyCore Qwiic bus = I2C (SDA/SCL)
 
-  if (joystick.begin(Wire, JOY_ADDR) == false) {
+  delay(100);
+
+  if (joystick.begin() == false) {
     Serial.println("Joystick not found on I2C — check the Qwiic cable. Halting.");
     while (1) delay(10);
   }

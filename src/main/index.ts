@@ -3,13 +3,18 @@ import { app, BrowserWindow, dialog, ipcMain, Menu, screen, shell } from 'electr
 import { constants, promises as fs } from 'fs'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
+import { AgentService, type AgentSendArgs } from './AgentService'
 import { ServiceManager } from './ServiceManager'
+import { clearApiKey, getStatus, setApiKey } from './settings'
 
 // Initialize ServiceManager
 const serviceManager = new ServiceManager({
   port: 3000,
   allowedOrigins: ['*']
 })
+
+// Studio AI agent — one instance, bound to the main window.
+const agentService = new AgentService()
 
 function createWindow(): void {
   // Size to fit the monitor: cap the window to the available work area so the
@@ -37,6 +42,9 @@ function createWindow(): void {
 
   // Set the main window for ServiceManager error reporting
   serviceManager.setMainWindow(mainWindow)
+
+  // Bind the Studio AI agent to this window for streaming + permission prompts.
+  agentService.setWindow(mainWindow)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -76,11 +84,7 @@ app.whenReady().then(async () => {
   // reload, devtools). The window is frameless so this menu stays hidden, but
   // without it those shortcuts never bind — e.g. Ctrl+Z wouldn't work in inputs.
   Menu.setApplicationMenu(
-    Menu.buildFromTemplate([
-      { role: 'editMenu' },
-      { role: 'viewMenu' },
-      { role: 'windowMenu' }
-    ])
+    Menu.buildFromTemplate([{ role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' }])
   )
 
   // Start TinyService
@@ -99,6 +103,21 @@ app.whenReady().then(async () => {
 
   // IPC test
   ipcMain.handle('ping', () => 'pong')
+
+  // --- Studio AI agent + settings ---
+  ipcMain.handle('settings:status', () => getStatus())
+  ipcMain.handle('settings:set-key', (_, key: string) => setApiKey(key))
+  ipcMain.handle('settings:clear-key', () => clearApiKey())
+
+  // Fire-and-forget: the agent streams its work back over 'agent:event'.
+  ipcMain.handle('agent:send', (_, args: AgentSendArgs) => {
+    void agentService.send(args)
+  })
+  ipcMain.handle('agent:abort', () => agentService.abort())
+  ipcMain.handle('agent:reset', () => agentService.reset())
+  ipcMain.handle('agent:permission-response', (_, id: string, allow: boolean) => {
+    agentService.resolvePermission(id, allow)
+  })
 
   // Window control handlers
   ipcMain.on('window:minimize', (event) => {
