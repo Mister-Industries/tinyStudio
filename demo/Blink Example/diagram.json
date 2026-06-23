@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "editor": "tinystudio",
+  "author": "tinyStudio",
+  "parts": [
+    {
+      "type": "tinycore",
+      "id": "tinycore",
+      "left": 150,
+      "top": 240
+    },
+    {
+      "type": "resistor",
+      "id": "resistor",
+      "left": 520,
+      "top": 230
+    },
+    {
+      "type": "led-generic-5mm",
+      "id": "led",
+      "left": 364.8,
+      "top": 144
+    },
+    {
+      "type": "battery-aa",
+      "id": "battery-aa_y90",
+      "left": 422.4,
+      "top": 345.59999999999997,
+      "rotate": 180
+    }
+  ],
+  "connections": [
+    [
+      "tinycore:SIG",
+      "resistor:Pin 0",
+      "#36c46b"
+    ],
+    [
+      "resistor:Pin 1",
+      "led:anode",
+      "#36c46b",
+      [
+        "v-22.73",
+        "h-179.8",
+        "v-32.83"
+      ]
+    ],
+    [
+      "led:cathode",
+      "tinycore:GND",
+      "#8b94c8",
+      [
+        "h-265.24",
+        "v157.63",
+        "h52.4"
+      ]
+    ],
+    [
+      "battery-aa_y90:-",
+      "tinycore:D3",
+      "#9b6cff",
+      [
+        "h-45.29",
+        "v-80.66",
+        "h-92"
+      ]
+    ],
+    [
+      "tinycore:D4",
+      "battery-aa_y90:+",
+      "#ff4d6d",
+      [
+        "h72.8",
+        "v78.91",
+        "h64.49"
+      ]
+    ]
+  ]
+}

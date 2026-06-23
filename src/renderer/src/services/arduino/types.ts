@@ -146,6 +146,16 @@ export interface AgentStatus {
 }
 
 /**
+ * Library metadata from the Arduino library index (search) or installed list
+ */
+export interface LibraryEntry {
+  name: string
+  author: string
+  sentence: string
+  version: string
+}
+
+/**
  * Arduino service interface
  * Provides abstraction over Arduino CLI (electron) - web environment is not supported
  */
@@ -189,6 +199,36 @@ export interface ArduinoService {
    * @returns Promise resolving to service status
    */
   checkStatus(): Promise<AgentStatus>
+
+  /** Search the Arduino library index */
+  searchLibraries(query: string): Promise<LibraryEntry[]>
+
+  /** List installed libraries */
+  listLibraries(): Promise<LibraryEntry[]>
+
+  /** Install a library by name (optionally pinned to a version) */
+  installLibrary(
+    name: string,
+    version?: string
+  ): Promise<{ success: boolean; output: string; error?: string }>
+
+  /** Uninstall a library by name */
+  uninstallLibrary(name: string): Promise<{ success: boolean; output: string; error?: string }>
+
+  /** Open the serial monitor on a port at a baud rate */
+  openSerial(port: string, baud: number): void
+
+  /** Close the serial monitor */
+  closeSerial(): void
+
+  /** Send a line to the serial port */
+  writeSerial(data: string): void
+
+  /** Subscribe to streamed serial lines; returns an unsubscribe function */
+  onSerialData(cb: (line: string) => void): () => void
+
+  /** Subscribe to serial open/close status; returns an unsubscribe function */
+  onSerialStatus(cb: (status: { opened?: boolean; closed?: boolean }) => void): () => void
 }
 
 /**
@@ -204,16 +244,28 @@ export type Environment = 'web' | 'electron'
  * Common Arduino board configurations
  */
 export const COMMON_BOARDS: { [key: string]: BoardConfig } = {
+  'tinyCore:esp32:tiny_core_esp32s3_nopsram': {
+    fqbn: 'tinyCore:esp32:tiny_core_esp32s3_nopsram',
+    name: 'tinyCore',
+    architecture: 'ESP32-S3',
+    package: 'tinyCore'
+  },
+  'esp32:esp32:esp32s3': {
+    fqbn: 'esp32:esp32:esp32s3',
+    name: 'ESP32-S3 Dev Module',
+    architecture: 'ESP32-S3',
+    package: 'esp32'
+  },
   'arduino:avr:uno': {
     fqbn: 'arduino:avr:uno',
     name: 'Arduino Uno',
-    architecture: 'avr',
+    architecture: 'ATmega328P',
     package: 'arduino'
   },
   'arduino:avr:nano': {
     fqbn: 'arduino:avr:nano',
     name: 'Arduino Nano',
-    architecture: 'avr',
+    architecture: 'ATmega328P',
     package: 'arduino'
   },
   'esp32:esp32:esp32': {
@@ -221,12 +273,6 @@ export const COMMON_BOARDS: { [key: string]: BoardConfig } = {
     name: 'ESP32 Dev Module',
     architecture: 'esp32',
     package: 'esp32'
-  },
-  'arduino:samd:mkr1000': {
-    fqbn: 'arduino:samd:mkr1000',
-    name: 'Arduino MKR1000',
-    architecture: 'samd',
-    package: 'arduino'
   }
 } as const
 

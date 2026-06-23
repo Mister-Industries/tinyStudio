@@ -16,6 +16,7 @@ import {
   BoardConfig,
   BoardInfo,
   CompileResult,
+  LibraryEntry,
   UploadResult
 } from './types'
 
@@ -151,6 +152,15 @@ export class ElectronArduinoService implements ArduinoService {
           if (message.data.details) {
             errorMessage += '\n' + message.data.details
           }
+          // For these request/response actions an error is terminal — the
+          // handler sends it instead of `complete`. Resolve now (with any
+          // streamed/compiler output) so the caller doesn't hang until timeout.
+          cleanup()
+          safeResolve({
+            success: false,
+            output: (message.data.output as string) || output,
+            error: errorMessage
+          })
         } else if (message.type === 'complete') {
           console.log(`[${action}] Operation completed:`, message.data) // Debug log
           cleanup()
@@ -165,6 +175,14 @@ export class ElectronArduinoService implements ArduinoService {
             safeResolve({
               success: !hasError,
               output: boardsOutput,
+              error: hasError ? errorMessage : undefined
+            })
+          } else if (Array.isArray((message.data as { libraries?: unknown[] }).libraries)) {
+            // Library search/list — serialize libraries to JSON lines
+            const libs = (message.data as { libraries: unknown[] }).libraries
+            safeResolve({
+              success: !hasError,
+              output: libs.map((l) => JSON.stringify(l)).join('\n'),
               error: hasError ? errorMessage : undefined
             })
           } else {
@@ -461,5 +479,84 @@ export class ElectronArduinoService implements ArduinoService {
         }
       }
     }
+  }
+
+  // ── library manager ────────────────────────────────────────────────────────
+
+  private parseLibraries(output: string): LibraryEntry[] {
+    return output
+      .split('\n')
+      .filter((l) => l.trim())
+      .map((l) => {
+        try {
+          return JSON.parse(l) as LibraryEntry
+        } catch {
+          return null
+        }
+      })
+      .filter((l): l is LibraryEntry => l !== null)
+  }
+
+  async searchLibraries(query: string): Promise<LibraryEntry[]> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.libSearch(query)
+    const result = await this.waitForResponse('lib-search', 60000)
+    if (!result.success) throw new Error(result.error || 'Library search failed')
+    return this.parseLibraries(result.output)
+  }
+
+  async listLibraries(): Promise<LibraryEntry[]> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.libList()
+    const result = await this.waitForResponse('lib-list', 30000)
+    if (!result.success) throw new Error(result.error || 'Library list failed')
+    return this.parseLibraries(result.output)
+  }
+
+  async installLibrary(name: string, version?: string): Promise<{ success: boolean; output: string; error?: string }> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.libInstall(name, version)
+    return this.waitForResponse('lib-install', 300000)
+  }
+
+  async uninstallLibrary(name: string): Promise<{ success: boolean; output: string; error?: string }> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.libUninstall(name)
+    return this.waitForResponse('lib-uninstall', 60000)
+  }
+
+  // ── serial monitor (streaming, not request/response) ─────────────────────────
+
+  openSerial(port: string, baud: number): void {
+    this.client?.serialOpen(port, baud)
+  }
+
+  closeSerial(): void {
+    this.client?.serialClose()
+  }
+
+  writeSerial(data: string): void {
+    this.client?.serialWrite(data)
+  }
+
+  /** Subscribe to streamed serial lines. Returns an unsubscribe function. */
+  onSerialData(cb: (line: string) => void): () => void {
+    if (!this.client) return () => {}
+    return this.client.onMessage((message: OutgoingMessage) => {
+      if (message.action === 'serial' && message.type === 'output') {
+        cb((message.data as { output: string }).output)
+      }
+    })
+  }
+
+  /** Subscribe to serial open/close status. Returns an unsubscribe function. */
+  onSerialStatus(cb: (status: { opened?: boolean; closed?: boolean }) => void): () => void {
+    if (!this.client) return () => {}
+    return this.client.onMessage((message: OutgoingMessage) => {
+      if (message.action !== 'serial') return
+      const d = message.data as { opened?: boolean; closed?: boolean }
+      if (message.type === 'status' && d.opened) cb({ opened: true })
+      if (message.type === 'complete' && d.closed) cb({ closed: true })
+    })
   }
 }

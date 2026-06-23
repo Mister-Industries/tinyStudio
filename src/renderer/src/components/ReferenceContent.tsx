@@ -2,7 +2,6 @@ import { useAppSelector } from '@renderer/redux'
 import { Folder } from 'lucide-react'
 import type { Components } from 'react-markdown'
 import ReactMarkdown from 'react-markdown'
-import { ScrollArea } from './ui/ScrollArea'
 
 export function ReadmeContent(): React.JSX.Element {
   const readmeContent = useAppSelector((state) => state.file.readmeContent)
@@ -15,7 +14,7 @@ export function ReadmeContent(): React.JSX.Element {
     h2: ({ children, className, ...props }) => (
       <h2
         {...props}
-        className={[className, 'text-2xl font-semibold mb-3 text-gray-800']
+        className={[className, 'text-2xl font-semibold mb-3 text-fg-1']
           .filter(Boolean)
           .join(' ')}
       >
@@ -25,7 +24,7 @@ export function ReadmeContent(): React.JSX.Element {
     h3: ({ children, className, ...props }) => (
       <h3
         {...props}
-        className={[className, 'text-xl font-medium mb-2 text-gray-700'].filter(Boolean).join(' ')}
+        className={[className, 'text-xl font-medium mb-2 text-fg-2'].filter(Boolean).join(' ')}
       >
         {children}
       </h3>
@@ -33,7 +32,7 @@ export function ReadmeContent(): React.JSX.Element {
     p: ({ children, className, ...props }) => (
       <p
         {...props}
-        className={[className, 'mb-4 text-sm text-gray-600 leading-relaxed']
+        className={[className, 'mb-4 text-sm text-fg-2 leading-relaxed']
           .filter(Boolean)
           .join(' ')}
       >
@@ -57,27 +56,27 @@ export function ReadmeContent(): React.JSX.Element {
       </ol>
     ),
     li: ({ children, className, ...props }) => (
-      <li {...props} className={[className, 'text-gray-600'].filter(Boolean).join(' ')}>
+      <li {...props} className={[className, 'text-fg-2'].filter(Boolean).join(' ')}>
         {children}
       </li>
     ),
     strong: ({ children, className, ...props }) => (
       <strong
         {...props}
-        className={[className, 'font-bold text-gray-900'].filter(Boolean).join(' ')}
+        className={[className, 'font-bold text-fg-1'].filter(Boolean).join(' ')}
       >
         {children}
       </strong>
     ),
     em: ({ children, className, ...props }) => (
-      <em {...props} className={[className, 'italic text-gray-700'].filter(Boolean).join(' ')}>
+      <em {...props} className={[className, 'italic text-fg-2'].filter(Boolean).join(' ')}>
         {children}
       </em>
     ),
     code: ({ children, className, ...props }) => (
       <code
         {...props}
-        className={[className, 'bg-gray-100 px-2 py-1 rounded text-sm font-mono text-red-600']
+        className={[className, 'bg-navy-900 px-1.5 py-0.5 rounded text-sm font-mono text-pink']
           .filter(Boolean)
           .join(' ')}
       >
@@ -87,7 +86,7 @@ export function ReadmeContent(): React.JSX.Element {
     pre: ({ children, className, ...props }) => (
       <pre
         {...props}
-        className={[className, 'bg-gray-100 p-4 rounded-lg overflow-x-auto mb-4']
+        className={[className, 'bg-navy-1000 border border-navy-600 p-3 rounded-lg overflow-x-auto max-w-full text-xs mb-4']
           .filter(Boolean)
           .join(' ')}
       >
@@ -97,7 +96,7 @@ export function ReadmeContent(): React.JSX.Element {
     blockquote: ({ children, className, ...props }) => (
       <blockquote
         {...props}
-        className={[className, 'border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4']
+        className={[className, 'border-l-4 border-cyan pl-4 italic text-fg-3 my-4']
           .filter(Boolean)
           .join(' ')}
       >
@@ -107,7 +106,7 @@ export function ReadmeContent(): React.JSX.Element {
     a: ({ children, className, ...props }) => (
       <a
         {...props}
-        className={[className, 'text-blue-600 hover:text-blue-800 underline']
+        className={[className, 'text-cyan hover:text-cyan-bright underline']
           .filter(Boolean)
           .join(' ')}
       >
@@ -117,15 +116,17 @@ export function ReadmeContent(): React.JSX.Element {
   }
   if (readmeContent === null || readmeContent === '' || readmeContent === undefined) {
     return (
-      <div className="size-full flex flex-col justify-center items-center gap-2">
-        <Folder size={48} className="mb-4 opacity-50" />
-        Open a project to view its documentation
+      <div className="h-full w-full flex flex-col items-center justify-center gap-3 text-center text-fg-3 px-6">
+        <Folder size={40} className="opacity-40" />
+        <p className="text-sm">Open a project to view its documentation</p>
       </div>
     )
   }
   return (
-    <ScrollArea className="h-full pb-24">
-      <ReactMarkdown components={components}>{readmeContent}</ReactMarkdown>
-    </ScrollArea>
+    <div className="h-full w-full min-w-0 overflow-y-auto overflow-x-hidden px-4 py-3 pb-10">
+      <div className="min-w-0 max-w-full break-words">
+        <ReactMarkdown components={components}>{readmeContent}</ReactMarkdown>
+      </div>
+    </div>
   )
 }

@@ -3,56 +3,42 @@
  * Main file explorer with tabs for file browser and source control
  */
 
-import { Construction, GitBranch } from 'lucide-react'
+import { Folder, Github } from 'lucide-react'
 import React, { useState } from 'react'
 import { FileExplorerContent } from './FileExplorerContent'
+import { SourceControl } from './SourceControl'
 
 // Tab types for file explorer navigation
 export type FileExplorerTab = 'file-explorer' | 'source-control'
 
 export function FileExplorer(): React.JSX.Element {
-  const [openTab] = useState<FileExplorerTab>('file-explorer')
+  const [openTab, setOpenTab] = useState<FileExplorerTab>('file-explorer')
 
   return (
-    <div className="size-full flex flex-col">
+    <div className="size-full flex flex-col bg-navy-700">
       {/* Tab Navigation */}
-      {/* <div className="flex w-full text-xs font-semibold border-b-2 border-border">
-        <div
+      <div className="flex w-full text-xs font-semibold border-b border-navy-600">
+        <button
           data-active={openTab === 'file-explorer'}
-          className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-4 data-[active=true]:bg-background data-[active=true]:text-foreground data-[active=true]:border-accent cursor-pointer"
+          className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-3 text-fg-3 data-[active=true]:text-fg-1 data-[active=true]:border-cyan hover:text-fg-1 cursor-pointer transition-colors"
           onClick={() => setOpenTab('file-explorer')}
         >
           <Folder size={14} />
-          File Explorer
-        </div>
-        <div
+          Files
+        </button>
+        <button
           data-active={openTab === 'source-control'}
-          className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-4 data-[active=true]:bg-background data-[active=true]:text-foreground data-[active=true]:border-accent cursor-pointer"
+          className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-3 text-fg-3 data-[active=true]:text-fg-1 data-[active=true]:border-cyan hover:text-fg-1 cursor-pointer transition-colors"
           onClick={() => setOpenTab('source-control')}
         >
-          <GitBranch size={14} />
-          Source Control
-        </div>
-      </div> */}
+          <Github size={14} />
+          GitHub
+        </button>
+      </div>
 
       {/* Tab Content */}
       {openTab === 'file-explorer' && <FileExplorerContent />}
-      {openTab === 'source-control' && (
-        <div className="flex-1 flex flex-col gap-2 items-center text-muted-foreground">
-          {/* Source Control Header */}
-          <div className="flex w-full justify-between items-center px-4 py-3 text-xs font-semibold border-b border-border">
-            <div className="flex items-center gap-2">
-              <GitBranch size={14} />
-              SOURCE CONTROL
-            </div>
-          </div>
-          {/* Under Construction Message */}
-          <div className="flex flex-col items-center justify-center text-muted-foreground py-8 px-4 gap-2">
-            <Construction size={48} className="mb-4 opacity-50" />
-            <p className="text-sm mb-4 text-center">Source Control is under construction</p>
-          </div>
-        </div>
-      )}
+      {openTab === 'source-control' && <SourceControl />}
     </div>
   )
 }

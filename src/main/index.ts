@@ -1,9 +1,11 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu, screen, shell } from 'electron'
 import { constants, promises as fs } from 'fs'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
+import { AgentService, type AgentSendArgs } from './AgentService'
 import { ServiceManager } from './ServiceManager'
+import { clearApiKey, getStatus, setApiKey } from './settings'
 
 // Initialize ServiceManager
 const serviceManager = new ServiceManager({
@@ -11,11 +13,23 @@ const serviceManager = new ServiceManager({
   allowedOrigins: ['*']
 })
 
+// Studio AI agent — one instance, bound to the main window.
+const agentService = new AgentService()
+
 function createWindow(): void {
+  // Size to fit the monitor: cap the window to the available work area so the
+  // bottom is never cut off on smaller / lower-resolution screens.
+  const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize
+  const winW = Math.min(1280, screenW - 40)
+  const winH = Math.min(800, screenH - 40)
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1920,
-    height: 1080,
+    width: winW,
+    height: winH,
+    minWidth: 900,
+    minHeight: 560,
+    center: true,
     show: false,
     autoHideMenuBar: true,
     frame: false,
@@ -28,6 +42,9 @@ function createWindow(): void {
 
   // Set the main window for ServiceManager error reporting
   serviceManager.setMainWindow(mainWindow)
+
+  // Bind the Studio AI agent to this window for streaming + permission prompts.
+  agentService.setWindow(mainWindow)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -63,6 +80,13 @@ app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
+  // Register standard edit/view accelerators (undo/redo/cut/copy/paste/select-all,
+  // reload, devtools). The window is frameless so this menu stays hidden, but
+  // without it those shortcuts never bind — e.g. Ctrl+Z wouldn't work in inputs.
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate([{ role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' }])
+  )
+
   // Start TinyService
   try {
     await serviceManager.start()
@@ -79,6 +103,21 @@ app.whenReady().then(async () => {
 
   // IPC test
   ipcMain.handle('ping', () => 'pong')
+
+  // --- Studio AI agent + settings ---
+  ipcMain.handle('settings:status', () => getStatus())
+  ipcMain.handle('settings:set-key', (_, key: string) => setApiKey(key))
+  ipcMain.handle('settings:clear-key', () => clearApiKey())
+
+  // Fire-and-forget: the agent streams its work back over 'agent:event'.
+  ipcMain.handle('agent:send', (_, args: AgentSendArgs) => {
+    void agentService.send(args)
+  })
+  ipcMain.handle('agent:abort', () => agentService.abort())
+  ipcMain.handle('agent:reset', () => agentService.reset())
+  ipcMain.handle('agent:permission-response', (_, id: string, allow: boolean) => {
+    agentService.resolvePermission(id, allow)
+  })
 
   // Window control handlers
   ipcMain.on('window:minimize', (event) => {
@@ -98,6 +137,32 @@ app.whenReady().then(async () => {
   ipcMain.on('window:close', (event) => {
     const window = BrowserWindow.fromWebContents(event.sender)
     window?.close()
+  })
+
+  // Open a local file with the OS default app (e.g. the exported index.html in
+  // the browser). Returns '' on success or an error string.
+  ipcMain.handle('open-path', async (_, targetPath: string) => {
+    return shell.openPath(targetPath)
+  })
+
+  // Open an external URL (e.g. the GitHub Pages site) in the default browser.
+  ipcMain.handle('open-external', async (_, url: string) => {
+    await shell.openExternal(url)
+  })
+
+  // Save a generated file (e.g. the Visual web export) via a Save dialog.
+  ipcMain.handle('save-file-as', async (event, defaultName: string, content: string) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    const result = await dialog.showSaveDialog(window!, {
+      defaultPath: defaultName,
+      filters: [
+        { name: 'HTML', extensions: ['html'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    })
+    if (result.canceled || !result.filePath) return null
+    await fs.writeFile(result.filePath, content, 'utf-8')
+    return result.filePath
   })
 
   // File system handlers

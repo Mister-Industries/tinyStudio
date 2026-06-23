@@ -1,66 +1,160 @@
+/* ============================================================================
+   tinyStudio / MR.INDUSTRIES — application theme
+   ----------------------------------------------------------------------------
+   tinyForge design system: deep-navy surfaces, neon-cyan primary action,
+   hot-pink reserved for Studio AI / accent moments.
+   Fonts: Plus Jakarta Sans (UI) + JetBrains Mono (code).
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+
 @import 'tailwindcss';
 
 @import 'tw-animate-css';
 
 :root {
+  /* ------------------------------------------------------------- BRAND RAW */
+  --brand-primary: #0a0f2d;
+  --brand-secondary: #1a1f4d;
+  --brand-cyan: #00f0ff;
+  --brand-pink: #ff3f8c;
+  --brand-amber: #f7a400;
+
+  /* ------------------------------------------------------------ NAVY SCALE */
+  --navy-1000: #05081a; /* editor gutter / deepest well         */
+  --navy-900: #070b22; /* code canvas background               */
+  --navy-800: #0a0f2d; /* app background (== brand-primary)    */
+  --navy-700: #11173a; /* sidebars, docked panels              */
+  --navy-600: #1a1f4d; /* cards, elevated panels (== secondary)*/
+  --navy-500: #262c5e; /* hover fill, input background         */
+  --navy-400: #353c78; /* borders, dividers (strong)           */
+  --navy-300: #4a5296; /* disabled text, faint lines           */
+
+  /* ----------------------------------------------------------- ACCENT CYAN */
+  --cyan-bright: #5cf7ff;
+  --cyan: #00f0ff;
+  --cyan-deep: #00b8d4;
+  --cyan-soft: rgba(0, 240, 255, 0.14);
+  --cyan-line: rgba(0, 240, 255, 0.4);
+
+  /* ----------------------------------------------------------- ACCENT PINK */
+  --pink-bright: #ff6ea8;
+  --pink: #ff3f8c;
+  --pink-deep: #d81f6a;
+  --pink-soft: rgba(255, 63, 140, 0.14);
+  --pink-line: rgba(255, 63, 140, 0.4);
+
+  /* ------------------------------------------------------ SIGNAL/SEMANTIC */
+  --signal-success: #3ddc97;
+  --signal-warning: #f7a400;
+  --signal-error: #ff4d6d;
+  --signal-info: #00f0ff;
+  --signal-success-soft: rgba(61, 220, 151, 0.14);
+  --signal-warning-soft: rgba(247, 164, 0, 0.14);
+  --signal-error-soft: rgba(255, 77, 109, 0.14);
+
+  /* --------------------------------------------------------- TEXT ON DARK */
+  --fg-1: #ffffff;
+  --fg-2: rgba(235, 238, 255, 0.72);
+  --fg-3: rgba(214, 220, 255, 0.46);
+  --fg-4: rgba(200, 208, 255, 0.3);
+  --fg-on-cyan: #04122b;
+  --fg-on-pink: #2a0413;
+
+  /* ------------------------------------------------------------ GRADIENTS */
+  --grad-brand: linear-gradient(45deg, var(--cyan), var(--pink));
+  --grad-brand-r: linear-gradient(45deg, var(--pink), var(--cyan));
+  --grad-ai: linear-gradient(120deg, #00f0ff 0%, #9b6cff 55%, #ff3f8c 100%);
+  --grad-panel: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+
+  /* --------------------------------------------------------------- SYNTAX */
+  --syn-bg: var(--navy-900);
+  --syn-text: #d7deff;
+  --syn-comment: #5f6aa0;
+  --syn-keyword: #ff3f8c;
+  --syn-type: #00f0ff;
+  --syn-func: #5cc8ff;
+  --syn-string: #3ddc97;
+  --syn-number: #f7a400;
+  --syn-const: #c792ea;
+  --syn-punc: #8b94c8;
+
+  /* --------------------------------------------------------- RADII/SHADOW */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+  --shadow-panel: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --glow-cyan: 0 0 0 1px var(--cyan-line), 0 0 18px rgba(0, 240, 255, 0.35);
+  --glow-pink: 0 0 0 1px var(--pink-line), 0 0 18px rgba(255, 63, 140, 0.35);
+
+  /* ----------------------------------------------- SEMANTIC THEME MAPPING
+     tinyStudio is a dark-first design system: light and dark resolve to the
+     same navy ramp so every shadcn-style component lands on brand. */
   --radius: 0.625rem;
-  --background: #ffffff;
-  --background-grid: #efefef;
-  --foreground: #4b5f5a;
-  --foreground-grid: #4b5f5a;
-  --card: #ffffff;
-  --card-foreground: #4b5f5a;
-  --popover: #ffffff;
-  --popover-foreground: #4b5f5a;
-  --primary: #359766;
-  --primary-foreground: #ffffff;
-  --secondary: #7ecfa6;
-  --secondary-foreground: #ffffff;
-  --muted: #e5f0ea;
-  --muted-foreground: #4b5f5a;
-  --accent: #359766;
+  --background: var(--navy-800);
+  --background-grid: var(--navy-900);
+  --foreground: #eef1ff;
+  --foreground-grid: var(--navy-400);
+  --card: var(--navy-700);
+  --card-foreground: #eef1ff;
+  --popover: var(--navy-600);
+  --popover-foreground: #eef1ff;
+  --primary: var(--cyan);
+  --primary-foreground: var(--fg-on-cyan);
+  --secondary: var(--navy-600);
+  --secondary-foreground: #eef1ff;
+  --muted: var(--navy-700);
+  --muted-foreground: var(--fg-3);
+  --accent: var(--navy-500);
   --accent-foreground: #ffffff;
-  --destructive: #e53e3e;
-  --border: #dae7e0;
-  --input: #ffffff;
-  --ring: #4b5f5a;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #4b5f5a;
-  --sidebar-primary: #359766;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #7ecfa6;
+  --destructive: var(--signal-error);
+  --border: var(--navy-400);
+  --input: var(--navy-500);
+  --ring: var(--cyan);
+  --sidebar: var(--navy-700);
+  --sidebar-foreground: #eef1ff;
+  --sidebar-primary: var(--cyan);
+  --sidebar-primary-foreground: var(--fg-on-cyan);
+  --sidebar-accent: var(--navy-500);
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #4b5f5a;
-  --sidebar-ring: #4b5f5a;
+  --sidebar-border: var(--navy-400);
+  --sidebar-ring: var(--cyan);
 }
 
 .dark {
-  --background: #14161a;
-  --foreground: #e5f0ea;
-  --card: #232b28;
-  --card-foreground: #e5f0ea;
-  --popover: #232b28;
-  --popover-foreground: #e5f0ea;
-  --primary: #14161a;
-  --primary-foreground: #e5f0ea;
-  --secondary: #295c43;
-  --secondary-foreground: #e5f0ea;
-  --muted: #1b1d22;
-  --muted-foreground: #a3b9b0;
-  --accent: #359766;
+  --background: var(--navy-800);
+  --foreground: #eef1ff;
+  --card: var(--navy-700);
+  --card-foreground: #eef1ff;
+  --popover: var(--navy-600);
+  --popover-foreground: #eef1ff;
+  --primary: var(--cyan);
+  --primary-foreground: var(--fg-on-cyan);
+  --secondary: var(--navy-600);
+  --secondary-foreground: #eef1ff;
+  --muted: var(--navy-700);
+  --muted-foreground: var(--fg-3);
+  --accent: var(--navy-500);
   --accent-foreground: #ffffff;
-  --destructive: #e53e3e;
-  --border: #3a4a45;
-  --input: #232b28;
-  --ring: #7ecfa6;
-  --sidebar: #1b1d22;
-  --sidebar-foreground: #e5f0ea;
-  --sidebar-primary: #359766;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #295c43;
-  --sidebar-accent-foreground: #e5f0ea;
-  --sidebar-border: #3a4a45;
-  --sidebar-ring: #7ecfa6;
+  --destructive: var(--signal-error);
+  --border: var(--navy-400);
+  --input: var(--navy-500);
+  --ring: var(--cyan);
+  --sidebar: var(--navy-700);
+  --sidebar-foreground: #eef1ff;
+  --sidebar-primary: var(--cyan);
+  --sidebar-primary-foreground: var(--fg-on-cyan);
+  --sidebar-accent: var(--navy-500);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: var(--navy-400);
+  --sidebar-ring: var(--cyan);
+}
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
 }
 
 @theme inline {
@@ -102,6 +196,27 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  /* tinyForge ramp exposed as utilities (bg-navy-700, text-cyan, …) */
+  --color-navy-1000: var(--navy-1000);
+  --color-navy-900: var(--navy-900);
+  --color-navy-800: var(--navy-800);
+  --color-navy-700: var(--navy-700);
+  --color-navy-600: var(--navy-600);
+  --color-navy-500: var(--navy-500);
+  --color-navy-400: var(--navy-400);
+  --color-navy-300: var(--navy-300);
+  --color-cyan: var(--cyan);
+  --color-cyan-bright: var(--cyan-bright);
+  --color-cyan-deep: var(--cyan-deep);
+  --color-pink: var(--pink);
+  --color-pink-bright: var(--pink-bright);
+  --color-signal-success: var(--signal-success);
+  --color-signal-warning: var(--signal-warning);
+  --color-signal-error: var(--signal-error);
+  --color-fg-1: var(--fg-1);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-fg-4: var(--fg-4);
 }
 
 @layer base {
@@ -109,6 +224,33 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
   }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--navy-400);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--navy-300);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+}
+
+/* Signature gradient wordmark/text treatment. */
+.tf-gradient-text {
+  background: var(--grad-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "editor": "tinystudio",
+  "parts": [
+    {
+      "type": "tinycore",
+      "id": "tinycore_bms",
+      "left": 364.8,
+      "top": 86.39999999999999
+    },
+    {
+      "type": "my-part",
+      "id": "my-part_y9r",
+      "left": 660,
+      "top": 242
+    }
+  ],
+  "connections": [
+    [
+      "tinycore_bms:8",
+      "my-part_y9r:4",
+      "#36c46b",
+      [
+        "v129.8",
+        "h194",
+        "v-19.2",
+        "h-1.8",
+        "v-26"
+      ]
+    ],
+    [
+      "tinycore_bms:9",
+      "my-part_y9r:3",
+      "#ff4d6d",
+      [
+        "v139.4",
+        "h214.6",
+        "v-19.2",
+        "h-2.4",
+        "v-36.6"
+      ]
+    ],
+    [
+      "tinycore_bms:10",
+      "my-part_y9r:2",
+      "#00f0ff",
+      [
+        "v149",
+        "h236.2",
+        "v-9.6",
+        "h-3",
+        "v-55.8"
+      ]
+    ],
+    [
+      "tinycore_bms:11",
+      "my-part_y9r:1",
+      "#f7a400",
+      [
+        "v157.6",
+        "h253.8",
+        "v-57.6",
+        "h-3.6",
+        "v-16.4"
+      ]
+    ]
+  ]
+}

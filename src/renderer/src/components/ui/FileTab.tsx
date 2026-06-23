@@ -31,7 +31,7 @@ function FileTabsList({ className, ...props }: React.ComponentProps<typeof TabsP
   return (
     <TabsPrimitive.List
       data-slot="file-tabs-list"
-      className={cn('flex justify-between w-full h-10 border-b border-border', className)}
+      className={cn('flex justify-between w-full h-10 border-b border-navy-600 bg-navy-1000', className)}
       {...props}
     />
   )
@@ -47,14 +47,14 @@ function FileTabTrigger({ className, file, onFileClose, ...props }: FileTabTrigg
     <TabsPrimitive.Trigger
       data-slot="file-tab-trigger"
       className={cn(
-        'text-xs justify-start px-4 py-2 h-full border-b border-transparent data-[state=active]:bg-muted data-[state=active]:border-b data-[state=active]:border-primary hover:bg-muted/50 transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap',
+        'text-xs justify-start px-4 py-2 h-full border-b border-transparent text-fg-3 data-[state=active]:bg-navy-900 data-[state=active]:text-fg-1 data-[state=active]:border-b data-[state=active]:border-primary hover:bg-navy-700/50 transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap',
         className
       )}
       {...props}
     >
       <span>{file.name}</span>
       {file.modified && (
-        <span className="w-2 h-2 bg-orange-500 rounded-full" title="Unsaved changes" />
+        <span className="w-2 h-2 bg-signal-warning rounded-full" title="Unsaved changes" />
       )}
       <div
         className="size-4 p-0 rounded hover:bg-muted-foreground/20 flex items-center justify-center cursor-pointer"

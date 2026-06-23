@@ -65,9 +65,9 @@ function getFileIcon(fileName: string | null, isSelected = false): React.ReactNo
 
   switch (iconType) {
     case 'image':
-      return <Image size={14} className={isSelected ? 'text-accent-foreground' : 'text-blue-500'} />
+      return <Image size={14} className={isSelected ? 'text-accent-foreground' : 'text-pink'} />
     case 'code':
-      return <Code size={14} className={isSelected ? 'text-accent-foreground' : 'text-green-500'} />
+      return <Code size={14} className={isSelected ? 'text-accent-foreground' : 'text-cyan'} />
     case 'file':
       return (
         <File
@@ -346,9 +346,9 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
               <ChevronRight size={14} className="text-muted-foreground" />
             )}
             {isExpanded ? (
-              <FolderOpen size={14} className="text-accent" />
+              <FolderOpen size={14} className="text-cyan" />
             ) : (
-              <Folder size={14} className="text-accent" />
+              <Folder size={14} className="text-cyan" />
             )}
           </>
         ) : (

@@ -3,7 +3,13 @@
  */
 
 import { getArduinoService } from '@renderer/services/arduino/ArduinoServiceFactory'
-import { Board, BoardConfig, CompileResult, UploadResult } from '@renderer/services/arduino/types'
+import {
+  Board,
+  BoardConfig,
+  CompileResult,
+  LibraryEntry,
+  UploadResult
+} from '@renderer/services/arduino/types'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useArduinoAgent } from './useArduinoAgent'
@@ -70,6 +76,24 @@ export interface UseArduinoReturn {
   // Agent connectivity
   isAgentConnected: boolean
   checkAgentStatus: () => Promise<void>
+
+  // Library manager
+  searchLibraries: (query: string) => Promise<LibraryEntry[]>
+  listLibraries: () => Promise<LibraryEntry[]>
+  installLibrary: (
+    name: string,
+    version?: string
+  ) => Promise<{ success: boolean; output: string; error?: string }>
+  uninstallLibrary: (
+    name: string
+  ) => Promise<{ success: boolean; output: string; error?: string }>
+
+  // Serial monitor
+  openSerial: (port: string, baud: number) => void
+  closeSerial: () => void
+  writeSerial: (data: string) => void
+  onSerialData: (cb: (line: string) => void) => () => void
+  onSerialStatus: (cb: (status: { opened?: boolean; closed?: boolean }) => void) => () => void
 }
 
 /**
@@ -529,6 +553,21 @@ export function useArduino(): UseArduinoReturn {
   }, [isAgentConnected, hasLoadedBoards])
 
   /**
+   * Auto-recognize boards, but only while NONE is connected — poll every 8s to
+   * catch a board being plugged in, then STOP once one is found (no point
+   * hammering arduino-cli when a board is already there). Plugging/unplugging
+   * after that is picked up by the manual Refresh or the next operation.
+   */
+  useEffect(() => {
+    if (!isAgentConnected || boards.length > 0) return
+    const id = setInterval(() => {
+      refreshBoards()
+    }, 8000)
+    return () => clearInterval(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAgentConnected, boards.length])
+
+  /**
    * Reset board loading state when agent disconnects
    */
   useEffect(() => {
@@ -538,6 +577,38 @@ export function useArduino(): UseArduinoReturn {
       setSelectedBoard(null)
     }
   }, [isAgentConnected])
+
+  // ── library manager ─────────────────────────────────────────────────────
+  const searchLibraries = useCallback(
+    (query: string) => arduinoService.searchLibraries(query),
+    [arduinoService]
+  )
+  const listLibraries = useCallback(() => arduinoService.listLibraries(), [arduinoService])
+  const installLibrary = useCallback(
+    (name: string, version?: string) => arduinoService.installLibrary(name, version),
+    [arduinoService]
+  )
+  const uninstallLibrary = useCallback(
+    (name: string) => arduinoService.uninstallLibrary(name),
+    [arduinoService]
+  )
+
+  // ── serial monitor ──────────────────────────────────────────────────────
+  const openSerial = useCallback(
+    (port: string, baud: number) => arduinoService.openSerial(port, baud),
+    [arduinoService]
+  )
+  const closeSerial = useCallback(() => arduinoService.closeSerial(), [arduinoService])
+  const writeSerial = useCallback((data: string) => arduinoService.writeSerial(data), [arduinoService])
+  const onSerialData = useCallback(
+    (cb: (line: string) => void) => arduinoService.onSerialData(cb),
+    [arduinoService]
+  )
+  const onSerialStatus = useCallback(
+    (cb: (status: { opened?: boolean; closed?: boolean }) => void) =>
+      arduinoService.onSerialStatus(cb),
+    [arduinoService]
+  )
 
   return {
     // Board management
@@ -566,6 +637,19 @@ export function useArduino(): UseArduinoReturn {
 
     // Agent
     isAgentConnected,
-    checkAgentStatus
+    checkAgentStatus,
+
+    // Library manager
+    searchLibraries,
+    listLibraries,
+    installLibrary,
+    uninstallLibrary,
+
+    // Serial monitor
+    openSerial,
+    closeSerial,
+    writeSerial,
+    onSerialData,
+    onSerialStatus
   }
 }

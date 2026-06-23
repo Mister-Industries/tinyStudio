@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: tinyforge
+productName: tinyStudio
 directories:
   buildResources: build
 files:
@@ -12,28 +12,30 @@ files:
 asarUnpack:
   - resources/**
 extraResources:
-  - from: node_modules/@mister-industries/tinyservice/binaries/macos-x64/arduino-cli
+  # arduino-cli binaries are fetched into vendor/ by scripts/fetch-arduino-cli.mjs
+  # (run automatically via the "prebuild" npm hook).
+  - from: vendor/arduino-cli/macos-x64/arduino-cli
     to: arduino-cli/darwin-x64/arduino-cli
     filter:
       - '**/*'
-  - from: node_modules/@mister-industries/tinyservice/binaries/macos-arm64/arduino-cli
+  - from: vendor/arduino-cli/macos-arm64/arduino-cli
     to: arduino-cli/darwin-arm64/arduino-cli
     filter:
       - '**/*'
-  - from: node_modules/@mister-industries/tinyservice/binaries/linux-x64/arduino-cli
+  - from: vendor/arduino-cli/linux-x64/arduino-cli
     to: arduino-cli/linux-x64/arduino-cli
     filter:
       - '**/*'
-  - from: node_modules/@mister-industries/tinyservice/binaries/linux-arm64/arduino-cli
+  - from: vendor/arduino-cli/linux-arm64/arduino-cli
     to: arduino-cli/linux-arm64/arduino-cli
     filter:
       - '**/*'
-  - from: node_modules/@mister-industries/tinyservice/binaries/windows-x64/arduino-cli.exe
+  - from: vendor/arduino-cli/windows-x64/arduino-cli.exe
     to: arduino-cli/win32-x64/arduino-cli.exe
     filter:
       - '**/*'
 win:
-  executableName: tinyforge
+  executableName: tinystudio
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

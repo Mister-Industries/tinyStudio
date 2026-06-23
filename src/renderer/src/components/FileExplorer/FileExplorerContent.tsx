@@ -4,9 +4,13 @@
  * Main content area for the file explorer with workspace management
  */
 
-import { OpenWorkspaceCommand, RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
+import {
+  CloseWorkspaceCommand,
+  OpenWorkspaceCommand,
+  RefreshWorkspaceCommand
+} from '@renderer/commands/fileCommands'
 import { BaseFileItem, startCreateItem, useAppDispatch, useAppSelector } from '@renderer/redux'
-import { Folder, FolderOpen, FolderPlus, FolderSync, Plus } from 'lucide-react'
+import { Folder, FolderOpen, FolderPlus, FolderSync, FolderX, Plus } from 'lucide-react'
 import React from 'react'
 import { Button } from '../ui/Button'
 import { ScrollArea } from '../ui/ScrollArea'
@@ -37,6 +41,11 @@ export function FileExplorerContent(): React.JSX.Element {
     command.execute()
   }
 
+  const handleCloseWorkspace = (): void => {
+    const command = new CloseWorkspaceCommand()
+    command.execute()
+  }
+
   const handleNewFolder = (): void => {
     dispatch(
       startCreateItem({
@@ -64,10 +73,12 @@ export function FileExplorerContent(): React.JSX.Element {
   return (
     <div className="h-full flex flex-col">
       {/* Header with workspace name and action buttons */}
-      <div className="flex justify-between items-center px-4 py-3 text-xs font-semibold border-b border-border">
-        <div className="flex items-center gap-2">
-          <Folder size={14} />
-          {workspace ? workspace.name.toUpperCase() : 'WORKSPACE'}
+      <div className="flex justify-between items-center px-4 py-3 text-[11px] font-semibold tracking-[0.16em] text-fg-3 border-b border-navy-600">
+        <div className="flex items-center gap-2 min-w-0">
+          <Folder size={14} className="shrink-0" />
+          <span className="truncate">
+            {workspace ? workspace.name.toUpperCase() : 'NO WORKSPACE SELECTED'}
+          </span>
         </div>
         <div className="flex gap-1">
           {workspace && (
@@ -104,6 +115,34 @@ export function FileExplorerContent(): React.JSX.Element {
                 </TooltipTrigger>
                 <TooltipContent>New file</TooltipContent>
               </Tooltip>
+              {/* Open a Different Folder Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-4"
+                    onClick={handleSelectWorkspace}
+                  >
+                    <FolderOpen size={12} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Open a different folder</TooltipContent>
+              </Tooltip>
+              {/* Close Workspace Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-4"
+                    onClick={handleCloseWorkspace}
+                  >
+                    <FolderX size={12} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Close workspace</TooltipContent>
+              </Tooltip>
             </>
           )}
         </div>
@@ -112,13 +151,13 @@ export function FileExplorerContent(): React.JSX.Element {
       {/* Main Content Area */}
       <ScrollArea className="flex-1">
         {!workspace ? (
-          // No workspace state - show welcome screen
-          <div className="flex flex-col items-center justify-center text-muted-foreground py-8 px-4 gap-2">
-            <Folder size={48} className="mb-4 opacity-50" />
-            <p className="text-sm mb-4 text-center">Open a folder to start working with files</p>
-            <Button onClick={handleSelectWorkspace} className="w-40">
-              Open Folder
-              <FolderOpen size={14} />
+          // No workspace — keep the sidebar minimal; the editor shows the
+          // primary "Open Folder" call to action.
+          <div className="flex flex-col items-center justify-center text-fg-4 py-10 px-4 gap-3 text-center">
+            <Folder size={32} className="opacity-50" />
+            <p className="text-xs">No workspace selected</p>
+            <Button variant="outline" size="sm" onClick={handleSelectWorkspace} className="gap-1.5">
+              <FolderOpen size={14} /> Open Folder
             </Button>
             <CreateProjectDialog openWorkspace={handleOpenWorkspace} />
           </div>

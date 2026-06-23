@@ -1,0 +1,391 @@
+/**
+ * PartsEditor — a top-level modal for authoring a custom part. Upload an SVG (or
+ * start from a blank box), set its size, then click on the preview to drop pins
+ * and drag them into place. Pins are named and saved into the live parts library
+ * in the same schema as Fritzing-imported parts (pixel coords @ 96 DPI), so a
+ * hand-made part wires up exactly like an imported one.
+ */
+
+import { Plus, Trash2, UploadCloud, X } from 'lucide-react'
+import React from 'react'
+import type { PartDef } from '../lib/partsLibrary'
+
+const PX_PER_MM = 96 / 25.4
+
+const slug = (s: string): string =>
+  s
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase() || 'custom-part'
+
+interface Pin {
+  name: string
+  x: number
+  y: number
+}
+
+const blankSvg = (w: number, h: number): string =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}"><rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" rx="4" fill="#1b2548" stroke="#3a4a78"/></svg>`
+
+export function PartsEditor({
+  initial,
+  onClose,
+  onSave
+}: {
+  initial?: PartDef | null
+  onClose: () => void
+  onSave: (def: PartDef) => void
+}): React.JSX.Element {
+  // when editing an existing part, seed from its (breadboard) view
+  const seed =
+    initial &&
+    (initial.views.breadboard || initial.views.schematic || Object.values(initial.views)[0])
+  const [name, setName] = React.useState(initial?.label || 'My Part')
+  const [w, setW] = React.useState(seed?.w || 80)
+  const [h, setH] = React.useState(seed?.h || 40)
+  const [svg, setSvg] = React.useState(seed?.svg || blankSvg(80, 40))
+  const [pins, setPins] = React.useState<Pin[]>(
+    seed ? Object.entries(seed.pins).map(([n, [x, y]]) => ({ name: n, x, y })) : []
+  )
+  const [sel, setSel] = React.useState<number>(-1)
+  const surfaceRef = React.useRef<HTMLDivElement>(null)
+  const dragRef = React.useRef<number>(-1)
+
+  // fit the part into the preview area (cap zoom so tiny parts stay visible)
+  const scale = Math.min(440 / w, 320 / h, 14)
+
+  const uniqueName = (base: string, skip = -1): string => {
+    let n = base
+    let i = 1
+    while (pins.some((p, idx) => idx !== skip && p.name === n)) n = `${base}.${i++}`
+    return n
+  }
+
+  const surfacePoint = (e: { clientX: number; clientY: number }): { x: number; y: number } => {
+    const r = surfaceRef.current!.getBoundingClientRect()
+    return {
+      x: Math.round(Math.max(0, Math.min(w, (e.clientX - r.left) / scale))),
+      y: Math.round(Math.max(0, Math.min(h, (e.clientY - r.top) / scale)))
+    }
+  }
+
+  const onSurfaceClick = (e: React.MouseEvent): void => {
+    if ((e.target as HTMLElement).closest('.editor-pin')) return
+    const p = surfacePoint(e)
+    setPins((ps) => [...ps, { name: uniqueName(String(ps.length + 1)), x: p.x, y: p.y }])
+    setSel(pins.length)
+  }
+
+  const onPinDown = (e: React.PointerEvent, i: number): void => {
+    e.stopPropagation()
+    setSel(i)
+    dragRef.current = i
+    const move = (ev: PointerEvent): void => {
+      const p = surfacePoint(ev)
+      setPins((ps) =>
+        ps.map((pin, idx) => (idx === dragRef.current ? { ...pin, x: p.x, y: p.y } : pin))
+      )
+    }
+    const up = (): void => {
+      dragRef.current = -1
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
+  const onUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (evt) => {
+      const doc = new DOMParser().parseFromString(String(evt.target?.result), 'image/svg+xml')
+      const el = doc.querySelector('svg')
+      if (!el) return
+      const parseLen = (v: string | null): number | null => {
+        if (!v) return null
+        const m = v.trim().match(/^(-?[\d.]+)\s*(px|mm|cm|in|pt)?$/)
+        if (!m) return null
+        const n = parseFloat(m[1])
+        return m[2] === 'mm'
+          ? n * PX_PER_MM
+          : m[2] === 'cm'
+            ? n * PX_PER_MM * 10
+            : m[2] === 'in'
+              ? n * 96
+              : m[2] === 'pt'
+                ? n * (96 / 72)
+                : n
+      }
+      let nw = parseLen(el.getAttribute('width'))
+      let nh = parseLen(el.getAttribute('height'))
+      const vb = (el.getAttribute('viewBox') || '')
+        .trim()
+        .split(/[\s,]+/)
+        .map(parseFloat)
+      if ((nw == null || nh == null) && vb.length === 4) {
+        nw = nw ?? vb[2]
+        nh = nh ?? vb[3]
+      }
+      if (nw && nh) {
+        setW(Math.round(nw))
+        setH(Math.round(nh))
+      }
+      el.removeAttribute('width')
+      el.removeAttribute('height')
+      if (!el.getAttribute('xmlns')) el.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+      if (!el.getAttribute('viewBox') && nw && nh) el.setAttribute('viewBox', `0 0 ${nw} ${nh}`)
+      setSvg(el.outerHTML)
+    }
+    reader.readAsText(file)
+  }
+
+  // arrow keys nudge the selected pin (Shift = ×10)
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (sel < 0) return
+      if (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return
+      const step = e.shiftKey ? 10 : 1
+      const d: Record<string, [number, number]> = {
+        ArrowLeft: [-step, 0],
+        ArrowRight: [step, 0],
+        ArrowUp: [0, -step],
+        ArrowDown: [0, step]
+      }
+      if (!d[e.key]) return
+      e.preventDefault()
+      const [dx, dy] = d[e.key]
+      setPins((ps) =>
+        ps.map((p, i) =>
+          i === sel
+            ? { ...p, x: Math.max(0, Math.min(w, p.x + dx)), y: Math.max(0, Math.min(h, p.y + dy)) }
+            : p
+        )
+      )
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [sel, w, h])
+
+  const save = (): void => {
+    const pinMap: Record<string, [number, number]> = {}
+    pins.forEach((p) => {
+      pinMap[p.name] = [p.x, p.y]
+    })
+    onSave({
+      // editing keeps the original identity so it updates in place (not a copy)
+      type: initial ? initial.type : slug(name),
+      label: name,
+      family: initial?.family || 'Custom',
+      builtin: initial?.builtin,
+      // regenerate the palette icon from the current art so the thumbnail updates
+      icon: svg,
+      views: { breadboard: { svg, w, h, pins: pinMap } }
+    })
+  }
+
+  const numField =
+    'w-20 bg-navy-900 border border-navy-600 rounded px-2 py-1 text-sm text-fg-1 focus:border-cyan outline-none'
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      onClick={onClose}
+    >
+      <div
+        className="w-[860px] max-w-[94vw] h-[600px] max-h-[92vh] bg-navy-900 border border-navy-600 rounded-xl shadow-2xl flex flex-col overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* header */}
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-navy-600">
+          <span className="text-fg-1 font-semibold">Parts Editor</span>
+          <span className="text-[11px] text-fg-3">
+            {initial ? `editing “${initial.label}”` : 'author a custom part'}
+          </span>
+          <div className="flex-1" />
+          <button className="text-fg-3 hover:text-fg-1" onClick={onClose}>
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="flex-1 flex min-h-0">
+          {/* preview surface */}
+          <div className="flex-1 flex items-center justify-center bg-navy-1000 overflow-auto p-6">
+            <div
+              ref={surfaceRef}
+              className="relative cursor-crosshair"
+              style={{
+                width: w * scale,
+                height: h * scale,
+                outline: '1px dashed var(--navy-500)',
+                backgroundImage:
+                  'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
+                backgroundSize: `${10 * scale}px ${10 * scale}px`
+              }}
+              onClick={onSurfaceClick}
+            >
+              <div
+                className="absolute inset-0 [&>svg]:size-full pointer-events-none"
+                dangerouslySetInnerHTML={{ __html: svg }}
+              />
+              {pins.map((pin, i) => (
+                <div
+                  key={i}
+                  className="editor-pin absolute -translate-x-1/2 -translate-y-1/2"
+                  style={{ left: pin.x * scale, top: pin.y * scale, zIndex: 2 }}
+                  onPointerDown={(e) => onPinDown(e, i)}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div
+                    className="rounded-full border-2"
+                    style={{
+                      width: 12,
+                      height: 12,
+                      background: i === sel ? 'var(--cyan)' : 'var(--pink)',
+                      borderColor: '#fff',
+                      cursor: 'grab'
+                    }}
+                  />
+                  <div className="absolute left-3 -top-1 text-[10px] text-cyan whitespace-nowrap pointer-events-none">
+                    {pin.name}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* inspector */}
+          <div className="w-72 shrink-0 border-l border-navy-600 bg-navy-800 flex flex-col">
+            <div className="p-3 flex flex-col gap-3 overflow-y-auto">
+              <label className="flex flex-col gap-1">
+                <span className="text-[11px] text-fg-3">Name</span>
+                <input
+                  className="bg-navy-900 border border-navy-600 rounded px-2 py-1 text-sm text-fg-1 focus:border-cyan outline-none"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </label>
+              <div className="flex gap-3">
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] text-fg-3">Width (px)</span>
+                  <input
+                    type="number"
+                    className={numField}
+                    value={w}
+                    onChange={(e) => {
+                      const nv = Math.max(1, parseInt(e.target.value, 10) || 1)
+                      setW(nv)
+                      if (svg.startsWith('<svg') && svg.includes('rx="4"')) setSvg(blankSvg(nv, h))
+                    }}
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] text-fg-3">Height (px)</span>
+                  <input
+                    type="number"
+                    className={numField}
+                    value={h}
+                    onChange={(e) => {
+                      const nv = Math.max(1, parseInt(e.target.value, 10) || 1)
+                      setH(nv)
+                      if (svg.startsWith('<svg') && svg.includes('rx="4"')) setSvg(blankSvg(w, nv))
+                    }}
+                  />
+                </label>
+              </div>
+
+              <label className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-dashed border-navy-500 text-sm text-fg-2 hover:border-cyan hover:text-fg-1 cursor-pointer">
+                <UploadCloud size={15} /> Upload SVG
+                <input
+                  type="file"
+                  accept=".svg,image/svg+xml"
+                  className="hidden"
+                  onChange={onUpload}
+                />
+              </label>
+
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-fg-3 uppercase tracking-wider">
+                  Pins ({pins.length})
+                </span>
+                <button
+                  className="text-fg-3 hover:text-cyan"
+                  title="Add pin at centre"
+                  onClick={() => {
+                    setPins((ps) => [
+                      ...ps,
+                      {
+                        name: uniqueName(String(ps.length + 1)),
+                        x: Math.round(w / 2),
+                        y: Math.round(h / 2)
+                      }
+                    ])
+                    setSel(pins.length)
+                  }}
+                >
+                  <Plus size={15} />
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                {pins.map((pin, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-2 px-2 py-1 rounded border ${i === sel ? 'border-cyan/50 bg-navy-700' : 'border-navy-600'}`}
+                    onClick={() => setSel(i)}
+                  >
+                    <input
+                      className="flex-1 min-w-0 bg-transparent text-sm text-fg-1 outline-none"
+                      value={pin.name}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        setPins((ps) => ps.map((p, idx) => (idx === i ? { ...p, name: v } : p)))
+                      }}
+                      onBlur={(e) => {
+                        const fixed = uniqueName(e.target.value || String(i + 1), i)
+                        setPins((ps) => ps.map((p, idx) => (idx === i ? { ...p, name: fixed } : p)))
+                      }}
+                    />
+                    <span className="text-[10px] text-fg-4 font-mono">
+                      {pin.x},{pin.y}
+                    </span>
+                    <button
+                      className="text-fg-4 hover:text-pink-bright"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setPins((ps) => ps.filter((_, idx) => idx !== i))
+                        setSel(-1)
+                      }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                ))}
+                {pins.length === 0 && (
+                  <div className="text-[11px] text-fg-4 py-2">Click the preview to drop pins.</div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-auto p-3 border-t border-navy-600 flex gap-2">
+              <button
+                className="flex-1 px-3 py-2 rounded-lg bg-navy-700 border border-navy-500 text-sm text-fg-2 hover:bg-navy-600"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                className="flex-1 px-3 py-2 rounded-lg bg-cyan/20 border border-cyan/50 text-sm text-cyan hover:bg-cyan/30 disabled:opacity-40"
+                disabled={pins.length === 0}
+                onClick={save}
+              >
+                Save to library
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -83,7 +83,7 @@ export function CreateProjectDialog({
         if (exists) {
           form.setError('projectTitle', {
             type: 'manual',
-            message: 'A tinyForge project with this name already exists in the selected location'
+            message: 'A tinyStudio project with this name already exists in the selected location'
           })
           return
         }

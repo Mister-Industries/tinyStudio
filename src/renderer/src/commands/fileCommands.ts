@@ -3,6 +3,7 @@ import { fileSystem, FileSystemItem } from '@renderer/lib/fileSystem'
 import {
   BaseFileItem,
   closeFile,
+  closeWorkspace,
   EditorFile,
   finishCreateItem,
   openFile,
@@ -148,15 +149,26 @@ export class OpenWorkspaceCommand implements Command {
 
   async execute(): Promise<void> {
     let fileSystemItems: FileSystemItem[] = []
-    if (this.filePath) {
-      fileSystemItems = await fileSystem.readDirectory(this.filePath, true)
+    let folderPath = this.filePath
+    if (folderPath) {
+      fileSystemItems = await fileSystem.readDirectory(folderPath, true)
     } else {
-      const filePath = await fileSystem.selectFolder()
-      if (filePath) {
-        fileSystemItems = await fileSystem.readDirectory(filePath, true)
+      const selected = await fileSystem.selectFolder()
+      if (selected) {
+        folderPath = selected
+        fileSystemItems = await fileSystem.readDirectory(selected, true)
       } else {
         // User cancelled folder selection, don't create workspace
         return
+      }
+    }
+
+    // Remember the folder so the app can reopen it on next launch.
+    if (folderPath) {
+      try {
+        localStorage.setItem('tinystudio.lastWorkspace', folderPath)
+      } catch {
+        /* ignore */
       }
     }
 
@@ -180,6 +192,10 @@ export class OpenWorkspaceCommand implements Command {
       root: fileItems
     }
 
+    // Clear any previously open project before showing the new one, so switching
+    // folders doesn't carry over the old workspace's tabs and tree state. Done
+    // only after a folder is confirmed above, so a cancelled picker is a no-op.
+    this.dispatch(closeWorkspace())
     this.dispatch(openWorkspace(workspace))
 
     if (fileItems.some((file: BaseFileItem) => file.name === 'README.md')) {
@@ -201,6 +217,23 @@ export class OpenWorkspaceCommand implements Command {
         })
       }
     }
+
+    // Auto-open the sketch: prefer the main .ino, else the README, so opening a
+    // project lands you on editable code instead of an empty editor.
+    const findFile = (items: BaseFileItem[], match: (i: BaseFileItem) => boolean): BaseFileItem | null => {
+      for (const item of items) {
+        if (item.type === 'file' && item.name && match(item)) return item
+        if (item.children) {
+          const found = findFile(item.children, match)
+          if (found) return found
+        }
+      }
+      return null
+    }
+    const sketch =
+      findFile(fileItems, (i) => /\.ino$/i.test(i.name!)) ||
+      findFile(fileItems, (i) => i.name === 'README.md')
+    if (sketch) await new OpenFileCommand(sketch).execute()
   }
 }
 
@@ -221,6 +254,24 @@ export class RefreshWorkspaceCommand implements Command {
 
     // Update the workspace with the new file structure
     this.dispatch(openWorkspace({ ...this.workspace, root: fileItems }))
+  }
+}
+
+export class CloseWorkspaceCommand implements Command {
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
+
+  async execute(): Promise<void> {
+    this.dispatch(closeWorkspace())
+
+    // Forget the remembered folder so the app starts on the empty state next
+    // launch instead of silently reopening the project the user just closed.
+    try {
+      localStorage.removeItem('tinystudio.lastWorkspace')
+    } catch {
+      /* ignore */
+    }
   }
 }
 
