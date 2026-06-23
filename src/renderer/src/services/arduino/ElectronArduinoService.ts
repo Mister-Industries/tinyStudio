@@ -11,12 +11,15 @@ import {
 } from '@mister-industries/shared'
 import {
   AgentStatus,
+  ArduinoActionResult,
   ArduinoService,
   Board,
   BoardConfig,
   BoardInfo,
   CompileResult,
+  InstallableBoard,
   LibraryEntry,
+  PlatformEntry,
   UploadResult
 } from './types'
 
@@ -183,6 +186,24 @@ export class ElectronArduinoService implements ArduinoService {
             safeResolve({
               success: !hasError,
               output: libs.map((l) => JSON.stringify(l)).join('\n'),
+              error: hasError ? errorMessage : undefined
+            })
+          } else if (
+            // Boards Manager list/search responses carry one of these arrays
+            // (platforms, boards, urls) — serialize to JSON lines like libraries.
+            Array.isArray((message.data as { platforms?: unknown[] }).platforms) ||
+            Array.isArray((message.data as { boards?: unknown[] }).boards) ||
+            Array.isArray((message.data as { urls?: unknown[] }).urls)
+          ) {
+            const d = message.data as {
+              platforms?: unknown[]
+              boards?: unknown[]
+              urls?: unknown[]
+            }
+            const arr = d.platforms || d.boards || d.urls || []
+            safeResolve({
+              success: !hasError,
+              output: arr.map((x) => JSON.stringify(x)).join('\n'),
               error: hasError ? errorMessage : undefined
             })
           } else {
@@ -523,6 +544,81 @@ export class ElectronArduinoService implements ArduinoService {
     if (!this.client) throw new Error('Arduino client not initialized')
     this.client.libUninstall(name)
     return this.waitForResponse('lib-uninstall', 60000)
+  }
+
+  // ── boards manager ───────────────────────────────────────────────────────────
+
+  /** Parse JSON-lines output (one object/string per line) into a typed array. */
+  private parseJsonLines<T>(output: string): T[] {
+    return output
+      .split('\n')
+      .filter((l) => l.trim())
+      .map((l) => {
+        try {
+          return JSON.parse(l) as T
+        } catch {
+          return null
+        }
+      })
+      .filter((x): x is T => x !== null)
+  }
+
+  async searchCores(query: string): Promise<PlatformEntry[]> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.coreSearch(query)
+    const result = await this.waitForResponse('core-search', 60000)
+    if (!result.success) throw new Error(result.error || 'Core search failed')
+    return this.parseJsonLines<PlatformEntry>(result.output)
+  }
+
+  async listCores(): Promise<PlatformEntry[]> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.coreList()
+    const result = await this.waitForResponse('core-list', 30000)
+    if (!result.success) throw new Error(result.error || 'Core list failed')
+    return this.parseJsonLines<PlatformEntry>(result.output)
+  }
+
+  async installCore(id: string, version?: string): Promise<ArduinoActionResult> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.coreInstall(id, version)
+    // Cores (esp32 especially) are large — allow up to 10 minutes.
+    return this.waitForResponse('core-install', 600000)
+  }
+
+  async uninstallCore(id: string): Promise<ArduinoActionResult> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.coreUninstall(id)
+    return this.waitForResponse('core-uninstall', 120000)
+  }
+
+  async listAllBoards(): Promise<InstallableBoard[]> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.boardListall()
+    const result = await this.waitForResponse('board-listall', 30000)
+    if (!result.success) throw new Error(result.error || 'Board listall failed')
+    return this.parseJsonLines<InstallableBoard>(result.output)
+  }
+
+  async listBoardUrls(): Promise<string[]> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.boardUrlList()
+    const result = await this.waitForResponse('board-url-list', 15000)
+    if (!result.success) throw new Error(result.error || 'Board URL list failed')
+    return this.parseJsonLines<string>(result.output)
+  }
+
+  async addBoardUrl(url: string): Promise<ArduinoActionResult> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.boardUrlAdd(url)
+    // Adding a URL also refreshes the index, which can take a while.
+    return this.waitForResponse('board-url-add', 120000)
+  }
+
+  async removeBoardUrl(url: string): Promise<ArduinoActionResult> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    this.client.boardUrlRemove(url)
+    return this.waitForResponse('board-url-remove', 30000)
   }
 
   // ── serial monitor (streaming, not request/response) ─────────────────────────

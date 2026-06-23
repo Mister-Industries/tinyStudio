@@ -2,7 +2,7 @@ import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { useSerial } from '@renderer/contexts/SerialContext'
 import { useAppDispatch } from '@renderer/redux'
 import { setPanelOpen } from '@renderer/redux/editorSlice'
-import { FileText, Send, Terminal, Trash, X } from 'lucide-react'
+import { FileText, ListX, Send, Terminal, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './ui/Button'
 import { ScrollArea } from './ui/ScrollArea'
@@ -19,6 +19,28 @@ import {
 export function SerialMonitor(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'serial' | 'output'>('serial')
   const dispatch = useAppDispatch()
+  const { clear } = useSerial()
+  const { clearLogs, isCompiling, isUploading } = useArduinoContext()
+
+  // Verify/Upload jump to the Output log so the build is visible, then snap
+  // back to the Serial Monitor once it finishes. The short delay rides over the
+  // brief gap between the compile and upload phases of an Upload so we don't
+  // flash back to Serial mid-operation.
+  const busy = isCompiling || isUploading
+  useEffect(() => {
+    if (busy) {
+      setActiveTab('output')
+      return
+    }
+    const t = setTimeout(() => setActiveTab('serial'), 400)
+    return () => clearTimeout(t)
+  }, [busy])
+
+  // Clear whichever pane is in front — the serial stream or the output log.
+  const handleClear = (): void => {
+    if (activeTab === 'serial') clear()
+    else clearLogs()
+  }
 
   const tab = (id: 'serial' | 'output', label: string, Icon: typeof Terminal): React.JSX.Element => (
     <div
@@ -38,14 +60,26 @@ export function SerialMonitor(): React.JSX.Element {
           {tab('serial', 'Serial Monitor', Terminal)}
           {tab('output', 'Output', FileText)}
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-fg-3 hover:text-fg-1 hover:bg-navy-500"
-          onClick={() => dispatch(setPanelOpen({ panel: 'monitor', isOpen: false }))}
-        >
-          <X />
-        </Button>
+        <div className="flex items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-fg-3 hover:text-fg-1 hover:bg-navy-500"
+            onClick={handleClear}
+            title={activeTab === 'serial' ? 'Clear serial monitor' : 'Clear output'}
+          >
+            <ListX />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-fg-3 hover:text-fg-1 hover:bg-navy-500"
+            onClick={() => dispatch(setPanelOpen({ panel: 'monitor', isOpen: false }))}
+            title="Close"
+          >
+            <X />
+          </Button>
+        </div>
       </div>
       {/* Both tabs stay mounted so the serial stream isn't dropped when you peek at Output. */}
       <div className={activeTab === 'serial' ? 'flex-1 min-h-0' : 'hidden'}>
@@ -62,18 +96,32 @@ export function SerialMonitor(): React.JSX.Element {
 export function SerialMonitorTab(): React.JSX.Element {
   const { isAgentConnected } = useArduinoContext()
   // The connection itself is owned by SerialProvider (app-level) so it persists
-  // across view switches; this tab just displays it and sends lines.
-  const { lines, connected, disconnected, port, baud, setBaud, send: sendLine, clear, reconnect } =
-    useSerial()
+  // across view switches; this tab just displays it and sends lines. The live
+  // connection status (COM @ baud) now lives in the bottom StatusBar.
+  const { lines, connected, port, baud, setBaud, send: sendLine } = useSerial()
   const [input, setInput] = useState('')
-  const [autoscroll, setAutoscroll] = useState(true)
   const scrollRef = useRef<HTMLDivElement>(null)
+  // Stick to the bottom as new lines arrive — but pause the moment the user
+  // scrolls up to read back, and resume once they return to the bottom.
+  const stickRef = useRef(true)
 
   useEffect(() => {
-    if (!autoscroll) return
+    const el = scrollRef.current?.querySelector(
+      '[data-radix-scroll-area-viewport]'
+    ) as HTMLElement | null
+    if (!el) return
+    const onScroll = (): void => {
+      stickRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 24
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    if (!stickRef.current) return
     const el = scrollRef.current?.querySelector('[data-radix-scroll-area-viewport]')
     if (el) el.scrollTop = el.scrollHeight
-  }, [lines, autoscroll])
+  }, [lines])
 
   const send = (): void => {
     if (!input.trim() || !connected) return
@@ -83,32 +131,6 @@ export function SerialMonitorTab(): React.JSX.Element {
 
   return (
     <div className="size-full flex flex-col gap-2 p-2">
-      <div className="flex items-center gap-2 px-1 text-[11px] text-fg-3">
-        <span
-          className="w-2 h-2 rounded-full shrink-0"
-          style={
-            connected
-              ? { background: 'var(--signal-success)', boxShadow: '0 0 8px var(--signal-success)' }
-              : { background: 'var(--fg-4)' }
-          }
-        />
-        {!isAgentConnected ? (
-          'Arduino service not connected'
-        ) : !port ? (
-          'Select a board/port to monitor'
-        ) : disconnected ? (
-          <span className="flex items-center gap-2">
-            Disconnected · port free for the browser
-            <button className="text-cyan hover:text-cyan-bright underline" onClick={reconnect}>
-              reconnect
-            </button>
-          </span>
-        ) : connected ? (
-          `Connected · ${port} @ ${baud}`
-        ) : (
-          `Connecting to ${port}…`
-        )}
-      </div>
       <ScrollArea
         ref={scrollRef}
         className="flex-1 min-h-0 border border-navy-600 bg-navy-1000 text-xs font-mono leading-[1.5] p-2"
@@ -142,26 +164,13 @@ export function SerialMonitorTab(): React.JSX.Element {
         <Button variant="ghost" size="sm" onClick={send} disabled={!connected || !input.trim()}>
           <Send size={14} />
         </Button>
-        <Button variant="outline" size="icon" onClick={clear} title="Clear">
-          <Trash size={14} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          data-active={autoscroll}
-          className="data-[active=true]:text-cyan"
-          onClick={() => setAutoscroll((a) => !a)}
-          title="Autoscroll"
-        >
-          Auto
-        </Button>
       </div>
     </div>
   )
 }
 
 export function OutputTab(): React.JSX.Element {
-  const { logs, clearLogs } = useArduinoContext()
+  const { logs } = useArduinoContext()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to bottom when new logs are added.
@@ -198,15 +207,6 @@ export function OutputTab(): React.JSX.Element {
           ))
         )}
       </div>
-      {logs.length > 0 && (
-        <button
-          onClick={clearLogs}
-          title="Clear output"
-          className="absolute top-1.5 right-2.5 z-10 p-1.5 rounded-md text-fg-4 hover:text-fg-1 hover:bg-navy-600/80"
-        >
-          <Trash size={14} />
-        </button>
-      )}
     </div>
   )
 }

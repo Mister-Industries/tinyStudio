@@ -15,9 +15,10 @@ import {
 import {
   BaseFileItem,
   cancelCreateItem,
+  revealFile,
   selectIsExpanded,
   selectOpenFiles,
-  setViewingFile,
+  setEditorView,
   startCreateItem,
   useAppDispatch,
   useAppSelector
@@ -180,19 +181,20 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   }
 
   const handleOpenFile = (): void => {
-    if (isOpen) {
-      dispatch(setViewingFile(item.id))
+    if (item.type === 'folder') {
+      new SetFolderOpenCommand(item, !isExpanded).execute()
       return
     }
 
-    // Logic to open the file
-    if (item.type === 'file') {
-      const command = new OpenFileCommand(item)
-      command.execute()
-    } else if (item.type === 'folder') {
-      const command = new SetFolderOpenCommand(item, !isExpanded)
-      command.execute()
+    // Opening a file from the tree always lands you in the Code view with that
+    // file selected. revealFile also un-hides background buffers (diagram.json /
+    // visual.js) so they show up as a tab; for files not open yet, load them.
+    if (isOpen) {
+      dispatch(revealFile(item.id))
+    } else {
+      new OpenFileCommand(item).execute()
     }
+    dispatch(setEditorView('code'))
   }
 
   const handleContextMenu = (e: React.MouseEvent): void => {

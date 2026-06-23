@@ -14,13 +14,14 @@ import {
   BaseFileItem,
   closeFile,
   EditorFile,
+  revealFile,
   saveFileWithContent,
   selectViewingFileId,
   setViewingFile,
   updateFileContent,
   updateReadmeContent
 } from '@renderer/redux/fileSlice'
-import { CircuitBoard, Code2, ExternalLink, FolderOpen, Loader2, UploadCloud } from 'lucide-react'
+import { CircuitBoard, CodeXml, ExternalLink, FolderOpen, Loader2, UploadCloud } from 'lucide-react'
 import * as monaco from 'monaco-editor'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -132,7 +133,10 @@ function useProjectFile(name: string, makeDefault?: () => string): EditorFile | 
           await new RefreshWorkspaceCommand(workspace).execute()
           item = { id: crypto.randomUUID(), parentId: 'root', name, path, type: 'file' }
         }
-        if (item) await new OpenFileCommand(item).execute()
+        // Load as a hidden background buffer: the full-window view edits/saves
+        // it, but it stays out of the Code tab bar until the user clicks the
+        // in-view code button (which reveals it).
+        if (item) await new OpenFileCommand(item, { hidden: true }).execute()
       } finally {
         busy.current = false
       }
@@ -171,7 +175,10 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
 // ── Code view: the normal tabbed IDE ────────────────────────────────────────
 
 function CodeView(): React.JSX.Element {
-  const openFiles = useAppSelector(selectOpenFiles)
+  const allOpenFiles = useAppSelector(selectOpenFiles)
+  // Background buffers (diagram.json / visual.js loaded for the Circuit/Visual
+  // views) are hidden from the tab bar until revealed via their code button.
+  const openFiles = allOpenFiles.filter((f) => !f.hidden)
   const viewingFileId = useAppSelector(selectViewingFileId)
   const editorMode = useAppSelector((state) => state.editor.editorMode)
   const workspace = useAppSelector((s) => s.file.workspace)
@@ -317,6 +324,10 @@ function CircuitView(): React.JSX.Element {
     <DiagramEditor
       content={file.content}
       onChange={(content) => dispatch(updateFileContent({ id: file.id, content }))}
+      onOpenCode={() => {
+        dispatch(revealFile(file.id))
+        dispatch(setEditorView('code'))
+      }}
     />
   )
 }
@@ -412,11 +423,11 @@ function VisualView(): React.JSX.Element {
           className="rounded-full"
           title="Edit code"
           onClick={() => {
-            dispatch(setViewingFile(file.id))
+            dispatch(revealFile(file.id))
             dispatch(setEditorView('code'))
           }}
         >
-          <Code2 size={16} />
+          <CodeXml size={16} />
         </Button>
         <Button
           size="icon"

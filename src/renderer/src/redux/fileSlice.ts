@@ -9,6 +9,11 @@ export interface EditorFile {
   modified: boolean
   createdAt: string
   updatedAt: string
+  // Loaded as a background buffer for a full-window view (Circuit/Visual) rather
+  // than opened as a code tab. Hidden buffers are live/editable/savable like any
+  // other, but the Code view filters them out of its tab bar until the user
+  // "reveals" them via the in-view code button. See revealFile.
+  hidden?: boolean
 }
 
 export interface Workspace {
@@ -198,12 +203,23 @@ export const fileSlice = createAppSlice({
             ...file,
             content: alreadyOpen.modified ? alreadyOpen.content : file.content,
             modified: alreadyOpen.modified,
+            // An explicit (non-hidden) open reveals the buffer as a tab; a
+            // background reload keeps whatever visibility it already had.
+            hidden: file.hidden ? alreadyOpen.hidden : false,
             updatedAt: new Date().toISOString()
           })
+        } else if (!file.hidden && alreadyOpen.hidden) {
+          // Existing background buffer opened explicitly — reveal it as a tab.
+          state.openFiles = editorObjectAdapter.updateOne(state.openFiles, {
+            id: file.id,
+            changes: { hidden: false }
+          })
         }
-        // Already open — just focus the existing tab, don't reload its buffer.
-        state.viewingFileId = file.id
-        state.highlightedFileId = file.id
+        // A hidden (background) open must not steal focus from the code tabs.
+        if (!file.hidden) {
+          state.viewingFileId = file.id
+          state.highlightedFileId = file.id
+        }
         return
       }
 
@@ -211,9 +227,25 @@ export const fileSlice = createAppSlice({
         ...file,
         updatedAt: new Date().toISOString()
       })
-      // Automatically set this file as the viewing file
-      state.viewingFileId = file.id
-      state.highlightedFileId = file.id
+      // Focus the file as the viewing tab — unless it's a background buffer for
+      // a full-window view, which stays out of the Code tab bar until revealed.
+      if (!file.hidden) {
+        state.viewingFileId = file.id
+        state.highlightedFileId = file.id
+      }
+    }),
+    // Promote a hidden background buffer (Circuit/Visual) into a visible code
+    // tab and focus it. Used by the in-view "open code" buttons.
+    revealFile: create.reducer((state, payload: PayloadAction<string>) => {
+      const id = payload.payload
+      if (state.openFiles.entities[id]) {
+        state.openFiles = editorObjectAdapter.updateOne(state.openFiles, {
+          id,
+          changes: { hidden: false }
+        })
+        state.viewingFileId = id
+        state.highlightedFileId = id
+      }
     }),
     setFolderOpen: create.reducer(
       (state, payload: PayloadAction<{ id: string; isOpen: boolean }>) => {
@@ -370,6 +402,7 @@ export const fileSlice = createAppSlice({
 export const {
   createNewFile,
   openFile,
+  revealFile,
   updateFileContent,
   updateReadmeContent,
   updateDiagramSvgContent,

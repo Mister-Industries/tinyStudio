@@ -1,10 +1,12 @@
-import { Cpu, Wifi, WifiOff } from 'lucide-react'
+import { Cpu, Usb, Wifi, WifiOff } from 'lucide-react'
 import { useArduinoContext } from '../contexts/ArduinoContext'
+import { useSerial } from '../contexts/SerialContext'
 import { Button } from './ui/Button'
 
 export function StatusBar(): React.JSX.Element {
   const { isAgentConnected, checkAgentStatus, selectedBoard, isCompiling, isUploading } =
     useArduinoContext()
+  const { connected, disconnected, port, baud, reconnect } = useSerial()
 
   const handleRetry = async (): Promise<void> => {
     try {
@@ -42,6 +44,34 @@ export function StatusBar(): React.JSX.Element {
           {isAgentConnected ? <Wifi size={12} /> : <WifiOff size={12} />}
           {isAgentConnected ? 'Connected' : 'Disconnected'}
         </span>
+        {isAgentConnected && port && (
+          <span
+            className="flex items-center gap-1.5"
+            style={
+              connected
+                ? { color: 'var(--signal-success)' }
+                : disconnected
+                  ? { color: 'var(--fg-4)' }
+                  : {}
+            }
+          >
+            <Usb size={12} />
+            {disconnected
+              ? 'Serial released'
+              : connected
+                ? `${port} @ ${baud}`
+                : `Connecting ${port}…`}
+            {disconnected && (
+              <Button
+                variant="link"
+                className="p-0 h-fit text-[11px] text-cyan hover:text-cyan-bright"
+                onClick={reconnect}
+              >
+                reconnect
+              </Button>
+            )}
+          </span>
+        )}
         {!isAgentConnected && (
           <Button
             variant="link"

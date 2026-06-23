@@ -4,10 +4,13 @@
 
 import { getArduinoService } from '@renderer/services/arduino/ArduinoServiceFactory'
 import {
+  ArduinoActionResult,
   Board,
   BoardConfig,
   CompileResult,
+  InstallableBoard,
   LibraryEntry,
+  PlatformEntry,
   UploadResult
 } from '@renderer/services/arduino/types'
 import { useCallback, useEffect, useState } from 'react'
@@ -87,6 +90,16 @@ export interface UseArduinoReturn {
   uninstallLibrary: (
     name: string
   ) => Promise<{ success: boolean; output: string; error?: string }>
+
+  // Boards manager
+  searchCores: (query: string) => Promise<PlatformEntry[]>
+  listCores: () => Promise<PlatformEntry[]>
+  installCore: (id: string, version?: string) => Promise<ArduinoActionResult>
+  uninstallCore: (id: string) => Promise<ArduinoActionResult>
+  listAllBoards: () => Promise<InstallableBoard[]>
+  listBoardUrls: () => Promise<string[]>
+  addBoardUrl: (url: string) => Promise<ArduinoActionResult>
+  removeBoardUrl: (url: string) => Promise<ArduinoActionResult>
 
   // Serial monitor
   openSerial: (port: string, baud: number) => void
@@ -593,6 +606,31 @@ export function useArduino(): UseArduinoReturn {
     [arduinoService]
   )
 
+  // ── boards manager ──────────────────────────────────────────────────────
+  const searchCores = useCallback(
+    (query: string) => arduinoService.searchCores(query),
+    [arduinoService]
+  )
+  const listCores = useCallback(() => arduinoService.listCores(), [arduinoService])
+  const installCore = useCallback(
+    (id: string, version?: string) => arduinoService.installCore(id, version),
+    [arduinoService]
+  )
+  const uninstallCore = useCallback(
+    (id: string) => arduinoService.uninstallCore(id),
+    [arduinoService]
+  )
+  const listAllBoards = useCallback(() => arduinoService.listAllBoards(), [arduinoService])
+  const listBoardUrls = useCallback(() => arduinoService.listBoardUrls(), [arduinoService])
+  const addBoardUrl = useCallback(
+    (url: string) => arduinoService.addBoardUrl(url),
+    [arduinoService]
+  )
+  const removeBoardUrl = useCallback(
+    (url: string) => arduinoService.removeBoardUrl(url),
+    [arduinoService]
+  )
+
   // ── serial monitor ──────────────────────────────────────────────────────
   const openSerial = useCallback(
     (port: string, baud: number) => arduinoService.openSerial(port, baud),
@@ -644,6 +682,16 @@ export function useArduino(): UseArduinoReturn {
     listLibraries,
     installLibrary,
     uninstallLibrary,
+
+    // Boards manager
+    searchCores,
+    listCores,
+    installCore,
+    uninstallCore,
+    listAllBoards,
+    listBoardUrls,
+    addBoardUrl,
+    removeBoardUrl,
 
     // Serial monitor
     openSerial,

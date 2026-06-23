@@ -9,10 +9,10 @@
  */
 
 import {
-  Braces,
   ChevronDown,
   ChevronRight,
   CircuitBoard,
+  CodeXml,
   Grid3x3,
   Maximize,
   MousePointer2,
@@ -20,7 +20,6 @@ import {
   Plus,
   Eye,
   Spline,
-  X,
   Zap,
   ZoomIn,
   ZoomOut
@@ -119,10 +118,13 @@ function Thumb({ svg }: { svg?: string }): React.JSX.Element {
 
 export function DiagramEditor({
   content,
-  onChange
+  onChange,
+  onOpenCode
 }: {
   content: string
   onChange: (next: string) => void
+  // Switch to the Code view with diagram.json selected (the `</>` button).
+  onOpenCode?: () => void
 }): React.JSX.Element {
   const diagram: Diagram = React.useMemo(() => {
     try {
@@ -142,7 +144,6 @@ export function DiagramEditor({
   const [view, setView] = React.useState<ViewKind>('breadboard')
   const [editable, setEditable] = React.useState(false)
   const [grid, setGrid] = React.useState(true)
-  const [showJson, setShowJson] = React.useState(false)
   const [editorPart, setEditorPart] = React.useState<PartDef | null | undefined>(undefined) // undefined = closed
   const [selPart, setSelPart] = React.useState<string | null>(null)
   const [selWire, setSelWire] = React.useState<number | null>(null)
@@ -746,7 +747,7 @@ export function DiagramEditor({
           </button>
         </div>
 
-        <div className="absolute top-3 z-10 flex gap-1.5" style={{ right: showJson ? 374 : 14 }}>
+        <div className="absolute top-3 right-3.5 z-10 flex gap-1.5">
           <button
             className={`${tool} w-8 justify-center px-0 ${grid ? 'text-cyan border-cyan/40' : ''}`}
             onClick={() => setGrid((g) => !g)}
@@ -755,15 +756,16 @@ export function DiagramEditor({
             <Grid3x3 size={15} />
           </button>
           <button
-            className={`${tool} ${showJson ? 'text-cyan border-cyan/40' : ''}`}
-            onClick={() => setShowJson((s) => !s)}
+            className={`${tool} w-8 justify-center px-0`}
+            onClick={() => onOpenCode?.()}
+            title="Edit diagram.json as code"
           >
-            <Braces size={15} /> JSON
+            <CodeXml size={15} />
           </button>
         </div>
 
         {/* zoom / fit — bottom-right */}
-        <div className="absolute bottom-3 z-10 flex gap-1.5" style={{ right: showJson ? 374 : 14 }}>
+        <div className="absolute bottom-3 right-3.5 z-10 flex gap-1.5">
           <button
             className={`${tool} w-8 justify-center px-0`}
             onClick={() => zoomCenter(1 / 1.15)}
@@ -1081,23 +1083,6 @@ export function DiagramEditor({
             </span>
           )}
         </div>
-
-        {showJson && (
-          <div className="absolute top-0 right-0 h-full w-[360px] bg-navy-1000 border-l border-navy-600 flex flex-col z-20">
-            <div className="flex items-center gap-2 px-3 py-2 border-b border-navy-600">
-              <Braces size={16} className="text-cyan" />
-              <span className="font-mono text-sm text-fg-1">diagram.json</span>
-              <span className="text-[11px] text-fg-3">Wokwi format</span>
-              <div className="flex-1" />
-              <button className="text-fg-3 hover:text-fg-1" onClick={() => setShowJson(false)}>
-                <X size={15} />
-              </button>
-            </div>
-            <pre className="flex-1 overflow-auto p-3 text-[11px] font-mono text-fg-2 whitespace-pre-wrap">
-              {content}
-            </pre>
-          </div>
-        )}
       </div>
 
       {editorPart !== undefined && (

@@ -7,12 +7,15 @@
 
 import {
   AgentStatus,
+  ArduinoActionResult,
   ArduinoService,
   Board,
   BoardConfig,
   BoardInfo,
   CompileResult,
+  InstallableBoard,
   LibraryEntry,
+  PlatformEntry,
   UploadResult
 } from './types'
 
@@ -95,6 +98,38 @@ export class WebArduinoService implements ArduinoService {
   async uninstallLibrary(
     _name: string
   ): Promise<{ success: boolean; output: string; error?: string }> {
+    throw new Error(WEB_UNSUPPORTED)
+  }
+
+  async searchCores(_query: string): Promise<PlatformEntry[]> {
+    throw new Error(WEB_UNSUPPORTED)
+  }
+
+  async listCores(): Promise<PlatformEntry[]> {
+    throw new Error(WEB_UNSUPPORTED)
+  }
+
+  async installCore(_id: string, _version?: string): Promise<ArduinoActionResult> {
+    throw new Error(WEB_UNSUPPORTED)
+  }
+
+  async uninstallCore(_id: string): Promise<ArduinoActionResult> {
+    throw new Error(WEB_UNSUPPORTED)
+  }
+
+  async listAllBoards(): Promise<InstallableBoard[]> {
+    throw new Error(WEB_UNSUPPORTED)
+  }
+
+  async listBoardUrls(): Promise<string[]> {
+    throw new Error(WEB_UNSUPPORTED)
+  }
+
+  async addBoardUrl(_url: string): Promise<ArduinoActionResult> {
+    throw new Error(WEB_UNSUPPORTED)
+  }
+
+  async removeBoardUrl(_url: string): Promise<ArduinoActionResult> {
     throw new Error(WEB_UNSUPPORTED)
   }
 
