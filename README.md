@@ -1,4 +1,4 @@
-# tinystudio
+# tinyforge
 
 An Electron application with React and TypeScript
 
@@ -11,13 +11,17 @@ An Electron application with React and TypeScript
 ### Install
 
 ```bash
-$ npm install
+npm install
 ```
 
 ### Development
 
 ```bash
-$ npm run dev
+npm run dev
+```
+
+```bash
+npm run dev:web
 ```
 
 ### Build
@@ -31,4 +35,7 @@ $ npm run build:mac
 
 # For Linux
 $ npm run build:linux
+
+# For Web
+$ npm run build:web
 ```

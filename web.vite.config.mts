@@ -1,4 +1,4 @@
-// web.vite.config.mts
+// web.vite.config.ts
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -11,5 +11,10 @@ export default defineConfig({
     outDir: path.resolve(__dirname, 'dist-web'),
     emptyOutDir: true
   },
-  root: 'src/renderer'
+  root: 'src/renderer',
+  resolve: {
+    alias: {
+      '@renderer': path.resolve(__dirname, 'src/renderer/src')
+    }
+  }
 })

@@ -23,6 +23,12 @@ export default tseslint.config(
       'react-refresh': eslintPluginReactRefresh
     },
     rules: {
+      'prettier/prettier': [
+        'error',
+        {
+          endOfLine: 'auto'
+        }
+      ],
       ...eslintPluginReactHooks.configs.recommended.rules,
       ...eslintPluginReactRefresh.configs.vite.rules
     }
