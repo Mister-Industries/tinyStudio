@@ -157,11 +157,11 @@ The Electron main process starts **tinyService**, a WebSocket wrapper around `ar
 launch; the renderer talks to it to compile, upload, and stream serial. See
 [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) for details.
 
-## Contributing
+## Contributions
 
-Issues and pull requests are welcome. The most approachable contributions are **new example
-projects** and **new parts** — see [docs/extending-the-library.md](docs/extending-the-library.md).
-Run `npm run lint` and `npm run typecheck` before opening a PR.
+tinyStudio is in **early alpha** and is **not accepting external contributions** at this time.
+Pull requests are closed automatically and issues may be closed without review. This will open up
+as the project stabilizes — until then, feel free to **fork** and experiment.
 
 ## License
 
