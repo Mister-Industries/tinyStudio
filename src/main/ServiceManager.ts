@@ -1,3 +1,4 @@
+import { spawn, type ChildProcess } from 'child_process'
 import { app, BrowserWindow } from 'electron'
 import { existsSync } from 'fs'
 import path from 'path'
@@ -18,13 +19,8 @@ interface HealthCheckResponse {
   }
 }
 
-interface TinyServiceInstance {
-  start(): Promise<void>
-  stop(): Promise<void>
-}
-
 export class ServiceManager {
-  private service: TinyServiceInstance | null = null
+  private child: ChildProcess | null = null
   private config: ServiceConfig
   private isRunning = false
   private mainWindow: BrowserWindow | null = null
@@ -56,11 +52,22 @@ export class ServiceManager {
   }
 
   /**
-   * Dynamically import TinyService (handles ESM in CommonJS context)
+   * Build the tiny Node program that boots TinyService in the child process.
+   * We pass config explicitly (port, arduino-cli path) so we don't depend on the
+   * service's own env/config handling. JSON.stringify keeps Windows paths valid.
    */
-  private async importTinyService() {
-    const module = await import('@mister-industries/tinyservice')
-    return module.TinyService
+  private buildLauncherCode(arduinoCliPath: string): string {
+    const opts = JSON.stringify({
+      port: this.config.port,
+      arduinoCliPath,
+      allowedOrigins: this.config.allowedOrigins
+    })
+    return [
+      `import('@mister-industries/tinyservice')`,
+      `.then((m) => new m.TinyService(${opts}).start())`,
+      `.then(() => console.log('[tinyService] started'))`,
+      `.catch((e) => { console.error('[tinyService] failed to start:', (e && e.stack) || e); process.exit(1) })`
+    ].join('\n')
   }
 
   /**
@@ -177,7 +184,15 @@ export class ServiceManager {
   }
 
   /**
-   * Start the TinyService WebSocket server
+   * Start TinyService as a child Node process.
+   *
+   * We deliberately spawn it instead of importing it in-process: tinyService is
+   * an ESM package, and Electron's main-process ESM loader can't reliably import
+   * ESM that's bundled with the app. Running it under Electron's own binary in
+   * Node mode (ELECTRON_RUN_AS_NODE) uses the plain Node ESM loader, which loads
+   * it fine — and isolates the backend in its own process. `cwd` points at the
+   * app root so the child resolves @mister-industries/tinyservice from
+   * node_modules (which is why asar must stay disabled — see electron-builder.yml).
    */
   async start(): Promise<void> {
     if (this.isRunning) {
@@ -186,46 +201,64 @@ export class ServiceManager {
     }
 
     try {
-      const TinyService = await this.importTinyService()
       const arduinoCliPath = this.resolveArduinoCliPath()
+      // out/main → app root (two levels up); node_modules lives here in dev and
+      // in the packaged app (asar disabled).
+      const cwd = path.resolve(__dirname, '..', '..')
 
-      console.log(`[ServiceManager] Starting TinyService on port ${this.config.port}`)
+      console.log(`[ServiceManager] Spawning TinyService on port ${this.config.port}`)
       console.log(`[ServiceManager] Arduino CLI path: ${arduinoCliPath}`)
+      console.log(`[ServiceManager] Service cwd: ${cwd}`)
 
-      this.service = new TinyService({
-        port: this.config.port,
-        arduinoCliPath,
-        allowedOrigins: this.config.allowedOrigins
+      this.child = spawn(process.execPath, ['-e', this.buildLauncherCode(arduinoCliPath)], {
+        cwd,
+        env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'pipe']
       })
 
-      await this.service.start()
+      this.child.stdout?.on('data', (d: Buffer) => console.log(`[tinyService] ${d.toString().trim()}`))
+      this.child.stderr?.on('data', (d: Buffer) =>
+        console.error(`[tinyService] ${d.toString().trim()}`)
+      )
+      this.child.on('error', (err) => this.sendErrorToRenderer('TinyService process error', err))
+      this.child.on('exit', (code) => {
+        if (code) console.warn(`[ServiceManager] TinyService process exited with code ${code}`)
+        this.isRunning = false
+        this.child = null
+      })
 
-      // Verify service health after startup
-      await this.verifyServiceHealth()
+      // Give the spawned process time to boot, then confirm it's serving.
+      await this.verifyServiceHealth(10, 1000)
 
       this.isRunning = true
-      console.log(`[ServiceManager] TinyService started successfully on ws://localhost:${this.config.port}`)
+      console.log(`[ServiceManager] TinyService started on ws://localhost:${this.config.port}`)
     } catch (error) {
       this.sendErrorToRenderer('Failed to start TinyService', error)
+      if (this.child) {
+        this.child.kill()
+        this.child = null
+      }
       throw error
     }
   }
 
   /**
-   * Stop the TinyService WebSocket server
+   * Stop the TinyService child process.
    */
   async stop(): Promise<void> {
-    if (!this.isRunning || !this.service) {
+    if (!this.child) {
       console.log('[ServiceManager] TinyService is not running')
+      this.isRunning = false
       return
     }
 
     try {
       console.log('[ServiceManager] Stopping TinyService...')
-      await this.service.stop()
-      this.service = null
+      this.child.kill()
+      this.child = null
       this.isRunning = false
-      console.log('[ServiceManager] TinyService stopped successfully')
+      console.log('[ServiceManager] TinyService stopped')
     } catch (error) {
       this.sendErrorToRenderer('Failed to stop TinyService', error)
       throw error
