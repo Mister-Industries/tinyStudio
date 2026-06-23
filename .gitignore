@@ -12,3 +12,6 @@ demo/**/index.html
 
 # arduino-cli binaries fetched by scripts/fetch-arduino-cli.mjs
 vendor/
+
+# Per-run diagnostic report written by scripts/fritzing-import.mjs
+src/renderer/src/assets/parts/_report.json

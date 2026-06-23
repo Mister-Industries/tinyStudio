@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "editor": "tinystudio",
+  "author": "tinyStudio",
+  "parts": [
+    {
+      "type": "tinycore",
+      "id": "tinycore",
+      "left": 150,
+      "top": 240
+    },
+    {
+      "type": "resistor",
+      "id": "resistor",
+      "left": 470,
+      "top": 230
+    },
+    {
+      "type": "led-generic-5mm",
+      "id": "led",
+      "left": 360,
+      "top": 140
+    }
+  ],
+  "connections": [
+    ["tinycore:SIG", "resistor:Pin 0", "#36c46b"],
+    ["resistor:Pin 1", "led:anode", "#36c46b"],
+    ["led:cathode", "tinycore:GND", "#8b94c8"]
+  ]
+}
