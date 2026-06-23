@@ -61,20 +61,13 @@ These ship as built-in parts in the Circuit view (see
 
 ### Prerequisites
 
-- **Node.js** 18+ and npm
-- **[`arduino-cli`](https://arduino.github.io/arduino-cli/latest/installation/)** on your `PATH`
-  for development builds. (Packaged builds bundle the binary automatically — see
-  [`scripts/fetch-arduino-cli.mjs`](scripts/fetch-arduino-cli.mjs).)
-- The backend packages **`@mister-industries/tinyservice`** and **`@mister-industries/shared`**,
-  published to the GitHub Package Registry. Configure the scope once in a local `.npmrc`
-  (already git-ignored):
+- **Node.js** 18+ and npm.
 
-  ```properties
-  @mister-industries:registry=https://npm.pkg.github.com
-  //npm.pkg.github.com/:_authToken=YOUR_TOKEN
-  ```
-
-  See [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) for what tinyService does and how it's wired in.
+That's it. `npm install` pulls the backend packages (**`@mister-industries/tinyservice`** and
+**`@mister-industries/shared`**) from public npm — no token or registry config needed — and
+`arduino-cli` is fetched automatically the first time you run `npm run dev` (or `npm run build`)
+by [`scripts/fetch-arduino-cli.mjs`](scripts/fetch-arduino-cli.mjs). See
+[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) for what tinyService does and how it's wired in.
 
 ### Install
 
@@ -85,9 +78,16 @@ npm install
 ### Develop
 
 ```bash
-npm run dev       # Electron desktop app (with the tinyService backend)
+npm run dev       # Electron desktop app — starts the tinyService backend for you
 npm run dev:web   # browser-only renderer at http://localhost:5173
 ```
+
+> **How the backend works:** all compile/upload/serial goes through **tinyService**, a small
+> local WebSocket server (on `ws://localhost:3000`) that wraps `arduino-cli`. On the **desktop**
+> app it starts automatically. For the **browser** build, run tinyService yourself
+> (`npx @mister-industries/tinyservice`, or a standalone binary) and the page connects to it —
+> so you can host the web build on GitHub Pages/Netlify and users just run the backend locally.
+> Point the UI at a non-default backend by setting `localStorage["tinyservice.url"]`.
 
 ### Build
 

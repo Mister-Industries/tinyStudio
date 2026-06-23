@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from 'electron'
+import { existsSync } from 'fs'
 import path from 'path'
 
 interface ServiceConfig {
@@ -66,9 +67,11 @@ export class ServiceManager {
    * Resolve the arduino-cli binary path based on the platform and architecture
    */
   private resolveArduinoCliPath(): string {
-    // In development, use system arduino-cli
+    // In development, prefer the binary fetched into vendor/ (so a fresh clone
+    // works after `npm install` with no global arduino-cli). Fall back to a
+    // system arduino-cli on PATH if the vendored copy isn't present.
     if (!app.isPackaged) {
-      return 'arduino-cli'
+      return this.resolveVendoredArduinoCliPath() ?? 'arduino-cli'
     }
 
     // In production, resolve from bundled resources
@@ -95,6 +98,34 @@ export class ServiceManager {
     const arduinoCliPath = path.join(process.resourcesPath, 'arduino-cli', platformDir, binaryName)
 
     return arduinoCliPath
+  }
+
+  /**
+   * Resolve the arduino-cli binary fetched by scripts/fetch-arduino-cli.mjs into
+   * vendor/arduino-cli/<platform>/ (used in development). Returns null if it
+   * isn't present so the caller can fall back to a system arduino-cli on PATH.
+   *
+   * Note: the vendor directory names (macos-x64, windows-x64, …) differ from the
+   * packaged resourcesPath names (darwin-x64, win32-x64, …).
+   */
+  private resolveVendoredArduinoCliPath(): string | null {
+    const arch = process.arch
+    let platformDir: string
+    let binaryName = 'arduino-cli'
+
+    if (process.platform === 'win32') {
+      platformDir = 'windows-x64'
+      binaryName = 'arduino-cli.exe'
+    } else if (process.platform === 'darwin') {
+      platformDir = arch === 'arm64' ? 'macos-arm64' : 'macos-x64'
+    } else if (process.platform === 'linux') {
+      platformDir = arch === 'arm64' ? 'linux-arm64' : 'linux-x64'
+    } else {
+      return null
+    }
+
+    const vendored = path.join(app.getAppPath(), 'vendor', 'arduino-cli', platformDir, binaryName)
+    return existsSync(vendored) ? vendored : null
   }
 
   /**

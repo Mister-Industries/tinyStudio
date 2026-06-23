@@ -78,10 +78,14 @@ export class ArduinoServiceFactory {
   }
 
   /**
-   * Check if current environment supports Arduino CLI
+   * Check if current environment can reach an Arduino backend.
+   *
+   * Both desktop and web connect to a local tinyService over WebSocket, so both
+   * support Arduino operations — the difference is only whether the app launches
+   * tinyService for you (desktop) or you run it yourself (web).
    */
   static supportsArduinoCLI(): boolean {
-    return this.detectEnvironment() === 'electron'
+    return true
   }
 
   /**
@@ -97,8 +101,8 @@ export class ArduinoServiceFactory {
 
     return {
       environment,
-      supportsArduinoCLI: environment === 'electron',
-      supportsAgent: environment === 'electron', // Only Electron can use Arduino CLI
+      supportsArduinoCLI: true, // both builds talk to a local tinyService backend
+      supportsAgent: environment === 'electron', // the AI agent runs in the Electron main process
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined
     }
   }

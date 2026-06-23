@@ -22,6 +22,7 @@
     "start": "electron-vite preview",
     "fetch:arduino-cli": "node scripts/fetch-arduino-cli.mjs",
     "prebuild": "node scripts/fetch-arduino-cli.mjs",
+    "predev": "node scripts/fetch-arduino-cli.mjs current",
     "dev": "electron-vite dev",
     "dev:web": "vite --config web.vite.config.mts",
     "build": "npm run typecheck && electron-vite build",

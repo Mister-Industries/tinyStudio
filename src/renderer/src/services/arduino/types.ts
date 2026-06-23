@@ -190,7 +190,9 @@ export interface ArduinoActionResult {
 
 /**
  * Arduino service interface
- * Provides abstraction over Arduino CLI (electron) - web environment is not supported
+ * Abstraction over the tinyService WebSocket backend. Implemented identically in
+ * the desktop (Electron) and browser (web) builds — both connect to a local
+ * tinyService on ws://localhost:3000.
  */
 export interface ArduinoService {
   /**
@@ -288,6 +290,12 @@ export interface ArduinoService {
 
   /** Subscribe to serial open/close status; returns an unsubscribe function */
   onSerialStatus(cb: (status: { opened?: boolean; closed?: boolean }) => void): () => void
+
+  /** Whether the tinyService backend is currently connected */
+  isConnected(): boolean
+
+  /** Subscribe to backend connect/disconnect transitions; returns an unsubscribe function */
+  onConnectionChange(cb: (connected: boolean) => void): () => void
 }
 
 /**
