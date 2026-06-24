@@ -128,6 +128,10 @@ interface SettingsAPI {
   clearApiKey: () => Promise<void>
 }
 
+interface AppAPI {
+  getExamplesDir: () => Promise<string>
+}
+
 export type AgentEvent =
   | { type: 'text_delta'; text: string }
   | { type: 'tool_use'; id: string; name: string; input: unknown }
@@ -167,6 +171,7 @@ declare global {
       arduino: ArduinoAPI
       settings: SettingsAPI
       agent: AgentAPI
+      app: AppAPI
     }
   }
 }

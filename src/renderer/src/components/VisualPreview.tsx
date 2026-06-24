@@ -143,9 +143,11 @@ export function VisualPreview({ code, name }: { code: string; name: string }): R
           P5.JS · {name.toUpperCase()}
         </span>
         <div className="flex-1" />
-        <span className="text-[11px] font-mono text-fg-3">
-          {err ? 'error' : !hasP5 ? 'loading p5…' : running ? '60 fps' : 'paused'}
-        </span>
+        {(err || !hasP5 || !running) && (
+          <span className="text-[11px] font-mono text-fg-3">
+            {err ? 'error' : !hasP5 ? 'loading p5…' : 'paused'}
+          </span>
+        )}
       </div>
       <div className="flex-1 flex items-center justify-center p-6" style={{ background: 'var(--navy-1000)' }}>
         {code ? (

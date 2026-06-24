@@ -1,0 +1,26 @@
+# Netlify configuration for the tinyStudio web build (app.tinyStudio.cc).
+#
+# The same renderer that ships in the Electron desktop app is built as a static
+# bundle by `npm run build:web` (see web.vite.config.mts) into dist-web/. Netlify
+# serves that bundle.
+
+[build]
+  command = "npm run build:web"
+  publish = "dist-web"
+
+[build.environment]
+  # Pin Node so cloud builds match local dev (package.json requires Node 18+).
+  NODE_VERSION = "20"
+  # Skip lifecycle scripts on install: the web build needs neither the bundled
+  # arduino-cli (scripts/fetch-arduino-cli.mjs) nor the Electron native-deps
+  # rebuild (postinstall: electron-builder install-app-deps). Both are desktop-
+  # only and the latter can fail on Netlify's Linux builders.
+  NPM_FLAGS = "--ignore-scripts"
+
+# SPA fallback: deep links like /<owner>/<repo>/<path> are client-side routes,
+# so every unmatched path must serve index.html (200, not a redirect) and let
+# the app parse the URL. Static assets are matched before this rule.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

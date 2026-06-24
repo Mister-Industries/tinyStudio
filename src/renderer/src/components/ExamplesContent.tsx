@@ -1,91 +1,98 @@
-import { Zap } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/Card'
-import { ScrollArea } from './ui/ScrollArea'
+// Examples browser. Pulls a manifest of ready-to-open projects from the public
+// examples repo and opens any of them straight into the editor (via the virtual
+// workspace) — no local folder pick, no clone. Each card maps to a
+// /<owner>/<repo>/<path> deep link.
+
+import { Loader2, Zap } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { fetchExamplesManifest, type ExampleEntry } from '@renderer/lib/examples'
+import { navigateToProject } from '@renderer/lib/projectRouting'
 import { Button } from './ui/Button'
-
-const arduinoExamples = [
-  {
-    title: 'Blink LED',
-    description: 'Basic LED blinking example',
-    code: `void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
-}
-
-void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1000);
-}`
-  },
-  {
-    title: 'Button Input',
-    description: 'Read button state and control LED',
-    code: `const int buttonPin = 2;
-const int ledPin = 13;
-
-void setup() {
-  pinMode(ledPin, OUTPUT);
-  pinMode(buttonPin, INPUT);
-}
-
-void loop() {
-  int buttonState = digitalRead(buttonPin);
-  if (buttonState == HIGH) {
-    digitalWrite(ledPin, HIGH);
-  } else {
-    digitalWrite(ledPin, LOW);
-  }
-}`
-  },
-  {
-    title: 'Servo Motor',
-    description: 'Control servo motor position',
-    code: `#include <Servo.h>
-
-Servo myservo;
-
-void setup() {
-  myservo.attach(9);
-}
-
-void loop() {
-  myservo.write(90);
-  delay(1000);
-  myservo.write(0);
-  delay(1000);
-}`
-  }
-]
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/Card'
+import { ScrollArea } from './ui/ScrollArea'
 
 export function ExamplesContent(): React.JSX.Element {
+  const [examples, setExamples] = useState<ExampleEntry[]>([])
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [openingPath, setOpeningPath] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchExamplesManifest()
+      .then((data) => {
+        if (cancelled) return
+        setExamples(data)
+        setStatus('ready')
+      })
+      .catch(() => {
+        if (!cancelled) setStatus('error')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const open = async (ex: ExampleEntry): Promise<void> => {
+    const key = `${ex.owner}/${ex.repo}/${ex.path}`
+    setOpeningPath(key)
+    try {
+      await navigateToProject(ex.owner, ex.repo, ex.path)
+    } catch (e) {
+      toast.error('Could not open example', {
+        description: e instanceof Error ? e.message : String(e)
+      })
+    } finally {
+      setOpeningPath(null)
+    }
+  }
+
   return (
     <>
       <div className="flex items-center gap-2 px-4 py-4 text-primary text-sm font-semibold border-b border-border mb-4">
         <Zap size={16} />
-        tinyCore Examples
+        Examples
       </div>
       <ScrollArea className="h-5/6">
-        <div className="flex flex-col gap-4">
-          {arduinoExamples.map((example, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle>{example.title}</CardTitle>
-                <CardDescription>{example.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
-                  <code>{example.code}</code>
-                </pre>
-              </CardContent>
-              <CardFooter>
-                <Button>
-                  <Zap />
-                  Run Example
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+        <div className="flex flex-col gap-4 px-1">
+          {status === 'loading' && (
+            <div className="flex items-center gap-2 px-3 text-sm text-muted-foreground">
+              <Loader2 size={16} className="animate-spin" />
+              Loading examples…
+            </div>
+          )}
+
+          {status === 'error' && (
+            <p className="px-3 text-sm text-muted-foreground">
+              Couldn&apos;t load examples. Check your connection and try again.
+            </p>
+          )}
+
+          {status === 'ready' && examples.length === 0 && (
+            <p className="px-3 text-sm text-muted-foreground">No examples available yet.</p>
+          )}
+
+          {examples.map((example) => {
+            const key = `${example.owner}/${example.repo}/${example.path}`
+            const opening = openingPath === key
+            return (
+              <Card key={key}>
+                <CardHeader>
+                  <CardTitle>{example.title}</CardTitle>
+                  <CardDescription>{example.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {example.board && (
+                    <p className="mb-3 text-xs text-muted-foreground">Board: {example.board}</p>
+                  )}
+                  <Button onClick={() => open(example)} disabled={opening}>
+                    {opening ? <Loader2 className="animate-spin" /> : <Zap />}
+                    {opening ? 'Opening…' : 'Open example'}
+                  </Button>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       </ScrollArea>
     </>

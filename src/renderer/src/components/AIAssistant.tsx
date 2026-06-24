@@ -14,6 +14,7 @@ import {
   useAppDispatch,
   useAppSelector
 } from '@renderer/redux'
+import { updateReadmeContent } from '@renderer/redux/fileSlice'
 import type { AgentEvent, AgentPermissionRequest } from '@renderer/lib/agentTypes'
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import {
@@ -33,6 +34,7 @@ import {
 } from 'lucide-react'
 import React from 'react'
 import { Button } from './ui/Button'
+import { Markdown } from './Markdown'
 import {
   Dialog,
   DialogContent,
@@ -52,6 +54,11 @@ type TimelineItem =
 
 const GREETING =
   "I'm Studio AI ✦ — I can read and edit the files in your open workspace. Ask me to explain code, wire a circuit, fix a build error, or write a sketch. I'll ask before changing any file."
+
+// The agent runs in the Electron main process, reached via the preload bridge.
+// In a plain browser (the web build) that bridge doesn't exist, so the panel
+// degrades to an explanatory message instead of throwing.
+const apiAvailable = (): boolean => typeof window !== 'undefined' && window.api != null
 
 const TOOL_ICON: Record<string, React.ReactNode> = {
   list_dir: <Folder size={13} />,
@@ -83,11 +90,13 @@ export function AIAssistant(): React.JSX.Element {
 
   // Check whether an API key is configured.
   React.useEffect(() => {
+    if (!apiAvailable()) return
     window.api.settings.getStatus().then((s) => setKeyConfigured(s.configured))
   }, [])
 
   // Subscribe to the agent's streamed events.
   React.useEffect(() => {
+    if (!apiAvailable()) return
     const off = window.api.agent.onEvent((evt: AgentEvent) => {
       setItems((prev) => applyEvent(prev, evt))
       if (evt.type === 'done' || evt.type === 'error') setBusy(false)
@@ -97,11 +106,13 @@ export function AIAssistant(): React.JSX.Element {
 
   // Surface permission prompts.
   React.useEffect(() => {
+    if (!apiAvailable()) return
     return window.api.agent.onPermissionRequest((req) => setPermission(req))
   }, [])
 
   // When the agent changes a file that's open in the editor, reload it from disk.
   React.useEffect(() => {
+    if (!apiAvailable()) return
     return window.api.agent.onFileChanged(({ path }) => {
       const norm = path.replace(/\\/g, '/')
       const match = openFilesRef.current.find((f) => f.path.replace(/\\/g, '/') === norm)
@@ -109,6 +120,14 @@ export function AIAssistant(): React.JSX.Element {
         window.api.fs
           .readFile(match.path)
           .then((content) => dispatch(refreshFileContentFromDisk({ id: match.id, content })))
+      }
+      // Keep the Documentation tab live when the agent rewrites the README —
+      // it reads from readmeContent, which otherwise only updates on a manual edit.
+      if (/(^|\/)README\.md$/i.test(norm)) {
+        window.api.fs
+          .readFile(path)
+          .then((content) => dispatch(updateReadmeContent(content)))
+          .catch((e) => console.error('Failed to refresh README:', e))
       }
     })
   }, [dispatch])
@@ -154,6 +173,20 @@ export function AIAssistant(): React.JSX.Element {
   const respond = (allow: boolean): void => {
     if (permission) window.api.agent.respondPermission(permission.id, allow)
     setPermission(null)
+  }
+
+  // Web build: the agent lives in the Electron main process and isn't reachable
+  // from a browser. Show why instead of crashing on the missing bridge.
+  if (!apiAvailable()) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center gap-3 text-center text-fg-3 px-6">
+        <Sparkles size={32} className="text-pink opacity-80" />
+        <p className="text-sm text-fg-2">Studio AI is only available in the desktop app.</p>
+        <p className="text-xs text-fg-4">
+          Open tinyStudio on your computer to let the assistant read and edit your project files.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -301,10 +334,10 @@ function TimelineRow({ item }: { item: TimelineItem }): React.JSX.Element {
 function AiBubble({ text }: { text: string }): React.JSX.Element {
   return (
     <div
-      className="self-start rounded-xl bg-navy-600 text-fg-1 py-2 px-4 mr-8 w-fit text-sm leading-relaxed whitespace-pre-wrap"
+      className="self-start rounded-xl bg-navy-600 text-fg-1 py-2 px-4 mr-8 max-w-[90%] text-sm leading-relaxed"
       style={{ border: '1px solid var(--pink-line)' }}
     >
-      {text}
+      <Markdown>{text}</Markdown>
     </div>
   )
 }

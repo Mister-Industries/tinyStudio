@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Blink LED",
+    "description": "Blink the onboard LED and mirror its state in the Visual view.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio",
+    "path": "demo/Blink Example",
+    "board": "tinyCore / Arduino"
+  },
+  {
+    "title": "Fade LED",
+    "description": "PWM-fade an LED and chart the brightness curve live.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio",
+    "path": "demo/Fade Example",
+    "board": "tinyCore / Arduino"
+  },
+  {
+    "title": "Joystick",
+    "description": "Read a Qwiic joystick and visualize the stick position.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio",
+    "path": "demo/Joystick Example",
+    "board": "tinyCore + Qwiic Joystick"
+  }
+]
