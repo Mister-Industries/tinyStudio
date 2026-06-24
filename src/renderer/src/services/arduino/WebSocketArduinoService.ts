@@ -435,6 +435,12 @@ export class WebSocketArduinoService implements ArduinoService {
         throw new Error('Arduino client not initialized')
       }
 
+      if (workspacePath.startsWith('mem://')) {
+        const msg =
+          'This example is open in the browser (in-memory) and has no folder on disk for the compiler. Open it in the desktop app, or save it to a local folder, to compile and upload.'
+        return { success: false, output: msg, errors: [{ message: msg, severity: 'fatal' }] }
+      }
+
       // Compile the sketch
       console.log(
         `Starting compile operation for workspace: ${workspacePath}, FQBN: ${boardConfig.fqbn}`
@@ -472,6 +478,12 @@ export class WebSocketArduinoService implements ArduinoService {
     try {
       if (!this.client) {
         throw new Error('Arduino client not initialized')
+      }
+
+      if ((workspacePathOrBinary || '').startsWith('mem://')) {
+        const msg =
+          'This example is open in the browser (in-memory) and has no folder on disk for the compiler. Open it in the desktop app, or save it to a local folder, to compile and upload.'
+        return { success: false, output: msg, error: msg }
       }
 
       // Upload the sketch

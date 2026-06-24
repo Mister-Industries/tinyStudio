@@ -85,7 +85,7 @@ export function StatusBar(): React.JSX.Element {
       <div className="flex items-center gap-4 font-mono">
         <p>UTF-8</p>
         <p>Arduino (C++)</p>
-        <p>tinyStudio 0.1.0 · alpha</p>
+        <p>tinyStudio 0.1.1 · alpha</p>
       </div>
     </div>
   )
