@@ -21,14 +21,11 @@ Added dependency:
 "@mister-industries/tinyservice": "^1.0.0"
 ```
 
-### 2. [.npmrc](.npmrc)
+### 2. Package registry
 
-Configured GitHub Package Registry for the `@mister-industries` scope:
-
-```properties
-@mister-industries:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=<token>
-```
+`@mister-industries/tinyservice` and `@mister-industries/shared` are published to **public npm**,
+so a plain `npm install` resolves them with no `.npmrc`, token, or registry configuration. (If you
+ever fork the backend into a private registry, that's where a scoped `.npmrc` would go.)
 
 ### 3. [electron-builder.yml](electron-builder.yml#L11-L35)
 

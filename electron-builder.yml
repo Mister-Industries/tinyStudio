@@ -9,8 +9,12 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-asarUnpack:
-  - resources/**
+# asar is disabled because the main process loads tinyService via a dynamic ESM
+# import(). Electron's require() shim can read inside app.asar, but its ESM loader
+# cannot — so an ESM dependency must live on the real filesystem to be importable.
+# Keeping the app unpacked is the simplest reliable fix (same files, just not
+# archived). Revisit post-alpha if we move tinyService to a spawned sidecar.
+asar: false
 extraResources:
   # arduino-cli binaries are fetched into vendor/ by scripts/fetch-arduino-cli.mjs
   # (run automatically via the "prebuild" npm hook).

@@ -1,6 +1,7 @@
 // Unified File System Service
 // Provides consistent API for both Electron and web environments
 
+import { webCache } from './webCache'
 import { webFileSystem, type FileStats, type FileSystemItem } from './webFileSystem'
 
 // Environment detection
@@ -79,6 +80,15 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         return await webFileSystem.readFile(filePath)
       }
     } catch (error) {
+      // In the browser, fall back to the IndexedDB cache — handy when the File
+      // System Access permission was lost on reload but we saved the file before.
+      if (!this.isElectron()) {
+        const cached = await webCache.get(filePath)
+        if (cached !== null) {
+          console.warn(`Reading "${filePath}" from browser cache (live read failed)`)
+          return cached
+        }
+      }
       console.error('Error reading file:', error)
       throw new Error(`Failed to read file: ${(error as Error).message}`)
     }
@@ -91,6 +101,8 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         await window.api.fs.writeFile(filePath, content)
       } else {
         await webFileSystem.writeFile(filePath, content)
+        // Mirror every web save into the durable browser cache (best-effort).
+        void webCache.put(filePath, content)
       }
     } catch (error) {
       console.error('Error writing file:', error)
@@ -105,6 +117,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         await window.api.fs.createFile(filePath, content)
       } else {
         await webFileSystem.createFile(filePath, content)
+        void webCache.put(filePath, content)
       }
     } catch (error) {
       console.error('Error creating file:', error)
@@ -118,6 +131,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         await window.api.fs.renameFile(oldPath, newPath)
       } else {
         await webFileSystem.renameFile(oldPath, newPath)
+        void webCache.rename(oldPath, newPath)
       }
     } catch (error) {
       console.error('Error renaming file:', error)
@@ -146,6 +160,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         await window.api.fs.deleteFile(targetPath)
       } else {
         await webFileSystem.deleteFile(targetPath)
+        void webCache.remove(targetPath)
       }
     } catch (error) {
       console.error('Error deleting file/folder:', error)

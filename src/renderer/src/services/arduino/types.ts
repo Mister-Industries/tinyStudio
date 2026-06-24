@@ -156,8 +156,43 @@ export interface LibraryEntry {
 }
 
 /**
+ * Platform (core) metadata from the Boards Manager index (search) or installed
+ * list. A platform groups one or more boards (e.g. "esp32:esp32").
+ */
+export interface PlatformEntry {
+  /** Platform id, e.g. "esp32:esp32" */
+  id: string
+  /** Human-readable name, e.g. "esp32 Boards" */
+  name: string
+  /** Installed version, or '' if not installed */
+  installed: string
+  /** Latest available version */
+  latest: string
+  /** Maintainer / author */
+  maintainer?: string
+}
+
+/**
+ * A single installable board (FQBN) provided by an installed platform. Used for
+ * the manual board-type override in the Boards Manager.
+ */
+export interface InstallableBoard {
+  name: string
+  fqbn: string
+}
+
+/** Result shape shared by Boards Manager / Library mutation actions */
+export interface ArduinoActionResult {
+  success: boolean
+  output: string
+  error?: string
+}
+
+/**
  * Arduino service interface
- * Provides abstraction over Arduino CLI (electron) - web environment is not supported
+ * Abstraction over the tinyService WebSocket backend. Implemented identically in
+ * the desktop (Electron) and browser (web) builds — both connect to a local
+ * tinyService on ws://localhost:3000.
  */
 export interface ArduinoService {
   /**
@@ -215,6 +250,32 @@ export interface ArduinoService {
   /** Uninstall a library by name */
   uninstallLibrary(name: string): Promise<{ success: boolean; output: string; error?: string }>
 
+  // ── Boards Manager ─────────────────────────────────────────────────────────
+
+  /** Search the platform (core) index, including any additional board URLs */
+  searchCores(query: string): Promise<PlatformEntry[]>
+
+  /** List installed platforms (cores) */
+  listCores(): Promise<PlatformEntry[]>
+
+  /** Install a platform (core) by id (optionally pinned to a version) */
+  installCore(id: string, version?: string): Promise<ArduinoActionResult>
+
+  /** Uninstall a platform (core) by id */
+  uninstallCore(id: string): Promise<ArduinoActionResult>
+
+  /** List every board (FQBN) provided by the installed platforms */
+  listAllBoards(): Promise<InstallableBoard[]>
+
+  /** List the configured additional board-manager URLs */
+  listBoardUrls(): Promise<string[]>
+
+  /** Add an additional board-manager URL (refreshes the core index) */
+  addBoardUrl(url: string): Promise<ArduinoActionResult>
+
+  /** Remove an additional board-manager URL */
+  removeBoardUrl(url: string): Promise<ArduinoActionResult>
+
   /** Open the serial monitor on a port at a baud rate */
   openSerial(port: string, baud: number): void
 
@@ -229,6 +290,12 @@ export interface ArduinoService {
 
   /** Subscribe to serial open/close status; returns an unsubscribe function */
   onSerialStatus(cb: (status: { opened?: boolean; closed?: boolean }) => void): () => void
+
+  /** Whether the tinyService backend is currently connected */
+  isConnected(): boolean
+
+  /** Subscribe to backend connect/disconnect transitions; returns an unsubscribe function */
+  onConnectionChange(cb: (connected: boolean) => void): () => void
 }
 
 /**

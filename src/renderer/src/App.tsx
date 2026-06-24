@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { OpenWorkspaceCommand } from './commands/fileCommands'
 import { DocsPanel } from './components/DocsPanel'
 import { EditorPanel } from './components/EditorPanel'
@@ -12,7 +13,7 @@ import { ArduinoProvider } from './contexts/ArduinoContext'
 import { SerialProvider } from './contexts/SerialContext'
 import { fileSystem } from './lib/fileSystem'
 import { selectEditorView, selectPanelState, setPanelOpen, useAppDispatch, useAppSelector } from './redux'
-import { ArduinoServiceFactory } from './services/arduino/ArduinoServiceFactory'
+import { ArduinoServiceFactory, getArduinoService } from './services/arduino/ArduinoServiceFactory'
 
 export default function App(): React.JSX.Element {
   const { isFileExplorerOpen, isSerialMonitorOpen, isDocsPanelOpen } =
@@ -32,6 +33,42 @@ export default function App(): React.JSX.Element {
     return () => {
       console.log('Cleaning up Arduino service on app unmount')
       ArduinoServiceFactory.cleanup()
+    }
+  }, [])
+
+  // Surface a clear message when the tinyService backend isn't reachable, instead
+  // of letting compile/upload/serial fail silently. On desktop the app starts
+  // tinyService for you; in the browser the user runs it themselves — either way,
+  // if nothing is listening on the service URL we say so.
+  useEffect(() => {
+    const service = getArduinoService()
+    let warned = false
+
+    const warnIfDown = (): void => {
+      if (service.isConnected() || warned) return
+      warned = true
+      toast.error('Arduino backend not running', {
+        description:
+          'Compile, upload, and the serial monitor need tinyService. Start it and it will reconnect automatically.',
+        duration: 8000
+      })
+    }
+
+    // Give the initial connection a few seconds before complaining.
+    const graceTimer = setTimeout(warnIfDown, 5000)
+
+    const off = service.onConnectionChange((connected) => {
+      if (connected) {
+        if (warned) toast.success('Arduino backend connected')
+        warned = false
+      } else {
+        warnIfDown()
+      }
+    })
+
+    return () => {
+      clearTimeout(graceTimer)
+      off()
     }
   }, [])
 

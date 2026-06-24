@@ -133,11 +133,11 @@ What this does (`package.json` → `build:win`):
 The installer is written to `dist/`:
 
 ```
-dist/tinystudio-1.0.0-setup.exe        ← give this to users
+dist/tinystudio-0.1.0-setup.exe        ← give this to users
 dist/win-unpacked/                      ← the raw app folder (for debugging)
 ```
 
-`tinystudio-1.0.0-setup.exe` is the self-contained artifact. It bundles the
+`tinystudio-0.1.0-setup.exe` is the self-contained artifact. It bundles the
 Chromium + Node runtime, your app, TinyService, and `arduino-cli.exe`. The user
 needs nothing else installed.
 
@@ -309,7 +309,7 @@ a SmartScreen warning on first launch.
 [ ] Developer Mode on OR 7za wrapper in place (Gotcha F)
 [ ] $env:CSC_IDENTITY_AUTO_DISCOVERY = "false"  (unless signing — section 7)
 [ ] npm run build:win
-[ ] dist/tinystudio-1.0.0-setup.exe produced (~250 MB)
+[ ] dist/tinystudio-0.1.0-setup.exe produced (~250 MB)
 [ ] Smoke test: launch dist/win-unpacked/tinystudio.exe, then
     Invoke-RestMethod http://localhost:3000/health → arduinoCli.available = true
 [ ] Installed on a clean Windows VM (no Node/Arduino) → app launches

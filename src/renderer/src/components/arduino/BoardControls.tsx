@@ -1,108 +1,42 @@
 /**
- * BoardControls — board-type and serial-port pickers for the toolbar.
+ * BoardControls — the serial-port picker for the toolbar.
  *
- * The board pill chooses the target board TYPE (FQBN) from a known list; the
- * port pill chooses which detected serial port to upload to. Together they form
- * the `selectedBoard` the Verify/Upload buttons compile and flash against, so
- * the user can correct a misidentified clone (e.g. a CH340 board the service
- * guessed as an Uno) or pick a board when only a bare serial port was detected.
+ * The port pill chooses which detected serial port to upload to. The board
+ * TYPE (FQBN) is chosen in the Boards Manager modal (see BoardManager.tsx);
+ * together they form the `selectedBoard` the Verify/Upload buttons compile and
+ * flash against.
  */
 
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
-import { Board, COMMON_BOARDS } from '@renderer/services/arduino/types'
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
-  SelectSeparator,
   SelectTrigger
 } from '@renderer/components/ui/Select'
 import { useSerial } from '@renderer/contexts/SerialContext'
-import { ChevronDown, Cpu, Usb } from 'lucide-react'
+import { ChevronDown, Usb } from 'lucide-react'
 import React from 'react'
 
 const PILL =
   'h-9 flex items-center gap-2 px-3.5 rounded-full bg-navy-700/60 border border-navy-400 text-[13px] font-semibold text-fg-1 hover:bg-navy-500 transition-colors outline-none disabled:opacity-50'
 
-export function BoardPicker(): React.JSX.Element {
-  const { selectedBoard, setSelectedBoard, isAgentConnected } = useArduinoContext()
-
-  const isConnected = isAgentConnected && selectedBoard !== null
-
-  const handleChange = (fqbn: string): void => {
-    const config = COMMON_BOARDS[fqbn]
-    if (!config) return
-    // Keep the currently selected port; only swap the board type/FQBN.
-    setSelectedBoard({
-      port: selectedBoard?.port || '',
-      config,
-      connected: selectedBoard?.connected ?? false
-    } as Board)
-  }
-
-  return (
-    <Select value={selectedBoard?.config.fqbn || ''} onValueChange={handleChange}>
-      <SelectTrigger className={`${PILL} [&>svg]:hidden`}>
-        <span
-          className="w-2 h-2 rounded-full shrink-0"
-          style={
-            isConnected
-              ? { background: 'var(--signal-success)', boxShadow: '0 0 8px var(--signal-success)' }
-              : { background: 'var(--fg-4)' }
-          }
-        />
-        <Cpu size={14} className="text-fg-3" />
-        {selectedBoard?.config.name ? (
-          <>
-            {selectedBoard.config.name}
-            {selectedBoard.config.architecture && (
-              <span className="text-[11px] font-medium text-fg-3">
-                {selectedBoard.config.architecture}
-              </span>
-            )}
-          </>
-        ) : (
-          <span className="text-fg-3 font-medium">Select board</span>
-        )}
-        <ChevronDown size={14} className="text-fg-4" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectLabel>Board</SelectLabel>
-          {Object.values(COMMON_BOARDS).map((b) => (
-            <SelectItem key={b.fqbn} value={b.fqbn}>
-              {b.name}
-              <span className="text-[11px] text-muted-foreground ml-1">{b.architecture}</span>
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
-  )
-}
-
-// Sentinel values for the connect/disconnect actions in the port dropdown.
-const DISCONNECT = '__disconnect__'
-const RECONNECT = '__reconnect__'
-
 export function PortPicker(): React.JSX.Element {
   const { boards, selectedBoard, setSelectedBoard, isAgentConnected } = useArduinoContext()
-  const { connected, disconnected, disconnect, reconnect } = useSerial()
+  const { disconnected, disconnect, reconnect } = useSerial()
+  const [open, setOpen] = React.useState(false)
 
   // Unique detected ports (a port may match multiple boards).
   const ports = Array.from(new Set(boards.map((b) => b.port).filter(Boolean))) as string[]
 
+  // The pill is "active" when a port is selected and we haven't released it.
+  // In that state a click disconnects (frees the port) instead of opening the
+  // dropdown; click again (now released) to open it and re-select a port.
+  const isActive = Boolean(selectedBoard?.port) && !disconnected
+
   const handleChange = (value: string): void => {
-    if (value === DISCONNECT) {
-      disconnect()
-      return
-    }
-    if (value === RECONNECT) {
-      reconnect()
-      return
-    }
     const port = value
     // Choosing a port re-enables the connection if the user had disconnected.
     if (disconnected) reconnect()
@@ -119,8 +53,27 @@ export function PortPicker(): React.JSX.Element {
   }
 
   return (
-    <Select value={selectedBoard?.port || ''} onValueChange={handleChange} disabled={!isAgentConnected}>
-      <SelectTrigger className={`${PILL} [&>svg]:hidden`}>
+    <Select
+      open={open}
+      onOpenChange={setOpen}
+      // While released we clear the value so re-selecting the SAME port still
+      // fires onValueChange (and reconnects); otherwise Radix swallows it.
+      value={disconnected ? '' : selectedBoard?.port || ''}
+      onValueChange={handleChange}
+      disabled={!isAgentConnected}
+    >
+      <SelectTrigger
+        className={`${PILL} [&>svg]:hidden`}
+        onPointerDown={(e) => {
+          // Active = connected: a click disconnects rather than opening the menu.
+          // Radix composes our handler first and skips its own open logic when
+          // we preventDefault, so this swallows the open.
+          if (isActive) {
+            e.preventDefault()
+            disconnect()
+          }
+        }}
+      >
         <Usb size={14} className={disconnected ? 'text-fg-4' : 'text-fg-3'} />
         {selectedBoard?.port || <span className="text-fg-3 font-medium">No port</span>}
         {disconnected && <span className="text-[11px] font-medium text-fg-4">released</span>}
@@ -140,21 +93,13 @@ export function PortPicker(): React.JSX.Element {
               <SelectItem key={port} value={port}>
                 {port}
                 {board?.config.name && (
-                  <span className="text-[11px] text-muted-foreground ml-1">{board.config.name}</span>
+                  <span className="text-[11px] text-muted-foreground ml-1">
+                    {board.config.name}
+                  </span>
                 )}
               </SelectItem>
             )
           })}
-        </SelectGroup>
-        <SelectSeparator />
-        <SelectGroup>
-          {disconnected ? (
-            <SelectItem value={RECONNECT}>Connect (let tinyStudio use the port)</SelectItem>
-          ) : (
-            <SelectItem value={DISCONNECT} disabled={!connected && !selectedBoard?.port}>
-              Disconnect (free the port for the browser)
-            </SelectItem>
-          )}
         </SelectGroup>
       </SelectContent>
     </Select>

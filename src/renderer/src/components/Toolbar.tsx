@@ -11,7 +11,8 @@ import {
 import { BookOpen, Monitor, RefreshCw, Save } from 'lucide-react'
 import React from 'react'
 import { UploadButton, VerifyButton } from './arduino/ArduinoButtons'
-import { BoardPicker, PortPicker } from './arduino/BoardControls'
+import { BoardManager } from './arduino/BoardManager'
+import { PortPicker } from './arduino/BoardControls'
 import { LibraryManager } from './arduino/LibraryManager'
 import { Button } from './ui/Button'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
@@ -66,7 +67,7 @@ export function Toolbar(): React.JSX.Element {
       </Tooltip>
 
       <div className="ml-1 flex items-center gap-2">
-        <BoardPicker />
+        <BoardManager />
         <PortPicker />
         <Tooltip>
           <TooltipTrigger asChild>

@@ -101,8 +101,22 @@ async function fetchOne(platform) {
   }
 }
 
+// Map the host machine to its TARGETS key (for `current`, used by the dev hook).
+function hostPlatform() {
+  const arm = process.arch === 'arm64'
+  if (process.platform === 'win32') return 'windows-x64'
+  if (process.platform === 'darwin') return arm ? 'macos-arm64' : 'macos-x64'
+  if (process.platform === 'linux') return arm ? 'linux-arm64' : 'linux-x64'
+  throw new Error(`Unsupported host platform: ${process.platform}/${process.arch}`)
+}
+
 async function main() {
-  const requested = process.argv.slice(2)
+  // `current` (or `--current`) resolves to just this machine's platform — handy
+  // for development, where you only need to run the app locally. With no args we
+  // fetch every platform (what packaging needs; see electron-builder.yml).
+  const requested = process.argv
+    .slice(2)
+    .map((a) => (a === 'current' || a === '--current' ? hostPlatform() : a))
   const platforms = requested.length ? requested : Object.keys(TARGETS)
   console.log(`Fetching arduino-cli v${VERSION} for: ${platforms.join(', ')}`)
   for (const p of platforms) {

@@ -1,0 +1,17 @@
+{
+  "type": "switch-spst",
+  "label": "Slide Switch (SPST)",
+  "family": "Switch",
+  "description": "A hand-authored example part: a single-pole, single-throw slide switch. Copy this file as a starting point for your own parts.",
+  "views": {
+    "breadboard": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 60 40\"><rect x=\"6\" y=\"4\" width=\"48\" height=\"22\" rx=\"4\" fill=\"#2b3358\" stroke=\"#5b6bb0\" stroke-width=\"1.5\"/><rect x=\"14\" y=\"8\" width=\"32\" height=\"14\" rx=\"3\" fill=\"#1a1f3d\"/><rect x=\"16\" y=\"10\" width=\"13\" height=\"10\" rx=\"2\" fill=\"#cfd6ff\"/><line x1=\"12\" y1=\"26\" x2=\"12\" y2=\"38\" stroke=\"#8C8C8C\" stroke-width=\"3\" stroke-linecap=\"round\"/><line x1=\"48\" y1=\"26\" x2=\"48\" y2=\"38\" stroke=\"#8C8C8C\" stroke-width=\"3\" stroke-linecap=\"round\"/><text x=\"30\" y=\"35\" fill=\"#7b86b8\" font-family=\"sans-serif\" font-size=\"7\" text-anchor=\"middle\">SPST</text></svg>",
+      "w": 60,
+      "h": 40,
+      "pins": {
+        "1": [12, 38],
+        "2": [48, 38]
+      }
+    }
+  }
+}

@@ -327,9 +327,13 @@ export class OpenFileCommand implements Command {
     return store.dispatch
   }
   private item: BaseFileItem
+  private hidden: boolean
 
-  constructor(item: BaseFileItem) {
+  // `hidden` loads the file as a background buffer for a full-window view
+  // (Circuit/Visual) without surfacing it as a code tab — see EditorFile.hidden.
+  constructor(item: BaseFileItem, opts?: { hidden?: boolean }) {
     this.item = item
+    this.hidden = opts?.hidden ?? false
   }
 
   async execute(): Promise<void> {
@@ -345,7 +349,8 @@ export class OpenFileCommand implements Command {
         path: this.item.path,
         modified: false,
         createdAt: '',
-        updatedAt: ''
+        updatedAt: '',
+        hidden: this.hidden
       }
       this.dispatch(openFile(file))
     }
