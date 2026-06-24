@@ -1,0 +1,20 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brand" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#22D3EE"/>
+      <stop offset="48%" stop-color="#7C7CF0"/>
+      <stop offset="100%" stop-color="#E0219B"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#262C42"/>
+      <stop offset="100%" stop-color="#171B2B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- rounded-square tile (Apple-ish ~22% radius) -->
+  <rect x="0" y="0" width="1024" height="1024" rx="228" ry="228" fill="url(#tile)"/>
+
+  <!-- monogram: Plus Jakarta Sans ExtraBold "tS" outlines -->
+  <g fill="#C9D3E6"><path transform="translate(87.75240572171657 801.6124837451234) scale(0.7989596879063718 -0.7989596879063718)" d="M318 -6Q219 -6 164.5 47.5Q110 101 110 197L110 416L18 416L18 546L23 546Q65 546 87.5 567Q110 588 110 630L110 670L260 670L260 546L388 546L388 416L260 416L260 207Q260 179 270 160.5Q280 142 301 133Q322 124 353 124Q360 124 369 125Q378 126 388 127L388 0Q373 -2 354 -4Q335 -6 318 -6Z"/></g>
+  <g fill="url(#brand)"><path transform="translate(440.09362808842656 801.6124837451234) scale(0.7989596879063718 -0.7989596879063718)" d="M337 -12Q267 -12 205.5 13.5Q144 39 99.5 86Q55 133 33 197L160 254Q188 193 237.5 158Q287 123 347 123Q379 123 402 133Q425 143 438 160.5Q451 178 451 202Q451 228 435 246.5Q419 265 385 276L239 324Q150 353 105 406.5Q60 460 60 535Q60 601 92.5 651Q125 701 183.5 729Q242 757 318 757Q385 757 442 734Q499 711 540.5 669Q582 627 603 568L477 511Q456 563 414 592.5Q372 622 318 622Q287 622 263 612Q239 602 226 583.5Q213 565 213 541Q213 515 230 495.5Q247 476 281 465L424 419Q514 390 558.5 338Q603 286 603 211Q603 146 569 95.5Q535 45 475.5 16.5Q416 -12 337 -12Z"/></g>
+</svg>

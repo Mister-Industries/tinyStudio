@@ -21,5 +21,5 @@ void loop() {
   if (brightness <= 0 || brightness >= 255) {
     step = -step;               // reverse direction at each end
   }
-  delay(30);
+  delay(100);
 }
