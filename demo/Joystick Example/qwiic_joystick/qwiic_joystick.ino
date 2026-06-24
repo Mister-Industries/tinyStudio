@@ -11,10 +11,8 @@
 JOYSTICK joystick;
 
 void setup() {
-  Serial.begin(9600);
-  Serial.println("Hello World");
+  Serial.begin(115200);
   
-  //Wire.begin();
   Wire.begin(3, 4);                  // tinyCore Qwiic bus = I2C (SDA/SCL)
 
   delay(100);
