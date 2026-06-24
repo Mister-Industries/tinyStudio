@@ -1,6 +1,6 @@
 {
   "name": "tinystudio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An open-source desktop + web IDE for building, wiring, simulating, and flashing tiny hardware projects — code, circuit, and visual views in one place.",
   "main": "./out/main/index.js",
   "author": "MR.INDUSTRIES",

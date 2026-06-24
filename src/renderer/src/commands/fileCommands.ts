@@ -281,6 +281,22 @@ export class LoadGitHubProjectCommand implements Command {
       )
     }
 
+    const name = this.path ? this.path.split('/').pop()! : this.repo
+
+    // Desktop: materialize the project to a real folder so arduino-cli (via
+    // tinyService) can read it from disk. The in-memory `mem://` path is not a
+    // real file path and can't be compiled/uploaded. The browser has no disk to
+    // write to, so it falls back to the virtual workspace (view/edit only; the
+    // Arduino service guards mem:// compile/upload with a clear message).
+    if (fileSystem.isElectron()) {
+      const dir = `${await window.api.app.getExamplesDir()}/${name}`
+      for (const [rel, content] of Object.entries(files)) {
+        await fileSystem.writeFile(`${dir}/${rel}`, content)
+      }
+      await new OpenWorkspaceCommand(dir).execute()
+      return
+    }
+
     const root = `${VIRTUAL_PREFIX}${this.owner}/${this.repo}${this.path ? '/' + this.path : ''}`
     virtualFileSystem.clear(root)
     await virtualFileSystem.seed(root, files)
@@ -291,7 +307,6 @@ export class LoadGitHubProjectCommand implements Command {
     const fsItems = await fileSystem.readDirectory(root, true)
     const fileItems = buildNestedStructure(fsItems)
 
-    const name = this.path ? this.path.split('/').pop()! : this.repo
     const workspace: Workspace = {
       id: crypto.randomUUID(),
       name,
