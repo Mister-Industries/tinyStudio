@@ -150,6 +150,11 @@ app.whenReady().then(async () => {
     await shell.openExternal(url)
   })
 
+  // Default location for downloaded example projects (first-run onboarding).
+  ipcMain.handle('app:get-examples-dir', () => {
+    return path.join(app.getPath('documents'), 'tinyStudio Examples')
+  })
+
   // Save a generated file (e.g. the Visual web export) via a Save dialog.
   ipcMain.handle('save-file-as', async (event, defaultName: string, content: string) => {
     const window = BrowserWindow.fromWebContents(event.sender)

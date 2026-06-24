@@ -6,7 +6,10 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: './',
+  // Absolute base so deep SPA routes (e.g. /owner/repo/path) still resolve
+  // /assets/... correctly. A relative './' base would resolve assets against
+  // the deep path and 404 once the Netlify SPA redirect serves index.html there.
+  base: '/',
   build: {
     outDir: path.resolve(__dirname, 'dist-web'),
     emptyOutDir: true

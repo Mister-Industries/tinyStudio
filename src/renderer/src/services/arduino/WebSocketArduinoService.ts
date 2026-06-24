@@ -674,15 +674,19 @@ export class WebSocketArduinoService implements ArduinoService {
   // ── serial monitor (streaming, not request/response) ─────────────────────────
 
   openSerial(port: string, baud: number): void {
-    this.client?.serialOpen(port, baud)
+    if (this.client?.isConnected()) this.client.serialOpen(port, baud)
   }
 
+  // Guard against a dropped backend: serialClose() sends over the socket, which
+  // throws "WebSocket is not connected" if the backend already went away. That
+  // throw escaped React cleanup and blanked the whole app, so skip it when the
+  // socket is down — there's nothing to close anyway.
   closeSerial(): void {
-    this.client?.serialClose()
+    if (this.client?.isConnected()) this.client.serialClose()
   }
 
   writeSerial(data: string): void {
-    this.client?.serialWrite(data)
+    if (this.client?.isConnected()) this.client.serialWrite(data)
   }
 
   /** Subscribe to streamed serial lines. Returns an unsubscribe function. */

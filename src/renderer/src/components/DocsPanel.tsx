@@ -1,6 +1,7 @@
 import { setPanelOpen, useAppDispatch } from '@renderer/redux'
-import { BookOpen, Sparkles, X } from 'lucide-react'
+import { BookOpen, Sparkles, X, Zap } from 'lucide-react'
 import { AIAssistant } from './AIAssistant'
+import { ExamplesContent } from './ExamplesContent'
 import { ReadmeContent } from './ReferenceContent'
 import { Button } from './ui/Button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs'
@@ -22,7 +23,14 @@ export function DocsPanel(): React.JSX.Element {
               className="rounded-full px-3 py-1 text-xs text-fg-3 data-[state=active]:bg-navy-500 data-[state=active]:text-fg-1"
             >
               <BookOpen size={14} className="mr-1.5" />
-              README
+              Documentation
+            </TabsTrigger>
+            <TabsTrigger
+              value="examples"
+              className="rounded-full px-3 py-1 text-xs text-fg-3 data-[state=active]:bg-navy-500 data-[state=active]:text-fg-1"
+            >
+              <Zap size={14} className="mr-1.5" />
+              Examples
             </TabsTrigger>
             <TabsTrigger
               value="ai"
@@ -44,6 +52,9 @@ export function DocsPanel(): React.JSX.Element {
         </div>
         <TabsContent value="readme" className="flex-1 min-h-0 min-w-0 overflow-hidden">
           <ReadmeContent />
+        </TabsContent>
+        <TabsContent value="examples" className="flex-1 min-h-0 min-w-0 overflow-hidden">
+          <ExamplesContent />
         </TabsContent>
         <TabsContent value="ai" className="flex-1 min-h-0 min-w-0 overflow-hidden">
           <AIAssistant />

@@ -3,6 +3,7 @@
 
 import { webCache } from './webCache'
 import { webFileSystem, type FileStats, type FileSystemItem } from './webFileSystem'
+import { isVirtualPath, virtualFileSystem } from './virtualFileSystem'
 
 // Environment detection
 const isElectron = (): boolean => {
@@ -56,6 +57,11 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
   // Read directory contents
   async readDirectory(dirPath = '', recursive = false): Promise<FileSystemItem[]> {
     try {
+      // A mem:// path (or a virtual current workspace) is served in-memory,
+      // regardless of Electron vs web — examples/deep links use this.
+      if (isVirtualPath(dirPath) || (!dirPath && isVirtualPath(this.currentWorkspace))) {
+        return await virtualFileSystem.readDirectory(dirPath || this.currentWorkspace!, recursive)
+      }
       if (this.isElectron()) {
         const targetPath = dirPath || this.currentWorkspace
         if (!targetPath) {
@@ -74,6 +80,9 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
   // Read file content
   async readFile(filePath: string): Promise<string> {
     try {
+      if (isVirtualPath(filePath)) {
+        return await virtualFileSystem.readFile(filePath)
+      }
       if (this.isElectron()) {
         return await window.api.fs.readFile(filePath)
       } else {
@@ -97,6 +106,10 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
   // Write file content
   async writeFile(filePath: string, content: string): Promise<void> {
     try {
+      if (isVirtualPath(filePath)) {
+        await virtualFileSystem.writeFile(filePath, content)
+        return
+      }
       if (this.isElectron()) {
         await window.api.fs.writeFile(filePath, content)
       } else {
@@ -113,6 +126,10 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
   // Create new file
   async createFile(filePath: string, content = ''): Promise<void> {
     try {
+      if (isVirtualPath(filePath)) {
+        await virtualFileSystem.createFile(filePath, content)
+        return
+      }
       if (this.isElectron()) {
         await window.api.fs.createFile(filePath, content)
       } else {
@@ -127,6 +144,10 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
 
   async renameFile(oldPath: string, newPath: string): Promise<void> {
     try {
+      if (isVirtualPath(oldPath) || isVirtualPath(newPath)) {
+        await virtualFileSystem.renameFile(oldPath, newPath)
+        return
+      }
       if (this.isElectron()) {
         await window.api.fs.renameFile(oldPath, newPath)
       } else {
@@ -142,6 +163,10 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
   // Create new folder
   async createFolder(folderPath: string): Promise<void> {
     try {
+      if (isVirtualPath(folderPath)) {
+        await virtualFileSystem.createFolder(folderPath)
+        return
+      }
       if (this.isElectron()) {
         await window.api.fs.createFolder(folderPath)
       } else {
@@ -156,6 +181,10 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
   // Delete file or directory
   async deleteFile(targetPath: string): Promise<void> {
     try {
+      if (isVirtualPath(targetPath)) {
+        await virtualFileSystem.deleteFile(targetPath)
+        return
+      }
       if (this.isElectron()) {
         await window.api.fs.deleteFile(targetPath)
       } else {
@@ -171,6 +200,9 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
   // Check if path exists
   async pathExists(targetPath: string): Promise<boolean> {
     try {
+      if (isVirtualPath(targetPath)) {
+        return await virtualFileSystem.pathExists(targetPath)
+      }
       if (this.isElectron()) {
         return await window.api.fs.pathExists(targetPath)
       } else {
@@ -185,6 +217,9 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
   // Get file stats
   async getFileStats(filePath: string): Promise<FileStats> {
     try {
+      if (isVirtualPath(filePath)) {
+        return await virtualFileSystem.getFileStats(filePath)
+      }
       if (this.isElectron()) {
         return await window.api.fs.getFileStats(filePath)
       } else {

@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { OpenWorkspaceCommand } from './commands/fileCommands'
+import { BackendPrompt } from './components/BackendPrompt'
+import { WelcomeDialog } from './components/WelcomeDialog'
+import { LoadGitHubProjectCommand, OpenWorkspaceCommand } from './commands/fileCommands'
+import { parseProjectRoute } from './lib/projectRouting'
 import { DocsPanel } from './components/DocsPanel'
 import { EditorPanel } from './components/EditorPanel'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { FileExplorer } from './components/FileExplorer'
 import { Header } from './components/Header'
 import { SerialMonitor } from './components/SerialMonitor'
@@ -12,8 +16,14 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './componen
 import { ArduinoProvider } from './contexts/ArduinoContext'
 import { SerialProvider } from './contexts/SerialContext'
 import { fileSystem } from './lib/fileSystem'
-import { selectEditorView, selectPanelState, setPanelOpen, useAppDispatch, useAppSelector } from './redux'
-import { ArduinoServiceFactory, getArduinoService } from './services/arduino/ArduinoServiceFactory'
+import {
+  selectEditorView,
+  selectPanelState,
+  setPanelOpen,
+  useAppDispatch,
+  useAppSelector
+} from './redux'
+import { ArduinoServiceFactory } from './services/arduino/ArduinoServiceFactory'
 
 export default function App(): React.JSX.Element {
   const { isFileExplorerOpen, isSerialMonitorOpen, isDocsPanelOpen } =
@@ -36,50 +46,33 @@ export default function App(): React.JSX.Element {
     }
   }, [])
 
-  // Surface a clear message when the tinyService backend isn't reachable, instead
-  // of letting compile/upload/serial fail silently. On desktop the app starts
-  // tinyService for you; in the browser the user runs it themselves — either way,
-  // if nothing is listening on the service URL we say so.
-  useEffect(() => {
-    const service = getArduinoService()
-    let warned = false
+  // The "backend not reachable" messaging now lives in <BackendPrompt/> (a
+  // persistent, actionable banner with the start command) rather than a transient
+  // toast, so compile/upload/serial don't appear to fail silently.
 
-    const warnIfDown = (): void => {
-      if (service.isConnected() || warned) return
-      warned = true
-      toast.error('Arduino backend not running', {
-        description:
-          'Compile, upload, and the serial monitor need tinyService. Start it and it will reconnect automatically.',
-        duration: 8000
-      })
-    }
-
-    // Give the initial connection a few seconds before complaining.
-    const graceTimer = setTimeout(warnIfDown, 5000)
-
-    const off = service.onConnectionChange((connected) => {
-      if (connected) {
-        if (warned) toast.success('Arduino backend connected')
-        warned = false
-      } else {
-        warnIfDown()
-      }
-    })
-
-    return () => {
-      clearTimeout(graceTimer)
-      off()
-    }
-  }, [])
-
-  // Reopen the last workspace on launch (if it still exists on disk).
-  // Guard against running twice — StrictMode double-invokes effects in dev,
-  // and a second OpenWorkspaceCommand rebuilds the tree with new ids, which
-  // previously opened a duplicate tab for the auto-opened sketch.
+  // On launch, a `/<owner>/<repo>/<path>` deep link opens that GitHub project and
+  // takes precedence over reopening the last local workspace. Otherwise, reopen
+  // the last workspace (if it still exists on disk).
+  //
+  // Guard against running twice — StrictMode double-invokes effects in dev, and a
+  // second open rebuilds the tree with new ids, which previously opened a
+  // duplicate tab for the auto-opened sketch.
   const reopenedRef = useRef(false)
   useEffect(() => {
     if (reopenedRef.current) return
     reopenedRef.current = true
+
+    const route = parseProjectRoute()
+    if (route) {
+      new LoadGitHubProjectCommand(route.owner, route.repo, route.path).execute().catch((e) => {
+        console.error('Failed to load project from URL:', e)
+        toast.error('Could not open that project', {
+          description: e instanceof Error ? e.message : String(e)
+        })
+      })
+      return
+    }
+
     const last = localStorage.getItem('tinystudio.lastWorkspace')
     if (!last) return
     fileSystem
@@ -94,51 +87,69 @@ export default function App(): React.JSX.Element {
       .catch((e) => console.error('Failed to reopen last workspace:', e))
   }, [])
 
+  // Honor browser back/forward between projects.
+  useEffect(() => {
+    const onPop = (): void => {
+      const route = parseProjectRoute()
+      if (route) {
+        new LoadGitHubProjectCommand(route.owner, route.repo, route.path)
+          .execute()
+          .catch((e) => console.error('Failed to load project on navigation:', e))
+      }
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
   return (
     <ArduinoProvider>
       <SerialProvider>
-      <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
-        <Header />
-        <Toolbar />
-        <ResizablePanelGroup direction="horizontal" className="flex-1">
-          {isFileExplorerOpen && (
-            <>
-              <ResizablePanel defaultSize={25} minSize={12} maxSize={40} className="bg-muted">
-                <FileExplorer />
-              </ResizablePanel>
-              <ResizableHandle />
-            </>
-          )}
-          <ResizablePanel defaultSize={50} className="flex flex-col">
-            <ResizablePanelGroup direction="vertical">
-              <ResizablePanel
-                defaultSize={70}
-                className="flex flex-col"
-                onResize={(size) => setEditorSize(size)}
-              >
-                <EditorPanel size={editorSize} />
-              </ResizablePanel>
-              {isSerialMonitorOpen && (
-                <>
-                  <ResizableHandle />
-                  <ResizablePanel defaultSize={30} minSize={15} className="bg-muted">
-                    <SerialMonitor />
-                  </ResizablePanel>
-                </>
-              )}
-            </ResizablePanelGroup>
-          </ResizablePanel>
-          {isDocsPanelOpen && (
-            <>
-              <ResizableHandle />
-              <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
-                <DocsPanel />
-              </ResizablePanel>
-            </>
-          )}
-        </ResizablePanelGroup>
-        <StatusBar />
-      </div>
+        <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
+          <Header />
+          <Toolbar />
+          <ResizablePanelGroup direction="horizontal" className="flex-1">
+            {isFileExplorerOpen && (
+              <>
+                <ResizablePanel defaultSize={25} minSize={12} maxSize={40} className="bg-muted">
+                  <FileExplorer />
+                </ResizablePanel>
+                <ResizableHandle />
+              </>
+            )}
+            <ResizablePanel defaultSize={50} className="flex flex-col">
+              <ResizablePanelGroup direction="vertical">
+                <ResizablePanel
+                  defaultSize={70}
+                  className="flex flex-col"
+                  onResize={(size) => setEditorSize(size)}
+                >
+                  <EditorPanel size={editorSize} />
+                </ResizablePanel>
+                {isSerialMonitorOpen && (
+                  <>
+                    <ResizableHandle />
+                    <ResizablePanel defaultSize={30} minSize={15} className="bg-muted">
+                      <SerialMonitor />
+                    </ResizablePanel>
+                  </>
+                )}
+              </ResizablePanelGroup>
+            </ResizablePanel>
+            {isDocsPanelOpen && (
+              <>
+                <ResizableHandle />
+                <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
+                  <ErrorBoundary label="Documentation panel">
+                    <DocsPanel />
+                  </ErrorBoundary>
+                </ResizablePanel>
+              </>
+            )}
+          </ResizablePanelGroup>
+          <StatusBar />
+          <BackendPrompt />
+          <WelcomeDialog />
+        </div>
       </SerialProvider>
     </ArduinoProvider>
   )

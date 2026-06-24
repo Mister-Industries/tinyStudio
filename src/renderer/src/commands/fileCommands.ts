@@ -1,5 +1,7 @@
 import { Dispatch } from '@reduxjs/toolkit'
 import { fileSystem, FileSystemItem } from '@renderer/lib/fileSystem'
+import { fetchRepoFolder, loadAccount } from '@renderer/lib/github'
+import { VIRTUAL_PREFIX, virtualFileSystem } from '@renderer/lib/virtualFileSystem'
 import {
   BaseFileItem,
   closeFile,
@@ -137,6 +139,58 @@ const combinePathAndFileName = (dirPath: string, fileName: string): string => {
   return dirPath + '/' + fileName
 }
 
+const findFileInTree = (
+  items: BaseFileItem[],
+  match: (i: BaseFileItem) => boolean
+): BaseFileItem | null => {
+  for (const item of items) {
+    if (item.type === 'file' && item.name && match(item)) return item
+    if (item.children) {
+      const found = findFileInTree(item.children, match)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+/**
+ * Swap the open workspace to `workspace` and run the standard "just opened a
+ * project" side effects: load the README and diagram.svg into their panels, and
+ * auto-open the main .ino (or README) so the editor lands on real content.
+ *
+ * Shared by OpenWorkspaceCommand (local folder) and LoadGitHubProjectCommand
+ * (virtual workspace fetched from GitHub) — both end the same way.
+ */
+async function activateWorkspace(workspace: Workspace, dispatch: Dispatch): Promise<void> {
+  const fileItems = workspace.root
+
+  // Clear any previously open project first so switching doesn't carry over the
+  // old workspace's tabs/tree/README/diagram.
+  dispatch(closeWorkspace())
+  dispatch(openWorkspace(workspace))
+
+  const readme = fileItems.find((file) => file.name === 'README.md')
+  if (readme) {
+    fileSystem
+      .readFile(readme.path)
+      .then((content) => dispatch(updateReadmeContent(content)))
+      .catch((e) => console.error('Failed to read README:', e))
+  }
+
+  const diagram = fileItems.find((file) => file.name === 'diagram.svg')
+  if (diagram) {
+    fileSystem
+      .readFile(diagram.path)
+      .then((content) => dispatch(updateDiagramSvgContent(content)))
+      .catch((e) => console.error('Failed to read diagram.svg:', e))
+  }
+
+  const sketch =
+    findFileInTree(fileItems, (i) => /\.ino$/i.test(i.name!)) ||
+    findFileInTree(fileItems, (i) => i.name === 'README.md')
+  if (sketch) await new OpenFileCommand(sketch).execute()
+}
+
 export class OpenWorkspaceCommand implements Command {
   private filePath: string | undefined
   private get dispatch(): Dispatch {
@@ -192,48 +246,59 @@ export class OpenWorkspaceCommand implements Command {
       root: fileItems
     }
 
-    // Clear any previously open project before showing the new one, so switching
-    // folders doesn't carry over the old workspace's tabs and tree state. Done
-    // only after a folder is confirmed above, so a cancelled picker is a no-op.
-    this.dispatch(closeWorkspace())
-    this.dispatch(openWorkspace(workspace))
+    // Activation (close previous, open this, load README/diagram, auto-open the
+    // sketch) is only run after a folder is confirmed above, so a cancelled
+    // picker is a no-op.
+    await activateWorkspace(workspace, this.dispatch)
+  }
+}
 
-    if (fileItems.some((file: BaseFileItem) => file.name === 'README.md')) {
-      // Open the README.md file if it exists
-      const readmeFile = fileItems.find((file: BaseFileItem) => file.name === 'README.md')
-      if (readmeFile) {
-        fileSystem.readFile(readmeFile.path).then((content) => {
-          this.dispatch(updateReadmeContent(content))
-        })
-      }
+/**
+ * Open a project that lives in a public GitHub repo folder, without a local
+ * folder pick. Fetches `<owner>/<repo>/<path>` into the in-memory virtual file
+ * system and opens it as a `mem://` workspace. Powers `/<owner>/<repo>/<path>`
+ * deep links and the Examples browser.
+ */
+export class LoadGitHubProjectCommand implements Command {
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
+  constructor(
+    private owner: string,
+    private repo: string,
+    private path = '',
+    private branch?: string
+  ) {}
+
+  async execute(): Promise<void> {
+    // A signed-in token (if any) just raises the GitHub rate limit; public
+    // repos load fine without one.
+    const token = loadAccount()?.token
+    const files = await fetchRepoFolder(this.owner, this.repo, this.path, this.branch, token)
+    if (Object.keys(files).length === 0) {
+      throw new Error(
+        `No files found at ${this.owner}/${this.repo}${this.path ? '/' + this.path : ''}`
+      )
     }
 
-    if (fileItems.some((file: BaseFileItem) => file.name === 'diagram.svg')) {
-      // Load the diagram.svg file if it exists
-      const diagramFile = fileItems.find((file: BaseFileItem) => file.name === 'diagram.svg')
-      if (diagramFile) {
-        fileSystem.readFile(diagramFile.path).then((content) => {
-          this.dispatch(updateDiagramSvgContent(content))
-        })
-      }
-    }
+    const root = `${VIRTUAL_PREFIX}${this.owner}/${this.repo}${this.path ? '/' + this.path : ''}`
+    virtualFileSystem.clear(root)
+    await virtualFileSystem.seed(root, files)
+    // Overlay any prior in-editor edits saved to the cache for this project.
+    await virtualFileSystem.hydrateFromCache(root)
+    fileSystem.setCurrentWorkspace(root)
 
-    // Auto-open the sketch: prefer the main .ino, else the README, so opening a
-    // project lands you on editable code instead of an empty editor.
-    const findFile = (items: BaseFileItem[], match: (i: BaseFileItem) => boolean): BaseFileItem | null => {
-      for (const item of items) {
-        if (item.type === 'file' && item.name && match(item)) return item
-        if (item.children) {
-          const found = findFile(item.children, match)
-          if (found) return found
-        }
-      }
-      return null
+    const fsItems = await fileSystem.readDirectory(root, true)
+    const fileItems = buildNestedStructure(fsItems)
+
+    const name = this.path ? this.path.split('/').pop()! : this.repo
+    const workspace: Workspace = {
+      id: crypto.randomUUID(),
+      name,
+      path: root,
+      root: fileItems
     }
-    const sketch =
-      findFile(fileItems, (i) => /\.ino$/i.test(i.name!)) ||
-      findFile(fileItems, (i) => i.name === 'README.md')
-    if (sketch) await new OpenFileCommand(sketch).execute()
+    await activateWorkspace(workspace, this.dispatch)
   }
 }
 

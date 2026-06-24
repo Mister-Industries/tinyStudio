@@ -49,6 +49,12 @@ const api = {
     openExternal: (url: string): Promise<void> => ipcRenderer.invoke('open-external', url)
   },
 
+  // App-level paths/info.
+  app: {
+    // Default folder for downloaded example projects (Documents/tinyStudio Examples).
+    getExamplesDir: (): Promise<string> => ipcRenderer.invoke('app:get-examples-dir')
+  },
+
   // App settings (Studio AI). The renderer never sees the API key value —
   // only whether one is configured.
   settings: {

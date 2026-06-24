@@ -99,6 +99,43 @@ async function ghFile(owner: string, repo: string, path: string, branch: string)
   return r.text()
 }
 
+/**
+ * Fetch a single folder (a project) out of a public repo as a flat
+ * { relpath: content } map, where relpath is relative to `folder`. Used to open
+ * `/<owner>/<repo>/<path>` deep links and Examples in the editor without a local
+ * folder pick. Only text files (TEXT_EXT) under ~200 KB are pulled; content
+ * comes from raw.githubusercontent to stay off the GitHub API rate limit.
+ */
+export async function fetchRepoFolder(
+  owner: string,
+  repo: string,
+  folder = '',
+  branch?: string,
+  token?: string
+): Promise<Record<string, string>> {
+  const resolvedBranch = branch || (await ghRepoMeta(owner, repo, token)).branch
+  const base = folder.replace(/^\/+|\/+$/g, '') // normalize, no leading/trailing slash
+  const prefix = base ? base + '/' : ''
+  const blobs = await ghTree(owner, repo, resolvedBranch, token)
+  const wanted = blobs.filter(
+    (b) =>
+      (base === '' || b.path === base || b.path.startsWith(prefix)) &&
+      TEXT_EXT.includes(extOf(b.path)) &&
+      b.size < 200000
+  )
+  const out: Record<string, string> = {}
+  for (const b of wanted) {
+    const rel = base ? b.path.slice(prefix.length) : b.path
+    if (!rel) continue
+    try {
+      out[rel] = await ghFile(owner, repo, b.path, resolvedBranch)
+    } catch {
+      /* skip unreadable blob */
+    }
+  }
+  return out
+}
+
 function b64encode(str: string): string {
   return btoa(unescape(encodeURIComponent(str)))
 }

@@ -21,15 +21,32 @@ import {
   updateFileContent,
   updateReadmeContent
 } from '@renderer/redux/fileSlice'
-import { CircuitBoard, CodeXml, ExternalLink, FolderOpen, Loader2, UploadCloud } from 'lucide-react'
+import {
+  CircuitBoard,
+  CodeXml,
+  ExternalLink,
+  FolderOpen,
+  Loader2,
+  Plus,
+  UploadCloud
+} from 'lucide-react'
 import * as monaco from 'monaco-editor'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { BlocklyEditor } from './BlocklyEditor'
 import { DiagramEditor } from './DiagramEditor'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from './ui/Dialog'
 import { FileTabContent, FileTabs, FileTabsList, FileTabTrigger } from './ui/FileTab'
 import { Button } from './ui/Button'
+import { Input } from './ui/Input'
 import { VisualPreview } from './VisualPreview'
 
 loader.config({ monaco })
@@ -108,6 +125,46 @@ function findInTree(
   }
   return null
 }
+
+/** Collect every file in the tree matching `match`, skipping noise folders. */
+function collectFiles(
+  items: BaseFileItem[],
+  match: (i: BaseFileItem) => boolean,
+  out: BaseFileItem[] = []
+): BaseFileItem[] {
+  for (const item of items) {
+    if (item.type === 'file' && item.name && match(item)) out.push(item)
+    if (item.children && !['node_modules', '.git', 'dist'].includes(item.name ?? '')) {
+      collectFiles(item.children, match, out)
+    }
+  }
+  return out
+}
+
+/** Starter p5.js sketch dropped into newly created .js files. */
+const sketchTemplate = (title: string): string => `// ${title} — p5.js sketch.
+// Switch to Code to edit this sketch; Visual to run it.
+
+let x = 240;
+let y = 140;
+let dx = 3;
+let dy = 2;
+
+function setup() {
+  createCanvas(480, 280);
+  noStroke();
+}
+
+function draw() {
+  background(7, 11, 34);
+  x += dx;
+  y += dy;
+  if (x < 20 || x > width - 20) dx = -dx;
+  if (y < 20 || y > height - 20) dy = -dy;
+  fill(0, 240, 255);
+  circle(x, y, 40);
+}
+`
 
 /**
  * Ensure a project file (e.g. diagram.json / visual.js) is open as an editor
@@ -337,22 +394,58 @@ function CircuitView(): React.JSX.Element {
 function VisualView(): React.JSX.Element {
   const workspace = useAppSelector((s) => s.file.workspace)
   const dispatch = useAppDispatch()
-  const file = useProjectFile('visual.js', () => DEFAULT_VISUAL)
 
+  // Which .js sketch is shown in the Visual view. Defaults to visual.js, the
+  // sketch auto-created for every project; other .js files are selectable too.
+  const [activeSketch, setActiveSketch] = useState('visual.js')
+  const [showNew, setShowNew] = useState(false)
   // Serial is owned app-wide by SerialProvider and feeds the running sketch via
   // the shared bus — the Visual view no longer opens the port itself, so
   // switching to/from this view doesn't reset the board.
   const [publishing, setPublishing] = useState(false)
 
+  const jsFiles = useMemo(
+    () => (workspace ? collectFiles(workspace.root, (i) => /\.js$/i.test(i.name!)) : []),
+    [workspace]
+  )
+
+  // If the active sketch isn't in this project (after a project switch or a
+  // delete), fall back to visual.js or the first sketch available.
+  useEffect(() => {
+    if (jsFiles.length && !jsFiles.some((f) => f.name === activeSketch)) {
+      setActiveSketch(jsFiles.find((f) => f.name === 'visual.js')?.name ?? jsFiles[0].name!)
+    }
+  }, [jsFiles, activeSketch])
+
+  // Only visual.js gets seeded from a default; other sketches must already exist.
+  const file = useProjectFile(
+    activeSketch,
+    activeSketch === 'visual.js' ? () => DEFAULT_VISUAL : undefined
+  )
+
   if (!workspace) return <EmptyHint icon="circuit" label="Open a project to run its visual." />
-  if (!file) return <LoadingHint label="Loading visual…" />
 
   const ws = workspace
+
+  const createSketch = async (fileName: string): Promise<void> => {
+    const path = `${ws.path}/${fileName}`
+    try {
+      await fileSystem.writeFile(path, sketchTemplate(fileName.replace(/\.js$/i, '')))
+      await new RefreshWorkspaceCommand(ws).execute()
+      setActiveSketch(fileName)
+      setShowNew(false)
+    } catch (e) {
+      toast.error('Could not create sketch', {
+        description: e instanceof Error ? e.message : 'Unknown error'
+      })
+    }
+  }
+
   // Build the standalone page, titled after the .ino project (not the folder).
   const buildHtml = (): string => {
     const ino = findInTree(ws.root, (i) => /\.ino$/i.test(i.name!))
     const projectName = ino?.name?.replace(/\.ino$/i, '') || ws.name || 'tinyStudio sketch'
-    return buildVisualExportHtml(projectName, file.content)
+    return buildVisualExportHtml(projectName, file?.content ?? '')
   }
 
   // Preview: write index.html into the project root and open it in the browser.
@@ -415,14 +508,42 @@ function VisualView(): React.JSX.Element {
   }
 
   return (
-    <div className="size-full relative">
-      <div className="absolute top-3 right-3 z-10 flex gap-2">
+    <div className="size-full flex flex-col bg-navy-900">
+      {/* Sketch picker + view actions. Tabs let you keep several p5.js renders
+          (asteroids.js, pong.js, …) in one project and switch between them. */}
+      <div className="flex items-center gap-2 px-2 py-1.5 border-b border-navy-600">
+        <div className="flex items-center gap-1 min-w-0 overflow-x-auto">
+          {jsFiles.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setActiveSketch(f.name!)}
+              title={f.name ?? undefined}
+              className={`shrink-0 px-3 py-1 rounded-full text-xs ${
+                f.name === activeSketch
+                  ? 'bg-navy-500 text-fg-1'
+                  : 'text-fg-3 hover:bg-navy-600 hover:text-fg-1'
+              }`}
+            >
+              {f.name}
+            </button>
+          ))}
+          <button
+            onClick={() => setShowNew(true)}
+            title="New sketch"
+            className="shrink-0 flex items-center px-2 py-1 rounded-full text-fg-3 hover:bg-navy-600 hover:text-fg-1"
+          >
+            <Plus size={14} />
+          </button>
+        </div>
+        <div className="flex-1" />
         <Button
           size="icon"
           variant="outline"
           className="rounded-full"
           title="Edit code"
+          disabled={!file}
           onClick={() => {
+            if (!file) return
             dispatch(revealFile(file.id))
             dispatch(setEditorView('code'))
           }}
@@ -434,6 +555,7 @@ function VisualView(): React.JSX.Element {
           variant="outline"
           className="rounded-full"
           title="Preview in browser"
+          disabled={!file}
           onClick={preview}
         >
           <ExternalLink size={16} />
@@ -443,14 +565,92 @@ function VisualView(): React.JSX.Element {
           variant="outline"
           className="rounded-full"
           title="Publish to GitHub Pages"
-          disabled={publishing}
+          disabled={publishing || !file}
           onClick={publish}
         >
           {publishing ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
         </Button>
       </div>
-      <VisualPreview code={file.content} name={file.name} />
+
+      <div className="flex-1 min-h-0">
+        {file ? (
+          <VisualPreview code={file.content} name={file.name} />
+        ) : (
+          <LoadingHint label="Loading visual…" />
+        )}
+      </div>
+
+      <NewSketchDialog
+        open={showNew}
+        onOpenChange={setShowNew}
+        existing={jsFiles.map((f) => f.name!)}
+        onCreate={createSketch}
+      />
     </div>
+  )
+}
+
+function NewSketchDialog({
+  open,
+  onOpenChange,
+  existing,
+  onCreate
+}: {
+  open: boolean
+  onOpenChange: (o: boolean) => void
+  existing: string[]
+  onCreate: (fileName: string) => void
+}): React.JSX.Element {
+  const [name, setName] = useState('')
+
+  // Reset the field each time the dialog opens.
+  useEffect(() => {
+    if (open) setName('')
+  }, [open])
+
+  const trimmed = name.trim()
+  const fileName = trimmed ? (/\.js$/i.test(trimmed) ? trimmed : `${trimmed}.js`) : ''
+  const duplicate = !!fileName && existing.includes(fileName)
+  const invalid = !trimmed || /[\\/:*?"<>|]/.test(trimmed) || duplicate
+
+  const submit = (): void => {
+    if (!invalid) onCreate(fileName)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>New p5.js sketch</DialogTitle>
+          <DialogDescription>
+            Creates a new <span className="font-mono">.js</span> sketch in your project. Switch
+            between sketches with the tabs in the Visual view.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-2">
+          <Input
+            autoFocus
+            placeholder="asteroids"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && submit()}
+          />
+          {duplicate && (
+            <p className="text-xs text-signal-error">
+              A file named <span className="font-mono">{fileName}</span> already exists.
+            </p>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button disabled={invalid} onClick={submit}>
+            Create sketch
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
