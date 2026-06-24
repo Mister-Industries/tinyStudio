@@ -32,8 +32,36 @@ import {
   PlatformEntry,
   UploadResult
 } from './types'
+import { isVirtualPath, virtualFileSystem } from '@renderer/lib/virtualFileSystem'
 
 const DEFAULT_SERVICE_URL = 'ws://localhost:3000'
+
+/**
+ * Gather a `mem://` sketch's files into a flat `{ relativePath: content }` map
+ * plus a sketch folder name. The browser can't hand tinyService a real disk
+ * path (the File System Access API hides absolute paths, and examples live only
+ * in memory), so the web build ships the sketch's contents instead and the
+ * service materializes them to a temp dir to compile/upload. Desktop never
+ * calls this — it passes a real path straight through.
+ */
+async function collectVirtualSketch(
+  sketchDir: string
+): Promise<{ files: Record<string, string>; sketchName: string }> {
+  const root = sketchDir.endsWith('/') ? sketchDir.slice(0, -1) : sketchDir
+  const items = await virtualFileSystem.readDirectory(root, true)
+  const files: Record<string, string> = {}
+  for (const item of items) {
+    if (item.isDirectory) continue
+    const rel = item.path.startsWith(root + '/')
+      ? item.path.slice(root.length + 1)
+      : item.name
+    files[rel] = await virtualFileSystem.readFile(item.path)
+  }
+  if (Object.keys(files).length === 0) {
+    throw new Error(`No files found in ${root} to compile`)
+  }
+  return { files, sketchName: root.slice(root.lastIndexOf('/') + 1) }
+}
 
 /** Resolve the tinyService URL, allowing a localStorage override for hosting. */
 function resolveServiceUrl(): string {
@@ -435,17 +463,20 @@ export class WebSocketArduinoService implements ArduinoService {
         throw new Error('Arduino client not initialized')
       }
 
-      if (workspacePath.startsWith('mem://')) {
-        const msg =
-          'This example is open in the browser (in-memory) and has no folder on disk for the compiler. Open it in the desktop app, or save it to a local folder, to compile and upload.'
-        return { success: false, output: msg, errors: [{ message: msg, severity: 'fatal' }] }
+      // Browser: the sketch lives in the in-memory FS with no disk path, so
+      // ship its files for the service to materialize and build. Desktop passes
+      // the real path straight through.
+      let files: Record<string, string> | undefined
+      let sketchName: string | undefined
+      if (isVirtualPath(workspacePath)) {
+        ;({ files, sketchName } = await collectVirtualSketch(workspacePath))
       }
 
       // Compile the sketch
       console.log(
         `Starting compile operation for workspace: ${workspacePath}, FQBN: ${boardConfig.fqbn}`
       )
-      this.client.compile(workspacePath, boardConfig.fqbn)
+      this.client.compile(workspacePath, boardConfig.fqbn, files, sketchName)
 
       // Wait for response with longer timeout for compilation
       const result = await this.waitForResponse('compile', 120000)
@@ -480,17 +511,20 @@ export class WebSocketArduinoService implements ArduinoService {
         throw new Error('Arduino client not initialized')
       }
 
-      if ((workspacePathOrBinary || '').startsWith('mem://')) {
-        const msg =
-          'This example is open in the browser (in-memory) and has no folder on disk for the compiler. Open it in the desktop app, or save it to a local folder, to compile and upload.'
-        return { success: false, output: msg, error: msg }
+      // Browser: ship the in-memory sketch's files; the service compiles them
+      // into a temp dir before uploading (arduino-cli's upload needs a build
+      // present). Desktop passes the real path and relies on its prior compile.
+      let files: Record<string, string> | undefined
+      let sketchName: string | undefined
+      if (isVirtualPath(workspacePathOrBinary)) {
+        ;({ files, sketchName } = await collectVirtualSketch(workspacePathOrBinary!))
       }
 
       // Upload the sketch
       console.log(
         `Starting upload operation to port: ${port}, FQBN: ${boardConfig.fqbn}, workspace: ${workspacePathOrBinary}`
       )
-      this.client.upload(workspacePathOrBinary || '', boardConfig.fqbn, port)
+      this.client.upload(workspacePathOrBinary || '', boardConfig.fqbn, port, files, sketchName)
 
       // Wait for response with longer timeout for upload
       const result = await this.waitForResponse('upload', 90000)
@@ -520,6 +554,25 @@ export class WebSocketArduinoService implements ArduinoService {
     boardConfig: BoardConfig
   ): Promise<{ compile: CompileResult; upload: UploadResult }> {
     try {
+      // Browser: the service compiles the shipped files into a temp dir as part
+      // of the upload, so a separate compile pass here would just build in a
+      // throwaway dir and double the (slow) compile. Send one upload instead.
+      if (isVirtualPath(workspacePath)) {
+        const uploadResult = await this.uploadSketch(port, boardConfig, workspacePath)
+        return {
+          compile: {
+            success: uploadResult.success,
+            output: uploadResult.success
+              ? 'Compiled and uploaded'
+              : uploadResult.output || '',
+            errors: uploadResult.success
+              ? undefined
+              : [{ message: uploadResult.error || 'Compilation failed', severity: 'fatal' }]
+          },
+          upload: uploadResult
+        }
+      }
+
       // Compile first
       const compileResult = await this.compileSketch(workspacePath, boardConfig)
 

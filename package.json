@@ -38,7 +38,7 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "@hookform/resolvers": "^5.1.1",
-    "@mister-industries/shared": "^1.0.0",
+    "@mister-industries/shared": "^1.1.0",
     "@mister-industries/tinyservice": "^1.0.0",
     "@monaco-editor/react": "^4.7.0-rc.0",
     "@reduxjs/toolkit": "^2.8.2",
