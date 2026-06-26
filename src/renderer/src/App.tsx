@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { notify as toast } from './lib/notify'
 import { BackendPrompt } from './components/BackendPrompt'
 import { WelcomeDialog } from './components/WelcomeDialog'
 import { LoadGitHubProjectCommand, OpenWorkspaceCommand } from './commands/fileCommands'

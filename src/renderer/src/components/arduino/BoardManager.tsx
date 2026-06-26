@@ -47,10 +47,10 @@ import {
   Usb
 } from 'lucide-react'
 import React from 'react'
-import { toast } from 'sonner'
+import { notify as toast } from '@renderer/lib/notify'
 
 const PILL =
-  'h-9 flex items-center gap-2 px-3.5 rounded-full bg-navy-700/60 border border-navy-400 text-[13px] font-semibold text-fg-1 hover:bg-navy-500 transition-colors outline-none disabled:opacity-50'
+  'h-[30px] flex items-center gap-[7px] px-2.5 rounded-[var(--radius-sm)] bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] text-[13px] font-semibold text-[var(--text-strong)] hover:border-[var(--border-interactive)] transition-colors outline-none disabled:opacity-50'
 
 const SECTION_LABEL = 'text-[11px] font-semibold tracking-wider text-fg-3 mb-2'
 
@@ -264,16 +264,9 @@ export function BoardManager(): React.JSX.Element {
         <SelectTrigger className={`${PILL} [&>svg]:hidden`}>
           <span
             className="w-2 h-2 rounded-full shrink-0"
-            style={
-              isConnected
-                ? {
-                    background: 'var(--signal-success)',
-                    boxShadow: '0 0 8px var(--signal-success)'
-                  }
-                : { background: 'var(--fg-4)' }
-            }
+            style={{ background: isConnected ? 'var(--status-ok)' : 'var(--text-faint)' }}
           />
-          <Cpu size={14} className="text-fg-3" />
+          <Cpu size={14} className="text-[var(--text-muted)]" />
           {selectedBoard?.config.name ? (
             <>
               {selectedBoard.config.name}
@@ -310,13 +303,13 @@ export function BoardManager(): React.JSX.Element {
       </Select>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-navy-700 border border-navy-500 text-fg-1 max-w-xl max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CircuitBoard size={18} className="text-cyan" />
+              <CircuitBoard size={18} className="text-[var(--brand)]" />
               Boards Manager
             </DialogTitle>
-            <DialogDescription className="text-fg-3">
+            <DialogDescription className="text-[var(--text-muted)]">
               Pick the active board, install board packages, and add board-manager URLs.
             </DialogDescription>
           </DialogHeader>
@@ -355,7 +348,7 @@ export function BoardManager(): React.JSX.Element {
                       return (
                         <div
                           key={`${b.port}:${b.config.fqbn}`}
-                          className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-navy-600"
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                         >
                           <Usb size={15} className="text-fg-4 shrink-0" />
                           <div className="flex-1 min-w-0">
@@ -415,7 +408,7 @@ export function BoardManager(): React.JSX.Element {
                         key={c.fqbn}
                         data-active={active}
                         onClick={() => selectBoardConfig(c)}
-                        className="px-2.5 py-1 rounded-full text-xs bg-navy-900 border border-navy-400 text-fg-1 hover:bg-navy-600 transition-colors data-[active=true]:border-cyan data-[active=true]:text-cyan"
+                        className="px-2.5 py-1 rounded-full text-xs bg-navy-900 border border-navy-400 text-fg-1 hover:bg-[var(--bg-sunken)] transition-colors data-[active=true]:border-cyan data-[active=true]:text-cyan"
                       >
                         {c.name}
                         {c.architecture && <span className="text-fg-4 ml-1">{c.architecture}</span>}
@@ -426,7 +419,7 @@ export function BoardManager(): React.JSX.Element {
 
                 {showOverride && (
                   <>
-                    <div className="flex items-center gap-2 bg-navy-900 border border-navy-400 rounded-lg px-3 mb-2">
+                    <div className="flex items-center gap-2 bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] rounded-[var(--radius-sm)] px-3 mb-2">
                       <Search size={15} className="text-fg-4" />
                       <input
                         className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-fg-1 placeholder:text-fg-4"
@@ -441,7 +434,7 @@ export function BoardManager(): React.JSX.Element {
                         return (
                           <div
                             key={b.fqbn}
-                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-navy-600"
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                           >
                             <Cpu size={15} className="text-fg-4 shrink-0" />
                             <div className="flex-1 min-w-0">
@@ -480,13 +473,13 @@ export function BoardManager(): React.JSX.Element {
                 )}
               </div>
 
-              <div className="border-t border-navy-500" />
+              <div className="border-t border-[var(--border-default)]" />
 
               {/* Platforms (Boards Manager) */}
               <div className="flex flex-col">
                 <div className={SECTION_LABEL}>INSTALL BOARD PACKAGES</div>
                 <div className="flex gap-2 mb-3">
-                  <div className="flex-1 flex items-center gap-2 bg-navy-900 border border-navy-400 rounded-lg px-3">
+                  <div className="flex-1 flex items-center gap-2 bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] rounded-[var(--radius-sm)] px-3">
                     <Search size={15} className="text-fg-4" />
                     <input
                       className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-fg-1 placeholder:text-fg-4"
@@ -519,7 +512,7 @@ export function BoardManager(): React.JSX.Element {
                         results.map((p) => (
                           <div
                             key={p.id}
-                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-navy-600"
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                           >
                             <CircuitBoard size={15} className="text-fg-4 shrink-0" />
                             <div className="flex-1 min-w-0">
@@ -559,7 +552,7 @@ export function BoardManager(): React.JSX.Element {
                   {installed.map((p) => (
                     <div
                       key={p.id}
-                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-navy-600"
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                     >
                       <CircuitBoard size={15} className="text-signal-success shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -595,13 +588,13 @@ export function BoardManager(): React.JSX.Element {
                 </div>
               </div>
 
-              <div className="border-t border-navy-500" />
+              <div className="border-t border-[var(--border-default)]" />
 
               {/* Additional board-manager URLs */}
               <div className="flex flex-col">
                 <div className={SECTION_LABEL}>ADDITIONAL BOARD URLS ({urls.length})</div>
                 <div className="flex gap-2 mb-2">
-                  <div className="flex-1 flex items-center gap-2 bg-navy-900 border border-navy-400 rounded-lg px-3">
+                  <div className="flex-1 flex items-center gap-2 bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] rounded-[var(--radius-sm)] px-3">
                     <Link2 size={15} className="text-fg-4" />
                     <input
                       className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-fg-1 placeholder:text-fg-4"
@@ -627,7 +620,7 @@ export function BoardManager(): React.JSX.Element {
                   {urls.map((url) => (
                     <div
                       key={url}
-                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-navy-600"
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                     >
                       <Link2 size={14} className="text-fg-4 shrink-0" />
                       <div className="flex-1 min-w-0 text-xs text-fg-3 truncate font-mono">

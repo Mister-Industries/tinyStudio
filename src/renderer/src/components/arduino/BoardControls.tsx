@@ -21,7 +21,7 @@ import { ChevronDown, Usb } from 'lucide-react'
 import React from 'react'
 
 const PILL =
-  'h-9 flex items-center gap-2 px-3.5 rounded-full bg-navy-700/60 border border-navy-400 text-[13px] font-semibold text-fg-1 hover:bg-navy-500 transition-colors outline-none disabled:opacity-50'
+  'h-[30px] flex items-center gap-[7px] px-2.5 rounded-[var(--radius-sm)] bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] text-[13px] font-semibold text-[var(--text-strong)] hover:border-[var(--border-interactive)] transition-colors outline-none disabled:opacity-50'
 
 export function PortPicker(): React.JSX.Element {
   const { boards, selectedBoard, setSelectedBoard, isAgentConnected } = useArduinoContext()

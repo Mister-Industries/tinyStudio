@@ -31,7 +31,10 @@ function FileTabsList({ className, ...props }: React.ComponentProps<typeof TabsP
   return (
     <TabsPrimitive.List
       data-slot="file-tabs-list"
-      className={cn('flex justify-between w-full h-10 border-b border-navy-600 bg-navy-1000', className)}
+      className={cn(
+        'flex justify-between w-full h-[36px] border-b-[1.5px] border-[var(--border-default)] bg-[var(--bg-sunken)]',
+        className
+      )}
       {...props}
     />
   )
@@ -47,7 +50,7 @@ function FileTabTrigger({ className, file, onFileClose, ...props }: FileTabTrigg
     <TabsPrimitive.Trigger
       data-slot="file-tab-trigger"
       className={cn(
-        'text-xs justify-start px-4 py-2 h-full border-b border-transparent text-fg-3 data-[state=active]:bg-navy-900 data-[state=active]:text-fg-1 data-[state=active]:border-b data-[state=active]:border-primary hover:bg-navy-700/50 transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap',
+        "relative text-[13px] justify-start px-3.5 h-full text-[var(--text-muted)] data-[state=active]:bg-[var(--surface-card)] data-[state=active]:text-[var(--text-strong)] data-[state=active]:shadow-[inset_0_2.5px_0_0_var(--brand)] hover:text-[var(--text-body)] transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap border-r-[1.5px] border-[var(--border-soft)]",
         className
       )}
       {...props}

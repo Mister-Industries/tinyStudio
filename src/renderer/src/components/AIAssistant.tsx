@@ -366,7 +366,7 @@ function PermissionDialog({
           </DialogTitle>
           <DialogDescription>Studio AI wants to change a file in your workspace.</DialogDescription>
         </DialogHeader>
-        <pre className="max-h-64 overflow-auto rounded-md bg-navy-900 border border-navy-600 p-3 text-xs text-fg-2 whitespace-pre-wrap">
+        <pre className="max-h-64 overflow-auto rounded-[var(--radius-md)] bg-[var(--bg-sunken)] border-[1.5px] border-[var(--border-soft)] p-3 font-mono text-xs text-[var(--text-body)] whitespace-pre-wrap">
           {request?.preview}
         </pre>
         <DialogFooter>
@@ -422,8 +422,9 @@ function SettingsDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2">
-          <label className="text-xs text-fg-3">
-            API key {configured && <span className="text-green-400">· a key is configured</span>}
+          <label className="text-xs text-[var(--text-muted)]">
+            API key{' '}
+            {configured && <span className="text-[var(--status-ok)]">· a key is configured</span>}
           </label>
           <Input
             type="password"
@@ -432,7 +433,7 @@ function SettingsDialog({
             onChange={(e) => setKey(e.target.value)}
           />
           <a
-            className="text-xs text-cyan hover:underline"
+            className="text-xs text-[var(--brand)] hover:underline cursor-pointer"
             onClick={() =>
               window.api.fs.openExternal('https://console.anthropic.com/settings/keys')
             }

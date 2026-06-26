@@ -60,15 +60,15 @@ export function ViewSegment(): React.JSX.Element {
     <button
       onClick={() => go(view)}
       data-active={editorView === view}
-      className="h-7 px-3 flex items-center gap-1.5 rounded-full text-xs font-medium text-fg-3 hover:text-fg-1 transition-colors data-[active=true]:bg-cyan data-[active=true]:text-[var(--fg-on-cyan)]"
+      className="h-7 px-3 flex items-center gap-1.5 rounded-[var(--radius-sm)] text-[13px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-body)] transition-colors data-[active=true]:bg-[var(--surface-card)] data-[active=true]:text-[var(--text-strong)] data-[active=true]:shadow-[var(--shadow-soft-sm)]"
     >
-      <Icon size={14} />
+      <Icon size={15} />
       {label}
     </button>
   )
 
   return (
-    <div className="flex items-center gap-1 p-1 rounded-full bg-navy-900 border border-navy-600">
+    <div className="flex items-center gap-0.5 p-[3px] rounded-[var(--radius-md)] bg-[var(--bg-sunken)] border-[1.5px] border-[var(--border-soft)]">
       {btn('code', 'Code', Code2)}
       {btn('circuit', 'Circuit', CircuitBoard)}
       {btn('visual', 'Visual', Play)}

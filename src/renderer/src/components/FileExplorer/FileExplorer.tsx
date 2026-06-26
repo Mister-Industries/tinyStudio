@@ -14,24 +14,29 @@ export type FileExplorerTab = 'file-explorer' | 'source-control'
 export function FileExplorer(): React.JSX.Element {
   const [openTab, setOpenTab] = useState<FileExplorerTab>('file-explorer')
 
+  // Underline tab — the two tabs split the strip evenly and center their labels.
+  const tab =
+    "relative flex flex-1 items-center justify-center gap-[7px] py-[9px] text-xs font-semibold text-[var(--text-muted)] transition-colors hover:text-[var(--text-body)] cursor-pointer data-[active=true]:text-[var(--text-strong)] after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[1.5px] after:h-[2.5px] after:origin-bottom after:scale-x-0 after:rounded-t-[2px] after:bg-[var(--brand)] after:transition-transform after:content-[''] data-[active=true]:after:scale-x-100"
+
   return (
-    <div className="size-full flex flex-col bg-navy-700">
+    // `group` enables the VS Code–style hover-reveal of the tree action icons.
+    <div className="size-full flex flex-col bg-[var(--bg-raised)] group">
       {/* Tab Navigation */}
-      <div className="flex w-full text-xs font-semibold border-b border-navy-600">
+      <div className="flex items-stretch h-[36px] border-b-[1.5px] border-[var(--border-default)]">
         <button
           data-active={openTab === 'file-explorer'}
-          className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-3 text-fg-3 data-[active=true]:text-fg-1 data-[active=true]:border-cyan hover:text-fg-1 cursor-pointer transition-colors"
+          className={tab}
           onClick={() => setOpenTab('file-explorer')}
         >
-          <Folder size={14} />
+          <Folder size={15} />
           Files
         </button>
         <button
           data-active={openTab === 'source-control'}
-          className="flex justify-center items-center gap-2 border-b-2 border-transparent flex-1 px-2 py-3 text-fg-3 data-[active=true]:text-fg-1 data-[active=true]:border-cyan hover:text-fg-1 cursor-pointer transition-colors"
+          className={tab}
           onClick={() => setOpenTab('source-control')}
         >
-          <Github size={14} />
+          <Github size={15} />
           GitHub
         </button>
       </div>

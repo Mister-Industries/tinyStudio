@@ -5,7 +5,7 @@
 
 import { Loader2, Zap } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+import { notify as toast } from '@renderer/lib/notify'
 import { fetchExamplesManifest, type ExampleEntry } from '@renderer/lib/examples'
 import { navigateToProject } from '@renderer/lib/projectRouting'
 import { Button } from './ui/Button'

@@ -7,8 +7,9 @@
 import { useGitHubAccount } from '@renderer/hooks/useGitHubAccount'
 import { ExternalLink, Github, LogOut, Loader2 } from 'lucide-react'
 import React from 'react'
-import { toast } from 'sonner'
+import { notify as toast } from '@renderer/lib/notify'
 import { Button } from './ui/Button'
+import { Input } from './ui/Input'
 import {
   Dialog,
   DialogContent,
@@ -44,15 +45,17 @@ export function GitHubAccountButton(): React.JSX.Element {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-navy-600 transition-colors">
+          <button className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-[var(--radius-sm)] hover:bg-white/15 dark:hover:bg-[var(--bg-sunken)] transition-colors">
             {account.avatarUrl ? (
               <img src={account.avatarUrl} alt="" className="w-6 h-6 rounded-full" />
             ) : (
-              <span className="w-6 h-6 rounded-full bg-navy-500 flex items-center justify-center text-[11px]">
+              <span className="w-6 h-6 rounded-full bg-white/20 dark:bg-[var(--bg-sunken)] flex items-center justify-center text-[11px] text-white dark:text-[var(--text-body)]">
                 {account.login.slice(0, 2).toUpperCase()}
               </span>
             )}
-            <span className="text-xs text-fg-2 max-w-[120px] truncate">{account.login}</span>
+            <span className="text-xs text-white dark:text-[var(--text-body)] max-w-[120px] truncate">
+              {account.login}
+            </span>
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -70,24 +73,28 @@ export function GitHubAccountButton(): React.JSX.Element {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="rounded-full text-fg-2 hover:text-fg-1 hover:bg-navy-600 gap-1.5">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5 h-7 px-2.5 rounded-[var(--radius-sm)] text-[13px] font-semibold bg-white/15 text-white hover:bg-white/25 dark:bg-[var(--bg-sunken)] dark:text-[var(--text-body)] dark:hover:bg-[var(--border-soft)]"
+        >
           <Github size={15} /> Sign in
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-navy-700 border border-navy-500 text-fg-1 max-w-sm">
+      <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Github size={18} className="text-cyan" /> Sign in to GitHub
+            <Github size={18} className="text-[var(--brand)]" /> Sign in to GitHub
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-3">
-          <p className="text-xs text-fg-3">
-            Paste a Personal Access Token with <span className="font-mono text-fg-2">repo</span> scope. It's
-            stored locally and used to list your repos, push, and publish to Pages.
+          <p className="text-xs text-[var(--text-muted)]">
+            Paste a Personal Access Token with{' '}
+            <span className="font-mono text-[var(--text-body)]">repo</span> scope. It's stored
+            locally and used to list your repos, push, and publish to Pages.
           </p>
-          <input
+          <Input
             type="password"
-            className="w-full bg-navy-900 border border-navy-400 rounded-lg px-3 py-2 text-sm text-fg-1 placeholder:text-fg-4 outline-none focus:border-cyan"
             placeholder="ghp_…"
             value={token}
             onChange={(e) => setToken(e.target.value)}
@@ -95,7 +102,7 @@ export function GitHubAccountButton(): React.JSX.Element {
           />
           <div className="flex items-center justify-between">
             <a
-              className="text-xs text-cyan hover:text-cyan-bright flex items-center gap-1"
+              className="text-xs text-[var(--brand)] hover:underline flex items-center gap-1"
               href="https://github.com/settings/tokens/new?scopes=repo&description=tinyStudio"
               target="_blank"
               rel="noreferrer"

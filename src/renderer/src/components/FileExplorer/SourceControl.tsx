@@ -29,7 +29,7 @@ import {
   UploadCloud
 } from 'lucide-react'
 import React from 'react'
-import { toast } from 'sonner'
+import { notify as toast } from '@renderer/lib/notify'
 import { Button } from '../ui/Button'
 import { ScrollArea } from '../ui/ScrollArea'
 
@@ -175,11 +175,6 @@ export function SourceControl(): React.JSX.Element {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center gap-2 px-4 py-3 text-[11px] font-semibold tracking-[0.16em] text-fg-3 border-b border-navy-600">
-        <Github size={14} />
-        GITHUB
-      </div>
-
       {!workspace ? (
         <div className="p-4 text-sm text-fg-4 text-center">Open a project to use source control.</div>
       ) : !account ? (

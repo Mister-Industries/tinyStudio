@@ -5,6 +5,7 @@ import { setPanelOpen } from '@renderer/redux/editorSlice'
 import { FileText, ListX, Send, Terminal, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './ui/Button'
+import { IconButton } from './ui/IconButton'
 import { ScrollArea } from './ui/ScrollArea'
 import {
   Select,
@@ -43,42 +44,40 @@ export function SerialMonitor(): React.JSX.Element {
   }
 
   const tab = (id: 'serial' | 'output', label: string, Icon: typeof Terminal): React.JSX.Element => (
-    <div
+    <button
       data-active={activeTab === id}
       onClick={() => setActiveTab(id)}
-      className="flex gap-2 px-4 py-2 items-center border-b-2 border-transparent text-fg-3 data-[active=true]:text-fg-1 data-[active=true]:border-cyan cursor-pointer transition-colors"
+      className="relative flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:text-[var(--text-body)] data-[active=true]:text-[var(--text-strong)] after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[1.5px] after:h-[2.5px] after:origin-bottom after:scale-x-0 after:rounded-t-[2px] after:bg-[var(--brand)] after:transition-transform after:content-[''] data-[active=true]:after:scale-x-100"
     >
       <Icon size={14} />
       {label}
-    </div>
+    </button>
   )
 
   return (
-    <div className="size-full flex flex-col bg-navy-900">
-      <div className="w-full flex justify-between text-xs font-semibold border-b border-navy-600">
+    <div className="size-full flex flex-col bg-[var(--bg-raised)]">
+      <div className="w-full flex items-center justify-between h-[36px] border-b-[1.5px] border-[var(--border-default)] pr-1">
         <div className="flex">
           {tab('serial', 'Serial Monitor', Terminal)}
           {tab('output', 'Output', FileText)}
         </div>
-        <div className="flex items-center">
-          <Button
+        <div className="flex items-center gap-0.5">
+          <IconButton
+            label={activeTab === 'serial' ? 'Clear serial monitor' : 'Clear output'}
             variant="ghost"
-            size="icon"
-            className="text-fg-3 hover:text-fg-1 hover:bg-navy-500"
+            size="sm"
             onClick={handleClear}
-            title={activeTab === 'serial' ? 'Clear serial monitor' : 'Clear output'}
           >
-            <ListX />
-          </Button>
-          <Button
+            <ListX size={15} />
+          </IconButton>
+          <IconButton
+            label="Close"
             variant="ghost"
-            size="icon"
-            className="text-fg-3 hover:text-fg-1 hover:bg-navy-500"
+            size="sm"
             onClick={() => dispatch(setPanelOpen({ panel: 'monitor', isOpen: false }))}
-            title="Close"
           >
-            <X />
-          </Button>
+            <X size={15} />
+          </IconButton>
         </div>
       </div>
       {/* Both tabs stay mounted so the serial stream isn't dropped when you peek at Output. */}
@@ -91,7 +90,6 @@ export function SerialMonitor(): React.JSX.Element {
     </div>
   )
 }
-
 
 export function SerialMonitorTab(): React.JSX.Element {
   const { isAgentConnected } = useArduinoContext()
@@ -130,13 +128,14 @@ export function SerialMonitorTab(): React.JSX.Element {
   }
 
   return (
-    <div className="size-full flex flex-col gap-2 p-2">
+    <div className="size-full flex flex-col">
+      {/* Body fills edge-to-edge like the Output pane (sunken code well). */}
       <ScrollArea
         ref={scrollRef}
-        className="flex-1 min-h-0 border border-navy-600 bg-navy-1000 text-xs font-mono leading-[1.5] p-2"
+        className="flex-1 min-h-0 bg-[var(--bg-sunken)] px-3.5 py-2.5 font-mono text-xs leading-[1.6]"
       >
         {lines.length === 0 ? (
-          <div className="text-fg-4">
+          <div className="text-[var(--text-faint)]">
             {isAgentConnected
               ? port
                 ? 'Listening… (no data yet)'
@@ -145,15 +144,18 @@ export function SerialMonitorTab(): React.JSX.Element {
           </div>
         ) : (
           lines.map((l, i) => (
-            <div key={i} className={l.startsWith('→') ? 'text-cyan' : 'text-fg-2'}>
+            <div
+              key={i}
+              className={l.startsWith('→') ? 'text-[var(--blue)]' : 'text-[var(--text-body)]'}
+            >
               {l}
             </div>
           ))
         )}
       </ScrollArea>
-      <div className="flex w-full gap-2">
+      <div className="flex w-full items-center gap-2 px-3 py-2 border-t-[1.5px] border-[var(--border-default)]">
         <input
-          className="flex-1 bg-navy-900 border border-navy-400 rounded-lg px-3 py-1.5 text-xs font-mono text-fg-1 placeholder:text-fg-4 outline-none focus:border-cyan disabled:opacity-50"
+          className="flex-1 h-[30px] bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] rounded-[var(--radius-sm)] px-3 font-mono text-xs text-[var(--text-strong)] placeholder:text-[var(--text-faint)] outline-none focus:border-[var(--brand)] disabled:opacity-50"
           placeholder={connected ? 'Send a line…' : 'Waiting for connection…'}
           value={input}
           disabled={!connected}
@@ -161,7 +163,14 @@ export function SerialMonitorTab(): React.JSX.Element {
           onKeyDown={(e) => e.key === 'Enter' && send()}
         />
         <FrequencySelect value={baud} onChange={setBaud} />
-        <Button variant="ghost" size="sm" onClick={send} disabled={!connected || !input.trim()}>
+        <Button
+          variant="default"
+          size="icon"
+          className="size-[30px]"
+          onClick={send}
+          disabled={!connected || !input.trim()}
+          title="Send"
+        >
           <Send size={14} />
         </Button>
       </div>
@@ -182,27 +191,31 @@ export function OutputTab(): React.JSX.Element {
   const time = (ts: number): string => new Date(ts).toLocaleTimeString()
   const lineColor = (type: string): string =>
     type === 'error'
-      ? 'text-signal-error'
+      ? 'text-[var(--status-error)]'
       : type === 'upload' || type === 'compile'
-        ? 'text-signal-success'
-        : 'text-fg-2'
+        ? 'text-[var(--status-ok)]'
+        : 'text-[var(--text-body)]'
 
   // Flatten each log entry into plain terminal lines: a header line, then its
   // raw detail lines (no cards, no padding, no emoji) — just a console.
   return (
-    <div className="size-full relative bg-navy-1000">
+    <div className="size-full relative bg-[var(--bg-sunken)]">
       <div
         ref={scrollRef}
-        className="absolute inset-0 overflow-auto p-2 text-xs font-mono leading-[1.5] whitespace-pre-wrap"
+        className="absolute inset-0 overflow-auto px-3.5 py-2.5 font-mono text-xs leading-[1.6] whitespace-pre-wrap"
       >
         {logs.length === 0 ? (
-          <span className="text-fg-4">— no output yet · Verify or Upload to compile —</span>
+          <span className="text-[var(--text-faint)]">
+            — no output yet · Verify or Upload to compile —
+          </span>
         ) : (
           logs.map((log) => (
             <div key={log.id} className={lineColor(log.type)}>
-              <span className="text-fg-4">{time(log.timestamp)} </span>
+              <span className="text-[var(--text-faint)]">{time(log.timestamp)} </span>
               {log.message}
-              {log.details && <div className="text-fg-3">{log.details.replace(/\n+$/, '')}</div>}
+              {log.details && (
+                <div className="text-[var(--text-muted)]">{log.details.replace(/\n+$/, '')}</div>
+              )}
             </div>
           ))
         )}
@@ -219,7 +232,7 @@ interface FrequencySelectProps {
 export function FrequencySelect({ value, onChange }: FrequencySelectProps): React.JSX.Element {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger>
+      <SelectTrigger size="sm">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

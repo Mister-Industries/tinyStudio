@@ -88,7 +88,9 @@ const components: Components = {
   h1: ({ children, className, ...props }) => (
     <h1
       {...props}
-      className={[className, 'text-2xl font-bold mb-4 text-fg-1'].filter(Boolean).join(' ')}
+      className={[className, 'text-xl font-bold mb-3 text-[var(--text-strong)] tracking-[-0.02em]']
+        .filter(Boolean)
+        .join(' ')}
     >
       {children}
     </h1>
@@ -96,7 +98,9 @@ const components: Components = {
   h2: ({ children, className, ...props }) => (
     <h2
       {...props}
-      className={[className, 'text-xl font-semibold mb-3 text-fg-1'].filter(Boolean).join(' ')}
+      className={[className, 'text-base font-bold mb-2 text-[var(--text-strong)]']
+        .filter(Boolean)
+        .join(' ')}
     >
       {children}
     </h2>
@@ -104,7 +108,9 @@ const components: Components = {
   h3: ({ children, className, ...props }) => (
     <h3
       {...props}
-      className={[className, 'text-lg font-medium mb-2 text-fg-2'].filter(Boolean).join(' ')}
+      className={[className, 'text-sm font-semibold mb-1.5 text-[var(--text-body)]']
+        .filter(Boolean)
+        .join(' ')}
     >
       {children}
     </h3>
