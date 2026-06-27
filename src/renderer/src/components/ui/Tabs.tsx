@@ -20,7 +20,7 @@ function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimi
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        'bg-primary text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-full p-[3px]',
+        'inline-flex items-stretch gap-5 border-b-[1.5px] border-[var(--border-soft)]',
         className
       )}
       {...props}
@@ -33,7 +33,8 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input text-primary-foreground dark:text-primary-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        // underline strip: brand label + a 2.5px underline that scales in under the active tab
+        "relative inline-flex items-center gap-[7px] whitespace-nowrap px-0.5 py-[9px] text-xs font-semibold text-[var(--text-muted)] outline-none transition-colors hover:text-[var(--text-body)] data-[state=active]:text-[var(--text-strong)] focus-visible:text-[var(--text-strong)] disabled:pointer-events-none disabled:opacity-50 after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[1.5px] after:h-[2.5px] after:origin-bottom after:scale-x-0 after:rounded-t-[2px] after:bg-[var(--brand)] after:transition-transform after:duration-[180ms] after:ease-[cubic-bezier(0.2,0.8,0.2,1)] after:content-[''] data-[state=active]:after:scale-x-100 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}

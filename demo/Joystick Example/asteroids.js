@@ -17,7 +17,7 @@ const DEADZONE = 90;         // ignore small wobble around center
 const START_LIVES = 3;
 
 // ---- palette (matches the visualizer) ----
-const C_BG     = [10, 15, 45];
+const C_BG     = [0, 0, 0];
 const C_SHIP   = [255, 255, 255];
 const C_ROCK   = [150, 162, 196];
 const C_BULLET = [255, 215, 0];   // gold

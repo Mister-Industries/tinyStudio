@@ -1,0 +1,274 @@
+/**
+ * Markdown — shared GitHub-flavored markdown renderer.
+ *
+ * Used by both the Documentation tab and the Studio AI chat so they stylize
+ * markdown the same way. Fenced ```mermaid blocks are rendered as diagrams
+ * instead of code; everything else falls back to themed HTML elements.
+ */
+
+import mermaid from 'mermaid'
+import React from 'react'
+import ReactMarkdown, { type Components } from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+
+// Initialize mermaid once for the whole renderer. `startOnLoad: false` because
+// we drive rendering ourselves from <MermaidDiagram />.
+let mermaidReady = false
+function ensureMermaid(): void {
+  if (mermaidReady) return
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: 'strict',
+    // Never let mermaid inject its "Syntax error" bomb graphic into the DOM —
+    // we render our own inline fallback instead.
+    suppressErrorRendering: true,
+    theme: 'dark',
+    themeVariables: {
+      fontFamily: 'inherit',
+      primaryColor: '#1e2a4a',
+      primaryTextColor: '#e6ecff',
+      primaryBorderColor: '#3a4a6a',
+      lineColor: '#5a6a8a',
+      secondaryColor: '#243156',
+      tertiaryColor: '#1a2540'
+    }
+  })
+  mermaidReady = true
+}
+
+/** Recursively flatten React markdown children into plain text. */
+function childrenToText(children: React.ReactNode): string {
+  if (children == null) return ''
+  if (typeof children === 'string' || typeof children === 'number') return String(children)
+  if (Array.isArray(children)) return children.map(childrenToText).join('')
+  if (React.isValidElement(children)) {
+    return childrenToText((children.props as { children?: React.ReactNode }).children)
+  }
+  return ''
+}
+
+/** Inspect a <pre>'s child <code> element for its language and source text. */
+function getCodeInfo(children: React.ReactNode): { lang: string | null; text: string } | null {
+  const child = React.Children.toArray(children)[0]
+  if (!React.isValidElement(child)) return null
+  const props = child.props as { className?: string; children?: React.ReactNode }
+  const match = /language-(\w+)/.exec(props.className ?? '')
+  return { lang: match ? match[1] : null, text: childrenToText(props.children) }
+}
+
+function MermaidDiagram({ chart }: { chart: string }): React.JSX.Element {
+  const ref = React.useRef<HTMLDivElement>(null)
+  const [error, setError] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    ensureMermaid()
+    let cancelled = false
+    const id = `mermaid-${Math.random().toString(36).slice(2)}`
+    ;(async () => {
+      try {
+        // Validate first (suppressErrors → returns false instead of throwing/
+        // injecting), so an invalid diagram never touches the DOM.
+        const ok = await mermaid.parse(chart, { suppressErrors: true })
+        if (!ok) {
+          if (!cancelled) setError('invalid diagram')
+          return
+        }
+        const { svg } = await mermaid.render(id, chart)
+        if (!cancelled && ref.current) ref.current.innerHTML = svg
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e))
+      } finally {
+        // belt-and-suspenders: remove any stray node mermaid may have left
+        document.getElementById(id)?.remove()
+        document.getElementById('d' + id)?.remove()
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [chart])
+
+  if (error) {
+    return (
+      <pre className="bg-navy-1000 border border-red-500/50 text-red-300 p-3 rounded-lg overflow-x-auto text-xs mb-4 whitespace-pre-wrap">
+        {chart}
+      </pre>
+    )
+  }
+  return <div ref={ref} className="my-4 flex justify-center overflow-x-auto [&_svg]:max-w-full" />
+}
+
+const components: Components = {
+  h1: ({ children, className, ...props }) => (
+    <h1
+      {...props}
+      className={[className, 'text-xl font-bold mb-3 text-[var(--text-strong)] tracking-[-0.02em]']
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </h1>
+  ),
+  h2: ({ children, className, ...props }) => (
+    <h2
+      {...props}
+      className={[className, 'text-base font-bold mb-2 text-[var(--text-strong)]']
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </h2>
+  ),
+  h3: ({ children, className, ...props }) => (
+    <h3
+      {...props}
+      className={[className, 'text-sm font-semibold mb-1.5 text-[var(--text-body)]']
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </h3>
+  ),
+  p: ({ children, className, ...props }) => (
+    <p
+      {...props}
+      className={[className, 'mb-3 text-sm text-fg-2 leading-relaxed'].filter(Boolean).join(' ')}
+    >
+      {children}
+    </p>
+  ),
+  ul: ({ children, className, ...props }) => (
+    <ul
+      {...props}
+      className={[className, 'list-disc list-inside mb-3 space-y-1 text-sm']
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </ul>
+  ),
+  ol: ({ children, className, ...props }) => (
+    <ol
+      {...props}
+      className={[className, 'list-decimal list-inside mb-3 space-y-1 text-sm']
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </ol>
+  ),
+  li: ({ children, className, ...props }) => (
+    <li {...props} className={[className, 'text-fg-2'].filter(Boolean).join(' ')}>
+      {children}
+    </li>
+  ),
+  strong: ({ children, className, ...props }) => (
+    <strong {...props} className={[className, 'font-bold text-fg-1'].filter(Boolean).join(' ')}>
+      {children}
+    </strong>
+  ),
+  em: ({ children, className, ...props }) => (
+    <em {...props} className={[className, 'italic text-fg-2'].filter(Boolean).join(' ')}>
+      {children}
+    </em>
+  ),
+  code: ({ children, className, ...props }) => (
+    <code
+      {...props}
+      className={[className, 'bg-navy-900 px-1.5 py-0.5 rounded text-sm font-mono text-pink']
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </code>
+  ),
+  pre: ({ children, className, ...props }) => {
+    const info = getCodeInfo(children)
+    if (info?.lang === 'mermaid') return <MermaidDiagram chart={info.text} />
+    return (
+      <pre
+        {...props}
+        className={[
+          className,
+          'bg-navy-1000 border border-navy-600 p-3 rounded-lg overflow-x-auto max-w-full text-xs mb-4 [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-fg-2'
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {children}
+      </pre>
+    )
+  },
+  blockquote: ({ children, className, ...props }) => (
+    <blockquote
+      {...props}
+      className={[className, 'border-l-4 border-cyan pl-4 italic text-fg-3 my-4']
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </blockquote>
+  ),
+  a: ({ children, className, ...props }) => (
+    <a
+      {...props}
+      className={[className, 'text-cyan hover:text-cyan-bright underline']
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </a>
+  ),
+  hr: ({ className, ...props }) => (
+    <hr {...props} className={[className, 'border-navy-600 my-4'].filter(Boolean).join(' ')} />
+  ),
+  table: ({ children, className, ...props }) => (
+    <div className="overflow-x-auto mb-4">
+      <table
+        {...props}
+        className={[className, 'w-full text-sm border-collapse'].filter(Boolean).join(' ')}
+      >
+        {children}
+      </table>
+    </div>
+  ),
+  th: ({ children, className, ...props }) => (
+    <th
+      {...props}
+      className={[
+        className,
+        'border border-navy-600 px-3 py-1.5 text-left font-semibold text-fg-1 bg-navy-900'
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </th>
+  ),
+  td: ({ children, className, ...props }) => (
+    <td
+      {...props}
+      className={[className, 'border border-navy-600 px-3 py-1.5 text-fg-2']
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </td>
+  )
+}
+
+export function Markdown({
+  children,
+  className
+}: {
+  children: string
+  className?: string
+}): React.JSX.Element {
+  return (
+    <div className={['[&>*:last-child]:mb-0', className].filter(Boolean).join(' ')}>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        {children}
+      </ReactMarkdown>
+    </div>
+  )
+}

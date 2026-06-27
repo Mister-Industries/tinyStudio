@@ -66,15 +66,12 @@ function getFileIcon(fileName: string | null, isSelected = false): React.ReactNo
 
   switch (iconType) {
     case 'image':
-      return <Image size={14} className={isSelected ? 'text-accent-foreground' : 'text-pink'} />
+      return <Image size={14} className={isSelected ? 'text-current' : 'text-[var(--text-muted)]'} />
     case 'code':
-      return <Code size={14} className={isSelected ? 'text-accent-foreground' : 'text-cyan'} />
+      return <Code size={14} className={isSelected ? 'text-current' : 'text-[var(--brand)]'} />
     case 'file':
       return (
-        <File
-          size={14}
-          className={isSelected ? 'text-accent-foreground' : 'text-muted-foreground'}
-        />
+        <File size={14} className={isSelected ? 'text-current' : 'text-[var(--text-faint)]'} />
       )
     default:
       return null
@@ -329,8 +326,10 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
     <>
       <div
         ref={itemRef}
-        className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent/50 group focus:ring-accent focus:ring-1 focus:outline-none ${
-          isSelected ? 'bg-accent text-accent-foreground' : isExpanded ? 'bg-accent/20' : ''
+        className={`flex items-center gap-2 px-2 py-[3px] text-[13px] rounded-[var(--radius-sm)] cursor-pointer group/row focus:outline-none ${
+          isSelected
+            ? 'bg-[var(--brand-soft)] text-[var(--brand-on)] font-semibold dark:bg-[var(--surface-card)] dark:text-[var(--text-strong)]'
+            : 'text-[var(--text-muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--text-body)]'
         }`}
         style={{ paddingLeft: `${level * 12 + 8}px` }}
         onClick={handleOpenFile}
@@ -343,14 +342,14 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
         {item.type === 'folder' ? (
           <>
             {isExpanded ? (
-              <ChevronDown size={14} className="text-muted-foreground" />
+              <ChevronDown size={14} className="text-[var(--text-faint)]" />
             ) : (
-              <ChevronRight size={14} className="text-muted-foreground" />
+              <ChevronRight size={14} className="text-[var(--text-faint)]" />
             )}
             {isExpanded ? (
-              <FolderOpen size={14} className="text-cyan" />
+              <FolderOpen size={14} className="text-[var(--yellow-deep)]" />
             ) : (
-              <Folder size={14} className="text-cyan" />
+              <Folder size={14} className="text-[var(--yellow-deep)]" />
             )}
           </>
         ) : (
@@ -367,7 +366,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
             <Button
               variant="ghost"
               size="icon"
-              className="size-4 opacity-0 group-hover:opacity-100"
+              className="size-4 opacity-0 group-hover/row:opacity-100"
               onClick={(e) => e.stopPropagation()}
               tabIndex={-1}
             >

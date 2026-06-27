@@ -1,11 +1,23 @@
 /**
  * DiagramEditor — renders a project's `diagram.json` as a live, editable circuit.
- * Parts come from the shared parts library (built-in tinyStudio boards + the
- * Fritzing-imported catalogue), drawn from their real SVG with a palette that
- * shows each part's icon. Draw orthogonal auto-routed wires pin-to-pin (with
- * waypoints), drag wire bends to re-route, switch breadboard/schematic views,
- * toggle a clean read-only view, and author/edit parts in the Parts Editor.
- * Every edit serializes back to the file in Wokwi `diagram.json` format.
+ *
+ * The wiring system is ported from the tinySchematic prototype (a Fritzing-style
+ * breadboard/schematic wiring engine): absolute bendpoints that hold their place
+ * when parts move, orthogonal auto-routing with clean pin entry, junctions
+ * (wire-to-wire taps), straight/diagonal mode (hold Shift), per-segment / bend /
+ * endpoint handle editing, double-click to add or remove a bend, and a live
+ * equipotential net model that glows everything sharing a node. Wires are drawn
+ * exactly like tinySchematic: rounded glossy tubes (dark outline → color core →
+ * animated selection dashes) with a yellow net glow.
+ *
+ * Around it: a Fritzing-style two-column components rail, a right-hand Inspector
+ * that edits the selected part's name / location / rotation / properties (e.g. a
+ * resistor's value) — or a selected wire's color — drag-to-place, draggable part
+ * labels, zoom/fit, and Wokwi `diagram.json` serialization.
+ *
+ * Styling follows the tinyStudio design system: cold neutral surfaces, the four
+ * PCB inks, a notebook dot-grid canvas, tactile controls, mono eyebrows,
+ * sentence-case copy.
  */
 
 import {
@@ -14,10 +26,13 @@ import {
   CircuitBoard,
   CodeXml,
   Grid3x3,
+  ImageDown,
   Maximize,
   MousePointer2,
   Pencil,
   Plus,
+  RotateCw,
+  Trash2,
   Eye,
   Spline,
   Zap,
@@ -37,21 +52,34 @@ import {
   type ViewKind
 } from '../lib/partsLibrary'
 import {
+  bendsFromInstructions,
+  buildWirePoints,
   calculateOrthogonalPath,
+  clampOntoSegment,
+  distanceToSegment,
+  dragSegment,
+  getWireAt,
   getWirePoints,
   instructionsFromPoints,
-  moveSegment,
-  ptsStr,
+  isStraightRoute,
   simplifyWirePoints,
   type Connection,
   type PinRef,
   type Pt
 } from '../lib/wireRouting'
+import { buildNets, meaningfulNetCount } from '../lib/circuitNets'
 import { PartsEditor } from './PartsEditor'
 
 const CANVAS_W = 1100
 const CANVAS_H = 640
 const GRID = 9.6 // 100 mil (0.1in) at 96 DPI — the standard breadboard pitch
+
+// wire look (mirrors tinySchematic config.js)
+const WIRE_W = 2.8
+const WIRE_OUTLINE_W = WIRE_W + 1.8
+const WIRE_GLOW_W = WIRE_W + 5
+const WIRE_CORNER = 4
+const NET_GLOW = 'rgba(243, 203, 0, 0.30)' // brand-yellow equipotential glow
 
 interface Part {
   id: string
@@ -76,7 +104,10 @@ interface Diagram {
   schematic: SchematicLayout
 }
 
-const WIRE_COLORS = ['#36c46b', '#ff4d6d', '#00f0ff', '#f7a400', '#ffffff', '#9b6cff']
+// The four PCB inks carry meaning (green = signal/connected, red = power/stop,
+// blue = primary, gold = warn) plus a neutral white and slate for contrast. We
+// persist concrete hex (not CSS vars) so the colors survive export.
+const WIRE_COLORS = ['#2fa46a', '#e5544b', '#42a5f5', '#f3cb00', '#ffffff', '#79818c']
 
 const uid = (): string => Math.random().toString(36).slice(2, 8)
 const snap = (v: number): number => Math.round(v / GRID) * GRID
@@ -103,28 +134,132 @@ function rotatePoint(px: number, py: number, w: number, h: number, deg: number):
   return { x: w / 2 + dx * cos - dy * sin, y: h / 2 + dx * sin + dy * cos }
 }
 
-// A small SVG thumbnail for the palette / part chips. Fritzing icon art is dark
-// line-work meant for a light background, so we put it on a light chip (keeping
-// its real colors) rather than flattening it to a silhouette.
-function Thumb({ svg }: { svg?: string }): React.JSX.Element {
-  if (!svg) return <CircuitBoard size={24} className="text-fg-2 shrink-0" />
+const eqRef = (a: PinRef, b: PinRef): boolean => {
+  if (typeof a === 'string' && typeof b === 'string') return a === b
+  if (typeof a === 'object' && typeof b === 'object')
+    return Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5
+  return false
+}
+
+// Drag a bendpoint while keeping its neighbouring segments orthogonal (ported
+// from tinySchematic's vertex-drag logic).
+function vertexDrag(orig: Pt[], index: number, x: number, y: number): Pt[] {
+  const points = orig.map((p) => ({ x: p.x, y: p.y }))
+  points[index].x = x
+  points[index].y = y
+  if (index > 0) {
+    if (
+      Math.abs(points[index - 1].y - points[index].y) <
+      Math.abs(points[index - 1].x - points[index].x)
+    ) {
+      if (index - 1 > 0) points[index - 1].y = points[index].y
+      else points[index].y = points[index - 1].y
+    } else {
+      if (index - 1 > 0) points[index - 1].x = points[index].x
+      else points[index].x = points[index - 1].x
+    }
+  }
+  if (index < points.length - 1) {
+    if (
+      Math.abs(points[index + 1].y - points[index].y) <
+      Math.abs(points[index + 1].x - points[index].x)
+    ) {
+      if (index + 1 < points.length - 1) points[index + 1].y = points[index].y
+      else points[index].y = points[index + 1].y
+    } else {
+      if (index + 1 < points.length - 1) points[index + 1].x = points[index].x
+      else points[index].x = points[index + 1].x
+    }
+  }
+  return points
+}
+
+// Build an SVG path with rounded corners (a quadratic fillet at each bend),
+// matching tinySchematic's arcTo wire look.
+function roundedPath(points: Pt[], r = WIRE_CORNER): string {
+  if (points.length < 2) return ''
+  if (points.length === 2) return `M${points[0].x} ${points[0].y} L${points[1].x} ${points[1].y}`
+  let d = `M${points[0].x} ${points[0].y}`
+  for (let i = 1; i < points.length - 1; i++) {
+    const p = points[i - 1]
+    const c = points[i]
+    const n = points[i + 1]
+    const d1 = Math.hypot(c.x - p.x, c.y - p.y) || 1
+    const d2 = Math.hypot(n.x - c.x, n.y - c.y) || 1
+    const rr = Math.max(0, Math.min(r, d1 / 2, d2 / 2))
+    const a = { x: c.x - ((c.x - p.x) / d1) * rr, y: c.y - ((c.y - p.y) / d1) * rr }
+    const b = { x: c.x + ((n.x - c.x) / d2) * rr, y: c.y + ((n.y - c.y) / d2) * rr }
+    d += ` L${a.x} ${a.y} Q${c.x} ${c.y} ${b.x} ${b.y}`
+  }
+  const last = points[points.length - 1]
+  d += ` L${last.x} ${last.y}`
+  return d
+}
+
+// A darker shade of a wire's color for its "3D" outline (Fritzing tube look).
+function darken(hex: string, f = 0.55): string {
+  const m = /^#?([0-9a-fA-F]{6})$/.exec(hex.trim())
+  if (!m) return 'rgba(0,0,0,0.45)'
+  const n = parseInt(m[1], 16)
+  const r = Math.round(((n >> 16) & 255) * f)
+  const g = Math.round(((n >> 8) & 255) * f)
+  const b = Math.round((n & 255) * f)
+  return `rgb(${r}, ${g}, ${b})`
+}
+
+// Escape text for safe inclusion in exported SVG markup.
+function escapeXml(s: string): string {
+  return s.replace(
+    /[<>&'"]/g,
+    (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c] as string
+  )
+}
+
+// Display family/section names in sentence case (the catalogue stores some in
+// ALL CAPS, e.g. "CAPACITOR [BIDIRECTIONAL]") — the brand voice is no all-caps.
+function titleCase(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/\b([a-z])/g, (m) => m.toUpperCase())
+    .replace(/\bIc\b/, 'IC')
+}
+
+// A small SVG thumbnail for the palette / part tiles. Fritzing icon art is dark
+// line-work meant for a light background, so we put it on a light chip.
+function Thumb({ svg, size = 40 }: { svg?: string; size?: number }): React.JSX.Element {
+  if (!svg)
+    return (
+      <div
+        className="shrink-0 rounded-md grid place-items-center"
+        style={{ width: size, height: size, background: 'var(--warm-150)' }}
+      >
+        <CircuitBoard size={20} className="text-warm-500" style={{ color: '#79818c' }} />
+      </div>
+    )
   return (
     <div
-      className="size-10 shrink-0 rounded-md bg-[#eef1f7] p-1 grid place-items-center [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto"
+      className="shrink-0 rounded-md p-1 grid place-items-center [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto"
+      style={{ width: size, height: size, background: 'var(--warm-150)' }}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   )
 }
 
+type HandleKind = 'vertex' | 'edge' | 'endpoint'
+
 export function DiagramEditor({
   content,
   onChange,
-  onOpenCode
+  onOpenCode,
+  onEditChange
 }: {
   content: string
   onChange: (next: string) => void
   // Switch to the Code view with diagram.json selected (the `</>` button).
   onOpenCode?: () => void
+  // Fires when the view/edit toggle flips (used to free space by closing the
+  // docs panel when you start editing).
+  onEditChange?: (editing: boolean) => void
 }): React.JSX.Element {
   const diagram: Diagram = React.useMemo(() => {
     try {
@@ -141,25 +276,38 @@ export function DiagramEditor({
     }
   }, [content])
 
-  const [view, setView] = React.useState<ViewKind>('breadboard')
+  const [view] = React.useState<ViewKind>('breadboard')
   const [editable, setEditable] = React.useState(false)
   const [grid, setGrid] = React.useState(true)
   const [editorPart, setEditorPart] = React.useState<PartDef | null | undefined>(undefined) // undefined = closed
   const [selPart, setSelPart] = React.useState<string | null>(null)
   const [selWire, setSelWire] = React.useState<number | null>(null)
   const [wireColor, setWireColor] = React.useState(WIRE_COLORS[0])
-  const [armed, setArmed] = React.useState<{ from: string; points: Pt[] } | null>(null)
+  const [armed, setArmed] = React.useState<{
+    from: PinRef
+    points: Pt[]
+    straight: boolean
+  } | null>(null)
   const [hoverPin, setHoverPin] = React.useState<{ id: string; pin: string } | null>(null)
+  const [hoverWire, setHoverWire] = React.useState<number | null>(null)
   const [mouse, setMouse] = React.useState<Pt>({ x: 0, y: 0 })
+  const [straight, setStraight] = React.useState(false)
   const [collapsed, setCollapsed] = React.useState<Set<string>>(new Set())
   const [editPts, setEditPts] = React.useState<Pt[] | null>(null) // selected-wire editing buffer
+  const [newAttr, setNewAttr] = React.useState('')
   const [tick, force] = React.useReducer((n) => n + 1, 0)
 
   const viewRef = React.useRef<HTMLDivElement>(null)
   const innerRef = React.useRef<HTMLDivElement>(null)
-  const drag = React.useRef<{ id: string; offX: number; offY: number } | null>(null)
+  const drag = React.useRef<{
+    id: string
+    offX: number
+    offY: number
+    affected: { i: number; bends: Pt[]; straight: boolean }[]
+  } | null>(null)
+  const labelDrag = React.useRef<{ id: string; ox: number; oy: number } | null>(null)
   const pan = React.useRef<{ x: number; y: number } | null>(null)
-  const handleDrag = React.useRef<{ idx: number } | null>(null)
+  const handleDrag = React.useRef<{ kind: HandleKind } | null>(null)
   const [cam, setCam] = React.useState({ scale: 0.62, tx: 0, ty: 0 })
   const scale = cam.scale
   const didInit = React.useRef(false)
@@ -182,7 +330,7 @@ export function DiagramEditor({
         left: p.left,
         top: p.top,
         ...(p.rotate ? { rotate: p.rotate } : {}),
-        ...(p.attrs ? { attrs: p.attrs } : {})
+        ...(p.attrs && Object.keys(p.attrs).length ? { attrs: p.attrs } : {})
       })),
       connections: d.connections || diagram.connections,
       ...(hasSch ? { schematic: sch } : {})
@@ -202,37 +350,82 @@ export function DiagramEditor({
   // wire route in the current view (schematic starts clean, then diverges)
   const routeFor = (c: Connection): string[] =>
     view === 'schematic' ? (diagram.schematic.routes[connKey(c)] ?? []) : c[3] || []
-  const wirePts = (c: Connection): Pt[] =>
-    getWirePoints([c[0], c[1], c[2], routeFor(c)] as Connection, resolve)
 
   // ── geometry ──────────────────────────────────────────────────────────────
 
-  const pinAbs = (part: Part, pin: string): Pt | null => {
+  const pinAbsAt = (part: Part, pin: string, left: number, top: number): Pt | null => {
     const def = getPart(part.type)
     if (!def) return null
     const v = viewFor(def, view)
     const p = v?.pins[pin]
     if (!p) return null
-    const [left, top] = partXY(part)
     const rp = part.rotate ? rotatePoint(p[0], p[1], v!.w, v!.h, part.rotate) : { x: p[0], y: p[1] }
     return { x: left + rp.x, y: top + rp.y }
   }
-  const resolve = (ref: PinRef): Pt | null => {
-    if (typeof ref === 'object') return ref
-    const [id, pin] = ref.split(':')
-    const part = diagram.parts.find((p) => p.id === id)
-    return part ? pinAbs(part, pin) : null
+  const pinAbs = (part: Part, pin: string): Pt | null => {
+    const [left, top] = partXY(part)
+    return pinAbsAt(part, pin, left, top)
   }
+  // Resolve refs, optionally overriding some parts' positions (used mid-drag so
+  // bends stay fixed in space while a part moves).
+  const resolveWith =
+    (posMap: Record<string, [number, number]>) =>
+    (ref: PinRef): Pt | null => {
+      if (typeof ref === 'object') return ref
+      const [id, pin] = ref.split(':')
+      const part = diagram.parts.find((p) => p.id === id)
+      if (!part) return null
+      const [left, top] = posMap[id] ?? partXY(part)
+      return pinAbsAt(part, pin, left, top)
+    }
+  const resolve = resolveWith({})
+  const wirePts = (c: Connection): Pt[] => getWirePoints(c, resolve, routeFor(c))
+
   const canvasPoint = (e: { clientX: number; clientY: number }): Pt => {
     const r = innerRef.current!.getBoundingClientRect()
     return { x: (e.clientX - r.left) / scale, y: (e.clientY - r.top) / scale }
   }
+  const getPinAtWorld = (wx: number, wy: number): { id: string; pin: string; pos: Pt } | null => {
+    const tol = 8 / scale
+    for (const part of diagram.parts) {
+      const def = getPart(part.type)
+      const v = def && viewFor(def, view)
+      if (!v) continue
+      for (const pin of Object.keys(v.pins)) {
+        const pos = pinAbs(part, pin)
+        if (pos && Math.hypot(pos.x - wx, pos.y - wy) < tol) return { id: part.id, pin, pos }
+      }
+    }
+    return null
+  }
+
+  // ── equipotential net model (drives net glow + the routed count) ────────────
+
+  const netModel = React.useMemo(
+    () => buildNets(diagram.parts, diagram.connections, (c) => wirePts(c)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [diagram, view, tick]
+  )
+  // Highlight the net under the hovered pin, hovered wire, or selected wire — so
+  // you can see (and effectively "select") a whole net.
+  const highlightNet = React.useMemo(() => {
+    if (hoverPin) {
+      const i = netModel.pinToNet.get(`${hoverPin.id}:${hoverPin.pin}`)
+      if (i != null) return i
+    }
+    if (hoverWire != null) {
+      const i = netModel.connToNet[hoverWire]
+      if (i >= 0) return i
+    }
+    if (selWire != null) {
+      const i = netModel.connToNet[selWire]
+      if (i >= 0) return i
+    }
+    return -1
+  }, [hoverPin, hoverWire, selWire, netModel])
 
   // ── camera ──────────────────────────────────────────────────────────────────
 
-  // Fit to the actual content (parts + wires) with a little padding, not the
-  // whole 1100×640 canvas — so the circuit fills the viewport instead of floating
-  // tiny in the middle. Falls back to centering the canvas when empty.
   const fitView = (): void => {
     const el = viewRef.current
     if (!el) return
@@ -259,7 +452,6 @@ export function DiagramEditor({
       }
     }
     if (!isFinite(minX)) {
-      // empty — center the canvas at a comfortable zoom
       const f = Math.min(el.clientWidth / CANVAS_W, el.clientHeight / CANVAS_H, 1)
       setCam({
         scale: f,
@@ -282,7 +474,6 @@ export function DiagramEditor({
       ty: (el.clientHeight - bh * f) / 2 - minY * f
     })
   }
-  // initial fit, and one more once the referenced parts have loaded (so sizes are known)
   React.useEffect(() => {
     if (didInit.current) return
     if (diagram.parts.length === 0 || diagram.parts.every((p) => getPart(p.type))) {
@@ -326,7 +517,73 @@ export function DiagramEditor({
     window.removeEventListener('pointerup', onPanUp)
   }
 
-  // ── part drag ─────────────────────────────────────────────────────────────
+  // ── shared: re-sync a part's wires after a discrete move/rotate ──────────────
+
+  const touches = (ref: PinRef, id: string): boolean =>
+    typeof ref === 'string' && ref.split(':')[0] === id
+
+  const collectFrozen = (id: string): { i: number; bends: Pt[]; straight: boolean }[] => {
+    const f: { i: number; bends: Pt[]; straight: boolean }[] = []
+    diagram.connections.forEach((c, i) => {
+      if (!touches(c[0], id) && !touches(c[1], id)) return
+      const route = routeFor(c)
+      const s = resolve(c[0])
+      const t = resolve(c[1])
+      if (s && t)
+        f.push({ i, bends: bendsFromInstructions(route, s, t), straight: isStraightRoute(route) })
+    })
+    return f
+  }
+  // Apply a new parts array (and optional schematic-pos patch) for `id`, holding
+  // its wires' bends fixed in world space.
+  const commitParts = (
+    parts: Part[],
+    id: string,
+    schPosPatch?: Record<string, [number, number]>
+  ): void => {
+    const frozen = collectFrozen(id)
+    const schPos = schPosPatch
+      ? { ...diagram.schematic.pos, ...schPosPatch }
+      : diagram.schematic.pos
+    const resolveNew = (ref: PinRef): Pt | null => {
+      if (typeof ref === 'object') return ref
+      const [pid, pin] = ref.split(':')
+      const part = parts.find((p) => p.id === pid)
+      if (!part) return null
+      const [l, t] =
+        view === 'schematic' ? schPos[pid] || [part.left, part.top] : [part.left, part.top]
+      return pinAbsAt(part, pin, l, t)
+    }
+    if (view === 'schematic') {
+      const routes = { ...diagram.schematic.routes }
+      frozen.forEach((a) => {
+        const c = diagram.connections[a.i]
+        const s = resolveNew(c[0])
+        const t = resolveNew(c[1])
+        if (s && t)
+          routes[connKey(c)] = instructionsFromPoints(
+            buildWirePoints(s, a.bends, t, a.straight),
+            a.straight
+          )
+      })
+      write({ parts, schematic: { pos: schPos, routes } })
+    } else {
+      const conns = diagram.connections.slice()
+      frozen.forEach((a) => {
+        const c = diagram.connections[a.i]
+        const s = resolveNew(c[0])
+        const t = resolveNew(c[1])
+        if (s && t) {
+          const nc = conns[a.i].slice() as Connection
+          nc[3] = instructionsFromPoints(buildWirePoints(s, a.bends, t, a.straight), a.straight)
+          conns[a.i] = nc
+        }
+      })
+      write({ parts, connections: conns })
+    }
+  }
+
+  // ── part drag (absolute bendpoints: bends hold while the part moves) ─────────
 
   const onPartDown = (e: React.PointerEvent, part: Part): void => {
     if (!editable || (e.target as HTMLElement).closest('.pin-hit')) return
@@ -338,7 +595,8 @@ export function DiagramEditor({
     drag.current = {
       id: part.id,
       offX: (e.clientX - r.left) / scale - left,
-      offY: (e.clientY - r.top) / scale - top
+      offY: (e.clientY - r.top) / scale - top,
+      affected: collectFrozen(part.id)
     }
     window.addEventListener('pointermove', onPartMove)
     window.addEventListener('pointerup', onPartUp)
@@ -349,19 +607,60 @@ export function DiagramEditor({
     const r = innerRef.current!.getBoundingClientRect()
     const nx = snap((e.clientX - r.left) / scale - d.offX)
     const ny = snap((e.clientY - r.top) / scale - d.offY)
+    const resolveNext = resolveWith({ [d.id]: [nx, ny] })
+    const updates: { i: number; key: string; instr: string[] }[] = []
+    for (const a of d.affected) {
+      const c = diagram.connections[a.i]
+      const src = resolveNext(c[0])
+      const tgt = resolveNext(c[1])
+      if (!src || !tgt) continue
+      const pts = buildWirePoints(src, a.bends, tgt, a.straight)
+      updates.push({ i: a.i, key: connKey(c), instr: instructionsFromPoints(pts, a.straight) })
+    }
     if (view === 'schematic') {
-      // schematic moves are independent — store in the overlay, leave breadboard alone
-      write({
-        schematic: { ...diagram.schematic, pos: { ...diagram.schematic.pos, [d.id]: [nx, ny] } }
-      })
+      const routes = { ...diagram.schematic.routes }
+      updates.forEach((u) => (routes[u.key] = u.instr))
+      write({ schematic: { pos: { ...diagram.schematic.pos, [d.id]: [nx, ny] }, routes } })
     } else {
-      write({ parts: diagram.parts.map((p) => (p.id === d.id ? { ...p, left: nx, top: ny } : p)) })
+      const parts = diagram.parts.map((p) => (p.id === d.id ? { ...p, left: nx, top: ny } : p))
+      const conns = diagram.connections.slice()
+      updates.forEach((u) => {
+        const nc = conns[u.i].slice() as Connection
+        nc[3] = u.instr
+        conns[u.i] = nc
+      })
+      write({ parts, connections: conns })
     }
   }
   const onPartUp = (): void => {
     drag.current = null
     window.removeEventListener('pointermove', onPartMove)
     window.removeEventListener('pointerup', onPartUp)
+  }
+
+  // drag a part's title label to reposition it (offset stored on the part)
+  const onLabelDown = (e: React.PointerEvent, part: Part): void => {
+    if (!editable) return
+    e.stopPropagation()
+    setSelPart(part.id)
+    selectWire(null)
+    const start = canvasPoint(e)
+    const off = (part.attrs?.labelOffset as [number, number]) || [0, 0]
+    labelDrag.current = { id: part.id, ox: off[0] - start.x, oy: off[1] - start.y }
+    const move = (ev: PointerEvent): void => {
+      const ld = labelDrag.current
+      if (!ld) return
+      const cp = canvasPoint(ev)
+      const offset: [number, number] = [Math.round(ld.ox + cp.x), Math.round(ld.oy + cp.y)]
+      patchAttr(ld.id, 'labelOffset', offset)
+    }
+    const up = (): void => {
+      labelDrag.current = null
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
   }
 
   // ── wiring ──────────────────────────────────────────────────────────────────
@@ -371,6 +670,31 @@ export function DiagramEditor({
     setEditPts(i == null ? null : wirePts(diagram.connections[i]))
   }
 
+  const commitNewWire = (from: PinRef, to: PinRef, instr: string[]): void => {
+    const conn: Connection =
+      view === 'schematic' ? [from, to, wireColor] : [from, to, wireColor, instr]
+    if (view === 'schematic') {
+      write({
+        connections: [...diagram.connections, conn],
+        schematic: {
+          ...diagram.schematic,
+          routes: { ...diagram.schematic.routes, [connKey(conn)]: instr }
+        }
+      })
+    } else {
+      write({ connections: [...diagram.connections, conn] })
+    }
+  }
+
+  const finalizeSegment = (target: Pt, clean: boolean): { pts: Pt[]; str: boolean } => {
+    const pts = [...armed!.points]
+    const last = pts[pts.length - 1]
+    const str = armed!.straight || straight
+    if (str) pts.push(target)
+    else pts.push(...calculateOrthogonalPath(last.x, last.y, target.x, target.y, clean).slice(1))
+    return { pts: simplifyWirePoints(pts), str }
+  }
+
   const onPinClick = (e: React.MouseEvent, part: Part, pin: string): void => {
     if (!editable) return
     e.stopPropagation()
@@ -378,52 +702,54 @@ export function DiagramEditor({
     const pos = pinAbs(part, pin)
     if (!pos) return
     if (!armed) {
-      setArmed({ from: ref, points: [pos] })
+      setArmed({ from: ref, points: [pos], straight: false })
       setSelPart(null)
       selectWire(null)
       return
     }
-    if (armed.from === ref) {
+    if (eqRef(armed.from, ref)) {
       setArmed(null)
       return
     }
-    // finalize using the SAME clean-entry routing the live preview showed, so the
-    // committed wire matches what you saw (no L→7 mirror flip on click)
-    const pts = [...armed.points]
-    const last = pts[pts.length - 1]
-    pts.push(...calculateOrthogonalPath(last.x, last.y, pos.x, pos.y, true).slice(1))
-    const instr = instructionsFromPoints(simplifyWirePoints(pts))
+    const { pts, str } = finalizeSegment(pos, true)
+    const instr = instructionsFromPoints(pts, str)
     const exists = diagram.connections.some(
-      (c) => (c[0] === armed.from && c[1] === ref) || (c[0] === ref && c[1] === armed.from)
+      (c) => (eqRef(c[0], armed.from) && c[1] === ref) || (c[0] === ref && eqRef(c[1], armed.from))
     )
-    if (!exists) {
-      if (view === 'schematic') {
-        // store the route in the schematic overlay; the breadboard route stays empty
-        const conn: Connection = [armed.from, ref, wireColor]
-        write({
-          connections: [...diagram.connections, conn],
-          schematic: {
-            ...diagram.schematic,
-            routes: { ...diagram.schematic.routes, [connKey(conn)]: instr }
-          }
-        })
-      } else {
-        write({ connections: [...diagram.connections, [armed.from, ref, wireColor, instr]] })
-      }
-    }
+    if (!exists) commitNewWire(armed.from, ref, instr)
+    setArmed(null)
+  }
+
+  // tap a junction onto an existing wire `i` at the click point
+  const tapJunction = (e: React.MouseEvent, i: number): void => {
+    const cp = canvasPoint(e)
+    const pts = wirePts(diagram.connections[i])
+    const hit = getWireAt(cp.x, cp.y, [diagram.connections[i]], () => pts, scale)
+    const seg = hit ? { p1: hit.p1, p2: hit.p2 } : { p1: pts[0], p2: pts[1] }
+    const jp = clampOntoSegment(seg.p1, seg.p2, snap(cp.x), snap(cp.y))
+    const { pts: fp, str } = finalizeSegment(jp, false)
+    commitNewWire(armed!.from, { x: jp.x, y: jp.y }, instructionsFromPoints(fp, str))
     setArmed(null)
   }
 
   const onCanvasClick = (e: React.MouseEvent): void => {
     if (armed) {
       const cp = canvasPoint(e)
+      const hit = getWireAt(cp.x, cp.y, diagram.connections, (c) => wirePts(c), scale)
+      if (hit) {
+        tapJunction(e, hit.index)
+        return
+      }
       const target = { x: snap(cp.x), y: snap(cp.y) }
       const last = armed.points[armed.points.length - 1]
-      const pts = [
-        ...armed.points,
-        ...calculateOrthogonalPath(last.x, last.y, target.x, target.y, false).slice(1)
-      ]
-      setArmed({ ...armed, points: pts })
+      const seg = straight
+        ? [last, target]
+        : calculateOrthogonalPath(last.x, last.y, target.x, target.y, false)
+      setArmed({
+        ...armed,
+        points: [...armed.points, ...seg.slice(1)],
+        straight: armed.straight || straight
+      })
       return
     }
     setSelPart(null)
@@ -433,71 +759,150 @@ export function DiagramEditor({
     if (armed) setMouse(canvasPoint(e))
   }
 
-  // ── wire editing — drag a whole segment perpendicular (Fritzing-style) ───────
+  // ── wire editing — endpoint / bend / segment handles ─────────────────────────
 
-  const startHandleDrag = (e: React.PointerEvent, idx: number): void => {
+  const resolveEndpointTarget = (wx: number, wy: number, selfIdx: number): PinRef => {
+    const pin = getPinAtWorld(wx, wy)
+    if (pin) return `${pin.id}:${pin.pin}`
+    const hit = getWireAt(wx, wy, diagram.connections, (c) => wirePts(c), scale)
+    if (hit && hit.index !== selfIdx) return clampOntoSegment(hit.p1, hit.p2, snap(wx), snap(wy))
+    return { x: snap(wx), y: snap(wy) }
+  }
+
+  const writeWire = (i: number, opts: { instr: string[]; from?: PinRef; to?: PinRef }): void => {
+    const c = diagram.connections[i]
+    const oldKey = connKey(c)
+    const nc = c.slice() as Connection
+    if (opts.from !== undefined) nc[0] = opts.from
+    if (opts.to !== undefined) nc[1] = opts.to
+    const newKey = connKey(nc)
+    const conns = diagram.connections.slice()
+    if (view === 'schematic') {
+      const routes = { ...diagram.schematic.routes }
+      if (oldKey !== newKey) delete routes[oldKey]
+      routes[newKey] = opts.instr
+      conns[i] = nc
+      write({ connections: conns, schematic: { ...diagram.schematic, routes } })
+    } else {
+      nc[3] = opts.instr
+      conns[i] = nc
+      if (oldKey !== newKey && diagram.schematic.routes[oldKey]) {
+        const routes = { ...diagram.schematic.routes }
+        routes[newKey] = routes[oldKey]
+        delete routes[oldKey]
+        write({ connections: conns, schematic: { ...diagram.schematic, routes } })
+      } else {
+        write({ connections: conns })
+      }
+    }
+  }
+
+  // recolor an existing wire (conn[2] is the logical color, shared across views)
+  const recolorWire = (i: number, color: string): void => {
+    const conns = diagram.connections.slice()
+    const nc = conns[i].slice() as Connection
+    nc[2] = color
+    conns[i] = nc
+    write({ connections: conns })
+  }
+  // colour swatch: recolour the selected wire if one is selected; else set the
+  // colour future wires are drawn in.
+  const pickColor = (color: string): void => {
+    setWireColor(color)
+    if (selWire != null) recolorWire(selWire, color)
+  }
+
+  const startHandleDrag = (
+    e: React.PointerEvent,
+    kind: HandleKind,
+    idx: number,
+    end?: 0 | 1
+  ): void => {
     if (!editable || selWire == null || !editPts) return
     e.stopPropagation()
     const wireIdx = selWire
-    const original = editPts
-    const horizontal = Math.abs(original[idx].y - original[idx + 1].y) < 0.001
-    let live = original
-    handleDrag.current = { idx }
+    const orig = editPts
+    const str = isStraightRoute(routeFor(diagram.connections[wireIdx]))
+    const axis: 'horizontal' | 'vertical' =
+      kind === 'edge' && Math.abs(orig[idx].y - orig[idx + 1].y) < 0.001 ? 'horizontal' : 'vertical'
+    const endIdx = end === 0 ? 0 : orig.length - 1
+    let live = orig
+    let lastWorld = { x: 0, y: 0 }
+    handleDrag.current = { kind }
     const move = (ev: PointerEvent): void => {
       const cp = canvasPoint(ev)
-      // a horizontal segment moves in y, a vertical one in x — snapped to the grid
-      const perp = horizontal ? snap(cp.y) : snap(cp.x)
-      live = moveSegment(original, idx, perp)
+      if (kind === 'vertex') {
+        live = vertexDrag(orig, idx, snap(cp.x), snap(cp.y))
+      } else if (kind === 'edge') {
+        live = dragSegment(orig, idx, axis, snap(cp.x), snap(cp.y))
+      } else {
+        lastWorld = { x: cp.x, y: cp.y }
+        const p = { x: snap(cp.x), y: snap(cp.y) }
+        live = orig.map((pt, k) => (k === endIdx ? p : pt))
+      }
       setEditPts(live)
     }
     const up = (): void => {
-      handleDrag.current = null
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
-      // commit (outside any state updater): instructionsFromPoints orthogonalizes
-      // any diagonal drag into clean h/v moves
-      const c = diagram.connections[wireIdx]
-      if (!c) return
-      const instr = instructionsFromPoints(simplifyWirePoints(live))
-      if (view === 'schematic') {
-        write({
-          schematic: {
-            ...diagram.schematic,
-            routes: { ...diagram.schematic.routes, [connKey(c)]: instr }
-          }
-        })
-      } else {
-        const conns = diagram.connections.slice()
-        const nc = c.slice() as Connection
-        nc[3] = instr
-        conns[wireIdx] = nc
-        write({ connections: conns })
+      handleDrag.current = null
+      let from: PinRef | undefined
+      let to: PinRef | undefined
+      if (kind === 'endpoint') {
+        const tgt = resolveEndpointTarget(lastWorld.x, lastWorld.y, wireIdx)
+        if (end === 0) from = tgt
+        else to = tgt
+        const rp = typeof tgt === 'object' ? tgt : resolve(tgt)
+        if (rp) live = live.map((pt, k) => (k === endIdx ? rp : pt))
       }
+      writeWire(wireIdx, { instr: instructionsFromPoints(simplifyWirePoints(live), str), from, to })
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
   }
 
-  const rerouteWire = (i: number): void => {
-    // double-click: clear the route so it auto-routes cleanly (kills loops)
+  const onWireDoubleClick = (e: React.MouseEvent, i: number): void => {
+    if (!editable) return
+    e.stopPropagation()
     const c = diagram.connections[i]
-    if (!c) return
-    if (view === 'schematic') {
-      const routes = { ...diagram.schematic.routes }
-      delete routes[connKey(c)]
-      write({ schematic: { ...diagram.schematic, routes } })
-      setEditPts(wirePts([c[0], c[1], c[2]] as Connection))
-    } else {
-      const conns = diagram.connections.slice()
-      const nc = c.slice() as Connection
-      nc[3] = []
-      conns[i] = nc
-      write({ connections: conns })
-      setEditPts(getWirePoints(nc, resolve))
+    const str = isStraightRoute(routeFor(c))
+    const cp = canvasPoint(e)
+    const pts = wirePts(c)
+    const handleR = 7 / scale
+    for (let k = 1; k < pts.length - 1; k++) {
+      if (Math.hypot(pts[k].x - cp.x, pts[k].y - cp.y) < handleR) {
+        const next = simplifyWirePoints(pts.filter((_, j) => j !== k))
+        writeWire(i, { instr: instructionsFromPoints(next, str) })
+        setEditPts(next)
+        return
+      }
+    }
+    const hit = getWireAt(cp.x, cp.y, [c], () => pts, scale)
+    if (hit) {
+      const next = pts.slice()
+      next.splice(hit.segmentIndex + 1, 0, { x: snap(cp.x), y: snap(cp.y) })
+      writeWire(i, { instr: instructionsFromPoints(next, str) })
+      selectWire(i)
+      setEditPts(next)
     }
   }
 
-  // keep the edit buffer in sync when the wire/route changes externally
+  // wire <g> click: tap a junction while drawing, else select the wire
+  const onWireClick = (e: React.MouseEvent, i: number): void => {
+    e.stopPropagation()
+    if (armed) {
+      tapJunction(e, i)
+      return
+    }
+    if (!editable) {
+      selectWire(i) // view-mode: select to inspect / highlight its net
+      setSelPart(null)
+      return
+    }
+    selectWire(i)
+    setSelPart(null)
+  }
+
   React.useEffect(() => {
     if (selWire != null && !handleDrag.current) {
       const c = diagram.connections[selWire]
@@ -507,7 +912,7 @@ export function DiagramEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content, view])
 
-  // ── palette / add / delete ──────────────────────────────────────────────────
+  // ── palette / add / delete / properties ─────────────────────────────────────
 
   const addPart = async (type: string, at?: Pt): Promise<void> => {
     const def = getPart(type) || (await loadPart(type))
@@ -520,7 +925,6 @@ export function DiagramEditor({
     const top = at ? Math.round(at.y - h / 2) : Math.round(CANVAS_H / 2 - h / 2)
     const pid = type + '_' + uid().slice(0, 3)
     const parts = [...diagram.parts, { id: pid, type, left, top }]
-    // when adding in schematic view, pin its schematic position to the drop point
     write(
       view === 'schematic'
         ? {
@@ -545,19 +949,79 @@ export function DiagramEditor({
     if (def) setEditorPart(def)
   }
 
-  // rotate a part 90° (shared orientation across views); works mid-drag too
-  const rotatePart = (id: string): void => {
+  // patch a part's attrs (used by the Inspector + label drag)
+  const patchAttr = (id: string, key: string, value: unknown): void => {
     write({
       parts: diagram.parts.map((p) =>
-        p.id === id ? { ...p, rotate: ((p.rotate || 0) + 90) % 360 } : p
+        p.id === id ? { ...p, attrs: { ...(p.attrs || {}), [key]: value } } : p
       )
     })
   }
+  const removeAttr = (id: string, key: string): void => {
+    write({
+      parts: diagram.parts.map((p) => {
+        if (p.id !== id) return p
+        const attrs = { ...(p.attrs || {}) }
+        delete attrs[key]
+        return { ...p, attrs }
+      })
+    })
+  }
+  // move a part to an absolute location in the current view (Inspector inputs)
+  const movePartTo = (id: string, left: number, top: number): void => {
+    if (view === 'schematic') {
+      commitParts(diagram.parts, id, { [id]: [left, top] })
+    } else {
+      commitParts(
+        diagram.parts.map((p) => (p.id === id ? { ...p, left, top } : p)),
+        id
+      )
+    }
+  }
+  const setRotation = (id: string, deg: number): void => {
+    commitParts(
+      diagram.parts.map((p) => (p.id === id ? { ...p, rotate: ((deg % 360) + 360) % 360 } : p)),
+      id
+    )
+  }
+  const rotatePart = (id: string): void => {
+    const part = diagram.parts.find((p) => p.id === id)
+    if (part) setRotation(id, (part.rotate || 0) + 90)
+  }
+
+  const deletePart = (id: string): void => {
+    const keep = (c: Connection): boolean =>
+      (typeof c[0] !== 'string' || c[0].split(':')[0] !== id) &&
+      (typeof c[1] !== 'string' || c[1].split(':')[0] !== id)
+    const routes = { ...diagram.schematic.routes }
+    const pos = { ...diagram.schematic.pos }
+    delete pos[id]
+    diagram.connections.forEach((c) => {
+      if (!keep(c)) delete routes[connKey(c)]
+    })
+    write({
+      parts: diagram.parts.filter((p) => p.id !== id),
+      connections: diagram.connections.filter(keep),
+      schematic: { pos, routes }
+    })
+    setSelPart(null)
+  }
+  const deleteWire = (i: number): void => {
+    const gone = diagram.connections[i]
+    const routes = { ...diagram.schematic.routes }
+    if (gone) delete routes[connKey(gone)]
+    write({
+      connections: diagram.connections.filter((_, j) => j !== i),
+      schematic: { ...diagram.schematic, routes }
+    })
+    selectWire(null)
+  }
 
   React.useEffect(() => {
-    const h = (e: KeyboardEvent): void => {
-      if (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return
-      // spacebar / R rotates the dragging or selected part
+    const down = (e: KeyboardEvent): void => {
+      if (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))
+        return
+      if (e.key === 'Shift') setStraight(true)
       if (editable && (e.key === ' ' || e.key === 'r' || e.key === 'R')) {
         const id = drag.current?.id || selPart
         if (id) {
@@ -572,38 +1036,20 @@ export function DiagramEditor({
         selectWire(null)
       }
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return
-        if (selWire != null) {
-          const gone = diagram.connections[selWire]
-          const routes = { ...diagram.schematic.routes }
-          if (gone) delete routes[connKey(gone)]
-          write({
-            connections: diagram.connections.filter((_, j) => j !== selWire),
-            schematic: { ...diagram.schematic, routes }
-          })
-          selectWire(null)
-        } else if (selPart) {
-          const keep = (c: Connection): boolean =>
-            (typeof c[0] !== 'string' || c[0].split(':')[0] !== selPart) &&
-            (typeof c[1] !== 'string' || c[1].split(':')[0] !== selPart)
-          const routes = { ...diagram.schematic.routes }
-          const pos = { ...diagram.schematic.pos }
-          delete pos[selPart]
-          diagram.connections.forEach((c) => {
-            if (!keep(c)) delete routes[connKey(c)]
-          })
-          write({
-            parts: diagram.parts.filter((p) => p.id !== selPart),
-            connections: diagram.connections.filter(keep),
-            schematic: { pos, routes }
-          })
-          setSelPart(null)
-        }
+        if (selWire != null) deleteWire(selWire)
+        else if (selPart) deletePart(selPart)
       }
     }
-    window.addEventListener('keydown', h)
-    return () => window.removeEventListener('keydown', h)
-  }, [selPart, selWire, diagram])
+    const up = (e: KeyboardEvent): void => {
+      if (e.key === 'Shift') setStraight(false)
+    }
+    window.addEventListener('keydown', down)
+    window.addEventListener('keyup', up)
+    return () => {
+      window.removeEventListener('keydown', down)
+      window.removeEventListener('keyup', up)
+    }
+  }, [selPart, selWire, diagram, editable, view, straight])
 
   const previewPts = React.useMemo((): Pt[] | null => {
     if (!armed) return null
@@ -618,16 +1064,18 @@ export function DiagramEditor({
         clean = true
       }
     }
+    if (straight) return [...armed.points, target]
     return [
       ...armed.points,
       ...calculateOrthogonalPath(last.x, last.y, target.x, target.y, clean).slice(1)
     ]
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [armed, mouse, hoverPin, diagram.parts, view])
+  }, [armed, mouse, hoverPin, diagram.parts, view, straight])
 
   const isAI = (diagram.author || '').includes('Studio AI')
+  // tactile pixel-art toolbar buttons (design-system .tactile-bordered)
   const tool =
-    'h-8 px-2.5 flex items-center gap-1.5 rounded-lg bg-navy-700/80 border border-navy-500 text-fg-2 text-xs hover:bg-navy-500 hover:text-fg-1 transition-colors'
+    'tactile-bordered h-8 px-2.5 flex items-center gap-1.5 rounded-md bg-surface-card text-text-muted text-xs hover:text-text-body active:translate-y-px'
   const families = partsByFamily()
   const isOpen = (fam: string): boolean => !collapsed.has(fam)
   const toggleFam = (fam: string): void =>
@@ -637,75 +1085,205 @@ export function DiagramEditor({
       else n.add(fam)
       return n
     })
+  const netCount = meaningfulNetCount(netModel)
+  // Junction solder dots: a free-point endpoint takes the color of the wire it
+  // lands on (the one you attached it to), so the joint reads as part of it.
+  const junctions: { pt: Pt; color: string }[] = []
+  diagram.connections.forEach((c, ci) => {
+    ;[c[0], c[1]].forEach((r) => {
+      if (typeof r !== 'object') return
+      let color = view === 'schematic' ? 'var(--text-strong)' : (c[2] as string) || '#2fa46a'
+      if (view !== 'schematic') {
+        for (let oi = 0; oi < diagram.connections.length; oi++) {
+          if (oi === ci) continue
+          const pts = wirePts(diagram.connections[oi])
+          let on = false
+          for (let s = 0; s < pts.length - 1; s++) {
+            if (distanceToSegment(r, pts[s], pts[s + 1]) < 2) {
+              on = true
+              break
+            }
+          }
+          if (on) {
+            color = (diagram.connections[oi][2] as string) || color
+            break
+          }
+        }
+      }
+      junctions.push({ pt: r, color })
+    })
+  })
+
+  const labelOf = (part: Part): string => {
+    const def = getPart(part.type)
+    return (part.attrs?.label as string) || def?.label || part.type
+  }
+  const selectedPart = selPart ? diagram.parts.find((p) => p.id === selPart) : null
+
+  // Export the diagram (parts + wires + a tinyStudio watermark) to a PNG by
+  // composing a standalone SVG and rasterizing it through a canvas.
+  const exportImage = (): void => {
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+    for (const part of diagram.parts) {
+      const def = getPart(part.type)
+      const v = def && viewFor(def, view)
+      if (!v) continue
+      const [l, t] = partXY(part)
+      minX = Math.min(minX, l)
+      minY = Math.min(minY, t)
+      maxX = Math.max(maxX, l + v.w + 60) // room for labels
+      maxY = Math.max(maxY, t + v.h + 18)
+    }
+    for (const c of diagram.connections) {
+      for (const p of wirePts(c)) {
+        minX = Math.min(minX, p.x)
+        minY = Math.min(minY, p.y)
+        maxX = Math.max(maxX, p.x)
+        maxY = Math.max(maxY, p.y)
+      }
+    }
+    if (!isFinite(minX)) return
+    const pad = 36
+    minX -= pad
+    minY -= pad
+    maxX += pad
+    maxY += pad + 16 // extra room for the watermark
+    const W = Math.round(maxX - minX)
+    const H = Math.round(maxY - minY)
+    const cs = getComputedStyle(document.documentElement)
+    const bg = (cs.getPropertyValue('--bg-sunken') || '#1e1f22').trim()
+
+    const wires = diagram.connections
+      .map((c) => {
+        const pts = wirePts(c)
+        if (pts.length < 2) return ''
+        const core = (c[2] as string) || '#2fa46a'
+        const d = roundedPath(pts)
+        return `<path d="${d}" fill="none" stroke="${darken(core)}" stroke-width="${WIRE_OUTLINE_W}" stroke-linejoin="round" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${core}" stroke-width="${WIRE_W}" stroke-linejoin="round" stroke-linecap="round"/>`
+      })
+      .join('')
+    const dots = junctions
+      .map((j) => `<circle cx="${j.pt.x}" cy="${j.pt.y}" r="3" fill="${j.color}"/>`)
+      .join('')
+    const partsSvg = diagram.parts
+      .map((part) => {
+        const def = getPart(part.type)
+        const v = def && viewFor(def, view)
+        if (!v) return ''
+        const [l, t] = partXY(part)
+        // strip any width/height on the part's <svg> then size+place it
+        const inner = v.svg
+          .replace(/<svg([^>]*?)\swidth="[^"]*"/i, '<svg$1')
+          .replace(/<svg([^>]*?)\sheight="[^"]*"/i, '<svg$1')
+          .replace('<svg', `<svg x="${l}" y="${t}" width="${v.w}" height="${v.h}"`)
+        const rot = part.rotate ? ` transform="rotate(${part.rotate} ${l + v.w / 2} ${t + v.h / 2})"` : ''
+        const label = `<text x="${l}" y="${t + v.h + 13}" fill="#969ba3" font-family="Plus Jakarta Sans, sans-serif" font-size="11">${escapeXml(labelOf(part))}</text>`
+        return `<g${rot}>${inner}</g>${label}`
+      })
+      .join('')
+    const watermark = `<text x="${maxX - 10}" y="${maxY - 10}" text-anchor="end" fill="#79818c" fill-opacity="0.75" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="600">tinyStudio</text>`
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="${minX} ${minY} ${W} ${H}"><rect x="${minX}" y="${minY}" width="${W}" height="${H}" fill="${bg}"/>${wires}${dots}${partsSvg}${watermark}</svg>`
+
+    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const img = new Image()
+    img.onload = () => {
+      const sf = 2
+      const canvas = document.createElement('canvas')
+      canvas.width = W * sf
+      canvas.height = H * sf
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        URL.revokeObjectURL(url)
+        return
+      }
+      ctx.scale(sf, sf)
+      ctx.drawImage(img, 0, 0)
+      URL.revokeObjectURL(url)
+      canvas.toBlob((png) => {
+        if (!png) return
+        const a = document.createElement('a')
+        const href = URL.createObjectURL(png)
+        a.href = href
+        a.download = 'circuit.png'
+        a.click()
+        setTimeout(() => URL.revokeObjectURL(href), 1000)
+      }, 'image/png')
+    }
+    img.onerror = () => URL.revokeObjectURL(url)
+    img.src = url
+  }
 
   return (
-    <div className="size-full relative flex bg-navy-900 overflow-hidden">
+    <div className="size-full relative flex bg-bg overflow-hidden pb-7">
       {/* components rail (edit mode only) */}
       {editable && (
-        <div className="w-52 shrink-0 min-h-0 relative z-20 border-r border-navy-600 bg-navy-800 flex flex-col">
-          <div className="flex items-center justify-between px-3 py-2 border-b border-navy-600 shrink-0">
-            <span className="text-[11px] font-semibold tracking-[0.16em] text-fg-3">
-              COMPONENTS
-            </span>
+        <div className="w-60 shrink-0 min-h-0 relative z-20 border-r border-border-default bg-bg-raised flex flex-col">
+          <div className="h-9 flex items-center justify-between px-3 border-b border-border-default shrink-0">
+            <span className="text-[13px] font-semibold text-text-body">Components</span>
             <button
-              className="text-fg-3 hover:text-cyan"
+              className="text-text-muted hover:text-brand"
               title="New part…"
               onClick={() => setEditorPart(null)}
             >
               <Plus size={15} />
             </button>
           </div>
-          {/* wire color — kept at the top so it's always visible */}
-          <div className="flex items-center gap-1.5 px-3 py-2 border-b border-navy-600 shrink-0">
-            <span className="text-[10px] text-fg-4 mr-1">Wire</span>
+          {/* wire color — recolours the selected wire, else sets the next-wire colour */}
+          <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border-default shrink-0">
+            <span className="text-[11px] text-text-muted mr-1">Wire</span>
             {WIRE_COLORS.map((c) => (
               <button
                 key={c}
-                onClick={() => setWireColor(c)}
-                className="w-4 h-4 rounded-full border-2"
+                onClick={() => pickColor(c)}
+                className="w-4 h-4 rounded-full border-2 transition-transform hover:scale-110"
                 style={{
                   background: c,
-                  borderColor: wireColor === c ? 'var(--fg-1)' : 'transparent'
+                  borderColor: wireColor === c ? 'var(--brand)' : 'rgba(255,255,255,0.18)'
                 }}
+                title={selWire != null ? 'Recolor selected wire' : 'Set wire color'}
               />
             ))}
           </div>
-          <div className="flex-1 min-h-0 overflow-y-auto p-2 flex flex-col gap-1">
+          <div className="flex-1 min-h-0 overflow-y-auto p-2 flex flex-col gap-2">
             {families.map((group) => (
               <div key={group.family}>
                 <button
-                  className="w-full flex items-center gap-1 px-1 py-1 text-[10px] uppercase tracking-wider text-fg-4 hover:text-fg-2"
+                  className="w-full flex items-center gap-1 px-1 py-1 text-[11px] font-medium text-text-muted hover:text-text-body"
                   onClick={() => toggleFam(group.family)}
                 >
                   {isOpen(group.family) ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                  <span className="truncate">{group.family}</span>
-                  <span className="ml-auto text-fg-4/70">{group.parts.length}</span>
+                  <span className="truncate">{titleCase(group.family)}</span>
+                  <span className="ml-auto text-text-faint/70">{group.parts.length}</span>
                 </button>
                 {isOpen(group.family) && (
-                  <div className="flex flex-col gap-1 pb-1">
+                  <div className="grid grid-cols-2 gap-1.5 pt-1 pb-1">
                     {group.parts.map((c: PartMeta) => (
                       <div
                         key={c.type}
                         draggable
                         onDragStart={(e) => e.dataTransfer.setData('text/tinystudio-part', c.type)}
                         onDoubleClick={() => addPart(c.type)}
-                        className="group flex items-center gap-2 px-2 py-1.5 rounded-lg border border-navy-600 bg-navy-700/50 hover:bg-navy-600 cursor-grab active:cursor-grabbing"
-                        title={`${c.label} — drag onto the canvas (or double-click)`}
+                        className="group relative flex flex-col items-center gap-1 p-2 rounded-lg border border-border-default bg-surface-card hover:bg-bg-sunken hover:-translate-y-px transition cursor-grab active:cursor-grabbing"
+                        title={`${c.label} · ${c.pins} pins — drag onto the canvas (or double-click)`}
                       >
-                        <Thumb svg={c.icon} />
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs text-fg-1 truncate">{c.label}</div>
-                          <div className="text-[10px] text-fg-4 truncate">{c.pins} pins</div>
+                        <Thumb svg={c.icon} size={44} />
+                        <div className="text-[10px] text-text-body text-center leading-tight line-clamp-2 w-full">
+                          {c.label}
                         </div>
                         <button
-                          className="opacity-0 group-hover:opacity-100 text-fg-4 hover:text-cyan"
+                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-text-faint hover:text-brand"
                           title="Edit this part"
                           onClick={(e) => {
                             e.stopPropagation()
                             editExisting(c.type)
                           }}
                         >
-                          <Pencil size={12} />
+                          <Pencil size={11} />
                         </button>
                       </div>
                     ))}
@@ -720,36 +1298,32 @@ export function DiagramEditor({
       {/* canvas + tools */}
       <div className="flex-1 relative min-w-0 overflow-hidden">
         <div className="absolute top-3 left-3 z-10 flex gap-1.5">
-          {/* view/edit — icon-only toggle (defaults to view) */}
           <button
-            className={`${tool} w-8 justify-center px-0 ${editable ? 'text-cyan border-cyan/40' : ''}`}
+            className={`${tool} w-8 justify-center px-0 ${editable ? 'text-brand' : ''}`}
             onClick={() => {
-              setEditable((v) => !v)
+              const next = !editable
+              setEditable(next)
               setArmed(null)
               setSelPart(null)
               selectWire(null)
+              onEditChange?.(next)
             }}
             title={editable ? 'Editing — click for view-only' : 'View-only — click to edit'}
           >
             {editable ? <Eye size={15} /> : <Pencil size={15} />}
           </button>
-          {/* breadboard / schematic — icon toggle */}
-          <button
-            className={`${tool} w-8 justify-center px-0`}
-            onClick={() => setView((v) => (v === 'breadboard' ? 'schematic' : 'breadboard'))}
-            title={
-              view === 'breadboard'
-                ? 'Breadboard view — click for schematic'
-                : 'Schematic view — click for breadboard'
-            }
-          >
-            {view === 'breadboard' ? <CircuitBoard size={15} /> : <Spline size={15} />}
-          </button>
         </div>
 
         <div className="absolute top-3 right-3.5 z-10 flex gap-1.5">
           <button
-            className={`${tool} w-8 justify-center px-0 ${grid ? 'text-cyan border-cyan/40' : ''}`}
+            className={`${tool} w-8 justify-center px-0`}
+            onClick={exportImage}
+            title="Export circuit as image (PNG)"
+          >
+            <ImageDown size={15} />
+          </button>
+          <button
+            className={`${tool} w-8 justify-center px-0 ${grid ? 'text-brand' : ''}`}
             onClick={() => setGrid((g) => !g)}
             title="Toggle grid"
           >
@@ -764,7 +1338,6 @@ export function DiagramEditor({
           </button>
         </div>
 
-        {/* zoom / fit — bottom-right */}
         <div className="absolute bottom-3 right-3.5 z-10 flex gap-1.5">
           <button
             className={`${tool} w-8 justify-center px-0`}
@@ -798,11 +1371,11 @@ export function DiagramEditor({
           style={{
             touchAction: 'none',
             cursor: armed ? 'crosshair' : 'default',
-            backgroundColor: '#1c2647',
+            backgroundColor: 'var(--bg-sunken)',
             backgroundImage: grid
-              ? 'radial-gradient(circle, rgba(255,255,255,0.10) 0.8px, transparent 1px)'
+              ? 'radial-gradient(var(--dot-color) 1.1px, transparent 1.1px)'
               : 'none',
-            backgroundSize: `${22 * scale}px ${22 * scale}px`,
+            backgroundSize: `${GRID * scale}px ${GRID * scale}px`,
             backgroundPosition: `${cam.tx}px ${cam.ty}px`
           }}
           onWheel={onWheel}
@@ -827,9 +1400,6 @@ export function DiagramEditor({
               transformOrigin: '0 0'
             }}
           >
-            {/* wires render ABOVE part bodies (zIndex 5); the svg itself ignores
-                pointer events so clicks fall through to parts/pins, while each
-                wire <g> and the handles opt back in */}
             <svg
               width={CANVAS_W}
               height={CANVAS_H}
@@ -845,79 +1415,89 @@ export function DiagramEditor({
                 const pts = selWire === i && editPts ? editPts : wirePts(c)
                 if (pts.length < 2) return null
                 const sel = selWire === i
-                // schematic wires are all white; breadboard keeps the chosen color
-                const wcolor = view === 'schematic' ? '#ffffff' : (c[2] as string) || '#36c46b'
+                const onHotNet = highlightNet >= 0 && netModel.connToNet[i] === highlightNet
+                const core =
+                  view === 'schematic' ? 'var(--text-strong)' : (c[2] as string) || '#2fa46a'
+                const outline = view === 'schematic' ? 'rgba(0,0,0,0.45)' : darken(core)
+                const d = roundedPath(pts)
                 return (
                   <g
                     key={i}
-                    style={{
-                      cursor: editable ? 'pointer' : 'default',
-                      pointerEvents: editable ? 'stroke' : 'none'
-                    }}
-                    onClick={(e) => {
-                      if (!editable) return
-                      e.stopPropagation()
-                      selectWire(i)
-                      setSelPart(null)
-                    }}
-                    onDoubleClick={(e) => {
-                      if (!editable) return
-                      e.stopPropagation()
-                      rerouteWire(i)
-                    }}
+                    style={{ cursor: editable ? 'pointer' : 'default', pointerEvents: 'stroke' }}
+                    onPointerEnter={() => setHoverWire(i)}
+                    onPointerLeave={() => setHoverWire((h) => (h === i ? null : h))}
+                    onClick={(e) => onWireClick(e, i)}
+                    onDoubleClick={(e) => onWireDoubleClick(e, i)}
                   >
-                    {/* thinner, glossy tube: dark edge → color → soft white sheen */}
-                    <polyline
-                      points={ptsStr(pts)}
+                    {/* equipotential net glow */}
+                    {onHotNet && (
+                      <path
+                        d={d}
+                        fill="none"
+                        stroke={NET_GLOW}
+                        strokeWidth={WIRE_GLOW_W}
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                      />
+                    )}
+                    {/* darker outline → glossy tube */}
+                    <path
+                      d={d}
                       fill="none"
-                      stroke="rgba(0,0,0,0.35)"
-                      strokeWidth={4}
+                      stroke={outline}
+                      strokeWidth={WIRE_OUTLINE_W}
                       strokeLinejoin="round"
                       strokeLinecap="round"
                     />
-                    <polyline
-                      points={ptsStr(pts)}
+                    <path
+                      d={d}
                       fill="none"
-                      stroke={wcolor}
-                      strokeWidth={2.8}
-                      strokeLinejoin="round"
-                      strokeLinecap="round"
-                    />
-                    <polyline
-                      points={ptsStr(pts)}
-                      fill="none"
-                      stroke="rgba(255,255,255,0.45)"
-                      strokeWidth={0.9}
+                      stroke={core}
+                      strokeWidth={WIRE_W}
                       strokeLinejoin="round"
                       strokeLinecap="round"
                     />
                     {sel && (
-                      <polyline
-                        points={ptsStr(pts)}
+                      <path
+                        d={d}
                         fill="none"
-                        stroke="#ffffff"
-                        strokeWidth={1.5}
-                        strokeDasharray="5 5"
+                        stroke="rgba(255,255,255,0.85)"
+                        strokeWidth={1}
+                        strokeDasharray="4 4"
                         strokeLinejoin="round"
-                      />
+                      >
+                        <animate
+                          attributeName="stroke-dashoffset"
+                          from="0"
+                          to="-8"
+                          dur="0.5s"
+                          repeatCount="indefinite"
+                        />
+                      </path>
                     )}
                   </g>
                 )
               })}
 
+              {/* junction solder dots where a wire taps another wire */}
+              {junctions.map((j, k) => (
+                <circle key={`j${k}`} cx={j.pt.x} cy={j.pt.y} r={3} fill={j.color} />
+              ))}
+
               {previewPts && (
-                <polyline
-                  points={ptsStr(previewPts)}
+                <path
+                  d={roundedPath(previewPts)}
                   fill="none"
-                  stroke={view === 'schematic' ? '#ffffff' : wireColor}
-                  strokeWidth={2.8}
+                  stroke={view === 'schematic' ? 'var(--text-strong)' : wireColor}
+                  strokeWidth={WIRE_W}
                   strokeLinejoin="round"
                   strokeLinecap="round"
                   opacity={0.6}
                 />
               )}
 
-              {/* one handle per segment — drag it to slide the whole segment */}
+              {/* handles on the selected wire: bend (circle), segment (square),
+                  endpoint (ring) — Fritzing-style */}
               {editable && selWire != null && editPts && (
                 <g style={{ pointerEvents: 'auto' }}>
                   {editPts.slice(0, -1).map((p, i) => {
@@ -927,16 +1507,45 @@ export function DiagramEditor({
                     return (
                       <rect
                         key={`s${i}`}
-                        x={m.x - (horizontal ? 6 : 3)}
-                        y={m.y - (horizontal ? 3 : 6)}
-                        width={horizontal ? 12 : 6}
-                        height={horizontal ? 6 : 12}
-                        rx={2}
-                        fill="var(--cyan)"
+                        x={m.x - 3.5}
+                        y={m.y - 3.5}
+                        width={7}
+                        height={7}
+                        rx={1.5}
+                        fill="var(--brand)"
                         stroke="#fff"
                         strokeWidth={1}
                         style={{ cursor: horizontal ? 'ns-resize' : 'ew-resize' }}
-                        onPointerDown={(e) => startHandleDrag(e, i)}
+                        onPointerDown={(e) => startHandleDrag(e, 'edge', i)}
+                      />
+                    )
+                  })}
+                  {editPts.slice(1, -1).map((p, i) => (
+                    <circle
+                      key={`v${i}`}
+                      cx={p.x}
+                      cy={p.y}
+                      r={4}
+                      fill="var(--brand)"
+                      stroke="#fff"
+                      strokeWidth={1.2}
+                      style={{ cursor: 'move' }}
+                      onPointerDown={(e) => startHandleDrag(e, 'vertex', i + 1)}
+                    />
+                  ))}
+                  {[0, 1].map((end) => {
+                    const p = end === 0 ? editPts[0] : editPts[editPts.length - 1]
+                    return (
+                      <circle
+                        key={`e${end}`}
+                        cx={p.x}
+                        cy={p.y}
+                        r={4.5}
+                        fill="var(--surface-card)"
+                        stroke="var(--brand)"
+                        strokeWidth={2}
+                        style={{ cursor: 'grab' }}
+                        onPointerDown={(e) => startHandleDrag(e, 'endpoint', 0, end as 0 | 1)}
                       />
                     )
                   })}
@@ -953,12 +1562,13 @@ export function DiagramEditor({
                   <div
                     key={part.id}
                     style={{ position: 'absolute', left: pLeft, top: pTop, zIndex: 2 }}
-                    className="px-2 py-1 rounded bg-navy-700 border border-navy-500 text-[10px] text-fg-4"
+                    className="px-2 py-1 rounded bg-surface-card border border-border-default text-[10px] text-text-faint"
                   >
                     {part.type}…
                   </div>
                 )
               }
+              const labelOff = (part.attrs?.labelOffset as [number, number]) || [0, 0]
               return (
                 <div
                   key={part.id}
@@ -971,7 +1581,7 @@ export function DiagramEditor({
                     zIndex: 2,
                     transform: part.rotate ? `rotate(${part.rotate}deg)` : undefined,
                     transformOrigin: 'center',
-                    outline: selPart === part.id ? '2px solid var(--cyan)' : 'none',
+                    outline: selPart === part.id ? '2px solid var(--brand)' : 'none',
                     outlineOffset: 4,
                     borderRadius: 6,
                     cursor: editable ? 'move' : 'default'
@@ -991,9 +1601,12 @@ export function DiagramEditor({
                   {editable &&
                     Object.keys(v.pins).map((pin) => {
                       const [px, py] = v.pins[pin]
-                      const on =
-                        (armed && armed.from === `${part.id}:${pin}`) ||
-                        (hoverPin?.id === part.id && hoverPin?.pin === pin)
+                      const armedHere = armed && eqRef(armed.from, `${part.id}:${pin}`)
+                      const hovered = hoverPin?.id === part.id && hoverPin?.pin === pin
+                      const onHotNet =
+                        highlightNet >= 0 &&
+                        netModel.pinToNet.get(`${part.id}:${pin}`) === highlightNet
+                      const on = armedHere || hovered
                       return (
                         <div
                           key={pin}
@@ -1016,24 +1629,42 @@ export function DiagramEditor({
                           onClick={(e) => onPinClick(e, part, pin)}
                         >
                           <svg width="16" height="16">
+                            {onHotNet && !on && (
+                              <circle
+                                cx="8"
+                                cy="8"
+                                r="5.5"
+                                fill="var(--yellow)"
+                                fillOpacity={0.4}
+                              />
+                            )}
                             <circle
                               cx="8"
                               cy="8"
-                              r={on ? 3 : 2.2}
-                              fill={on ? 'var(--cyan)' : '#ffffff'}
-                              fillOpacity={on ? 1 : 0.8}
-                              stroke={on ? 'var(--cyan-bright)' : 'rgba(255,255,255,0.4)'}
+                              r={on ? 3.4 : 2.6}
+                              fill={on ? 'var(--brand)' : 'var(--yellow)'}
+                              stroke={on ? 'var(--brand)' : 'var(--border-strong)'}
                               strokeWidth="1"
                             />
                           </svg>
                         </div>
                       )
                     })}
+                  {/* draggable title label */}
                   <div
-                    className="absolute text-[11px] text-fg-2 whitespace-nowrap pointer-events-none"
-                    style={{ left: 0, top: v.h + 4 }}
+                    className="absolute text-[11px] whitespace-nowrap select-none"
+                    style={{
+                      left: labelOff[0],
+                      top: v.h + 4 + labelOff[1],
+                      transform: part.rotate ? `rotate(${-part.rotate}deg)` : undefined,
+                      transformOrigin: 'left top',
+                      color: selPart === part.id ? 'var(--brand)' : 'var(--text-muted)',
+                      cursor: editable ? 'move' : 'default',
+                      pointerEvents: editable ? 'auto' : 'none'
+                    }}
+                    onPointerDown={(e) => onLabelDown(e, part)}
                   >
-                    {def.label}
+                    {labelOf(part)}
                   </div>
                 </div>
               )
@@ -1041,49 +1672,107 @@ export function DiagramEditor({
 
             {diagram.parts.length === 0 && (
               <div
-                className="absolute flex flex-col items-center gap-2 text-fg-4 text-sm text-center"
+                className="absolute flex flex-col items-center gap-2 text-text-faint text-sm text-center"
                 style={{ left: CANVAS_W / 2 - 160, top: CANVAS_H / 2 - 40, width: 320 }}
               >
                 <CircuitBoard size={42} />
                 <div>
-                  Drag parts from the Components rail — or double-click one to drop it here.
+                  Drag parts from the components rail — or double-click one to drop it here.
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* footer */}
-        <div className="absolute bottom-3 left-3 z-10 flex gap-2 text-[11px]">
-          <span className="px-2.5 py-1 rounded-full bg-navy-700/80 border border-navy-500 font-mono text-fg-2">
-            Parts: {diagram.parts.length} · Connections: {diagram.connections.length}
+        {/* tinyStudio watermark — sits above the bottom UI, bottom-right, and is
+            baked into the exported image */}
+        <div className="absolute bottom-12 right-4 z-0 pointer-events-none select-none text-[12px] font-semibold text-text-faint/70">
+          tinyStudio
+        </div>
+
+        {/* footer (kept clear of the zoom cluster on the right; wraps upward) */}
+        <div className="absolute bottom-3 left-3 right-[176px] z-10 flex flex-wrap gap-2 text-[11px]">
+          <span className="px-2.5 py-1 rounded-full bg-surface-card border border-border-default text-text-body">
+            Parts: {diagram.parts.length} · Connections: {diagram.connections.length} · Nets:{' '}
+            {netCount}
           </span>
           {isAI && (
-            <span className="px-2.5 py-1 rounded-full bg-navy-700/80 border border-pink/40 text-pink-bright flex items-center gap-1">
+            <span className="px-2.5 py-1 rounded-full bg-surface-card border border-brand/40 text-brand flex items-center gap-1">
               Auto-wired by Studio AI
             </span>
           )}
           {!editable ? (
-            <span className="px-2.5 py-1 rounded-full bg-navy-700/80 border border-navy-500 text-fg-4 flex items-center gap-1">
-              <Eye size={12} /> View-only · click Edit to make changes
+            <span className="px-2.5 py-1 rounded-full bg-surface-card border border-border-default text-text-muted flex items-center gap-1">
+              <Eye size={12} /> View-only · hover a wire to light its net · click edit to change
             </span>
           ) : armed ? (
-            <span className="px-2.5 py-1 rounded-full bg-navy-700/80 border border-cyan/40 text-cyan flex items-center gap-1">
-              <Zap size={12} /> Click a pin to connect · click empty space for a bend · Esc to
-              cancel
+            <span className="px-2.5 py-1 rounded-full bg-surface-card border border-brand/40 text-brand flex items-center gap-1">
+              <Zap size={12} /> Click a pin or wire to connect · click for a bend · hold Shift for
+              straight · Esc to cancel
             </span>
           ) : selWire != null ? (
-            <span className="px-2.5 py-1 rounded-full bg-navy-700/80 border border-cyan/40 text-cyan flex items-center gap-1">
-              Drag a handle to slide that segment · double-click wire to auto-route · Del to remove
+            <span className="px-2.5 py-1 rounded-full bg-surface-card border border-brand/40 text-brand flex items-center gap-1">
+              Drag a handle to reshape · double-click to add/remove a bend · pick a color · Del to
+              remove
             </span>
           ) : (
-            <span className="px-2.5 py-1 rounded-full bg-navy-700/80 border border-navy-500 text-fg-4 flex items-center gap-1">
+            <span className="px-2.5 py-1 rounded-full bg-surface-card border border-border-default text-text-muted flex items-center gap-1">
               <MousePointer2 size={12} /> Scroll to zoom · middle/Alt-drag to pan · click a pin to
               wire
             </span>
           )}
         </div>
       </div>
+
+      {/* inspector (edit mode only) */}
+      {editable && (
+        <div className="w-64 shrink-0 min-h-0 relative z-20 border-l border-border-default bg-bg-raised flex flex-col">
+          <div className="h-9 flex items-center px-3 border-b border-border-default shrink-0">
+            <span className="text-[13px] font-semibold text-text-body">Inspector</span>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto p-3 flex flex-col gap-3 text-xs">
+            {selectedPart ? (
+              <Inspector
+                key={selectedPart.id}
+                part={selectedPart}
+                def={getPart(selectedPart.type)}
+                view={view}
+                xy={partXY(selectedPart)}
+                connCount={
+                  diagram.connections.filter(
+                    (c) => touches(c[0], selectedPart.id) || touches(c[1], selectedPart.id)
+                  ).length
+                }
+                onLabel={(val) => patchAttr(selectedPart.id, 'label', val)}
+                onMove={(l, t) => movePartTo(selectedPart.id, l, t)}
+                onRotate={(deg) => setRotation(selectedPart.id, deg)}
+                onSetAttr={(k, val) => patchAttr(selectedPart.id, k, val)}
+                onRemoveAttr={(k) => removeAttr(selectedPart.id, k)}
+                onDelete={() => deletePart(selectedPart.id)}
+                newAttr={newAttr}
+                setNewAttr={setNewAttr}
+              />
+            ) : selWire != null ? (
+              <WireInspector
+                color={(diagram.connections[selWire]?.[2] as string) || '#2fa46a'}
+                colors={WIRE_COLORS}
+                netPins={
+                  netModel.connToNet[selWire] >= 0
+                    ? netModel.nets[netModel.connToNet[selWire]].length
+                    : 0
+                }
+                onColor={(c) => recolorWire(selWire, c)}
+                onDelete={() => deleteWire(selWire)}
+              />
+            ) : (
+              <div className="text-text-faint text-[11px] leading-relaxed">
+                Select a component to edit its name, location, rotation, and properties — or a wire
+                to recolor it.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {editorPart !== undefined && (
         <PartsEditor
@@ -1097,5 +1786,221 @@ export function DiagramEditor({
         />
       )}
     </div>
+  )
+}
+
+// ── Inspector subcomponents ───────────────────────────────────────────────────
+
+const field =
+  'bg-bg-sunken border border-border-default rounded px-2 py-1 text-text-strong outline-none focus:border-brand w-full'
+const rowLabel = 'text-[11px] text-text-muted'
+
+function Inspector({
+  part,
+  def,
+  view,
+  xy,
+  connCount,
+  onLabel,
+  onMove,
+  onRotate,
+  onSetAttr,
+  onRemoveAttr,
+  onDelete,
+  newAttr,
+  setNewAttr
+}: {
+  part: { id: string; type: string; rotate?: number; attrs?: Record<string, unknown> }
+  def?: PartDef
+  view: ViewKind
+  xy: [number, number]
+  connCount: number
+  onLabel: (v: string) => void
+  onMove: (l: number, t: number) => void
+  onRotate: (deg: number) => void
+  onSetAttr: (k: string, v: string) => void
+  onRemoveAttr: (k: string) => void
+  onDelete: () => void
+  newAttr: string
+  setNewAttr: (v: string) => void
+}): React.JSX.Element {
+  const label = (part.attrs?.label as string) ?? def?.label ?? part.type
+  // attrs to expose as editable properties (hide internal layout keys)
+  const propRows = Object.entries(part.attrs || {}).filter(
+    ([k]) => k !== 'label' && k !== 'labelOffset'
+  )
+  return (
+    <>
+      <div className="flex items-center gap-2">
+        <CircuitBoard size={16} className="text-brand shrink-0" />
+        <input
+          className={`${field} font-semibold`}
+          value={label}
+          onChange={(e) => onLabel(e.target.value)}
+        />
+      </div>
+      <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 items-center text-text-muted">
+        <span className={rowLabel}>Type</span>
+        <span className="text-text-body truncate text-[11px]">{part.type}</span>
+        <span className={rowLabel}>Family</span>
+        <span className="text-text-body truncate">{def?.family ? titleCase(def.family) : '—'}</span>
+        <span className={rowLabel}>Wires</span>
+        <span className="text-text-body">{connCount}</span>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className={rowLabel}>Location ({view})</span>
+        <div className="flex gap-2">
+          <input
+            type="number"
+            className={`${field}`}
+            value={Math.round(xy[0])}
+            onChange={(e) => onMove(parseFloat(e.target.value) || 0, xy[1])}
+          />
+          <input
+            type="number"
+            className={`${field}`}
+            value={Math.round(xy[1])}
+            onChange={(e) => onMove(xy[0], parseFloat(e.target.value) || 0)}
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <span className={rowLabel}>Rotation</span>
+        <div className="flex items-center gap-1">
+          <select
+            className={`${field} w-auto`}
+            value={part.rotate || 0}
+            onChange={(e) => onRotate(parseInt(e.target.value, 10))}
+          >
+            {[0, 90, 180, 270].map((d) => (
+              <option key={d} value={d}>
+                {d}°
+              </option>
+            ))}
+          </select>
+          <button
+            className="tactile-bordered rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand"
+            title="Rotate 90°"
+            onClick={() => onRotate((part.rotate || 0) + 90)}
+          >
+            <RotateCw size={13} />
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <span className={rowLabel}>Properties</span>
+        {propRows.length === 0 && (
+          <div className="text-[11px] text-text-faint">
+            No properties yet. Add one below — e.g. a resistor’s{' '}
+            <span className="text-text-body">value</span>.
+          </div>
+        )}
+        {propRows.map(([k, val]) => (
+          <div key={k} className="flex items-center gap-1.5">
+            <span className="text-[11px] text-text-muted w-16 truncate" title={k}>
+              {k}
+            </span>
+            <input
+              className={`${field}`}
+              value={String(val ?? '')}
+              onChange={(e) => onSetAttr(k, e.target.value)}
+            />
+            <button
+              className="text-text-faint hover:text-status-error shrink-0"
+              title="Remove property"
+              onClick={() => onRemoveAttr(k)}
+            >
+              <Trash2 size={13} />
+            </button>
+          </div>
+        ))}
+        <div className="flex items-center gap-1.5">
+          <input
+            className={`${field}`}
+            placeholder="new property…"
+            value={newAttr}
+            onChange={(e) => setNewAttr(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && newAttr.trim()) {
+                onSetAttr(newAttr.trim(), '')
+                setNewAttr('')
+              }
+            }}
+          />
+          <button
+            className="tactile-bordered rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand shrink-0"
+            title="Add property"
+            onClick={() => {
+              if (newAttr.trim()) {
+                onSetAttr(newAttr.trim(), '')
+                setNewAttr('')
+              }
+            }}
+          >
+            <Plus size={13} />
+          </button>
+        </div>
+      </div>
+
+      <button
+        className="mt-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-border-default text-text-muted hover:text-status-error hover:border-status-error/40"
+        onClick={onDelete}
+      >
+        <Trash2 size={13} /> Delete component
+      </button>
+    </>
+  )
+}
+
+function WireInspector({
+  color,
+  colors,
+  netPins,
+  onColor,
+  onDelete
+}: {
+  color: string
+  colors: string[]
+  netPins: number
+  onColor: (c: string) => void
+  onDelete: () => void
+}): React.JSX.Element {
+  return (
+    <>
+      <div className="flex items-center gap-2">
+        <Spline size={16} className="text-brand shrink-0" />
+        <span className="text-text-strong font-semibold">Wire</span>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <span className={rowLabel}>Color</span>
+        <div className="flex items-center gap-2">
+          {colors.map((c) => (
+            <button
+              key={c}
+              onClick={() => onColor(c)}
+              className="w-5 h-5 rounded-full border-2 transition-transform hover:scale-110"
+              style={{
+                background: c,
+                borderColor:
+                  c.toLowerCase() === color.toLowerCase() ? 'var(--brand)' : 'rgba(255,255,255,0.18)'
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 items-center">
+        <span className={rowLabel}>Net pins</span>
+        <span className="text-text-body">{netPins}</span>
+      </div>
+      <button
+        className="mt-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-border-default text-text-muted hover:text-status-error hover:border-status-error/40"
+        onClick={onDelete}
+      >
+        <Trash2 size={13} /> Delete wire
+      </button>
+    </>
   )
 }

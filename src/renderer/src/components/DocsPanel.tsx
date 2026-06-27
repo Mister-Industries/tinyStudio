@@ -1,54 +1,46 @@
-import { setPanelOpen, useAppDispatch } from '@renderer/redux'
+import { selectOpenFiles, setPanelOpen, useAppDispatch, useAppSelector } from '@renderer/redux'
 import { BookOpen, Sparkles, X, Zap } from 'lucide-react'
 import { AIAssistant } from './AIAssistant'
 import { ExamplesContent } from './ExamplesContent'
 import { ReadmeContent } from './ReferenceContent'
-import { Button } from './ui/Button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs'
 
 export function DocsPanel(): React.JSX.Element {
   const dispatch = useAppDispatch()
+  // On a fresh start with nothing open, land on Examples so there's somewhere to
+  // go; once a project is open, default to Docs. (Uncontrolled — only the initial
+  // tab; the user can switch freely after.)
+  const initialTab = useAppSelector(selectOpenFiles).length === 0 ? 'examples' : 'readme'
 
   const handleCloseDocsPanel = (): void => {
     dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
   }
 
   return (
-    <div className="size-full flex flex-col bg-navy-700 border-l border-navy-600">
-      <Tabs defaultValue="readme" className="size-full flex flex-col gap-0">
-        <div className="flex items-center gap-2 px-2 py-2 border-b border-navy-600">
-          <TabsList className="bg-navy-900 border border-navy-600 rounded-full p-1 h-auto">
-            <TabsTrigger
-              value="readme"
-              className="rounded-full px-3 py-1 text-xs text-fg-3 data-[state=active]:bg-navy-500 data-[state=active]:text-fg-1"
-            >
-              <BookOpen size={14} className="mr-1.5" />
-              Documentation
+    <div className="size-full flex flex-col bg-[var(--bg-raised)] border-l border-[var(--border-default)]">
+      <Tabs defaultValue={initialTab} className="size-full flex flex-col gap-0">
+        <div className="flex items-stretch h-[36px] gap-1 pl-3 pr-1 border-b-[1.5px] border-[var(--border-default)]">
+          <TabsList className="flex-1 border-0 gap-1">
+            <TabsTrigger value="readme" className="flex-1 justify-center">
+              <BookOpen size={15} />
+              Docs
             </TabsTrigger>
-            <TabsTrigger
-              value="examples"
-              className="rounded-full px-3 py-1 text-xs text-fg-3 data-[state=active]:bg-navy-500 data-[state=active]:text-fg-1"
-            >
-              <Zap size={14} className="mr-1.5" />
+            <TabsTrigger value="examples" className="flex-1 justify-center">
+              <Zap size={15} />
               Examples
             </TabsTrigger>
-            <TabsTrigger
-              value="ai"
-              className="rounded-full px-3 py-1 text-xs text-fg-3 data-[state=active]:bg-navy-500 data-[state=active]:text-fg-1"
-            >
-              <Sparkles size={14} className="mr-1.5" />
+            <TabsTrigger value="ai" className="flex-1 justify-center">
+              <Sparkles size={15} />
               Studio AI
             </TabsTrigger>
           </TabsList>
-          <div className="flex-1" />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-fg-3 hover:text-fg-1 hover:bg-navy-500"
+          <button
+            className="shrink-0 self-center flex items-center justify-center size-6 rounded-[var(--radius-xs)] text-[var(--text-faint)] hover:bg-[var(--bg-sunken)] hover:text-[var(--text-strong)]"
+            title="Close"
             onClick={handleCloseDocsPanel}
           >
-            <X />
-          </Button>
+            <X size={15} />
+          </button>
         </div>
         <TabsContent value="readme" className="flex-1 min-h-0 min-w-0 overflow-hidden">
           <ReadmeContent />
@@ -62,4 +54,4 @@ export function DocsPanel(): React.JSX.Element {
       </Tabs>
     </div>
   )
-}
+}

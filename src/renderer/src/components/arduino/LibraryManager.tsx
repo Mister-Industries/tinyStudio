@@ -16,7 +16,7 @@ import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { LibraryEntry } from '@renderer/services/arduino/types'
 import { Check, Download, Library, Loader2, Package, Search, Trash2 } from 'lucide-react'
 import React from 'react'
-import { toast } from 'sonner'
+import { notify as toast } from '@renderer/lib/notify'
 
 export function LibraryManager(): React.JSX.Element {
   const { isAgentConnected, searchLibraries, listLibraries, installLibrary, uninstallLibrary } =
@@ -91,7 +91,7 @@ export function LibraryManager(): React.JSX.Element {
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full text-fg-3 hover:text-fg-1 hover:bg-navy-500"
+              className="size-[30px] text-[var(--text-muted)] hover:text-[var(--text-strong)]"
             >
               <Library size={18} />
             </Button>
@@ -99,33 +99,33 @@ export function LibraryManager(): React.JSX.Element {
         </TooltipTrigger>
         <TooltipContent side="bottom">Library manager</TooltipContent>
       </Tooltip>
-      <DialogContent className="bg-navy-700 border border-navy-500 text-fg-1 max-w-xl max-h-[80vh] overflow-hidden">
+      <DialogContent className="max-w-xl max-h-[80vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Library size={18} className="text-cyan" />
+            <Library size={18} className="text-[var(--brand)]" />
             Library manager
           </DialogTitle>
         </DialogHeader>
 
         {!isAgentConnected ? (
-          <div className="py-8 text-center text-signal-warning text-sm">
+          <div className="py-8 text-center text-[var(--status-warn)] text-sm">
             Arduino service not connected.
           </div>
         ) : (
           <div className="flex flex-col gap-4 min-h-0">
             {/* Search */}
             <div className="flex gap-2">
-              <div className="flex-1 flex items-center gap-2 bg-navy-900 border border-navy-400 rounded-lg px-3">
-                <Search size={15} className="text-fg-4" />
+              <div className="flex-1 flex items-center gap-2 bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] rounded-[var(--radius-sm)] px-3 focus-within:border-[var(--brand)]">
+                <Search size={15} className="text-[var(--text-faint)]" />
                 <input
-                  className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-fg-1 placeholder:text-fg-4"
+                  className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-[var(--text-strong)] placeholder:text-[var(--text-faint)]"
                   placeholder="Search libraries — e.g. Adafruit NeoPixel, FastLED…"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && search()}
                 />
               </div>
-              <Button onClick={search} disabled={searching || !query.trim()} className="rounded-lg">
+              <Button onClick={search} disabled={searching || !query.trim()}>
                 {searching ? <Loader2 size={15} className="animate-spin" /> : <Search size={15} />}
               </Button>
             </div>
@@ -144,7 +144,7 @@ export function LibraryManager(): React.JSX.Element {
                       {results.map((lib) => (
                         <div
                           key={lib.name}
-                          className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-navy-600"
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                         >
                           <Package size={15} className="text-fg-4 shrink-0" />
                           <div className="flex-1 min-w-0">
@@ -192,7 +192,7 @@ export function LibraryManager(): React.JSX.Element {
                   {installed.map((lib) => (
                     <div
                       key={lib.name}
-                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-navy-600"
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                     >
                       <Package size={15} className="text-signal-success shrink-0" />
                       <div className="flex-1 min-w-0">

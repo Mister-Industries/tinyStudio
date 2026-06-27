@@ -1,163 +1,361 @@
 /* ============================================================================
    tinyStudio / MR.INDUSTRIES — application theme
    ----------------------------------------------------------------------------
-   tinyForge design system: deep-navy surfaces, neon-cyan primary action,
-   hot-pink reserved for Studio AI / accent moments.
-   Fonts: Plus Jakarta Sans (UI) + JetBrains Mono (code).
+   tinyStudio design system: a clean digital workbench. Cold neutral greys
+   (near-white in light, Discord-charcoal in dark) form a calm ground; four
+   soft PCB inks (red/green/blue/yellow) carry meaning. Tactile "pixel-art"
+   controls, a faint notebook dot-grid, sentence-case copy, monospace for
+   anything that represents the machine.
+
+   Tokens are ported from the tinyStudio Design System. Components consume the
+   semantic aliases (--bg, --surface-card, --text-body, --brand, --status-*)
+   and the shadcn-style mapping below (--background, --card, --primary, …) so
+   light + dark both work for free.
+
+   Theme: dark is the default the user sees (set in main.tsx); light is fully
+   available. .dark on <html> switches to the charcoal theme.
+   Fonts: Plus Jakarta Sans (UI/display) + Fira Code (mono / "the machine").
    ============================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Fira+Code:wght@400;500;600;700&display=swap');
 
 @import 'tailwindcss';
 
 @import 'tw-animate-css';
 
+@import './ds-components.css';
+
+/* Drive Tailwind's `dark:` variant off the `.dark` class (set by ThemeProvider),
+   not the OS `prefers-color-scheme`. Without this, `dark:` utilities silently
+   key off the media query and don't track the app's theme toggle. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  /* ------------------------------------------------------------- BRAND RAW */
-  --brand-primary: #0a0f2d;
-  --brand-secondary: #1a1f4d;
-  --brand-cyan: #00f0ff;
-  --brand-pink: #ff3f8c;
-  --brand-amber: #f7a400;
+  /* ── RAW INK RAMPS — the four PCB solder-mask colors ───────────────────────
+     *-soft = light tint surface · *-deep = press/border shade ·
+     *-on = accessible text on the soft tint. (LIGHT values; dark brightens.) */
 
-  /* ------------------------------------------------------------ NAVY SCALE */
-  --navy-1000: #05081a; /* editor gutter / deepest well         */
-  --navy-900: #070b22; /* code canvas background               */
-  --navy-800: #0a0f2d; /* app background (== brand-primary)    */
-  --navy-700: #11173a; /* sidebars, docked panels              */
-  --navy-600: #1a1f4d; /* cards, elevated panels (== secondary)*/
-  --navy-500: #262c5e; /* hover fill, input background         */
-  --navy-400: #353c78; /* borders, dividers (strong)           */
-  --navy-300: #4a5296; /* disabled text, faint lines           */
+  /* RED — error · disconnected · stop */
+  --red-soft: #fbe4e1;
+  --red: #e5544b;
+  --red-deep: #b23a33;
+  --red-on: #8c2a25;
 
-  /* ----------------------------------------------------------- ACCENT CYAN */
-  --cyan-bright: #5cf7ff;
-  --cyan: #00f0ff;
-  --cyan-deep: #00b8d4;
-  --cyan-soft: rgba(0, 240, 255, 0.14);
-  --cyan-line: rgba(0, 240, 255, 0.4);
+  /* GREEN — success · connected · run */
+  --green-soft: #daf1e5;
+  --green: #2fa46a;
+  --green-deep: #1e7a4d;
+  --green-on: #155c3a;
 
-  /* ----------------------------------------------------------- ACCENT PINK */
-  --pink-bright: #ff6ea8;
-  --pink: #ff3f8c;
-  --pink-deep: #d81f6a;
-  --pink-soft: rgba(255, 63, 140, 0.14);
-  --pink-line: rgba(255, 63, 140, 0.4);
+  /* BLUE — primary action · info · links (the brand) */
+  --blue-soft: #dceefd;
+  --blue: #42a5f5;
+  --blue-deep: #1e88e5;
+  --blue-on: #0d5b9a;
 
-  /* ------------------------------------------------------ SIGNAL/SEMANTIC */
-  --signal-success: #3ddc97;
-  --signal-warning: #f7a400;
-  --signal-error: #ff4d6d;
-  --signal-info: #00f0ff;
-  --signal-success-soft: rgba(61, 220, 151, 0.14);
-  --signal-warning-soft: rgba(247, 164, 0, 0.14);
-  --signal-error-soft: rgba(255, 77, 109, 0.14);
+  /* YELLOW — warning · uploading · highlight (gold) */
+  --yellow-soft: #fbf1c2;
+  --yellow: #f3cb00;
+  --yellow-deep: #c6a500;
+  --yellow-on: #6b5800;
 
-  /* --------------------------------------------------------- TEXT ON DARK */
-  --fg-1: #ffffff;
-  --fg-2: rgba(235, 238, 255, 0.72);
-  --fg-3: rgba(214, 220, 255, 0.46);
-  --fg-4: rgba(200, 208, 255, 0.3);
-  --fg-on-cyan: #04122b;
-  --fg-on-pink: #2a0413;
+  /* ── COLD NEUTRAL RAMP — white → slate ───────────────────────────────────── */
+  --warm-50: #fbfcfd;
+  --warm-100: #f5f7f9;
+  --warm-150: #edf0f3;
+  --warm-200: #e3e7ec;
+  --warm-300: #cfd5dc;
+  --warm-400: #a3abb5;
+  --warm-500: #79818c;
+  --warm-600: #565d66;
+  --warm-700: #3c4147;
+  --warm-800: #24272c;
+  --warm-900: #181a1e;
+  --warm-950: #101113;
 
-  /* ------------------------------------------------------------ GRADIENTS */
-  --grad-brand: linear-gradient(45deg, var(--cyan), var(--pink));
-  --grad-brand-r: linear-gradient(45deg, var(--pink), var(--cyan));
-  --grad-ai: linear-gradient(120deg, #00f0ff 0%, #9b6cff 55%, #ff3f8c 100%);
-  --grad-panel: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+  /* ── SEMANTIC ALIASES — LIGHT (default) ──────────────────────────────────── */
 
-  /* --------------------------------------------------------------- SYNTAX */
-  --syn-bg: var(--navy-900);
-  --syn-text: #d7deff;
-  --syn-comment: #5f6aa0;
-  --syn-keyword: #ff3f8c;
-  --syn-type: #00f0ff;
-  --syn-func: #5cc8ff;
-  --syn-string: #3ddc97;
-  --syn-number: #f7a400;
-  --syn-const: #c792ea;
-  --syn-punc: #8b94c8;
+  /* surfaces — near-white canvas, light-grey wells */
+  --bg: #fafbfc;
+  --bg-sunken: #edf0f3;
+  --bg-raised: #ffffff;
+  --surface-card: #ffffff;
+  --surface-overlay: #ffffff;
 
-  /* --------------------------------------------------------- RADII/SHADOW */
-  --r-sm: 6px;
-  --r-md: 10px;
-  --r-lg: 14px;
-  --r-pill: 999px;
-  --shadow-panel: 0 8px 30px rgba(0, 0, 0, 0.35);
-  --shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.5);
-  --glow-cyan: 0 0 0 1px var(--cyan-line), 0 0 18px rgba(0, 240, 255, 0.35);
-  --glow-pink: 0 0 0 1px var(--pink-line), 0 0 18px rgba(255, 63, 140, 0.35);
+  /* text */
+  --text-strong: var(--warm-900);
+  --text-body: var(--warm-800);
+  --text-muted: var(--warm-500);
+  --text-faint: var(--warm-400);
+  --text-inverse: var(--warm-50);
 
-  /* ----------------------------------------------- SEMANTIC THEME MAPPING
-     tinyStudio is a dark-first design system: light and dark resolve to the
-     same navy ramp so every shadcn-style component lands on brand. */
-  --radius: 0.625rem;
-  --background: var(--navy-800);
-  --background-grid: var(--navy-900);
-  --foreground: #eef1ff;
-  --foreground-grid: var(--navy-400);
-  --card: var(--navy-700);
-  --card-foreground: #eef1ff;
-  --popover: var(--navy-600);
-  --popover-foreground: #eef1ff;
-  --primary: var(--cyan);
-  --primary-foreground: var(--fg-on-cyan);
-  --secondary: var(--navy-600);
-  --secondary-foreground: #eef1ff;
-  --muted: var(--navy-700);
-  --muted-foreground: var(--fg-3);
-  --accent: var(--navy-500);
-  --accent-foreground: #ffffff;
-  --destructive: var(--signal-error);
-  --border: var(--navy-400);
-  --input: var(--navy-500);
-  --ring: var(--cyan);
-  --sidebar: var(--navy-700);
-  --sidebar-foreground: #eef1ff;
-  --sidebar-primary: var(--cyan);
-  --sidebar-primary-foreground: var(--fg-on-cyan);
-  --sidebar-accent: var(--navy-500);
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: var(--navy-400);
-  --sidebar-ring: var(--cyan);
+  /* borders */
+  --border-soft: var(--warm-200);
+  --border-default: #cfd5dc;
+  --border-strong: var(--warm-900);
+  --border-interactive: var(--warm-400);
+
+  /* brand / primary action */
+  --brand: var(--blue);
+  --brand-deep: var(--blue-deep);
+  --brand-soft: var(--blue-soft);
+  --brand-on: var(--blue-on);
+  --brand-contrast: #ffffff;
+
+  /* status (board state, compile, etc.) */
+  --status-ok: var(--green);
+  --status-error: var(--red);
+  --status-warn: var(--yellow);
+  --status-info: var(--blue);
+
+  /* focus ring */
+  --ring-ink: var(--blue);
+
+  /* dot-matrix "notebook" background */
+  --dot-color: rgba(24, 26, 30, 0.09);
+
+  /* translucent scrim for blur/overlay layers */
+  --scrim: rgba(16, 17, 19, 0.42);
+
+  /* ── TYPOGRAPHY tokens ───────────────────────────────────────────────────── */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extra: 800;
+
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 19px;
+  --text-xl: 23px;
+  --text-2xl: 28px;
+  --text-3xl: 34px;
+
+  --leading-tight: 1.05;
+  --leading-snug: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.04em;
+  --tracking-mono-label: 0.06em;
+
+  /* ── SPACING / control heights (4px grid) ────────────────────────────────── */
+  --control-sm: 30px;
+  --control-md: 38px;
+  --control-lg: 46px;
+
+  /* ── EFFECTS — radius, shadows, motion, dot-grid ─────────────────────────── */
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  /* HARD offset shadows (the pixel-art / workbench edge) */
+  --shadow-hard-xs: 1px 1px 0 0 var(--border-strong);
+  --shadow-hard-sm: 2px 2px 0 0 var(--border-strong);
+  --shadow-hard: 3px 3px 0 0 var(--border-strong);
+  --shadow-hard-lg: 5px 5px 0 0 var(--border-strong);
+
+  /* top inner highlight that makes fills look molded / tactile */
+  --highlight-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.45);
+  --highlight-top-strong: inset 0 1.5px 0 0 rgba(255, 255, 255, 0.6);
+
+  /* SOFT elevation — floating UI only */
+  --shadow-soft-sm: 0 2px 6px rgba(20, 19, 16, 0.1);
+  --shadow-soft: 0 8px 24px rgba(20, 19, 16, 0.14);
+  --shadow-soft-lg: 0 20px 48px rgba(20, 19, 16, 0.2);
+
+  /* motion */
+  --ease-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 110ms;
+  --dur-med: 180ms;
+  --dur-slow: 260ms;
+  --press: 2px;
+
+  /* dot-grid */
+  --dot-gap: 18px;
+  --dots: radial-gradient(var(--dot-color) 1.1px, transparent 1.1px);
+
+  /* ── EDITOR SYNTAX — derived from the ink palette ────────────────────────── */
+  --syn-bg: var(--bg-sunken);
+  --syn-text: var(--text-body);
+  --syn-comment: var(--text-faint);
+  --syn-keyword: var(--blue-deep);
+  --syn-type: var(--blue-on);
+  --syn-func: var(--blue);
+  --syn-string: var(--green-deep);
+  --syn-number: var(--yellow-deep);
+  --syn-const: var(--red-deep);
+  --syn-punc: var(--text-muted);
+
+  /* ── SHADCN SEMANTIC MAPPING — points the component system at design tokens.
+     These reference the semantic aliases above, so they flip with the theme
+     automatically; no need to redefine them in the dark block. ──────────────── */
+  --radius: var(--radius-md);
+  --background: var(--bg);
+  --background-grid: var(--bg-sunken);
+  --foreground: var(--text-body);
+  --foreground-grid: var(--border-soft);
+  --card: var(--surface-card);
+  --card-foreground: var(--text-body);
+  --popover: var(--surface-overlay);
+  --popover-foreground: var(--text-body);
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-contrast);
+  --secondary: var(--bg-sunken);
+  --secondary-foreground: var(--text-body);
+  --muted: var(--bg-sunken);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--bg-sunken);
+  --accent-foreground: var(--text-strong);
+  --destructive: var(--status-error);
+  --destructive-foreground: #ffffff;
+  --border: var(--border-default);
+  --input: var(--border-default);
+  --ring: var(--ring-ink);
+  --chart-1: var(--blue);
+  --chart-2: var(--green);
+  --chart-3: var(--yellow);
+  --chart-4: var(--red);
+  --chart-5: var(--warm-500);
+  --sidebar: var(--bg-raised);
+  --sidebar-foreground: var(--text-body);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: var(--brand-contrast);
+  --sidebar-accent: var(--bg-sunken);
+  --sidebar-accent-foreground: var(--text-strong);
+  --sidebar-border: var(--border-default);
+  --sidebar-ring: var(--ring-ink);
+
+  /* ── LEGACY BACK-COMPAT — old tinyForge token names re-pointed at the new
+     palette so chrome that still references them stays on-brand and theme-aware
+     until each component is restyled. Remove once nothing references them. ──── */
+  --navy-1000: var(--bg-sunken);
+  --navy-900: var(--bg-raised);
+  --navy-800: var(--bg);
+  --navy-700: var(--bg-raised);
+  --navy-600: var(--border-default);
+  --navy-500: var(--bg-sunken);
+  --navy-400: var(--border-default);
+  --navy-300: var(--border-soft);
+
+  --cyan-bright: var(--brand);
+  --cyan: var(--brand);
+  --cyan-deep: var(--brand-deep);
+  --cyan-soft: var(--brand-soft);
+  --cyan-line: var(--border-interactive);
+
+  --pink-bright: var(--brand);
+  --pink: var(--brand);
+  --pink-deep: var(--brand-deep);
+  --pink-soft: var(--brand-soft);
+  --pink-line: var(--border-interactive);
+
+  --signal-success: var(--status-ok);
+  --signal-warning: var(--status-warn);
+  --signal-error: var(--status-error);
+  --signal-info: var(--status-info);
+  --signal-success-soft: var(--green-soft);
+  --signal-warning-soft: var(--yellow-soft);
+  --signal-error-soft: var(--red-soft);
+
+  --fg-1: var(--text-strong);
+  --fg-2: var(--text-body);
+  --fg-3: var(--text-muted);
+  --fg-4: var(--text-faint);
+  --fg-on-cyan: var(--brand-contrast);
+  --fg-on-pink: var(--brand-contrast);
+
+  --grad-brand: var(--brand);
+  --grad-brand-r: var(--brand);
+  --grad-ai: var(--brand);
+  --grad-panel: linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0));
+
+  --r-sm: var(--radius-sm);
+  --r-md: var(--radius-md);
+  --r-lg: var(--radius-lg);
+  --r-pill: var(--radius-pill);
+  --shadow-panel: var(--shadow-soft);
+  --shadow-pop: var(--shadow-soft-lg);
+  --glow-cyan: 0 0 0 1.5px var(--brand-soft);
+  --glow-pink: 0 0 0 1.5px var(--brand-soft);
 }
 
-.dark {
-  --background: var(--navy-800);
-  --foreground: #eef1ff;
-  --card: var(--navy-700);
-  --card-foreground: #eef1ff;
-  --popover: var(--navy-600);
-  --popover-foreground: #eef1ff;
-  --primary: var(--cyan);
-  --primary-foreground: var(--fg-on-cyan);
-  --secondary: var(--navy-600);
-  --secondary-foreground: #eef1ff;
-  --muted: var(--navy-700);
-  --muted-foreground: var(--fg-3);
-  --accent: var(--navy-500);
-  --accent-foreground: #ffffff;
-  --destructive: var(--signal-error);
-  --border: var(--navy-400);
-  --input: var(--navy-500);
-  --ring: var(--cyan);
-  --sidebar: var(--navy-700);
-  --sidebar-foreground: #eef1ff;
-  --sidebar-primary: var(--cyan);
-  --sidebar-primary-foreground: var(--fg-on-cyan);
-  --sidebar-accent: var(--navy-500);
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: var(--navy-400);
-  --sidebar-ring: var(--cyan);
+/* ── DARK THEME — Discord-style cold charcoal ───────────────────────────────
+   Inks brighten so they sit on dark grey without vibrating. Neutrals are cold
+   dark grey (never pure black). Everything referencing the semantic aliases
+   (shadcn vars, legacy aliases) flips automatically. ────────────────────────── */
+.dark,
+:root[data-theme='dark'] {
+  /* brightened inks */
+  --red-soft: #3a2421;
+  --red: #f26d63;
+  --red-deep: #c9483f;
+  --red-on: #f8c4bf;
+
+  --green-soft: #16291f;
+  --green: #46c586;
+  --green-deep: #2c9e66;
+  --green-on: #b4e8cd;
+
+  --blue-soft: #16314a;
+  --blue: #42a5f5;
+  --blue-deep: #2a8fdb;
+  --blue-on: #bcdffb;
+
+  --yellow-soft: #322b0c;
+  --yellow: #f5d426;
+  --yellow-deep: #cdae1f;
+  --yellow-on: #f4e29a;
+
+  /* surfaces — Discord-ish cold grey ladder */
+  --bg: #2b2d31;
+  --bg-sunken: #1e1f22;
+  --bg-raised: #313338;
+  --surface-card: #383a40;
+  --surface-overlay: #3e4046;
+
+  /* text — cool soft whites */
+  --text-strong: #f2f3f5;
+  --text-body: #dbdee1;
+  --text-muted: #969ba3;
+  --text-faint: #6b7077;
+  --text-inverse: var(--warm-900);
+
+  /* borders */
+  --border-soft: #26282c;
+  --border-default: #26282b;
+  --border-strong: #141517;
+  --border-interactive: #4a4d54;
+
+  --brand-contrast: #06243b;
+
+  /* dark effect overrides */
+  --shadow-soft-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-soft-lg: 0 20px 48px rgba(0, 0, 0, 0.6);
+  --highlight-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  --highlight-top-strong: inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18);
+
+  --dot-color: rgba(242, 243, 245, 0.07);
+  --scrim: rgba(0, 0, 0, 0.6);
 }
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Fira Code', ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
 }
 
 @theme inline {
+  /* shadcn semantic colors (resolve at runtime → theme switch works) */
   --color-background: var(--background);
   --color-background-grid: var(--background-grid);
   --color-foreground: var(--foreground);
@@ -184,10 +382,10 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -196,7 +394,44 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  /* tinyForge ramp exposed as utilities (bg-navy-700, text-cyan, …) */
+
+  /* design-system surfaces / text exposed as utilities (bg-surface-card, …) */
+  --color-bg: var(--bg);
+  --color-bg-sunken: var(--bg-sunken);
+  --color-bg-raised: var(--bg-raised);
+  --color-surface-card: var(--surface-card);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-text-strong: var(--text-strong);
+  --color-text-body: var(--text-body);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+
+  /* brand + status + four inks exposed as utilities */
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-on: var(--brand-on);
+  --color-brand-contrast: var(--brand-contrast);
+  --color-status-ok: var(--status-ok);
+  --color-status-error: var(--status-error);
+  --color-status-warn: var(--status-warn);
+  --color-status-info: var(--status-info);
+  --color-ink-red: var(--red);
+  --color-ink-red-soft: var(--red-soft);
+  --color-ink-green: var(--green);
+  --color-ink-green-soft: var(--green-soft);
+  --color-ink-blue: var(--blue);
+  --color-ink-blue-soft: var(--blue-soft);
+  --color-ink-yellow: var(--yellow);
+  --color-ink-yellow-soft: var(--yellow-soft);
+
+  /* border tokens */
+  --color-border-soft: var(--border-soft);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-border-interactive: var(--border-interactive);
+
+  /* legacy ramps still referenced by un-migrated chrome */
   --color-navy-1000: var(--navy-1000);
   --color-navy-900: var(--navy-900);
   --color-navy-800: var(--navy-800);
@@ -226,6 +461,10 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
+  ::selection {
+    background: var(--yellow);
+    color: var(--warm-900);
+  }
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -234,23 +473,66 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--navy-400);
+    background: var(--border-interactive);
     border-radius: 999px;
     border: 2px solid transparent;
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--navy-300);
+    background: var(--text-faint);
     border: 2px solid transparent;
     background-clip: content-box;
   }
 }
 
-/* Signature gradient wordmark/text treatment. */
+/* ── mono eyebrow / label — the maker-signature microtype ────────────────────
+   e.g. SERIAL MONITOR, ▸ HARDWARE */
+.ts-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-mono-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── notebook dot-grid background (the one decorative motif) ───────────────── */
+.dot-grid {
+  background-color: var(--bg);
+  background-image: var(--dots);
+  background-size: var(--dot-gap) var(--dot-gap);
+  background-position: -1px -1px;
+}
+.dot-grid-tight {
+  --dot-gap: 12px;
+}
+.dot-grid-loose {
+  --dot-gap: 26px;
+}
+
+/* ── RISO registration offset — colorful decorative graphics ONLY ─────────── */
+.ts-riso {
+  position: relative;
+  display: inline-block;
+  color: var(--text-strong);
+  isolation: isolate;
+}
+.ts-riso::before {
+  content: attr(data-riso-glyph);
+  position: absolute;
+  inset: 0;
+  transform: translate(var(--riso-x, 2px), var(--riso-y, 2px));
+  color: var(--riso-ink, var(--red));
+  mix-blend-mode: multiply;
+  z-index: -1;
+  pointer-events: none;
+}
+.dark .ts-riso::before {
+  mix-blend-mode: screen;
+}
+
+/* Legacy wordmark hook — now a flat brand treatment (no neon gradient).
+   The Header wordmark is restyled in the chrome phase. */
 .tf-gradient-text {
-  background: var(--grad-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  color: var(--brand);
 }

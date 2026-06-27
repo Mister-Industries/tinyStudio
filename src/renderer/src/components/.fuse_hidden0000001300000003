@@ -1,0 +1,678 @@
+import {
+  OpenFileCommand,
+  OpenWorkspaceCommand,
+  RefreshWorkspaceCommand
+} from '@renderer/commands/fileCommands'
+import { loader } from '@monaco-editor/react'
+import tinyLogo from '@renderer/assets/tinyLogo.png'
+import { fileSystem } from '@renderer/lib/fileSystem'
+import { enablePages, loadAccount, loadLink, pushFile } from '@renderer/lib/github'
+import { buildVisualExportHtml } from '@renderer/lib/visualExport'
+import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
+import { selectEditorView, setEditorView, setPanelOpen } from '@renderer/redux/editorSlice'
+import {
+  BaseFileItem,
+  closeFile,
+  EditorFile,
+  revealFile,
+  saveFileWithContent,
+  selectViewingFileId,
+  setViewingFile,
+  updateFileContent,
+  updateReadmeContent
+} from '@renderer/redux/fileSlice'
+import {
+  CircuitBoard,
+  CodeXml,
+  ExternalLink,
+  FolderOpen,
+  Loader2,
+  Plus,
+  UploadCloud
+} from 'lucide-react'
+import * as monaco from 'monaco-editor'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { notify as toast } from '@renderer/lib/notify'
+import { BlocklyEditor } from './BlocklyEditor'
+import { DiagramEditor } from './DiagramEditor'
+import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from './ui/Dialog'
+import { FileTabContent, FileTabs, FileTabsList, FileTabTrigger } from './ui/FileTab'
+import { Button } from './ui/Button'
+import { IconButton } from './ui/IconButton'
+import { Input } from './ui/Input'
+import { VisualPreview } from './VisualPreview'
+
+loader.config({ monaco })
+
+const DEFAULT_DIAGRAM = JSON.stringify(
+  { version: 1, editor: 'tinystudio', parts: [], connections: [] },
+  null,
+  2
+)
+const DEFAULT_VISUAL = `// visual.js — Serial Plotter
+// Graphs the latest number printed over Serial (serialValue()) as a scrolling
+// line, auto-scaling to the data. Try Serial.println(analogRead(A0)) on the
+// board. Switch to Code to edit this sketch; Visual to run it.
+
+let data = [];
+const MAX = 240; // points kept on screen
+
+function setup() {
+  createCanvas(480, 280);
+  textFont('monospace');
+}
+
+function draw() {
+  background(7, 11, 34);
+
+  // pull the most recent serial value each frame
+  data.push(serialValue());
+  if (data.length > MAX) data.shift();
+
+  // auto-scale to the data range (with a little headroom)
+  let lo = Math.min(...data, 0);
+  let hi = Math.max(...data, 1);
+  if (hi === lo) hi = lo + 1;
+
+  // grid
+  stroke(26, 31, 77);
+  strokeWeight(1);
+  for (let i = 0; i <= 4; i++) {
+    let y = map(i, 0, 4, 20, height - 24);
+    line(40, y, width - 12, y);
+  }
+
+  // plotted line
+  noFill();
+  stroke(0, 240, 255);
+  strokeWeight(2);
+  beginShape();
+  for (let i = 0; i < data.length; i++) {
+    let x = map(i, 0, MAX - 1, 40, width - 12);
+    let y = map(data[i], lo, hi, height - 24, 20);
+    vertex(x, y);
+  }
+  endShape();
+
+  // readouts
+  noStroke();
+  fill(235, 238, 255);
+  textSize(12);
+  text('value: ' + serialValue().toFixed(2), 44, 16);
+  fill(120, 130, 170);
+  text(hi.toFixed(0), 8, 24);
+  text(lo.toFixed(0), 8, height - 24);
+}
+`
+
+function findInTree(
+  items: BaseFileItem[],
+  match: (i: BaseFileItem) => boolean
+): BaseFileItem | null {
+  for (const item of items) {
+    if (item.type === 'file' && item.name && match(item)) return item
+    if (item.children) {
+      const found = findInTree(item.children, match)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+/** Collect every file in the tree matching `match`, skipping noise folders. */
+function collectFiles(
+  items: BaseFileItem[],
+  match: (i: BaseFileItem) => boolean,
+  out: BaseFileItem[] = []
+): BaseFileItem[] {
+  for (const item of items) {
+    if (item.type === 'file' && item.name && match(item)) out.push(item)
+    if (item.children && !['node_modules', '.git', 'dist'].includes(item.name ?? '')) {
+      collectFiles(item.children, match, out)
+    }
+  }
+  return out
+}
+
+/** Starter p5.js sketch dropped into newly created .js files. */
+const sketchTemplate = (title: string): string => `// ${title} — p5.js sketch.
+// Switch to Code to edit this sketch; Visual to run it.
+
+let x = 240;
+let y = 140;
+let dx = 3;
+let dy = 2;
+
+function setup() {
+  createCanvas(480, 280);
+  noStroke();
+}
+
+function draw() {
+  background(7, 11, 34);
+  x += dx;
+  y += dy;
+  if (x < 20 || x > width - 20) dx = -dx;
+  if (y < 20 || y > height - 20) dy = -dy;
+  fill(0, 240, 255);
+  circle(x, y, 40);
+}
+`
+
+/**
+ * Ensure a project file (e.g. diagram.json / visual.js) is open as an editor
+ * buffer, creating it from a default if it doesn't exist yet. Returns the open
+ * file once ready. Used by the full-window Circuit/Visual views so their edits
+ * live in the same buffer model as code (saved on Ctrl+S / build).
+ */
+function useProjectFile(name: string, makeDefault?: () => string): EditorFile | undefined {
+  const workspace = useAppSelector((s) => s.file.workspace)
+  const openFiles = useAppSelector(selectOpenFiles)
+  const file = openFiles.find((f) => f.name === name)
+  const busy = useRef(false)
+
+  useEffect(() => {
+    if (file || !workspace || busy.current) return
+    busy.current = true
+    ;(async () => {
+      try {
+        let item = findInTree(workspace.root, (i) => i.name === name)
+        if (!item && makeDefault) {
+          const path = `${workspace.path}/${name}`
+          await fileSystem.writeFile(path, makeDefault())
+          await new RefreshWorkspaceCommand(workspace).execute()
+          item = { id: crypto.randomUUID(), parentId: 'root', name, path, type: 'file' }
+        }
+        // Load as a hidden background buffer: the full-window view edits/saves
+        // it, but it stays out of the Code tab bar until the user clicks the
+        // in-view code button (which reveals it).
+        if (item) await new OpenFileCommand(item, { hidden: true }).execute()
+      } finally {
+        busy.current = false
+      }
+    })()
+  }, [file, workspace, name, makeDefault])
+
+  return file
+}
+
+export function EditorPanel({ size }: { size: number }): React.JSX.Element {
+  const editorView = useAppSelector(selectEditorView)
+  // Track viewport height so the panel re-measures on resize / fullscreen toggle
+  // (otherwise the height is computed once from a stale window.innerHeight and
+  // the layout — and its buttons — break after going fullscreen).
+  const [winHeight, setWinHeight] = useState(window.innerHeight)
+  useEffect(() => {
+    const onResize = (): void => setWinHeight(window.innerHeight)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  const pixelSize = Math.round((size / 100) * (winHeight - 92))
+
+  return (
+    <div className="flex flex-col bg-navy-900" style={{ height: `${pixelSize}px` }}>
+      {editorView === 'circuit' ? (
+        <CircuitView />
+      ) : editorView === 'visual' ? (
+        <VisualView />
+      ) : (
+        <CodeView />
+      )}
+    </div>
+  )
+}
+
+// ── Code view: the normal tabbed IDE ────────────────────────────────────────
+
+function CodeView(): React.JSX.Element {
+  const allOpenFiles = useAppSelector(selectOpenFiles)
+  // Background buffers (diagram.json / visual.js loaded for the Circuit/Visual
+  // views) are hidden from the tab bar until revealed via their code button.
+  const openFiles = allOpenFiles.filter((f) => !f.hidden)
+  const viewingFileId = useAppSelector(selectViewingFileId)
+  const editorMode = useAppSelector((state) => state.editor.editorMode)
+  const workspace = useAppSelector((s) => s.file.workspace)
+  const dispatch = useAppDispatch()
+  const monacoEditorRef = useRef<MonacoEditorRef>(null)
+
+  const handleFileClose = useCallback(
+    (fileId: string): void => {
+      dispatch(closeFile(fileId))
+    },
+    [dispatch]
+  )
+
+  const handleFileSelect = useCallback(
+    (fileId: string): void => {
+      dispatch(setViewingFile(fileId))
+      setTimeout(() => {
+        if (monacoEditorRef.current && editorMode !== 'blocks') monacoEditorRef.current.focus()
+      }, 50)
+    },
+    [dispatch, editorMode]
+  )
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'w') {
+        event.preventDefault()
+        if (viewingFileId) handleFileClose(viewingFileId)
+      }
+      if (event.ctrlKey && event.key === 'Tab') {
+        event.preventDefault()
+        if (openFiles.length > 1) {
+          const i = openFiles.findIndex((f) => f.id === viewingFileId)
+          const next = event.shiftKey
+            ? i <= 0
+              ? openFiles.length - 1
+              : i - 1
+            : (i + 1) % openFiles.length
+          if (openFiles[next]) handleFileSelect(openFiles[next].id)
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [viewingFileId, handleFileClose, openFiles, handleFileSelect])
+
+  const handleContentChange = useCallback(
+    (content: string, fileId: string) => {
+      const file = openFiles.find((f) => f.id === fileId)
+      if (file) {
+        dispatch(updateFileContent({ id: file.id, content }))
+        if (file.name === 'README.md') dispatch(updateReadmeContent(content))
+      }
+    },
+    [openFiles, dispatch]
+  )
+
+  const handleSaveFile = async (content: string, fileId: string): Promise<void> => {
+    const file = openFiles.find((f) => f.id === fileId)
+    if (file && file.path) {
+      try {
+        await fileSystem.writeFile(file.path, content)
+        dispatch(saveFileWithContent({ id: file.id, content }))
+      } catch (error) {
+        console.error('Failed to save file:', error)
+      }
+    }
+  }
+
+  if (openFiles.length === 0) {
+    return (
+      <div className="size-full flex flex-col items-center justify-center text-sm gap-5">
+        <div
+          className="size-40"
+          style={{
+            backgroundColor: 'var(--navy-500)',
+            mask: `url(${tinyLogo}) no-repeat center/contain`,
+            WebkitMask: `url(${tinyLogo}) no-repeat center/contain`
+          }}
+        />
+        <div className="text-center">
+          <div className="text-fg-1 text-base font-semibold">No project open</div>
+          <div className="text-fg-3 text-xs mt-1">Open a folder to start building.</div>
+        </div>
+        <Button
+          size="lg"
+          className="rounded-full px-6 shadow-[0_0_18px_rgba(0,240,255,0.25)]"
+          onClick={() => new OpenWorkspaceCommand(workspace?.path).execute()}
+        >
+          <FolderOpen size={16} /> Open Folder
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <FileTabs
+      value={viewingFileId || undefined}
+      onValueChange={handleFileSelect}
+      className="h-full"
+    >
+      <FileTabsList>
+        <div className="flex">
+          {openFiles.map((file) => (
+            <FileTabTrigger
+              key={file.id}
+              value={file.id}
+              file={file}
+              onFileClose={handleFileClose}
+            />
+          ))}
+        </div>
+      </FileTabsList>
+      {openFiles.map((file) => (
+        <FileTabContent key={`content-${file.id}`} value={file.id}>
+          {editorMode === 'blocks' ? (
+            <BlocklyEditor />
+          ) : (
+            <MonacoEditor
+              ref={monacoEditorRef}
+              activeFile={file}
+              onContentChange={(content) => handleContentChange(content, file.id)}
+              onSaveFile={(content) => handleSaveFile(content, file.id)}
+            />
+          )}
+        </FileTabContent>
+      ))}
+    </FileTabs>
+  )
+}
+
+// ── Circuit view: full-window interactive diagram.json ──────────────────────
+
+function CircuitView(): React.JSX.Element {
+  const workspace = useAppSelector((s) => s.file.workspace)
+  const dispatch = useAppDispatch()
+  const file = useProjectFile('diagram.json', () => DEFAULT_DIAGRAM)
+
+  if (!workspace) return <EmptyHint icon="circuit" label="Open a project to design its circuit." />
+  if (!file) return <LoadingHint label="Loading circuit…" />
+
+  return (
+    <DiagramEditor
+      content={file.content}
+      onChange={(content) => dispatch(updateFileContent({ id: file.id, content }))}
+      onOpenCode={() => {
+        dispatch(revealFile(file.id))
+        dispatch(setEditorView('code'))
+      }}
+      onEditChange={(editing) => {
+        // entering edit mode: free horizontal space by closing the docs panel
+        if (editing) dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
+      }}
+    />
+  )
+}
+
+// ── Visual view: full-window p5 sketch with an Edit-code button ─────────────
+
+function VisualView(): React.JSX.Element {
+  const workspace = useAppSelector((s) => s.file.workspace)
+  const dispatch = useAppDispatch()
+
+  // Which .js sketch is shown in the Visual view. Defaults to visual.js, the
+  // sketch auto-created for every project; other .js files are selectable too.
+  const [activeSketch, setActiveSketch] = useState('visual.js')
+  const [showNew, setShowNew] = useState(false)
+  // Serial is owned app-wide by SerialProvider and feeds the running sketch via
+  // the shared bus — the Visual view no longer opens the port itself, so
+  // switching to/from this view doesn't reset the board.
+  const [publishing, setPublishing] = useState(false)
+
+  const jsFiles = useMemo(
+    () => (workspace ? collectFiles(workspace.root, (i) => /\.js$/i.test(i.name!)) : []),
+    [workspace]
+  )
+
+  // If the active sketch isn't in this project (after a project switch or a
+  // delete), fall back to visual.js or the first sketch available.
+  useEffect(() => {
+    if (jsFiles.length && !jsFiles.some((f) => f.name === activeSketch)) {
+      setActiveSketch(jsFiles.find((f) => f.name === 'visual.js')?.name ?? jsFiles[0].name!)
+    }
+  }, [jsFiles, activeSketch])
+
+  // Only visual.js gets seeded from a default; other sketches must already exist.
+  const file = useProjectFile(
+    activeSketch,
+    activeSketch === 'visual.js' ? () => DEFAULT_VISUAL : undefined
+  )
+
+  if (!workspace) return <EmptyHint icon="circuit" label="Open a project to run its visual." />
+
+  const ws = workspace
+
+  const createSketch = async (fileName: string): Promise<void> => {
+    const path = `${ws.path}/${fileName}`
+    try {
+      await fileSystem.writeFile(path, sketchTemplate(fileName.replace(/\.js$/i, '')))
+      await new RefreshWorkspaceCommand(ws).execute()
+      setActiveSketch(fileName)
+      setShowNew(false)
+    } catch (e) {
+      toast.error('Could not create sketch', {
+        description: e instanceof Error ? e.message : 'Unknown error'
+      })
+    }
+  }
+
+  // Build the standalone page, titled after the .ino project (not the folder).
+  const buildHtml = (): string => {
+    const ino = findInTree(ws.root, (i) => /\.ino$/i.test(i.name!))
+    const projectName = ino?.name?.replace(/\.ino$/i, '') || ws.name || 'tinyStudio sketch'
+    return buildVisualExportHtml(projectName, file?.content ?? '')
+  }
+
+  // Preview: write index.html into the project root and open it in the browser.
+  const preview = async (): Promise<void> => {
+    const path = `${ws.path}/index.html`
+    try {
+      await window.api.fs.writeFile(path, buildHtml())
+      await new RefreshWorkspaceCommand(ws).execute()
+      const err = await window.api.fs.openPath(path)
+      if (err) toast.error('Could not open preview', { description: err })
+      else toast.success('Preview opened in your browser', { description: path })
+    } catch (e) {
+      toast.error('Preview failed', {
+        description: e instanceof Error ? e.message : 'Unknown error'
+      })
+    }
+  }
+
+  // Publish: push index.html to the linked repo and turn on GitHub Pages.
+  const publish = async (): Promise<void> => {
+    const account = loadAccount()
+    if (!account) {
+      toast.info('Connect GitHub first', {
+        description: 'Open the GitHub tab in the sidebar to sign in.'
+      })
+      return
+    }
+    const link = loadLink(ws.path)
+    if (!link) {
+      toast.info('Link this project to a repo first', {
+        description: 'Use the GitHub tab to link or publish a repository.'
+      })
+      return
+    }
+    setPublishing(true)
+    try {
+      const html = buildHtml()
+      await window.api.fs.writeFile(`${ws.path}/index.html`, html)
+      await new RefreshWorkspaceCommand(ws).execute()
+      await pushFile(
+        link.remote,
+        link.branch,
+        'index.html',
+        html,
+        account.token,
+        'Publish web export via tinyStudio'
+      )
+      const url = await enablePages(link.remote, link.branch, account.token)
+      toast.success('Published to GitHub Pages', {
+        description: `${url} — the first build can take a minute.`
+      })
+      window.api.fs.openExternal(url)
+    } catch (e) {
+      toast.error('Publish failed', {
+        description: e instanceof Error ? e.message : 'Unknown error'
+      })
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  return (
+    <div className="size-full flex flex-col bg-[var(--bg)]">
+      {/* Sketch picker + view actions. Tabs let you keep several p5.js renders
+          (asteroids.js, pong.js, …) in one project and switch between them. */}
+      <div className="flex items-stretch h-[36px] border-b-[1.5px] border-[var(--border-default)] bg-[var(--bg-sunken)]">
+        <div className="flex items-stretch min-w-0 overflow-x-auto">
+          {jsFiles.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setActiveSketch(f.name!)}
+              title={f.name ?? undefined}
+              className={`shrink-0 px-3.5 text-[13px] flex items-center border-r-[1.5px] border-[var(--border-soft)] ${
+                f.name === activeSketch
+                  ? 'bg-[var(--surface-card)] text-[var(--text-strong)] shadow-[inset_0_2.5px_0_0_var(--brand)]'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-body)]'
+              }`}
+            >
+              {f.name}
+            </button>
+          ))}
+          <button
+            onClick={() => setShowNew(true)}
+            title="New sketch"
+            className="shrink-0 flex items-center px-2.5 text-[var(--text-muted)] hover:text-[var(--text-strong)]"
+          >
+            <Plus size={15} />
+          </button>
+        </div>
+        <div className="flex-1" />
+      </div>
+
+      <div className="flex-1 min-h-0">
+        {file ? (
+          <VisualPreview
+            code={file.content}
+            name={file.name}
+            actions={
+              <>
+                <IconButton
+                  label="Edit code"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    dispatch(revealFile(file.id))
+                    dispatch(setEditorView('code'))
+                  }}
+                >
+                  <CodeXml size={16} />
+                </IconButton>
+                <IconButton label="Preview in browser" variant="ghost" size="sm" onClick={preview}>
+                  <ExternalLink size={16} />
+                </IconButton>
+                <IconButton
+                  label="Publish to GitHub Pages"
+                  variant="ghost"
+                  size="sm"
+                  disabled={publishing}
+                  onClick={publish}
+                >
+                  {publishing ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <UploadCloud size={16} />
+                  )}
+                </IconButton>
+              </>
+            }
+          />
+        ) : (
+          <LoadingHint label="Loading visual…" />
+        )}
+      </div>
+
+      <NewSketchDialog
+        open={showNew}
+        onOpenChange={setShowNew}
+        existing={jsFiles.map((f) => f.name!)}
+        onCreate={createSketch}
+      />
+    </div>
+  )
+}
+
+function NewSketchDialog({
+  open,
+  onOpenChange,
+  existing,
+  onCreate
+}: {
+  open: boolean
+  onOpenChange: (o: boolean) => void
+  existing: string[]
+  onCreate: (fileName: string) => void
+}): React.JSX.Element {
+  const [name, setName] = useState('')
+
+  // Reset the field each time the dialog opens.
+  useEffect(() => {
+    if (open) setName('')
+  }, [open])
+
+  const trimmed = name.trim()
+  const fileName = trimmed ? (/\.js$/i.test(trimmed) ? trimmed : `${trimmed}.js`) : ''
+  const duplicate = !!fileName && existing.includes(fileName)
+  const invalid = !trimmed || /[\\/:*?"<>|]/.test(trimmed) || duplicate
+
+  const submit = (): void => {
+    if (!invalid) onCreate(fileName)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>New p5.js sketch</DialogTitle>
+          <DialogDescription>
+            Creates a new <span className="font-mono">.js</span> sketch in your project. Switch
+            between sketches with the tabs in the Visual view.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-2">
+          <Input
+            autoFocus
+            placeholder="asteroids"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && submit()}
+          />
+          {duplicate && (
+            <p className="text-xs text-signal-error">
+              A file named <span className="font-mono">{fileName}</span> already exists.
+            </p>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button disabled={invalid} onClick={submit}>
+            Create sketch
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function EmptyHint({ label }: { icon: string; label: string }): React.JSX.Element {
+  return (
+    <div className="size-full flex flex-col items-center justify-center gap-3 text-center text-fg-3">
+      <CircuitBoard size={40} className="opacity-40" />
+      <p className="text-sm">{label}</p>
+    </div>
+  )
+}
+
+function LoadingHint({ label }: { label: string }): React.JSX.Element {
+  return (
+    <div className="size-full flex flex-col items-center justify-center gap-3 text-fg-3">
+      <Loader2 size={22} className="animate-spin text-cyan" />
+      <p className="text-sm">{label}</p>
+    </div>
+  )
+}

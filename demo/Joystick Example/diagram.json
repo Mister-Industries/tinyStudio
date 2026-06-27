@@ -3,65 +3,82 @@
   "editor": "tinystudio",
   "parts": [
     {
-      "type": "tinycore",
-      "id": "tinycore_bms",
-      "left": 364.8,
-      "top": 86.39999999999999
+      "type": "potentiometer-rotary-16mm-5",
+      "id": "potentiometer-rotary-16mm-5_g9d",
+      "left": 710.4,
+      "top": -124.8,
+      "attrs": {
+        "labelOffset": [
+          65,
+          -68
+        ],
+        "label": "Potentiometer"
+      }
     },
     {
-      "type": "my-part",
-      "id": "my-part_y9r",
-      "left": 660,
-      "top": 242
+      "type": "battery-aa",
+      "id": "battery-aa_2dp",
+      "left": 329,
+      "top": -27
+    },
+    {
+      "type": "led-generic-5mm",
+      "id": "led-generic-5mm_fsn",
+      "left": 637,
+      "top": -57.599999999999994,
+      "attrs": {
+        "labelOffset": [
+          -42,
+          -67
+        ]
+      }
+    },
+    {
+      "type": "resistor",
+      "id": "resistor_hwt",
+      "left": 643.1999999999999,
+      "top": 63
     }
   ],
   "connections": [
     [
-      "tinycore_bms:8",
-      "my-part_y9r:4",
-      "#36c46b",
+      "battery-aa_2dp:+",
+      "led-generic-5mm_fsn:cathode",
+      "#e5544b",
       [
-        "v129.8",
-        "h194",
-        "v-19.2",
-        "h-1.8",
-        "v-26"
+        "h98.21",
+        "v-41.56",
+        "h-0.16"
       ]
     ],
     [
-      "tinycore_bms:9",
-      "my-part_y9r:3",
-      "#ff4d6d",
+      "led-generic-5mm_fsn:anode",
+      "potentiometer-rotary-16mm-5_g9d:leg1",
+      "#42a5f5",
       [
-        "v139.4",
-        "h214.6",
-        "v-19.2",
-        "h-2.4",
-        "v-36.6"
+        "v6.07",
+        "h66.91"
       ]
     ],
     [
-      "tinycore_bms:10",
-      "my-part_y9r:2",
-      "#00f0ff",
+      "potentiometer-rotary-16mm-5_g9d:wiper",
+      "resistor_hwt:Pin 1",
+      "#42a5f5",
       [
-        "v149",
-        "h236.2",
-        "v-9.6",
-        "h-3",
-        "v-55.8"
+        "v84.36",
+        "h-28.32",
+        "v-0.27",
+        "h-26.96"
       ]
     ],
     [
-      "tinycore_bms:11",
-      "my-part_y9r:1",
-      "#f7a400",
+      "resistor_hwt:Pin 0",
+      "battery-aa_2dp:-",
+      "#79818c",
       [
-        "v157.6",
-        "h253.8",
-        "v-57.6",
-        "h-3.6",
-        "v-16.4"
+        "h-39.36",
+        "v-30.35",
+        "h-59.81"
       ]
     ]
   ]

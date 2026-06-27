@@ -15,7 +15,9 @@ import {
 } from '@renderer/redux'
 import { AlertCircle, Check, Loader2, Upload } from 'lucide-react'
 import React from 'react'
-import { toast } from 'sonner'
+// Route build/upload feedback through notify so it also lands in the status-bar
+// notification bell (not just a transient toast).
+import { notify as toast } from '@renderer/lib/notify'
 
 /**
  * Flush all unsaved editor buffers to disk. Verify/Upload compile the sketch
@@ -67,7 +69,7 @@ export interface VerifyButtonProps {
   /** Custom className for styling */
   className?: string
   /** Button variant */
-  variant?: 'default' | 'muted' | 'secondary' | 'destructive' | 'outline' | 'ghost'
+  variant?: 'default' | 'muted' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'success'
   /** Button size */
   size?: 'default' | 'sm' | 'lg' | 'icon'
   /** Whether to show icon */
@@ -119,6 +121,7 @@ export function VerifyButton({
     try {
       await saveAll() // compile the current code, not the last saved version
       await compileSketch(sketchDir || workspace.path, selectedBoard.config)
+      toast.success('Compile complete', { description: `${selectedBoard.config.name} sketch verified.` })
     } catch (error) {
       console.error('Compilation error:', error)
       toast.error('Compilation failed', {
@@ -227,6 +230,7 @@ export function UploadButton({
       } else {
         await uploadSketch(selectedBoard.port, selectedBoard.config, dir)
       }
+      toast.success('Upload complete', { description: 'Your sketch is running on the board.' })
     } catch (error) {
       console.error('Upload error:', error)
       toast.error('Upload failed', {

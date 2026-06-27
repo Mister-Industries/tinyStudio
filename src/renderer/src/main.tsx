@@ -17,7 +17,21 @@ createRoot(document.getElementById('root')!).render(
           <App />
         </ErrorBoundary>
         {/* Toast host — without this, no toast.* feedback ever renders. */}
-        <Toaster theme="dark" position="bottom-right" richColors closeButton />
+        <Toaster
+          theme="dark"
+          position="bottom-right"
+          closeButton
+          toastOptions={{
+            style: {
+              background: 'var(--surface-overlay)',
+              color: 'var(--text-body)',
+              border: '1.5px solid var(--border-default)',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-soft)',
+              fontFamily: 'var(--font-sans)'
+            }
+          }}
+        />
       </Provider>
     </ThemeProvider>
   </StrictMode>

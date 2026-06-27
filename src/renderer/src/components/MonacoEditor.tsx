@@ -28,14 +28,14 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
     }))
 
     function handleBeforeMount(monaco): void {
-      // tinyStudio "Studio Dark" — colors from the tinyForge token set.
-      // Both theme names resolve to the same navy theme: the design system is
-      // dark-first, so light mode stays on brand.
-      const studioDark = {
+      // Design-system surfaces (cold charcoal dark / near-white light) with the
+      // existing tinyForge syntax hues kept on dark; light uses deeper variants
+      // of the same hues for contrast on a pale background.
+      monaco.editor.defineTheme('tiny-dark-theme', {
         base: 'vs-dark' as const,
         inherit: true,
         rules: [
-          { token: '', foreground: 'd7deff', background: '070b22' },
+          { token: '', foreground: 'dbdee1', background: '1e1f22' },
           { token: 'keyword', foreground: 'ff3f8c' },
           { token: 'keyword.type', foreground: '00f0ff' },
           { token: 'predefined', foreground: '5cc8ff' },
@@ -44,34 +44,71 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
           { token: 'string.escape', foreground: '3ddc97' },
           { token: 'number', foreground: 'f7a400' },
           { token: 'number.float', foreground: 'f7a400' },
-          { token: 'comment', foreground: '5f6aa0' },
-          { token: 'identifier', foreground: 'd7deff' },
-          { token: 'delimiter', foreground: '8b94c8' }
+          { token: 'comment', foreground: '6b7077' },
+          { token: 'identifier', foreground: 'dbdee1' },
+          { token: 'delimiter', foreground: '969ba3' }
         ],
         colors: {
-          'editor.background': '#070b22',
-          'editor.foreground': '#d7deff',
-          'editor.lineHighlightBackground': '#11173a',
-          'editorCursor.foreground': '#00f0ff',
-          'editorLineNumber.foreground': '#4a5296',
-          'editorLineNumber.activeForeground': '#00f0ff',
-          'editor.selectionBackground': '#00f0ff33',
-          'editor.selectionHighlightBackground': '#00f0ff1a',
-          'editorBracketMatch.background': '#00f0ff22',
-          'editorBracketMatch.border': '#00f0ff',
-          'editorIndentGuide.background': '#1a1f4d',
-          'editorIndentGuide.activeBackground': '#353c78',
-          'editorGutter.background': '#070b22',
-          'editorWidget.background': '#1a1f4d',
-          'editorWidget.border': '#353c78',
-          'editorSuggestWidget.background': '#1a1f4d',
-          'editorSuggestWidget.selectedBackground': '#262c5e',
-          'scrollbarSlider.background': '#353c7866',
-          'scrollbarSlider.hoverBackground': '#353c78aa'
+          'editor.background': '#1e1f22',
+          'editor.foreground': '#dbdee1',
+          'editor.lineHighlightBackground': '#ffffff0d',
+          'editorCursor.foreground': '#42a5f5',
+          'editorLineNumber.foreground': '#6b7077',
+          'editorLineNumber.activeForeground': '#dbdee1',
+          'editor.selectionBackground': '#42a5f540',
+          'editor.selectionHighlightBackground': '#42a5f51a',
+          'editorBracketMatch.background': '#42a5f522',
+          'editorBracketMatch.border': '#42a5f5',
+          'editorIndentGuide.background': '#2b2d31',
+          'editorIndentGuide.activeBackground': '#3c3f45',
+          'editorGutter.background': '#1e1f22',
+          'editorWidget.background': '#383a40',
+          'editorWidget.border': '#3c3f45',
+          'editorSuggestWidget.background': '#383a40',
+          'editorSuggestWidget.selectedBackground': '#2b2d31',
+          'scrollbarSlider.background': '#4a4d5466',
+          'scrollbarSlider.hoverBackground': '#4a4d54aa'
         }
-      }
-      monaco.editor.defineTheme('tiny-dark-theme', studioDark)
-      monaco.editor.defineTheme('tiny-light-theme', studioDark)
+      })
+      monaco.editor.defineTheme('tiny-light-theme', {
+        base: 'vs' as const,
+        inherit: true,
+        rules: [
+          { token: '', foreground: '24272c', background: 'fafbfc' },
+          { token: 'keyword', foreground: 'd81f6a' },
+          { token: 'keyword.type', foreground: '0e8fa8' },
+          { token: 'predefined', foreground: '1e88e5' },
+          { token: 'string', foreground: '1e7a4d' },
+          { token: 'string.quote', foreground: '1e7a4d' },
+          { token: 'string.escape', foreground: '1e7a4d' },
+          { token: 'number', foreground: 'b5760a' },
+          { token: 'number.float', foreground: 'b5760a' },
+          { token: 'comment', foreground: '79818c' },
+          { token: 'identifier', foreground: '24272c' },
+          { token: 'delimiter', foreground: '79818c' }
+        ],
+        colors: {
+          'editor.background': '#fafbfc',
+          'editor.foreground': '#24272c',
+          'editor.lineHighlightBackground': '#1814170a',
+          'editorCursor.foreground': '#1e88e5',
+          'editorLineNumber.foreground': '#a3abb5',
+          'editorLineNumber.activeForeground': '#24272c',
+          'editor.selectionBackground': '#42a5f533',
+          'editor.selectionHighlightBackground': '#42a5f51a',
+          'editorBracketMatch.background': '#42a5f522',
+          'editorBracketMatch.border': '#1e88e5',
+          'editorIndentGuide.background': '#e3e7ec',
+          'editorIndentGuide.activeBackground': '#cfd5dc',
+          'editorGutter.background': '#fafbfc',
+          'editorWidget.background': '#ffffff',
+          'editorWidget.border': '#cfd5dc',
+          'editorSuggestWidget.background': '#ffffff',
+          'editorSuggestWidget.selectedBackground': '#edf0f3',
+          'scrollbarSlider.background': '#a3abb566',
+          'scrollbarSlider.hoverBackground': '#a3abb5aa'
+        }
+      })
     }
 
     const handleEditorMounted: OnMount = (editor, monaco) => {
@@ -150,7 +187,7 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
         onMount={handleEditorMounted}
         beforeMount={handleBeforeMount}
         options={{
-          fontFamily: '"JetBrains Mono", "Fira Code", monospace',
+          fontFamily: '"Fira Code", "JetBrains Mono", ui-monospace, monospace',
           fontSize: 14,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,

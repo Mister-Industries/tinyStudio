@@ -8,7 +8,7 @@
 
 import { Download, Loader2, Zap } from 'lucide-react'
 import { useState } from 'react'
-import { toast } from 'sonner'
+import { notify as toast } from '@renderer/lib/notify'
 import { OpenWorkspaceCommand } from '@renderer/commands/fileCommands'
 import { installExamplesToDisk } from '@renderer/lib/examples'
 import { parseProjectRoute } from '@renderer/lib/projectRouting'
@@ -84,7 +84,7 @@ export function WelcomeDialog(): React.JSX.Element {
     markOnboarded()
     setOpen(false)
     dispatch(setPanelOpen({ panel: 'docs', isOpen: true }))
-    toast('Browse ready-made projects in the Examples tab.')
+    toast.info('Browse ready-made projects in the Examples tab.')
   }
 
   return (

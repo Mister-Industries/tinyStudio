@@ -3,29 +3,42 @@ import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@renderer/lib/utils'
 
+/* tinyStudio — Button
+   The signature "pixel-art" tactile control: a top inner highlight + a solid
+   colored bottom edge + a soft ambient shadow. Filled variants lift on hover
+   and press DOWN on click (see .tactile / .tactile-bordered in ds-components.css).
+   All historical variant/size names are preserved so existing call sites keep
+   working — they're just remapped onto the new design language. */
+
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md)] font-semibold tracking-[-0.01em] select-none transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]",
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
-        destructive:
-          'bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
-        outline:
-          'border border-border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-border dark:hover:bg-input/50',
-        secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
-        muted: 'bg-muted text-muted-foreground shadow-xs hover:bg-muted/80',
-        ghost: 'hover:bg-primary-foreground hover:text-foreground dark:hover:bg-primary-foreground',
-        link: 'underline-offset-4 hover:underline',
-        destructiveGhost: 'hover:bg-destructive hover:text-secondary-foreground',
+        // filled — tactile depth, lifts/presses
+        default: 'tactile bg-primary text-white [--_edge:var(--brand-deep)]',
+        destructive: 'tactile bg-[var(--red)] text-white [--_edge:var(--red-deep)]',
+        success: 'tactile bg-[var(--green)] text-white [--_edge:var(--green-deep)]',
+        // bordered tactile — neutral actions
+        secondary: 'tactile-bordered bg-card text-[var(--text-strong)]',
+        outline: 'tactile-bordered bg-background text-[var(--text-strong)]',
+        // flat soft — quiet neutral
+        muted:
+          'border-[1.5px] border-[var(--border-soft)] bg-[var(--bg-sunken)] text-[var(--text-body)] hover:border-[var(--border-interactive)]',
+        // chromeless
+        ghost:
+          'bg-transparent text-[var(--text-body)] hover:bg-[var(--bg-sunken)] active:translate-y-px',
         toolbarGhost:
-          'bg-transparent text-secondary-foreground hover:bg-secondary-foreground hover:text-primary-foreground dark:hover:bg-secondary/20 dark:hover:text-secondary-foreground/80'
+          'bg-transparent text-[var(--text-muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--text-strong)] active:translate-y-px',
+        destructiveGhost:
+          'bg-transparent text-[var(--text-body)] hover:bg-[var(--red-soft)] hover:text-[var(--red-on)] active:translate-y-px',
+        link: 'text-[var(--brand)] underline-offset-4 hover:underline'
       },
       size: {
-        default: 'h-9 px-4 py-2 has-[>svg]:px-3',
-        sm: 'h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
-        lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
-        icon: 'size-9 rounded-full'
+        default: 'h-[38px] px-4 text-sm has-[>svg]:px-3',
+        sm: 'h-[30px] gap-1.5 rounded-[var(--radius-sm)] px-3 text-sm has-[>svg]:px-2.5',
+        lg: 'h-[46px] px-6 text-base has-[>svg]:px-4',
+        icon: 'size-[38px] rounded-[var(--radius-sm)] p-0'
       }
     },
     defaultVariants: {

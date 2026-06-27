@@ -4,12 +4,11 @@ import {
   RefreshWorkspaceCommand
 } from '@renderer/commands/fileCommands'
 import { loader } from '@monaco-editor/react'
-import tinyLogo from '@renderer/assets/tinyLogo.png'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { enablePages, loadAccount, loadLink, pushFile } from '@renderer/lib/github'
 import { buildVisualExportHtml } from '@renderer/lib/visualExport'
 import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
-import { selectEditorView, setEditorView } from '@renderer/redux/editorSlice'
+import { selectEditorView, setEditorView, setPanelOpen } from '@renderer/redux/editorSlice'
 import {
   BaseFileItem,
   closeFile,
@@ -32,7 +31,7 @@ import {
 } from 'lucide-react'
 import * as monaco from 'monaco-editor'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { notify as toast } from '@renderer/lib/notify'
 import { BlocklyEditor } from './BlocklyEditor'
 import { DiagramEditor } from './DiagramEditor'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
@@ -46,6 +45,7 @@ import {
 } from './ui/Dialog'
 import { FileTabContent, FileTabs, FileTabsList, FileTabTrigger } from './ui/FileTab'
 import { Button } from './ui/Button'
+import { IconButton } from './ui/IconButton'
 import { Input } from './ui/Input'
 import { VisualPreview } from './VisualPreview'
 
@@ -308,14 +308,6 @@ function CodeView(): React.JSX.Element {
   if (openFiles.length === 0) {
     return (
       <div className="size-full flex flex-col items-center justify-center text-sm gap-5">
-        <div
-          className="size-40"
-          style={{
-            backgroundColor: 'var(--navy-500)',
-            mask: `url(${tinyLogo}) no-repeat center/contain`,
-            WebkitMask: `url(${tinyLogo}) no-repeat center/contain`
-          }}
-        />
         <div className="text-center">
           <div className="text-fg-1 text-base font-semibold">No project open</div>
           <div className="text-fg-3 text-xs mt-1">Open a folder to start building.</div>
@@ -384,6 +376,10 @@ function CircuitView(): React.JSX.Element {
       onOpenCode={() => {
         dispatch(revealFile(file.id))
         dispatch(setEditorView('code'))
+      }}
+      onEditChange={(editing) => {
+        // entering edit mode: free horizontal space by closing the docs panel
+        if (editing) dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
       }}
     />
   )
@@ -508,20 +504,20 @@ function VisualView(): React.JSX.Element {
   }
 
   return (
-    <div className="size-full flex flex-col bg-navy-900">
+    <div className="size-full flex flex-col bg-[var(--bg)]">
       {/* Sketch picker + view actions. Tabs let you keep several p5.js renders
           (asteroids.js, pong.js, …) in one project and switch between them. */}
-      <div className="flex items-center gap-2 px-2 py-1.5 border-b border-navy-600">
-        <div className="flex items-center gap-1 min-w-0 overflow-x-auto">
+      <div className="flex items-stretch h-[36px] border-b-[1.5px] border-[var(--border-default)] bg-[var(--bg-sunken)]">
+        <div className="flex items-stretch min-w-0 overflow-x-auto">
           {jsFiles.map((f) => (
             <button
               key={f.id}
               onClick={() => setActiveSketch(f.name!)}
               title={f.name ?? undefined}
-              className={`shrink-0 px-3 py-1 rounded-full text-xs ${
+              className={`shrink-0 px-3.5 text-[13px] flex items-center border-r-[1.5px] border-[var(--border-soft)] ${
                 f.name === activeSketch
-                  ? 'bg-navy-500 text-fg-1'
-                  : 'text-fg-3 hover:bg-navy-600 hover:text-fg-1'
+                  ? 'bg-[var(--surface-card)] text-[var(--text-strong)] shadow-[inset_0_2.5px_0_0_var(--brand)]'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-body)]'
               }`}
             >
               {f.name}
@@ -530,51 +526,51 @@ function VisualView(): React.JSX.Element {
           <button
             onClick={() => setShowNew(true)}
             title="New sketch"
-            className="shrink-0 flex items-center px-2 py-1 rounded-full text-fg-3 hover:bg-navy-600 hover:text-fg-1"
+            className="shrink-0 flex items-center px-2.5 text-[var(--text-muted)] hover:text-[var(--text-strong)]"
           >
-            <Plus size={14} />
+            <Plus size={15} />
           </button>
         </div>
         <div className="flex-1" />
-        <Button
-          size="icon"
-          variant="outline"
-          className="rounded-full"
-          title="Edit code"
-          disabled={!file}
-          onClick={() => {
-            if (!file) return
-            dispatch(revealFile(file.id))
-            dispatch(setEditorView('code'))
-          }}
-        >
-          <CodeXml size={16} />
-        </Button>
-        <Button
-          size="icon"
-          variant="outline"
-          className="rounded-full"
-          title="Preview in browser"
-          disabled={!file}
-          onClick={preview}
-        >
-          <ExternalLink size={16} />
-        </Button>
-        <Button
-          size="icon"
-          variant="outline"
-          className="rounded-full"
-          title="Publish to GitHub Pages"
-          disabled={publishing || !file}
-          onClick={publish}
-        >
-          {publishing ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
-        </Button>
       </div>
 
       <div className="flex-1 min-h-0">
         {file ? (
-          <VisualPreview code={file.content} name={file.name} />
+          <VisualPreview
+            code={file.content}
+            name={file.name}
+            actions={
+              <>
+                <IconButton
+                  label="Edit code"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    dispatch(revealFile(file.id))
+                    dispatch(setEditorView('code'))
+                  }}
+                >
+                  <CodeXml size={16} />
+                </IconButton>
+                <IconButton label="Preview in browser" variant="ghost" size="sm" onClick={preview}>
+                  <ExternalLink size={16} />
+                </IconButton>
+                <IconButton
+                  label="Publish to GitHub Pages"
+                  variant="ghost"
+                  size="sm"
+                  disabled={publishing}
+                  onClick={publish}
+                >
+                  {publishing ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <UploadCloud size={16} />
+                  )}
+                </IconButton>
+              </>
+            }
+          />
         ) : (
           <LoadingHint label="Loading visual…" />
         )}
