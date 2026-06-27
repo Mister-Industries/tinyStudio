@@ -26,7 +26,6 @@ import {
   CircuitBoard,
   CodeXml,
   Grid3x3,
-  ImageDown,
   Maximize,
   MousePointer2,
   Pencil,
@@ -56,7 +55,6 @@ import {
   buildWirePoints,
   calculateOrthogonalPath,
   clampOntoSegment,
-  distanceToSegment,
   dragSegment,
   getWireAt,
   getWirePoints,
@@ -207,23 +205,6 @@ function darken(hex: string, f = 0.55): string {
   return `rgb(${r}, ${g}, ${b})`
 }
 
-// Escape text for safe inclusion in exported SVG markup.
-function escapeXml(s: string): string {
-  return s.replace(
-    /[<>&'"]/g,
-    (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c] as string
-  )
-}
-
-// Display family/section names in sentence case (the catalogue stores some in
-// ALL CAPS, e.g. "CAPACITOR [BIDIRECTIONAL]") — the brand voice is no all-caps.
-function titleCase(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/\b([a-z])/g, (m) => m.toUpperCase())
-    .replace(/\bIc\b/, 'IC')
-}
-
 // A small SVG thumbnail for the palette / part tiles. Fritzing icon art is dark
 // line-work meant for a light background, so we put it on a light chip.
 function Thumb({ svg, size = 40 }: { svg?: string; size?: number }): React.JSX.Element {
@@ -250,16 +231,12 @@ type HandleKind = 'vertex' | 'edge' | 'endpoint'
 export function DiagramEditor({
   content,
   onChange,
-  onOpenCode,
-  onEditChange
+  onOpenCode
 }: {
   content: string
   onChange: (next: string) => void
   // Switch to the Code view with diagram.json selected (the `</>` button).
   onOpenCode?: () => void
-  // Fires when the view/edit toggle flips (used to free space by closing the
-  // docs panel when you start editing).
-  onEditChange?: (editing: boolean) => void
 }): React.JSX.Element {
   const diagram: Diagram = React.useMemo(() => {
     try {
@@ -276,7 +253,7 @@ export function DiagramEditor({
     }
   }, [content])
 
-  const [view] = React.useState<ViewKind>('breadboard')
+  const [view, setView] = React.useState<ViewKind>('breadboard')
   const [editable, setEditable] = React.useState(false)
   const [grid, setGrid] = React.useState(true)
   const [editorPart, setEditorPart] = React.useState<PartDef | null | undefined>(undefined) // undefined = closed
@@ -1086,31 +1063,10 @@ export function DiagramEditor({
       return n
     })
   const netCount = meaningfulNetCount(netModel)
-  // Junction solder dots: a free-point endpoint takes the color of the wire it
-  // lands on (the one you attached it to), so the joint reads as part of it.
-  const junctions: { pt: Pt; color: string }[] = []
-  diagram.connections.forEach((c, ci) => {
+  const junctions: Pt[] = []
+  diagram.connections.forEach((c) => {
     ;[c[0], c[1]].forEach((r) => {
-      if (typeof r !== 'object') return
-      let color = view === 'schematic' ? 'var(--text-strong)' : (c[2] as string) || '#2fa46a'
-      if (view !== 'schematic') {
-        for (let oi = 0; oi < diagram.connections.length; oi++) {
-          if (oi === ci) continue
-          const pts = wirePts(diagram.connections[oi])
-          let on = false
-          for (let s = 0; s < pts.length - 1; s++) {
-            if (distanceToSegment(r, pts[s], pts[s + 1]) < 2) {
-              on = true
-              break
-            }
-          }
-          if (on) {
-            color = (diagram.connections[oi][2] as string) || color
-            break
-          }
-        }
-      }
-      junctions.push({ pt: r, color })
+      if (typeof r === 'object') junctions.push(r)
     })
   })
 
@@ -1120,111 +1076,13 @@ export function DiagramEditor({
   }
   const selectedPart = selPart ? diagram.parts.find((p) => p.id === selPart) : null
 
-  // Export the diagram (parts + wires + a tinyStudio watermark) to a PNG by
-  // composing a standalone SVG and rasterizing it through a canvas.
-  const exportImage = (): void => {
-    let minX = Infinity
-    let minY = Infinity
-    let maxX = -Infinity
-    let maxY = -Infinity
-    for (const part of diagram.parts) {
-      const def = getPart(part.type)
-      const v = def && viewFor(def, view)
-      if (!v) continue
-      const [l, t] = partXY(part)
-      minX = Math.min(minX, l)
-      minY = Math.min(minY, t)
-      maxX = Math.max(maxX, l + v.w + 60) // room for labels
-      maxY = Math.max(maxY, t + v.h + 18)
-    }
-    for (const c of diagram.connections) {
-      for (const p of wirePts(c)) {
-        minX = Math.min(minX, p.x)
-        minY = Math.min(minY, p.y)
-        maxX = Math.max(maxX, p.x)
-        maxY = Math.max(maxY, p.y)
-      }
-    }
-    if (!isFinite(minX)) return
-    const pad = 36
-    minX -= pad
-    minY -= pad
-    maxX += pad
-    maxY += pad + 16 // extra room for the watermark
-    const W = Math.round(maxX - minX)
-    const H = Math.round(maxY - minY)
-    const cs = getComputedStyle(document.documentElement)
-    const bg = (cs.getPropertyValue('--bg-sunken') || '#1e1f22').trim()
-
-    const wires = diagram.connections
-      .map((c) => {
-        const pts = wirePts(c)
-        if (pts.length < 2) return ''
-        const core = (c[2] as string) || '#2fa46a'
-        const d = roundedPath(pts)
-        return `<path d="${d}" fill="none" stroke="${darken(core)}" stroke-width="${WIRE_OUTLINE_W}" stroke-linejoin="round" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${core}" stroke-width="${WIRE_W}" stroke-linejoin="round" stroke-linecap="round"/>`
-      })
-      .join('')
-    const dots = junctions
-      .map((j) => `<circle cx="${j.pt.x}" cy="${j.pt.y}" r="3" fill="${j.color}"/>`)
-      .join('')
-    const partsSvg = diagram.parts
-      .map((part) => {
-        const def = getPart(part.type)
-        const v = def && viewFor(def, view)
-        if (!v) return ''
-        const [l, t] = partXY(part)
-        // strip any width/height on the part's <svg> then size+place it
-        const inner = v.svg
-          .replace(/<svg([^>]*?)\swidth="[^"]*"/i, '<svg$1')
-          .replace(/<svg([^>]*?)\sheight="[^"]*"/i, '<svg$1')
-          .replace('<svg', `<svg x="${l}" y="${t}" width="${v.w}" height="${v.h}"`)
-        const rot = part.rotate ? ` transform="rotate(${part.rotate} ${l + v.w / 2} ${t + v.h / 2})"` : ''
-        const label = `<text x="${l}" y="${t + v.h + 13}" fill="#969ba3" font-family="Plus Jakarta Sans, sans-serif" font-size="11">${escapeXml(labelOf(part))}</text>`
-        return `<g${rot}>${inner}</g>${label}`
-      })
-      .join('')
-    const watermark = `<text x="${maxX - 10}" y="${maxY - 10}" text-anchor="end" fill="#79818c" fill-opacity="0.75" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="600">tinyStudio</text>`
-
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="${minX} ${minY} ${W} ${H}"><rect x="${minX}" y="${minY}" width="${W}" height="${H}" fill="${bg}"/>${wires}${dots}${partsSvg}${watermark}</svg>`
-
-    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const img = new Image()
-    img.onload = () => {
-      const sf = 2
-      const canvas = document.createElement('canvas')
-      canvas.width = W * sf
-      canvas.height = H * sf
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        URL.revokeObjectURL(url)
-        return
-      }
-      ctx.scale(sf, sf)
-      ctx.drawImage(img, 0, 0)
-      URL.revokeObjectURL(url)
-      canvas.toBlob((png) => {
-        if (!png) return
-        const a = document.createElement('a')
-        const href = URL.createObjectURL(png)
-        a.href = href
-        a.download = 'circuit.png'
-        a.click()
-        setTimeout(() => URL.revokeObjectURL(href), 1000)
-      }, 'image/png')
-    }
-    img.onerror = () => URL.revokeObjectURL(url)
-    img.src = url
-  }
-
   return (
-    <div className="size-full relative flex bg-bg overflow-hidden pb-7">
+    <div className="size-full relative flex bg-bg overflow-hidden">
       {/* components rail (edit mode only) */}
       {editable && (
         <div className="w-60 shrink-0 min-h-0 relative z-20 border-r border-border-default bg-bg-raised flex flex-col">
-          <div className="h-9 flex items-center justify-between px-3 border-b border-border-default shrink-0">
-            <span className="text-[13px] font-semibold text-text-body">Components</span>
+          <div className="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0">
+            <span className="ts-eyebrow">Components</span>
             <button
               className="text-text-muted hover:text-brand"
               title="New part…"
@@ -1235,7 +1093,9 @@ export function DiagramEditor({
           </div>
           {/* wire color — recolours the selected wire, else sets the next-wire colour */}
           <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border-default shrink-0">
-            <span className="text-[11px] text-text-muted mr-1">Wire</span>
+            <span className="text-[10px] text-text-faint mr-1 font-mono uppercase tracking-wide">
+              Wire
+            </span>
             {WIRE_COLORS.map((c) => (
               <button
                 key={c}
@@ -1253,11 +1113,11 @@ export function DiagramEditor({
             {families.map((group) => (
               <div key={group.family}>
                 <button
-                  className="w-full flex items-center gap-1 px-1 py-1 text-[11px] font-medium text-text-muted hover:text-text-body"
+                  className="w-full flex items-center gap-1 px-1 py-1 text-[10px] uppercase tracking-wider font-mono text-text-faint hover:text-text-body"
                   onClick={() => toggleFam(group.family)}
                 >
                   {isOpen(group.family) ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                  <span className="truncate">{titleCase(group.family)}</span>
+                  <span className="truncate">{group.family}</span>
                   <span className="ml-auto text-text-faint/70">{group.parts.length}</span>
                 </button>
                 {isOpen(group.family) && (
@@ -1301,27 +1161,29 @@ export function DiagramEditor({
           <button
             className={`${tool} w-8 justify-center px-0 ${editable ? 'text-brand' : ''}`}
             onClick={() => {
-              const next = !editable
-              setEditable(next)
+              setEditable((v) => !v)
               setArmed(null)
               setSelPart(null)
               selectWire(null)
-              onEditChange?.(next)
             }}
             title={editable ? 'Editing — click for view-only' : 'View-only — click to edit'}
           >
             {editable ? <Eye size={15} /> : <Pencil size={15} />}
           </button>
+          <button
+            className={`${tool} w-8 justify-center px-0`}
+            onClick={() => setView((v) => (v === 'breadboard' ? 'schematic' : 'breadboard'))}
+            title={
+              view === 'breadboard'
+                ? 'Breadboard view — click for schematic'
+                : 'Schematic view — click for breadboard'
+            }
+          >
+            {view === 'breadboard' ? <CircuitBoard size={15} /> : <Spline size={15} />}
+          </button>
         </div>
 
         <div className="absolute top-3 right-3.5 z-10 flex gap-1.5">
-          <button
-            className={`${tool} w-8 justify-center px-0`}
-            onClick={exportImage}
-            title="Export circuit as image (PNG)"
-          >
-            <ImageDown size={15} />
-          </button>
           <button
             className={`${tool} w-8 justify-center px-0 ${grid ? 'text-brand' : ''}`}
             onClick={() => setGrid((g) => !g)}
@@ -1346,7 +1208,7 @@ export function DiagramEditor({
           >
             <ZoomOut size={15} />
           </button>
-          <span className={`${tool} pointer-events-none min-w-[52px] justify-center`}>
+          <span className={`${tool} pointer-events-none min-w-[52px] justify-center font-mono`}>
             {Math.round(scale * 100)}%
           </span>
           <button
@@ -1481,7 +1343,7 @@ export function DiagramEditor({
 
               {/* junction solder dots where a wire taps another wire */}
               {junctions.map((j, k) => (
-                <circle key={`j${k}`} cx={j.pt.x} cy={j.pt.y} r={3} fill={j.color} />
+                <circle key={`j${k}`} cx={j.x} cy={j.y} r={2.8} fill="var(--text-strong)" />
               ))}
 
               {previewPts && (
@@ -1562,7 +1424,7 @@ export function DiagramEditor({
                   <div
                     key={part.id}
                     style={{ position: 'absolute', left: pLeft, top: pTop, zIndex: 2 }}
-                    className="px-2 py-1 rounded bg-surface-card border border-border-default text-[10px] text-text-faint"
+                    className="px-2 py-1 rounded bg-surface-card border border-border-default text-[10px] text-text-faint font-mono"
                   >
                     {part.type}…
                   </div>
@@ -1684,15 +1546,9 @@ export function DiagramEditor({
           </div>
         </div>
 
-        {/* tinyStudio watermark — sits above the bottom UI, bottom-right, and is
-            baked into the exported image */}
-        <div className="absolute bottom-12 right-4 z-0 pointer-events-none select-none text-[12px] font-semibold text-text-faint/70">
-          tinyStudio
-        </div>
-
-        {/* footer (kept clear of the zoom cluster on the right; wraps upward) */}
-        <div className="absolute bottom-3 left-3 right-[176px] z-10 flex flex-wrap gap-2 text-[11px]">
-          <span className="px-2.5 py-1 rounded-full bg-surface-card border border-border-default text-text-body">
+        {/* footer */}
+        <div className="absolute bottom-3 left-3 z-10 flex gap-2 text-[11px]">
+          <span className="px-2.5 py-1 rounded-full bg-surface-card border border-border-default font-mono text-text-body">
             Parts: {diagram.parts.length} · Connections: {diagram.connections.length} · Nets:{' '}
             {netCount}
           </span>
@@ -1727,8 +1583,8 @@ export function DiagramEditor({
       {/* inspector (edit mode only) */}
       {editable && (
         <div className="w-64 shrink-0 min-h-0 relative z-20 border-l border-border-default bg-bg-raised flex flex-col">
-          <div className="h-9 flex items-center px-3 border-b border-border-default shrink-0">
-            <span className="text-[13px] font-semibold text-text-body">Inspector</span>
+          <div className="px-3 py-2 border-b border-border-default shrink-0">
+            <span className="ts-eyebrow">Inspector</span>
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto p-3 flex flex-col gap-3 text-xs">
             {selectedPart ? (
@@ -1793,7 +1649,7 @@ export function DiagramEditor({
 
 const field =
   'bg-bg-sunken border border-border-default rounded px-2 py-1 text-text-strong outline-none focus:border-brand w-full'
-const rowLabel = 'text-[11px] text-text-muted'
+const rowLabel = 'text-[10px] text-text-faint uppercase tracking-wide font-mono'
 
 function Inspector({
   part,
@@ -1840,12 +1696,12 @@ function Inspector({
         />
       </div>
       <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 items-center text-text-muted">
-        <span className={rowLabel}>Type</span>
-        <span className="text-text-body truncate text-[11px]">{part.type}</span>
-        <span className={rowLabel}>Family</span>
-        <span className="text-text-body truncate">{def?.family ? titleCase(def.family) : '—'}</span>
-        <span className={rowLabel}>Wires</span>
-        <span className="text-text-body">{connCount}</span>
+        <span className={rowLabel}>type</span>
+        <span className="text-text-body truncate font-mono text-[11px]">{part.type}</span>
+        <span className={rowLabel}>family</span>
+        <span className="text-text-body truncate">{def?.family || '—'}</span>
+        <span className={rowLabel}>wires</span>
+        <span className="text-text-body font-mono">{connCount}</span>
       </div>
 
       <div className="flex flex-col gap-1">
@@ -1853,13 +1709,13 @@ function Inspector({
         <div className="flex gap-2">
           <input
             type="number"
-            className={`${field}`}
+            className={`${field} font-mono`}
             value={Math.round(xy[0])}
             onChange={(e) => onMove(parseFloat(e.target.value) || 0, xy[1])}
           />
           <input
             type="number"
-            className={`${field}`}
+            className={`${field} font-mono`}
             value={Math.round(xy[1])}
             onChange={(e) => onMove(xy[0], parseFloat(e.target.value) || 0)}
           />
@@ -1870,7 +1726,7 @@ function Inspector({
         <span className={rowLabel}>Rotation</span>
         <div className="flex items-center gap-1">
           <select
-            className={`${field} w-auto`}
+            className={`${field} font-mono w-auto`}
             value={part.rotate || 0}
             onChange={(e) => onRotate(parseInt(e.target.value, 10))}
           >
@@ -1892,19 +1748,19 @@ function Inspector({
 
       <div className="flex flex-col gap-1.5">
         <span className={rowLabel}>Properties</span>
-        {propRows.length === 0 && (
+        {props.length === 0 && (
           <div className="text-[11px] text-text-faint">
             No properties yet. Add one below — e.g. a resistor’s{' '}
-            <span className="text-text-body">value</span>.
+            <span className="font-mono">value</span>.
           </div>
         )}
-        {propRows.map(([k, val]) => (
+        {props.map(([k, val]) => (
           <div key={k} className="flex items-center gap-1.5">
-            <span className="text-[11px] text-text-muted w-16 truncate" title={k}>
+            <span className="text-[11px] text-text-muted font-mono w-16 truncate" title={k}>
               {k}
             </span>
             <input
-              className={`${field}`}
+              className={`${field} font-mono`}
               value={String(val ?? '')}
               onChange={(e) => onSetAttr(k, e.target.value)}
             />
@@ -1919,7 +1775,7 @@ function Inspector({
         ))}
         <div className="flex items-center gap-1.5">
           <input
-            className={`${field}`}
+            className={`${field} font-mono`}
             placeholder="new property…"
             value={newAttr}
             onChange={(e) => setNewAttr(e.target.value)}
@@ -1985,15 +1841,17 @@ function WireInspector({
               style={{
                 background: c,
                 borderColor:
-                  c.toLowerCase() === color.toLowerCase() ? 'var(--brand)' : 'rgba(255,255,255,0.18)'
+                  c.toLowerCase() === color.toLowerCase()
+                    ? 'var(--brand)'
+                    : 'rgba(255,255,255,0.18)'
               }}
             />
           ))}
         </div>
       </div>
       <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 items-center">
-        <span className={rowLabel}>Net pins</span>
-        <span className="text-text-body">{netPins}</span>
+        <span className={rowLabel}>net pins</span>
+        <span className="text-text-body font-mono">{netPins}</span>
       </div>
       <button
         className="mt-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-border-default text-text-muted hover:text-status-error hover:border-status-error/40"

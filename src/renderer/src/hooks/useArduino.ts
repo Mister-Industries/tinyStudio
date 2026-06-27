@@ -431,6 +431,17 @@ export function useArduino(): UseArduinoReturn {
           })
         }, 200)
 
+        // Release the serial port before flashing — esptool needs exclusive
+        // access to the COM port, and the monitor may still be holding it, so
+        // close it and give the OS a moment to free the handle (otherwise the
+        // upload fails with "uploading error: exit status 2").
+        try {
+          arduinoService.closeSerial()
+        } catch {
+          /* port was not open */
+        }
+        await new Promise((r) => setTimeout(r, 500))
+
         const result = await arduinoService.uploadSketch(targetPort, targetBoard, workspacePath)
         clearInterval(progressTimer)
 

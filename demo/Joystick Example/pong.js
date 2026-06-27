@@ -15,7 +15,7 @@ const RANGE = 1023;          // 10-bit ADC full scale
 const WIN_SCORE = 7;
 
 // ---- palette (matches the visualizer) ----
-const C_BG     = [10, 15, 45];
+const C_BG     = [0, 0, 0];
 const C_NET    = [26, 34, 70];
 const C_PLAYER = [255, 255, 255];   // cyan
 const C_AI     = [255, 255, 255];  // pink

@@ -8,7 +8,6 @@ export type Notification = {
   tone: NotificationTone
   title: string
   msg?: string
-  code?: string
   at: number
 }
 
@@ -30,14 +29,13 @@ export const notificationsSlice = createAppSlice({
   initialState,
   reducers: (create) => ({
     addNotification: create.reducer(
-      (state, { payload }: PayloadAction<{ tone: NotificationTone; title: string; msg?: string; code?: string }>) => {
+      (state, { payload }: PayloadAction<{ tone: NotificationTone; title: string; msg?: string }>) => {
         state.items.unshift({
           id: nanoid(),
           at: Date.now(),
           tone: payload.tone,
           title: payload.title,
-          msg: payload.msg,
-          code: payload.code
+          msg: payload.msg
         })
         if (state.items.length > MAX) state.items.length = MAX
       }

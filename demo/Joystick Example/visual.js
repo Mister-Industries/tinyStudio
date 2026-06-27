@@ -28,7 +28,7 @@ function sx(x) { return map(x, RANGE, 0, PAD, width - PAD); }
 function sy(y) { return map(y, 0, RANGE, height - PAD, PAD); }
 
 function draw() {
-  background(10, 15, 45);
+  background(0, 0, 0);
 
   let p = parseLine(serialRead());
   if (p) { px = p.x; py = p.y; pressed = p.b === 1; }

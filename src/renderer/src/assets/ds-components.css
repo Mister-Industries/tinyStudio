@@ -697,3 +697,21 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ── notification code block (e.g. the "Start tinyService" command) ─────────
+   A darker, monospace, selectable block so a command/link is readable and you
+   can copy it straight out of the bell. */
+.notif__code {
+  display: block;
+  margin-top: 6px;
+  padding: 7px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  border: 1px solid var(--border-default);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-strong);
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: text;
+}

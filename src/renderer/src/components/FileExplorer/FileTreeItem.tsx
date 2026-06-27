@@ -326,7 +326,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
     <>
       <div
         ref={itemRef}
-        className={`flex items-center gap-2 px-2 py-[3px] text-[13px] rounded-[var(--radius-sm)] cursor-pointer group focus:outline-none ${
+        className={`flex items-center gap-2 px-2 py-[3px] text-[13px] rounded-[var(--radius-sm)] cursor-pointer group/row focus:outline-none ${
           isSelected
             ? 'bg-[var(--brand-soft)] text-[var(--brand-on)] font-semibold dark:bg-[var(--surface-card)] dark:text-[var(--text-strong)]'
             : 'text-[var(--text-muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--text-body)]'
@@ -366,7 +366,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
             <Button
               variant="ghost"
               size="icon"
-              className="size-4 opacity-0 group-hover:opacity-100"
+              className="size-4 opacity-0 group-hover/row:opacity-100"
               onClick={(e) => e.stopPropagation()}
               tabIndex={-1}
             >

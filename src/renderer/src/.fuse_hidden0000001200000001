@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { notify as toast } from './lib/notify'
 import { BackendPrompt } from './components/BackendPrompt'
+import { WelcomeDialog } from './components/WelcomeDialog'
 import { LoadGitHubProjectCommand, OpenWorkspaceCommand } from './commands/fileCommands'
 import { parseProjectRoute } from './lib/projectRouting'
 import { DocsPanel } from './components/DocsPanel'
@@ -147,6 +148,7 @@ export default function App(): React.JSX.Element {
           </ResizablePanelGroup>
           <StatusBar />
           <BackendPrompt />
+          <WelcomeDialog />
         </div>
       </SerialProvider>
     </ArduinoProvider>

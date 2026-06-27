@@ -1,6 +1,5 @@
 import {
   OpenFileCommand,
-  OpenWorkspaceCommand,
   RefreshWorkspaceCommand
 } from '@renderer/commands/fileCommands'
 import { loader } from '@monaco-editor/react'
@@ -24,7 +23,6 @@ import {
   CircuitBoard,
   CodeXml,
   ExternalLink,
-  FolderOpen,
   Loader2,
   Plus,
   UploadCloud
@@ -308,6 +306,14 @@ function CodeView(): React.JSX.Element {
   if (openFiles.length === 0) {
     return (
       <div className="size-full flex flex-col items-center justify-center text-sm gap-5">
+        <div
+          className="size-40"
+          style={{
+            backgroundColor: 'var(--navy-500)',
+            mask: `url(${tinyLogo}) no-repeat center/contain`,
+            WebkitMask: `url(${tinyLogo}) no-repeat center/contain`
+          }}
+        />
         <div className="text-center">
           <div className="text-fg-1 text-base font-semibold">No project open</div>
           <div className="text-fg-3 text-xs mt-1">Open a folder to start building.</div>

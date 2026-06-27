@@ -91,7 +91,7 @@
 
   /* borders */
   --border-soft: var(--warm-200);
-  --border-default: var(--warm-300);
+  --border-default: #cfd5dc;
   --border-strong: var(--warm-900);
   --border-interactive: var(--warm-400);
 
@@ -332,7 +332,7 @@
 
   /* borders */
   --border-soft: #26282c;
-  --border-default: #3c3f45;
+  --border-default: #26282b;
   --border-strong: #141517;
   --border-interactive: #4a4d54;
 

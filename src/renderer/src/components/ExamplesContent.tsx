@@ -48,12 +48,12 @@ export function ExamplesContent(): React.JSX.Element {
   }
 
   return (
-    <>
-      <div className="flex items-center gap-2 px-4 py-4 text-primary text-sm font-semibold border-b border-border mb-4">
+    <div className="size-full flex flex-col">
+      <div className="flex items-center gap-2 px-4 py-4 text-primary text-sm font-semibold border-b border-border mb-4 shrink-0">
         <Zap size={16} />
         Examples
       </div>
-      <ScrollArea className="h-5/6">
+      <ScrollArea className="flex-1 min-h-0">
         <div className="flex flex-col gap-4 px-1">
           {status === 'loading' && (
             <div className="flex items-center gap-2 px-3 text-sm text-muted-foreground">
@@ -95,6 +95,6 @@ export function ExamplesContent(): React.JSX.Element {
           })}
         </div>
       </ScrollArea>
-    </>
+    </div>
   )
 }

@@ -1,4 +1,4 @@
-# 🕹️ Qwiic Joystick Asteroids
+# Qwiic Joystick Asteroids Example
 
 Stream the SparkFun Qwiic Joystick's X/Y position (and button) over serial, then **play a
 full game of Asteroids** with it in the **Visual** tab.
@@ -15,7 +15,7 @@ Built with **tinyStudio** for the **tinyCore** ESP32-S3 board by MR.INDUSTRIES.
 - [x] `visual.js` parses that stream and lets you **fly a ship, rotate, thrust, and shoot rocks**
 
 ```mermaid
-flowchart LR
+flowchart TD
   JOY[Qwiic Joystick] -->|I²C SDA/SCL| MCU[tinyCore]
   MCU -->|"Serial.println x,y,button"| MON[Serial Stream]
   MON --> VIS[visual.js · Asteroids]

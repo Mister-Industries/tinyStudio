@@ -1,4 +1,4 @@
-import { setPanelOpen, useAppDispatch } from '@renderer/redux'
+import { selectOpenFiles, setPanelOpen, useAppDispatch, useAppSelector } from '@renderer/redux'
 import { BookOpen, Sparkles, X, Zap } from 'lucide-react'
 import { AIAssistant } from './AIAssistant'
 import { ExamplesContent } from './ExamplesContent'
@@ -7,6 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs'
 
 export function DocsPanel(): React.JSX.Element {
   const dispatch = useAppDispatch()
+  // On a fresh start with nothing open, land on Examples so there's somewhere to
+  // go; once a project is open, default to Docs. (Uncontrolled — only the initial
+  // tab; the user can switch freely after.)
+  const initialTab = useAppSelector(selectOpenFiles).length === 0 ? 'examples' : 'readme'
 
   const handleCloseDocsPanel = (): void => {
     dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
@@ -14,7 +18,7 @@ export function DocsPanel(): React.JSX.Element {
 
   return (
     <div className="size-full flex flex-col bg-[var(--bg-raised)] border-l border-[var(--border-default)]">
-      <Tabs defaultValue="readme" className="size-full flex flex-col gap-0">
+      <Tabs defaultValue={initialTab} className="size-full flex flex-col gap-0">
         <div className="flex items-stretch h-[36px] gap-1 pl-3 pr-1 border-b-[1.5px] border-[var(--border-default)]">
           <TabsList className="flex-1 border-0 gap-1">
             <TabsTrigger value="readme" className="flex-1 justify-center">
@@ -50,4 +54,4 @@ export function DocsPanel(): React.JSX.Element {
       </Tabs>
     </div>
   )
-}
+}

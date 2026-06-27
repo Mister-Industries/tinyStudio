@@ -2,7 +2,7 @@ import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { useSerial } from '@renderer/contexts/SerialContext'
 import { useAppDispatch } from '@renderer/redux'
 import { setPanelOpen } from '@renderer/redux/editorSlice'
-import { FileText, ListX, Send, Terminal, X } from 'lucide-react'
+import { ArrowDownToLine, FileText, ListX, Send, Terminal, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './ui/Button'
 import { IconButton } from './ui/IconButton'
@@ -22,6 +22,13 @@ export function SerialMonitor(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const { clear } = useSerial()
   const { clearLogs, isCompiling, isUploading } = useArduinoContext()
+
+  // Auto-scroll (stick to bottom) per pane — toggled by the button in the header.
+  const [serialAuto, setSerialAuto] = useState(true)
+  const [outputAuto, setOutputAuto] = useState(true)
+  const auto = activeTab === 'serial' ? serialAuto : outputAuto
+  const toggleAuto = (): void =>
+    activeTab === 'serial' ? setSerialAuto((v) => !v) : setOutputAuto((v) => !v)
 
   // Verify/Upload jump to the Output log so the build is visible, then snap
   // back to the Serial Monitor once it finishes. The short delay rides over the
@@ -63,6 +70,15 @@ export function SerialMonitor(): React.JSX.Element {
         </div>
         <div className="flex items-center gap-0.5">
           <IconButton
+            label={auto ? 'Auto-scroll on' : 'Auto-scroll off'}
+            variant="ghost"
+            size="sm"
+            onClick={toggleAuto}
+            className={auto ? 'text-[var(--brand)]' : 'text-[var(--text-muted)]'}
+          >
+            <ArrowDownToLine size={15} />
+          </IconButton>
+          <IconButton
             label={activeTab === 'serial' ? 'Clear serial monitor' : 'Clear output'}
             variant="ghost"
             size="sm"
@@ -82,16 +98,16 @@ export function SerialMonitor(): React.JSX.Element {
       </div>
       {/* Both tabs stay mounted so the serial stream isn't dropped when you peek at Output. */}
       <div className={activeTab === 'serial' ? 'flex-1 min-h-0' : 'hidden'}>
-        <SerialMonitorTab />
+        <SerialMonitorTab autoScroll={serialAuto} />
       </div>
       <div className={activeTab === 'output' ? 'flex-1 min-h-0' : 'hidden'}>
-        <OutputTab />
+        <OutputTab autoScroll={outputAuto} />
       </div>
     </div>
   )
 }
 
-export function SerialMonitorTab(): React.JSX.Element {
+export function SerialMonitorTab({ autoScroll = true }: { autoScroll?: boolean }): React.JSX.Element {
   const { isAgentConnected } = useArduinoContext()
   // The connection itself is owned by SerialProvider (app-level) so it persists
   // across view switches; this tab just displays it and sends lines. The live
@@ -99,27 +115,16 @@ export function SerialMonitorTab(): React.JSX.Element {
   const { lines, connected, port, baud, setBaud, send: sendLine } = useSerial()
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
-  // Stick to the bottom as new lines arrive — but pause the moment the user
-  // scrolls up to read back, and resume once they return to the bottom.
-  const stickRef = useRef(true)
 
+  // Stick to the bottom as new lines arrive while auto-scroll is on. Toggling it
+  // on also jumps to the bottom immediately.
   useEffect(() => {
+    if (!autoScroll) return
     const el = scrollRef.current?.querySelector(
       '[data-radix-scroll-area-viewport]'
     ) as HTMLElement | null
-    if (!el) return
-    const onScroll = (): void => {
-      stickRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 24
-    }
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => el.removeEventListener('scroll', onScroll)
-  }, [])
-
-  useEffect(() => {
-    if (!stickRef.current) return
-    const el = scrollRef.current?.querySelector('[data-radix-scroll-area-viewport]')
     if (el) el.scrollTop = el.scrollHeight
-  }, [lines])
+  }, [lines, autoScroll])
 
   const send = (): void => {
     if (!input.trim() || !connected) return
@@ -178,15 +183,16 @@ export function SerialMonitorTab(): React.JSX.Element {
   )
 }
 
-export function OutputTab(): React.JSX.Element {
+export function OutputTab({ autoScroll = true }: { autoScroll?: boolean }): React.JSX.Element {
   const { logs } = useArduinoContext()
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll to bottom when new logs are added.
+  // Auto-scroll to bottom when new logs are added (while enabled).
   useEffect(() => {
+    if (!autoScroll) return
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }, [logs])
+  }, [logs, autoScroll])
 
   const time = (ts: number): string => new Date(ts).toLocaleTimeString()
   const lineColor = (type: string): string =>

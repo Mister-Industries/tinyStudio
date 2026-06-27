@@ -21,7 +21,7 @@ export function CircuitEditor({ svgContent }: CircuitEditorProps): React.JSX.Ele
   )
 
   return (
-    <div className="size-full flex items-center justify-center bg-background-grid overflow-hidden">
+    <div className="size-full flex items-center justify-center bg-bg-sunken overflow-hidden">
       <TransformWrapper
         centerOnInit
         centerZoomedOut
@@ -29,11 +29,10 @@ export function CircuitEditor({ svgContent }: CircuitEditorProps): React.JSX.Ele
         maxScale={5}
         minScale={1.8}
         wheel={{
-          smoothStep: 0.01, // Changes the zoom speed
-          touchPadDisabled: false // Enable pinch zoom on touchpads
+          smoothStep: 0.01,
+          touchPadDisabled: false
         }}
         pinch={{ step: 10 }}
-        // disablePadding
       >
         <TransformComponent
           wrapperStyle={{ width: '100%', height: '100%' }}
@@ -48,12 +47,9 @@ export function CircuitEditor({ svgContent }: CircuitEditorProps): React.JSX.Ele
           <div
             className="absolute -inset-20"
             style={{
-              backgroundImage: `
-                linear-gradient(to right, rgba(75, 95, 90, 0.1) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(75, 95, 90, 0.1) 1px, transparent 1px)
-              `,
+              backgroundImage: 'radial-gradient(var(--dot-color) 1.1px, transparent 1.1px)',
               backgroundSize: '10px 10px',
-              backgroundColor: 'var(--background-grid)'
+              backgroundColor: 'var(--bg-sunken)'
             }}
           ></div>
           {diagramElement}

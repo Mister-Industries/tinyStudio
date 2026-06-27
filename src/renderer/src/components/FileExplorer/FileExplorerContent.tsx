@@ -73,7 +73,7 @@ export function FileExplorerContent(): React.JSX.Element {
   return (
     <div className="h-full flex flex-col">
       {/* Header with workspace name and (hover-revealed) action buttons */}
-      <div className="relative flex justify-between items-center px-3 pt-2.5 pb-1.5">
+      <div className="group/dir relative flex justify-between items-center px-3 pt-2.5 pb-1.5">
         <span className="inline-flex items-center gap-1.5 min-w-0 font-sans text-[12.5px] font-bold tracking-[0.01em] text-[var(--text-body)]">
           <Folder size={14} className="shrink-0 text-[var(--text-faint)]" />
           <span className="truncate">
@@ -81,7 +81,7 @@ export function FileExplorerContent(): React.JSX.Element {
           </span>
         </span>
         {workspace && (
-          <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex gap-px pl-2 bg-[var(--bg-raised)] opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+          <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex gap-px pl-2 bg-[var(--bg-raised)] opacity-0 transition-opacity group-hover/dir:opacity-100 focus-within:opacity-100">
             {/* Refresh Files Button */}
             <Tooltip>
               <TooltipTrigger asChild>

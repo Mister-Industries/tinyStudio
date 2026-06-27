@@ -8,6 +8,7 @@
 // auto-starts the backend). Renders nothing — it's a headless watcher.
 
 import { useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 import { isElectron } from '@renderer/lib/utils'
 import { getArduinoService } from '@renderer/services/arduino/ArduinoServiceFactory'
 import { addNotification, useAppDispatch } from '@renderer/redux'
@@ -26,13 +27,22 @@ export function BackendPrompt(): null {
     const announce = (): void => {
       if (pushed.current || service.isConnected()) return
       pushed.current = true
+      const msg =
+        'Compiling, uploading, and the serial monitor run through a small local backend. Run this command in a terminal — the app reconnects automatically. Use Chrome or Edge to allow the local connection from a hosted page.'
       dispatch(
         addNotification({
           tone: 'warn',
           title: 'Start tinyService to build & flash',
-          msg: `Compiling, uploading, and the serial monitor run through a small local backend. Run "${INSTALL_CMD}" in a terminal — the app reconnects automatically. Use Chrome or Edge to allow the local connection from a hosted page.`
+          msg,
+          code: INSTALL_CMD
         })
       )
+      // Also surface a toast so it's seen immediately, not just in the bell.
+      // Persistent (duration: Infinity) since it's an actionable prompt.
+      toast.warning('Start tinyService to build & flash', {
+        description: `${msg}\n\n${INSTALL_CMD}`,
+        duration: Infinity
+      })
     }
 
     // Assume connected during the initial grace period so we don't announce

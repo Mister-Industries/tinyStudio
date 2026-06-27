@@ -261,7 +261,7 @@ export function BoardManager(): React.JSX.Element {
         onValueChange={handleDropdownChange}
         disabled={!isAgentConnected}
       >
-        <SelectTrigger className={`${PILL} [&>svg]:hidden`}>
+        <SelectTrigger size="sm" className={`${PILL} [&>svg]:hidden`}>
           <span
             className="w-2 h-2 rounded-full shrink-0"
             style={{ background: isConnected ? 'var(--status-ok)' : 'var(--text-faint)' }}

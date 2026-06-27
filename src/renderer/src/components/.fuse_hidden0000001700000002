@@ -79,6 +79,7 @@ function MermaidDiagram({ chart }: { chart: string }): React.JSX.Element {
         if (!cancelled) setError(e instanceof Error ? e.message : String(e))
       } finally {
         // belt-and-suspenders: remove any stray node mermaid may have left
+        document.getElementById(id)?.remove()
         document.getElementById('d' + id)?.remove()
       }
     })()

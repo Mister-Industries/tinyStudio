@@ -1,6 +1,5 @@
 import {
   OpenFileCommand,
-  OpenWorkspaceCommand,
   RefreshWorkspaceCommand
 } from '@renderer/commands/fileCommands'
 import { loader } from '@monaco-editor/react'
@@ -24,7 +23,6 @@ import {
   CircuitBoard,
   CodeXml,
   ExternalLink,
-  FolderOpen,
   Loader2,
   Plus,
   UploadCloud
@@ -34,6 +32,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { notify as toast } from '@renderer/lib/notify'
 import { BlocklyEditor } from './BlocklyEditor'
 import { DiagramEditor } from './DiagramEditor'
+import { ExamplesContent } from './ExamplesContent'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
 import {
   Dialog,
@@ -306,19 +305,11 @@ function CodeView(): React.JSX.Element {
   }
 
   if (openFiles.length === 0) {
+    // No file open → land on the Examples browser so there is something to do
+    // right away (replaces the old logo / first-run welcome dialog).
     return (
-      <div className="size-full flex flex-col items-center justify-center text-sm gap-5">
-        <div className="text-center">
-          <div className="text-fg-1 text-base font-semibold">No project open</div>
-          <div className="text-fg-3 text-xs mt-1">Open a folder to start building.</div>
-        </div>
-        <Button
-          size="lg"
-          className="rounded-full px-6 shadow-[0_0_18px_rgba(0,240,255,0.25)]"
-          onClick={() => new OpenWorkspaceCommand(workspace?.path).execute()}
-        >
-          <FolderOpen size={16} /> Open Folder
-        </Button>
+      <div className="size-full bg-[var(--bg)]">
+        <ExamplesContent />
       </div>
     )
   }

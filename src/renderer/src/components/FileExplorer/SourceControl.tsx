@@ -251,6 +251,23 @@ export function SourceControl(): React.JSX.Element {
                 <span className="text-fg-1 truncate flex-1">{link.remote}</span>
                 <span className="font-mono text-fg-4">{link.branch}</span>
               </div>
+              <div className="px-4 py-1 text-[11px] font-semibold tracking-wider text-fg-3">
+                CHANGES ({changed.length})
+              </div>
+              <ScrollArea className="flex-1">
+                <div className="px-4 pb-3 flex flex-col gap-0.5">
+                  {changed.length === 0 ? (
+                    <div className="text-xs text-fg-4 py-2">Working tree matches the last sync.</div>
+                  ) : (
+                    changed.map((p) => (
+                      <div key={p} className="flex items-center gap-2 text-xs text-fg-2 py-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-signal-warning shrink-0" />
+                        <span className="truncate font-mono">{p}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
               <div className="px-4 py-2 flex gap-2">
                 <Button onClick={push} disabled={!!busy} className="flex-1" size="sm">
                   {busy && busy.startsWith('Push') ? (
@@ -269,23 +286,6 @@ export function SourceControl(): React.JSX.Element {
                   Pull
                 </Button>
               </div>
-              <div className="px-4 py-1 text-[11px] font-semibold tracking-wider text-fg-3">
-                CHANGES ({changed.length})
-              </div>
-              <ScrollArea className="flex-1">
-                <div className="px-4 pb-3 flex flex-col gap-0.5">
-                  {changed.length === 0 ? (
-                    <div className="text-xs text-fg-4 py-2">Working tree matches the last sync.</div>
-                  ) : (
-                    changed.map((p) => (
-                      <div key={p} className="flex items-center gap-2 text-xs text-fg-2 py-0.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-signal-warning shrink-0" />
-                        <span className="truncate font-mono">{p}</span>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </ScrollArea>
             </>
           )}
           {busy && busy.includes('·') && (
