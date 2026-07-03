@@ -17,6 +17,8 @@ export * as commands from './core/commands'
 export { CircuitStore } from './core/store'
 export * from './core/geometry'
 export * from './core/refdes'
+export * from './core/clipboard'
+export { namespaceSvgIds, svgNs, stripSvgSize, escapeXml } from './parts/svg'
 
 export const CIRCUIT_V2_FLAG = 'tinystudio.circuitV2'
 
