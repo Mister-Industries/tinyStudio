@@ -34,7 +34,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { notify as toast } from '@renderer/lib/notify'
 import { BlocklyEditor } from './BlocklyEditor'
 import { DiagramEditor } from './DiagramEditor'
-import { circuitV2Enabled } from '../circuit'
+import { circuitV2Enabled, emptyDoc, parseCircuitFile, serializeDoc } from '../circuit'
 import { CircuitViewV2 } from '../circuit/views/CircuitView'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
 import {
@@ -361,21 +361,24 @@ function CodeView(): React.JSX.Element {
   )
 }
 
-// ── Circuit view: full-window interactive diagram.json ──────────────────────
+// ── Circuit view: full-window interactive diagram.json / circuit.json ───────
 
 function CircuitView(): React.JSX.Element {
+  // Circuit View v2 (docs/circuit-view-tech-spec.md) — same window slot, both
+  // desktop and web builds. Enable: localStorage.setItem('tinystudio.circuitV2','1')
+  // The flag is stable for the app session, so branching to components with
+  // different hooks is safe here.
+  if (circuitV2Enabled()) return <CircuitV2View />
+  return <CircuitV1View />
+}
+
+function CircuitV1View(): React.JSX.Element {
   const workspace = useAppSelector((s) => s.file.workspace)
   const dispatch = useAppDispatch()
   const file = useProjectFile('diagram.json', () => DEFAULT_DIAGRAM)
 
   if (!workspace) return <EmptyHint icon="circuit" label="Open a project to design its circuit." />
   if (!file) return <LoadingHint label="Loading circuit…" />
-
-  // Circuit View v2 (docs/circuit-view-tech-spec.md) — same window slot, both
-  // desktop and web builds. Enable: localStorage.setItem('tinystudio.circuitV2','1')
-  if (circuitV2Enabled()) {
-    return <CircuitViewV2 content={file.content} />
-  }
 
   return (
     <DiagramEditor
@@ -387,6 +390,74 @@ function CircuitView(): React.JSX.Element {
       }}
       onEditChange={(editing) => {
         // entering edit mode: free horizontal space by closing the docs panel
+        if (editing) dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
+      }}
+    />
+  )
+}
+
+/**
+ * v2 adoption (spec §4, §13): the native file is `circuit.json`. On first
+ * open of a project that only has a v1 `diagram.json`, migrate it on disk:
+ * write `circuit.json` (converted) and `diagram.json.bak` (verbatim copy).
+ * `diagram.json` itself is left in place until M4 removes the legacy editor —
+ * flipping the flag off must keep working during the preview period.
+ */
+function CircuitV2View(): React.JSX.Element {
+  const workspace = useAppSelector((s) => s.file.workspace)
+  const [ready, setReady] = useState(false)
+  const adopting = useRef(false)
+
+  useEffect(() => {
+    setReady(false)
+    if (!workspace || adopting.current) return
+    if (findInTree(workspace.root, (i) => i.name === 'circuit.json')) {
+      setReady(true)
+      return
+    }
+    const diagram = findInTree(workspace.root, (i) => i.name === 'diagram.json')
+    if (!diagram) {
+      setReady(true) // fresh project — useProjectFile seeds an empty circuit.json
+      return
+    }
+    adopting.current = true
+    ;(async () => {
+      try {
+        const old = await fileSystem.readFile(diagram.path!)
+        const { doc } = parseCircuitFile(old)
+        await fileSystem.writeFile(`${workspace.path}/circuit.json`, serializeDoc(doc))
+        await fileSystem.writeFile(`${workspace.path}/diagram.json.bak`, old)
+        await new RefreshWorkspaceCommand(workspace).execute()
+      } catch (e) {
+        console.error('circuit.json adoption failed:', e)
+      } finally {
+        adopting.current = false
+        setReady(true)
+      }
+    })()
+  }, [workspace])
+
+  if (!workspace) return <EmptyHint icon="circuit" label="Open a project to design its circuit." />
+  if (!ready) return <LoadingHint label="Preparing circuit…" />
+  return <CircuitV2Inner />
+}
+
+function CircuitV2Inner(): React.JSX.Element {
+  const dispatch = useAppDispatch()
+  const makeDefault = useCallback(() => serializeDoc(emptyDoc()), [])
+  const file = useProjectFile('circuit.json', makeDefault)
+
+  if (!file) return <LoadingHint label="Loading circuit…" />
+
+  return (
+    <CircuitViewV2
+      content={file.content}
+      onChange={(content) => dispatch(updateFileContent({ id: file.id, content }))}
+      onOpenCode={() => {
+        dispatch(revealFile(file.id))
+        dispatch(setEditorView('code'))
+      }}
+      onEditChange={(editing) => {
         if (editing) dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
       }}
     />

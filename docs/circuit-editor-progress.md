@@ -57,3 +57,41 @@ This file is the running context for agents working on the Circuit View v2. Read
 6. Keyboard: undo/redo (Ctrl+Z/Y), delete, rotate R, nudge arrows, Esc.
 7. Multi-select, copy/paste (`application/x-tinystudio-circuit`), duplicate.
 8. SVG/PNG export with id-namespacing (B6) — namespacing helper belongs in `circuit/parts/svg.ts`.
+
+---
+
+## 2026-07-03 — M1: breadboard editor parity ✅
+
+### Added
+
+- `core/clipboard.ts` — copy/paste as pure doc logic: `buildClipboard` (wires kept only when every endpoint resolves inside the payload; junction riders filtered to a fixpoint), `parseClipboard` (shape-detected JSON on the system clipboard as text — custom MIME was unreliable across desktop/web), `materializePaste` (fresh refdes per prefix, endpoint/junction-host rewrite, placement offset).
+- `commands.composite(label, cmds, mergeKey?)` — composites can merge, so multi-part drags collapse into one undo step.
+- `model.ts` — `PendingJunctionEnd` / `isPendingJunction` formalize the v1-migration pending state.
+- `parts/svg.ts` — `namespaceSvgIds` (B6), `svgNs`, `stripSvgSize`, `escapeXml`. Full sanitizer is M2.
+- `views/partsAdapter.ts` — ALL geometry glue over the legacy partsLibrary (pin world positions, endpoint resolver incl. junction chains + pending, `collectFrozen`/`reroutesFor` for frozen-bend moves, `snapBB` = snap-by-first-pin per §6.3). The M2 registry replaces only this file's imports.
+- `views/canvas/Canvas.tsx` — the M1 editor: camera (wheel-zoom-at-cursor, middle/Alt pan, left-pan in view mode, fit), marquee + shift multi-select, wire drawing (pin→pin, junction taps store `{wire,t}` via `tAtPoint`, Shift straight, click bends, Esc), selected-wire handles (segment ⊥-drag, vertex, endpoint; endpoint drop must land on a pin or wire — reverts on empty space since v2 has no free endpoints), double-click add/remove bend, part drag (multi-part; wires between two moved parts translate their bends, others hold world-space), label drag → `Placement.labelOffset`, right-click/R rotate, arrow nudge (Shift=5×), Del cascade, Ctrl+Z/Y, Ctrl+C/X/V/D. Pending junctions resolve to `{wire,t}` on first render once part defs load (one undoable "Resolve migrated junctions" step; unresolvable ones stay pending and render at their raw coordinate).
+- `views/palette/Palette.tsx`, `views/inspector/Inspector.tsx` — ported rail + inspector; inspector edits refdes (rename validated + wires rewritten), display label (attrs.label), location/rotation (with reroutes), attrs; wire color/net info; multi-select summary.
+- `views/CircuitView.tsx` — shell owns the store; **save path**: revision subscription → debounced 250 ms `store.serialize()` → `onChange` → Redux `updateFileContent` (disk write stays on Ctrl+S like all buffers). External Code-tab edits fold in as an undoable step; the echo guard + a `skipSaveRev` marker prevent both loops and reformat-under-cursor.
+- `views/exportImage.ts` — standalone scene SVG (id-namespaced per instance), `.svg` download + `.png` @2×, watermark.
+- `EditorPanel.tsx` — v2 branch split into `CircuitV2View` (adoption) → `CircuitV2Inner` (buffer): on first open with only `diagram.json`, writes migrated `circuit.json` + verbatim `diagram.json.bak`, refreshes the tree, then opens `circuit.json` as the hidden buffer. **Deviation from spec §4:** `diagram.json` is left in place (not renamed) until M4 removes the legacy editor, so flipping the flag off keeps working.
+- Tests: +18 (53 total) — clipboard rules/paste re-iding, svg namespacing, composite mergeKey collapse, placePart reroutes, pending-junction typing/resolution.
+
+### State / verification
+
+- `npm run test:circuit` → **53/53**. `npm run typecheck` (node + web) → clean.
+- Committed as 4 chunks: core (f12699a), svg/export (61d3c9a), views (9a98df9), integration+log (this commit).
+
+### Known gaps / notes for the next agent
+
+- Camera is NOT persisted to `doc.camera` (writing it would dirty the file on pan; needs a non-undo side channel — decide in M3 when the second view needs per-view cameras anyway).
+- Pin hit targets are fixed 16 world px (legacy parity), not the B23 min-10-screen-px rule — revisit with the M2 registry.
+- Legacy `partsLibrary` has no `buses`, so `buildNets` runs without `busesFor` in the view (bus seams are wired in core and tested; M2 turns them on).
+- Clipboard rides `text/plain` JSON with a format marker instead of `application/x-tinystudio-circuit` (Chromium custom-type restrictions in the web build); cross-project paste works.
+- PartsEditor still saves via `registerPart` (in-memory, B7) — persistence is an M2 item.
+- Wire-end plug-into-hole (wire-end as male pin) needs real breadboard parts — M2 drop-to-connect.
+- **Tooling (this session, worse than last time):** Write/Edit through the Cowork mount truncated files to their PREVIOUS byte length whenever an edit GREW a file (commands.ts, model.ts, index.ts, EditorPanel.tsx, CircuitView.tsx all hit; one NUL-padded). `.git/index` also corrupted once (`bad signature 0x00000000` → `rm .git/index && git reset`). Reliable path: write files from the LINUX side (bash heredoc / python replace), verify with a NUL+tail scan, keep typecheck as the gate.
+
+### Next up (M2 or M3 — parallelizable per spec §15)
+
+- M2: procedural breadboards + drop-to-connect + legs; `.fzpz` import; Part Editor v2 persistence; pack manager + GitHub index install; regenerate default pack (buses/pinType/legs).
+- M3: schematic view (needs M0/M1 only): view toggle, symbols, unplaced tray + ratsnest, net labels/ground, flip/mirror, ERC panel.
