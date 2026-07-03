@@ -19,6 +19,7 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "test:circuit": "node scripts/test-circuit.mjs",
     "start": "electron-vite preview",
     "fetch:arduino-cli": "node scripts/fetch-arduino-cli.mjs",
     "prebuild": "node scripts/fetch-arduino-cli.mjs",

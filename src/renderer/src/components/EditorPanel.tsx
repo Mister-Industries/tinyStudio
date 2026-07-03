@@ -34,6 +34,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { notify as toast } from '@renderer/lib/notify'
 import { BlocklyEditor } from './BlocklyEditor'
 import { DiagramEditor } from './DiagramEditor'
+import { circuitV2Enabled } from '../circuit'
+import { CircuitViewV2 } from '../circuit/views/CircuitView'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
 import {
   Dialog,
@@ -368,6 +370,12 @@ function CircuitView(): React.JSX.Element {
 
   if (!workspace) return <EmptyHint icon="circuit" label="Open a project to design its circuit." />
   if (!file) return <LoadingHint label="Loading circuit…" />
+
+  // Circuit View v2 (docs/circuit-view-tech-spec.md) — same window slot, both
+  // desktop and web builds. Enable: localStorage.setItem('tinystudio.circuitV2','1')
+  if (circuitV2Enabled()) {
+    return <CircuitViewV2 content={file.content} />
+  }
 
   return (
     <DiagramEditor
