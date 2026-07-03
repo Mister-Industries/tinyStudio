@@ -1,337 +1,291 @@
 /**
- * circuit/views/CircuitView — the v2 Circuit View shell (M0: read-only preview).
- *
- * M0 scope: prove the core end-to-end inside the real IDE window slot —
- * parse (with v1/Wokwi migration) → store → net model → render parts + wires
- * on the tinyStudio dot-grid canvas with fit/zoom/pan. NO editing yet (M1).
- * Part visuals come from the existing partsLibrary as a temporary adapter
- * until the v2 parts registry lands (M2).
+ * circuit/views/CircuitView — the Circuit View v2 shell (M1: breadboard
+ * editor parity). Composes: components palette · interactive Canvas ·
+ * Inspector rail · toolbar (edit toggle, grid, export, code) · zoom cluster ·
+ * status pills. Owns the CircuitStore and the debounced save path
+ * (store.serialize() → onChange → Redux buffer; disk save stays on Ctrl+S,
+ * same as every other editor buffer).
  *
  * Mounted by EditorPanel behind the `tinystudio.circuitV2` flag, in the same
- * window space the legacy DiagramEditor occupies — desktop and web builds.
+ * window slot the legacy DiagramEditor occupies — desktop and web builds.
  */
 
-import { CircuitBoard, Maximize, ZoomIn, ZoomOut } from 'lucide-react'
-import React from 'react'
-import { ensureParts, getPart, viewFor } from '../../lib/partsLibrary'
 import {
-  isJunction,
-  splitPinRef,
-  type CircuitDoc,
-  type CircuitWire,
-  type Pt,
-  type WireEnd
-} from '../core/model'
-import { pinWorld } from '../core/geometry'
+  CodeXml,
+  Eye,
+  FileCode2,
+  Grid3x3,
+  ImageDown,
+  Maximize,
+  Pencil,
+  Redo2,
+  Undo2,
+  ZoomIn,
+  ZoomOut
+} from 'lucide-react'
+import React from 'react'
+import {
+  ensureParts,
+  getPart,
+  loadPart,
+  registerPart,
+  viewFor,
+  type PartDef
+} from '../../lib/partsLibrary'
+import { PartsEditor } from '../../components/PartsEditor'
+import * as cmd from '../core/commands'
+import { type Pt } from '../core/model'
 import { buildNets } from '../core/nets'
-import { pointAtT, wirePoints } from '../core/routing'
+import { nextRefdes, prefixForFamily } from '../core/refdes'
 import { CircuitStore } from '../core/store'
+import { Canvas, emptySel, type Cam, type CanvasHandle, type Selection } from './canvas/Canvas'
+import { exportPng, exportSvg } from './exportImage'
+import { InspectorRail } from './inspector/Inspector'
+import { Palette, WIRE_COLORS } from './palette/Palette'
+import { snapBB } from './partsAdapter'
 
-const WIRE_W = 2.8
-const WIRE_OUTLINE_W = WIRE_W + 1.8
-
-function darken(hex: string, f = 0.55): string {
-  const m = /^#?([0-9a-fA-F]{6})$/.exec(hex.trim())
-  if (!m) return 'rgba(0,0,0,0.45)'
-  const n = parseInt(m[1], 16)
-  return `rgb(${Math.round(((n >> 16) & 255) * f)}, ${Math.round(((n >> 8) & 255) * f)}, ${Math.round((n & 255) * f)})`
-}
-
-function roundedPath(points: Pt[], r = 4): string {
-  if (points.length < 2) return ''
-  if (points.length === 2) return `M${points[0].x} ${points[0].y} L${points[1].x} ${points[1].y}`
-  let d = `M${points[0].x} ${points[0].y}`
-  for (let i = 1; i < points.length - 1; i++) {
-    const p = points[i - 1]
-    const c = points[i]
-    const n = points[i + 1]
-    const d1 = Math.hypot(c.x - p.x, c.y - p.y) || 1
-    const d2 = Math.hypot(n.x - c.x, n.y - c.y) || 1
-    const rr = Math.max(0, Math.min(r, d1 / 2, d2 / 2))
-    const a = { x: c.x - ((c.x - p.x) / d1) * rr, y: c.y - ((c.y - p.y) / d1) * rr }
-    const b = { x: c.x + ((n.x - c.x) / d2) * rr, y: c.y + ((n.y - c.y) / d2) * rr }
-    d += ` L${a.x} ${a.y} Q${c.x} ${c.y} ${b.x} ${b.y}`
-  }
-  const last = points[points.length - 1]
-  d += ` L${last.x} ${last.y}`
-  return d
-}
-
-/** Resolve a wire endpoint to a world point using the legacy parts adapter. */
-function makeResolver(doc: CircuitDoc): (end: WireEnd, seen?: Set<string>) => Pt | null {
-  const wireById = new Map(doc.wires.map((w) => [w.id, w]))
-  const resolve = (end: WireEnd, seen: Set<string> = new Set()): Pt | null => {
-    if (isJunction(end)) {
-      // pending v1-migrated junction carries raw coords
-      const raw = end as unknown as { x?: number; y?: number; wire: string; t: number }
-      if (end.wire === '' && raw.x !== undefined) return { x: raw.x!, y: raw.y! }
-      if (seen.has(end.wire)) return null
-      seen.add(end.wire)
-      const host = wireById.get(end.wire)
-      if (!host) return null
-      const pts = resolveWire(host, seen)
-      return pts ? pointAtT(pts, end.t) : null
-    }
-    const { part: partId, pin } = splitPinRef(end)
-    const part = doc.parts.find((p) => p.id === partId)
-    if (!part?.bb) return null
-    const def = getPart(part.type)
-    const v = def && viewFor(def, 'breadboard')
-    const local = v?.pins[pin]
-    if (!v || !local) return null
-    return pinWorld(local, part.bb, v.w, v.h, part.bb.legs?.[pin])
-  }
-  const resolveWire = (w: CircuitWire, seen: Set<string>): Pt[] | null => {
-    const s = resolve(w.from, seen)
-    const t = resolve(w.to, seen)
-    if (!s || !t) return null
-    return wirePoints(s, t, w.route)
-  }
-  return resolve
-}
-
-export function CircuitViewV2({ content }: { content: string }): React.JSX.Element {
+export function CircuitViewV2({
+  content,
+  onChange,
+  onOpenCode,
+  onEditChange
+}: {
+  content: string
+  onChange: (next: string) => void
+  onOpenCode?: () => void
+  onEditChange?: (editing: boolean) => void
+}): React.JSX.Element {
   const [{ store, migrated, warnings }] = React.useState(() => CircuitStore.fromFile(content))
   const revision = React.useSyncExternalStore(store.subscribe, store.getRevision)
   const doc = store.getDoc()
-  const [, force] = React.useReducer((n: number) => n + 1, 0)
-  const [cam, setCam] = React.useState({ scale: 1, tx: 40, ty: 40 })
-  const viewRef = React.useRef<HTMLDivElement>(null)
-  const pan = React.useRef<Pt | null>(null)
-  const didFit = React.useRef(false)
 
-  // adopt external content changes (Code tab)
+  const [editable, setEditable] = React.useState(false)
+  const [grid, setGrid] = React.useState(true)
+  const [sel, setSel] = React.useState<Selection>(emptySel())
+  const [wireColor, setWireColor] = React.useState(WIRE_COLORS[0])
+  const [cam, setCam] = React.useState<Cam>({ scale: 1, tx: 40, ty: 40 })
+  const [editorPart, setEditorPart] = React.useState<PartDef | null | undefined>(undefined)
+  const [defsTick, bumpDefs] = React.useReducer((n: number) => n + 1, 0)
+  const canvasRef = React.useRef<CanvasHandle>(null)
+
+  // ── file sync ───────────────────────────────────────────────────────────────
+
+  // External content changes (Code tab / disk) fold in as an undoable step;
+  // our own serialized echoes are ignored by the store. Externally-caused
+  // revisions must NOT trigger a save (that would reformat under the user's
+  // cursor in the Code tab).
+  const skipSaveRev = React.useRef(0)
   React.useEffect(() => {
-    store.replaceFromFile(content)
+    const res = store.replaceFromFile(content)
+    if (res.applied) skipSaveRev.current = store.getRevision()
   }, [content, store])
+
+  React.useEffect(() => {
+    if (revision === 0 || revision === skipSaveRev.current) return
+    const t = setTimeout(() => onChange(store.serialize()), 250)
+    return () => clearTimeout(t)
+  }, [revision, store, onChange])
 
   // lazy-load part defs through the legacy adapter
   React.useEffect(() => {
     const missing = doc.parts.map((p) => p.type).filter((t) => !getPart(t))
-    if (missing.length) ensureParts(missing).then(force)
+    if (missing.length) void ensureParts(missing).then(bumpDefs)
   }, [doc.parts])
 
-  const resolve = React.useMemo(() => makeResolver(doc), [doc, revision])
-  const nets = React.useMemo(() => buildNets(doc), [doc])
-
-  const wireGeom = React.useMemo(() => {
-    return doc.wires
-      .filter((w) => w.view === 'bb')
-      .map((w) => {
-        const s = resolve(w.from)
-        const t = resolve(w.to)
-        return { w, pts: s && t ? wirePoints(s, t, w.route) : [] }
-      })
-  }, [doc, resolve])
-
-  const fit = React.useCallback((): void => {
-    const el = viewRef.current
-    if (!el) return
-    let minX = Infinity
-    let minY = Infinity
-    let maxX = -Infinity
-    let maxY = -Infinity
-    for (const part of doc.parts) {
-      if (!part.bb) continue
-      const def = getPart(part.type)
-      const v = def && viewFor(def, 'breadboard')
-      if (!v) continue
-      minX = Math.min(minX, part.bb.x)
-      minY = Math.min(minY, part.bb.y)
-      maxX = Math.max(maxX, part.bb.x + v.w)
-      maxY = Math.max(maxY, part.bb.y + v.h)
-    }
-    for (const { pts } of wireGeom)
-      for (const p of pts) {
-        minX = Math.min(minX, p.x)
-        minY = Math.min(minY, p.y)
-        maxX = Math.max(maxX, p.x)
-        maxY = Math.max(maxY, p.y)
-      }
-    if (!isFinite(minX)) return
-    const pad = 48
-    const bw = maxX - minX + pad * 2
-    const bh = maxY - minY + pad * 2
-    const f = Math.max(0.25, Math.min(3, Math.min(el.clientWidth / bw, el.clientHeight / bh)))
-    setCam({
-      scale: f,
-      tx: (el.clientWidth - bw * f) / 2 - (minX - pad) * f,
-      ty: (el.clientHeight - bh * f) / 2 - (minY - pad) * f
-    })
-  }, [doc, wireGeom])
-
+  // drop selection entries that no longer exist (undo, delete, external edit)
   React.useEffect(() => {
-    if (didFit.current) return
-    if (doc.parts.length === 0 || doc.parts.every((p) => getPart(p.type))) {
-      fit()
-      didFit.current = true
-    }
-  })
-
-  const zoomAt = (factor: number, sx: number, sy: number): void =>
-    setCam((c) => {
-      const ns = Math.max(0.25, Math.min(3, c.scale * factor))
-      const k = ns / c.scale
-      return { scale: ns, tx: sx - (sx - c.tx) * k, ty: sy - (sy - c.ty) * k }
+    const partIds = new Set(doc.parts.map((p) => p.id))
+    const wireIds = new Set(doc.wires.map((w) => w.id))
+    if ([...sel.parts].every((id) => partIds.has(id)) && [...sel.wires].every((id) => wireIds.has(id)))
+      return
+    setSel({
+      parts: new Set([...sel.parts].filter((id) => partIds.has(id))),
+      wires: new Set([...sel.wires].filter((id) => wireIds.has(id)))
     })
+  }, [doc, sel])
+
+  const netModel = React.useMemo(() => buildNets(doc), [doc])
+
+  // ── actions ─────────────────────────────────────────────────────────────────
+
+  const addPartAt = async (type: string, at?: Pt): Promise<void> => {
+    const def = getPart(type) || (await loadPart(type))
+    if (!def) return
+    bumpDefs()
+    const v = viewFor(def, 'breadboard')
+    const w = v?.w || 80
+    const h = v?.h || 40
+    const p = at ?? canvasRef.current?.centerWorld() ?? { x: 300, y: 200 }
+    const id = nextRefdes(store.getDoc(), prefixForFamily(`${def.family ?? ''} ${def.type}`))
+    const bb = snapBB(type, { x: Math.round(p.x - w / 2), y: Math.round(p.y - h / 2) })
+    store.dispatch(cmd.addPart({ id, type, bb }))
+    setSel({ parts: new Set([id]), wires: new Set() })
+  }
+
+  const pickColor = (c: string): void => {
+    setWireColor(c)
+    if (sel.wires.size === 1 && sel.parts.size === 0)
+      store.dispatch(cmd.recolorWire([...sel.wires][0], c))
+  }
+
+  const editExisting = async (type: string): Promise<void> => {
+    const def = getPart(type) || (await loadPart(type))
+    if (def) setEditorPart(def)
+  }
 
   const tool =
     'tactile-bordered h-8 px-2.5 flex items-center gap-1.5 rounded-md bg-surface-card text-text-muted text-xs hover:text-text-body active:translate-y-px'
 
   return (
-    <div className="size-full relative overflow-hidden bg-bg-sunken">
-      {/* v2 badge + status */}
-      <div className="absolute top-3 left-3 z-10 flex gap-1.5 items-center">
-        <span className="px-2.5 py-1 rounded-full bg-surface-card border border-brand/40 text-brand text-[11px] font-semibold">
-          Circuit v2 preview
-        </span>
-        {migrated && (
-          <span className="px-2.5 py-1 rounded-full bg-surface-card border border-border-default text-text-muted text-[11px]">
-            migrated from diagram.json (in memory)
-          </span>
-        )}
-      </div>
-      <div className="absolute bottom-3 right-3.5 z-10 flex gap-1.5">
-        <button className={`${tool} w-8 justify-center px-0`} onClick={() => {
-          const el = viewRef.current
-          if (el) zoomAt(1 / 1.15, el.clientWidth / 2, el.clientHeight / 2)
-        }} title="Zoom out">
-          <ZoomOut size={15} />
-        </button>
-        <span className={`${tool} pointer-events-none min-w-[52px] justify-center`}>
-          {Math.round(cam.scale * 100)}%
-        </span>
-        <button className={`${tool} w-8 justify-center px-0`} onClick={() => {
-          const el = viewRef.current
-          if (el) zoomAt(1.15, el.clientWidth / 2, el.clientHeight / 2)
-        }} title="Zoom in">
-          <ZoomIn size={15} />
-        </button>
-        <button className={`${tool} w-8 justify-center px-0`} onClick={fit} title="Fit to view">
-          <Maximize size={15} />
-        </button>
-      </div>
-      <div className="absolute bottom-3 left-3 z-10 flex gap-2 text-[11px]">
-        <span className="px-2.5 py-1 rounded-full bg-surface-card border border-border-default text-text-body">
-          Parts: {doc.parts.length} · Wires: {doc.wires.length} · Nets: {nets.meaningful}
-        </span>
-        {warnings.length > 0 && (
-          <span className="px-2.5 py-1 rounded-full bg-surface-card border border-status-warning/40 text-status-warning" title={warnings.join('\n')}>
-            {warnings.length} migration note{warnings.length > 1 ? 's' : ''}
-          </span>
-        )}
-      </div>
+    <div className="size-full relative flex bg-bg overflow-hidden pb-7">
+      {editable && (
+        <Palette
+          wireColor={wireColor}
+          onPickColor={pickColor}
+          onAdd={(type) => void addPartAt(type)}
+          onEditPart={(type) => void editExisting(type)}
+          onNewPart={() => setEditorPart(null)}
+        />
+      )}
 
-      <div
-        ref={viewRef}
-        className="size-full"
-        style={{
-          touchAction: 'none',
-          backgroundImage: 'radial-gradient(var(--dot-color) 1.1px, transparent 1.1px)',
-          backgroundSize: `${9.6 * cam.scale}px ${9.6 * cam.scale}px`,
-          backgroundPosition: `${cam.tx}px ${cam.ty}px`
-        }}
-        onWheel={(e) => {
-          const r = viewRef.current!.getBoundingClientRect()
-          zoomAt(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - r.left, e.clientY - r.top)
-        }}
-        onPointerDown={(e) => {
-          if (e.button !== 1 && !(e.button === 0 && e.altKey) && e.button !== 0) return
-          pan.current = { x: e.clientX, y: e.clientY }
-          ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
-        }}
-        onPointerMove={(e) => {
-          const p = pan.current
-          if (!p) return
-          setCam((c) => ({ ...c, tx: c.tx + (e.clientX - p.x), ty: c.ty + (e.clientY - p.y) }))
-          pan.current = { x: e.clientX, y: e.clientY }
-        }}
-        onPointerUp={() => (pan.current = null)}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            transform: `translate(${cam.tx}px, ${cam.ty}px) scale(${cam.scale})`,
-            transformOrigin: '0 0'
-          }}
-        >
-          {/* parts */}
-          {doc.parts.map((part) => {
-            if (!part.bb) return null
-            const def = getPart(part.type)
-            const v = def && viewFor(def, 'breadboard')
-            if (!v) {
-              return (
-                <div
-                  key={part.id}
-                  style={{ position: 'absolute', left: part.bb.x, top: part.bb.y }}
-                  className="px-2 py-1 rounded bg-surface-card border border-border-default text-[10px] text-text-faint"
-                >
-                  {part.type}…
-                </div>
-              )
-            }
-            return (
-              <div
-                key={part.id}
-                style={{
-                  position: 'absolute',
-                  left: part.bb.x,
-                  top: part.bb.y,
-                  width: v.w,
-                  height: v.h,
-                  transform: part.bb.rotate ? `rotate(${part.bb.rotate}deg)` : undefined,
-                  transformOrigin: 'center'
-                }}
+      <div className="flex-1 relative min-w-0 overflow-hidden flex">
+        {/* left toolbar: edit toggle + undo/redo */}
+        <div className="absolute top-3 left-3 z-10 flex gap-1.5">
+          <button
+            className={`${tool} w-8 justify-center px-0 ${editable ? 'text-brand' : ''}`}
+            onClick={() => {
+              const next = !editable
+              setEditable(next)
+              setSel(emptySel())
+              onEditChange?.(next)
+            }}
+            title={editable ? 'Editing — click for view-only' : 'View-only — click to edit'}
+          >
+            {editable ? <Eye size={15} /> : <Pencil size={15} />}
+          </button>
+          {editable && (
+            <>
+              <button
+                className={`${tool} w-8 justify-center px-0 disabled:opacity-40`}
+                disabled={!store.canUndo()}
+                onClick={() => store.undo()}
+                title={store.undoLabel() ? `Undo ${store.undoLabel()} (Ctrl+Z)` : 'Undo (Ctrl+Z)'}
               >
-                <div
-                  className="size-full [&>svg]:size-full [&>svg]:block pointer-events-none select-none"
-                  dangerouslySetInnerHTML={{ __html: v.svg }}
-                />
-                <div
-                  className="absolute text-[11px] whitespace-nowrap select-none text-text-muted"
-                  style={{ left: 0, top: v.h + 4 }}
-                >
-                  {part.id}
-                </div>
-              </div>
-            )
-          })}
-
-          {/* wires */}
-          <svg style={{ position: 'absolute', inset: 0, overflow: 'visible', pointerEvents: 'none' }}>
-            {wireGeom.map(({ w, pts }) => {
-              if (pts.length < 2) return null
-              const core = w.color || '#2fa46a'
-              const d = roundedPath(pts)
-              return (
-                <g key={w.id}>
-                  <path d={d} fill="none" stroke={darken(core)} strokeWidth={WIRE_OUTLINE_W} strokeLinejoin="round" strokeLinecap="round" />
-                  <path d={d} fill="none" stroke={core} strokeWidth={WIRE_W} strokeLinejoin="round" strokeLinecap="round" />
-                </g>
-              )
-            })}
-            {/* junction dots */}
-            {doc.wires.flatMap((w) =>
-              [w.from, w.to]
-                .filter(isJunction)
-                .map((j, i) => {
-                  const p = resolve(j)
-                  return p ? <circle key={`${w.id}j${i}`} cx={p.x} cy={p.y} r={3} fill={w.color || 'var(--text-strong)'} /> : null
-                })
-            )}
-          </svg>
-
-          {doc.parts.length === 0 && (
-            <div className="absolute flex flex-col items-center gap-2 text-text-faint text-sm text-center" style={{ left: 200, top: 160, width: 320 }}>
-              <CircuitBoard size={42} />
-              <div>Circuit v2 — empty document. Editing lands in M1.</div>
-            </div>
+                <Undo2 size={15} />
+              </button>
+              <button
+                className={`${tool} w-8 justify-center px-0 disabled:opacity-40`}
+                disabled={!store.canRedo()}
+                onClick={() => store.redo()}
+                title="Redo (Ctrl+Y)"
+              >
+                <Redo2 size={15} />
+              </button>
+            </>
           )}
         </div>
+
+        {/* right toolbar: export / grid / code */}
+        <div className="absolute top-3 right-3.5 z-10 flex gap-1.5">
+          <button className={`${tool} w-8 justify-center px-0`} onClick={() => exportPng(doc)} title="Export as PNG">
+            <ImageDown size={15} />
+          </button>
+          <button className={`${tool} w-8 justify-center px-0`} onClick={() => exportSvg(doc)} title="Export as SVG">
+            <FileCode2 size={15} />
+          </button>
+          <button
+            className={`${tool} w-8 justify-center px-0 ${grid ? 'text-brand' : ''}`}
+            onClick={() => setGrid((g) => !g)}
+            title="Toggle grid"
+          >
+            <Grid3x3 size={15} />
+          </button>
+          {onOpenCode && (
+            <button className={`${tool} w-8 justify-center px-0`} onClick={onOpenCode} title="Edit circuit.json as code">
+              <CodeXml size={15} />
+            </button>
+          )}
+        </div>
+
+        {/* zoom cluster */}
+        <div className="absolute bottom-3 right-3.5 z-10 flex gap-1.5">
+          <button
+            className={`${tool} w-8 justify-center px-0`}
+            onClick={() => canvasRef.current?.zoomCenter(1 / 1.15)}
+            title="Zoom out"
+          >
+            <ZoomOut size={15} />
+          </button>
+          <span className={`${tool} pointer-events-none min-w-[52px] justify-center`}>
+            {Math.round(cam.scale * 100)}%
+          </span>
+          <button
+            className={`${tool} w-8 justify-center px-0`}
+            onClick={() => canvasRef.current?.zoomCenter(1.15)}
+            title="Zoom in"
+          >
+            <ZoomIn size={15} />
+          </button>
+          <button className={`${tool} w-8 justify-center px-0`} onClick={() => canvasRef.current?.fit()} title="Fit to view">
+            <Maximize size={15} />
+          </button>
+        </div>
+
+        {/* status pills */}
+        <div className="absolute bottom-3 left-3 z-10 flex flex-wrap gap-2 text-[11px] max-w-[60%]">
+          <span className="px-2.5 py-1 rounded-full bg-surface-card border border-border-default text-text-body">
+            Parts: {doc.parts.length} · Wires: {doc.wires.length} · Nets: {netModel.meaningful}
+          </span>
+          {migrated && (
+            <span className="px-2.5 py-1 rounded-full bg-surface-card border border-brand/40 text-brand">
+              migrated from diagram.json
+            </span>
+          )}
+          {warnings.length > 0 && (
+            <span
+              className="px-2.5 py-1 rounded-full bg-surface-card border border-status-warning/40 text-status-warning"
+              title={warnings.join('\n')}
+            >
+              {warnings.length} migration note{warnings.length > 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
+
+        <Canvas
+          store={store}
+          doc={doc}
+          editable={editable}
+          grid={grid}
+          sel={sel}
+          setSel={setSel}
+          wireColor={wireColor}
+          netModel={netModel}
+          defsTick={defsTick}
+          cam={cam}
+          setCam={setCam}
+          handleRef={canvasRef}
+          onDropPart={(type, at) => void addPartAt(type, at)}
+        />
+
+        {/* watermark */}
+        <div className="absolute bottom-12 right-4 z-0 pointer-events-none select-none text-[12px] font-semibold text-text-faint/70">
+          tinyStudio
+        </div>
       </div>
+
+      {editable && <InspectorRail doc={doc} store={store} sel={sel} setSel={setSel} netModel={netModel} />}
+
+      {editorPart !== undefined && (
+        <PartsEditor
+          initial={editorPart}
+          onClose={() => setEditorPart(undefined)}
+          onSave={(def: PartDef) => {
+            registerPart(def)
+            bumpDefs()
+            setEditorPart(undefined)
+          }}
+        />
+      )}
     </div>
   )
 }
