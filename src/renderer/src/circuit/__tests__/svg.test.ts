@@ -2,7 +2,7 @@
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { escapeXml, namespaceSvgIds, stripSvgSize, svgNs } from '../parts/svg'
+import { escapeXml, namespaceSvgIds, prepareSvgForEmbed, stripSvgSize, svgNs } from '../parts/svg'
 
 test('namespaceSvgIds prefixes defined ids and their references', () => {
   const svg =
@@ -46,4 +46,35 @@ test('stripSvgSize removes root width/height only', () => {
 
 test('escapeXml escapes the five specials', () => {
   assert.equal(escapeXml(`<a href="x">R&D's</a>`), '&lt;a href=&quot;x&quot;&gt;R&amp;D&apos;s&lt;/a&gt;')
+})
+
+test('prepareSvgForEmbed strips prolog/doctype and root x/y/width/height (Fritzing exports)', () => {
+  const fritzing =
+    '<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "x.dtd">\n' +
+    '<svg version="1.2" baseProfile="tiny" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" ' +
+    'width="41.2px" height="9.32px" viewBox="0 0 42.917 9.71"><g id="g"/></svg>'
+  const out = prepareSvgForEmbed(fritzing)
+  assert.ok(!out.includes('<?xml'))
+  assert.ok(!out.includes('DOCTYPE'))
+  const root = /<svg\b[^>]*>/.exec(out)![0]
+  assert.ok(!/\s[xy]\s*=/.test(root), 'root x/y removed')
+  assert.ok(!/\s(width|height)\s*=/.test(root), 'root size removed')
+  assert.ok(root.includes('viewBox="0 0 42.917 9.71"'), 'viewBox kept')
+  // composer can now inject placement without duplicate attributes
+  const placed = out.replace('<svg', '<svg x="10" y="20" width="41.2" height="9.32"')
+  const attrs = /<svg\b[^>]*>/.exec(placed)![0].match(/\s(x|y|width|height)\s*=/g)!
+  assert.equal(attrs.length, 4)
+})
+
+test('prepareSvgForEmbed keeps inner-element geometry attributes', () => {
+  const out = prepareSvgForEmbed('<svg width="10" viewBox="0 0 10 10"><rect x="1" y="2" width="3" height="4"/></svg>')
+  assert.ok(out.includes('<rect x="1" y="2" width="3" height="4"/>'))
+})
+
+test('namespaceSvgIds rewrites #id selectors inside style blocks', () => {
+  const svg = '<svg><style>.a{fill:red}#body{fill:blue}#other{}</style><g id="body"/></svg>'
+  const out = namespaceSvgIds(svg, 'pR1')
+  assert.ok(out.includes('#pR1-body{fill:blue}'))
+  assert.ok(out.includes('#other{}')) // not defined as an id here — untouched
+  assert.ok(out.includes('id="pR1-body"'))
 })

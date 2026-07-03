@@ -21,6 +21,15 @@ export function namespaceSvgIds(svg: string, ns: string): string {
   if (ids.size === 0) return svg
   const has = (id: string): boolean => ids.has(id)
 
+  // rewrite #id selectors inside <style> blocks first (rare but real in
+  // Fritzing exports; attribute passes below don't reach CSS text)
+  svg = svg.replace(/(<style[^>]*>)([\s\S]*?)(<\/style>)/g, (_all, open, css, close) => {
+    const fixed = css.replace(/#([A-Za-z_][\w-]*)/g, (m: string, id: string) =>
+      has(id) ? `#${ns}-${id}` : m
+    )
+    return `${open}${fixed}${close}`
+  })
+
   return svg
     .replace(/\bid\s*=\s*"([^"]+)"/g, (all, id) => (has(id) ? `id="${ns}-${id}"` : all))
     .replace(/\bid\s*=\s*'([^']+)'/g, (all, id) => (has(id) ? `id='${ns}-${id}'` : all))
@@ -43,6 +52,28 @@ export function stripSvgSize(svg: string): string {
   return svg
     .replace(/<svg([^>]*?)\swidth\s*=\s*"[^"]*"/i, '<svg$1')
     .replace(/<svg([^>]*?)\sheight\s*=\s*"[^"]*"/i, '<svg$1')
+}
+
+/**
+ * Prepare a part's SVG for embedding as a NESTED <svg> element in a composed
+ * scene: strip the XML prolog / doctype (illegal mid-document — they killed
+ * the whole exported file's parse), and remove any root-level x/y/width/height
+ * attributes (Fritzing exports carry x="0px" y="0px", which collided with the
+ * composer's placement attributes → duplicate-attribute XML errors). The
+ * root's viewBox is kept — it's what makes the injected width/height scale.
+ */
+export function prepareSvgForEmbed(svg: string): string {
+  let s = svg
+    .replace(/<\?xml[\s\S]*?\?>/g, '')
+    .replace(/<!DOCTYPE[^>]*>/gi, '')
+    .trim()
+  const m = /<svg\b[^>]*>/i.exec(s)
+  if (!m) return s
+  let root = m[0]
+  root = root
+    .replace(/\s(?:x|y|width|height)\s*=\s*"[^"]*"/gi, '')
+    .replace(/\s(?:x|y|width|height)\s*=\s*'[^']*'/gi, '')
+  return s.slice(0, m.index) + root + s.slice(m.index + m[0].length)
 }
 
 /** Escape text for inclusion in generated SVG markup. */

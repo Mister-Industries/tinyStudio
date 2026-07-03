@@ -95,3 +95,9 @@ This file is the running context for agents working on the Circuit View v2. Read
 
 - M2: procedural breadboards + drop-to-connect + legs; `.fzpz` import; Part Editor v2 persistence; pack manager + GitHub index install; regenerate default pack (buses/pinType/legs).
 - M3: schematic view (needs M0/M1 only): view toggle, symbols, unplaced tray + ratsnest, net labels/ground, flip/mirror, ERC panel.
+
+---
+
+## 2026-07-03 (later) — M1 fix: image export
+
+Geoff's testing found SVG export rendering symbols wrong and PNG export dead. Root cause (probed in Node with the Blink demo): Fritzing part SVG roots carry their own `x="0px" y="0px"` (and width/height) — the composer's injected placement attributes duplicated them → **invalid XML**. The in-app canvas tolerates it (lenient HTML parser); the standalone `.svg` and the PNG rasterizer's strict XML parse both fail. Fixes: `prepareSvgForEmbed` (strips prolog/doctype + root x/y/width/height, keeps viewBox) replaces `stripSvgSize` in the exporter; `namespaceSvgIds` now also rewrites `#id` selectors in `<style>` blocks; `resolveCssVars` inlines `var(--…)` design tokens (builtin board art) at export time; PNG rasterize failure logs instead of dying silently. Probe validates the composed scene parses clean. 56/56 tests.

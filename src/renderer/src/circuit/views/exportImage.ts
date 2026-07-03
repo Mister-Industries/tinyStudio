@@ -4,7 +4,7 @@
  * instance (fixes B6: two parts sharing `id="g"` corrupted exports).
  */
 
-import { escapeXml, namespaceSvgIds, stripSvgSize, svgNs } from '../parts/svg'
+import { escapeXml, namespaceSvgIds, prepareSvgForEmbed, svgNs } from '../parts/svg'
 import { isJunction, type CircuitDoc } from '../core/model'
 import { bbBounds, bbVisual, bbWireGeometry, makeEndResolver } from './partsAdapter'
 
@@ -77,7 +77,7 @@ export function composeSceneSvg(doc: CircuitDoc, bg: string): string | null {
       const vis = bbVisual(part.type)
       if (!vis) return ''
       const { x, y } = part.bb
-      const inner = stripSvgSize(namespaceSvgIds(vis.v.svg, svgNs(part.id))).replace(
+      const inner = prepareSvgForEmbed(namespaceSvgIds(vis.v.svg, svgNs(part.id))).replace(
         '<svg',
         `<svg x="${x}" y="${y}" width="${vis.v.w}" height="${vis.v.h}"`
       )
@@ -95,6 +95,19 @@ export function composeSceneSvg(doc: CircuitDoc, bg: string): string | null {
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="${minX} ${minY} ${W} ${H}"><rect x="${minX}" y="${minY}" width="${W}" height="${H}" fill="${bg}"/>${wires}${dots}${partsSvg}${watermark}</svg>`
 }
 
+/**
+ * Inline every var(--token) with its computed value — builtin board art uses
+ * design-system variables that only resolve inside the app's stylesheet, not
+ * in a standalone .svg / rasterized .png.
+ */
+function resolveCssVars(svg: string): string {
+  const cs = getComputedStyle(document.documentElement)
+  return svg.replace(/var\((--[A-Za-z0-9_-]+)\)/g, (all, name) => {
+    const v = cs.getPropertyValue(name).trim()
+    return v || all
+  })
+}
+
 function download(blob: Blob, name: string): void {
   const a = document.createElement('a')
   const href = URL.createObjectURL(blob)
@@ -108,13 +121,14 @@ export function exportSvg(doc: CircuitDoc): void {
   const bg = (getComputedStyle(document.documentElement).getPropertyValue('--bg-sunken') || '#1e1f22').trim()
   const svg = composeSceneSvg(doc, bg)
   if (!svg) return
-  download(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), 'circuit.svg')
+  download(new Blob([resolveCssVars(svg)], { type: 'image/svg+xml;charset=utf-8' }), 'circuit.svg')
 }
 
 export function exportPng(doc: CircuitDoc): void {
   const bg = (getComputedStyle(document.documentElement).getPropertyValue('--bg-sunken') || '#1e1f22').trim()
-  const svg = composeSceneSvg(doc, bg)
-  if (!svg) return
+  const raw = composeSceneSvg(doc, bg)
+  if (!raw) return
+  const svg = resolveCssVars(raw)
   const m = /width="(\d+)" height="(\d+)"/.exec(svg)
   const W = m ? parseInt(m[1], 10) : 800
   const H = m ? parseInt(m[2], 10) : 600
@@ -137,6 +151,9 @@ export function exportPng(doc: CircuitDoc): void {
       if (png) download(png, 'circuit.png')
     }, 'image/png')
   }
-  img.onerror = () => URL.revokeObjectURL(url)
+  img.onerror = () => {
+    URL.revokeObjectURL(url)
+    console.error('circuit PNG export: SVG failed to rasterize')
+  }
   img.src = url
 }
