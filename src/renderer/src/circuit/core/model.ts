@@ -133,6 +133,20 @@ export function isJunction(end: WireEnd): end is JunctionEnd {
   return typeof end === 'object' && end !== null && 'wire' in end
 }
 
+/**
+ * A v1-migrated junction endpoint the editor hasn't geometrically resolved
+ * yet: carries the original raw coordinate; `wire` is '' and `t` is -1 until
+ * the first render (where pin geometry exists) rewrites it to a real
+ * `{wire, t}` — see migrateV1 pass 2.
+ */
+export interface PendingJunctionEnd extends JunctionEnd {
+  x: number
+  y: number
+}
+export function isPendingJunction(end: WireEnd): end is PendingJunctionEnd {
+  return isJunction(end) && end.wire === '' && (end as PendingJunctionEnd).x !== undefined
+}
+
 /** Split a "partId:pinName" pin ref. Pin names may contain ':'? No — first colon splits. */
 export function splitPinRef(ref: string): { part: string; pin: string } {
   const i = ref.indexOf(':')

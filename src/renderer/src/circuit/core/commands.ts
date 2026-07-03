@@ -238,10 +238,13 @@ export function setProbes(probes: Probe[]): Command {
 
 // ── batch ────────────────────────────────────────────────────────────────────
 
-/** Compose several commands into one undo step (cross-view cascades, paste…). */
-export function composite(label: string, commands: Command[]): Command {
+/** Compose several commands into one undo step (cross-view cascades, paste…).
+ * `mergeKey` lets composite gestures (multi-part drags) collapse like single
+ * commands do. */
+export function composite(label: string, commands: Command[], mergeKey?: string): Command {
   return {
     label,
+    mergeKey,
     apply: (doc) => commands.reduce((d, c) => c.apply(d), doc)
   }
 }
