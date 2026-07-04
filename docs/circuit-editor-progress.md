@@ -101,3 +101,30 @@ This file is the running context for agents working on the Circuit View v2. Read
 ## 2026-07-03 (later) — M1 fix: image export
 
 Geoff's testing found SVG export rendering symbols wrong and PNG export dead. Root cause (probed in Node with the Blink demo): Fritzing part SVG roots carry their own `x="0px" y="0px"` (and width/height) — the composer's injected placement attributes duplicated them → **invalid XML**. The in-app canvas tolerates it (lenient HTML parser); the standalone `.svg` and the PNG rasterizer's strict XML parse both fail. Fixes: `prepareSvgForEmbed` (strips prolog/doctype + root x/y/width/height, keeps viewBox) replaces `stripSvgSize` in the exporter; `namespaceSvgIds` now also rewrites `#id` selectors in `<style>` blocks; `resolveCssVars` inlines `var(--…)` design tokens (builtin board art) at export time; PNG rasterize failure logs instead of dying silently. Probe validates the composed scene parses clean. 56/56 tests.
+
+---
+
+## 2026-07-03 (later) — M2 core + M3 core ✅ (breadboards, drop-to-connect, schematic view)
+
+### M2 core (commit a0f3ccd)
+
+- `parts/breadboard.ts` — parametric generator (`breadboard-mini`/`-half`/`-full`), holes on the GRID_BB pitch, per-column bank buses + rail buses (`breadboardBuses`), generated SVG. Registered into the legacy partsLibrary at view mount.
+- `partsAdapter.implicitSeats()` — derived pin-in-hole seating (SpatialHash, radius = ½ pitch); `seatedPartsOn` (sticky boards); `holeAt`.
+- Canvas: boards skip per-pin divs (>60 pins) — press-without-displacement = hole interaction (wires can start/end on holes), board drags carry seated parts, hole hover shows highlight + `hole · net members` tooltip, green seat marks. Net model runs with `busesFor` + implicit seats.
+
+### M3 core (this commit)
+
+- `parts/symbols.ts` — generated IC-box schematic symbols (label on top, pins left/right in definition order, 9.6 grid, ink = `var(--text-strong)`); `schematicVisual` prefers authored art.
+- `partsAdapter` is now **view-generic**: `visualFor/pinWorldOf/makeEndResolver/wireGeometry/viewBounds/collectFrozen/reroutesFor/snapBB/pinAtWorld` all take a `ViewId` (default `'bb'`; `bbVisual`/`bbWireGeometry`/`bbBounds` kept as aliases). `ratsnest()` computes unrouted-here bridges: global net groups by this-view-only connectivity (bb counts seating as routed), greedy nearest-group bridging.
+- Canvas takes `view`: per-view placements/wires/snap (sch wires bend on the 4.8 fine grid, parts snap pins to 9.6), sch wires ink + orthogonal-only (Shift-straight is bb-only), junction dots ink in sch, flip (F key + Inspector mirror button, sch only, CSS `scaleX(-1)` matching `transformLocalPoint`), ratsnest dashed layer, seats/holes gated to bb. Canvas is remounted per view (`key={view}`) so gesture state can't leak across views.
+- Shell: **Breadboard | Schematic** toggle (top-center), **unplaced tray** (chips for parts placed only in the other view; click = place at viewport centre — spec wants attach-to-cursor, simplified for now), status pill gains `routed here: k/n`, per-view part adds (palette/drop place into the active view), exports hidden in sch (composer is bb-only for now). Inspector is view-aware (location/rotation/flip act on the active view's placement).
+- Tests: 63 total (breadboard geometry/buses/net integration; symbol grid/split/caching).
+
+### Deferred (still open from M2/M3 scope)
+
+- M2: `.fzpz` drop-import, pack manager + GitHub index install, Part Editor v2 persistence (B7), bendable legs, default-pack regeneration, "all pins must seat" rigid-translation rule (we seat per-pin on grid match).
+- M3: net labels / ground symbols UI (nets engine + model support already exist and are tested — needs palette entries, canvas rendering of `netLabels`, label pin wiring), ERC panel, attach-to-cursor tray placement, schematic-styled canvas background (currently same dot grid), sch-view image export.
+
+### Verification
+
+- `npm run test:circuit` → **63/63** · `npm run typecheck` → clean · NUL scan clean (all writes done Linux-side per the tooling note above).

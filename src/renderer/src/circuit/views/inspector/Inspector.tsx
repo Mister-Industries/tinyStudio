@@ -6,11 +6,11 @@
  * frozen bends like canvas drags do.
  */
 
-import { CircuitBoard, Plus, RotateCw, Spline, Trash2 } from 'lucide-react'
+import { CircuitBoard, FlipHorizontal2, Plus, RotateCw, Spline, Trash2 } from 'lucide-react'
 import React from 'react'
 import { getPart } from '../../../lib/partsLibrary'
 import * as cmd from '../../core/commands'
-import type { CircuitDoc, CircuitPart, CircuitWire, Placement } from '../../core/model'
+import type { CircuitDoc, CircuitPart, CircuitWire, Placement, ViewId } from '../../core/model'
 import type { NetModel } from '../../core/nets'
 import { isValidRefdes } from '../../core/refdes'
 import type { CircuitStore } from '../../core/store'
@@ -34,13 +34,15 @@ export function InspectorRail({
   store,
   sel,
   setSel,
-  netModel
+  netModel,
+  view
 }: {
   doc: CircuitDoc
   store: CircuitStore
   sel: Selection
   setSel: (s: Selection) => void
   netModel: NetModel
+  view: ViewId
 }): React.JSX.Element {
   const part =
     sel.parts.size === 1 && sel.wires.size === 0
@@ -59,7 +61,7 @@ export function InspectorRail({
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-3 flex flex-col gap-3 text-xs">
         {part ? (
-          <PartInspector key={part.id} part={part} doc={doc} store={store} setSel={setSel} />
+          <PartInspector key={`${part.id}:${view}`} part={part} doc={doc} store={store} setSel={setSel} view={view} />
         ) : wire ? (
           <WireInspector key={wire.id} wire={wire} store={store} setSel={setSel} netModel={netModel} />
         ) : multi ? (
@@ -79,12 +81,14 @@ function PartInspector({
   part,
   doc,
   store,
-  setSel
+  setSel,
+  view
 }: {
   part: CircuitPart
   doc: CircuitDoc
   store: CircuitStore
   setSel: (s: Selection) => void
+  view: ViewId
 }): React.JSX.Element {
   const def = getPart(part.type)
   const [refdes, setRefdes] = React.useState(part.id)
@@ -104,23 +108,32 @@ function PartInspector({
     setSel({ parts: new Set([refdes]), wires: new Set() })
   }
 
+  const pv = part[view]
   const moveTo = (x: number, y: number): void => {
-    if (!part.bb) return
-    const frozen = collectFrozen(doc, new Set([part.id]))
-    const pl: Placement = { ...part.bb, x, y }
+    if (!pv) return
+    const frozen = collectFrozen(doc, new Set([part.id]), view)
+    const pl: Placement = { ...pv, x, y }
     const placements = new Map([[part.id, pl]])
     store.dispatch(
-      cmd.placePart(part.id, 'bb', pl, reroutesFor(doc, frozen, placements, { x: x - part.bb.x, y: y - part.bb.y }))
+      cmd.placePart(part.id, view, pl, reroutesFor(doc, frozen, placements, { x: x - pv.x, y: y - pv.y }, view))
     )
   }
 
   const setRotation = (deg: number): void => {
-    if (!part.bb) return
+    if (!pv) return
     const next = (((deg % 360) + 360) % 360) as 0 | 90 | 180 | 270
-    const frozen = collectFrozen(doc, new Set([part.id]))
-    const pl: Placement = { ...part.bb, rotate: next || undefined }
+    const frozen = collectFrozen(doc, new Set([part.id]), view)
+    const pl: Placement = { ...pv, rotate: next || undefined }
     const placements = new Map([[part.id, pl]])
-    store.dispatch(cmd.placePart(part.id, 'bb', pl, reroutesFor(doc, frozen, placements, { x: 0, y: 0 })))
+    store.dispatch(cmd.placePart(part.id, view, pl, reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view)))
+  }
+
+  const toggleFlip = (): void => {
+    if (!pv) return
+    const frozen = collectFrozen(doc, new Set([part.id]), view)
+    const pl: Placement = { ...pv, flip: pv.flip ? undefined : true }
+    const placements = new Map([[part.id, pl]])
+    store.dispatch(cmd.placePart(part.id, view, pl, reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view)))
   }
 
   const wiresTouching = doc.wires.filter((w) =>
@@ -162,22 +175,22 @@ function PartInspector({
         <span className="text-text-body">{wiresTouching}</span>
       </div>
 
-      {part.bb && (
+      {pv && (
         <>
           <div className="flex flex-col gap-1">
-            <span className={rowLabel}>Location (breadboard)</span>
+            <span className={rowLabel}>Location ({view === 'bb' ? 'breadboard' : 'schematic'})</span>
             <div className="flex gap-2">
               <input
                 type="number"
                 className={field}
-                value={Math.round(part.bb.x)}
-                onChange={(e) => moveTo(parseFloat(e.target.value) || 0, part.bb!.y)}
+                value={Math.round(pv.x)}
+                onChange={(e) => moveTo(parseFloat(e.target.value) || 0, pv.y)}
               />
               <input
                 type="number"
                 className={field}
-                value={Math.round(part.bb.y)}
-                onChange={(e) => moveTo(part.bb!.x, parseFloat(e.target.value) || 0)}
+                value={Math.round(pv.y)}
+                onChange={(e) => moveTo(pv.x, parseFloat(e.target.value) || 0)}
               />
             </div>
           </div>
@@ -187,7 +200,7 @@ function PartInspector({
             <div className="flex items-center gap-1">
               <select
                 className={`${field} w-auto`}
-                value={part.bb.rotate || 0}
+                value={pv.rotate || 0}
                 onChange={(e) => setRotation(parseInt(e.target.value, 10))}
               >
                 {[0, 90, 180, 270].map((d) => (
@@ -199,10 +212,19 @@ function PartInspector({
               <button
                 className="tactile-bordered rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand"
                 title="Rotate 90°"
-                onClick={() => setRotation((part.bb!.rotate || 0) + 90)}
+                onClick={() => setRotation((pv.rotate || 0) + 90)}
               >
                 <RotateCw size={13} />
               </button>
+              {view === 'sch' && (
+                <button
+                  className={`tactile-bordered rounded-md p-1.5 bg-surface-card hover:text-brand ${pv.flip ? 'text-brand' : 'text-text-muted'}`}
+                  title="Mirror horizontally (F)"
+                  onClick={toggleFlip}
+                >
+                  <FlipHorizontal2 size={13} />
+                </button>
+              )}
             </div>
           </div>
         </>

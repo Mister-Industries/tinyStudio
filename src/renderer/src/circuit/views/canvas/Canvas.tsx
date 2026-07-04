@@ -17,11 +17,13 @@ import { buildClipboard, materializePaste, parseClipboard } from '../../core/cli
 import * as cmd from '../../core/commands'
 import {
   GRID_BB,
+  GRID_SCH,
   isJunction,
   isPendingJunction,
   type CircuitDoc,
   type Placement,
   type Pt,
+  type ViewId,
   type WireEnd
 } from '../../core/model'
 import { describeNet, type NetModel } from '../../core/nets'
@@ -40,9 +42,6 @@ import {
 } from '../../core/routing'
 import type { CircuitStore } from '../../core/store'
 import {
-  bbVisual,
-  bbBounds,
-  bbWireGeometry,
   collectFrozen,
   holeAt,
   makeEndResolver,
@@ -50,7 +49,11 @@ import {
   reroutesFor,
   seatedPartsOn,
   snapBB,
+  viewBounds,
+  visualFor,
+  wireGeometry,
   type FrozenWire,
+  type RatsnestSegment,
   type Seat
 } from '../partsAdapter'
 
@@ -60,8 +63,6 @@ const WIRE_OUTLINE_W = WIRE_W + 1.8
 const WIRE_GLOW_W = WIRE_W + 5
 const WIRE_CORNER = 4
 const NET_GLOW = 'rgba(243, 203, 0, 0.30)'
-
-const snap = (v: number): number => Math.round(v / GRID_BB) * GRID_BB
 
 export interface Selection {
   parts: Set<string>
@@ -120,6 +121,7 @@ function roundedPath(points: Pt[], r = WIRE_CORNER): string {
 export function Canvas({
   store,
   doc,
+  view,
   editable,
   grid,
   sel,
@@ -127,6 +129,7 @@ export function Canvas({
   wireColor,
   netModel,
   seats,
+  rats,
   defsTick,
   cam,
   setCam,
@@ -135,6 +138,7 @@ export function Canvas({
 }: {
   store: CircuitStore
   doc: CircuitDoc
+  view: ViewId
   editable: boolean
   grid: boolean
   sel: Selection
@@ -143,6 +147,8 @@ export function Canvas({
   netModel: NetModel
   /** derived breadboard seating (drop-to-connect), for seat marks + sticky */
   seats: Seat[]
+  /** unrouted-in-this-view net bridges (dashed guidance lines) */
+  rats: RatsnestSegment[]
   /** bumps when lazy part defs finish loading (geometry depends on them) */
   defsTick: number
   cam: Cam
@@ -151,6 +157,10 @@ export function Canvas({
   onDropPart: (type: string, at: Pt) => void
 }): React.JSX.Element {
   const scale = cam.scale
+  // schematic wires bend on the fine grid; parts still snap pins to major
+  const wireGrid = view === 'sch' ? GRID_SCH : GRID_BB
+  const snap = (v: number): number => Math.round(v / wireGrid) * wireGrid
+  const ink = 'var(--text-strong)'
   const viewRef = React.useRef<HTMLDivElement>(null)
   const innerRef = React.useRef<HTMLDivElement>(null)
 
@@ -183,12 +193,12 @@ export function Canvas({
   // ── geometry ────────────────────────────────────────────────────────────────
 
   const resolve = React.useMemo(
-    () => makeEndResolver(doc, dragOverrides ?? undefined),
-    [doc, dragOverrides, defsTick]
+    () => makeEndResolver(doc, dragOverrides ?? undefined, view),
+    [doc, dragOverrides, defsTick, view]
   )
   const wireGeom = React.useMemo(
-    () => bbWireGeometry(doc, dragOverrides ?? undefined),
-    [doc, dragOverrides, defsTick]
+    () => wireGeometry(doc, view, dragOverrides ?? undefined),
+    [doc, dragOverrides, defsTick, view]
   )
   const geomForHit = React.useMemo(
     () => wireGeom.filter((g) => g.pts.length >= 2).map((g) => ({ id: g.w.id, points: g.pts })),
@@ -200,7 +210,7 @@ export function Canvas({
     return { x: (e.clientX - r.left) / scale, y: (e.clientY - r.top) / scale }
   }
   const placementOf = (id: string): Placement | undefined =>
-    dragOverrides?.get(id) ?? doc.parts.find((p) => p.id === id)?.bb
+    dragOverrides?.get(id) ?? doc.parts.find((p) => p.id === id)?.[view]
 
   // selected wire edit buffer stays in sync with the doc (undo, external edits)
   const soloWire = sel.wires.size === 1 && sel.parts.size === 0 ? [...sel.wires][0] : null
@@ -217,6 +227,7 @@ export function Canvas({
   // resolve v1-migrated *pending junctions* once geometry exists (M0 gap)
   const pendingDone = React.useRef(false)
   React.useEffect(() => {
+    if (view !== 'bb') return // v1 migration produced bb wires only
     if (pendingDone.current) return
     const pending = doc.wires.filter(
       (w) => isPendingJunction(w.from) || isPendingJunction(w.to)
@@ -225,7 +236,7 @@ export function Canvas({
       pendingDone.current = true
       return
     }
-    if (doc.parts.some((p) => p.bb && !bbVisual(p.type))) return // defs still loading
+    if (doc.parts.some((p) => p.bb && !visualFor(p.type, 'bb'))) return // defs still loading
     const fixes: cmd.Command[] = []
     for (const w of pending) {
       const fix = (end: WireEnd): WireEnd => {
@@ -264,7 +275,7 @@ export function Canvas({
   const fit = React.useCallback((): void => {
     const el = viewRef.current
     if (!el) return
-    const b = bbBounds(doc)
+    const b = viewBounds(doc, view)
     if (!b) return
     const pad = 48
     const bw = b.maxX - b.minX + pad * 2
@@ -275,7 +286,7 @@ export function Canvas({
       tx: (el.clientWidth - bw * f) / 2 - (b.minX - pad) * f,
       ty: (el.clientHeight - bh * f) / 2 - (b.minY - pad) * f
     })
-  }, [doc, setCam])
+  }, [doc, setCam, view])
 
   const zoomAt = (factor: number, sx: number, sy: number): void =>
     setCam((c) => {
@@ -307,7 +318,7 @@ export function Canvas({
   const didFit = React.useRef(false)
   React.useEffect(() => {
     if (didFit.current) return
-    if (doc.parts.length === 0 || doc.parts.every((p) => !p.bb || bbVisual(p.type))) {
+    if (doc.parts.length === 0 || doc.parts.every((p) => !p[view] || visualFor(p.type, view))) {
       fit()
       didFit.current = true
     }
@@ -330,9 +341,11 @@ export function Canvas({
       return
     }
     const part = doc.parts.find((p) => p.id === partId)
-    // sticky boards: dragging a breadboard takes its seated parts along
+    // sticky boards: dragging a breadboard takes its seated parts along (bb)
     const stickyIds =
-      part && isBreadboard(part.type) ? [partId, ...seatedPartsOn(partId, seats)] : [partId]
+      view === 'bb' && part && isBreadboard(part.type)
+        ? [partId, ...seatedPartsOn(partId, seats)]
+        : [partId]
     const moveIds = sel.parts.has(partId) ? [...sel.parts] : stickyIds
     if (!sel.parts.has(partId)) setSel({ parts: new Set([partId]), wires: new Set() })
 
@@ -341,7 +354,7 @@ export function Canvas({
     const r = innerRef.current!.getBoundingClientRect()
     const orig = new Map<string, Placement>()
     for (const id of moveIds) {
-      const pl = doc.parts.find((p) => p.id === id)?.bb
+      const pl = doc.parts.find((p) => p.id === id)?.[view]
       if (pl) orig.set(id, pl)
     }
     partDrag.current = {
@@ -350,7 +363,7 @@ export function Canvas({
       offX: (e.clientX - r.left) / scale - grabbedPl.x,
       offY: (e.clientY - r.top) / scale - grabbedPl.y,
       orig,
-      frozen: collectFrozen(doc, new Set(orig.keys())),
+      frozen: collectFrozen(doc, new Set(orig.keys()), view),
       moved: false
     }
     window.addEventListener('pointermove', onPartMove)
@@ -369,7 +382,7 @@ export function Canvas({
       x: (e.clientX - r.left) / scale - d.offX,
       y: (e.clientY - r.top) / scale - d.offY
     }
-    const snapped = snapBB(part.type, raw)
+    const snapped = snapBB(part.type, raw, view)
     const delta = { x: snapped.x - grabbedOrig.x, y: snapped.y - grabbedOrig.y }
     if (delta.x !== 0 || delta.y !== 0) d.moved = true
     if (!d.moved) return
@@ -380,15 +393,15 @@ export function Canvas({
     }
     setDragOverrides(placements)
 
-    const reroutes = reroutesFor(doc, d.frozen, placements, delta)
+    const reroutes = reroutesFor(doc, d.frozen, placements, delta, view)
     const cmds = [...placements.entries()].map(([id, pl], i) =>
-      cmd.placePart(id, 'bb', pl, i === 0 ? reroutes : [])
+      cmd.placePart(id, view, pl, i === 0 ? reroutes : [])
     )
     store.dispatch(
       cmd.composite(
         d.ids.length === 1 ? `Move ${d.grabbed}` : `Move ${d.ids.length} parts`,
         cmds,
-        `movebb:${d.ids.slice().sort().join(',')}`
+        `move:${view}:${d.ids.slice().sort().join(',')}`
       )
     )
   }
@@ -400,7 +413,7 @@ export function Canvas({
     window.removeEventListener('pointermove', onPartMove)
     window.removeEventListener('pointerup', onPartUp)
     // a press on a breadboard that never displaced = a hole interaction
-    if (d && !d.moved && editable) {
+    if (d && !d.moved && editable && view === 'bb') {
       const part = doc.parts.find((p) => p.id === d.grabbed)
       if (part && isBreadboard(part.type)) {
         const cp = canvasPoint(e)
@@ -423,11 +436,11 @@ export function Canvas({
     const move = (ev: PointerEvent): void => {
       const ld = labelDrag.current
       if (!ld) return
-      const cur = doc.parts.find((p) => p.id === ld.id)?.bb
+      const cur = doc.parts.find((p) => p.id === ld.id)?.[view]
       if (!cur) return
       const cp = canvasPoint(ev)
       const offset: [number, number] = [Math.round(ld.ox + cp.x), Math.round(ld.oy + cp.y)]
-      store.dispatch(cmd.placePart(ld.id, 'bb', { ...cur, labelOffset: offset }, [], true))
+      store.dispatch(cmd.placePart(ld.id, view, { ...cur, labelOffset: offset }, [], true))
     }
     const up = (): void => {
       labelDrag.current = null
@@ -443,7 +456,7 @@ export function Canvas({
   const finalizeSegment = (target: Pt, clean: boolean): { pts: Pt[]; str: boolean } => {
     const pts = [...armed!.points]
     const last = pts[pts.length - 1]
-    const str = armed!.straight || straight
+    const str = view === 'bb' && (armed!.straight || straight) // sch: orthogonal only
     if (str) pts.push(target)
     else pts.push(...calculateOrthogonalPath(last.x, last.y, target.x, target.y, clean).slice(1))
     return { pts: simplifyWirePoints(pts), str }
@@ -454,8 +467,8 @@ export function Canvas({
       cmd.addWire({
         from,
         to,
-        view: 'bb',
-        color: wireColor,
+        view,
+        ...(view === 'bb' ? { color: wireColor } : {}), // schematic wires are ink
         route: journeyFromPoints(pts, str)
       })
     )
@@ -528,7 +541,7 @@ export function Canvas({
   // ── selected-wire editing (segment / vertex / endpoint handles) ─────────────
 
   const resolveEndpointTarget = (wx: number, wy: number, selfId: string): WireEnd | null => {
-    const pin = pinAtWorld(doc, wx, wy, 8 / scale)
+    const pin = pinAtWorld(doc, wx, wy, 8 / scale, view)
     if (pin) return `${pin.id}:${pin.pin}`
     const others = geomForHit.filter((g) => g.id !== selfId)
     const hit = hitWire(wx, wy, others, scale)
@@ -685,10 +698,11 @@ export function Canvas({
         suppressClick.current = true
         const parts = new Set(additive ? sel.parts : [])
         for (const part of doc.parts) {
-          if (!part.bb) continue
-          const vis = bbVisual(part.type)
+          const pl = part[view]
+          if (!pl) continue
+          const vis = visualFor(part.type, view)
           if (!vis) continue
-          if (part.bb.x < x1 && part.bb.x + vis.v.w > x0 && part.bb.y < y1 && part.bb.y + vis.v.h > y0)
+          if (pl.x < x1 && pl.x + vis.v.w > x0 && pl.y < y1 && pl.y + vis.v.h > y0)
             parts.add(part.id)
         }
         const wires = new Set(additive ? sel.wires : [])
@@ -717,45 +731,45 @@ export function Canvas({
   const rotateSelection = React.useCallback((): void => {
     const ids = [...sel.parts]
     if (!ids.length) return
-    const frozen = collectFrozen(doc, new Set(ids))
+    const frozen = collectFrozen(doc, new Set(ids), view)
     const placements = new Map<string, Placement>()
     const cmds: cmd.Command[] = []
     for (const id of ids) {
-      const cur = doc.parts.find((p) => p.id === id)?.bb
+      const cur = doc.parts.find((p) => p.id === id)?.[view]
       if (!cur) continue
       const next = (((((cur.rotate ?? 0) + 90) % 360) + 360) % 360) as 0 | 90 | 180 | 270
       placements.set(id, { ...cur, rotate: next || undefined })
     }
-    const reroutes = reroutesFor(doc, frozen, placements, { x: 0, y: 0 })
+    const reroutes = reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view)
     let first = true
     for (const [id, pl] of placements) {
-      cmds.push(cmd.placePart(id, 'bb', pl, first ? reroutes : []))
+      cmds.push(cmd.placePart(id, view, pl, first ? reroutes : []))
       first = false
     }
     if (cmds.length) store.dispatch(cmd.composite(`Rotate ${ids.length > 1 ? `${ids.length} parts` : ids[0]}`, cmds))
-  }, [doc, sel, store])
+  }, [doc, sel, store, view])
 
   const nudgeSelection = React.useCallback(
     (dx: number, dy: number): void => {
       const ids = [...sel.parts]
       if (!ids.length) return
-      const frozen = collectFrozen(doc, new Set(ids))
+      const frozen = collectFrozen(doc, new Set(ids), view)
       const placements = new Map<string, Placement>()
       for (const id of ids) {
-        const cur = doc.parts.find((p) => p.id === id)?.bb
+        const cur = doc.parts.find((p) => p.id === id)?.[view]
         if (cur) placements.set(id, { ...cur, x: cur.x + dx, y: cur.y + dy })
       }
-      const reroutes = reroutesFor(doc, frozen, placements, { x: dx, y: dy })
+      const reroutes = reroutesFor(doc, frozen, placements, { x: dx, y: dy }, view)
       let first = true
       const cmds: cmd.Command[] = []
       for (const [id, pl] of placements) {
-        cmds.push(cmd.placePart(id, 'bb', pl, first ? reroutes : []))
+        cmds.push(cmd.placePart(id, view, pl, first ? reroutes : []))
         first = false
       }
       if (cmds.length)
         store.dispatch(cmd.composite('Nudge', cmds, `nudge:${ids.slice().sort().join(',')}`))
     },
-    [doc, sel, store]
+    [doc, sel, store, view]
   )
 
   const deleteSelection = React.useCallback((): void => {
@@ -845,13 +859,33 @@ export function Canvas({
         }
         return
       }
+      if ((e.key === 'f' || e.key === 'F') && view === 'sch' && sel.parts.size) {
+        // horizontal mirror — schematic only (spec §6.3 / B13)
+        e.preventDefault()
+        const ids = [...sel.parts]
+        const frozen = collectFrozen(doc, new Set(ids), view)
+        const placements = new Map<string, Placement>()
+        for (const id of ids) {
+          const cur = doc.parts.find((p) => p.id === id)?.[view]
+          if (cur) placements.set(id, { ...cur, flip: cur.flip ? undefined : true })
+        }
+        const reroutes = reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view)
+        let first = true
+        const cmds: cmd.Command[] = []
+        for (const [id, pl] of placements) {
+          cmds.push(cmd.placePart(id, view, pl, first ? reroutes : []))
+          first = false
+        }
+        if (cmds.length) store.dispatch(cmd.composite('Flip', cmds))
+        return
+      }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         deleteSelection()
         return
       }
       if (e.key.startsWith('Arrow') && sel.parts.size) {
         e.preventDefault()
-        const step = GRID_BB * (e.shiftKey ? 5 : 1)
+        const step = (view === 'sch' ? GRID_SCH : GRID_BB) * (e.shiftKey ? 5 : 1)
         const d = {
           ArrowLeft: [-step, 0],
           ArrowRight: [step, 0],
@@ -870,7 +904,7 @@ export function Canvas({
       window.removeEventListener('keydown', down)
       window.removeEventListener('keyup', up)
     }
-  }, [editable, sel, doc, store, setSel, copySelection, pastePayload, deleteSelection, rotateSelection, nudgeSelection])
+  }, [editable, sel, doc, store, setSel, view, copySelection, pastePayload, deleteSelection, rotateSelection, nudgeSelection])
 
   // ── derived render bits ─────────────────────────────────────────────────────
 
@@ -896,17 +930,18 @@ export function Canvas({
   // junction solder dots (junction endpoints take the host wire's color)
   const junctionDots = React.useMemo(() => {
     const out: { key: string; pt: Pt; color: string }[] = []
-    const colorOf = new Map(doc.wires.map((w) => [w.id, w.color || '#2fa46a']))
+    const fallback = view === 'sch' ? ink : '#2fa46a'
+    const colorOf = new Map(doc.wires.map((w) => [w.id, w.color || fallback]))
     doc.wires
-      .filter((w) => w.view === 'bb')
+      .filter((w) => w.view === view)
       .forEach((w) =>
         [w.from, w.to].forEach((end, i) => {
           if (!isJunction(end)) return
           const p = resolve(end)
           if (!p) return
           const color = isPendingJunction(end)
-            ? w.color || '#2fa46a'
-            : colorOf.get(end.wire) || w.color || '#2fa46a'
+            ? w.color || fallback
+            : colorOf.get(end.wire) || w.color || fallback
           out.push({ key: `${w.id}:${i}`, pt: p, color })
         })
       )
@@ -959,12 +994,27 @@ export function Canvas({
         >
           {/* wires */}
           <svg style={{ position: 'absolute', inset: 0, overflow: 'visible', zIndex: 5, pointerEvents: 'none' }}>
+            {/* ratsnest: connected elsewhere, not yet drawn here (spec §8.2) */}
+            {rats.map((r, i) => (
+              <line
+                key={`rat${i}`}
+                x1={r.a.x}
+                y1={r.a.y}
+                x2={r.b.x}
+                y2={r.b.y}
+                stroke="var(--text-faint)"
+                strokeWidth={1.2}
+                strokeDasharray="5 4"
+                opacity={0.75}
+              />
+            ))}
             {wireGeom.map(({ w, pts: raw }) => {
               const pts = soloWire === w.id && editPts ? editPts : raw
               if (pts.length < 2) return null
               const selected = sel.wires.has(w.id)
               const onHotNet = highlightNet >= 0 && netModel.wireToNet.get(w.id) === highlightNet
-              const core = w.color || '#2fa46a'
+              const core = view === 'sch' ? ink : w.color || '#2fa46a'
+              const outline = view === 'sch' ? 'rgba(0,0,0,0.45)' : darken(w.color || '#2fa46a')
               const d = roundedPath(pts)
               return (
                 <g
@@ -978,7 +1028,7 @@ export function Canvas({
                   {onHotNet && (
                     <path d={d} fill="none" stroke={NET_GLOW} strokeWidth={WIRE_GLOW_W} strokeLinejoin="round" strokeLinecap="round" />
                   )}
-                  <path d={d} fill="none" stroke={darken(core)} strokeWidth={WIRE_OUTLINE_W} strokeLinejoin="round" strokeLinecap="round" />
+                  <path d={d} fill="none" stroke={outline} strokeWidth={WIRE_OUTLINE_W} strokeLinejoin="round" strokeLinecap="round" />
                   <path d={d} fill="none" stroke={core} strokeWidth={WIRE_W} strokeLinejoin="round" strokeLinecap="round" />
                   {selected && (
                     <path d={d} fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={1} strokeDasharray="4 4" strokeLinejoin="round">
@@ -994,7 +1044,7 @@ export function Canvas({
             ))}
 
             {previewPts && (
-              <path d={roundedPath(previewPts)} fill="none" stroke={wireColor} strokeWidth={WIRE_W} strokeLinejoin="round" strokeLinecap="round" opacity={0.6} />
+              <path d={roundedPath(previewPts)} fill="none" stroke={view === 'sch' ? ink : wireColor} strokeWidth={WIRE_W} strokeLinejoin="round" strokeLinecap="round" opacity={0.6} />
             )}
 
             {/* handles on the solo-selected wire */}
@@ -1054,6 +1104,7 @@ export function Canvas({
 
             {/* drop-to-connect seat marks (green) + hovered hole */}
             {editable &&
+              view === 'bb' &&
               seats.map((s) => (
                 <rect
                   key={`seat:${s.pin}`}
@@ -1067,7 +1118,7 @@ export function Canvas({
                   strokeWidth={1.1}
                 />
               ))}
-            {hoverHole && (
+            {hoverHole && view === 'bb' && (
               <circle
                 cx={hoverHole.pos.x}
                 cy={hoverHole.pos.y}
@@ -1098,7 +1149,7 @@ export function Canvas({
           {doc.parts.map((part) => {
             const pl = placementOf(part.id)
             if (!pl) return null
-            const vis = bbVisual(part.type)
+            const vis = visualFor(part.type, view)
             if (!vis) {
               return (
                 <div
@@ -1122,7 +1173,10 @@ export function Canvas({
                   width: vis.v.w,
                   height: vis.v.h,
                   zIndex: 2,
-                  transform: pl.rotate ? `rotate(${pl.rotate}deg)` : undefined,
+                  transform:
+                    pl.rotate || pl.flip
+                      ? `${pl.rotate ? `rotate(${pl.rotate}deg)` : ''}${pl.flip ? ' scaleX(-1)' : ''}`
+                      : undefined,
                   transformOrigin: 'center',
                   outline: selected ? '2px solid var(--brand)' : 'none',
                   outlineOffset: 4,
@@ -1131,7 +1185,7 @@ export function Canvas({
                 }}
                 onPointerDown={(e) => onPartDown(e, part.id)}
                 onPointerMove={(e) => {
-                  if (!editable || !isBreadboard(part.type) || partDrag.current) return
+                  if (!editable || view !== 'bb' || !isBreadboard(part.type) || partDrag.current) return
                   const cp = canvasPoint(e)
                   const hole = holeAt(doc, part.id, cp.x, cp.y, 6 / Math.min(scale, 1))
                   setHoverHole(hole ? { id: part.id, pin: hole.pin, pos: hole.pos } : null)
@@ -1141,13 +1195,13 @@ export function Canvas({
                 onContextMenu={(e) => {
                   if (!editable) return
                   e.preventDefault()
-                  const cur = doc.parts.find((p) => p.id === part.id)?.bb
+                  const cur = doc.parts.find((p) => p.id === part.id)?.[view]
                   if (!cur) return
                   const next = ((((cur.rotate ?? 0) + 90) % 360) + 360) % 360 as 0 | 90 | 180 | 270
-                  const frozen = collectFrozen(doc, new Set([part.id]))
+                  const frozen = collectFrozen(doc, new Set([part.id]), view)
                   const placements = new Map([[part.id, { ...cur, rotate: next || undefined }]])
                   store.dispatch(
-                    cmd.placePart(part.id, 'bb', placements.get(part.id), reroutesFor(doc, frozen, placements, { x: 0, y: 0 }))
+                    cmd.placePart(part.id, view, placements.get(part.id), reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view))
                   )
                 }}
               >
@@ -1202,7 +1256,10 @@ export function Canvas({
                   style={{
                     left: labelOff[0],
                     top: vis.v.h + 4 + labelOff[1],
-                    transform: pl.rotate ? `rotate(${-pl.rotate}deg)` : undefined,
+                    transform:
+                      pl.rotate || pl.flip
+                        ? `${pl.flip ? 'scaleX(-1) ' : ''}${pl.rotate ? `rotate(${-pl.rotate}deg)` : ''}`
+                        : undefined,
                     transformOrigin: 'left top',
                     color: selected ? 'var(--brand)' : 'var(--text-muted)',
                     cursor: editable ? 'move' : 'default',

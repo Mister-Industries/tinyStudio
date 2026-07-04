@@ -29,12 +29,11 @@ import {
   getPart,
   loadPart,
   registerPart,
-  viewFor,
   type PartDef
 } from '../../lib/partsLibrary'
 import { PartsEditor } from '../../components/PartsEditor'
 import * as cmd from '../core/commands'
-import { type Pt } from '../core/model'
+import { type Pt, type ViewId } from '../core/model'
 import { buildNets } from '../core/nets'
 import { nextRefdes, prefixForFamily } from '../core/refdes'
 import { CircuitStore } from '../core/store'
@@ -43,7 +42,7 @@ import { Canvas, emptySel, type Cam, type CanvasHandle, type Selection } from '.
 import { exportPng, exportSvg } from './exportImage'
 import { InspectorRail } from './inspector/Inspector'
 import { Palette, WIRE_COLORS } from './palette/Palette'
-import { circuitBuses, implicitSeats, snapBB } from './partsAdapter'
+import { circuitBuses, implicitSeats, ratsnest, snapBB, visualFor } from './partsAdapter'
 
 export function CircuitViewV2({
   content,
@@ -66,6 +65,7 @@ export function CircuitViewV2({
   const doc = store.getDoc()
 
   const [editable, setEditable] = React.useState(false)
+  const [view, setView] = React.useState<ViewId>('bb')
   const [grid, setGrid] = React.useState(true)
   const [sel, setSel] = React.useState<Selection>(emptySel())
   const [wireColor, setWireColor] = React.useState(WIRE_COLORS[0])
@@ -120,6 +120,39 @@ export function CircuitViewV2({
       }),
     [doc, seats]
   )
+  // nets satisfied elsewhere but unrouted here → dashed guidance (spec §8.2)
+  const rats = React.useMemo(() => ratsnest(doc, view, netModel), [doc, view, netModel, defsTick])
+  const routedHere = React.useMemo(() => {
+    const unrouted = new Set(rats.map((r) => r.net))
+    return netModel.meaningful - unrouted.size
+  }, [rats, netModel])
+  // parts with no placement in the current view live in the tray
+  const trayParts = React.useMemo(
+    () => doc.parts.filter((p) => !p[view] && (view === 'bb' ? p.sch : p.bb)),
+    [doc, view]
+  )
+
+  // switching views: selection is per-view state, wires especially
+  const switchView = (v: ViewId): void => {
+    if (v === view) return
+    setView(v)
+    setSel(emptySel())
+    requestAnimationFrame(() => canvasRef.current?.fit())
+  }
+
+  const placeFromTray = (partId: string): void => {
+    const part = doc.parts.find((p) => p.id === partId)
+    if (!part) return
+    const vis = visualFor(part.type, view)
+    const c = canvasRef.current?.centerWorld() ?? { x: 300, y: 200 }
+    const pl = snapBB(
+      part.type,
+      { x: Math.round(c.x - (vis?.v.w ?? 80) / 2), y: Math.round(c.y - (vis?.v.h ?? 40) / 2) },
+      view
+    )
+    store.dispatch(cmd.placePart(partId, view, pl))
+    setSel({ parts: new Set([partId]), wires: new Set() })
+  }
 
   // ── actions ─────────────────────────────────────────────────────────────────
 
@@ -127,13 +160,13 @@ export function CircuitViewV2({
     const def = getPart(type) || (await loadPart(type))
     if (!def) return
     bumpDefs()
-    const v = viewFor(def, 'breadboard')
-    const w = v?.w || 80
-    const h = v?.h || 40
+    const vis = visualFor(type, view)
+    const w = vis?.v.w || 80
+    const h = vis?.v.h || 40
     const p = at ?? canvasRef.current?.centerWorld() ?? { x: 300, y: 200 }
     const id = nextRefdes(store.getDoc(), prefixForFamily(`${def.family ?? ''} ${def.type}`))
-    const bb = snapBB(type, { x: Math.round(p.x - w / 2), y: Math.round(p.y - h / 2) })
-    store.dispatch(cmd.addPart({ id, type, bb }))
+    const pl = snapBB(type, { x: Math.round(p.x - w / 2), y: Math.round(p.y - h / 2) }, view)
+    store.dispatch(cmd.addPart({ id, type, [view]: pl }))
     setSel({ parts: new Set([id]), wires: new Set() })
   }
 
@@ -200,14 +233,57 @@ export function CircuitViewV2({
           )}
         </div>
 
+        {/* view toggle: Breadboard | Schematic */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex rounded-md overflow-hidden tactile-bordered">
+          {(
+            [
+              ['bb', 'Breadboard'],
+              ['sch', 'Schematic']
+            ] as [ViewId, string][]
+          ).map(([v, label]) => (
+            <button
+              key={v}
+              className={`h-8 px-3 text-xs font-medium ${
+                view === v
+                  ? 'bg-brand/15 text-brand'
+                  : 'bg-surface-card text-text-muted hover:text-text-body'
+              }`}
+              onClick={() => switchView(v)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* unplaced tray: parts that only exist in the other view */}
+        {trayParts.length > 0 && (
+          <div className="absolute top-14 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 items-center flex-wrap max-w-[70%] justify-center">
+            <span className="text-[10px] text-text-faint">unplaced here:</span>
+            {trayParts.map((part) => (
+              <button
+                key={part.id}
+                className="px-2 py-0.5 rounded-full bg-surface-card border border-dashed border-border-strong text-[11px] text-text-body hover:border-brand hover:text-brand"
+                title={`${part.type} — click to place in this view`}
+                onClick={() => placeFromTray(part.id)}
+              >
+                {part.id}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* right toolbar: export / grid / code */}
         <div className="absolute top-3 right-3.5 z-10 flex gap-1.5">
-          <button className={`${tool} w-8 justify-center px-0`} onClick={() => exportPng(doc)} title="Export as PNG">
-            <ImageDown size={15} />
-          </button>
-          <button className={`${tool} w-8 justify-center px-0`} onClick={() => exportSvg(doc)} title="Export as SVG">
-            <FileCode2 size={15} />
-          </button>
+          {view === 'bb' && (
+            <>
+              <button className={`${tool} w-8 justify-center px-0`} onClick={() => exportPng(doc)} title="Export as PNG">
+                <ImageDown size={15} />
+              </button>
+              <button className={`${tool} w-8 justify-center px-0`} onClick={() => exportSvg(doc)} title="Export as SVG">
+                <FileCode2 size={15} />
+              </button>
+            </>
+          )}
           <button
             className={`${tool} w-8 justify-center px-0 ${grid ? 'text-brand' : ''}`}
             onClick={() => setGrid((g) => !g)}
@@ -249,7 +325,8 @@ export function CircuitViewV2({
         {/* status pills */}
         <div className="absolute bottom-3 left-3 z-10 flex flex-wrap gap-2 text-[11px] max-w-[60%]">
           <span className="px-2.5 py-1 rounded-full bg-surface-card border border-border-default text-text-body">
-            Parts: {doc.parts.length} · Wires: {doc.wires.length} · Nets: {netModel.meaningful}
+            Parts: {doc.parts.length} · Wires: {doc.wires.filter((w) => w.view === view).length} ·
+            Nets: {netModel.meaningful} · routed here: {routedHere}/{netModel.meaningful}
           </span>
           {migrated && (
             <span className="px-2.5 py-1 rounded-full bg-surface-card border border-brand/40 text-brand">
@@ -267,8 +344,10 @@ export function CircuitViewV2({
         </div>
 
         <Canvas
+          key={view}
           store={store}
           doc={doc}
+          view={view}
           editable={editable}
           grid={grid}
           sel={sel}
@@ -276,6 +355,7 @@ export function CircuitViewV2({
           wireColor={wireColor}
           netModel={netModel}
           seats={seats}
+          rats={rats}
           defsTick={defsTick}
           cam={cam}
           setCam={setCam}
@@ -289,7 +369,9 @@ export function CircuitViewV2({
         </div>
       </div>
 
-      {editable && <InspectorRail doc={doc} store={store} sel={sel} setSel={setSel} netModel={netModel} />}
+      {editable && (
+        <InspectorRail doc={doc} store={store} sel={sel} setSel={setSel} netModel={netModel} view={view} />
+      )}
 
       {editorPart !== undefined && (
         <PartsEditor
