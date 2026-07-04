@@ -24,7 +24,8 @@ import {
   type Pt,
   type WireEnd
 } from '../../core/model'
-import type { NetModel } from '../../core/nets'
+import { describeNet, type NetModel } from '../../core/nets'
+import { isBreadboard } from '../../parts/breadboard'
 import {
   calculateOrthogonalPath,
   clampOntoSegment,
@@ -43,11 +44,14 @@ import {
   bbBounds,
   bbWireGeometry,
   collectFrozen,
+  holeAt,
   makeEndResolver,
   pinAtWorld,
   reroutesFor,
+  seatedPartsOn,
   snapBB,
-  type FrozenWire
+  type FrozenWire,
+  type Seat
 } from '../partsAdapter'
 
 // wire look (identical to DiagramEditor / tinySchematic)
@@ -122,6 +126,7 @@ export function Canvas({
   setSel,
   wireColor,
   netModel,
+  seats,
   defsTick,
   cam,
   setCam,
@@ -136,6 +141,8 @@ export function Canvas({
   setSel: (s: Selection) => void
   wireColor: string
   netModel: NetModel
+  /** derived breadboard seating (drop-to-connect), for seat marks + sticky */
+  seats: Seat[]
   /** bumps when lazy part defs finish loading (geometry depends on them) */
   defsTick: number
   cam: Cam
@@ -150,6 +157,7 @@ export function Canvas({
   const [armed, setArmed] = React.useState<Armed | null>(null)
   const [straight, setStraight] = React.useState(false)
   const [hoverPin, setHoverPin] = React.useState<{ id: string; pin: string } | null>(null)
+  const [hoverHole, setHoverHole] = React.useState<{ id: string; pin: string; pos: Pt } | null>(null)
   const [hoverWire, setHoverWire] = React.useState<string | null>(null)
   const [mouse, setMouse] = React.useState<Pt>({ x: 0, y: 0 })
   const [editPts, setEditPts] = React.useState<Pt[] | null>(null)
@@ -165,6 +173,8 @@ export function Canvas({
     offY: number
     orig: Map<string, Placement>
     frozen: FrozenWire[]
+    /** set once the pointer actually displaces — distinguishes board-hole clicks */
+    moved: boolean
   } | null>(null)
   const handleDrag = React.useRef<{ kind: HandleKind } | null>(null)
   const labelDrag = React.useRef<{ id: string; ox: number; oy: number } | null>(null)
@@ -319,7 +329,11 @@ export function Canvas({
       setSel({ parts, wires: new Set() })
       return
     }
-    const moveIds = sel.parts.has(partId) ? [...sel.parts] : [partId]
+    const part = doc.parts.find((p) => p.id === partId)
+    // sticky boards: dragging a breadboard takes its seated parts along
+    const stickyIds =
+      part && isBreadboard(part.type) ? [partId, ...seatedPartsOn(partId, seats)] : [partId]
+    const moveIds = sel.parts.has(partId) ? [...sel.parts] : stickyIds
     if (!sel.parts.has(partId)) setSel({ parts: new Set([partId]), wires: new Set() })
 
     const grabbedPl = placementOf(partId)
@@ -336,7 +350,8 @@ export function Canvas({
       offX: (e.clientX - r.left) / scale - grabbedPl.x,
       offY: (e.clientY - r.top) / scale - grabbedPl.y,
       orig,
-      frozen: collectFrozen(doc, new Set(orig.keys()))
+      frozen: collectFrozen(doc, new Set(orig.keys())),
+      moved: false
     }
     window.addEventListener('pointermove', onPartMove)
     window.addEventListener('pointerup', onPartUp)
@@ -356,6 +371,8 @@ export function Canvas({
     }
     const snapped = snapBB(part.type, raw)
     const delta = { x: snapped.x - grabbedOrig.x, y: snapped.y - grabbedOrig.y }
+    if (delta.x !== 0 || delta.y !== 0) d.moved = true
+    if (!d.moved) return
 
     const placements = new Map<string, Placement>()
     for (const [id, pl] of d.orig) {
@@ -376,11 +393,21 @@ export function Canvas({
     )
   }
 
-  const onPartUp = (): void => {
+  const onPartUp = (e: PointerEvent): void => {
+    const d = partDrag.current
     partDrag.current = null
     setDragOverrides(null)
     window.removeEventListener('pointermove', onPartMove)
     window.removeEventListener('pointerup', onPartUp)
+    // a press on a breadboard that never displaced = a hole interaction
+    if (d && !d.moved && editable) {
+      const part = doc.parts.find((p) => p.id === d.grabbed)
+      if (part && isBreadboard(part.type)) {
+        const cp = canvasPoint(e)
+        const hole = holeAt(doc, d.grabbed, cp.x, cp.y, 8 / scale)
+        if (hole) pinInteract(`${d.grabbed}:${hole.pin}`, hole.pos)
+      }
+    }
   }
 
   // drag a part's title label (offset stored on the bb placement)
@@ -434,12 +461,9 @@ export function Canvas({
     )
   }
 
-  const onPinClick = (e: React.MouseEvent, partId: string, pin: string): void => {
-    if (!editable) return
-    e.stopPropagation()
-    const ref = `${partId}:${pin}`
-    const pos = resolve(ref)
-    if (!pos) return
+  /** Shared pin gesture: arm on first pin, finalize on second (also used by
+   * breadboard holes, which have no per-pin hit divs). */
+  const pinInteract = (ref: string, pos: Pt): void => {
     if (!armed) {
       setArmed({ from: ref, points: [pos], straight: false })
       setSel(emptySel())
@@ -452,6 +476,14 @@ export function Canvas({
     const { pts, str } = finalizeSegment(pos, true)
     commitWire(armed.from, ref, pts, str)
     setArmed(null)
+  }
+
+  const onPinClick = (e: React.MouseEvent, partId: string, pin: string): void => {
+    if (!editable) return
+    e.stopPropagation()
+    const ref = `${partId}:${pin}`
+    const pos = resolve(ref)
+    if (pos) pinInteract(ref, pos)
   }
 
   // tap a junction onto an existing wire at the click point → {wire, t}
@@ -853,10 +885,13 @@ export function Canvas({
         target = pos
         clean = true
       }
+    } else if (hoverHole) {
+      target = hoverHole.pos
+      clean = true
     }
     if (armed.straight || straight) return [...armed.points, target]
     return [...armed.points, ...calculateOrthogonalPath(last.x, last.y, target.x, target.y, clean).slice(1)]
-  }, [armed, mouse, hoverPin, straight, resolve])
+  }, [armed, mouse, hoverPin, hoverHole, straight, resolve])
 
   // junction solder dots (junction endpoints take the host wire's color)
   const junctionDots = React.useMemo(() => {
@@ -1017,6 +1052,33 @@ export function Canvas({
               </g>
             )}
 
+            {/* drop-to-connect seat marks (green) + hovered hole */}
+            {editable &&
+              seats.map((s) => (
+                <rect
+                  key={`seat:${s.pin}`}
+                  x={s.pos.x - 3.1}
+                  y={s.pos.y - 3.1}
+                  width={6.2}
+                  height={6.2}
+                  rx={1.2}
+                  fill="none"
+                  stroke="#37b26b"
+                  strokeWidth={1.1}
+                />
+              ))}
+            {hoverHole && (
+              <circle
+                cx={hoverHole.pos.x}
+                cy={hoverHole.pos.y}
+                r={4}
+                fill="var(--yellow)"
+                fillOpacity={0.45}
+                stroke="var(--yellow)"
+                strokeWidth={1}
+              />
+            )}
+
             {/* marquee */}
             {marquee && (
               <rect
@@ -1068,6 +1130,13 @@ export function Canvas({
                   cursor: editable ? 'move' : 'default'
                 }}
                 onPointerDown={(e) => onPartDown(e, part.id)}
+                onPointerMove={(e) => {
+                  if (!editable || !isBreadboard(part.type) || partDrag.current) return
+                  const cp = canvasPoint(e)
+                  const hole = holeAt(doc, part.id, cp.x, cp.y, 6 / Math.min(scale, 1))
+                  setHoverHole(hole ? { id: part.id, pin: hole.pin, pos: hole.pos } : null)
+                }}
+                onPointerLeave={() => setHoverHole((h) => (h?.id === part.id ? null : h))}
                 onClick={(e) => e.stopPropagation()}
                 onContextMenu={(e) => {
                   if (!editable) return
@@ -1087,6 +1156,7 @@ export function Canvas({
                   dangerouslySetInnerHTML={{ __html: vis.v.svg }}
                 />
                 {editable &&
+                  Object.keys(vis.v.pins).length <= 60 &&
                   Object.keys(vis.v.pins).map((pin) => {
                     const [px, py] = vis.v.pins[pin]
                     const armedHere = armed?.from === `${part.id}:${pin}`
@@ -1145,6 +1215,28 @@ export function Canvas({
               </div>
             )
           })}
+
+          {/* hole tooltip: name + net members */}
+          {hoverHole && (
+            <div
+              style={{
+                position: 'absolute',
+                left: hoverHole.pos.x + 8,
+                top: hoverHole.pos.y - 10,
+                zIndex: 6,
+                transform: `scale(${1 / scale})`,
+                transformOrigin: 'left bottom',
+                pointerEvents: 'none'
+              }}
+              className="px-2 py-1 rounded-md bg-surface-card border border-border-default text-[11px] text-text-body whitespace-nowrap shadow"
+            >
+              {hoverHole.pin}
+              {(() => {
+                const idx = netModel.pinToNet.get(`${hoverHole.id}:${hoverHole.pin}`)
+                return idx != null ? ` · net: ${describeNet(netModel, idx)}` : ''
+              })()}
+            </div>
+          )}
 
           {doc.parts.length === 0 && (
             <div

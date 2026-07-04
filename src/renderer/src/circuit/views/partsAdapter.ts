@@ -228,3 +228,91 @@ export function reroutesFor(
   }
   return out
 }
+
+// ── M2: breadboard seating (drop-to-connect, derived — never stored) ─────────
+
+import { SpatialHash } from '../core/geometry'
+import { breadboardBuses, isBreadboard } from '../parts/breadboard'
+
+/** Seat radius: half a hole pitch (spec §7.3). */
+const SEAT_RADIUS = GRID_BB / 2
+
+/** buses resolver for buildNets — breadboards today, PartDef v2 packs later. */
+export function circuitBuses(type: string): string[][] | undefined {
+  return breadboardBuses(type)
+}
+
+export interface Seat {
+  /** part pin ref sitting in the hole, e.g. "R1:2" */
+  pin: string
+  /** breadboard hole pin ref, e.g. "BB1:e12" */
+  hole: string
+  pos: Pt
+}
+
+/**
+ * Derive implicit pin-in-hole connections: every placed non-breadboard pin
+ * within SEAT_RADIUS of a breadboard hole. Grid-snapped placement makes the
+ * common case an exact coordinate match.
+ */
+export function implicitSeats(doc: CircuitDoc): Seat[] {
+  const hash = new SpatialHash<string>()
+  let holes = 0
+  for (const part of doc.parts) {
+    if (!part.bb || !isBreadboard(part.type)) continue
+    const vis = bbVisual(part.type)
+    if (!vis) continue
+    for (const pin of Object.keys(vis.v.pins)) {
+      const p = pinWorldOf(part, pin)
+      if (p) {
+        hash.insert(p, `${part.id}:${pin}`)
+        holes++
+      }
+    }
+  }
+  if (!holes) return []
+  const seats: Seat[] = []
+  for (const part of doc.parts) {
+    if (!part.bb || isBreadboard(part.type)) continue
+    const vis = bbVisual(part.type)
+    if (!vis) continue
+    for (const pin of Object.keys(vis.v.pins)) {
+      const p = pinWorldOf(part, pin)
+      if (!p) continue
+      const hit = hash.nearest(p, SEAT_RADIUS)
+      if (hit) seats.push({ pin: `${part.id}:${pin}`, hole: hit.v, pos: hit.p })
+    }
+  }
+  return seats
+}
+
+/** Ids of parts seated on `boardId` (sticky-board moves, spec §7.3). */
+export function seatedPartsOn(boardId: string, seats: Seat[]): string[] {
+  const out = new Set<string>()
+  for (const s of seats) {
+    if (splitPinRef(s.hole).part === boardId) out.add(splitPinRef(s.pin).part)
+  }
+  return [...out]
+}
+
+/** Nearest hole of a specific breadboard part to a world point. */
+export function holeAt(
+  doc: CircuitDoc,
+  boardId: string,
+  wx: number,
+  wy: number,
+  tol: number
+): { pin: string; pos: Pt } | null {
+  const part = doc.parts.find((p) => p.id === boardId)
+  if (!part?.bb) return null
+  const vis = bbVisual(part.type)
+  if (!vis) return null
+  let best: { pin: string; pos: Pt; d: number } | null = null
+  for (const pin of Object.keys(vis.v.pins)) {
+    const p = pinWorldOf(part, pin)
+    if (!p) continue
+    const d = Math.hypot(p.x - wx, p.y - wy)
+    if (d < tol && (!best || d < best.d)) best = { pin, pos: p, d }
+  }
+  return best ? { pin: best.pin, pos: best.pos } : null
+}

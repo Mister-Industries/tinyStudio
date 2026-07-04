@@ -38,11 +38,12 @@ import { type Pt } from '../core/model'
 import { buildNets } from '../core/nets'
 import { nextRefdes, prefixForFamily } from '../core/refdes'
 import { CircuitStore } from '../core/store'
+import { BREADBOARDS, generateBreadboard } from '../parts/breadboard'
 import { Canvas, emptySel, type Cam, type CanvasHandle, type Selection } from './canvas/Canvas'
 import { exportPng, exportSvg } from './exportImage'
 import { InspectorRail } from './inspector/Inspector'
 import { Palette, WIRE_COLORS } from './palette/Palette'
-import { snapBB } from './partsAdapter'
+import { circuitBuses, implicitSeats, snapBB } from './partsAdapter'
 
 export function CircuitViewV2({
   content,
@@ -55,7 +56,12 @@ export function CircuitViewV2({
   onOpenCode?: () => void
   onEditChange?: (editing: boolean) => void
 }): React.JSX.Element {
-  const [{ store, migrated, warnings }] = React.useState(() => CircuitStore.fromFile(content))
+  const [{ store, migrated, warnings }] = React.useState(() => {
+    // procedural breadboards live in the legacy registry until the M2+ pack
+    // registry replaces it — register once, before first geometry pass
+    for (const s of BREADBOARDS) if (!getPart(s.type)) registerPart(generateBreadboard(s).def)
+    return CircuitStore.fromFile(content)
+  })
   const revision = React.useSyncExternalStore(store.subscribe, store.getRevision)
   const doc = store.getDoc()
 
@@ -104,7 +110,16 @@ export function CircuitViewV2({
     })
   }, [doc, sel])
 
-  const netModel = React.useMemo(() => buildNets(doc), [doc])
+  // derived breadboard seating (drop-to-connect) + bus-aware net model
+  const seats = React.useMemo(() => implicitSeats(doc), [doc, defsTick])
+  const netModel = React.useMemo(
+    () =>
+      buildNets(doc, {
+        busesFor: circuitBuses,
+        implicit: seats.map((s): [string, string] => [s.pin, s.hole])
+      }),
+    [doc, seats]
+  )
 
   // ── actions ─────────────────────────────────────────────────────────────────
 
@@ -260,6 +275,7 @@ export function CircuitViewV2({
           setSel={setSel}
           wireColor={wireColor}
           netModel={netModel}
+          seats={seats}
           defsTick={defsTick}
           cam={cam}
           setCam={setCam}
