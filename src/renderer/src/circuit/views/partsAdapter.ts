@@ -14,6 +14,7 @@
 
 import { getPart, viewFor, type PartDef, type PartView } from '../../lib/partsLibrary'
 import { schematicVisual } from '../parts/symbols'
+import { netLabelPinWorld, netLabelVisualOf } from '../parts/netLabels'
 import { pinWorld, snapPlacementToPinGrid } from '../core/geometry'
 import {
   GRID_BB,
@@ -43,6 +44,21 @@ export interface PartVisual {
   v: PartView
 }
 
+// Fritzing part legs are baked into the breadboard art as
+// `<line id="connectorNleg" … stroke="#8C8C8C"/>` (grey). Recolor those leg
+// strokes to ink so bendable legs read as black, matching the part body.
+const legCache = new Map<string, string>()
+function blackenLegs(svg: string): string {
+  if (!svg.includes('leg"')) return svg
+  const hit = legCache.get(svg)
+  if (hit !== undefined) return hit
+  const out = svg.replace(/<line\b[^>]*\bid="connector\d+leg"[^>]*>/gi, (m) =>
+    m.replace(/stroke="#[0-9a-fA-F]{6}"/g, 'stroke="#1A1A1A"')
+  )
+  legCache.set(svg, out)
+  return out
+}
+
 /** Visual for a part type in a view, or null while its def is still loading.
  * Schematic falls back to a generated IC-box symbol (spec §5.1). */
 export function visualFor(type: string, view: ViewId): PartVisual | null {
@@ -50,7 +66,7 @@ export function visualFor(type: string, view: ViewId): PartVisual | null {
   if (!def) return null
   if (view === 'sch') return { def, v: schematicVisual(def) }
   const v = viewFor(def, 'breadboard')
-  return v ? { def, v } : null
+  return v ? { def, v: { ...v, svg: blackenLegs(v.svg) } } : null
 }
 
 /** Breadboard visual (bb-fixed callers: seats, breadboard holes, exports). */
@@ -69,8 +85,19 @@ export function firstPinLocal(type: string, view: ViewId = 'bb'): [number, numbe
  * spec §4 pin-on-grid contract; Fritzing behavior). */
 export function snapBB(type: string, placement: Placement, view: ViewId = 'bb'): Placement {
   const vis = visualFor(type, view)
-  if (!vis) return { ...placement, x: Math.round(placement.x / GRID_BB) * GRID_BB, y: Math.round(placement.y / GRID_BB) * GRID_BB }
-  const { x, y } = snapPlacementToPinGrid(placement, firstPinLocal(type, view), vis.v.w, vis.v.h, GRID_BB)
+  if (!vis)
+    return {
+      ...placement,
+      x: Math.round(placement.x / GRID_BB) * GRID_BB,
+      y: Math.round(placement.y / GRID_BB) * GRID_BB
+    }
+  const { x, y } = snapPlacementToPinGrid(
+    placement,
+    firstPinLocal(type, view),
+    vis.v.w,
+    vis.v.h,
+    GRID_BB
+  )
   return { ...placement, x, y }
 }
 
@@ -116,7 +143,12 @@ export function makeEndResolver(
     }
     const { part: partId, pin } = splitPinRef(end)
     const part = doc.parts.find((p) => p.id === partId)
-    if (!part) return null
+    if (!part) {
+      // net labels are wire-connectable in the schematic (their virtual pin is
+      // "<id>:1"); resolve to the glyph's connection point.
+      const label = view === 'sch' ? doc.netLabels?.find((l) => l.id === partId) : undefined
+      return label ? netLabelPinWorld(label, overrides?.get(partId) ?? label.sch) : null
+    }
     return pinWorldOf(part, pin, overrides?.get(partId) ?? part[view], view)
   }
   return resolve
@@ -205,10 +237,13 @@ export interface FrozenWire {
 }
 
 /** Snapshot the wires touching any of `ids` before a move begins. */
-export function collectFrozen(doc: CircuitDoc, ids: Set<string>, view: ViewId = 'bb'): FrozenWire[] {
+export function collectFrozen(
+  doc: CircuitDoc,
+  ids: Set<string>,
+  view: ViewId = 'bb'
+): FrozenWire[] {
   const resolve = makeEndResolver(doc, undefined, view)
-  const touches = (e: WireEnd): boolean =>
-    typeof e === 'string' && ids.has(splitPinRef(e).part)
+  const touches = (e: WireEnd): boolean => typeof e === 'string' && ids.has(splitPinRef(e).part)
   const out: FrozenWire[] = []
   for (const w of doc.wires) {
     if (w.view !== view) continue
@@ -238,7 +273,10 @@ export function reroutesFor(
   frozen: FrozenWire[],
   placements: Map<string, Placement>,
   delta: Pt,
-  view: ViewId = 'bb'
+  view: ViewId = 'bb',
+  /** rigid-assembly moves (board rotation): applied to both-ends-moved wires'
+   * bends instead of the delta translation. */
+  transformBoth?: (p: Pt) => Pt
 ): WireReroute[] {
   const resolve = makeEndResolver(doc, placements, view)
   const wireById = new Map(doc.wires.map((w) => [w.id, w]))
@@ -249,17 +287,29 @@ export function reroutesFor(
     const s = resolve(w.from)
     const t = resolve(w.to)
     if (!s || !t) continue
-    const bends = f.both ? f.bends.map((b) => ({ x: b.x + delta.x, y: b.y + delta.y })) : f.bends
-    out.push({ wireId: f.id, route: journeyFromPoints(buildWirePoints(s, bends, t, f.straight), f.straight) })
+    const bends = f.both
+      ? f.bends.map((b) =>
+          transformBoth ? transformBoth(b) : { x: b.x + delta.x, y: b.y + delta.y }
+        )
+      : f.bends
+    out.push({
+      wireId: f.id,
+      route: journeyFromPoints(buildWirePoints(s, bends, t, f.straight), f.straight)
+    })
   }
   return out
 }
 
 /** bb-fixed aliases (exportImage & friends). */
-export function bbWireGeometry(doc: CircuitDoc, overrides?: Map<string, Placement>): ResolvedWire[] {
+export function bbWireGeometry(
+  doc: CircuitDoc,
+  overrides?: Map<string, Placement>
+): ResolvedWire[] {
   return wireGeometry(doc, 'bb', overrides)
 }
-export function bbBounds(doc: CircuitDoc): { minX: number; minY: number; maxX: number; maxY: number } | null {
+export function bbBounds(
+  doc: CircuitDoc
+): { minX: number; minY: number; maxX: number; maxY: number } | null {
   return viewBounds(doc, 'bb')
 }
 
@@ -413,4 +463,144 @@ export function ratsnest(doc: CircuitDoc, view: ViewId, global: NetModel): Ratsn
     }
   })
   return out
+}
+
+// ── ERC (view-side floating-pin check; merged with core/erc net rules) ────────
+
+import type { ErcIssue } from '../core/erc'
+
+/**
+ * Info-level floating-pin findings that need pin geometry (hence view-side).
+ * Only parts that are PARTIALLY connected are reported — a fully-unwired part
+ * is just not placed yet and would only add noise.
+ */
+export function ercFloatingPins(doc: CircuitDoc, net: NetModel, view: ViewId): ErcIssue[] {
+  const out: ErcIssue[] = []
+  for (const part of doc.parts) {
+    const pl = part[view]
+    if (!pl || isBreadboard(part.type)) continue
+    const vis = visualFor(part.type, view)
+    if (!vis) continue
+    const floating: string[] = []
+    let connected = 0
+    for (const pin of Object.keys(vis.v.pins)) {
+      const idx = net.pinToNet.get(`${part.id}:${pin}`)
+      if (idx !== undefined && net.nets[idx].length >= 2) connected++
+      else floating.push(pin)
+    }
+    if (connected === 0) continue
+    for (const pin of floating) {
+      out.push({
+        id: `float:${part.id}:${pin}`,
+        severity: 'info',
+        message: `${part.id}.${pin} is unconnected.`,
+        ref: { part: part.id, pin }
+      })
+    }
+  }
+  return out
+}
+
+// ── collision-avoidance placement (parity with the pre-rewrite editor) ────────
+
+interface Box {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+function overlaps(a: Box, b: Box, gap = 0): boolean {
+  return (
+    a.x < b.x + b.w + gap && a.x + a.w + gap > b.x && a.y < b.y + b.h + gap && a.y + a.h + gap > b.y
+  )
+}
+
+/** AABBs of everything already on the canvas in this view: parts, net labels,
+ * and thin boxes along wire segments (so drops don't land on top of wires). */
+export function occupiedBoxes(doc: CircuitDoc, view: ViewId, exclude?: Set<string>): Box[] {
+  const out: Box[] = []
+  for (const part of doc.parts) {
+    if (exclude?.has(part.id)) continue
+    const pl = part[view]
+    if (!pl) continue
+    const vis = visualFor(part.type, view)
+    if (!vis) continue
+    out.push({ x: pl.x, y: pl.y, w: vis.v.w, h: vis.v.h })
+  }
+  if (view === 'sch') {
+    for (const l of doc.netLabels ?? []) {
+      if (exclude?.has(l.id)) continue
+      const v = netLabelVisualOf(l)
+      out.push({ x: l.sch.x, y: l.sch.y, w: v.w, h: v.h })
+    }
+  }
+  for (const { pts } of wireGeometry(doc, view)) {
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i]
+      const b = pts[i + 1]
+      const x = Math.min(a.x, b.x)
+      const y = Math.min(a.y, b.y)
+      out.push({ x, y, w: Math.abs(a.x - b.x) || 1, h: Math.abs(a.y - b.y) || 1 })
+    }
+  }
+  return out
+}
+
+/** Grid-snapped placement for a new `type` near `preferred` that clears the
+ * existing scene. Spirals outward on the major grid until a free slot is found. */
+export function findFreePlacement(
+  doc: CircuitDoc,
+  type: string,
+  view: ViewId,
+  preferred: Pt,
+  exclude?: Set<string>
+): Placement {
+  const vis = visualFor(type, view)
+  const w = vis?.v.w ?? 80
+  const h = vis?.v.h ?? 40
+  const boxes = occupiedBoxes(doc, view, exclude)
+  const base = snapBB(
+    type,
+    { x: Math.round(preferred.x - w / 2), y: Math.round(preferred.y - h / 2) },
+    view
+  )
+  const step = Math.max(GRID_BB, Math.ceil(Math.max(w, h) / GRID_BB / 2) * GRID_BB)
+  const gap = GRID_BB
+  for (let ring = 0; ring < 60; ring++) {
+    for (let dx = -ring; dx <= ring; dx++) {
+      for (let dy = -ring; dy <= ring; dy++) {
+        if (ring > 0 && Math.max(Math.abs(dx), Math.abs(dy)) !== ring) continue
+        const cand = { x: base.x + dx * step, y: base.y + dy * step }
+        const box = { x: cand.x, y: cand.y, w, h }
+        if (!boxes.some((b) => overlaps(box, b, gap))) return { ...base, x: cand.x, y: cand.y }
+      }
+    }
+  }
+  return base
+}
+
+/** A paste offset (applied to every pasted placement) that clears the scene. */
+export function freePasteOffset(
+  doc: CircuitDoc,
+  parts: { type: string; bb?: Placement; sch?: Placement }[],
+  view: ViewId,
+  step = GRID_BB * 2
+): Pt {
+  const boxes = occupiedBoxes(doc, view)
+  const items: Box[] = []
+  for (const p of parts) {
+    const pl = p[view]
+    if (!pl) continue
+    const vis = visualFor(p.type, view)
+    if (!vis) continue
+    items.push({ x: pl.x, y: pl.y, w: vis.v.w, h: vis.v.h })
+  }
+  if (!items.length) return { x: step, y: step }
+  for (let k = 1; k <= 60; k++) {
+    const off = { x: step * k, y: step * k }
+    const moved = items.map((b) => ({ x: b.x + off.x, y: b.y + off.y, w: b.w, h: b.h }))
+    if (!moved.some((m) => boxes.some((b) => overlaps(m, b, GRID_BB)))) return off
+  }
+  return { x: step, y: step }
 }

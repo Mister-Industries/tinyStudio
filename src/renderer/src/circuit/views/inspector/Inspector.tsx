@@ -10,7 +10,15 @@ import { CircuitBoard, FlipHorizontal2, Plus, RotateCw, Spline, Trash2 } from 'l
 import React from 'react'
 import { getPart } from '../../../lib/partsLibrary'
 import * as cmd from '../../core/commands'
-import type { CircuitDoc, CircuitPart, CircuitWire, Placement, ViewId } from '../../core/model'
+import type {
+  CircuitDoc,
+  CircuitPart,
+  CircuitWire,
+  NetLabel,
+  NetLabelKind,
+  Placement,
+  ViewId
+} from '../../core/model'
 import type { NetModel } from '../../core/nets'
 import { isValidRefdes } from '../../core/refdes'
 import type { CircuitStore } from '../../core/store'
@@ -53,6 +61,10 @@ export function InspectorRail({
       ? doc.wires.find((w) => w.id === [...sel.wires][0])
       : undefined
   const multi = sel.parts.size + sel.wires.size > 1
+  const label =
+    sel.parts.size === 0 && sel.wires.size === 0 && (sel.labels?.size ?? 0) === 1
+      ? doc.netLabels?.find((l) => l.id === [...(sel.labels ?? [])][0])
+      : undefined
 
   return (
     <div className="w-64 shrink-0 min-h-0 relative z-20 border-l border-border-default bg-bg-raised flex flex-col">
@@ -61,15 +73,30 @@ export function InspectorRail({
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-3 flex flex-col gap-3 text-xs">
         {part ? (
-          <PartInspector key={`${part.id}:${view}`} part={part} doc={doc} store={store} setSel={setSel} view={view} />
+          <PartInspector
+            key={`${part.id}:${view}`}
+            part={part}
+            doc={doc}
+            store={store}
+            setSel={setSel}
+            view={view}
+          />
         ) : wire ? (
-          <WireInspector key={wire.id} wire={wire} store={store} setSel={setSel} netModel={netModel} />
+          <WireInspector
+            key={wire.id}
+            wire={wire}
+            store={store}
+            setSel={setSel}
+            netModel={netModel}
+          />
         ) : multi ? (
           <MultiInspector sel={sel} store={store} setSel={setSel} />
+        ) : label ? (
+          <LabelInspector key={label.id} label={label} store={store} setSel={setSel} />
         ) : (
           <div className="text-text-faint text-[11px] leading-relaxed">
-            Select a component to edit its refdes, location, rotation, and properties — or a wire
-            to recolor it. Shift-click or drag a marquee for multi-select.
+            Select a component to edit its refdes, location, rotation, and properties — or a wire to
+            recolor it. Shift-click or drag a marquee for multi-select.
           </div>
         )}
       </div>
@@ -115,7 +142,12 @@ function PartInspector({
     const pl: Placement = { ...pv, x, y }
     const placements = new Map([[part.id, pl]])
     store.dispatch(
-      cmd.placePart(part.id, view, pl, reroutesFor(doc, frozen, placements, { x: x - pv.x, y: y - pv.y }, view))
+      cmd.placePart(
+        part.id,
+        view,
+        pl,
+        reroutesFor(doc, frozen, placements, { x: x - pv.x, y: y - pv.y }, view)
+      )
     )
   }
 
@@ -125,7 +157,9 @@ function PartInspector({
     const frozen = collectFrozen(doc, new Set([part.id]), view)
     const pl: Placement = { ...pv, rotate: next || undefined }
     const placements = new Map([[part.id, pl]])
-    store.dispatch(cmd.placePart(part.id, view, pl, reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view)))
+    store.dispatch(
+      cmd.placePart(part.id, view, pl, reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view))
+    )
   }
 
   const toggleFlip = (): void => {
@@ -133,7 +167,9 @@ function PartInspector({
     const frozen = collectFrozen(doc, new Set([part.id]), view)
     const pl: Placement = { ...pv, flip: pv.flip ? undefined : true }
     const placements = new Map([[part.id, pl]])
-    store.dispatch(cmd.placePart(part.id, view, pl, reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view)))
+    store.dispatch(
+      cmd.placePart(part.id, view, pl, reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view))
+    )
   }
 
   const wiresTouching = doc.wires.filter((w) =>
@@ -178,7 +214,9 @@ function PartInspector({
       {pv && (
         <>
           <div className="flex flex-col gap-1">
-            <span className={rowLabel}>Location ({view === 'bb' ? 'breadboard' : 'schematic'})</span>
+            <span className={rowLabel}>
+              Location ({view === 'bb' ? 'breadboard' : 'schematic'})
+            </span>
             <div className="flex gap-2">
               <input
                 type="number"
@@ -329,7 +367,9 @@ function WireInspector({
               style={{
                 background: c,
                 borderColor:
-                  c.toLowerCase() === color.toLowerCase() ? 'var(--brand)' : 'rgba(255,255,255,0.18)'
+                  c.toLowerCase() === color.toLowerCase()
+                    ? 'var(--brand)'
+                    : 'rgba(255,255,255,0.18)'
               }}
             />
           ))}
@@ -368,8 +408,8 @@ function MultiInspector({
         {sel.wires.size === 1 ? '' : 's'} selected
       </div>
       <div className="text-text-faint text-[11px] leading-relaxed">
-        Drag to move together · R to rotate · arrows to nudge · Ctrl+C / Ctrl+D to copy or
-        duplicate · Del to remove.
+        Drag to move together · R to rotate · arrows to nudge · Ctrl+C / Ctrl+D to copy or duplicate
+        · Del to remove.
       </div>
       <button
         className="mt-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-border-default text-text-muted hover:text-status-error hover:border-status-error/40"
@@ -384,5 +424,77 @@ function MultiInspector({
         <Trash2 size={13} /> Delete selection
       </button>
     </>
+  )
+}
+
+function LabelInspector({
+  label,
+  store,
+  setSel
+}: {
+  label: NetLabel
+  store: CircuitStore
+  setSel: (s: Selection) => void
+}): React.JSX.Element {
+  const [name, setName] = React.useState(label.name)
+  React.useEffect(() => setName(label.name), [label.id, label.name])
+
+  const commitName = (): void => {
+    const n = name.trim()
+    if (!n || n === label.name) {
+      setName(label.name)
+      return
+    }
+    store.dispatch(cmd.updateNetLabel(label.id, { name: n }))
+  }
+
+  const setKind = (kind: NetLabelKind): void => {
+    const patch = kind === 'ground' ? { kind, name: 'GND' } : { kind }
+    store.dispatch(cmd.updateNetLabel(label.id, patch))
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <Spline size={14} className="text-brand" />
+        <span className="font-semibold text-text-strong">Net label</span>
+      </div>
+      <label className="flex flex-col gap-1">
+        <span className={rowLabel}>Net name</span>
+        <input
+          className={field}
+          value={name}
+          disabled={label.kind === 'ground'}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={commitName}
+          onKeyDown={(e) => e.key === 'Enter' && commitName()}
+        />
+      </label>
+      <label className="flex flex-col gap-1">
+        <span className={rowLabel}>Kind</span>
+        <select
+          className={field}
+          value={label.kind}
+          onChange={(e) => setKind(e.target.value as NetLabelKind)}
+        >
+          <option value="ground">Ground (GND)</option>
+          <option value="power">Power rail</option>
+          <option value="net">Named net</option>
+        </select>
+      </label>
+      <p className="text-[11px] text-text-faint leading-relaxed">
+        Labels sharing a name join the same net — a clean way to wire power and ground without long
+        wires.
+      </p>
+      <button
+        className="mt-1 flex items-center justify-center gap-1.5 h-8 rounded-md bg-surface-card border border-border-default text-status-danger hover:border-status-danger/50"
+        onClick={() => {
+          store.dispatch(cmd.deleteNetLabel(label.id))
+          setSel({ parts: new Set(), wires: new Set(), labels: new Set() })
+        }}
+      >
+        <Trash2 size={13} /> Delete label
+      </button>
+    </div>
   )
 }

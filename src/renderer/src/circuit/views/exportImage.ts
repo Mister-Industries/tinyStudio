@@ -1,15 +1,20 @@
 /**
- * circuit/views/exportImage — compose the bb scene into a standalone SVG and
- * download it as .svg or rasterized .png @2×. Part SVG ids are namespaced per
- * instance (fixes B6: two parts sharing `id="g"` corrupted exports).
+ * circuit/views/exportImage — compose a scene (breadboard OR schematic) into a
+ * standalone SVG and download it as .svg or rasterized .png @2×. Part SVG ids
+ * are namespaced per instance (fixes B6). Schematic wires are single ink
+ * strokes; net labels are rendered from their glyphs.
  */
 
+import { isBreadboard } from '../parts/breadboard'
+import { netLabelVisualOf } from '../parts/netLabels'
 import { escapeXml, namespaceSvgIds, prepareSvgForEmbed, svgNs } from '../parts/svg'
-import { isJunction, type CircuitDoc } from '../core/model'
-import { bbBounds, bbVisual, bbWireGeometry, makeEndResolver } from './partsAdapter'
+import { isJunction, type CircuitDoc, type ViewId } from '../core/model'
+import { makeEndResolver, viewBounds, visualFor, wireGeometry } from './partsAdapter'
 
 const WIRE_W = 2.8
 const WIRE_OUTLINE_W = WIRE_W + 1.8
+const WIRE_SCH_W = 1
+const INK = 'var(--text-strong)'
 
 function darken(hex: string, f = 0.55): string {
   const m = /^#?([0-9a-fA-F]{6})$/.exec(hex.trim())
@@ -38,67 +43,97 @@ function roundedPath(points: { x: number; y: number }[], r = 4): string {
   return d
 }
 
-/** Build the standalone scene SVG (exported for tests). */
-export function composeSceneSvg(doc: CircuitDoc, bg: string): string | null {
-  const bounds = bbBounds(doc)
+/** Embed one part/label svg at a placement, ids namespaced, rotate+flip applied. */
+function embed(
+  svg: string,
+  ns: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  rotate?: number,
+  flip?: boolean
+): string {
+  const inner = prepareSvgForEmbed(namespaceSvgIds(svg, svgNs(ns))).replace(
+    '<svg',
+    `<svg x="${x}" y="${y}" width="${w}" height="${h}"`
+  )
+  const cx = x + w / 2
+  const cy = y + h / 2
+  let tf = ''
+  if (rotate) tf += `rotate(${rotate} ${cx} ${cy}) `
+  if (flip) tf += `translate(${2 * cx} 0) scale(-1 1) `
+  return tf ? `<g transform="${tf.trim()}">${inner}</g>` : `<g>${inner}</g>`
+}
+
+/** Build the standalone scene SVG for a view (exported for tests; default bb). */
+export function composeSceneSvg(doc: CircuitDoc, bg: string, view: ViewId = 'bb'): string | null {
+  const bounds = viewBounds(doc, view)
   if (!bounds) return null
+  const sch = view === 'sch'
   const pad = 36
   const minX = bounds.minX - pad
   const minY = bounds.minY - pad
-  const maxX = bounds.maxX + pad + 60 // room for labels
-  const maxY = bounds.maxY + pad + 16 // room for the watermark
+  const maxX = bounds.maxX + pad + 60
+  const maxY = bounds.maxY + pad + 48 // room for the larger watermark
   const W = Math.round(maxX - minX)
   const H = Math.round(maxY - minY)
 
-  const geom = bbWireGeometry(doc)
-  const wires = geom
+  const wires = wireGeometry(doc, view)
     .map(({ w, pts }) => {
       if (pts.length < 2) return ''
-      const core = w.color || '#2fa46a'
       const d = roundedPath(pts)
+      if (sch)
+        return `<path d="${d}" fill="none" stroke="${INK}" stroke-width="${WIRE_SCH_W}" stroke-linejoin="round" stroke-linecap="round"/>`
+      const core = w.color || '#2fa46a'
       return `<path d="${d}" fill="none" stroke="${darken(core)}" stroke-width="${WIRE_OUTLINE_W}" stroke-linejoin="round" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${core}" stroke-width="${WIRE_W}" stroke-linejoin="round" stroke-linecap="round"/>`
     })
     .join('')
 
-  const resolve = makeEndResolver(doc)
+  const resolve = makeEndResolver(doc, undefined, view)
   const dots = doc.wires
-    .filter((w) => w.view === 'bb')
+    .filter((w) => w.view === view)
     .flatMap((w) =>
       [w.from, w.to].filter(isJunction).map((j) => {
         const p = resolve(j)
-        return p ? `<circle cx="${p.x}" cy="${p.y}" r="3" fill="${w.color || '#c9ced6'}"/>` : ''
+        return p
+          ? `<circle cx="${p.x}" cy="${p.y}" r="3" fill="${sch ? INK : w.color || '#c9ced6'}"/>`
+          : ''
       })
     )
     .join('')
 
   const partsSvg = doc.parts
     .map((part) => {
-      if (!part.bb) return ''
-      const vis = bbVisual(part.type)
+      const pl = part[view]
+      if (!pl) return ''
+      if (sch && isBreadboard(part.type)) return '' // breadboards are transparent in sch
+      const vis = visualFor(part.type, view)
       if (!vis) return ''
-      const { x, y } = part.bb
-      const inner = prepareSvgForEmbed(namespaceSvgIds(vis.v.svg, svgNs(part.id))).replace(
-        '<svg',
-        `<svg x="${x}" y="${y}" width="${vis.v.w}" height="${vis.v.h}"`
-      )
-      const rot = part.bb.rotate
-        ? ` transform="rotate(${part.bb.rotate} ${x + vis.v.w / 2} ${y + vis.v.h / 2})"`
-        : ''
-      const off = part.bb.labelOffset || [0, 0]
+      const g = embed(vis.v.svg, part.id, pl.x, pl.y, vis.v.w, vis.v.h, pl.rotate, sch && pl.flip)
+      const off = pl.labelOffset || [0, 0]
       const labelText = String(part.attrs?.label ?? part.id)
-      const label = `<text x="${x + off[0]}" y="${y + vis.v.h + 13 + off[1]}" fill="#969ba3" font-family="Plus Jakarta Sans, sans-serif" font-size="11">${escapeXml(labelText)}</text>`
-      return `<g${rot}>${inner}</g>${label}`
+      const label = `<text x="${pl.x + off[0]}" y="${pl.y + vis.v.h + 13 + off[1]}" fill="#969ba3" font-family="Plus Jakarta Sans, sans-serif" font-size="11">${escapeXml(labelText)}</text>`
+      return `${g}${label}`
     })
     .join('')
 
-  const watermark = `<text x="${maxX - 10}" y="${maxY - 10}" text-anchor="end" fill="#79818c" fill-opacity="0.75" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="600">tinyStudio</text>`
-  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="${minX} ${minY} ${W} ${H}"><rect x="${minX}" y="${minY}" width="${W}" height="${H}" fill="${bg}"/>${wires}${dots}${partsSvg}${watermark}</svg>`
+  const labelsSvg = sch
+    ? (doc.netLabels ?? [])
+        .map((label) => {
+          const v = netLabelVisualOf(label)
+          return embed(v.svg, label.id, label.sch.x, label.sch.y, v.w, v.h, label.sch.rotate)
+        })
+        .join('')
+    : ''
+
+  const watermark = `<text x="${maxX - 14}" y="${maxY - 16}" text-anchor="end" fill="#79818c" fill-opacity="0.4" font-family="Plus Jakarta Sans, sans-serif" font-size="46" letter-spacing="-1"><tspan font-weight="300">tiny</tspan><tspan font-weight="800">Studio</tspan></text>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="${minX} ${minY} ${W} ${H}"><rect x="${minX}" y="${minY}" width="${W}" height="${H}" fill="${bg}"/>${wires}${dots}${partsSvg}${labelsSvg}${watermark}</svg>`
 }
 
 /**
- * Inline every var(--token) with its computed value — builtin board art uses
- * design-system variables that only resolve inside the app's stylesheet, not
- * in a standalone .svg / rasterized .png.
+ * Inline every var(--token) with its computed value — builtin art and schematic
+ * ink use design-system variables that only resolve inside the app stylesheet.
  */
 function resolveCssVars(svg: string): string {
   const cs = getComputedStyle(document.documentElement)
@@ -117,16 +152,20 @@ function download(blob: Blob, name: string): void {
   setTimeout(() => URL.revokeObjectURL(href), 1000)
 }
 
-export function exportSvg(doc: CircuitDoc): void {
-  const bg = (getComputedStyle(document.documentElement).getPropertyValue('--bg-sunken') || '#1e1f22').trim()
-  const svg = composeSceneSvg(doc, bg)
-  if (!svg) return
-  download(new Blob([resolveCssVars(svg)], { type: 'image/svg+xml;charset=utf-8' }), 'circuit.svg')
+function bgFor(view: ViewId): string {
+  const token = view === 'sch' ? '--bg' : '--bg-sunken'
+  return (getComputedStyle(document.documentElement).getPropertyValue(token) || '#1e1f22').trim()
 }
 
-export function exportPng(doc: CircuitDoc): void {
-  const bg = (getComputedStyle(document.documentElement).getPropertyValue('--bg-sunken') || '#1e1f22').trim()
-  const raw = composeSceneSvg(doc, bg)
+export function exportSvg(doc: CircuitDoc, view: ViewId = 'bb'): void {
+  const svg = composeSceneSvg(doc, bgFor(view), view)
+  if (!svg) return
+  const name = view === 'sch' ? 'circuit-schematic.svg' : 'circuit.svg'
+  download(new Blob([resolveCssVars(svg)], { type: 'image/svg+xml;charset=utf-8' }), name)
+}
+
+export function exportPng(doc: CircuitDoc, view: ViewId = 'bb'): void {
+  const raw = composeSceneSvg(doc, bgFor(view), view)
   if (!raw) return
   const svg = resolveCssVars(raw)
   const m = /width="(\d+)" height="(\d+)"/.exec(svg)
@@ -148,7 +187,7 @@ export function exportPng(doc: CircuitDoc): void {
     ctx.drawImage(img, 0, 0)
     URL.revokeObjectURL(url)
     canvas.toBlob((png) => {
-      if (png) download(png, 'circuit.png')
+      if (png) download(png, view === 'sch' ? 'circuit-schematic.png' : 'circuit.png')
     }, 'image/png')
   }
   img.onerror = () => {

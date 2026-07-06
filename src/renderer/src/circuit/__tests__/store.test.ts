@@ -149,4 +149,7 @@ test('refdes assignment', () => {
   assert.equal(nextRefdes(d, 'U'), 'U1')
   assert.equal(prefixForFamily('Diode LED'), 'D') // 'diode' matches first
   assert.equal(prefixForFamily(undefined, 'Q'), 'Q')
+  // longest-key-first: a breadboard is BB, not U (it contains 'board')
+  assert.equal(prefixForFamily('breadboard'), 'BB')
+  assert.equal(prefixForFamily('Custom Board'), 'U')
 })

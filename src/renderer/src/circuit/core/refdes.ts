@@ -31,7 +31,9 @@ export function prefixForFamily(family?: string, explicit?: string): string {
   if (explicit) return explicit
   if (!family) return 'P'
   const f = family.toLowerCase()
-  for (const key of Object.keys(FAMILY_PREFIX)) {
+  // longest key first: "breadboard" must win over "board" (BB1, not U1)
+  const keys = Object.keys(FAMILY_PREFIX).sort((a, b) => b.length - a.length)
+  for (const key of keys) {
     if (f.includes(key)) return FAMILY_PREFIX[key]
   }
   return 'P'

@@ -389,8 +389,9 @@ function CircuitV1View(): React.JSX.Element {
         dispatch(setEditorView('code'))
       }}
       onEditChange={(editing) => {
-        // entering edit mode: free horizontal space by closing the docs panel
-        if (editing) dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
+        // entering edit mode frees horizontal space by closing the docs panel;
+        // returning to view mode reopens it.
+        dispatch(setPanelOpen({ panel: 'docs', isOpen: !editing }))
       }}
     />
   )
@@ -458,7 +459,7 @@ function CircuitV2Inner(): React.JSX.Element {
         dispatch(setEditorView('code'))
       }}
       onEditChange={(editing) => {
-        if (editing) dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
+        dispatch(setPanelOpen({ panel: 'docs', isOpen: !editing }))
       }}
     />
   )

@@ -128,3 +128,94 @@ Geoff's testing found SVG export rendering symbols wrong and PNG export dead. Ro
 ### Verification
 
 - `npm run test:circuit` → **63/63** · `npm run typecheck` → clean · NUL scan clean (all writes done Linux-side per the tooling note above).
+
+---
+
+## 2026-07-05 — bug-fix pass (Geoff's testing feedback)
+
+Five fixes, all in the editor layer (no core/model changes). `npm run typecheck` clean · `npm run test:circuit` → 63/63.
+
+- **Breadboards are transparent on the schematic.** They no longer appear as a placeable/`U1` part in the schematic — only their row/rail buses still merge nets globally. Three-part fix: `refdes.ts` now matches `FAMILY_PREFIX` keys longest-first so `breadboard` wins over `board` (`BB1`, not `U1`); `CircuitView` drops breadboards from the "unplaced here" tray in the sch view; `Canvas` render loop skips `isBreadboard` parts when `view === 'sch'`. Added a `prefixForFamily` guard test.
+- **Rigid breadboard rotation.** Rotating a breadboard (right-click, or `R` with a lone board selected) now turns the board, its seated parts, and the wires *between* seated parts as one rigid assembly about the board's centre — layout is preserved instead of the wires rerouting. Uses `reroutesFor`'s `transformBoth` hook (rot90-about-centre) for both-ends-on-board wires; seated parts get their centres rotated + `rotate += 90`. Grid-aligned seating means holes map to holes, so pins re-seat exactly. New `rotateBoardAssembly` helper in `Canvas`; `rotateSelection` and the board context-menu delegate to it. (Wires with only one end on the board still reroute — expected, that end left the assembly.)
+- **Straight-wire modifier moved Shift → Space.** Shift is now free for shift-select while drawing on a breadboard. Space was previously bound to rotate; rotate is now `R`/right-click only. Keydown on Space `preventDefault`s to stop page scroll; status hint updated ("hold Space for straight", bb only).
+- **Schematic wires thinned, glow/border removed.** New `WIRE_SCH_W = 1` (was the shared `2.8`, ~3× too thick). In the sch view the color-outline path and the persistent border are dropped — a single thin ink stroke. A transparent fat stroke is layered under every wire so the thin line stays clickable. The net-highlight glow is kept but slimmed in sch.
+- **Connected pins drop their yellow "open lead" dot.** A pin whose net has ≥2 members (wired or seated) is `connected`; its dot is hidden unless armed/hovered (then brand-colored) or its net is highlighted. Open leads still show yellow. Hit target is unchanged, so connected pins remain clickable to re-wire.
+
+### Known gaps / notes for the next agent
+
+- The **Inspector's** rotate button/dropdown still rotates a breadboard in place (it has no `seats` context), so it will reroute wires the way the canvas gestures no longer do. Low-traffic path; wire it through `rotateBoardAssembly` (or lift the helper to the shell) if it comes up.
+- **Tooling (unchanged, still biting):** Write/Edit through the Cowork mount truncated `Canvas.tsx` and `store.test.ts` to their previous byte length when an edit grew them — the Windows-side file tool showed the full file while the Linux mount (where tsc/tests/git run) was cut off mid-block. Reliable path confirmed again: reconstruct the whole file from `git show HEAD:<path>` + Python `.replace()` written **Linux-side** with `newline='\n'`, then verify with `awk 'END{print NR}'` + `tail`. Also hit a stale `.git/index.lock` (`unable to unlink … Operation not permitted`) that made `git diff` go silent — diff against `git show HEAD:` instead.
+
+---
+
+## 2026-07-05 (later) — M3 complete: net labels, ERC, schematic polish ✅
+
+Closes the remaining M3 scope (schematic view). All work is in `circuit/` behind the flag. `npm run typecheck` clean · `npm run test:circuit` → **71/71**.
+
+### Net labels / ground (spec §8.4)
+
+- `parts/netLabels.ts` — generated glyphs for the three kinds: `ground` (three-bar), `power` (up-flag with rail name, e.g. 5V/3V3), `net` (named tag). Single connection pin `"<id>:1"`, pin-on-grid via `snapNetLabel`, cached. `NET_LABEL_KINDS` drives the palette.
+- The net engine already merged same-named labels (`core/nets.ts` §4) — this session added the geometry/UI: `commands.moveNetLabel` / `updateNetLabel`; `makeEndResolver` now resolves label pins in the schematic (labels are wire-connectable like any pin); `Canvas` renders the glyphs (sch only), starts/ends wires on a label pin, drags a label with live wire reroutes, selects (new optional `Selection.labels`) and deletes them.
+- Palette gained a **Net Labels** section (sch only) — drag or double-click to add. `Inspector` shows a label editor (net name + kind, delete) when a label is selected. Add flow in `CircuitView.addNetLabel`; drop routes through `Canvas.onDropNetLabel`.
+
+### ERC (spec §9)
+
+- `core/erc.ts` — net-model rule checks (pure, tested): **rail short** (two named rails/grounds on one net → error), **floating net label** (placed but unwired → info), **missing ground** (power rails but no GND → info), **dangling junction host** (error, reuses `danglingJunctions`).
+- `partsAdapter.ercFloatingPins` — view-side floating-pin finding (needs pin geometry); only flags *partially* connected parts to avoid noise.
+- `CircuitView` — an **ERC pill** in the status row (clean / err·warn·info counts) toggles a non-blocking findings panel; clicking a row selects the offending part/wire/label.
+
+### Schematic polish
+
+- Canvas background is now paper (`--bg`) with a finer dot grid in the schematic (spec §8.1); breadboard view unchanged.
+- **Attach-to-cursor tray:** clicking an "unplaced here" chip arms placement (chip highlights, hint changes) and the next canvas click drops the part at the cursor — replaces the old drop-at-centre. `Canvas` gained `placingId` / `onCanvasPlace`.
+- **Schematic image export:** `exportImage.composeSceneSvg` is now view-generic — ink single-stroke wires, generated symbols, net-label glyphs, part flip; breadboards omitted in sch. Export buttons show in both views (`exportSvg/exportPng(doc, view)`), filenames `circuit-schematic.{svg,png}`.
+
+### Tests (+8, 71 total)
+
+- `netLabels.test.ts` (glyph pins, grid snap), `erc.test.ts` (rail short, floating label, missing ground), `exportSch.test.ts` (sch compose: ink wires + label glyphs, balanced SVG tags, graceful null).
+
+### Deferred (out of M3 scope → M4/M5)
+
+- Solder-dot rendering at genuine T-junctions is via the existing junction-dot layer; 4-way-crossing "never auto-join" hygiene (spec §8.1) is not specially enforced yet.
+- ERC's `erc` pin-type rules (shorted `power-out`↔`power-out`, LED-without-series-R heuristic) need typed pins from the M2 parts pipeline — current pins carry no `erc` metadata, so those checks are stubbed out (not emitted) rather than guessed.
+- Net-label rotation is supported in the model/geometry but has no keyboard/inspector control yet (drag + delete only).
+
+### Notes for the next agent
+
+- `Selection` grew an optional `labels: Set<string>`; most construction sites omit it (treated empty). Marquee/rubber-band does **not** yet grab labels — click / shift-click only.
+- Pre-existing lint: `Canvas.tsx` (`emptySel`) and `Palette.tsx` (`WIRE_COLORS`) trip `react-refresh/only-export-components` (colocated helpers) — unchanged by this work; gates remain typecheck + `test:circuit`.
+- Tooling: same Cowork-mount truncation gremlin — every file this session was written Linux-side (bash heredoc / Python `.replace`, `newline='\n'`) and verified with `awk NR` + `tail`. The stale `.git/index.lock` is still unremovable from the sandbox, so this work is **uncommitted** on `circuit-editor` (see file list below).
+
+---
+
+## 2026-07-05 (later) — editor UX pass (Geoff's feedback round 2)
+
+Eleven fixes across the circuit editor + app shell. `npm run typecheck` clean · `npm run test:circuit` → 71/71.
+
+### Placement & interaction
+
+- **Collision-avoidance placement** (`partsAdapter.occupiedBoxes` / `findFreePlacement` / `freePasteOffset`): new parts, tray placements, and copy/paste all spiral out on the grid to a slot that clears existing parts, net labels, and wire segments — parity with the pre-rewrite editor. `addPartAt` and paste now route through these.
+- **Unplaced tray auto-places** (reverting the click-then-click attach-to-cursor): clicking a tray chip drops the part straight onto a free slot *and* flips the view into edit mode so it can be dragged immediately.
+- **Double-click any component → edit mode** (`Canvas.onRequestEdit`, wired to `CircuitView.enterEdit`): double-clicking a part or net label in view-only mode enters edit mode.
+
+### Visuals
+
+- **View-aware palette icons** (`Palette.iconFor`): the components rail shows schematic symbols in the schematic view, breadboard art in the breadboard view.
+- **Black part legs** (`partsAdapter.blackenLegs`): Fritzing legs are baked into the art as `<line id="connectorNleg" … stroke="#8C8C8C"/>`; we recolor those leg strokes to ink (`#1A1A1A`) at render time (cached). Only leg elements are touched.
+- **Bigger watermark** (canvas + image export): ~5× larger, thin `tiny` + bold `Studio` to match the header wordmark; export uses `<tspan>` weights and extra bottom padding.
+- **Cleaner status area**: dropped the persistent "Parts/Wires/Nets" pill and the idle "Scroll to zoom" / "View-only" hint bubbles. One compact warning bubble appears only when there's something to fix (unplaced parts · unwired nets · ERC err/warn) and opens the ERC panel; the contextual wiring hint now shows only while actively drawing/reshaping.
+
+### Part editor
+
+- **Dual-view authoring** (`PartsEditor`): a Breadboard | Schematic toggle; each view keeps its own art, size, and pin positions (pin names are the shared cross-view key). Save writes both populated views; palette icon prefers the breadboard art. A dot next to a toggle label marks which views have pins.
+
+### App shell
+
+- **Stable left panel** (`App`): the Files panel no longer gets shoved around when the right (docs) or bottom (serial) panel toggles. We remember a manual drag (`ResizableHandle onDragging` → `manualFilePct`) and otherwise the toolbar-divider alignment, and re-assert that width via the imperative panel handle after any panel toggle. So it only changes when *you* drag it.
+- **Docs panel reopens on view mode** (`EditorPanel.onEditChange`): entering circuit edit mode still closes the docs panel to free space; returning to view mode reopens it (`isOpen: !editing`).
+
+### Notes for the next agent
+
+- Marquee/rubber-band still selects parts + wires only, not net labels (click / shift-click for labels).
+- Leg recolor is render-time and keyed by svg string; if a part with a different (non-`connectorNleg`) leg convention shows up, extend `blackenLegs`.
+- Tooling: `PartsEditor.tsx` hit the Cowork-mount truncation bug when written via the file tool (cut at line 399 mid-word) — rewritten Linux-side and verified. Everything else this round was written Linux-side. The stale `.git/index.lock` is still unremovable from the sandbox, so this round is **uncommitted** on `circuit-editor`.

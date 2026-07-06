@@ -5,13 +5,17 @@
  * in the same schema as Fritzing-imported parts (pixel coords @ 96 DPI), so a
  * hand-made part wires up exactly like an imported one.
  *
+ * Both the breadboard and schematic views are editable via the view toggle —
+ * each keeps its own art, size, and pin positions (pin NAMES are the cross-view
+ * join key, so keep them consistent between views).
+ *
  * Styled with the tinyStudio design system: cold neutral surfaces, soft-elevation
  * floating dialog, dot-grid preview, brand-blue accents, sentence-case copy.
  */
 
 import { Plus, Trash2, UploadCloud, X } from 'lucide-react'
 import React from 'react'
-import type { PartDef } from '../lib/partsLibrary'
+import type { PartDef, PartView, ViewKind } from '../lib/partsLibrary'
 
 const PX_PER_MM = 96 / 25.4
 
@@ -27,8 +31,25 @@ interface Pin {
   y: number
 }
 
+interface ViewBuf {
+  svg: string
+  w: number
+  h: number
+  pins: Pin[]
+}
+
 const blankSvg = (w: number, h: number): string =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}"><rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" rx="4" fill="#383A40" stroke="#4A4D54"/></svg>`
+
+const seedView = (v: PartView | undefined, fallbackW = 80, fallbackH = 40): ViewBuf =>
+  v
+    ? {
+        svg: v.svg,
+        w: v.w,
+        h: v.h,
+        pins: Object.entries(v.pins).map(([n, [x, y]]) => ({ name: n, x, y }))
+      }
+    : { svg: blankSvg(fallbackW, fallbackH), w: fallbackW, h: fallbackH, pins: [] }
 
 export function PartsEditor({
   initial,
@@ -39,20 +60,26 @@ export function PartsEditor({
   onClose: () => void
   onSave: (def: PartDef) => void
 }): React.JSX.Element {
-  // when editing an existing part, seed from its (breadboard) view
-  const seed =
-    initial &&
-    (initial.views.breadboard || initial.views.schematic || Object.values(initial.views)[0])
   const [name, setName] = React.useState(initial?.label || 'My Part')
-  const [w, setW] = React.useState(seed?.w || 80)
-  const [h, setH] = React.useState(seed?.h || 40)
-  const [svg, setSvg] = React.useState(seed?.svg || blankSvg(80, 40))
-  const [pins, setPins] = React.useState<Pin[]>(
-    seed ? Object.entries(seed.pins).map(([n, [x, y]]) => ({ name: n, x, y })) : []
-  )
+  const [bb, setBb] = React.useState<ViewBuf>(() => seedView(initial?.views.breadboard))
+  const [sch, setSch] = React.useState<ViewBuf>(() => seedView(initial?.views.schematic))
+  const [editView, setEditView] = React.useState<ViewKind>('breadboard')
   const [sel, setSel] = React.useState<number>(-1)
   const surfaceRef = React.useRef<HTMLDivElement>(null)
   const dragRef = React.useRef<number>(-1)
+
+  const buf = editView === 'breadboard' ? bb : sch
+  const setBuf = editView === 'breadboard' ? setBb : setSch
+  const { svg, w, h, pins } = buf
+
+  const patch = (p: Partial<ViewBuf>): void => setBuf((b) => ({ ...b, ...p }))
+  const setPins = (fn: (ps: Pin[]) => Pin[]): void => setBuf((b) => ({ ...b, pins: fn(b.pins) }))
+
+  const switchView = (v: ViewKind): void => {
+    if (v === editView) return
+    setEditView(v)
+    setSel(-1)
+  }
 
   // fit the part into the preview area (cap zoom so tiny parts stay visible)
   const scale = Math.min(440 / w, 320 / h, 14)
@@ -131,15 +158,14 @@ export function PartsEditor({
         nw = nw ?? vb[2]
         nh = nh ?? vb[3]
       }
-      if (nw && nh) {
-        setW(Math.round(nw))
-        setH(Math.round(nh))
-      }
+      if (!el.getAttribute('xmlns')) el.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
       el.removeAttribute('width')
       el.removeAttribute('height')
-      if (!el.getAttribute('xmlns')) el.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
       if (!el.getAttribute('viewBox') && nw && nh) el.setAttribute('viewBox', `0 0 ${nw} ${nh}`)
-      setSvg(el.outerHTML)
+      patch({
+        svg: el.outerHTML,
+        ...(nw && nh ? { w: Math.round(nw), h: Math.round(nh) } : {})
+      })
     }
     reader.readAsText(file)
   }
@@ -169,22 +195,36 @@ export function PartsEditor({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [sel, w, h])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sel, w, h, editView])
+
+  const toMap = (ps: Pin[]): Record<string, [number, number]> => {
+    const m: Record<string, [number, number]> = {}
+    ps.forEach((p) => {
+      m[p.name] = [p.x, p.y]
+    })
+    return m
+  }
+
+  const canSave = bb.pins.length > 0 || sch.pins.length > 0
 
   const save = (): void => {
-    const pinMap: Record<string, [number, number]> = {}
-    pins.forEach((p) => {
-      pinMap[p.name] = [p.x, p.y]
-    })
+    const views: Partial<Record<ViewKind, PartView>> = {}
+    if (bb.pins.length || initial?.views.breadboard)
+      views.breadboard = { svg: bb.svg, w: bb.w, h: bb.h, pins: toMap(bb.pins) }
+    if (sch.pins.length || initial?.views.schematic)
+      views.schematic = { svg: sch.svg, w: sch.w, h: sch.h, pins: toMap(sch.pins) }
+    if (!views.breadboard && !views.schematic)
+      views.breadboard = { svg: bb.svg, w: bb.w, h: bb.h, pins: toMap(bb.pins) }
     onSave({
       // editing keeps the original identity so it updates in place (not a copy)
       type: initial ? initial.type : slug(name),
       label: name,
       family: initial?.family || 'Custom',
       builtin: initial?.builtin,
-      // regenerate the palette icon from the current art so the thumbnail updates
-      icon: svg,
-      views: { breadboard: { svg, w, h, pins: pinMap } }
+      // palette icon prefers the breadboard art, falls back to schematic
+      icon: bb.pins.length ? bb.svg : sch.svg,
+      views
     })
   }
 
@@ -209,7 +249,29 @@ export function PartsEditor({
             {initial ? `editing “${initial.label}”` : 'author a custom part'}
           </span>
           <div className="flex-1" />
-          <button className="text-text-muted hover:text-text-strong" onClick={onClose}>
+          {/* view toggle: edit breadboard art or schematic symbol */}
+          <div className="flex rounded-md overflow-hidden border border-border-default">
+            {(
+              [
+                ['breadboard', 'Breadboard'],
+                ['schematic', 'Schematic']
+              ] as [ViewKind, string][]
+            ).map(([v, label]) => (
+              <button
+                key={v}
+                className={`h-7 px-2.5 text-xs font-medium ${
+                  editView === v
+                    ? 'bg-brand/15 text-brand'
+                    : 'bg-surface-card text-text-muted hover:text-text-body'
+                }`}
+                onClick={() => switchView(v)}
+              >
+                {label}
+                {(v === 'breadboard' ? bb.pins.length : sch.pins.length) > 0 ? ' •' : ''}
+              </button>
+            ))}
+          </div>
+          <button className="text-text-muted hover:text-text-strong ml-1" onClick={onClose}>
             <X size={18} />
           </button>
         </div>
@@ -270,6 +332,9 @@ export function PartsEditor({
                   onChange={(e) => setName(e.target.value)}
                 />
               </label>
+              <div className="text-[11px] text-text-faint -mt-1">
+                Editing the <span className="text-text-muted">{editView}</span> view.
+              </div>
               <div className="flex gap-3">
                 <label className="flex flex-col gap-1">
                   <span className="text-[11px] text-text-muted">Width (px)</span>
@@ -279,8 +344,12 @@ export function PartsEditor({
                     value={w}
                     onChange={(e) => {
                       const nv = Math.max(1, parseInt(e.target.value, 10) || 1)
-                      setW(nv)
-                      if (svg.startsWith('<svg') && svg.includes('rx="4"')) setSvg(blankSvg(nv, h))
+                      patch({
+                        w: nv,
+                        ...(svg.startsWith('<svg') && svg.includes('rx="4"')
+                          ? { svg: blankSvg(nv, h) }
+                          : {})
+                      })
                     }}
                   />
                 </label>
@@ -292,8 +361,12 @@ export function PartsEditor({
                     value={h}
                     onChange={(e) => {
                       const nv = Math.max(1, parseInt(e.target.value, 10) || 1)
-                      setH(nv)
-                      if (svg.startsWith('<svg') && svg.includes('rx="4"')) setSvg(blankSvg(w, nv))
+                      patch({
+                        h: nv,
+                        ...(svg.startsWith('<svg') && svg.includes('rx="4"')
+                          ? { svg: blankSvg(w, nv) }
+                          : {})
+                      })
                     }}
                   />
                 </label>
@@ -366,7 +439,7 @@ export function PartsEditor({
                 ))}
                 {pins.length === 0 && (
                   <div className="text-[11px] text-text-faint py-2">
-                    Click the preview to drop pins.
+                    Click the preview to drop pins for the {editView} view.
                   </div>
                 )}
               </div>
@@ -381,7 +454,7 @@ export function PartsEditor({
               </button>
               <button
                 className="flex-1 px-3 py-2 rounded-lg bg-brand border border-brand text-sm text-brand-contrast font-medium hover:brightness-105 disabled:opacity-40"
-                disabled={pins.length === 0}
+                disabled={!canSave}
                 onClick={save}
               >
                 Save to library

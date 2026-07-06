@@ -6,9 +6,20 @@
 
 import { ChevronDown, ChevronRight, CircuitBoard, Pencil, Plus } from 'lucide-react'
 import React from 'react'
-import { partsByFamily, type PartMeta } from '../../../lib/partsLibrary'
+import { getPart, partsByFamily, type PartMeta } from '../../../lib/partsLibrary'
+import type { ViewId } from '../../core/model'
+import { NET_LABEL_KINDS, netLabelView } from '../../parts/netLabels'
+import { schematicVisual } from '../../parts/symbols'
 
 export const WIRE_COLORS = ['#2fa46a', '#e5544b', '#42a5f5', '#f3cb00', '#ffffff', '#79818c']
+
+function iconFor(meta: PartMeta, view: ViewId): string | undefined {
+  if (view === 'sch') {
+    const def = getPart(meta.type)
+    if (def) return schematicVisual(def).svg
+  }
+  return meta.icon
+}
 
 function titleCase(s: string): string {
   return s
@@ -37,15 +48,19 @@ function Thumb({ svg, size = 40 }: { svg?: string; size?: number }): React.JSX.E
 }
 
 export function Palette({
+  view,
   wireColor,
   onPickColor,
   onAdd,
+  onAddNetLabel,
   onEditPart,
   onNewPart
 }: {
+  view: ViewId
   wireColor: string
   onPickColor: (c: string) => void
   onAdd: (type: string) => void
+  onAddNetLabel: (kind: string, name: string) => void
   onEditPart: (type: string) => void
   onNewPart: () => void
 }): React.JSX.Element {
@@ -84,6 +99,30 @@ export function Palette({
         ))}
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-2 flex flex-col gap-2">
+        {view === 'sch' && (
+          <div>
+            <div className="px-1 py-1 text-[11px] font-medium text-text-muted">Net Labels</div>
+            <div className="grid grid-cols-2 gap-1.5 pt-1 pb-1">
+              {NET_LABEL_KINDS.map((k) => (
+                <div
+                  key={`${k.kind}:${k.name}`}
+                  draggable
+                  onDragStart={(e) =>
+                    e.dataTransfer.setData('text/tinystudio-netlabel', `${k.kind}:${k.name}`)
+                  }
+                  onDoubleClick={() => onAddNetLabel(k.kind, k.name)}
+                  className="group relative flex flex-col items-center gap-1 p-2 rounded-lg border border-border-default bg-surface-card hover:bg-bg-sunken hover:-translate-y-px transition cursor-grab active:cursor-grabbing"
+                  title={`${k.label} — drag onto the schematic (or double-click)`}
+                >
+                  <Thumb svg={netLabelView(k.kind, k.name).svg} size={44} />
+                  <div className="text-[10px] text-text-body text-center leading-tight w-full">
+                    {k.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {families.map((group) => (
           <div key={group.family}>
             <button
@@ -105,7 +144,7 @@ export function Palette({
                     className="group relative flex flex-col items-center gap-1 p-2 rounded-lg border border-border-default bg-surface-card hover:bg-bg-sunken hover:-translate-y-px transition cursor-grab active:cursor-grabbing"
                     title={`${c.label} · ${c.pins} pins — drag onto the canvas (or double-click)`}
                   >
-                    <Thumb svg={c.icon} size={44} />
+                    <Thumb svg={iconFor(c, view)} size={44} />
                     <div className="text-[10px] text-text-body text-center leading-tight line-clamp-2 w-full">
                       {c.label}
                     </div>

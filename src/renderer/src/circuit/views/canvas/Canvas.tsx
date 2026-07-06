@@ -11,7 +11,7 @@
  * (camera, hover, armed wire, marquee, edit buffer) never touches the doc.
  */
 
-import { CircuitBoard, MousePointer2, Zap } from 'lucide-react'
+import { CircuitBoard, Zap } from 'lucide-react'
 import React from 'react'
 import { buildClipboard, materializePaste, parseClipboard } from '../../core/clipboard'
 import * as cmd from '../../core/commands'
@@ -21,6 +21,7 @@ import {
   isJunction,
   isPendingJunction,
   type CircuitDoc,
+  type NetLabelKind,
   type Placement,
   type Pt,
   type ViewId,
@@ -28,6 +29,7 @@ import {
 } from '../../core/model'
 import { describeNet, type NetModel } from '../../core/nets'
 import { isBreadboard } from '../../parts/breadboard'
+import { netLabelVisualOf, snapNetLabel } from '../../parts/netLabels'
 import {
   calculateOrthogonalPath,
   clampOntoSegment,
@@ -43,6 +45,7 @@ import {
 import type { CircuitStore } from '../../core/store'
 import {
   collectFrozen,
+  freePasteOffset,
   holeAt,
   makeEndResolver,
   pinAtWorld,
@@ -59,6 +62,7 @@ import {
 
 // wire look (identical to DiagramEditor / tinySchematic)
 const WIRE_W = 2.8
+const WIRE_SCH_W = 1 // schematic ink: thin single stroke (no outline/glow)
 const WIRE_OUTLINE_W = WIRE_W + 1.8
 const WIRE_GLOW_W = WIRE_W + 5
 const WIRE_CORNER = 4
@@ -67,8 +71,14 @@ const NET_GLOW = 'rgba(243, 203, 0, 0.30)'
 export interface Selection {
   parts: Set<string>
   wires: Set<string>
+  /** selected net-label ids (schematic) */
+  labels?: Set<string>
 }
-export const emptySel = (): Selection => ({ parts: new Set(), wires: new Set() })
+export const emptySel = (): Selection => ({
+  parts: new Set(),
+  wires: new Set(),
+  labels: new Set()
+})
 
 export interface Cam {
   scale: number
@@ -134,7 +144,9 @@ export function Canvas({
   cam,
   setCam,
   handleRef,
-  onDropPart
+  onDropPart,
+  onDropNetLabel,
+  onRequestEdit
 }: {
   store: CircuitStore
   doc: CircuitDoc
@@ -155,6 +167,10 @@ export function Canvas({
   setCam: React.Dispatch<React.SetStateAction<Cam>>
   handleRef: React.Ref<CanvasHandle>
   onDropPart: (type: string, at: Pt) => void
+  onDropNetLabel: (kind: NetLabelKind, name: string, at: Pt) => void
+  /** tray "attach to cursor" placement: id being placed + drop callback */
+  /** double-clicking a component asks the shell to enter edit mode */
+  onRequestEdit: () => void
 }): React.JSX.Element {
   const scale = cam.scale
   // schematic wires bend on the fine grid; parts still snap pins to major
@@ -167,7 +183,9 @@ export function Canvas({
   const [armed, setArmed] = React.useState<Armed | null>(null)
   const [straight, setStraight] = React.useState(false)
   const [hoverPin, setHoverPin] = React.useState<{ id: string; pin: string } | null>(null)
-  const [hoverHole, setHoverHole] = React.useState<{ id: string; pin: string; pos: Pt } | null>(null)
+  const [hoverHole, setHoverHole] = React.useState<{ id: string; pin: string; pos: Pt } | null>(
+    null
+  )
   const [hoverWire, setHoverWire] = React.useState<string | null>(null)
   const [mouse, setMouse] = React.useState<Pt>({ x: 0, y: 0 })
   const [editPts, setEditPts] = React.useState<Pt[] | null>(null)
@@ -188,6 +206,13 @@ export function Canvas({
   } | null>(null)
   const handleDrag = React.useRef<{ kind: HandleKind } | null>(null)
   const labelDrag = React.useRef<{ id: string; ox: number; oy: number } | null>(null)
+  const netLabelDrag = React.useRef<{
+    id: string
+    offX: number
+    offY: number
+    frozen: FrozenWire[]
+    moved: boolean
+  } | null>(null)
   const suppressClick = React.useRef(false)
 
   // ── geometry ────────────────────────────────────────────────────────────────
@@ -229,9 +254,7 @@ export function Canvas({
   React.useEffect(() => {
     if (view !== 'bb') return // v1 migration produced bb wires only
     if (pendingDone.current) return
-    const pending = doc.wires.filter(
-      (w) => isPendingJunction(w.from) || isPendingJunction(w.to)
-    )
+    const pending = doc.wires.filter((w) => isPendingJunction(w.from) || isPendingJunction(w.to))
     if (pending.length === 0) {
       pendingDone.current = true
       return
@@ -451,6 +474,59 @@ export function Canvas({
     window.addEventListener('pointerup', up)
   }
 
+  // drag / select a schematic net label (moves its sch placement + reroutes wires)
+  const onNetLabelDown = (e: React.PointerEvent, id: string): void => {
+    if ((e.target as HTMLElement).closest('.pin-hit')) return
+    e.stopPropagation()
+    if (!editable) {
+      setSel({ parts: new Set(), wires: new Set(), labels: new Set([id]) })
+      return
+    }
+    if (e.shiftKey) {
+      const labels = new Set(sel.labels ?? [])
+      if (labels.has(id)) labels.delete(id)
+      else labels.add(id)
+      setSel({ parts: new Set(), wires: new Set(), labels })
+      return
+    }
+    setSel({ parts: new Set(), wires: new Set(), labels: new Set([id]) })
+    const label = doc.netLabels?.find((l) => l.id === id)
+    if (!label) return
+    const start = canvasPoint(e)
+    netLabelDrag.current = {
+      id,
+      offX: start.x - label.sch.x,
+      offY: start.y - label.sch.y,
+      frozen: collectFrozen(doc, new Set([id]), 'sch'),
+      moved: false
+    }
+    const move = (ev: PointerEvent): void => {
+      const d = netLabelDrag.current
+      if (!d) return
+      const cur = doc.netLabels?.find((l) => l.id === d.id)
+      if (!cur) return
+      const cp = canvasPoint(ev)
+      const snapped = snapNetLabel(cur.kind, cur.name, {
+        ...cur.sch,
+        x: cp.x - d.offX,
+        y: cp.y - d.offY
+      })
+      if (snapped.x !== cur.sch.x || snapped.y !== cur.sch.y) d.moved = true
+      const overrides = new Map<string, Placement>([[d.id, snapped]])
+      setDragOverrides(overrides)
+      const reroutes = reroutesFor(doc, d.frozen, overrides, { x: 0, y: 0 }, 'sch')
+      store.dispatch(cmd.moveNetLabel(d.id, snapped, reroutes, true))
+    }
+    const up = (): void => {
+      netLabelDrag.current = null
+      setDragOverrides(null)
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
   // ── wire drawing ────────────────────────────────────────────────────────────
 
   const finalizeSegment = (target: Pt, clean: boolean): { pts: Pt[]; str: boolean } => {
@@ -553,7 +629,12 @@ export function Canvas({
     return null // v2 has no free-point endpoints — caller reverts
   }
 
-  const startHandleDrag = (e: React.PointerEvent, kind: HandleKind, idx: number, end?: 0 | 1): void => {
+  const startHandleDrag = (
+    e: React.PointerEvent,
+    kind: HandleKind,
+    idx: number,
+    end?: 0 | 1
+  ): void => {
     if (!editable || !soloWire || !editPts) return
     e.stopPropagation()
     const wireId = soloWire
@@ -637,7 +718,12 @@ export function Canvas({
     if (armed) {
       const cp = canvasPoint(e)
       setMouse(cp)
-      const hit = hitWire(cp.x, cp.y, geomForHit.filter((g) => g.id === wireId), scale)
+      const hit = hitWire(
+        cp.x,
+        cp.y,
+        geomForHit.filter((g) => g.id === wireId),
+        scale
+      )
       if (hit) tapJunction(hit)
       return
     }
@@ -654,7 +740,8 @@ export function Canvas({
   // ── background: pan / marquee ───────────────────────────────────────────────
 
   const onViewPointerDown = (e: React.PointerEvent): void => {
-    const panButton = e.button === 1 || (e.button === 0 && e.altKey) || (e.button === 0 && !editable)
+    const panButton =
+      e.button === 1 || (e.button === 0 && e.altKey) || (e.button === 0 && !editable)
     if (panButton) {
       e.preventDefault()
       pan.current = { x: e.clientX, y: e.clientY }
@@ -723,14 +810,79 @@ export function Canvas({
   const onDrop = (e: React.DragEvent): void => {
     e.preventDefault()
     const type = e.dataTransfer.getData('text/tinystudio-part')
-    if (type) onDropPart(type, canvasPoint(e))
+    if (type) {
+      onDropPart(type, canvasPoint(e))
+      return
+    }
+    const nl = e.dataTransfer.getData('text/tinystudio-netlabel')
+    if (nl && view === 'sch') {
+      const idx = nl.indexOf(':')
+      onDropNetLabel(nl.slice(0, idx) as NetLabelKind, nl.slice(idx + 1), canvasPoint(e))
+    }
   }
 
   // ── keyboard: undo/redo, delete, rotate, nudge, clipboard, Esc, Shift ───────
 
+  /**
+   * Rotate a breadboard as a rigid assembly (bb only): the board, its seated
+   * parts, and the wires between them all turn 90 deg about the board's centre,
+   * so the whole layout is preserved rather than the wires rerouting. Seating is
+   * grid-aligned, so a 90 deg turn about centre maps holes->holes and pins re-seat.
+   */
+  const rotateBoardAssembly = React.useCallback(
+    (boardId: string): void => {
+      const board = doc.parts.find((p) => p.id === boardId)
+      const bpl = board?.bb
+      const bvis = board && visualFor(board.type, 'bb')
+      if (!board || !bpl || !bvis) return
+      const c = { x: bpl.x + bvis.v.w / 2, y: bpl.y + bvis.v.h / 2 }
+      // 90 deg CW about c, matching transformLocalPoint's rotation sense.
+      const rot90 = (p: Pt): Pt => ({ x: c.x - (p.y - c.y), y: c.y + (p.x - c.x) })
+      const ids = [boardId, ...seatedPartsOn(boardId, seats)]
+      const placements = new Map<string, Placement>()
+      for (const id of ids) {
+        const part = doc.parts.find((p) => p.id === id)
+        const cur = part?.bb
+        const vis = part && visualFor(part.type, 'bb')
+        if (!part || !cur || !vis) continue
+        const nr = (((((cur.rotate ?? 0) + 90) % 360) + 360) % 360) as 0 | 90 | 180 | 270
+        if (id === boardId) {
+          placements.set(id, { ...cur, rotate: nr || undefined })
+        } else {
+          const nc = rot90({ x: cur.x + vis.v.w / 2, y: cur.y + vis.v.h / 2 })
+          placements.set(id, {
+            ...cur,
+            x: nc.x - vis.v.w / 2,
+            y: nc.y - vis.v.h / 2,
+            rotate: nr || undefined
+          })
+        }
+      }
+      const frozen = collectFrozen(doc, new Set(ids), 'bb')
+      const reroutes = reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, 'bb', rot90)
+      let first = true
+      const cmds: cmd.Command[] = []
+      for (const [id, pl] of placements) {
+        cmds.push(cmd.placePart(id, 'bb', pl, first ? reroutes : []))
+        first = false
+      }
+      if (cmds.length) store.dispatch(cmd.composite(`Rotate ${boardId}`, cmds))
+    },
+    [doc, store, seats]
+  )
+
   const rotateSelection = React.useCallback((): void => {
     const ids = [...sel.parts]
     if (!ids.length) return
+    // a lone breadboard rotates as a rigid assembly (carries seated parts + wires)
+    if (
+      view === 'bb' &&
+      ids.length === 1 &&
+      isBreadboard(doc.parts.find((p) => p.id === ids[0])?.type ?? '')
+    ) {
+      rotateBoardAssembly(ids[0])
+      return
+    }
     const frozen = collectFrozen(doc, new Set(ids), view)
     const placements = new Map<string, Placement>()
     const cmds: cmd.Command[] = []
@@ -746,8 +898,11 @@ export function Canvas({
       cmds.push(cmd.placePart(id, view, pl, first ? reroutes : []))
       first = false
     }
-    if (cmds.length) store.dispatch(cmd.composite(`Rotate ${ids.length > 1 ? `${ids.length} parts` : ids[0]}`, cmds))
-  }, [doc, sel, store, view])
+    if (cmds.length)
+      store.dispatch(
+        cmd.composite(`Rotate ${ids.length > 1 ? `${ids.length} parts` : ids[0]}`, cmds)
+      )
+  }, [doc, sel, store, view, rotateBoardAssembly])
 
   const nudgeSelection = React.useCallback(
     (dx: number, dy: number): void => {
@@ -776,6 +931,7 @@ export function Canvas({
     const cmds: cmd.Command[] = []
     if (sel.parts.size) cmds.push(cmd.deleteParts([...sel.parts]))
     if (sel.wires.size) cmds.push(cmd.deleteWires([...sel.wires]))
+    if (sel.labels?.size) for (const id of sel.labels) cmds.push(cmd.deleteNetLabel(id))
     if (!cmds.length) return
     store.dispatch(cmds.length === 1 ? cmds[0] : cmd.composite('Delete selection', cmds))
     setSel(emptySel())
@@ -794,7 +950,11 @@ export function Canvas({
 
   const pastePayload = React.useCallback(
     (payload: NonNullable<ReturnType<typeof parseClipboard>>): void => {
-      const { parts, wires, idMap } = materializePaste(doc, payload, { x: GRID_BB * 2, y: GRID_BB * 2 })
+      const { parts, wires, idMap } = materializePaste(
+        doc,
+        payload,
+        freePasteOffset(doc, payload.parts, view)
+      )
       if (!parts.length && !wires.length) return
       store.dispatch(
         cmd.composite(`Paste ${parts.length} part${parts.length === 1 ? '' : 's'}`, [
@@ -809,8 +969,14 @@ export function Canvas({
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent): void => {
-      if (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return
-      if (e.key === 'Shift') setStraight(true)
+      if (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))
+        return
+      // Space = straight-wire modifier (Shift is reserved for shift-select).
+      if (e.key === ' ') {
+        setStraight(true)
+        e.preventDefault()
+        return
+      }
       if (e.key === 'Escape') {
         setArmed(null)
         setSel(emptySel())
@@ -852,7 +1018,7 @@ export function Canvas({
         if (payload) pastePayload(payload)
         return
       }
-      if (e.key === 'r' || e.key === 'R' || e.key === ' ') {
+      if (e.key === 'r' || e.key === 'R') {
         if (sel.parts.size) {
           e.preventDefault()
           rotateSelection()
@@ -896,7 +1062,7 @@ export function Canvas({
       }
     }
     const up = (e: KeyboardEvent): void => {
-      if (e.key === 'Shift') setStraight(false)
+      if (e.key === ' ') setStraight(false)
     }
     window.addEventListener('keydown', down)
     window.addEventListener('keyup', up)
@@ -904,7 +1070,19 @@ export function Canvas({
       window.removeEventListener('keydown', down)
       window.removeEventListener('keyup', up)
     }
-  }, [editable, sel, doc, store, setSel, view, copySelection, pastePayload, deleteSelection, rotateSelection, nudgeSelection])
+  }, [
+    editable,
+    sel,
+    doc,
+    store,
+    setSel,
+    view,
+    copySelection,
+    pastePayload,
+    deleteSelection,
+    rotateSelection,
+    nudgeSelection
+  ])
 
   // ── derived render bits ─────────────────────────────────────────────────────
 
@@ -924,7 +1102,10 @@ export function Canvas({
       clean = true
     }
     if (armed.straight || straight) return [...armed.points, target]
-    return [...armed.points, ...calculateOrthogonalPath(last.x, last.y, target.x, target.y, clean).slice(1)]
+    return [
+      ...armed.points,
+      ...calculateOrthogonalPath(last.x, last.y, target.x, target.y, clean).slice(1)
+    ]
   }, [armed, mouse, hoverPin, hoverHole, straight, resolve])
 
   // junction solder dots (junction endpoints take the host wire's color)
@@ -948,13 +1129,20 @@ export function Canvas({
     return out
   }, [doc, resolve])
 
-  const hint = !editable
-    ? { icon: <MousePointer2 size={12} />, text: 'View-only · hover a wire to light its net · click edit to change', hot: false }
-    : armed
-      ? { icon: <Zap size={12} />, text: 'Click a pin or wire to connect · click for a bend · hold Shift for straight · Esc to cancel', hot: true }
-      : soloWire
-        ? { icon: null, text: 'Drag a handle to reshape · double-click to add/remove a bend · Del to remove', hot: true }
-        : { icon: <MousePointer2 size={12} />, text: 'Scroll to zoom · drag to marquee-select · middle/Alt-drag to pan · click a pin to wire', hot: false }
+  // Contextual hint only while actively wiring/editing — no idle 'scroll to
+  // zoom' / 'view-only' bubbles cluttering the canvas.
+  const hint: { icon: React.JSX.Element | null; text: string } | null =
+    editable && armed
+      ? {
+          icon: <Zap size={12} />,
+          text: `Click a pin or wire to connect · click for a bend${view === 'bb' ? ' · hold Space for straight' : ''} · Esc to cancel`
+        }
+      : editable && soloWire
+        ? {
+            icon: null,
+            text: 'Drag a handle to reshape · double-click to add/remove a bend · Del to remove'
+          }
+        : null
 
   return (
     <div className="flex-1 relative min-w-0 overflow-hidden">
@@ -964,9 +1152,12 @@ export function Canvas({
         style={{
           touchAction: 'none',
           cursor: armed ? 'crosshair' : 'default',
-          backgroundColor: 'var(--bg-sunken)',
-          backgroundImage: grid ? 'radial-gradient(var(--dot-color) 1.1px, transparent 1.1px)' : 'none',
-          backgroundSize: `${GRID_BB * scale}px ${GRID_BB * scale}px`,
+          // schematic reads as paper (lighter surface, finer dot grid — spec §8.1)
+          backgroundColor: view === 'sch' ? 'var(--bg)' : 'var(--bg-sunken)',
+          backgroundImage: grid
+            ? `radial-gradient(var(--dot-color) ${view === 'sch' ? 0.9 : 1.1}px, transparent ${view === 'sch' ? 0.9 : 1.1}px)`
+            : 'none',
+          backgroundSize: `${(view === 'sch' ? GRID_SCH : GRID_BB) * scale}px ${(view === 'sch' ? GRID_SCH : GRID_BB) * scale}px`,
           backgroundPosition: `${cam.tx}px ${cam.ty}px`
         }}
         onWheel={(e) => {
@@ -993,7 +1184,15 @@ export function Canvas({
           }}
         >
           {/* wires */}
-          <svg style={{ position: 'absolute', inset: 0, overflow: 'visible', zIndex: 5, pointerEvents: 'none' }}>
+          <svg
+            style={{
+              position: 'absolute',
+              inset: 0,
+              overflow: 'visible',
+              zIndex: 5,
+              pointerEvents: 'none'
+            }}
+          >
             {/* ratsnest: connected elsewhere, not yet drawn here (spec §8.2) */}
             {rats.map((r, i) => (
               <line
@@ -1015,6 +1214,8 @@ export function Canvas({
               const onHotNet = highlightNet >= 0 && netModel.wireToNet.get(w.id) === highlightNet
               const core = view === 'sch' ? ink : w.color || '#2fa46a'
               const outline = view === 'sch' ? 'rgba(0,0,0,0.45)' : darken(w.color || '#2fa46a')
+              // schematic ink is a single thin stroke — no color outline, no glow.
+              const coreW = view === 'sch' ? WIRE_SCH_W : WIRE_W
               const d = roundedPath(pts)
               return (
                 <g
@@ -1025,14 +1226,59 @@ export function Canvas({
                   onClick={(e) => onWireClick(e, w.id)}
                   onDoubleClick={(e) => onWireDoubleClick(e, w.id)}
                 >
+                  {/* transparent fat stroke keeps thin schematic lines clickable */}
+                  <path
+                    d={d}
+                    fill="none"
+                    stroke="transparent"
+                    strokeWidth={Math.max(coreW + 10, 12)}
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
                   {onHotNet && (
-                    <path d={d} fill="none" stroke={NET_GLOW} strokeWidth={WIRE_GLOW_W} strokeLinejoin="round" strokeLinecap="round" />
+                    <path
+                      d={d}
+                      fill="none"
+                      stroke={NET_GLOW}
+                      strokeWidth={view === 'sch' ? coreW + 3 : WIRE_GLOW_W}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
                   )}
-                  <path d={d} fill="none" stroke={outline} strokeWidth={WIRE_OUTLINE_W} strokeLinejoin="round" strokeLinecap="round" />
-                  <path d={d} fill="none" stroke={core} strokeWidth={WIRE_W} strokeLinejoin="round" strokeLinecap="round" />
+                  {view !== 'sch' && (
+                    <path
+                      d={d}
+                      fill="none"
+                      stroke={outline}
+                      strokeWidth={WIRE_OUTLINE_W}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                  )}
+                  <path
+                    d={d}
+                    fill="none"
+                    stroke={core}
+                    strokeWidth={coreW}
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
                   {selected && (
-                    <path d={d} fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={1} strokeDasharray="4 4" strokeLinejoin="round">
-                      <animate attributeName="stroke-dashoffset" from="0" to="-8" dur="0.5s" repeatCount="indefinite" />
+                    <path
+                      d={d}
+                      fill="none"
+                      stroke="rgba(255,255,255,0.85)"
+                      strokeWidth={1}
+                      strokeDasharray="4 4"
+                      strokeLinejoin="round"
+                    >
+                      <animate
+                        attributeName="stroke-dashoffset"
+                        from="0"
+                        to="-8"
+                        dur="0.5s"
+                        repeatCount="indefinite"
+                      />
                     </path>
                   )}
                 </g>
@@ -1044,7 +1290,15 @@ export function Canvas({
             ))}
 
             {previewPts && (
-              <path d={roundedPath(previewPts)} fill="none" stroke={view === 'sch' ? ink : wireColor} strokeWidth={WIRE_W} strokeLinejoin="round" strokeLinecap="round" opacity={0.6} />
+              <path
+                d={roundedPath(previewPts)}
+                fill="none"
+                stroke={view === 'sch' ? ink : wireColor}
+                strokeWidth={view === 'sch' ? WIRE_SCH_W : WIRE_W}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                opacity={0.6}
+              />
             )}
 
             {/* handles on the solo-selected wire */}
@@ -1149,6 +1403,9 @@ export function Canvas({
           {doc.parts.map((part) => {
             const pl = placementOf(part.id)
             if (!pl) return null
+            // breadboards are transparent on the schematic — their row/rail
+            // buses still merge nets globally, but they render as no part here.
+            if (view === 'sch' && isBreadboard(part.type)) return null
             const vis = visualFor(part.type, view)
             if (!vis) {
               return (
@@ -1184,8 +1441,13 @@ export function Canvas({
                   cursor: editable ? 'move' : 'default'
                 }}
                 onPointerDown={(e) => onPartDown(e, part.id)}
+                onDoubleClick={(e) => {
+                  e.stopPropagation()
+                  if (!editable) onRequestEdit()
+                }}
                 onPointerMove={(e) => {
-                  if (!editable || view !== 'bb' || !isBreadboard(part.type) || partDrag.current) return
+                  if (!editable || view !== 'bb' || !isBreadboard(part.type) || partDrag.current)
+                    return
                   const cp = canvasPoint(e)
                   const hole = holeAt(doc, part.id, cp.x, cp.y, 6 / Math.min(scale, 1))
                   setHoverHole(hole ? { id: part.id, pin: hole.pin, pos: hole.pos } : null)
@@ -1195,13 +1457,28 @@ export function Canvas({
                 onContextMenu={(e) => {
                   if (!editable) return
                   e.preventDefault()
+                  // breadboards rotate as a rigid assembly (seated parts + wires
+                  // turn with the board); other parts rotate in place.
+                  if (view === 'bb' && isBreadboard(part.type)) {
+                    rotateBoardAssembly(part.id)
+                    return
+                  }
                   const cur = doc.parts.find((p) => p.id === part.id)?.[view]
                   if (!cur) return
-                  const next = ((((cur.rotate ?? 0) + 90) % 360) + 360) % 360 as 0 | 90 | 180 | 270
+                  const next = (((((cur.rotate ?? 0) + 90) % 360) + 360) % 360) as
+                    | 0
+                    | 90
+                    | 180
+                    | 270
                   const frozen = collectFrozen(doc, new Set([part.id]), view)
                   const placements = new Map([[part.id, { ...cur, rotate: next || undefined }]])
                   store.dispatch(
-                    cmd.placePart(part.id, view, placements.get(part.id), reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view))
+                    cmd.placePart(
+                      part.id,
+                      view,
+                      placements.get(part.id),
+                      reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view)
+                    )
                   )
                 }}
               >
@@ -1215,9 +1492,14 @@ export function Canvas({
                     const [px, py] = vis.v.pins[pin]
                     const armedHere = armed?.from === `${part.id}:${pin}`
                     const hovered = hoverPin?.id === part.id && hoverPin?.pin === pin
-                    const onHotNet =
-                      highlightNet >= 0 && netModel.pinToNet.get(`${part.id}:${pin}`) === highlightNet
+                    const netIdx = netModel.pinToNet.get(`${part.id}:${pin}`)
+                    const onHotNet = highlightNet >= 0 && netIdx === highlightNet
+                    // a pin sharing a net with anything else is connected — its
+                    // "open lead" dot disappears (still clickable to re-wire).
+                    const connected =
+                      netIdx !== undefined && (netModel.nets[netIdx]?.length ?? 0) >= 2
                     const on = armedHere || hovered
+                    const showDot = on || onHotNet || !connected
                     return (
                       <div
                         key={pin}
@@ -1234,19 +1516,25 @@ export function Canvas({
                         }}
                         onPointerDown={(e) => e.stopPropagation()}
                         onPointerEnter={() => setHoverPin({ id: part.id, pin })}
-                        onPointerLeave={() => setHoverPin((h) => (h?.id === part.id && h?.pin === pin ? null : h))}
+                        onPointerLeave={() =>
+                          setHoverPin((h) => (h?.id === part.id && h?.pin === pin ? null : h))
+                        }
                         onClick={(e) => onPinClick(e, part.id, pin)}
                       >
                         <svg width="16" height="16">
-                          {onHotNet && !on && <circle cx="8" cy="8" r="5.5" fill="var(--yellow)" fillOpacity={0.4} />}
-                          <circle
-                            cx="8"
-                            cy="8"
-                            r={on ? 3.4 : 2.6}
-                            fill={on ? 'var(--brand)' : 'var(--yellow)'}
-                            stroke={on ? 'var(--brand)' : 'var(--border-strong)'}
-                            strokeWidth="1"
-                          />
+                          {onHotNet && !on && (
+                            <circle cx="8" cy="8" r="5.5" fill="var(--yellow)" fillOpacity={0.4} />
+                          )}
+                          {showDot && (
+                            <circle
+                              cx="8"
+                              cy="8"
+                              r={on ? 3.4 : 2.6}
+                              fill={on || connected ? 'var(--brand)' : 'var(--yellow)'}
+                              stroke={on || connected ? 'var(--brand)' : 'var(--border-strong)'}
+                              strokeWidth="1"
+                            />
+                          )}
                         </svg>
                       </div>
                     )
@@ -1272,6 +1560,85 @@ export function Canvas({
               </div>
             )
           })}
+
+          {/* schematic net labels (GND / power / named) */}
+          {view === 'sch' &&
+            (doc.netLabels ?? []).map((label) => {
+              const pl = dragOverrides?.get(label.id) ?? label.sch
+              const v = netLabelVisualOf(label)
+              const selected = sel.labels?.has(label.id) ?? false
+              const [px, py] = v.pins['1']
+              const armedHere = armed?.from === `${label.id}:1`
+              const hovered = hoverPin?.id === label.id && hoverPin?.pin === '1'
+              const netIdx = netModel.pinToNet.get(`${label.id}:1`)
+              const connected = netIdx !== undefined && (netModel.nets[netIdx]?.length ?? 0) >= 2
+              const on = armedHere || hovered
+              const showDot = on || !connected
+              return (
+                <div
+                  key={label.id}
+                  style={{
+                    position: 'absolute',
+                    left: pl.x,
+                    top: pl.y,
+                    width: v.w,
+                    height: v.h,
+                    zIndex: 2,
+                    transform: pl.rotate ? `rotate(${pl.rotate}deg)` : undefined,
+                    transformOrigin: 'center',
+                    outline: selected ? '2px solid var(--brand)' : 'none',
+                    outlineOffset: 3,
+                    borderRadius: 4,
+                    cursor: editable ? 'move' : 'default'
+                  }}
+                  onPointerDown={(e) => onNetLabelDown(e, label.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  onDoubleClick={(e) => {
+                    e.stopPropagation()
+                    if (!editable) onRequestEdit()
+                  }}
+                >
+                  <div
+                    className="size-full [&>svg]:size-full [&>svg]:block pointer-events-none select-none"
+                    dangerouslySetInnerHTML={{ __html: v.svg }}
+                  />
+                  {editable && (
+                    <div
+                      className="pin-hit"
+                      title={label.name}
+                      style={{
+                        position: 'absolute',
+                        left: px - 8,
+                        top: py - 8,
+                        width: 16,
+                        height: 16,
+                        zIndex: 3,
+                        cursor: 'crosshair'
+                      }}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onPointerEnter={() => setHoverPin({ id: label.id, pin: '1' })}
+                      onPointerLeave={() =>
+                        setHoverPin((h) => (h?.id === label.id && h?.pin === '1' ? null : h))
+                      }
+                      onClick={(e) => onPinClick(e, label.id, '1')}
+                    >
+                      <svg width="16" height="16">
+                        {showDot && (
+                          <circle
+                            cx="8"
+                            cy="8"
+                            r={on ? 3.4 : 2.6}
+                            fill={on || connected ? 'var(--brand)' : 'var(--yellow)'}
+                            stroke={on || connected ? 'var(--brand)' : 'var(--border-strong)'}
+                            strokeWidth="1"
+                          />
+                        )}
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
 
           {/* hole tooltip: name + net members */}
           {hoverHole && (
@@ -1311,16 +1678,14 @@ export function Canvas({
         </div>
       </div>
 
-      {/* status hint pill (bottom-left, next to the shell's counters) */}
-      <div className="absolute bottom-3 left-3 z-10 translate-x-[210px] hidden xl:block">
-        <span
-          className={`px-2.5 py-1 rounded-full bg-surface-card border text-[11px] flex items-center gap-1 ${
-            hint.hot ? 'border-brand/40 text-brand' : 'border-border-default text-text-muted'
-          }`}
-        >
-          {hint.icon} {hint.text}
-        </span>
-      </div>
+      {/* transient action hint (only while wiring/reshaping) */}
+      {hint && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 hidden xl:block">
+          <span className="px-2.5 py-1 rounded-full bg-surface-card border border-brand/40 text-brand text-[11px] flex items-center gap-1">
+            {hint.icon} {hint.text}
+          </span>
+        </div>
+      )}
     </div>
   )
 }

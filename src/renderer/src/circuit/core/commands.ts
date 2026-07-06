@@ -61,15 +61,17 @@ export function placePart(
     mergeKey: merge ? `place:${view}:${id}` : undefined,
     apply: (doc) => ({
       ...doc,
-      parts: doc.parts.map((p) =>
-        p.id === id ? { ...p, [view]: placement } : p
-      ),
+      parts: doc.parts.map((p) => (p.id === id ? { ...p, [view]: placement } : p)),
       wires: applyReroutes(doc.wires, reroutes)
     })
   }
 }
 
-export function setPartAttr(id: string, key: string, value: string | number | boolean | undefined): Command {
+export function setPartAttr(
+  id: string,
+  key: string,
+  value: string | number | boolean | undefined
+): Command {
   return {
     label: `Set ${id}.${key}`,
     mergeKey: `attr:${id}:${key}`,
@@ -160,7 +162,12 @@ export function rerouteWire(id: string, route: string[], merge = false): Command
   }
 }
 
-export function setWireEnds(id: string, from: WireEnd | undefined, to: WireEnd | undefined, route?: string[]): Command {
+export function setWireEnds(
+  id: string,
+  from: WireEnd | undefined,
+  to: WireEnd | undefined,
+  route?: string[]
+): Command {
   return {
     label: 'Reconnect wire',
     apply: (doc) => ({
@@ -217,6 +224,36 @@ export function deleteNetLabel(id: string): Command {
             .map((w) => w.id)
         )
       )
+    })
+  }
+}
+
+export function moveNetLabel(
+  id: string,
+  sch: Placement,
+  reroutes: WireReroute[] = [],
+  merge = false
+): Command {
+  return {
+    label: `Move ${id}`,
+    mergeKey: merge ? `label:${id}` : undefined,
+    apply: (doc) => ({
+      ...doc,
+      netLabels: (doc.netLabels ?? []).map((l) => (l.id === id ? { ...l, sch } : l)),
+      wires: applyReroutes(doc.wires, reroutes)
+    })
+  }
+}
+
+export function updateNetLabel(
+  id: string,
+  patch: Partial<Pick<NetLabel, 'name' | 'kind'>>
+): Command {
+  return {
+    label: `Edit ${id}`,
+    apply: (doc) => ({
+      ...doc,
+      netLabels: (doc.netLabels ?? []).map((l) => (l.id === id ? { ...l, ...patch } : l))
     })
   }
 }
