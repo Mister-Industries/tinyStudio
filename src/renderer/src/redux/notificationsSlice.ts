@@ -3,12 +3,18 @@ import { createAppSlice } from './createAppSlice'
 
 export type NotificationTone = 'ok' | 'error' | 'warn' | 'info'
 
+export type NotificationLink = {
+  href: string
+  label: string
+}
+
 export type Notification = {
   id: string
   tone: NotificationTone
   title: string
   msg?: string
   code?: string
+  link?: NotificationLink
   at: number
 }
 
@@ -30,14 +36,26 @@ export const notificationsSlice = createAppSlice({
   initialState,
   reducers: (create) => ({
     addNotification: create.reducer(
-      (state, { payload }: PayloadAction<{ tone: NotificationTone; title: string; msg?: string; code?: string }>) => {
+      (
+        state,
+        {
+          payload
+        }: PayloadAction<{
+          tone: NotificationTone
+          title: string
+          msg?: string
+          code?: string
+          link?: NotificationLink
+        }>
+      ) => {
         state.items.unshift({
           id: nanoid(),
           at: Date.now(),
           tone: payload.tone,
           title: payload.title,
           msg: payload.msg,
-          code: payload.code
+          code: payload.code,
+          link: payload.link
         })
         if (state.items.length > MAX) state.items.length = MAX
       }

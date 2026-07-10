@@ -126,6 +126,11 @@ function NotificationBell(): React.JSX.Element {
                     <div className="notif__itembody">
                       <div className="notif__title">{n.title}</div>
                       {n.msg && <div className="notif__msg">{n.msg}</div>}
+                      {n.link && (
+                        <a className="notif__link" href={n.link.href} target="_blank" rel="noreferrer">
+                          {n.link.label}
+                        </a>
+                      )}
                       {n.code && <code className="notif__code">{n.code}</code>}
                     </div>
                   </div>
