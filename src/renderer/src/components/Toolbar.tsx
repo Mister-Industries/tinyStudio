@@ -11,6 +11,7 @@ import React from 'react'
 import { UploadButton, VerifyButton } from './arduino/ArduinoButtons'
 import { BoardManager } from './arduino/BoardManager'
 import { PortPicker } from './arduino/BoardControls'
+import { BoardOptionsMenu } from './arduino/BoardOptionsMenu'
 import { LibraryManager } from './arduino/LibraryManager'
 import { IconButton } from './ui/IconButton'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
@@ -59,6 +60,7 @@ export function Toolbar(): React.JSX.Element {
       <div className="flex items-center gap-2">
         <BoardManager />
         <PortPicker />
+        <BoardOptionsMenu />
         <Tooltip>
           <TooltipTrigger asChild>
             <IconButton

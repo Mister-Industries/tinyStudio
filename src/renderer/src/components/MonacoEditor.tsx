@@ -1,7 +1,10 @@
 import { Editor, Monaco, OnMount } from '@monaco-editor/react'
+import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
+import { diagnosticMatchesFile } from '@renderer/lib/compileErrors'
+import { attachLspToEditor } from '@renderer/lib/lsp/monacoLsp'
 import { useTheme } from '@renderer/lib/ThemeProvider'
 import { EditorFile } from '@renderer/redux'
-import { forwardRef, useImperativeHandle, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 interface MonacoEditorProps {
   activeFile: EditorFile
@@ -18,6 +21,10 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
     const editorRef = useRef<ReturnType<typeof import('monaco-editor').editor.create> | null>(null)
     const monacoRef = useRef<Monaco | null>(null)
     const { theme } = useTheme()
+    const { lastCompileResult, selectedBoard, isAgentConnected } = useArduinoContext()
+    // Bumped when the editor mounts so effects that need editor/monaco refs
+    // re-run (refs alone don't trigger renders).
+    const [editorReady, setEditorReady] = useState(false)
 
     useImperativeHandle(ref, () => ({
       focus: () => {
@@ -26,6 +33,59 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
         }
       }
     }))
+
+    // ── Inline compile diagnostics ────────────────────────────────────────
+    // Render the last build's errors/warnings as squiggles in the gutter of
+    // the file they belong to (Arduino IDE parity), instead of leaving them
+    // only as text in the Output pane. Cleared on a successful build.
+    useEffect(() => {
+      const monaco = monacoRef.current
+      const editor = editorRef.current
+      const model = editor?.getModel()
+      if (!monaco || !model) return
+
+      const filePath = activeFile.path || activeFile.id
+      const all = [
+        ...(lastCompileResult?.errors ?? []).map((e) => ({ ...e, isError: true })),
+        ...(lastCompileResult?.warnings ?? []).map((w) => ({ ...w, isError: false }))
+      ]
+      const markers = all
+        .filter(
+          (d) =>
+            d.file &&
+            d.line &&
+            diagnosticMatchesFile(
+              { file: d.file, line: d.line ?? 1, column: d.column ?? 1, severity: 'error', message: d.message },
+              filePath
+            )
+        )
+        .map((d) => ({
+          severity: d.isError ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
+          message: d.message,
+          startLineNumber: d.line ?? 1,
+          startColumn: d.column ?? 1,
+          endLineNumber: d.line ?? 1,
+          endColumn: model.getLineMaxColumn(Math.min(d.line ?? 1, model.getLineCount()))
+        }))
+      monaco.editor.setModelMarkers(model, 'arduino-compile', markers)
+    }, [lastCompileResult, activeFile.path, activeFile.id, editorReady])
+
+    // ── Language server (code intelligence) ───────────────────────────────
+    // Bridges Monaco to the Arduino Language Server (clangd) via tinyService's
+    // /lsp WebSocket. Desktop-only for now: the LS needs the sketch on disk,
+    // which mem:// (browser) sketches don't have. Degrades silently when the
+    // backend has no language-server binaries.
+    useEffect(() => {
+      const monaco = monacoRef.current
+      const editor = editorRef.current
+      const fqbn = selectedBoard?.config.fqbn
+      const filePath = activeFile.path
+      if (!monaco || !editor || !fqbn || !isAgentConnected) return
+      if (!filePath || filePath.startsWith('mem://')) return
+      const detach = attachLspToEditor(monaco, editor, filePath, fqbn)
+      return detach
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedBoard?.config.fqbn, isAgentConnected, activeFile.path, editorReady])
 
     function handleBeforeMount(monaco): void {
       // Design-system surfaces (cold charcoal dark / near-white light) with the
@@ -114,6 +174,7 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
     const handleEditorMounted: OnMount = (editor, monaco) => {
       editorRef.current = editor
       monacoRef.current = monaco
+      setEditorReady(true)
 
       // Add save command (Ctrl+S)
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {

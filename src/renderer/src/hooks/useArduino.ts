@@ -2,18 +2,20 @@
  * useArduino - Main hook for Arduino operations (compile, upload, board management)
  */
 
+import { parseCompileDiagnostics } from '@renderer/lib/compileErrors'
 import { getArduinoService } from '@renderer/services/arduino/ArduinoServiceFactory'
 import {
   ArduinoActionResult,
   Board,
   BoardConfig,
+  BoardDetails,
   CompileResult,
   InstallableBoard,
   LibraryEntry,
   PlatformEntry,
   UploadResult
 } from '@renderer/services/arduino/types'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useArduinoAgent } from './useArduinoAgent'
 
@@ -100,13 +102,17 @@ export interface UseArduinoReturn {
   listBoardUrls: () => Promise<string[]>
   addBoardUrl: (url: string) => Promise<ArduinoActionResult>
   removeBoardUrl: (url: string) => Promise<ArduinoActionResult>
+  /** FQBN config options + programmers for a board (Tools-menu equivalents) */
+  boardDetails: (fqbn: string) => Promise<BoardDetails>
 
   // Serial monitor
   openSerial: (port: string, baud: number) => void
   closeSerial: () => void
-  writeSerial: (data: string) => void
+  writeSerial: (data: string, raw?: boolean) => void
   onSerialData: (cb: (line: string) => void) => () => void
-  onSerialStatus: (cb: (status: { opened?: boolean; closed?: boolean }) => void) => () => void
+  onSerialStatus: (
+    cb: (status: { opened?: boolean; closed?: boolean; error?: string }) => void
+  ) => () => void
 }
 
 /**
@@ -125,6 +131,13 @@ export function useArduino(): UseArduinoReturn {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null)
   const [lastUploadResult, setLastUploadResult] = useState<UploadResult | null>(null)
+
+  // Refs mirroring the last results so long-lived callbacks (the timeout
+  // recovery paths) read the CURRENT value instead of a stale closure.
+  const lastCompileResultRef = useRef<CompileResult | null>(null)
+  lastCompileResultRef.current = lastCompileResult
+  const lastUploadResultRef = useRef<UploadResult | null>(null)
+  lastUploadResultRef.current = lastUploadResult
 
   const [logs, setLogs] = useState<ArduinoLogEntry[]>([])
 
@@ -264,6 +277,29 @@ export function useArduino(): UseArduinoReturn {
 
         const result = await arduinoService.compileSketch(workspacePath, targetBoard)
         const buildDuration = Date.now() - buildStartTime
+
+        // Extract file:line:col diagnostics from the compiler output so the
+        // editor can render them inline (squiggles) and make them clickable.
+        if (!result.success) {
+          const diagText = [result.output, ...(result.errors?.map((e) => e.message) ?? [])].join(
+            '\n'
+          )
+          const parsed = parseCompileDiagnostics(diagText)
+          if (parsed.length > 0) {
+            result.errors = parsed
+              .filter((d) => d.severity === 'error')
+              .map((d) => ({
+                message: d.message,
+                file: d.file,
+                line: d.line,
+                column: d.column,
+                severity: 'error' as const
+              }))
+            result.warnings = parsed
+              .filter((d) => d.severity === 'warning')
+              .map((d) => ({ message: d.message, file: d.file, line: d.line, column: d.column }))
+          }
+        }
         setLastCompileResult(result)
 
         if (result.success) {
@@ -332,14 +368,16 @@ export function useArduino(): UseArduinoReturn {
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
-        // Check if this was a timeout error after a successful operation
+        // Check if this was a timeout error after a successful operation.
+        // (Read through the ref — the state value in this closure is stale.)
+        const prevCompile = lastCompileResultRef.current
         const isTimeout = errorMessage.includes('timed out')
-        const isAfterSuccess = isTimeout && (lastCompileResult?.success ?? false)
+        const isAfterSuccess = isTimeout && (prevCompile?.success ?? false)
 
         const result: CompileResult = {
           success: isAfterSuccess, // If last result was successful and this is just a timeout, preserve success
           output: isAfterSuccess
-            ? (lastCompileResult?.output ?? '')
+            ? (prevCompile?.output ?? '')
             : `Compilation error: ${errorMessage}`,
           errors: isAfterSuccess ? [] : [{ message: errorMessage, severity: 'fatal' }]
         }
@@ -350,7 +388,7 @@ export function useArduino(): UseArduinoReturn {
           addLog({
             type: 'compile',
             message: 'Compilation completed (with timeout warning)',
-            details: `Build finished successfully but communication timed out.\nOriginal output:\n${lastCompileResult?.output ?? ''}`
+            details: `Build finished successfully but communication timed out.\nOriginal output:\n${prevCompile?.output ?? ''}`
           })
           toast.warning('Compilation completed with timeout', {
             description: 'Build succeeded but communication was slow'
@@ -407,6 +445,7 @@ export function useArduino(): UseArduinoReturn {
         details: `Target: ${targetBoard.name}\nPort: ${targetPort}\nFQBN: ${targetBoard.fqbn}\nWorkspace: ${workspacePath || 'Using compiled binary'}`
       })
 
+      let offProgress: (() => void) | null = null
       try {
         // Add upload progress step logging
         addLog({
@@ -414,22 +453,32 @@ export function useArduino(): UseArduinoReturn {
           message: 'Executing upload command via Arduino CLI...'
         })
 
-        // Simulate progress updates (real implementation would get these from service)
-        const progressTimer = setInterval(() => {
-          setUploadProgress((prev) => {
-            if (!prev || prev.percentage >= 100) return prev
-            return {
-              ...prev,
-              percentage: Math.min(prev.percentage + 10, 90),
-              stage:
-                prev.percentage < 30
-                  ? 'preparing'
-                  : prev.percentage < 80
-                    ? 'uploading'
-                    : 'verifying'
+        // Real progress: parse the flasher's streamed output. esptool (ESP32
+        // family, incl. tinyCore) prints "Writing at 0x... (NN %)"; avrdude
+        // prints "Writing | ### ... | NN%". Falls back to indeterminate
+        // stages when the tool prints no percentages.
+        offProgress = arduinoService.onActionOutput('upload', (chunk) => {
+          const matches = chunk.match(/\((\d{1,3})\s*%\)|\s(\d{1,3})%/g)
+          if (matches && matches.length > 0) {
+            const last = matches[matches.length - 1]
+            const num = parseInt(last.replace(/[^0-9]/g, ''), 10)
+            if (!Number.isNaN(num)) {
+              setUploadProgress({
+                percentage: Math.min(num, 99),
+                stage: num >= 99 ? 'verifying' : 'uploading'
+              })
+              return
             }
-          })
-        }, 200)
+          }
+          if (/Connecting|Chip is|Uploading stub|esptool/i.test(chunk)) {
+            setUploadProgress((prev) => prev ?? { percentage: 0, stage: 'preparing' })
+          }
+          if (/Hash of data verified|verif/i.test(chunk)) {
+            setUploadProgress((prev) =>
+              prev ? { ...prev, stage: 'verifying' } : { percentage: 99, stage: 'verifying' }
+            )
+          }
+        })
 
         // Release the serial port before flashing — esptool needs exclusive
         // access to the COM port, and the monitor may still be holding it, so
@@ -443,7 +492,6 @@ export function useArduino(): UseArduinoReturn {
         await new Promise((r) => setTimeout(r, 500))
 
         const result = await arduinoService.uploadSketch(targetPort, targetBoard, workspacePath)
-        clearInterval(progressTimer)
 
         setLastUploadResult(result)
         setUploadProgress({ percentage: 100, stage: 'complete' })
@@ -496,13 +544,15 @@ export function useArduino(): UseArduinoReturn {
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
-        // Check if this was a timeout error after a successful operation
+        // Check if this was a timeout error after a successful operation.
+        // (Read through the ref — the state value in this closure is stale.)
+        const prevUpload = lastUploadResultRef.current
         const isTimeout = errorMessage.includes('timed out')
-        const isAfterSuccess = isTimeout && (lastUploadResult?.success ?? false)
+        const isAfterSuccess = isTimeout && (prevUpload?.success ?? false)
 
         const result: UploadResult = {
           success: isAfterSuccess, // If last result was successful and this is just a timeout, preserve success
-          output: isAfterSuccess ? (lastUploadResult?.output ?? '') : '',
+          output: isAfterSuccess ? (prevUpload?.output ?? '') : '',
           error: isAfterSuccess ? undefined : errorMessage
         }
 
@@ -513,7 +563,7 @@ export function useArduino(): UseArduinoReturn {
           addLog({
             type: 'upload',
             message: 'Upload completed (with timeout warning)',
-            details: `Upload finished successfully but communication timed out.\nOriginal output:\n${lastUploadResult?.output ?? ''}`
+            details: `Upload finished successfully but communication timed out.\nOriginal output:\n${prevUpload?.output ?? ''}`
           })
           toast.warning('Upload completed with timeout', {
             description: 'Upload succeeded but communication was slow'
@@ -529,6 +579,7 @@ export function useArduino(): UseArduinoReturn {
 
         return result
       } finally {
+        offProgress?.()
         setIsUploading(false)
       }
     },
@@ -577,19 +628,40 @@ export function useArduino(): UseArduinoReturn {
   }, [isAgentConnected, hasLoadedBoards])
 
   /**
-   * Auto-recognize boards, but only while NONE is connected — poll every 8s to
-   * catch a board being plugged in, then STOP once one is found (no point
-   * hammering arduino-cli when a board is already there). Plugging/unplugging
-   * after that is picked up by the manual Refresh or the next operation.
+   * Event-driven board detection: the backend watches
+   * `arduino-cli board list --watch` and pushes the full board list on every
+   * plug/unplug. This replaces the old 8-second poll (which stopped polling
+   * once a board was found, so unplugs went unnoticed until manual refresh).
+   * The selection is reconciled on every event: kept if the same port is
+   * still present, cleared (with a heads-up) if its board was unplugged.
    */
   useEffect(() => {
-    if (!isAgentConnected || boards.length > 0) return
-    const id = setInterval(() => {
-      refreshBoards()
-    }, 8000)
-    return () => clearInterval(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAgentConnected, boards.length])
+    const off = arduinoService.onBoardEvents((boardsList) => {
+      setBoards(boardsList)
+      setHasLoadedBoards(true)
+      setSelectedBoard((currentBoard) => {
+        if (!currentBoard) {
+          return boardsList[0] || null
+        }
+        // Same port still present: keep the user's choice (incl. any manual
+        // board override / FQBN options), but follow arduino-cli if the
+        // board on that port changed identity.
+        const samePort = boardsList.find((b) => b.port === currentBoard.port)
+        if (samePort) return currentBoard
+        if (boardsList.length === 0) {
+          toast.warning('Board disconnected', {
+            description: `${currentBoard.config.name} on ${currentBoard.port} was unplugged.`
+          })
+          return null
+        }
+        toast.info('Board changed', {
+          description: `${currentBoard.port} is gone — switched to ${boardsList[0].config.name} (${boardsList[0].port}).`
+        })
+        return boardsList[0]
+      })
+    })
+    return off
+  }, [arduinoService])
 
   /**
    * Reset board loading state when agent disconnects
@@ -632,6 +704,10 @@ export function useArduino(): UseArduinoReturn {
     [arduinoService]
   )
   const listAllBoards = useCallback(() => arduinoService.listAllBoards(), [arduinoService])
+  const boardDetails = useCallback(
+    (fqbn: string) => arduinoService.boardDetails(fqbn),
+    [arduinoService]
+  )
   const listBoardUrls = useCallback(() => arduinoService.listBoardUrls(), [arduinoService])
   const addBoardUrl = useCallback(
     (url: string) => arduinoService.addBoardUrl(url),
@@ -648,13 +724,16 @@ export function useArduino(): UseArduinoReturn {
     [arduinoService]
   )
   const closeSerial = useCallback(() => arduinoService.closeSerial(), [arduinoService])
-  const writeSerial = useCallback((data: string) => arduinoService.writeSerial(data), [arduinoService])
+  const writeSerial = useCallback(
+    (data: string, raw?: boolean) => arduinoService.writeSerial(data, raw),
+    [arduinoService]
+  )
   const onSerialData = useCallback(
     (cb: (line: string) => void) => arduinoService.onSerialData(cb),
     [arduinoService]
   )
   const onSerialStatus = useCallback(
-    (cb: (status: { opened?: boolean; closed?: boolean }) => void) =>
+    (cb: (status: { opened?: boolean; closed?: boolean; error?: string }) => void) =>
       arduinoService.onSerialStatus(cb),
     [arduinoService]
   )
@@ -703,6 +782,7 @@ export function useArduino(): UseArduinoReturn {
     listBoardUrls,
     addBoardUrl,
     removeBoardUrl,
+    boardDetails,
 
     // Serial monitor
     openSerial,

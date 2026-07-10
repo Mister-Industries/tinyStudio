@@ -10,20 +10,74 @@
  *
  * It accumulates the line buffer (for the Serial Monitor) and feeds the shared
  * serial bus (window.__tinySerial / `tinyserial`) for the Visual sketch.
+ *
+ * Monitor settings (baud + line ending) are persisted per port, so a board
+ * you always run at 115200 comes back at 115200 (Arduino IDE parity).
  */
 
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { pushSerialLine } from '@renderer/lib/serialBus'
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
+
+/** One rendered line of the Serial Monitor. */
+export interface SerialLine {
+  text: string
+  /** Receive (or send) time, ms since epoch — rendered by the timestamps toggle. */
+  ts: number
+  /** True for lines the user sent (rendered in the accent color). */
+  tx?: boolean
+}
+
+/** Line ending appended to sent data (Arduino IDE parity). */
+export type SerialEol = 'none' | 'nl' | 'cr' | 'crlf'
+
+const EOL_CHARS: Record<SerialEol, string> = {
+  none: '',
+  nl: '\n',
+  cr: '\r',
+  crlf: '\r\n'
+}
+
+interface PortSettings {
+  baud?: string
+  eol?: SerialEol
+}
+
+const settingsKey = (port: string): string => `tinystudio.monitor.${port}`
+
+function loadPortSettings(port: string | undefined): PortSettings {
+  if (!port) return {}
+  try {
+    const raw = localStorage.getItem(settingsKey(port))
+    return raw ? (JSON.parse(raw) as PortSettings) : {}
+  } catch {
+    return {}
+  }
+}
+
+function savePortSettings(port: string | undefined, settings: PortSettings): void {
+  if (!port) return
+  try {
+    const merged = { ...loadPortSettings(port), ...settings }
+    localStorage.setItem(settingsKey(port), JSON.stringify(merged))
+  } catch {
+    /* storage may be unavailable */
+  }
+}
 
 interface SerialContextValue {
-  lines: string[]
+  lines: SerialLine[]
   connected: boolean
   /** User chose to release the port (e.g. so the browser can use it) */
   disconnected: boolean
+  /** Last port-open failure reported by the backend (busy port etc.), if any */
+  lastError: string | null
   port?: string
   baud: string
   setBaud: (b: string) => void
+  /** Line ending appended to sent data */
+  eol: SerialEol
+  setEol: (e: SerialEol) => void
   send: (data: string) => void
   clear: () => void
   /** Release the serial port and stay disconnected until reconnect() */
@@ -46,24 +100,55 @@ export function SerialProvider({ children }: { children: React.ReactNode }): Rea
     onSerialStatus
   } = useArduinoContext()
 
-  const [lines, setLines] = useState<string[]>([])
+  const [lines, setLines] = useState<SerialLine[]>([])
   const [connected, setConnected] = useState(false)
   // Manual override: when true, we release the port and don't auto-reopen, so
   // another app (e.g. the exported page over Web Serial) can use the board.
   const [disconnected, setDisconnected] = useState(false)
-  const [baud, setBaud] = useState('9600')
+  const [lastError, setLastError] = useState<string | null>(null)
+  const [baud, setBaudState] = useState('9600')
+  const [eol, setEolState] = useState<SerialEol>('nl')
   const port = selectedBoard?.port
   const baudNum = parseInt(baud, 10)
+
+  // Restore per-port monitor settings whenever the port changes.
+  const restoredPortRef = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (port === restoredPortRef.current) return
+    restoredPortRef.current = port
+    const saved = loadPortSettings(port)
+    if (saved.baud) setBaudState(saved.baud)
+    if (saved.eol) setEolState(saved.eol)
+  }, [port])
+
+  const setBaud = (b: string): void => {
+    setBaudState(b)
+    savePortSettings(port, { baud: b })
+  }
+  const setEol = (e: SerialEol): void => {
+    setEolState(e)
+    savePortSettings(port, { eol: e })
+  }
 
   // Stream subscription lives for the whole app session.
   useEffect(() => {
     const offData = onSerialData((line) => {
-      setLines((prev) => [...prev.slice(-1000), line])
+      setLines((prev) => [...prev.slice(-1000), { text: line, ts: Date.now() }])
       pushSerialLine(line) // feed the Visual sketch
     })
     const offStatus = onSerialStatus((s) => {
-      if (s.opened) setConnected(true)
+      if (s.opened) {
+        setConnected(true)
+        setLastError(null)
+      }
       if (s.closed) setConnected(false)
+      if (s.error) {
+        // The backend now surfaces WHY a port didn't open (busy, missing…)
+        // instead of silently flashing connected → disconnected.
+        setConnected(false)
+        setLastError(s.error)
+        setLines((prev) => [...prev.slice(-1000), { text: `⚠ ${s.error}`, ts: Date.now() }])
+      }
     })
     return () => {
       offData()
@@ -94,12 +179,17 @@ export function SerialProvider({ children }: { children: React.ReactNode }): Rea
     lines,
     connected,
     disconnected,
+    lastError,
     port,
     baud,
     setBaud,
+    eol,
+    setEol,
     send: (data: string) => {
-      writeSerial(data)
-      setLines((prev) => [...prev.slice(-1000), `→ ${data}`])
+      // Apply the chosen line ending ourselves and write raw — the backend
+      // appends nothing (Arduino IDE's None / NL / CR / Both behavior).
+      writeSerial(data + EOL_CHARS[eol], true)
+      setLines((prev) => [...prev.slice(-1000), { text: `→ ${data}`, ts: Date.now(), tx: true }])
     },
     clear: () => setLines([]),
     disconnect: () => setDisconnected(true),

@@ -36,6 +36,12 @@ export interface Board {
   protocol?: string
   /** Whether the board is currently connected */
   connected: boolean
+  /**
+   * True when the board identity was guessed from USB VID/PID rather than
+   * matched by arduino-cli — the user should be able to override it via the
+   * "choose board for this port" picker.
+   */
+  guess?: boolean
   /** Additional board metadata */
   metadata?: {
     vendorId?: string
@@ -188,6 +194,31 @@ export interface ArduinoActionResult {
   error?: string
 }
 
+/** One selectable value of an FQBN config option */
+export interface BoardConfigOptionValue {
+  value: string
+  valueLabel: string
+  selected?: boolean
+}
+
+/**
+ * One FQBN config option of a board (PSRAM, CPU frequency, partition scheme…).
+ * Selected values are appended to the FQBN as `base:option=value,option2=value2`.
+ */
+export interface BoardConfigOption {
+  option: string
+  optionLabel: string
+  values: BoardConfigOptionValue[]
+}
+
+/** Result of board-details: identity + Tools-menu equivalents */
+export interface BoardDetails {
+  fqbn: string
+  name: string
+  configOptions: BoardConfigOption[]
+  programmers: { id: string; name: string }[]
+}
+
 /**
  * Arduino service interface
  * Abstraction over the tinyService WebSocket backend. Implemented identically in
@@ -276,26 +307,59 @@ export interface ArduinoService {
   /** Remove an additional board-manager URL */
   removeBoardUrl(url: string): Promise<ArduinoActionResult>
 
+  /** Fetch FQBN config options + programmers for a board (arduino-cli board details) */
+  boardDetails(fqbn: string): Promise<BoardDetails>
+
   /** Open the serial monitor on a port at a baud rate */
   openSerial(port: string, baud: number): void
 
   /** Close the serial monitor */
   closeSerial(): void
 
-  /** Send a line to the serial port */
-  writeSerial(data: string): void
+  /**
+   * Send data to the serial port. With `raw: true` the payload is written
+   * exactly as provided (caller applies its own line ending); otherwise the
+   * backend appends "\n" (legacy behavior).
+   */
+  writeSerial(data: string, raw?: boolean): void
 
   /** Subscribe to streamed serial lines; returns an unsubscribe function */
   onSerialData(cb: (line: string) => void): () => void
 
-  /** Subscribe to serial open/close status; returns an unsubscribe function */
-  onSerialStatus(cb: (status: { opened?: boolean; closed?: boolean }) => void): () => void
+  /**
+   * Subscribe to serial open/close/error status; returns an unsubscribe
+   * function. `error` carries the backend's explanation when a port could
+   * not be opened (busy, missing, …).
+   */
+  onSerialStatus(
+    cb: (status: { opened?: boolean; closed?: boolean; error?: string }) => void
+  ): () => void
+
+  /**
+   * Subscribe to server-pushed board events (event-driven detection via
+   * `arduino-cli board list --watch`). Fired with the full current board list
+   * whenever a device is plugged/unplugged. Returns an unsubscribe function.
+   */
+  onBoardEvents(cb: (boards: Board[]) => void): () => void
+
+  /**
+   * Subscribe to streamed output lines of a request/response action
+   * ("upload", "compile", …) — e.g. to derive real upload progress from
+   * esptool/avrdude output. Returns an unsubscribe function.
+   */
+  onActionOutput(action: string, cb: (output: string) => void): () => void
 
   /** Whether the tinyService backend is currently connected */
   isConnected(): boolean
 
   /** Subscribe to backend connect/disconnect transitions; returns an unsubscribe function */
   onConnectionChange(cb: (connected: boolean) => void): () => void
+
+  /**
+   * WebSocket URL of the backend's LSP bridge for a given FQBN, or null when
+   * unsupported in this environment.
+   */
+  getLspUrl(fqbn: string): string | null
 }
 
 /**

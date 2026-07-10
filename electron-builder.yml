@@ -38,6 +38,13 @@ extraResources:
     to: arduino-cli/win32-x64/arduino-cli.exe
     filter:
       - '**/*'
+  # arduino-language-server + clangd (optional; fetched by
+  # scripts/fetch-language-server.mjs). Powers editor code intelligence via
+  # tinyService's /lsp bridge; the app degrades gracefully when absent.
+  - from: vendor/language-server
+    to: language-server
+    filter:
+      - '**/*'
 win:
   executableName: tinystudio
 nsis:
