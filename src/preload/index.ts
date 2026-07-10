@@ -55,6 +55,16 @@ const api = {
     getExamplesDir: (): Promise<string> => ipcRenderer.invoke('app:get-examples-dir')
   },
 
+  // Backend (tinyService) info.
+  service: {
+    // Real ws:// URL of the spawned backend — its port may differ from 3000.
+    getUrl: (): Promise<string> => ipcRenderer.invoke('service:get-url'),
+    // Synchronous variant for construction-time use: the WebSocket service
+    // client is created synchronously at renderer startup, and the backend is
+    // already running by then (main starts it before creating the window).
+    getUrlSync: (): string => ipcRenderer.sendSync('service:get-url-sync')
+  },
+
   // App settings (Studio AI). The renderer never sees the API key value —
   // only whether one is configured.
   settings: {

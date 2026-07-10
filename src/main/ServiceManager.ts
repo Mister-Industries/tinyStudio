@@ -1,6 +1,8 @@
 import { spawn, type ChildProcess } from 'child_process'
 import { app, BrowserWindow } from 'electron'
 import { existsSync } from 'fs'
+import net from 'net'
+import os from 'os'
 import path from 'path'
 
 interface ServiceConfig {
@@ -57,10 +59,16 @@ export class ServiceManager {
    * service's own env/config handling. JSON.stringify keeps Windows paths valid.
    */
   private buildLauncherCode(arduinoCliPath: string): string {
+    const lsPaths = this.resolveLanguageServerPaths()
     const opts = JSON.stringify({
       port: this.config.port,
       arduinoCliPath,
-      allowedOrigins: this.config.allowedOrigins
+      allowedOrigins: this.config.allowedOrigins,
+      // Language-server integration (optional — the service degrades to
+      // "lsp-unavailable" when the binaries aren't present).
+      lspServerPath: lsPaths?.lspServerPath,
+      clangdPath: lsPaths?.clangdPath,
+      cliConfigPath: this.resolveArduinoCliConfigPath()
     })
     return [
       `import('@mister-industries/tinyservice')`,
@@ -136,6 +144,94 @@ export class ServiceManager {
   }
 
   /**
+   * Resolve the arduino-language-server + clangd binaries fetched by
+   * scripts/fetch-language-server.mjs into vendor/language-server/<platform>/
+   * (dev) or bundled resources (packaged). Returns null when missing — the
+   * backend then reports the LSP as unavailable and the editor degrades to
+   * syntax-highlighting only.
+   */
+  private resolveLanguageServerPaths(): {
+    lspServerPath: string
+    clangdPath: string
+  } | null {
+    const arch = process.arch
+    let platformDir: string
+    let exe = ''
+
+    if (process.platform === 'win32') {
+      platformDir = 'windows-x64'
+      exe = '.exe'
+    } else if (process.platform === 'darwin') {
+      platformDir = arch === 'arm64' ? 'macos-arm64' : 'macos-x64'
+    } else if (process.platform === 'linux') {
+      platformDir = arch === 'arm64' ? 'linux-arm64' : 'linux-x64'
+    } else {
+      return null
+    }
+
+    const root = app.isPackaged
+      ? path.join(process.resourcesPath, 'language-server', platformDir)
+      : path.join(app.getAppPath(), 'vendor', 'language-server', platformDir)
+
+    const lspServerPath = path.join(root, `arduino-language-server${exe}`)
+    const clangdPath = path.join(root, `clangd${exe}`)
+    if (existsSync(lspServerPath) && existsSync(clangdPath)) {
+      return { lspServerPath, clangdPath }
+    }
+    return null
+  }
+
+  /**
+   * Default arduino-cli.yaml location (the language server wants the config
+   * file arduino-cli itself uses). Returns undefined when the file doesn't
+   * exist yet — arduino-cli works on defaults without one.
+   */
+  private resolveArduinoCliConfigPath(): string | undefined {
+    let candidate: string
+    if (process.platform === 'win32') {
+      candidate = path.join(
+        process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'),
+        'Arduino15',
+        'arduino-cli.yaml'
+      )
+    } else if (process.platform === 'darwin') {
+      candidate = path.join(os.homedir(), 'Library', 'Arduino15', 'arduino-cli.yaml')
+    } else {
+      candidate = path.join(os.homedir(), '.arduino15', 'arduino-cli.yaml')
+    }
+    return existsSync(candidate) ? candidate : undefined
+  }
+
+  /**
+   * Find a free TCP port, starting at the preferred one. Port 3000 is a very
+   * popular dev-server default, so never assume it's ours — a foreign process
+   * on 3000 previously made the backend fail to bind and the app report
+   * "agent offline" with no explanation.
+   */
+  private async findFreePort(preferred: number, attempts = 10): Promise<number> {
+    for (let port = preferred; port < preferred + attempts; port++) {
+      const free = await new Promise<boolean>((resolve) => {
+        const probe = net
+          .createServer()
+          .once('error', () => resolve(false))
+          .once('listening', () => {
+            probe.close(() => resolve(true))
+          })
+        probe.listen(port, '127.0.0.1')
+      })
+      if (free) return port
+    }
+    throw new Error(
+      `No free port found in ${preferred}-${preferred + attempts - 1} for TinyService`
+    )
+  }
+
+  /** ws:// URL of the running service (port may differ from the default 3000). */
+  getServiceUrl(): string {
+    return `ws://localhost:${this.config.port}`
+  }
+
+  /**
    * Check service health via HTTP endpoint
    */
   private async checkServiceHealth(): Promise<HealthCheckResponse> {
@@ -201,6 +297,9 @@ export class ServiceManager {
     }
 
     try {
+      // Bind to a free port — 3000 may be taken by another dev server.
+      this.config.port = await this.findFreePort(this.config.port)
+
       const arduinoCliPath = this.resolveArduinoCliPath()
       // out/main → app root (two levels up); node_modules lives here in dev and
       // in the packaged app (asar disabled).

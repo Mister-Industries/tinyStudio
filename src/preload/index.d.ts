@@ -132,6 +132,13 @@ interface AppAPI {
   getExamplesDir: () => Promise<string>
 }
 
+interface ServiceAPI {
+  /** Real ws:// URL of the spawned tinyService backend (port may differ from 3000). */
+  getUrl: () => Promise<string>
+  /** Synchronous variant for construction-time use. */
+  getUrlSync: () => string
+}
+
 export type AgentEvent =
   | { type: 'text_delta'; text: string }
   | { type: 'tool_use'; id: string; name: string; input: unknown }
@@ -172,6 +179,7 @@ declare global {
       settings: SettingsAPI
       agent: AgentAPI
       app: AppAPI
+      service: ServiceAPI
     }
   }
 }

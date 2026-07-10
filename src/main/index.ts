@@ -104,6 +104,13 @@ app.whenReady().then(async () => {
   // IPC test
   ipcMain.handle('ping', () => 'pong')
 
+  // The backend may bind to a non-default port (3000 can be taken by another
+  // dev server); the renderer asks for the real URL instead of assuming.
+  ipcMain.handle('service:get-url', () => serviceManager.getServiceUrl())
+  ipcMain.on('service:get-url-sync', (event) => {
+    event.returnValue = serviceManager.getServiceUrl()
+  })
+
   // --- Studio AI agent + settings ---
   ipcMain.handle('settings:status', () => getStatus())
   ipcMain.handle('settings:set-key', (_, key: string) => setApiKey(key))

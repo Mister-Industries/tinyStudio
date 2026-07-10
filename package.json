@@ -21,6 +21,7 @@
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
     "fetch:arduino-cli": "node scripts/fetch-arduino-cli.mjs",
+    "fetch:language-server": "node scripts/fetch-language-server.mjs",
     "prebuild": "node scripts/fetch-arduino-cli.mjs",
     "predev": "node scripts/fetch-arduino-cli.mjs current",
     "dev": "electron-vite dev",

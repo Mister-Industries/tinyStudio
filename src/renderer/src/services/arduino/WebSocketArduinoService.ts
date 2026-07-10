@@ -25,6 +25,7 @@ import {
   ArduinoService,
   Board,
   BoardConfig,
+  BoardDetails,
   BoardInfo,
   CompileResult,
   InstallableBoard,
@@ -63,7 +64,11 @@ async function collectVirtualSketch(
   return { files, sketchName: root.slice(root.lastIndexOf('/') + 1) }
 }
 
-/** Resolve the tinyService URL, allowing a localStorage override for hosting. */
+/**
+ * Resolve the tinyService URL. Order: explicit localStorage override (web
+ * hosting), the Electron main process's answer (the backend may have bound a
+ * non-default port when 3000 was taken), then the default.
+ */
 function resolveServiceUrl(): string {
   try {
     if (typeof localStorage !== 'undefined') {
@@ -73,15 +78,31 @@ function resolveServiceUrl(): string {
   } catch {
     /* localStorage may be unavailable (private mode); fall back to default */
   }
+  try {
+    const desktopUrl = window.api?.service?.getUrlSync?.()
+    if (desktopUrl) return desktopUrl
+  } catch {
+    /* not the Electron build (or preload unavailable) */
+  }
   return DEFAULT_SERVICE_URL
 }
 
-// Helper function to normalize tinyCore FQBN
-function normalizeTinyCoreFqbn(fqbn: string): string {
-  if (fqbn.startsWith('tinyCore:')) {
-    return 'tinyCore:esp32:tiny_core_esp32s3_nopsram'
+/**
+ * Convert a backend BoardInfo into the renderer's Board shape. The FQBN is
+ * passed through untouched: collapsing every tinyCore variant to one FQBN
+ * (the old behavior) forced all tinyCore boards to compile for the S3
+ * no-PSRAM variant and made other variants unselectable.
+ */
+function toBoard(info: SharedBoardInfo): Board {
+  return {
+    port: info.port || '',
+    config: {
+      fqbn: info.fqbn,
+      name: info.name
+    },
+    connected: true,
+    guess: (info as { guess?: boolean }).guess
   }
-  return fqbn
 }
 
 /**
@@ -90,14 +111,20 @@ function normalizeTinyCoreFqbn(fqbn: string): string {
  */
 export class WebSocketArduinoService implements ArduinoService {
   protected client: TinyServiceClient
-  private lastListBoardsCall = 0
-  private readonly LIST_BOARDS_THROTTLE_MS = 5000 // 5 seconds
+  private readonly serviceUrl: string
+  /** Latest board list, kept in sync by the backend's board-events pushes. */
   private cachedBoardList: Board[] = []
+
+  /** Last known board list (updated by list-boards replies and board-events pushes). */
+  getCachedBoards(): Board[] {
+    return this.cachedBoardList
+  }
 
   constructor() {
     // Initialize the WebSocket client
+    this.serviceUrl = resolveServiceUrl()
     this.client = new TinyServiceClient({
-      url: resolveServiceUrl(),
+      url: this.serviceUrl,
       autoReconnect: true,
       reconnectInterval: 3000,
       maxReconnectAttempts: 10,
@@ -144,11 +171,17 @@ export class WebSocketArduinoService implements ArduinoService {
   }
 
   /**
-   * Helper method to wait for Arduino service responses
+   * Helper method to wait for Arduino service responses.
+   *
+   * `requestId` is the id returned by the client's send methods; the backend
+   * echoes it on every reply, so concurrent requests of the same action no
+   * longer cross-talk. When the backend doesn't echo ids (older tinyService),
+   * matching falls back to the action name.
    */
   private waitForResponse(
     action: string,
-    timeout = 60000
+    timeout = 60000,
+    requestId?: string
   ): Promise<{ success: boolean; output: string; error?: string }> {
     return new Promise((resolve, reject) => {
       if (!this.client) {
@@ -201,7 +234,11 @@ export class WebSocketArduinoService implements ArduinoService {
           })
         } else if (
           action === 'upload' &&
-          (output.includes('avrdude done') || output.includes('Upload complete'))
+          (output.includes('avrdude done') ||
+            output.includes('Upload complete') ||
+            // esptool (ESP32 family, incl. tinyCore) success markers
+            output.includes('Hash of data verified') ||
+            output.includes('Hard resetting'))
         ) {
           console.log(`[${action}] Detected successful upload from output, resolving...`)
           safeResolve({
@@ -217,6 +254,11 @@ export class WebSocketArduinoService implements ArduinoService {
       messageUnsubscribe = this.client.onMessage((message: OutgoingMessage) => {
         // Only handle messages for this action
         if (message.action !== action) return
+        // When both sides carry request ids, require an exact match so
+        // concurrent requests of the same action don't cross-talk.
+        if (requestId !== undefined && message.id !== undefined && message.id !== requestId) {
+          return
+        }
 
         console.log(`[${action}] Received message:`, message.type, message.data) // Debug log
 
@@ -279,6 +321,13 @@ export class WebSocketArduinoService implements ArduinoService {
               output: arr.map((x) => JSON.stringify(x)).join('\n'),
               error: hasError ? errorMessage : undefined
             })
+          } else if ((message.data as { details?: unknown }).details) {
+            // board-details response — serialize the details object.
+            safeResolve({
+              success: !hasError,
+              output: JSON.stringify((message.data as { details: unknown }).details),
+              error: hasError ? errorMessage : undefined
+            })
           } else {
             // Default handling for other actions
             const completeData = message.data as CompleteData
@@ -333,25 +382,10 @@ export class WebSocketArduinoService implements ArduinoService {
         throw new Error('Arduino client not initialized')
       }
 
-      // Throttle list-boards calls to once every 5 seconds
-      const now = Date.now()
-      const timeSinceLastCall = now - this.lastListBoardsCall
-
-      if (timeSinceLastCall < this.LIST_BOARDS_THROTTLE_MS) {
-        console.log(
-          `Throttling list-boards call. ${this.LIST_BOARDS_THROTTLE_MS - timeSinceLastCall}ms until next allowed call. Returning cached result.`
-        )
-        // Return cached result instead of making a new request
-        return this.cachedBoardList
-      }
-
-      this.lastListBoardsCall = now
-
-      // Request list of boards
-      this.client.listBoards()
-
-      // Wait for response
-      const result = await this.waitForResponse('list-boards', 10000)
+      // No throttle/cache needed anymore: the backend serves this instantly
+      // from its board watcher's in-memory state (no CLI spawn per call).
+      const requestId = this.client.listBoards()
+      const result = await this.waitForResponse('list-boards', 10000, requestId)
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to list boards')
@@ -363,16 +397,7 @@ export class WebSocketArduinoService implements ArduinoService {
         const lines = result.output.split('\n').filter((line) => line.trim())
         for (const line of lines) {
           try {
-            const boardData = JSON.parse(line) as SharedBoardInfo
-            const normalizedFqbn = normalizeTinyCoreFqbn(boardData.fqbn)
-            boards.push({
-              port: boardData.port || '',
-              config: {
-                fqbn: normalizedFqbn,
-                name: boardData.name
-              },
-              connected: true
-            })
+            boards.push(toBoard(JSON.parse(line) as SharedBoardInfo))
           } catch {
             // Skip invalid lines
           }
@@ -402,22 +427,9 @@ export class WebSocketArduinoService implements ArduinoService {
         throw new Error('Arduino client not initialized')
       }
 
-      // Check throttle for list-boards
-      const now = Date.now()
-      const timeSinceLastCall = now - this.lastListBoardsCall
-
-      if (timeSinceLastCall < this.LIST_BOARDS_THROTTLE_MS) {
-        console.log(
-          `Throttling getBoardInfo list-boards call. ${this.LIST_BOARDS_THROTTLE_MS - timeSinceLastCall}ms until next allowed call`
-        )
-        throw new Error('Board list request throttled. Please wait a moment and try again.')
-      }
-
-      this.lastListBoardsCall = now
-
       // List all boards and find the one matching the port
-      this.client.listBoards()
-      const result = await this.waitForResponse('list-boards', 10000)
+      const requestId = this.client.listBoards()
+      const result = await this.waitForResponse('list-boards', 10000, requestId)
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to get board info')
@@ -429,16 +441,7 @@ export class WebSocketArduinoService implements ArduinoService {
         try {
           const boardData = JSON.parse(line) as SharedBoardInfo
           if (boardData.port === port) {
-            const normalizedFqbn = normalizeTinyCoreFqbn(boardData.fqbn)
-            return {
-              port: boardData.port || '',
-              config: {
-                fqbn: normalizedFqbn,
-                name: boardData.name
-              },
-              connected: true,
-              description: boardData.name
-            }
+            return { ...toBoard(boardData), description: boardData.name }
           }
         } catch {
           // Skip invalid lines
@@ -476,10 +479,10 @@ export class WebSocketArduinoService implements ArduinoService {
       console.log(
         `Starting compile operation for workspace: ${workspacePath}, FQBN: ${boardConfig.fqbn}`
       )
-      this.client.compile(workspacePath, boardConfig.fqbn, files, sketchName)
+      const requestId = this.client.compile(workspacePath, boardConfig.fqbn, files, sketchName)
 
       // Wait for response with longer timeout for compilation
-      const result = await this.waitForResponse('compile', 120000)
+      const result = await this.waitForResponse('compile', 120000, requestId)
 
       return {
         success: result.success,
@@ -524,10 +527,16 @@ export class WebSocketArduinoService implements ArduinoService {
       console.log(
         `Starting upload operation to port: ${port}, FQBN: ${boardConfig.fqbn}, workspace: ${workspacePathOrBinary}`
       )
-      this.client.upload(workspacePathOrBinary || '', boardConfig.fqbn, port, files, sketchName)
+      const requestId = this.client.upload(
+        workspacePathOrBinary || '',
+        boardConfig.fqbn,
+        port,
+        files,
+        sketchName
+      )
 
       // Wait for response with longer timeout for upload
-      const result = await this.waitForResponse('upload', 90000)
+      const result = await this.waitForResponse('upload', 90000, requestId)
 
       return {
         success: result.success,
@@ -630,16 +639,16 @@ export class WebSocketArduinoService implements ArduinoService {
 
   async searchLibraries(query: string): Promise<LibraryEntry[]> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.libSearch(query)
-    const result = await this.waitForResponse('lib-search', 60000)
+    const requestId = this.client.libSearch(query)
+    const result = await this.waitForResponse('lib-search', 60000, requestId)
     if (!result.success) throw new Error(result.error || 'Library search failed')
     return this.parseLibraries(result.output)
   }
 
   async listLibraries(): Promise<LibraryEntry[]> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.libList()
-    const result = await this.waitForResponse('lib-list', 30000)
+    const requestId = this.client.libList()
+    const result = await this.waitForResponse('lib-list', 30000, requestId)
     if (!result.success) throw new Error(result.error || 'Library list failed')
     return this.parseLibraries(result.output)
   }
@@ -649,16 +658,16 @@ export class WebSocketArduinoService implements ArduinoService {
     version?: string
   ): Promise<{ success: boolean; output: string; error?: string }> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.libInstall(name, version)
-    return this.waitForResponse('lib-install', 300000)
+    const requestId = this.client.libInstall(name, version)
+    return this.waitForResponse('lib-install', 300000, requestId)
   }
 
   async uninstallLibrary(
     name: string
   ): Promise<{ success: boolean; output: string; error?: string }> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.libUninstall(name)
-    return this.waitForResponse('lib-uninstall', 60000)
+    const requestId = this.client.libUninstall(name)
+    return this.waitForResponse('lib-uninstall', 60000, requestId)
   }
 
   // ── boards manager ───────────────────────────────────────────────────────────
@@ -680,60 +689,60 @@ export class WebSocketArduinoService implements ArduinoService {
 
   async searchCores(query: string): Promise<PlatformEntry[]> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.coreSearch(query)
-    const result = await this.waitForResponse('core-search', 60000)
+    const requestId = this.client.coreSearch(query)
+    const result = await this.waitForResponse('core-search', 60000, requestId)
     if (!result.success) throw new Error(result.error || 'Core search failed')
     return this.parseJsonLines<PlatformEntry>(result.output)
   }
 
   async listCores(): Promise<PlatformEntry[]> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.coreList()
-    const result = await this.waitForResponse('core-list', 30000)
+    const requestId = this.client.coreList()
+    const result = await this.waitForResponse('core-list', 30000, requestId)
     if (!result.success) throw new Error(result.error || 'Core list failed')
     return this.parseJsonLines<PlatformEntry>(result.output)
   }
 
   async installCore(id: string, version?: string): Promise<ArduinoActionResult> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.coreInstall(id, version)
+    const requestId = this.client.coreInstall(id, version)
     // Cores (esp32 especially) are large — allow up to 10 minutes.
-    return this.waitForResponse('core-install', 600000)
+    return this.waitForResponse('core-install', 600000, requestId)
   }
 
   async uninstallCore(id: string): Promise<ArduinoActionResult> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.coreUninstall(id)
-    return this.waitForResponse('core-uninstall', 120000)
+    const requestId = this.client.coreUninstall(id)
+    return this.waitForResponse('core-uninstall', 120000, requestId)
   }
 
   async listAllBoards(): Promise<InstallableBoard[]> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.boardListall()
-    const result = await this.waitForResponse('board-listall', 30000)
+    const requestId = this.client.boardListall()
+    const result = await this.waitForResponse('board-listall', 30000, requestId)
     if (!result.success) throw new Error(result.error || 'Board listall failed')
     return this.parseJsonLines<InstallableBoard>(result.output)
   }
 
   async listBoardUrls(): Promise<string[]> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.boardUrlList()
-    const result = await this.waitForResponse('board-url-list', 15000)
+    const requestId = this.client.boardUrlList()
+    const result = await this.waitForResponse('board-url-list', 15000, requestId)
     if (!result.success) throw new Error(result.error || 'Board URL list failed')
     return this.parseJsonLines<string>(result.output)
   }
 
   async addBoardUrl(url: string): Promise<ArduinoActionResult> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.boardUrlAdd(url)
+    const requestId = this.client.boardUrlAdd(url)
     // Adding a URL also refreshes the index, which can take a while.
-    return this.waitForResponse('board-url-add', 120000)
+    return this.waitForResponse('board-url-add', 120000, requestId)
   }
 
   async removeBoardUrl(url: string): Promise<ArduinoActionResult> {
     if (!this.client) throw new Error('Arduino client not initialized')
-    this.client.boardUrlRemove(url)
-    return this.waitForResponse('board-url-remove', 30000)
+    const requestId = this.client.boardUrlRemove(url)
+    return this.waitForResponse('board-url-remove', 30000, requestId)
   }
 
   // ── serial monitor (streaming, not request/response) ─────────────────────────
@@ -750,8 +759,8 @@ export class WebSocketArduinoService implements ArduinoService {
     if (this.client?.isConnected()) this.client.serialClose()
   }
 
-  writeSerial(data: string): void {
-    if (this.client?.isConnected()) this.client.serialWrite(data)
+  writeSerial(data: string, raw?: boolean): void {
+    if (this.client?.isConnected()) this.client.serialWrite(data, raw)
   }
 
   /** Subscribe to streamed serial lines. Returns an unsubscribe function. */
@@ -764,14 +773,80 @@ export class WebSocketArduinoService implements ArduinoService {
     })
   }
 
-  /** Subscribe to serial open/close status. Returns an unsubscribe function. */
-  onSerialStatus(cb: (status: { opened?: boolean; closed?: boolean }) => void): () => void {
+  /**
+   * Subscribe to serial open/close/error status. Returns an unsubscribe
+   * function. The backend only reports `opened` after arduino-cli confirms
+   * the port is live, and sends `error` with its explanation when the port
+   * could not be opened (busy, missing, …).
+   */
+  onSerialStatus(
+    cb: (status: { opened?: boolean; closed?: boolean; error?: string }) => void
+  ): () => void {
     if (!this.client) return () => {}
     return this.client.onMessage((message: OutgoingMessage) => {
       if (message.action !== 'serial') return
-      const d = message.data as { opened?: boolean; closed?: boolean }
+      const d = message.data as { opened?: boolean; closed?: boolean; error?: string }
       if (message.type === 'status' && d.opened) cb({ opened: true })
       if (message.type === 'complete' && d.closed) cb({ closed: true })
+      if (message.type === 'error' && d.error) cb({ error: d.error })
     })
+  }
+
+  // ── board events (server push) ───────────────────────────────────────────────
+
+  /**
+   * Subscribe to server-pushed board events. The backend watches
+   * `arduino-cli board list --watch` and broadcasts the full board list on
+   * every plug/unplug — no client polling. Returns an unsubscribe function.
+   */
+  onBoardEvents(cb: (boards: Board[]) => void): () => void {
+    if (!this.client) return () => {}
+    return this.client.onMessage((message: OutgoingMessage) => {
+      if (message.action !== 'board-events' || message.type !== 'status') return
+      const data = message.data as { boards?: SharedBoardInfo[] }
+      if (!Array.isArray(data.boards)) return
+      const boards = data.boards.map(toBoard)
+      this.cachedBoardList = boards
+      cb(boards)
+    })
+  }
+
+  /**
+   * Subscribe to streamed output of a request/response action ("upload",
+   * "compile", …). Used e.g. to derive real upload progress from esptool /
+   * avrdude output. Returns an unsubscribe function.
+   */
+  onActionOutput(action: string, cb: (output: string) => void): () => void {
+    if (!this.client) return () => {}
+    return this.client.onMessage((message: OutgoingMessage) => {
+      if (message.action === action && message.type === 'output') {
+        cb((message.data as { output: string }).output)
+      }
+    })
+  }
+
+  // ── board details (FQBN config options / programmers) ────────────────────────
+
+  async boardDetails(fqbn: string): Promise<BoardDetails> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    const requestId = this.client.boardDetails(fqbn)
+    const result = await this.waitForResponse('board-details', 20000, requestId)
+    if (!result.success) throw new Error(result.error || 'board-details failed')
+    return JSON.parse(result.output) as BoardDetails
+  }
+
+  // ── language server ──────────────────────────────────────────────────────────
+
+  /**
+   * WebSocket URL of the backend's LSP bridge for a given FQBN. The bridge
+   * lives on the same host/port as the main service socket, path /lsp.
+   */
+  getLspUrl(fqbn: string): string | null {
+    try {
+      const base = this.serviceUrl.replace(/\/+$/, '')
+      return `${base}/lsp?fqbn=${encodeURIComponent(fqbn)}`
+    } catch {
+      return null
+    }
   }
 }
