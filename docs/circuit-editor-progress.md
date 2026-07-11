@@ -219,3 +219,41 @@ Eleven fixes across the circuit editor + app shell. `npm run typecheck` clean ·
 - Marquee/rubber-band still selects parts + wires only, not net labels (click / shift-click for labels).
 - Leg recolor is render-time and keyed by svg string; if a part with a different (non-`connectorNleg`) leg convention shows up, extend `blackenLegs`.
 - Tooling: `PartsEditor.tsx` hit the Cowork-mount truncation bug when written via the file tool (cut at line 399 mid-word) — rewritten Linux-side and verified. Everything else this round was written Linux-side. The stale `.git/index.lock` is still unremovable from the sandbox, so this round is **uncommitted** on `circuit-editor`.
+
+---
+
+## 2026-07-11 — M2 leftovers + M4 core: persistence, .fzpz import, simulation ✅
+
+Four chunks, committed separately. `npm run typecheck` clean · `npm run test:circuit` → **89/89** (sim tests run the real WASM engine on generated netlists).
+
+### Small gaps (from the 07-05 notes)
+
+- **Marquee selects net labels** (sch) alongside parts/wires; additive with Shift.
+- **Inspector breadboard rotate is rigid**: `rotateBoardAssemblyCmd` lifted into `partsAdapter` (shared by canvas gestures and the Inspector, `steps` param covers the 0/90/180/270 dropdown); Inspector detects `isBreadboard` + bb view and delegates.
+- **Net-label rotation**: `rotateNetLabelCmd` (90° steps about centre, pin re-snapped to grid, wires reroute) — `R` key with labels selected, plus a rotation dropdown + 90° button in the label Inspector.
+
+### M2: Part Editor persistence (B7) — `lib/userParts.ts`
+
+- Custom parts persist in **IndexedDB** (`tinystudio-user-parts`), one impl for Electron renderer + web; localStorage fallback. `initUserParts()` (idempotent) restores them into the live registry on CircuitView/DiagramEditor mount, before geometry; both PartsEditor save paths now `saveUserPart` (register + persist). `deleteUserPart` exported for a future pack-manager UI.
+
+### M2: `.fzpz` drop-import — `parts/zip.ts`, `parts/svgUnits.ts`, `parts/fzpz.ts`
+
+- **Zero-dep zip reader**: central-directory walk + native `DecompressionStream('deflate-raw')` (Chromium + Node ≥18 → unit-testable against real deflate streams from node:zlib).
+- **In-app fzp→PartDef conversion** mirroring `scripts/fritzing-import.mjs`: connector resolution by svgId/terminalId with full ancestor-transform accumulation (`svgUnits.ts` is the pure math, tested), viewBox→96 DPI scaling, line-end picking, name-uniquing, icon extraction. DOM parts use the browser DOMParser (renderer-only module).
+- **Drop a .fzpz on the canvas** → converts → `saveUserPart` (persists) → places at the cursor with collision avoidance → toast (with unresolved-pin count when partial). Canvas gained `onImportFiles`; multiple files per drop OK.
+
+### M4 core: netlist gen + SimBackend + Simulate panel
+
+- `core/netlist.ts` — pure SPICE generation from doc + NetModel (seating/buses included as the editor sees them). Node naming per spec §10.2 (GND label → `0`, named nets keep names, `n<k>` stable). Built-in emitter table (R/C/L/D/LED/pot→2R/NPN/PNP/switch/battery + `sim-*` sources) with name-matched pins (anode/cathode/+/-) and positional fallback; breadboards transparent; boards excluded with "drive its pins with sources" info; unknowns excluded with warning. `spiceNum` normalization (`4.7kΩ`→`4.7k`, `µ`→`u`, trailing `M`→`Meg`). Analyses: `.op`/`.tran [uic]`/`.dc`/`.ac`.
+- `parts/simParts.ts` — builtin **Source** family (`sim-vdc`, `sim-vsin`, `sim-idc`): generated circle symbols, same art both views, default attrs applied on placement (Inspector-editable). Registered at CircuitView mount like breadboards.
+- `sim/` — **`SimBackend`** interface (engine-agnostic per §10.6), `SpiceWorkerBackend`: module worker (Vite `?worker`, `worker.format='es'` set in both vite configs), lazy `eecircuit-engine` import (≈20 MB chunk, loaded on first Run), 10 s watchdog default, cancel = terminate+respawn. **eecircuit-engine installed as the first backend** — the tscircuit-build bake-off remains open behind the interface.
+- `views/sim/SimPanel.tsx` — bottom-docked panel: DC | Transient tabs (step/stop/uic), Run/Cancel, netlist preview toggle, generator warnings, error surface (ngspice messages), `.op` results table, transient traces in an inline SVG plot (uPlot lands with the full plotting pass). **DC annotations**: after an `.op` run the canvas shows node-voltage chips at one pin per net (both views); results auto-clear on any doc edit.
+- Tests: +18 (89 total) — netlist goldens (divider, LED chain model-once, exclusions, switches, spiceNum, analysis cards), zip round-trip/EOCD-comment, svgUnits math, **sim integration**: engine solves the generated divider `.op` within 1% and an RC transient (uic) charge curve within 5% at t=RC.
+
+### Deferred / notes for the next agent
+
+- M2 still open: pack manager + GitHub index install, bendable legs, default-pack regeneration, "all pins must seat" rule.
+- M4 still open: DC sweep + AC tabs in the panel (cards already generate), uPlot with cursors/zoom/log axes + CSV export, current probes (§10.3 probe parts — `sim.probes` is modeled but unused), error→part/net highlight mapping, auto-rerun toggle, breadboard hole-tooltip voltages, flag default ON + legacy editor removal.
+- M5 untouched (KiCad/Wokwi interop).
+- The sim source symbols seat on breadboards like any 2-pin part; netlist pin matching for them keys on `+`/`-` names.
+- Tooling: Cowork-mount truncation did NOT reproduce this session (new files written via the file tool verified clean); git index/HEAD locks were stale early on — **fixed by enabling file deletion for the folder**, commits work normally again.

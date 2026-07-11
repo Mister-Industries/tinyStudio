@@ -20,6 +20,7 @@ import {
   Info,
   Maximize,
   Pencil,
+  Play,
   Redo2,
   ShieldCheck,
   TriangleAlert,
@@ -41,6 +42,7 @@ import { runErc, type ErcIssue, type ErcSeverity } from '../core/erc'
 import { nextRefdes, prefixForFamily } from '../core/refdes'
 import { CircuitStore } from '../core/store'
 import { BREADBOARDS, generateBreadboard, isBreadboard } from '../parts/breadboard'
+import { SIM_SOURCES, generateSimSource, simSourceDefaultAttrs } from '../parts/simParts'
 import { snapNetLabel } from '../parts/netLabels'
 import { Canvas, emptySel, type Cam, type CanvasHandle, type Selection } from './canvas/Canvas'
 import { exportPng, exportSvg } from './exportImage'
@@ -51,8 +53,10 @@ import {
   ercFloatingPins,
   findFreePlacement,
   implicitSeats,
+  pinWorldOf,
   ratsnest
 } from './partsAdapter'
+import { SimPanel, fmtSI, type SimState } from './sim/SimPanel'
 
 export function CircuitViewV2({
   content,
@@ -69,6 +73,7 @@ export function CircuitViewV2({
     // procedural breadboards live in the legacy registry until the M2+ pack
     // registry replaces it — register once, before first geometry pass
     for (const s of BREADBOARDS) if (!getPart(s.type)) registerPart(generateBreadboard(s).def)
+    for (const s of SIM_SOURCES) if (!getPart(s.type)) registerPart(generateSimSource(s))
     return CircuitStore.fromFile(content)
   })
   const revision = React.useSyncExternalStore(store.subscribe, store.getRevision)
@@ -82,6 +87,8 @@ export function CircuitViewV2({
   const [cam, setCam] = React.useState<Cam>({ scale: 1, tx: 40, ty: 40 })
   const [editorPart, setEditorPart] = React.useState<PartDef | null | undefined>(undefined)
   const [showErc, setShowErc] = React.useState(false)
+  const [showSim, setShowSim] = React.useState(false)
+  const [sim, setSim] = React.useState<SimState>({ run: null, netlist: null })
   const [defsTick, bumpDefs] = React.useReducer((n: number) => n + 1, 0)
   const canvasRef = React.useRef<CanvasHandle>(null)
 
@@ -138,6 +145,32 @@ export function CircuitViewV2({
       }),
     [doc, seats]
   )
+
+  // sim results go stale the moment the circuit changes — drop them
+  React.useEffect(() => {
+    setSim((s) => (s.run || s.netlist ? { run: null, netlist: null } : s))
+  }, [doc])
+
+  // DC (.op) node voltages → world-anchored chips at one pin per net
+  const simAnnotations = React.useMemo(() => {
+    if (!sim.run || sim.run.numPoints !== 1 || !sim.netlist) return []
+    const out: { x: number; y: number; text: string }[] = []
+    sim.netlist.nodeOfNet.forEach((node, i) => {
+      if (node === '0') return
+      const vec = sim.run!.vectors.find((v) => v.name.toLowerCase() === `v(${node.toLowerCase()})`)
+      if (!vec || vec.values.length !== 1) return
+      for (const ref of netModel.nets[i] ?? []) {
+        const ci = ref.lastIndexOf(':')
+        const part = doc.parts.find((p) => p.id === ref.slice(0, ci))
+        if (!part) continue
+        const pt = pinWorldOf(part, ref.slice(ci + 1), undefined, view)
+        if (!pt) continue
+        out.push({ x: pt.x, y: pt.y, text: fmtSI(vec.values[0], 'V') })
+        break
+      }
+    })
+    return out
+  }, [sim, netModel, doc, view])
   // nets satisfied elsewhere but unrouted here → dashed guidance (spec §8.2)
   const rats = React.useMemo(() => ratsnest(doc, view, netModel), [doc, view, netModel, defsTick])
   // ERC: net-model rules + view-side floating-pin findings (spec §9)
@@ -209,7 +242,8 @@ export function CircuitViewV2({
     const p = at ?? canvasRef.current?.centerWorld() ?? { x: 300, y: 200 }
     const id = nextRefdes(store.getDoc(), prefixForFamily(`${def.family ?? ''} ${def.type}`))
     const pl = findFreePlacement(store.getDoc(), type, view, p)
-    store.dispatch(cmd.addPart({ id, type, [view]: pl }))
+    const attrs = simSourceDefaultAttrs(type)
+    store.dispatch(cmd.addPart({ id, type, ...(attrs ? { attrs } : {}), [view]: pl }))
     setSel({ parts: new Set([id]), wires: new Set() })
   }
 
@@ -349,6 +383,13 @@ export function CircuitViewV2({
         {/* right toolbar: export / grid / code */}
         <div className="absolute top-3 right-3.5 z-10 flex gap-1.5">
           <button
+            className={`${tool} w-8 justify-center px-0 ${showSim ? 'text-brand' : ''}`}
+            onClick={() => setShowSim((s) => !s)}
+            title="Simulate"
+          >
+            <Play size={15} />
+          </button>
+          <button
             className={`${tool} w-8 justify-center px-0`}
             onClick={() => exportPng(doc, view)}
             title="Export as PNG"
@@ -487,8 +528,20 @@ export function CircuitViewV2({
           onDropPart={(type, at) => void addPartAt(type, at)}
           onDropNetLabel={(kind, name, at) => addNetLabel(kind, name, at)}
           onImportFiles={(files, at) => void importFzpzFiles(files, at)}
+          annotations={simAnnotations}
           onRequestEdit={enterEdit}
         />
+
+        {showSim && (
+          <SimPanel
+            doc={doc}
+            netModel={netModel}
+            store={store}
+            familyOf={(t) => getPart(t)?.family}
+            onClose={() => setShowSim(false)}
+            onResult={setSim}
+          />
+        )}
 
         {/* watermark — matches the header wordmark: thin 'tiny', bold 'Studio' */}
         <div className="absolute bottom-8 right-6 z-0 pointer-events-none select-none text-[60px] leading-none tracking-[-0.02em] text-text-faint/25">

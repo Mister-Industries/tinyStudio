@@ -46,6 +46,7 @@
     "@tailwindcss/vite": "^4.1.8",
     "blockly": "^12.1.0",
     "class-variance-authority": "^0.7.1",
+    "eecircuit-engine": "^1.7.0",
     "electron-updater": "^6.3.9",
     "express": "^4.18.2",
     "lucide-react": "^0.515.0",

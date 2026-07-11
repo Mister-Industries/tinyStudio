@@ -16,6 +16,8 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
+    // module workers (sim engine lazy-imports ngspice-WASM inside a worker)
+    worker: { format: 'es' },
     plugins: [react(), tailwindcss()]
   }
 })

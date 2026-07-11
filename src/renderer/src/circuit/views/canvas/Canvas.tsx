@@ -149,6 +149,7 @@ export function Canvas({
   onDropPart,
   onDropNetLabel,
   onImportFiles,
+  annotations,
   onRequestEdit
 }: {
   store: CircuitStore
@@ -173,6 +174,8 @@ export function Canvas({
   onDropNetLabel: (kind: NetLabelKind, name: string, at: Pt) => void
   /** dropped OS files (.fzpz part import) */
   onImportFiles?: (files: File[], at: Pt) => void
+  /** world-anchored value chips (DC sim annotations) */
+  annotations?: { x: number; y: number; text: string }[]
   /** tray "attach to cursor" placement: id being placed + drop callback */
   /** double-clicking a component asks the shell to enter edit mode */
   onRequestEdit: () => void
@@ -1656,6 +1659,17 @@ export function Canvas({
               })()}
             </div>
           )}
+
+          {/* sim annotations (node voltages after a DC run) */}
+          {annotations?.map((a, i) => (
+            <div
+              key={i}
+              className="pointer-events-none select-none px-1 py-0.5 rounded bg-surface-card/90 border border-brand/40 text-[9px] font-mono text-brand whitespace-nowrap"
+              style={{ position: 'absolute', left: a.x + 7, top: a.y - 21, zIndex: 4 }}
+            >
+              {a.text}
+            </div>
+          ))}
 
           {doc.parts.length === 0 && (
             <div
