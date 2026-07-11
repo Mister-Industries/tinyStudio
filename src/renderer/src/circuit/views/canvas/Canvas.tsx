@@ -50,6 +50,8 @@ import {
   makeEndResolver,
   pinAtWorld,
   reroutesFor,
+  rotateBoardAssemblyCmd,
+  rotateNetLabelCmd,
   seatedPartsOn,
   snapBB,
   viewBounds,
@@ -796,7 +798,15 @@ export function Canvas({
         for (const g of wireGeom) {
           if (g.pts.some((p) => p.x >= x0 && p.x <= x1 && p.y >= y0 && p.y <= y1)) wires.add(g.w.id)
         }
-        setSel({ parts, wires })
+        const labels = new Set(additive ? (sel.labels ?? []) : [])
+        if (view === 'sch') {
+          for (const label of doc.netLabels ?? []) {
+            const pl = label.sch
+            const v = netLabelVisualOf(label)
+            if (pl.x < x1 && pl.x + v.w > x0 && pl.y < y1 && pl.y + v.h > y0) labels.add(label.id)
+          }
+        }
+        setSel({ parts, wires, labels })
       }
       window.addEventListener('pointermove', move)
       window.addEventListener('pointerup', up)
@@ -831,49 +841,26 @@ export function Canvas({
    */
   const rotateBoardAssembly = React.useCallback(
     (boardId: string): void => {
-      const board = doc.parts.find((p) => p.id === boardId)
-      const bpl = board?.bb
-      const bvis = board && visualFor(board.type, 'bb')
-      if (!board || !bpl || !bvis) return
-      const c = { x: bpl.x + bvis.v.w / 2, y: bpl.y + bvis.v.h / 2 }
-      // 90 deg CW about c, matching transformLocalPoint's rotation sense.
-      const rot90 = (p: Pt): Pt => ({ x: c.x - (p.y - c.y), y: c.y + (p.x - c.x) })
-      const ids = [boardId, ...seatedPartsOn(boardId, seats)]
-      const placements = new Map<string, Placement>()
-      for (const id of ids) {
-        const part = doc.parts.find((p) => p.id === id)
-        const cur = part?.bb
-        const vis = part && visualFor(part.type, 'bb')
-        if (!part || !cur || !vis) continue
-        const nr = (((((cur.rotate ?? 0) + 90) % 360) + 360) % 360) as 0 | 90 | 180 | 270
-        if (id === boardId) {
-          placements.set(id, { ...cur, rotate: nr || undefined })
-        } else {
-          const nc = rot90({ x: cur.x + vis.v.w / 2, y: cur.y + vis.v.h / 2 })
-          placements.set(id, {
-            ...cur,
-            x: nc.x - vis.v.w / 2,
-            y: nc.y - vis.v.h / 2,
-            rotate: nr || undefined
-          })
-        }
-      }
-      const frozen = collectFrozen(doc, new Set(ids), 'bb')
-      const reroutes = reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, 'bb', rot90)
-      let first = true
-      const cmds: cmd.Command[] = []
-      for (const [id, pl] of placements) {
-        cmds.push(cmd.placePart(id, 'bb', pl, first ? reroutes : []))
-        first = false
-      }
-      if (cmds.length) store.dispatch(cmd.composite(`Rotate ${boardId}`, cmds))
+      const c = rotateBoardAssemblyCmd(doc, boardId, seats)
+      if (c) store.dispatch(c)
     },
     [doc, store, seats]
   )
 
   const rotateSelection = React.useCallback((): void => {
     const ids = [...sel.parts]
-    if (!ids.length) return
+    if (!ids.length) {
+      // schematic: R rotates selected net labels (90° steps, wires reroute)
+      if (view !== 'sch') return
+      const cmds: cmd.Command[] = []
+      for (const id of sel.labels ?? []) {
+        const c = rotateNetLabelCmd(doc, id)
+        if (c) cmds.push(c)
+      }
+      if (cmds.length)
+        store.dispatch(cmds.length === 1 ? cmds[0] : cmd.composite('Rotate labels', cmds))
+      return
+    }
     // a lone breadboard rotates as a rigid assembly (carries seated parts + wires)
     if (
       view === 'bb' &&

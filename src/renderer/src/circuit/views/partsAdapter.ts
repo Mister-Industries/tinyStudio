@@ -14,7 +14,7 @@
 
 import { getPart, viewFor, type PartDef, type PartView } from '../../lib/partsLibrary'
 import { schematicVisual } from '../parts/symbols'
-import { netLabelPinWorld, netLabelVisualOf } from '../parts/netLabels'
+import { netLabelPinWorld, netLabelVisualOf, snapNetLabel } from '../parts/netLabels'
 import { pinWorld, snapPlacementToPinGrid } from '../core/geometry'
 import {
   GRID_BB,
@@ -37,7 +37,13 @@ import {
   pointAtT,
   wirePoints
 } from '../core/routing'
-import type { WireReroute } from '../core/commands'
+import {
+  composite,
+  moveNetLabel,
+  placePart,
+  type Command,
+  type WireReroute
+} from '../core/commands'
 
 export interface PartVisual {
   def: PartDef
@@ -603,4 +609,78 @@ export function freePasteOffset(
     if (!moved.some((m) => boxes.some((b) => overlaps(m, b, GRID_BB)))) return off
   }
   return { x: step, y: step }
+}
+
+// ── rigid rotations (shared by Canvas gestures and the Inspector) ────────────
+
+/**
+ * Rigid 90°-step rotation of a breadboard assembly (bb view): the board, its
+ * seated parts, and the wires *between* seated parts all turn about the
+ * board's centre, so the layout is preserved instead of the wires rerouting.
+ * Grid-aligned seating means holes map to holes, so pins re-seat exactly.
+ * Returns one undoable composite Command, or null if the board is unknown.
+ */
+export function rotateBoardAssemblyCmd(
+  doc: CircuitDoc,
+  boardId: string,
+  seats: Seat[],
+  steps = 1
+): Command | null {
+  const n = ((steps % 4) + 4) % 4
+  if (!n) return null
+  const board = doc.parts.find((p) => p.id === boardId)
+  const bpl = board?.bb
+  const bvis = board && visualFor(board.type, 'bb')
+  if (!board || !bpl || !bvis) return null
+  const c = { x: bpl.x + bvis.v.w / 2, y: bpl.y + bvis.v.h / 2 }
+  // 90° CW about c (matching transformLocalPoint's rotation sense), n times.
+  const rot90 = (p: Pt): Pt => ({ x: c.x - (p.y - c.y), y: c.y + (p.x - c.x) })
+  const rot = (p: Pt): Pt => {
+    let q = p
+    for (let i = 0; i < n; i++) q = rot90(q)
+    return q
+  }
+  const ids = [boardId, ...seatedPartsOn(boardId, seats)]
+  const placements = new Map<string, Placement>()
+  for (const id of ids) {
+    const part = doc.parts.find((p) => p.id === id)
+    const cur = part?.bb
+    const vis = part && visualFor(part.type, 'bb')
+    if (!part || !cur || !vis) continue
+    const nr = ((((cur.rotate ?? 0) + 90 * n) % 360) + 360) % 360
+    const rotate = (nr || undefined) as Placement['rotate']
+    if (id === boardId) {
+      placements.set(id, { ...cur, rotate })
+    } else {
+      const nc = rot({ x: cur.x + vis.v.w / 2, y: cur.y + vis.v.h / 2 })
+      placements.set(id, { ...cur, x: nc.x - vis.v.w / 2, y: nc.y - vis.v.h / 2, rotate })
+    }
+  }
+  const frozen = collectFrozen(doc, new Set(ids), 'bb')
+  const reroutes = reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, 'bb', rot)
+  const cmds: Command[] = []
+  let first = true
+  for (const [id, pl] of placements) {
+    cmds.push(placePart(id, 'bb', pl, first ? reroutes : []))
+    first = false
+  }
+  return cmds.length ? composite(`Rotate ${boardId}`, cmds) : null
+}
+
+/**
+ * Rotate a schematic net label 90° about its centre, snapping its pin back to
+ * the major grid and rerouting attached wires (frozen bends). Returns an
+ * undoable Command, or null if the label is unknown.
+ */
+export function rotateNetLabelCmd(doc: CircuitDoc, labelId: string): Command | null {
+  const label = doc.netLabels?.find((l) => l.id === labelId)
+  if (!label) return null
+  const nr = ((((label.sch.rotate ?? 0) + 90) % 360) + 360) % 360
+  const snapped = snapNetLabel(label.kind, label.name, {
+    ...label.sch,
+    rotate: (nr || undefined) as Placement['rotate']
+  })
+  const frozen = collectFrozen(doc, new Set([labelId]), 'sch')
+  const reroutes = reroutesFor(doc, frozen, new Map([[labelId, snapped]]), { x: 0, y: 0 }, 'sch')
+  return moveNetLabel(labelId, snapped, reroutes)
 }

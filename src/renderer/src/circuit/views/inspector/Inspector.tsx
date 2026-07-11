@@ -22,7 +22,14 @@ import type {
 import type { NetModel } from '../../core/nets'
 import { isValidRefdes } from '../../core/refdes'
 import type { CircuitStore } from '../../core/store'
-import { collectFrozen, reroutesFor } from '../partsAdapter'
+import { isBreadboard } from '../../parts/breadboard'
+import {
+  collectFrozen,
+  implicitSeats,
+  reroutesFor,
+  rotateBoardAssemblyCmd,
+  rotateNetLabelCmd
+} from '../partsAdapter'
 import { WIRE_COLORS } from '../palette/Palette'
 import type { Selection } from '../canvas/Canvas'
 
@@ -92,7 +99,7 @@ export function InspectorRail({
         ) : multi ? (
           <MultiInspector sel={sel} store={store} setSel={setSel} />
         ) : label ? (
-          <LabelInspector key={label.id} label={label} store={store} setSel={setSel} />
+          <LabelInspector key={label.id} label={label} doc={doc} store={store} setSel={setSel} />
         ) : (
           <div className="text-text-faint text-[11px] leading-relaxed">
             Select a component to edit its refdes, location, rotation, and properties — or a wire to
@@ -154,6 +161,14 @@ function PartInspector({
   const setRotation = (deg: number): void => {
     if (!pv) return
     const next = (((deg % 360) + 360) % 360) as 0 | 90 | 180 | 270
+    // Breadboards rotate as a rigid assembly (board + seated parts + wires
+    // between them) — same path as the canvas R / right-click gesture.
+    if (view === 'bb' && isBreadboard(part.type)) {
+      const steps = ((next - (pv.rotate ?? 0)) / 90 + 4) % 4
+      const c = rotateBoardAssemblyCmd(doc, part.id, implicitSeats(doc), steps)
+      if (c) store.dispatch(c)
+      return
+    }
     const frozen = collectFrozen(doc, new Set([part.id]), view)
     const pl: Placement = { ...pv, rotate: next || undefined }
     const placements = new Map([[part.id, pl]])
@@ -429,10 +444,12 @@ function MultiInspector({
 
 function LabelInspector({
   label,
+  doc,
   store,
   setSel
 }: {
   label: NetLabel
+  doc: CircuitDoc
   store: CircuitStore
   setSel: (s: Selection) => void
 }): React.JSX.Element {
@@ -481,6 +498,47 @@ function LabelInspector({
           <option value="power">Power rail</option>
           <option value="net">Named net</option>
         </select>
+      </label>
+      <label className="flex flex-col gap-1">
+        <span className={rowLabel}>Rotation</span>
+        <div className="flex items-center gap-1.5">
+          <select
+            className={field}
+            value={label.sch.rotate || 0}
+            onChange={(e) => {
+              const target = Number(e.target.value)
+              let c: ReturnType<typeof rotateNetLabelCmd> = null
+              let d = doc
+              // rotateNetLabelCmd is a single 90° step; compose to reach target
+              const steps = (((target - (label.sch.rotate || 0)) / 90 + 4) % 4 + 4) % 4
+              const cmds: cmd.Command[] = []
+              for (let i = 0; i < steps; i++) {
+                c = rotateNetLabelCmd(d, label.id)
+                if (!c) break
+                cmds.push(c)
+                d = c.apply(d)
+              }
+              if (cmds.length)
+                store.dispatch(cmds.length === 1 ? cmds[0] : cmd.composite('Rotate label', cmds))
+            }}
+          >
+            {[0, 90, 180, 270].map((r) => (
+              <option key={r} value={r}>
+                {r}°
+              </option>
+            ))}
+          </select>
+          <button
+            className="h-[26px] px-2 rounded border border-border-default bg-surface-card text-text-body hover:border-brand"
+            title="Rotate 90°"
+            onClick={() => {
+              const c = rotateNetLabelCmd(doc, label.id)
+              if (c) store.dispatch(c)
+            }}
+          >
+            <RotateCw size={13} />
+          </button>
+        </div>
       </label>
       <p className="text-[11px] text-text-faint leading-relaxed">
         Labels sharing a name join the same net — a clean way to wire power and ground without long
