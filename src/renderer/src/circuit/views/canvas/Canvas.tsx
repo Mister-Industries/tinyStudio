@@ -148,6 +148,7 @@ export function Canvas({
   handleRef,
   onDropPart,
   onDropNetLabel,
+  onImportFiles,
   onRequestEdit
 }: {
   store: CircuitStore
@@ -170,6 +171,8 @@ export function Canvas({
   handleRef: React.Ref<CanvasHandle>
   onDropPart: (type: string, at: Pt) => void
   onDropNetLabel: (kind: NetLabelKind, name: string, at: Pt) => void
+  /** dropped OS files (.fzpz part import) */
+  onImportFiles?: (files: File[], at: Pt) => void
   /** tray "attach to cursor" placement: id being placed + drop callback */
   /** double-clicking a component asks the shell to enter edit mode */
   onRequestEdit: () => void
@@ -819,6 +822,11 @@ export function Canvas({
 
   const onDrop = (e: React.DragEvent): void => {
     e.preventDefault()
+    const files = Array.from(e.dataTransfer.files ?? []).filter((f) => /\.fzpz$/i.test(f.name))
+    if (files.length && onImportFiles) {
+      onImportFiles(files, canvasPoint(e))
+      return
+    }
     const type = e.dataTransfer.getData('text/tinystudio-part')
     if (type) {
       onDropPart(type, canvasPoint(e))

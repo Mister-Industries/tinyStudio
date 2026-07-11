@@ -30,7 +30,9 @@ import {
 } from 'lucide-react'
 import React from 'react'
 import { ensureParts, getPart, loadPart, registerPart, type PartDef } from '../../lib/partsLibrary'
+import { toast } from 'sonner'
 import { initUserParts, saveUserPart } from '../../lib/userParts'
+import { importFzpz } from '../parts/fzpz'
 import { PartsEditor } from '../../components/PartsEditor'
 import * as cmd from '../core/commands'
 import { newId, type NetLabelKind, type Pt, type ViewId } from '../core/model'
@@ -209,6 +211,27 @@ export function CircuitViewV2({
     const pl = findFreePlacement(store.getDoc(), type, view, p)
     store.dispatch(cmd.addPart({ id, type, [view]: pl }))
     setSel({ parts: new Set([id]), wires: new Set() })
+  }
+
+  // .fzpz dropped on the canvas: convert → persist → place at the cursor
+  const importFzpzFiles = async (files: File[], at: Pt): Promise<void> => {
+    for (const f of files) {
+      try {
+        const { def, warnings } = await importFzpz(new Uint8Array(await f.arrayBuffer()), f.name)
+        await saveUserPart(def)
+        bumpDefs()
+        await addPartAt(def.type, at)
+        toast.success(`Imported ${def.label}`, {
+          description: warnings.length
+            ? `${warnings.length} pin${warnings.length === 1 ? '' : 's'} could not be resolved`
+            : `${def.family} · now in the palette`
+        })
+      } catch (err) {
+        toast.error(`Couldn't import ${f.name}`, {
+          description: err instanceof Error ? err.message : String(err)
+        })
+      }
+    }
   }
 
   const addNetLabel = (kind: NetLabelKind, name: string, at?: Pt): void => {
@@ -463,6 +486,7 @@ export function CircuitViewV2({
           handleRef={canvasRef}
           onDropPart={(type, at) => void addPartAt(type, at)}
           onDropNetLabel={(kind, name, at) => addNetLabel(kind, name, at)}
+          onImportFiles={(files, at) => void importFzpzFiles(files, at)}
           onRequestEdit={enterEdit}
         />
 
