@@ -30,6 +30,7 @@ import {
 } from 'lucide-react'
 import React from 'react'
 import { ensureParts, getPart, loadPart, registerPart, type PartDef } from '../../lib/partsLibrary'
+import { initUserParts, saveUserPart } from '../../lib/userParts'
 import { PartsEditor } from '../../components/PartsEditor'
 import * as cmd from '../core/commands'
 import { newId, type NetLabelKind, type Pt, type ViewId } from '../core/model'
@@ -100,10 +101,14 @@ export function CircuitViewV2({
     return () => clearTimeout(t)
   }, [revision, store, onChange])
 
-  // lazy-load part defs through the legacy adapter
+  // restore persisted user parts (B7), then lazy-load part defs through the
+  // legacy adapter — user parts must land first so custom types resolve
   React.useEffect(() => {
-    const missing = doc.parts.map((p) => p.type).filter((t) => !getPart(t))
-    if (missing.length) void ensureParts(missing).then(bumpDefs)
+    void initUserParts().then((n) => {
+      const missing = doc.parts.map((p) => p.type).filter((t) => !getPart(t))
+      if (missing.length) void ensureParts(missing).then(bumpDefs)
+      else if (n) bumpDefs()
+    })
   }, [doc.parts])
 
   // drop selection entries that no longer exist (undo, delete, external edit)
@@ -484,7 +489,7 @@ export function CircuitViewV2({
           initial={editorPart}
           onClose={() => setEditorPart(undefined)}
           onSave={(def: PartDef) => {
-            registerPart(def)
+            void saveUserPart(def)
             bumpDefs()
             setEditorPart(undefined)
           }}

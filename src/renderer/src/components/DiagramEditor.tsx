@@ -45,7 +45,6 @@ import {
   getPart,
   loadPart,
   partsByFamily,
-  registerPart,
   viewFor,
   type PartDef,
   type PartMeta,
@@ -68,6 +67,7 @@ import {
   type Pt
 } from '../lib/wireRouting'
 import { buildNets, meaningfulNetCount } from '../lib/circuitNets'
+import { initUserParts, saveUserPart } from '../lib/userParts'
 import { PartsEditor } from './PartsEditor'
 
 const CANVAS_W = 1100
@@ -313,8 +313,11 @@ export function DiagramEditor({
   const didInit = React.useRef(false)
 
   React.useEffect(() => {
-    const types = diagram.parts.map((p) => p.type).filter((t) => !getPart(t))
-    if (types.length) ensureParts(types).then(force)
+    void initUserParts().then((n) => {
+      const types = diagram.parts.map((p) => p.type).filter((t) => !getPart(t))
+      if (types.length) ensureParts(types).then(force)
+      else if (n) force()
+    })
   }, [diagram.parts])
 
   const write = (d: Partial<Diagram>): void => {
@@ -1779,7 +1782,7 @@ export function DiagramEditor({
           initial={editorPart}
           onClose={() => setEditorPart(undefined)}
           onSave={(def: PartDef) => {
-            registerPart(def)
+            void saveUserPart(def)
             force()
             setEditorPart(undefined)
           }}
