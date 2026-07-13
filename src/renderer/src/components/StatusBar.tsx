@@ -11,6 +11,7 @@ import {
   PlugZap
 } from 'lucide-react'
 import React from 'react'
+import { version as appVersion } from '../../../../package.json'
 import { useArduinoContext } from '../contexts/ArduinoContext'
 import { useSerial } from '../contexts/SerialContext'
 import {
@@ -218,7 +219,7 @@ export function StatusBar(): React.JSX.Element {
         <span className="text-white dark:text-[var(--text-faint)] mx-2">·</span>
         <span>Arduino (C++)</span>
         <span className="text-white dark:text-[var(--text-faint)] mx-2">·</span>
-        <span>tinyStudio 0.2.0</span>
+        <span>tinyStudio {appVersion}</span>
         <span className="ml-2.5">
           <Badge tone="yellow" variant="solid">
             alpha
