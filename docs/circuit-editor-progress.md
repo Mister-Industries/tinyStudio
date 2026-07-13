@@ -257,3 +257,13 @@ Four chunks, committed separately. `npm run typecheck` clean · `npm run test:ci
 - M5 untouched (KiCad/Wokwi interop).
 - The sim source symbols seat on breadboards like any 2-pin part; netlist pin matching for them keys on `+`/`-` names.
 - Tooling: Cowork-mount truncation did NOT reproduce this session (new files written via the file tool verified clean); git index/HEAD locks were stale early on — **fixed by enabling file deletion for the folder**, commits work normally again.
+
+---
+
+## 2026-07-13 — sim UX pass (Geoff's feedback: "can't set values, can't choose probes")
+
+- **Inspector "Simulation" section**: `netlist.simAttrsFor(type, family)` exposes each mapping's editable attrs (resistance/capacitance/inductance, voltage, amplitude+frequency+offset, current, pot position, switch closed) as labeled fields with the emitter's default as placeholder + unit hint. No more guessing magic attr names; the keys are excluded from the generic Properties rows. Attr edits are mergeKey'd (one undo step per field).
+- **Trace picking**: the transient plot's legend is now clickable — toggle traces on/off (state survives reruns; results still auto-clear on doc edits). Visible traces cap at 6 colors.
+- **Readable DC table**: each `v(node)` row shows the net's members ("R1:Pin 1 · LED1:anode"), `i(vxx)` rows say "current through …".
+- Real probe *parts* (§10.3, `sim.probes`) remain backlog — this pass makes everything probeable-by-default usable.
+- `npm run typecheck` clean · `npm run test:circuit` → 89/89.

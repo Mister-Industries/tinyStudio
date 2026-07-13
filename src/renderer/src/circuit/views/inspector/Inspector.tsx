@@ -20,6 +20,7 @@ import type {
   ViewId
 } from '../../core/model'
 import type { NetModel } from '../../core/nets'
+import { simAttrsFor } from '../../core/netlist'
 import { isValidRefdes } from '../../core/refdes'
 import type { CircuitStore } from '../../core/store'
 import { isBreadboard } from '../../parts/breadboard'
@@ -191,7 +192,11 @@ function PartInspector({
     [w.from, w.to].some((e) => typeof e === 'string' && e.split(':')[0] === part.id)
   ).length
 
-  const propRows = Object.entries(part.attrs || {}).filter(([k]) => k !== 'label')
+  const simAttrs = simAttrsFor(part.type, def?.family)
+  const simKeys = new Set(simAttrs.map((a) => a.key))
+  const propRows = Object.entries(part.attrs || {}).filter(
+    ([k]) => k !== 'label' && !simKeys.has(k)
+  )
 
   return (
     <>
@@ -281,6 +286,33 @@ function PartInspector({
             </div>
           </div>
         </>
+      )}
+
+      {simAttrs.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <span className={rowLabel}>Simulation</span>
+          {simAttrs.map((a) => (
+            <div key={a.key} className="flex items-center gap-1.5">
+              <span className="text-[11px] text-text-muted w-16 truncate" title={a.hint || a.label}>
+                {a.label}
+              </span>
+              <input
+                className={field}
+                value={String(part.attrs?.[a.key] ?? '')}
+                placeholder={a.default}
+                title={a.hint}
+                onChange={(e) =>
+                  store.dispatch(
+                    cmd.setPartAttr(part.id, a.key, e.target.value === '' ? undefined : e.target.value)
+                  )
+                }
+              />
+              {a.hint && (
+                <span className="text-[10px] text-text-faint w-8 shrink-0 truncate">{a.hint}</span>
+              )}
+            </div>
+          ))}
+        </div>
       )}
 
       <div className="flex flex-col gap-1.5">

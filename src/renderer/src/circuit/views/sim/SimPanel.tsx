@@ -50,6 +50,7 @@ export function SimPanel({
   const [gen, setGen] = React.useState<NetlistResult | null>(null)
   const [error, setError] = React.useState<{ message: string; details?: string[] } | null>(null)
   const [showNetlist, setShowNetlist] = React.useState(false)
+  const [hidden, setHidden] = React.useState<Set<string>>(new Set())
 
   const setAnalysis = (patch: Partial<Analysis>): void => {
     store.dispatch(cmd.setAnalyses([{ ...analysis, ...patch }]))
@@ -83,6 +84,25 @@ export function SimPanel({
   }
 
   const isOp = result != null && result.numPoints === 1
+
+  // "v(n1)" → the net's members ("R1:Pin 1 · LED1:anode"); "i(vv1)" → source
+  const describe = React.useCallback(
+    (vecName: string): string | undefined => {
+      if (!gen) return undefined
+      const m = /^v\((.+)\)$/i.exec(vecName)
+      if (m) {
+        const node = m[1]
+        const i = gen.nodeOfNet.findIndex((n) => n.toLowerCase() === node.toLowerCase())
+        if (i < 0) return undefined
+        const members = netModel.nets[i] ?? []
+        return members.slice(0, 4).join(' · ') + (members.length > 4 ? ' …' : '')
+      }
+      const im = /^i\((.+)\)$/i.exec(vecName)
+      if (im) return `current through ${im[1].toUpperCase()}`
+      return undefined
+    },
+    [gen, netModel]
+  )
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-border-default bg-bg-raised flex flex-col max-h-[45%]">
@@ -198,8 +218,21 @@ export function SimPanel({
           </div>
         )}
 
-        {isOp && result && <OpTable run={result} />}
-        {result && result.numPoints > 1 && <WavePlot run={result} />}
+        {isOp && result && <OpTable run={result} describe={describe} />}
+        {result && result.numPoints > 1 && (
+          <WavePlot
+            run={result}
+            hidden={hidden}
+            onToggle={(name) =>
+              setHidden((h) => {
+                const next = new Set(h)
+                if (next.has(name)) next.delete(name)
+                else next.add(name)
+                return next
+              })
+            }
+          />
+        )}
 
         {showNetlist && gen && (
           <pre className="rounded-md border border-border-default bg-bg-sunken p-2 text-[10px] leading-relaxed text-text-body whitespace-pre-wrap">
@@ -232,20 +265,29 @@ export function fmtSI(v: number, unit: string): string {
   return `${(v * 1e9).toFixed(2)} n${unit}`
 }
 
-function OpTable({ run }: { run: SimRun }): React.JSX.Element {
+function OpTable({
+  run,
+  describe
+}: {
+  run: SimRun
+  describe: (vecName: string) => string | undefined
+}): React.JSX.Element {
   const rows = run.vectors
     .filter((v) => v.values.length === 1)
     .map((v) => {
       const isV = v.name.startsWith('v(')
       const unit = isV ? 'V' : 'A'
-      return { name: v.name, value: fmtSI(v.values[0], unit) }
+      return { name: v.name, value: fmtSI(v.values[0], unit), what: describe(v.name) }
     })
   return (
-    <div className="grid grid-cols-[auto_auto] gap-x-6 gap-y-1 w-fit">
+    <div className="grid grid-cols-[auto_auto_1fr] gap-x-6 gap-y-1 w-full max-w-[720px]">
       {rows.map((r) => (
         <React.Fragment key={r.name}>
           <span className="text-text-muted font-mono">{r.name}</span>
           <span className="text-text-strong font-mono">{r.value}</span>
+          <span className="text-text-faint truncate" title={r.what}>
+            {r.what ?? ''}
+          </span>
         </React.Fragment>
       ))}
     </div>
@@ -256,21 +298,28 @@ function OpTable({ run }: { run: SimRun }): React.JSX.Element {
 
 const TRACES = ['#4f9cf9', '#f36e6e', '#54c08a', '#e5b567', '#b78be5', '#5bc8c8']
 
-function WavePlot({ run }: { run: SimRun }): React.JSX.Element {
+function WavePlot({
+  run,
+  hidden,
+  onToggle
+}: {
+  run: SimRun
+  hidden: Set<string>
+  onToggle: (name: string) => void
+}): React.JSX.Element {
   const x =
     run.vectors.find((v) => v.type === 'time' || v.type === 'frequency') ?? run.vectors[0]
-  const traces = run.vectors
-    .filter((v) => v !== x && v.name.startsWith('v('))
-    .slice(0, TRACES.length)
-  if (!x || traces.length === 0) return <div className="text-text-faint">no voltage vectors</div>
+  const all = run.vectors.filter((v) => v !== x && v.name.startsWith('v('))
+  const traces = all.filter((v) => !hidden.has(v.name)).slice(0, TRACES.length)
+  if (!x || all.length === 0) return <div className="text-text-faint">no voltage vectors</div>
 
   const W = 640
   const H = 180
   const PAD = 28
   const xmin = Math.min(...x.values)
   const xmax = Math.max(...x.values)
-  let ymin = Infinity
-  let ymax = -Infinity
+  let ymin = traces.length ? Infinity : -1
+  let ymax = traces.length ? -Infinity : 1
   for (const tr of traces)
     for (const v of tr.values) {
       ymin = Math.min(ymin, v)
@@ -308,13 +357,30 @@ function WavePlot({ run }: { run: SimRun }): React.JSX.Element {
           />
         ))}
       </svg>
-      <div className="flex gap-3 flex-wrap">
-        {traces.map((tr, i) => (
-          <span key={tr.name} className="flex items-center gap-1 text-[10px] text-text-muted">
-            <span className="w-3 h-0.5 inline-block" style={{ background: TRACES[i] }} />
-            {tr.name}
-          </span>
-        ))}
+      <div className="flex gap-2 flex-wrap items-center">
+        {all.map((tr) => {
+          const idx = traces.indexOf(tr)
+          const off = idx < 0
+          return (
+            <button
+              key={tr.name}
+              className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border ${
+                off
+                  ? 'border-border-default text-text-faint line-through'
+                  : 'border-transparent text-text-muted'
+              }`}
+              title={off ? 'Show trace' : 'Hide trace'}
+              onClick={() => onToggle(tr.name)}
+            >
+              <span
+                className="w-3 h-0.5 inline-block"
+                style={{ background: off ? 'var(--border-strong)' : TRACES[idx] }}
+              />
+              {tr.name}
+            </button>
+          )
+        })}
+        <span className="text-[10px] text-text-faint ml-1">click to toggle</span>
       </div>
     </div>
   )

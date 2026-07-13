@@ -107,16 +107,31 @@ const MINUS = [/^-$/, /cathode|kath/i, /^gnd$/i, /neg/i]
 
 type Emitter = (ctx: Ctx) => SpiceCard | null
 
+/** An editable sim attr a part type understands (Inspector surfaces these). */
+export interface SimAttrSpec {
+  key: string
+  label: string
+  /** value used when the attr is unset (mirrors the emitter fallbacks) */
+  default: string
+  hint?: string
+}
+
 const LED_MODEL = { name: 'DLED', card: '.model DLED D(IS=1e-22 N=2.2 RS=2)' }
 const D_MODEL = { name: 'DGEN', card: '.model DGEN D(IS=1e-14 N=1.9 RS=0.1)' }
 const NPN_MODEL = { name: 'QNPN', card: '.model QNPN NPN(BF=150 VAF=100)' }
 const PNP_MODEL = { name: 'QPNP', card: '.model QPNP PNP(BF=150 VAF=100)' }
 
-const EMITTERS: { match: RegExp; kind?: MappingKind; emit?: Emitter }[] = [
+const EMITTERS: {
+  match: RegExp
+  kind?: MappingKind
+  emit?: Emitter
+  attrs?: SimAttrSpec[]
+}[] = [
   { match: /breadboard/i, kind: 'transparent' },
   { match: /tinystudio|microcontroller|\bboard\b|arduino|esp32/i, kind: 'board' },
   {
     match: /sim-vdc|voltage source|battery/i,
+    attrs: [{ key: 'voltage', label: 'Voltage', default: '5', hint: 'V' }],
     emit: (c) => ({
       lines: [
         `V${c.part.id} ${pinLike(c, PLUS, 0, '+')} ${pinLike(c, MINUS, 1, '-')} DC ${c.attr(
@@ -128,6 +143,11 @@ const EMITTERS: { match: RegExp; kind?: MappingKind; emit?: Emitter }[] = [
   },
   {
     match: /sim-vsin|sine|waveform/i,
+    attrs: [
+      { key: 'amplitude', label: 'Amplitude', default: '1', hint: 'V' },
+      { key: 'frequency', label: 'Frequency', default: '1k', hint: 'Hz' },
+      { key: 'offset', label: 'DC offset', default: '0', hint: 'V' }
+    ],
     emit: (c) => ({
       lines: [
         `V${c.part.id} ${pinLike(c, PLUS, 0, '+')} ${pinLike(c, MINUS, 1, '-')} SIN(${c.attr(
@@ -139,6 +159,7 @@ const EMITTERS: { match: RegExp; kind?: MappingKind; emit?: Emitter }[] = [
   },
   {
     match: /sim-idc|current source/i,
+    attrs: [{ key: 'current', label: 'Current', default: '1m', hint: 'A' }],
     emit: (c) => ({
       lines: [
         `I${c.part.id} ${pinLike(c, PLUS, 0, '+')} ${pinLike(c, MINUS, 1, '-')} DC ${c.attr(
@@ -150,6 +171,7 @@ const EMITTERS: { match: RegExp; kind?: MappingKind; emit?: Emitter }[] = [
   },
   {
     match: /resistor|photocell|ldr|thermistor/i,
+    attrs: [{ key: 'resistance', label: 'Resistance', default: '1k', hint: 'Ω' }],
     emit: (c) => {
       const [a, b] = two(c)
       return { lines: [`R${c.part.id} ${a} ${b} ${c.attr(['resistance', 'value'], '1k')}`] }
@@ -157,6 +179,10 @@ const EMITTERS: { match: RegExp; kind?: MappingKind; emit?: Emitter }[] = [
   },
   {
     match: /potentiometer|trimmer/i,
+    attrs: [
+      { key: 'resistance', label: 'Resistance', default: '10k', hint: 'Ω end-to-end' },
+      { key: 'position', label: 'Wiper position', default: '0.5', hint: '0–1' }
+    ],
     emit: (c) => {
       const total = c.attr(['resistance', 'value'], '10k')
       const posRaw = c.attr(['position'], '0.5')
@@ -174,6 +200,7 @@ const EMITTERS: { match: RegExp; kind?: MappingKind; emit?: Emitter }[] = [
   },
   {
     match: /capacitor/i,
+    attrs: [{ key: 'capacitance', label: 'Capacitance', default: '100n', hint: 'F' }],
     emit: (c) => {
       const plus = c.pins.find((p) => PLUS.some((re) => re.test(p)))
       const minus = c.pins.find((p) => MINUS.some((re) => re.test(p)))
@@ -184,6 +211,7 @@ const EMITTERS: { match: RegExp; kind?: MappingKind; emit?: Emitter }[] = [
   },
   {
     match: /inductor/i,
+    attrs: [{ key: 'inductance', label: 'Inductance', default: '10u', hint: 'H' }],
     emit: (c) => {
       const [a, b] = two(c)
       return { lines: [`L${c.part.id} ${a} ${b} ${c.attr(['inductance', 'value'], '10u')}`] }
@@ -247,6 +275,7 @@ const EMITTERS: { match: RegExp; kind?: MappingKind; emit?: Emitter }[] = [
   },
   {
     match: /switch|button/i,
+    attrs: [{ key: 'closed', label: 'Closed', default: 'false', hint: 'true/false' }],
     emit: (c) => {
       const closed = c.part.attrs?.closed === true || c.part.attrs?.closed === 'true'
       if (!closed) return null // open switch = not in the circuit
@@ -266,6 +295,12 @@ function spiceScale(total: string, frac: number): string {
   const base = parseFloat(m[1]) * (m[2] ? mult[m[2]] : 1)
   const v = base * frac
   return v >= 1 ? String(Math.round(v * 100) / 100) : v.toExponential(3)
+}
+
+/** Sim attrs a part type supports (same matching rule as generation). */
+export function simAttrsFor(type: string, family = ''): SimAttrSpec[] {
+  const entry = EMITTERS.find((e) => e.match.test(`${type} ${family}`))
+  return entry?.attrs ?? []
 }
 
 // ── generator ────────────────────────────────────────────────────────────────
