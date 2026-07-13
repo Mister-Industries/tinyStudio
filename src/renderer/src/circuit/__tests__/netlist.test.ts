@@ -152,3 +152,20 @@ test('analysisCard forms', () => {
     '.ac dec 20 1 100k'
   )
 })
+
+test('sine source carries an AC magnitude; ac card sweeps log frequency', () => {
+  const doc = divider()
+  doc.parts.push(part('V2', 'sim-vsin', { amplitude: '2', frequency: '10k' }))
+  doc.wires.push(wire('V2:+', 'R1:Pin 0'), wire('V2:-', 'V1:-'))
+  doc.sim = { analyses: [{ id: 'a1', kind: 'ac', points: 10, fstart: '1', fstop: '100k' }] }
+  const res = generateNetlist(doc, buildNets(doc))
+  assert.match(res.netlist, /VV2 \S+ \S+ SIN\(0 2 10k\) AC 2/)
+  assert.ok(res.netlist.includes('.ac dec 10 1 100k'))
+})
+
+test('a dc analysis without a source falls back to .op instead of a card-less netlist', () => {
+  const doc = divider()
+  doc.sim = { analyses: [{ id: 'a1', kind: 'dc' }] }
+  const res = generateNetlist(doc, buildNets(doc))
+  assert.ok(res.netlist.includes('.op'))
+})

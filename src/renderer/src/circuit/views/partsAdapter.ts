@@ -15,6 +15,7 @@
 import { getPart, viewFor, type PartDef, type PartView } from '../../lib/partsLibrary'
 import { schematicVisual } from '../parts/symbols'
 import { netLabelPinWorld, netLabelVisualOf, snapNetLabel } from '../parts/netLabels'
+import { decorateResistor, hasResistorBands } from '../parts/resistorBands'
 import { pinWorld, snapPlacementToPinGrid } from '../core/geometry'
 import {
   GRID_BB,
@@ -683,4 +684,15 @@ export function rotateNetLabelCmd(doc: CircuitDoc, labelId: string): Command | n
   const frozen = collectFrozen(doc, new Set([labelId]), 'sch')
   const reroutes = reroutesFor(doc, frozen, new Map([[labelId, snapped]]), { x: 0, y: 0 }, 'sch')
   return moveNetLabel(labelId, snapped, reroutes)
+}
+
+/**
+ * Per-part art: the type-level visual, decorated with instance attrs.
+ * Today that's resistor color bands following `attrs.resistance` (bb art
+ * carries `band_*` ids); everything else renders the stock art.
+ */
+export function partArtFor(part: CircuitPart, vis: PartVisual, view: ViewId): string {
+  if (view === 'bb' && part.attrs?.resistance !== undefined && hasResistorBands(vis.v.svg))
+    return decorateResistor(vis.v.svg, part.attrs.resistance)
+  return vis.v.svg
 }

@@ -49,6 +49,7 @@ import {
   holeAt,
   makeEndResolver,
   pinAtWorld,
+  partArtFor,
   reroutesFor,
   rotateBoardAssemblyCmd,
   rotateNetLabelCmd,
@@ -1427,7 +1428,8 @@ export function Canvas({
                   top: pl.y,
                   width: vis.v.w,
                   height: vis.v.h,
-                  zIndex: 2,
+                  // boards sit under every other part (and under the z5 wire layer)
+                  zIndex: isBreadboard(part.type) ? 1 : 2,
                   transform:
                     pl.rotate || pl.flip
                       ? `${pl.rotate ? `rotate(${pl.rotate}deg)` : ''}${pl.flip ? ' scaleX(-1)' : ''}`
@@ -1482,7 +1484,7 @@ export function Canvas({
               >
                 <div
                   className="size-full [&>svg]:size-full [&>svg]:block pointer-events-none select-none"
-                  dangerouslySetInnerHTML={{ __html: vis.v.svg }}
+                  dangerouslySetInnerHTML={{ __html: partArtFor(part, vis, view) }}
                 />
                 {editable &&
                   Object.keys(vis.v.pins).length <= 60 &&

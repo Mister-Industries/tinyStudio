@@ -9,7 +9,7 @@ import { isBreadboard } from '../parts/breadboard'
 import { netLabelVisualOf } from '../parts/netLabels'
 import { escapeXml, namespaceSvgIds, prepareSvgForEmbed, svgNs } from '../parts/svg'
 import { isJunction, type CircuitDoc, type ViewId } from '../core/model'
-import { makeEndResolver, viewBounds, visualFor, wireGeometry } from './partsAdapter'
+import { makeEndResolver, partArtFor, viewBounds, visualFor, wireGeometry } from './partsAdapter'
 
 const WIRE_W = 2.8
 const WIRE_OUTLINE_W = WIRE_W + 1.8
@@ -103,20 +103,22 @@ export function composeSceneSvg(doc: CircuitDoc, bg: string, view: ViewId = 'bb'
     )
     .join('')
 
-  const partsSvg = doc.parts
-    .map((part) => {
-      const pl = part[view]
-      if (!pl) return ''
-      if (sch && isBreadboard(part.type)) return '' // breadboards are transparent in sch
-      const vis = visualFor(part.type, view)
-      if (!vis) return ''
-      const g = embed(vis.v.svg, part.id, pl.x, pl.y, vis.v.w, vis.v.h, pl.rotate, sch && pl.flip)
-      const off = pl.labelOffset || [0, 0]
-      const labelText = String(part.attrs?.label ?? part.id)
-      const label = `<text x="${pl.x + off[0]}" y="${pl.y + vis.v.h + 13 + off[1]}" fill="#969ba3" font-family="Plus Jakarta Sans, sans-serif" font-size="11">${escapeXml(labelText)}</text>`
-      return `${g}${label}`
-    })
-    .join('')
+  const partSvg = (part: (typeof doc.parts)[number]): string => {
+    const pl = part[view]
+    if (!pl) return ''
+    if (sch && isBreadboard(part.type)) return '' // breadboards are transparent in sch
+    const vis = visualFor(part.type, view)
+    if (!vis) return ''
+    const art = partArtFor(part, vis, view)
+    const g = embed(art, part.id, pl.x, pl.y, vis.v.w, vis.v.h, pl.rotate, sch && pl.flip)
+    const off = pl.labelOffset || [0, 0]
+    const labelText = String(part.attrs?.label ?? part.id)
+    const label = `<text x="${pl.x + off[0]}" y="${pl.y + vis.v.h + 13 + off[1]}" fill="#969ba3" font-family="Plus Jakarta Sans, sans-serif" font-size="11">${escapeXml(labelText)}</text>`
+    return `${g}${label}`
+  }
+  // boards paint first — under the wires and every other part
+  const boardsSvg = doc.parts.filter((p) => isBreadboard(p.type)).map(partSvg).join('')
+  const partsSvg = doc.parts.filter((p) => !isBreadboard(p.type)).map(partSvg).join('')
 
   const labelsSvg = sch
     ? (doc.netLabels ?? [])
@@ -128,7 +130,7 @@ export function composeSceneSvg(doc: CircuitDoc, bg: string, view: ViewId = 'bb'
     : ''
 
   const watermark = `<text x="${maxX - 14}" y="${maxY - 16}" text-anchor="end" fill="#79818c" fill-opacity="0.4" font-family="Plus Jakarta Sans, sans-serif" font-size="46" letter-spacing="-1"><tspan font-weight="300">tiny</tspan><tspan font-weight="800">Studio</tspan></text>`
-  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="${minX} ${minY} ${W} ${H}"><rect x="${minX}" y="${minY}" width="${W}" height="${H}" fill="${bg}"/>${wires}${dots}${partsSvg}${labelsSvg}${watermark}</svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="${minX} ${minY} ${W} ${H}"><rect x="${minX}" y="${minY}" width="${W}" height="${H}" fill="${bg}"/>${boardsSvg}${wires}${dots}${partsSvg}${labelsSvg}${watermark}</svg>`
 }
 
 /**

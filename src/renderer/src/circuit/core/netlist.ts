@@ -153,7 +153,10 @@ const EMITTERS: {
         `V${c.part.id} ${pinLike(c, PLUS, 0, '+')} ${pinLike(c, MINUS, 1, '-')} SIN(${c.attr(
           ['offset'],
           '0'
-        )} ${c.attr(['amplitude', 'value'], '1')} ${c.attr(['frequency', 'freq'], '1k')})`
+        )} ${c.attr(['amplitude', 'value'], '1')} ${c.attr(['frequency', 'freq'], '1k')}) AC ${c.attr(
+          ['amplitude', 'value'],
+          '1'
+        )}`
       ]
     })
   },
@@ -171,10 +174,10 @@ const EMITTERS: {
   },
   {
     match: /resistor|photocell|ldr|thermistor/i,
-    attrs: [{ key: 'resistance', label: 'Resistance', default: '1k', hint: 'Ω' }],
+    attrs: [{ key: 'resistance', label: 'Resistance', default: '220', hint: 'Ω' }],
     emit: (c) => {
       const [a, b] = two(c)
-      return { lines: [`R${c.part.id} ${a} ${b} ${c.attr(['resistance', 'value'], '1k')}`] }
+      return { lines: [`R${c.part.id} ${a} ${b} ${c.attr(['resistance', 'value'], '220')}`] }
     }
   },
   {
@@ -376,7 +379,8 @@ export function generateNetlist(
 
   // analyses (spec §10.2.4) — default to .op
   const analyses = (doc.sim?.analyses ?? []).filter((a) => a.enabled !== false)
-  const cards = analyses.length ? analyses.map(analysisCard).filter(Boolean) : ['.op']
+  const resolved = analyses.map(analysisCard).filter(Boolean)
+  const cards = resolved.length ? resolved : ['.op'] // never emit a card-less netlist
 
   const text = [
     `* ${opts.title ?? 'tinyStudio circuit'}`,

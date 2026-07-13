@@ -1,16 +1,16 @@
 /**
  * circuit/views/sim/SimPanel — the M4 Simulate panel (spec §10.4, first cut).
  *
- * Docked at the bottom of the circuit area: analysis tabs (DC / Transient),
- * parameters, Run/Cancel, results. DC (.op) lists node voltages and source
- * currents — and the shell mirrors them onto the schematic as annotations;
- * transient renders probe traces in a lightweight inline SVG plot (uPlot
- * arrives with the full plotting pass — cursors/zoom/AC are M4 backlog).
+ * Docked at the bottom of the circuit area: analysis tabs (DC op / DC sweep /
+ * Transient / AC), parameters, Run/Cancel, results. DC (.op) lists node
+ * voltages and source currents — and the shell mirrors them onto the canvas
+ * as annotations; sweeps render in a uPlot chart (cursors, drag-zoom,
+ * legend-toggle) with CSV export.
  *
  * Analysis config persists in doc.sim via Commands (undoable, serialized).
  */
 
-import { CircuitBoard, Loader2, Play, Square, X } from 'lucide-react'
+import { CircuitBoard, Download, Loader2, Play, Square, X } from 'lucide-react'
 import React from 'react'
 import * as cmd from '../../core/commands'
 import type { Analysis, CircuitDoc } from '../../core/model'
@@ -19,6 +19,7 @@ import { generateNetlist, type NetlistResult } from '../../core/netlist'
 import type { CircuitStore } from '../../core/store'
 import { getSimBackend, SimError } from '../../sim'
 import type { SimRun } from '../../sim'
+import { runToCsv, SimPlot, type PlotMode } from './Plot'
 
 const field =
   'bg-bg-sunken border border-border-default rounded px-2 py-1 text-text-strong outline-none focus:border-brand w-20 text-xs'
@@ -50,11 +51,24 @@ export function SimPanel({
   const [gen, setGen] = React.useState<NetlistResult | null>(null)
   const [error, setError] = React.useState<{ message: string; details?: string[] } | null>(null)
   const [showNetlist, setShowNetlist] = React.useState(false)
-  const [hidden, setHidden] = React.useState<Set<string>>(new Set())
 
   const setAnalysis = (patch: Partial<Analysis>): void => {
     store.dispatch(cmd.setAnalyses([{ ...analysis, ...patch }]))
   }
+
+  // sweepable sources, named the way the netlist emits them (VV1, II1…)
+  const sources = React.useMemo(
+    () =>
+      doc.parts
+        .map((p) => {
+          const key = `${p.type} ${familyOf(p.type) ?? ''}`
+          if (/sim-vdc|voltage source|battery|sim-vsin|sine|waveform/i.test(key)) return `V${p.id}`
+          if (/sim-idc|current source/i.test(key)) return `I${p.id}`
+          return null
+        })
+        .filter((n): n is string => n !== null),
+    [doc.parts, familyOf]
+  )
 
   const run = async (): Promise<void> => {
     setRunning(true)
@@ -115,7 +129,9 @@ export function SimPanel({
           {(
             [
               ['op', 'DC'],
-              ['tran', 'Transient']
+              ['dc', 'Sweep'],
+              ['tran', 'Transient'],
+              ['ac', 'AC']
             ] as [Analysis['kind'], string][]
           ).map(([kind, label]) => (
             <button
@@ -125,7 +141,13 @@ export function SimPanel({
                   ? 'bg-brand/15 text-brand'
                   : 'bg-surface-card text-text-muted hover:text-text-body'
               }`}
-              onClick={() => setAnalysis({ kind })}
+              onClick={() =>
+                setAnalysis(
+                  kind === 'dc'
+                    ? { kind, src: String(analysis.src ?? sources[0] ?? '') }
+                    : { kind }
+                )
+              }
             >
               {label}
             </button>
@@ -159,7 +181,102 @@ export function SimPanel({
           </div>
         )}
 
+        {analysis.kind === 'dc' && (
+          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+            <span>source</span>
+            <select
+              className={`${field} w-24`}
+              value={String(analysis.src ?? sources[0] ?? '')}
+              onChange={(e) => setAnalysis({ src: e.target.value })}
+            >
+              {sources.length === 0 && <option value="">no sources</option>}
+              {sources.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+            <span>from</span>
+            <input
+              className={field}
+              defaultValue={String(analysis.from ?? '0')}
+              key={`from:${analysis.id}`}
+              onBlur={(e) => setAnalysis({ from: e.target.value })}
+            />
+            <span>to</span>
+            <input
+              className={field}
+              defaultValue={String(analysis.to ?? '5')}
+              key={`to:${analysis.id}`}
+              onBlur={(e) => setAnalysis({ to: e.target.value })}
+            />
+            <span>step</span>
+            <input
+              className={field}
+              defaultValue={String(analysis.step ?? '0.1')}
+              key={`dcstep:${analysis.id}`}
+              onBlur={(e) => setAnalysis({ step: e.target.value })}
+            />
+          </div>
+        )}
+
+        {analysis.kind === 'ac' && (
+          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+            <select
+              className={`${field} w-16`}
+              value={String(analysis.variation ?? 'dec')}
+              onChange={(e) => setAnalysis({ variation: e.target.value })}
+            >
+              {['dec', 'oct', 'lin'].map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+            <span>pts</span>
+            <input
+              className={`${field} w-12`}
+              defaultValue={String(analysis.points ?? '20')}
+              key={`pts:${analysis.id}`}
+              onBlur={(e) => setAnalysis({ points: e.target.value })}
+            />
+            <span>from</span>
+            <input
+              className={field}
+              defaultValue={String(analysis.fstart ?? '1')}
+              key={`fstart:${analysis.id}`}
+              onBlur={(e) => setAnalysis({ fstart: e.target.value })}
+            />
+            <span>to</span>
+            <input
+              className={field}
+              defaultValue={String(analysis.fstop ?? '1Meg')}
+              key={`fstop:${analysis.id}`}
+              onBlur={(e) => setAnalysis({ fstop: e.target.value })}
+            />
+            <span className="text-text-faint" title="AC needs a sine source — its amplitude sets the AC magnitude">
+              Hz
+            </span>
+          </div>
+        )}
+
         <div className="flex-1" />
+        {result && result.numPoints > 1 && (
+          <button
+            className="flex items-center gap-1 text-[11px] text-text-faint hover:text-text-body"
+            title="Download results as CSV"
+            onClick={() => {
+              const blob = new Blob([runToCsv(result)], { type: 'text/csv' })
+              const a = document.createElement('a')
+              a.href = URL.createObjectURL(blob)
+              a.download = 'simulation.csv'
+              a.click()
+              URL.revokeObjectURL(a.href)
+            }}
+          >
+            <Download size={11} /> CSV
+          </button>
+        )}
         <button
           className="text-[11px] text-text-faint hover:text-text-body"
           onClick={() => setShowNetlist((s) => !s)}
@@ -220,18 +337,7 @@ export function SimPanel({
 
         {isOp && result && <OpTable run={result} describe={describe} />}
         {result && result.numPoints > 1 && (
-          <WavePlot
-            run={result}
-            hidden={hidden}
-            onToggle={(name) =>
-              setHidden((h) => {
-                const next = new Set(h)
-                if (next.has(name)) next.delete(name)
-                else next.add(name)
-                return next
-              })
-            }
-          />
+          <SimPlot run={result} mode={(analysis.kind === 'op' ? 'tran' : analysis.kind) as PlotMode} />
         )}
 
         {showNetlist && gen && (
@@ -290,98 +396,6 @@ function OpTable({
           </span>
         </React.Fragment>
       ))}
-    </div>
-  )
-}
-
-// ── waveform plot (inline SVG — uPlot lands with the full plotting pass) ─────
-
-const TRACES = ['#4f9cf9', '#f36e6e', '#54c08a', '#e5b567', '#b78be5', '#5bc8c8']
-
-function WavePlot({
-  run,
-  hidden,
-  onToggle
-}: {
-  run: SimRun
-  hidden: Set<string>
-  onToggle: (name: string) => void
-}): React.JSX.Element {
-  const x =
-    run.vectors.find((v) => v.type === 'time' || v.type === 'frequency') ?? run.vectors[0]
-  const all = run.vectors.filter((v) => v !== x && v.name.startsWith('v('))
-  const traces = all.filter((v) => !hidden.has(v.name)).slice(0, TRACES.length)
-  if (!x || all.length === 0) return <div className="text-text-faint">no voltage vectors</div>
-
-  const W = 640
-  const H = 180
-  const PAD = 28
-  const xmin = Math.min(...x.values)
-  const xmax = Math.max(...x.values)
-  let ymin = traces.length ? Infinity : -1
-  let ymax = traces.length ? -Infinity : 1
-  for (const tr of traces)
-    for (const v of tr.values) {
-      ymin = Math.min(ymin, v)
-      ymax = Math.max(ymax, v)
-    }
-  if (ymin === ymax) {
-    ymin -= 1
-    ymax += 1
-  }
-  const sx = (v: number): number => PAD + ((v - xmin) / (xmax - xmin || 1)) * (W - PAD * 2)
-  const sy = (v: number): number => H - PAD - ((v - ymin) / (ymax - ymin)) * (H - PAD * 2)
-
-  return (
-    <div className="flex flex-col gap-1">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[720px] rounded-md border border-border-default bg-bg-sunken">
-        {/* axes */}
-        <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="var(--border-strong)" />
-        <line x1={PAD} y1={PAD} x2={PAD} y2={H - PAD} stroke="var(--border-strong)" />
-        <text x={PAD} y={PAD - 6} fontSize="9" fill="var(--text-muted)">
-          {fmtSI(ymax, 'V')}
-        </text>
-        <text x={PAD} y={H - PAD + 12} fontSize="9" fill="var(--text-muted)">
-          {fmtSI(ymin, 'V')}
-        </text>
-        <text x={W - PAD} y={H - PAD + 12} fontSize="9" fill="var(--text-muted)" textAnchor="end">
-          {fmtSI(xmax, x.type === 'frequency' ? 'Hz' : 's')}
-        </text>
-        {traces.map((tr, i) => (
-          <polyline
-            key={tr.name}
-            fill="none"
-            stroke={TRACES[i]}
-            strokeWidth="1.4"
-            points={tr.values.map((v, k) => `${sx(x.values[k])},${sy(v)}`).join(' ')}
-          />
-        ))}
-      </svg>
-      <div className="flex gap-2 flex-wrap items-center">
-        {all.map((tr) => {
-          const idx = traces.indexOf(tr)
-          const off = idx < 0
-          return (
-            <button
-              key={tr.name}
-              className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border ${
-                off
-                  ? 'border-border-default text-text-faint line-through'
-                  : 'border-transparent text-text-muted'
-              }`}
-              title={off ? 'Show trace' : 'Hide trace'}
-              onClick={() => onToggle(tr.name)}
-            >
-              <span
-                className="w-3 h-0.5 inline-block"
-                style={{ background: off ? 'var(--border-strong)' : TRACES[idx] }}
-              />
-              {tr.name}
-            </button>
-          )
-        })}
-        <span className="text-[10px] text-text-faint ml-1">click to toggle</span>
-      </div>
     </div>
   )
 }

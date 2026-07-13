@@ -267,3 +267,28 @@ Four chunks, committed separately. `npm run typecheck` clean · `npm run test:ci
 - **Readable DC table**: each `v(node)` row shows the net's members ("R1:Pin 1 · LED1:anode"), `i(vxx)` rows say "current through …".
 - Real probe *parts* (§10.3, `sim.probes`) remain backlog — this pass makes everything probeable-by-default usable.
 - `npm run typecheck` clean · `npm run test:circuit` → 89/89.
+
+---
+
+## 2026-07-13 (later) — M4 panel complete + visual fixes (Geoff's round 3)
+
+`npm run typecheck` clean · `npm run test:circuit` → **95/95** · web build verified (worker + engine chunks intact).
+
+### Sim panel: all four analyses (spec §10.4)
+
+- Tabs are now **DC | Sweep | Transient | AC**. Sweep: source select (element names as emitted — VV1/II1, seeded to the first source on tab switch), from/to/step. AC: dec/oct/lin, points, fstart/fstop.
+- **uPlot** (spec's decided plot lib, MIT, ~45 kB) replaces the inline SVG plot: live cursor readouts, drag-to-zoom (double-click resets), click-to-toggle legend. One `SimPlot` component handles the three sweep shapes — transient (x=time), DC sweep (x=`v(v-sweep)`), AC (log-frequency axis, magnitude in **dB** + dashed **phase** traces on a right-hand degree axis). Theme colors read from design tokens at mount.
+- **CSV export** button (full vectors; complex AC data exported as mag+deg columns).
+- **AC actually works**: the sine source card now carries `AC <amplitude>` (`SIN(…) AC 2`), so `.ac` sweeps have a stimulus. Generator hardening: an analysis list that resolves to zero cards falls back to `.op` (a `.dc` without a source can no longer emit a card-less netlist).
+
+### Visual fixes
+
+- **Breadboards render below everything**: canvas boards get `zIndex 1` (parts 2, wires 5); the image exporter paints a `boardsSvg` layer before wires and parts, so exports match the canvas.
+- **Resistor color bands follow the value** (`parts/resistorBands.ts`): the Fritzing art's `band_1_st`/`band_2_nd`/`band_rd_multiplier` ids are recolored to the 4-band IEC code computed from `attrs.resistance` (gold/silver multipliers for sub-10Ω; tolerance band untouched; unparseable values leave stock art). Wired through `partsAdapter.partArtFor` — used by both the canvas and the exporter, cached per (svg, value). Resistor sim default changed 1k → **220** to match the stock red-red-brown art.
+- Tests: +6 (95 total) — band parsing/coding/recolor, vsin AC card, dc-without-source fallback.
+
+### Notes
+
+- uPlot inlines into the main chunk (small); the engine stays its own lazy chunk.
+- Sandbox web build needed `NODE_OPTIONS=--max-old-space-size=4096` once (OOM at transform) — not a repo issue.
+- Remaining M4: probe parts (`sim.probes`), current probes, error→part highlight mapping, auto-rerun toggle, bb hole-tooltip voltages, flag default ON + legacy editor removal. Then M5 interop.
