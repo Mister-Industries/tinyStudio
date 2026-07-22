@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { emptyDoc, type CircuitDoc, type CircuitPart, type CircuitWire } from '../core/model'
 import { buildNets } from '../core/nets'
-import { analysisCard, generateNetlist, spiceNum } from '../core/netlist'
+import { analysisCard, generateNetlist, mapSimIssue, mapSimIssues, spiceNum } from '../core/netlist'
 
 let wid = 0
 const wire = (from: string, to: string): CircuitWire => ({
@@ -168,4 +168,49 @@ test('a dc analysis without a source falls back to .op instead of a card-less ne
   doc.sim = { analyses: [{ id: 'a1', kind: 'dc' }] }
   const res = generateNetlist(doc, buildNets(doc))
   assert.ok(res.netlist.includes('.op'))
+})
+
+// ── mapSimIssue / mapSimIssues (M4: error → part/net highlight mapping) ─────
+
+test('elementOfPart records the lowercased device name(s) generateNetlist emitted', () => {
+  const doc = divider()
+  const res = generateNetlist(doc, buildNets(doc))
+  assert.deepEqual(res.elementOfPart.V1, ['vv1'])
+  assert.deepEqual(res.elementOfPart.R1, ['rr1'])
+  assert.equal(res.elementOfPart.R2?.[0], 'rr2')
+})
+
+test('mapSimIssue finds the part behind an ngspice device-name mention', () => {
+  const doc = divider()
+  const res = generateNetlist(doc, buildNets(doc))
+  const hit = mapSimIssue('Warning: singular matrix:  check node or device rr1', res)
+  assert.deepEqual(hit.parts, ['R1'])
+  assert.deepEqual(hit.nets, [])
+})
+
+test('mapSimIssue finds the net behind a node-name mention, skips ground', () => {
+  const doc = divider()
+  const res = generateNetlist(doc, buildNets(doc))
+  // R1/R2 share a node — find its synthetic name and confirm it round-trips
+  const midIdx = res.nodeOfNet.findIndex((n) => n !== '0' && n.startsWith('n'))
+  assert.ok(midIdx >= 0)
+  const hit = mapSimIssue(`doAnalyses: node ${res.nodeOfNet[midIdx]} is floating`, res)
+  assert.deepEqual(hit.nets, [midIdx])
+  const groundHit = mapSimIssue('node 0 shorted', res)
+  assert.deepEqual(groundHit.nets, [], 'ground is never matched')
+})
+
+test('mapSimIssue does not confuse n1 with n10 (word boundaries)', () => {
+  const doc = divider()
+  const res = generateNetlist(doc, buildNets(doc))
+  const hit = mapSimIssue('reference only to node n10 here', res)
+  const n1Idx = res.nodeOfNet.indexOf('n1')
+  if (n1Idx >= 0) assert.ok(!hit.nets.includes(n1Idx))
+})
+
+test('mapSimIssues de-dupes across multiple lines', () => {
+  const doc = divider()
+  const res = generateNetlist(doc, buildNets(doc))
+  const hit = mapSimIssues(['device rr1 bad', 'device rr1 bad again', 'device vv1 too'], res)
+  assert.deepEqual([...hit.parts].sort(), ['R1', 'V1'])
 })

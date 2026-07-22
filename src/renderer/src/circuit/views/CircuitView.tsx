@@ -39,6 +39,7 @@ import { PartsEditor } from '../../components/PartsEditor'
 import * as cmd from '../core/commands'
 import { newId, type NetLabelKind, type Pt, type ViewId } from '../core/model'
 import { buildNets } from '../core/nets'
+import type { SimIssueRef } from '../core/netlist'
 import { runErc, type ErcIssue, type ErcSeverity } from '../core/erc'
 import { nextRefdes, prefixForFamily } from '../core/refdes'
 import { CircuitStore } from '../core/store'
@@ -204,6 +205,15 @@ export function CircuitViewV2({
       setSel({ parts: new Set(), wires: new Set([i.ref.wire]), labels: new Set() })
     else if (i.ref?.label)
       setSel({ parts: new Set(), wires: new Set(), labels: new Set([i.ref.label]) })
+  }
+  // sim error chip click (mapSimIssues): select the implicated part(s), plus
+  // every part touching an implicated net (a net has no its own selection).
+  const selectSimIssue = (refs: SimIssueRef): void => {
+    const partIds = new Set(refs.parts)
+    for (const i of refs.nets) {
+      for (const ref of netModel.nets[i] ?? []) partIds.add(ref.slice(0, ref.lastIndexOf(':')))
+    }
+    setSel({ parts: partIds, wires: new Set(), labels: new Set() })
   }
   // parts with no placement in the current view live in the tray.
   // Breadboards are excluded from the schematic entirely (spec §10.2: they
@@ -556,6 +566,7 @@ export function CircuitViewV2({
             familyOf={(t) => getPart(t)?.family}
             onClose={() => setShowSim(false)}
             onResult={setSim}
+            onSelectIssue={selectSimIssue}
           />
         )}
 

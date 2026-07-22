@@ -70,6 +70,9 @@ export interface NetlistResult {
   warnings: string[]
   /** part ids not simulated (unknown/board) */
   excluded: string[]
+  /** SPICE element/device names emitted per part id (e.g. R1 → ['rr1']),
+   *  lowercased to match ngspice's own casing — feeds mapSimIssue. */
+  elementOfPart: Record<string, string[]>
 }
 
 interface Ctx {
@@ -328,6 +331,7 @@ export function generateNetlist(
 
   const lines: string[] = []
   const models = new Map<string, string>()
+  const elementOfPart: Record<string, string[]> = {}
 
   for (const part of doc.parts) {
     const family = opts.familyOf?.(part.type) ?? ''
@@ -375,6 +379,10 @@ export function generateNetlist(
     if (!card) continue
     lines.push(...card.lines)
     if (card.model) models.set(card.model.name, card.model.card)
+    for (const line of card.lines) {
+      const dev = line.split(/\s+/, 1)[0]?.toLowerCase()
+      if (dev) (elementOfPart[part.id] ??= []).push(dev)
+    }
   }
 
   // analyses (spec §10.2.4) — default to .op
@@ -391,7 +399,7 @@ export function generateNetlist(
     ''
   ].join('\n')
 
-  return { netlist: text, nodeOfNet, warnings, excluded }
+  return { netlist: text, nodeOfNet, warnings, excluded, elementOfPart }
 }
 
 export function analysisCard(a: Analysis): string | null {
@@ -412,4 +420,51 @@ export function analysisCard(a: Analysis): string | null {
     default:
       return null
   }
+}
+
+// ── error → part/net mapping (M4 leftover) ──────────────────────────────────
+
+export interface SimIssueRef {
+  /** part ids whose emitted device name(s) appear in the message */
+  parts: string[]
+  /** net indices whose node name appears in the message */
+  nets: number[]
+}
+
+function escapeReg(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
+ * Map one raw ngspice error/warning line back to the parts and nets it names,
+ * using the element/node names `generateNetlist` recorded for this run.
+ * Case-insensitive, word-boundary matching (ngspice lowercases everything it
+ * prints). Ground (`0`) is skipped — it appears in far too much numeric text
+ * to be a useful match.
+ */
+export function mapSimIssue(text: string, gen: NetlistResult): SimIssueRef {
+  const low = text.toLowerCase()
+  const parts: string[] = []
+  for (const [id, devices] of Object.entries(gen.elementOfPart)) {
+    if (devices.some((d) => new RegExp(`\\b${escapeReg(d)}\\b`).test(low))) parts.push(id)
+  }
+  const nets: number[] = []
+  gen.nodeOfNet.forEach((node, i) => {
+    if (!node || node === '0') return
+    if (new RegExp(`\\b${escapeReg(node.toLowerCase())}\\b`).test(low)) nets.push(i)
+  })
+  return { parts, nets }
+}
+
+/** Same as `mapSimIssue`, folded over every line of a failure's details
+ * (or just the top-level message), de-duplicated. */
+export function mapSimIssues(lines: string[], gen: NetlistResult): SimIssueRef {
+  const parts = new Set<string>()
+  const nets = new Set<number>()
+  for (const line of lines) {
+    const r = mapSimIssue(line, gen)
+    r.parts.forEach((p) => parts.add(p))
+    r.nets.forEach((n) => nets.add(n))
+  }
+  return { parts: [...parts], nets: [...nets] }
 }

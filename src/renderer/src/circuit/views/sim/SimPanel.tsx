@@ -14,8 +14,8 @@ import { CircuitBoard, Download, Loader2, Play, Square, X } from 'lucide-react'
 import React from 'react'
 import * as cmd from '../../core/commands'
 import type { Analysis, CircuitDoc } from '../../core/model'
-import type { NetModel } from '../../core/nets'
-import { generateNetlist, type NetlistResult } from '../../core/netlist'
+import { describeNet, type NetModel } from '../../core/nets'
+import { generateNetlist, mapSimIssues, type NetlistResult, type SimIssueRef } from '../../core/netlist'
 import type { CircuitStore } from '../../core/store'
 import { getSimBackend, SimError } from '../../sim'
 import type { SimRun } from '../../sim'
@@ -35,7 +35,8 @@ export function SimPanel({
   store,
   familyOf,
   onClose,
-  onResult
+  onResult,
+  onSelectIssue
 }: {
   doc: CircuitDoc
   netModel: NetModel
@@ -44,6 +45,8 @@ export function SimPanel({
   onClose: () => void
   /** surfaces the run to the shell (canvas DC annotations) */
   onResult: (s: SimState) => void
+  /** clicking a part/net chip on an error asks the shell to select it */
+  onSelectIssue?: (refs: SimIssueRef) => void
 }): React.JSX.Element {
   const analysis: Analysis = doc.sim?.analyses?.[0] ?? { id: 'a1', kind: 'op' }
   const [running, setRunning] = React.useState(false)
@@ -119,6 +122,16 @@ export function SimPanel({
   }, [doc, autoRerun])
 
   const isOp = result != null && result.numPoints === 1
+
+  // error → part/net highlight mapping (M4 leftover): scan the engine's raw
+  // message lines for the device/node names this run's netlist used, so the
+  // offending elements can be selected on the canvas straight from the error.
+  const issueRefs: SimIssueRef | null = React.useMemo(() => {
+    if (!error || !gen) return null
+    const lines = error.details?.length ? error.details : [error.message]
+    const r = mapSimIssues(lines, gen)
+    return r.parts.length || r.nets.length ? r : null
+  }, [error, gen])
 
   // "v(n1)" → the net's members ("R1:Pin 1 · LED1:anode"); "i(vv1)" → source
   const describe = React.useCallback(
@@ -360,6 +373,38 @@ export function SimPanel({
               <pre className="mt-1 whitespace-pre-wrap text-[10px] opacity-80">
                 {error.details.slice(0, 8).join('\n')}
               </pre>
+            )}
+            {issueRefs && (
+              <div className="mt-1.5 flex flex-wrap items-center gap-1">
+                <span className="text-[10px] opacity-70">select:</span>
+                {issueRefs.parts.map((id) => (
+                  <button
+                    key={id}
+                    className="px-1.5 py-0.5 rounded bg-status-danger/10 hover:bg-status-danger/20 text-[10px] font-mono text-status-danger"
+                    onClick={() => onSelectIssue?.({ parts: [id], nets: [] })}
+                  >
+                    {id}
+                  </button>
+                ))}
+                {issueRefs.nets.map((i) => (
+                  <button
+                    key={`n${i}`}
+                    className="px-1.5 py-0.5 rounded bg-status-danger/10 hover:bg-status-danger/20 text-[10px] text-status-danger"
+                    onClick={() => onSelectIssue?.({ parts: [], nets: [i] })}
+                    title={describeNet(netModel, i)}
+                  >
+                    net {i}
+                  </button>
+                ))}
+                {(issueRefs.parts.length > 1 || issueRefs.nets.length > 0) && (
+                  <button
+                    className="px-1.5 py-0.5 rounded bg-status-danger/15 hover:bg-status-danger/25 text-[10px] font-medium text-status-danger"
+                    onClick={() => onSelectIssue?.(issueRefs)}
+                  >
+                    select all
+                  </button>
+                )}
+              </div>
             )}
           </div>
         )}
