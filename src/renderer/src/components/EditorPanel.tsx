@@ -33,7 +33,8 @@ import * as monaco from 'monaco-editor'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { notify as toast } from '@renderer/lib/notify'
 import { BlocklyEditor } from './BlocklyEditor'
-import { DiagramEditor } from './DiagramEditor'
+import { emptyDoc, parseCircuitFile, serializeDoc } from '../circuit'
+import { CircuitViewV2 } from '../circuit/views/CircuitView'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
 import {
   Dialog,
@@ -50,12 +51,6 @@ import { Input } from './ui/Input'
 import { VisualPreview } from './VisualPreview'
 
 loader.config({ monaco })
-
-const DEFAULT_DIAGRAM = JSON.stringify(
-  { version: 1, editor: 'tinystudio', parts: [], connections: [] },
-  null,
-  2
-)
 const DEFAULT_VISUAL = `// visual.js — Serial Plotter
 // Graphs the latest number printed over Serial (serialValue()) as a scrolling
 // line, auto-scaling to the data. Try Serial.println(analogRead(A0)) on the
@@ -359,18 +354,66 @@ function CodeView(): React.JSX.Element {
   )
 }
 
-// ── Circuit view: full-window interactive diagram.json ──────────────────────
+// ── Circuit view: full-window interactive circuit.json editor (v2) ──────────
+//
+// Circuit View v2 (docs/circuit-view-tech-spec.md) is the only editor as of
+// M4 — the legacy DiagramEditor and its `diagram.json`-only path were removed
+// once v2 reached parity + simulation. Any project still holding a v1
+// `diagram.json` is migrated on open (see CircuitView below).
 
+/**
+ * v2 adoption (spec §4, §13): the native file is `circuit.json`. On first
+ * open of a project that only has a v1 `diagram.json`, migrate it on disk:
+ * write `circuit.json` (converted) and `diagram.json.bak` (verbatim copy).
+ */
 function CircuitView(): React.JSX.Element {
   const workspace = useAppSelector((s) => s.file.workspace)
-  const dispatch = useAppDispatch()
-  const file = useProjectFile('diagram.json', () => DEFAULT_DIAGRAM)
+  const [ready, setReady] = useState(false)
+  const adopting = useRef(false)
+
+  useEffect(() => {
+    setReady(false)
+    if (!workspace || adopting.current) return
+    if (findInTree(workspace.root, (i) => i.name === 'circuit.json')) {
+      setReady(true)
+      return
+    }
+    const diagram = findInTree(workspace.root, (i) => i.name === 'diagram.json')
+    if (!diagram) {
+      setReady(true) // fresh project — useProjectFile seeds an empty circuit.json
+      return
+    }
+    adopting.current = true
+    ;(async () => {
+      try {
+        const old = await fileSystem.readFile(diagram.path!)
+        const { doc } = parseCircuitFile(old)
+        await fileSystem.writeFile(`${workspace.path}/circuit.json`, serializeDoc(doc))
+        await fileSystem.writeFile(`${workspace.path}/diagram.json.bak`, old)
+        await new RefreshWorkspaceCommand(workspace).execute()
+      } catch (e) {
+        console.error('circuit.json adoption failed:', e)
+      } finally {
+        adopting.current = false
+        setReady(true)
+      }
+    })()
+  }, [workspace])
 
   if (!workspace) return <EmptyHint icon="circuit" label="Open a project to design its circuit." />
+  if (!ready) return <LoadingHint label="Preparing circuit…" />
+  return <CircuitV2Inner />
+}
+
+function CircuitV2Inner(): React.JSX.Element {
+  const dispatch = useAppDispatch()
+  const makeDefault = useCallback(() => serializeDoc(emptyDoc()), [])
+  const file = useProjectFile('circuit.json', makeDefault)
+
   if (!file) return <LoadingHint label="Loading circuit…" />
 
   return (
-    <DiagramEditor
+    <CircuitViewV2
       content={file.content}
       onChange={(content) => dispatch(updateFileContent({ id: file.id, content }))}
       onOpenCode={() => {
@@ -378,8 +421,7 @@ function CircuitView(): React.JSX.Element {
         dispatch(setEditorView('code'))
       }}
       onEditChange={(editing) => {
-        // entering edit mode: free horizontal space by closing the docs panel
-        if (editing) dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
+        dispatch(setPanelOpen({ panel: 'docs', isOpen: !editing }))
       }}
     />
   )

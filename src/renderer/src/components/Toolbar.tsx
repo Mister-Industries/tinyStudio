@@ -55,7 +55,10 @@ export function Toolbar(): React.JSX.Element {
         </Tooltip>
       </div>
 
-      <span className="w-[1.5px] h-[26px] bg-[var(--border-default)] mx-0.5 shrink-0" />
+      <span
+        data-toolbar-divider
+        className="w-[1.5px] h-[26px] bg-[var(--border-default)] mx-0.5 shrink-0"
+      />
 
       <div className="flex items-center gap-2">
         <BoardManager />

@@ -3,6 +3,9 @@ import { createAppSlice } from './createAppSlice'
 
 export type EditorView = 'code' | 'circuit' | 'visual'
 
+// Which tab is active in the docs/examples/AI side panel.
+export type DocsTab = 'readme' | 'examples' | 'ai'
+
 export type EditorSliceState = {
   status: 'idle' | 'loading' | 'failed'
   isFileExplorerOpen: boolean
@@ -13,6 +16,9 @@ export type EditorSliceState = {
   // diagram.json interactively; 'visual' runs a p5 sketch (.js). The toolbar
   // segment sets this and auto-focuses the matching file.
   editorView: EditorView
+  // Starts on 'examples' when nothing is open yet; activateWorkspace() flips
+  // this to 'readme' whenever a folder or example is opened.
+  docsTab: DocsTab
 }
 
 const initialState: EditorSliceState = {
@@ -21,7 +27,8 @@ const initialState: EditorSliceState = {
   isSerialMonitorOpen: true,
   isDocsPanelOpen: true,
   editorMode: 'code',
-  editorView: 'code'
+  editorView: 'code',
+  docsTab: 'examples'
 }
 
 // If you are not using async thunks you can use the standalone `createSlice`.
@@ -51,6 +58,9 @@ export const editorSlice = createAppSlice({
     }),
     setEditorView: create.reducer((state, payload: PayloadAction<EditorView>) => {
       state.editorView = payload.payload
+    }),
+    setDocsTab: create.reducer((state, payload: PayloadAction<DocsTab>) => {
+      state.docsTab = payload.payload
     })
   }),
   selectors: {
@@ -66,12 +76,13 @@ export const editorSlice = createAppSlice({
         isDocsPanelOpen
       })
     ),
-    selectEditorView: (state) => state.editorView
+    selectEditorView: (state) => state.editorView,
+    selectDocsTab: (state) => state.docsTab
   }
 })
 
 // Action creators are generated for each case reducer function.
-export const { setPanelOpen, setEditorMode, setEditorView } = editorSlice.actions
+export const { setPanelOpen, setEditorMode, setEditorView, setDocsTab } = editorSlice.actions
 
 // Selectors returned by `slice.selectors` take the root state as their first argument.
-export const { selectPanelState, selectEditorView } = editorSlice.selectors
+export const { selectPanelState, selectEditorView, selectDocsTab } = editorSlice.selectors

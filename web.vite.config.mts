@@ -10,6 +10,8 @@ export default defineConfig({
   // /assets/... correctly. A relative './' base would resolve assets against
   // the deep path and 404 once the Netlify SPA redirect serves index.html there.
   base: '/',
+  // module workers (sim engine lazy-imports ngspice-WASM inside a worker)
+  worker: { format: 'es' },
   build: {
     outDir: path.resolve(__dirname, 'dist-web'),
     emptyOutDir: true

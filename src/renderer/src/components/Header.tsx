@@ -11,9 +11,11 @@ import { GitHubAccountButton } from './GitHubAccountButton'
  * Top bar (38px). Brand wordmark + breadcrumb on the left; theme toggle, GitHub
  * account, and (on Electron) window controls on the right.
  *
- * Theme-aware per the design system: in LIGHT mode the bar is the blue brand
- * color with a white wordmark; in DARK mode it's the raised grey surface with
- * the wordmark's "Studio" in brand blue. Inset controls flip with it.
+ * Theme-aware per the design system: in LIGHT mode the bar is the green bar
+ * accent color with a white wordmark; in DARK mode it's the raised grey
+ * surface with the wordmark's "Studio" in that same accent green. Inset
+ * controls flip with it. Uses --bar-accent (not --brand), so buttons and
+ * selection elsewhere stay on the blue brand color.
  */
 export function Header(): React.JSX.Element {
   const [isMaximized, setIsMaximized] = useState(false)
@@ -49,11 +51,11 @@ export function Header(): React.JSX.Element {
 
   return (
     <div
-      className="h-[38px] w-full shrink-0 flex items-center justify-between bg-[var(--brand)] shadow-[inset_0_-1px_0_0_rgba(0,0,0,0.18)] dark:bg-[var(--bg-raised)] dark:border-b dark:border-[var(--border-default)] dark:shadow-none"
+      className="h-[38px] w-full shrink-0 flex items-center justify-between bg-[var(--bar-accent)] shadow-[inset_0_-1px_0_0_rgba(0,0,0,0.18)] dark:bg-[var(--bg-raised)] dark:border-b dark:border-[var(--border-default)] dark:shadow-none"
       style={isElectron() ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : {}}
     >
       <div className="flex items-center gap-2 pl-3 min-w-0">
-        <h1 className="text-[15px] font-extrabold tracking-[-0.02em] select-none text-white dark:text-[var(--brand)]">
+        <h1 className="text-[15px] font-extrabold tracking-[-0.02em] select-none text-white dark:text-[var(--bar-accent)]">
           <span className="font-medium text-white/70 dark:text-[var(--text-muted)]">tiny</span>Studio
         </h1>
         {workspace && (

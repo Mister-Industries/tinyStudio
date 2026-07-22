@@ -19,6 +19,8 @@ const buttonVariants = cva(
         default: 'tactile bg-primary text-white [--_edge:var(--brand-deep)]',
         destructive: 'tactile bg-[var(--red)] text-white [--_edge:var(--red-deep)]',
         success: 'tactile bg-[var(--green)] text-white [--_edge:var(--green-deep)]',
+        warning:
+          'tactile bg-[var(--yellow)] text-[var(--yellow-contrast)] [--_edge:var(--yellow-deep)]',
         // bordered tactile — neutral actions
         secondary: 'tactile-bordered bg-card text-[var(--text-strong)]',
         outline: 'tactile-bordered bg-background text-[var(--text-strong)]',

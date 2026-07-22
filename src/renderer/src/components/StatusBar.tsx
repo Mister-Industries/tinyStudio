@@ -11,6 +11,7 @@ import {
   PlugZap
 } from 'lucide-react'
 import React from 'react'
+import { version as appVersion } from '../../../../package.json'
 import { useArduinoContext } from '../contexts/ArduinoContext'
 import { useSerial } from '../contexts/SerialContext'
 import {
@@ -168,12 +169,13 @@ export function StatusBar(): React.JSX.Element {
   const busy = isUploading || isCompiling
   const busyLabel = isUploading ? 'Uploading…' : isCompiling ? 'Compiling…' : 'Ready'
 
-  // Links must read on the blue bar (light) and the grey bar (dark).
+  // Links must read on the green bar (light) and the grey bar (dark). Uses
+  // --bar-accent (not --brand) so this stays independent of button/selection color.
   const link =
-    'underline underline-offset-2 text-white/90 hover:text-white dark:text-[var(--brand)] dark:no-underline dark:hover:underline'
+    'underline underline-offset-2 text-white/90 hover:text-white dark:text-[var(--bar-accent)] dark:no-underline dark:hover:underline'
 
   return (
-    <footer className="ts-statusbar flex items-center justify-between shrink-0 h-[27px] px-3 text-[11.5px] font-sans bg-[var(--brand)] text-white/[0.88] shadow-[inset_0_1px_0_0_rgba(0,0,0,0.14)] dark:bg-[var(--bg-raised)] dark:text-[var(--text-muted)] dark:border-t dark:border-[var(--border-default)] dark:shadow-none">
+    <footer className="ts-statusbar flex items-center justify-between shrink-0 h-[27px] px-3 text-[11.5px] font-sans bg-[var(--bar-accent)] text-white/[0.88] shadow-[inset_0_1px_0_0_rgba(0,0,0,0.14)] dark:bg-[var(--bg-raised)] dark:text-[var(--text-muted)] dark:border-t dark:border-[var(--border-default)] dark:shadow-none">
       <div className="flex items-center">
         <StatusPill status={busy ? 'warn' : 'idle'} pulse={busy} bare>
           {busyLabel}
@@ -223,7 +225,7 @@ export function StatusBar(): React.JSX.Element {
         <span className="text-white dark:text-[var(--text-faint)] mx-2">·</span>
         <span>Arduino (C++)</span>
         <span className="text-white dark:text-[var(--text-faint)] mx-2">·</span>
-        <span>tinyStudio 0.2.0</span>
+        <span>tinyStudio {appVersion}</span>
         <span className="ml-2.5">
           <Badge tone="yellow" variant="solid">
             alpha
