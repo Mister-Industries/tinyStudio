@@ -6,8 +6,9 @@
  * (store.serialize() → onChange → Redux buffer; disk save stays on Ctrl+S,
  * same as every other editor buffer).
  *
- * Mounted by EditorPanel behind the `tinystudio.circuitV2` flag, in the same
- * window slot the legacy DiagramEditor occupies — desktop and web builds.
+ * Mounted directly by EditorPanel's CircuitView in the Circuit tab — desktop
+ * and web builds. This has been the only circuit editor since M4 (the legacy
+ * DiagramEditor and its feature flag were removed).
  */
 
 import {
