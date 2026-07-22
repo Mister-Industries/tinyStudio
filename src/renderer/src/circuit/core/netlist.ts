@@ -280,6 +280,20 @@ const EMITTERS: {
     })
   },
   {
+    // current probe (spec §10.3): a 0V series source, so ngspice reports
+    // i(v<id>) through it without disturbing the circuit — an ideal ammeter.
+    match: /^sim-probe-i\b/i,
+    emit: (c) => {
+      const [a, b] = two(c)
+      return { lines: [`V${c.part.id} ${a} ${b} DC 0`] }
+    }
+  },
+  // voltage / diff. voltage probes need no element — every node's voltage is
+  // already reported by ngspice; core/probes.ts reads it back by node name
+  // (and computes the diff-probe subtraction). Just don't warn about them.
+  { match: /^sim-probe-vdiff\b/i, kind: 'transparent' },
+  { match: /^sim-probe-v\b/i, kind: 'transparent' },
+  {
     match: /switch|button/i,
     attrs: [{ key: 'closed', label: 'Closed', default: 'false', hint: 'true/false' }],
     emit: (c) => {

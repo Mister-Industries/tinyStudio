@@ -45,6 +45,7 @@ import { nextRefdes, prefixForFamily } from '../core/refdes'
 import { CircuitStore } from '../core/store'
 import { BREADBOARDS, generateBreadboard, isBreadboard } from '../parts/breadboard'
 import { SIM_SOURCES, generateSimSource, simSourceDefaultAttrs } from '../parts/simParts'
+import { SIM_PROBES, generateSimProbe, simProbeDefaultAttrs } from '../parts/simProbes'
 import { snapNetLabel } from '../parts/netLabels'
 import { Canvas, emptySel, type Cam, type CanvasHandle, type Selection } from './canvas/Canvas'
 import { exportPng, exportSvg } from './exportImage'
@@ -76,6 +77,7 @@ export function CircuitViewV2({
     // registry replaces it — register once, before first geometry pass
     for (const s of BREADBOARDS) if (!getPart(s.type)) registerPart(generateBreadboard(s).def)
     for (const s of SIM_SOURCES) if (!getPart(s.type)) registerPart(generateSimSource(s))
+    for (const s of SIM_PROBES) if (!getPart(s.type)) registerPart(generateSimProbe(s))
     return CircuitStore.fromFile(content)
   })
   const revision = React.useSyncExternalStore(store.subscribe, store.getRevision)
@@ -267,7 +269,7 @@ export function CircuitViewV2({
     const p = at ?? canvasRef.current?.centerWorld() ?? { x: 300, y: 200 }
     const id = nextRefdes(store.getDoc(), prefixForFamily(`${def.family ?? ''} ${def.type}`))
     const pl = findFreePlacement(store.getDoc(), type, view, p)
-    const attrs = simSourceDefaultAttrs(type)
+    const attrs = simSourceDefaultAttrs(type) ?? simProbeDefaultAttrs(type)
     store.dispatch(cmd.addPart({ id, type, ...(attrs ? { attrs } : {}), [view]: pl }))
     setSel({ parts: new Set([id]), wires: new Set() })
   }

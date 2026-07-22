@@ -116,3 +116,33 @@ test('engine runs a generated RC transient with sane charge curve', async () => 
   const atRc = out[i]
   assert.ok(Math.abs(atRc - 3.161) / 3.161 < 0.05, `v(RC)=${atRc}`)
 })
+
+test('current probe (M4 leftover): engine reports the divider branch current', async () => {
+  const doc = emptyDoc()
+  doc.parts = [
+    part('V1', 'sim-vdc', { voltage: '5' }),
+    part('AMM1', 'sim-probe-i'),
+    part('R1', 'resistor', { resistance: '10k' }),
+    part('R2', 'resistor', { resistance: '4.7k' })
+  ]
+  doc.netLabels = [{ id: 'nl1', name: 'GND', kind: 'ground', sch: { x: 0, y: 0 } }]
+  doc.wires = [
+    wire('V1:+', 'AMM1:in'),
+    wire('AMM1:out', 'R1:Pin 0'),
+    wire('R1:Pin 1', 'R2:Pin 0'),
+    wire('R2:Pin 1', 'V1:-'),
+    wire('nl1:1', 'V1:-')
+  ]
+  const { netlist, warnings } = generateNetlist(doc, buildNets(doc))
+  assert.equal(warnings.length, 0)
+  assert.match(netlist, /VAMM1 \S+ \S+ DC 0/)
+
+  const sim = await makeSim()
+  sim.setNetList(netlist)
+  const res = await sim.runSim()
+  const i = vec(res, 'i(vamm1)')
+  assert.ok(i, `i(vamm1) present (got: ${res.data.map((d) => d.name).join(', ')})`)
+  // 5V across 14.7k, current flows V+ -> AMM1 -> R1 -> R2 -> V- (into V- => negative by SPICE convention)
+  const expected = 5 / 14700
+  assert.ok(Math.abs(Math.abs(i![0]) - expected) / expected < 0.01, `i(vamm1)=${i![0]} ≈ ±${expected}`)
+})

@@ -24,7 +24,8 @@ const FAMILY_PREFIX: Record<string, string> = {
   battery: 'BT',
   source: 'V',
   breadboard: 'BB',
-  label: 'NL'
+  label: 'NL',
+  probe: 'P'
 }
 
 export function prefixForFamily(family?: string, explicit?: string): string {

@@ -38,7 +38,11 @@ interface Prepared {
   hasPhase: boolean
 }
 
-function prepare(run: SimRun, mode: PlotMode): Prepared | null {
+function prepare(
+  run: SimRun,
+  mode: PlotMode,
+  labelFor?: (name: string) => string | undefined
+): Prepared | null {
   const x =
     mode === 'ac'
       ? run.vectors.find((v) => v.type === 'frequency')
@@ -47,7 +51,12 @@ function prepare(run: SimRun, mode: PlotMode): Prepared | null {
         : (run.vectors.find((v) => v.type === 'time') ?? run.vectors[0])
   if (!x) return null
   const ys = run.vectors
-    .filter((v) => v !== x && v.name.toLowerCase() !== 'v(v-sweep)' && v.name.startsWith('v('))
+    .filter(
+      (v) =>
+        v !== x &&
+        v.name.toLowerCase() !== 'v(v-sweep)' &&
+        (v.name.startsWith('v(') || v.name.startsWith('vdiff('))
+    )
     .slice(0, TRACES.length)
   if (!ys.length) return null
 
@@ -57,10 +66,11 @@ function prepare(run: SimRun, mode: PlotMode): Prepared | null {
   const isAc = mode === 'ac' && ys.some((v) => v.imag)
   for (let i = 0; i < ys.length; i++) {
     const v = ys[i]
+    const name = labelFor?.(v.name) ?? v.name
     if (isAc) {
       cols.push(v.values.map((re, k) => db(mag(re, v.imag?.[k] ?? 0))))
       series.push({
-        label: `${v.name} dB`,
+        label: `${name} dB`,
         stroke: TRACES[i],
         width: 1.4,
         scale: 'y',
@@ -69,7 +79,7 @@ function prepare(run: SimRun, mode: PlotMode): Prepared | null {
     } else {
       cols.push(v.values)
       series.push({
-        label: v.name,
+        label: name,
         stroke: TRACES[i],
         width: 1.4,
         scale: 'y',
@@ -80,9 +90,10 @@ function prepare(run: SimRun, mode: PlotMode): Prepared | null {
   if (isAc) {
     for (let i = 0; i < ys.length; i++) {
       const v = ys[i]
+      const name = labelFor?.(v.name) ?? v.name
       cols.push(v.values.map((re, k) => deg(re, v.imag?.[k] ?? 0)))
       series.push({
-        label: `${v.name} °`,
+        label: `${name} °`,
         stroke: TRACES[i],
         width: 1,
         dash: [4, 4],
@@ -111,10 +122,19 @@ export function fmtEng(v: number): string {
   return `${(v * 1e9).toFixed(2)}n`
 }
 
-export function SimPlot({ run, mode }: { run: SimRun; mode: PlotMode }): React.JSX.Element {
+export function SimPlot({
+  run,
+  mode,
+  labelFor
+}: {
+  run: SimRun
+  mode: PlotMode
+  /** override a vector's displayed legend name (e.g. a probe's label) */
+  labelFor?: (name: string) => string | undefined
+}): React.JSX.Element {
   const host = React.useRef<HTMLDivElement>(null)
   const plot = React.useRef<uPlot | null>(null)
-  const prepared = React.useMemo(() => prepare(run, mode), [run, mode])
+  const prepared = React.useMemo(() => prepare(run, mode, labelFor), [run, mode, labelFor])
 
   React.useEffect(() => {
     const el = host.current

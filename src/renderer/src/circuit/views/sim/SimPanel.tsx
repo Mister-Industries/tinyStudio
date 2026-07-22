@@ -16,6 +16,7 @@ import * as cmd from '../../core/commands'
 import type { Analysis, CircuitDoc } from '../../core/model'
 import { describeNet, type NetModel } from '../../core/nets'
 import { generateNetlist, mapSimIssues, type NetlistResult, type SimIssueRef } from '../../core/netlist'
+import { diffProbeVectors, probeLabelFor } from '../../core/probes'
 import type { CircuitStore } from '../../core/store'
 import { getSimBackend, SimError } from '../../sim'
 import type { SimRun } from '../../sim'
@@ -84,7 +85,11 @@ export function SimPanel({
     const g = generateNetlist(doc, netModel, { familyOf, title: 'tinyStudio circuit' })
     setGen(g)
     try {
-      const r = await getSimBackend().run(g.netlist, 20000)
+      const raw = await getSimBackend().run(g.netlist, 20000)
+      // fold in synthetic diff-probe vectors (voltage/current probes need no
+      // extra work — ngspice already reports every node and probe source)
+      const diffs = diffProbeVectors(doc, netModel, g, raw)
+      const r: SimRun = diffs.length ? { ...raw, vectors: [...raw.vectors, ...diffs] } : raw
       setResult(r)
       onResult({ run: r, netlist: g })
     } catch (err) {
@@ -122,6 +127,15 @@ export function SimPanel({
   }, [doc, autoRerun])
 
   const isOp = result != null && result.numPoints === 1
+
+  // probe labels (M4 leftover): a placed sim-probe-v/-vdiff/-i part's
+  // attrs.label, if any, stands in for the raw v(node)/vdiff(id)/i(v<id>)
+  // vector name in the table and plot legend.
+  const labelFor = React.useCallback(
+    (vecName: string): string | undefined =>
+      gen ? probeLabelFor(vecName, doc, netModel, gen) : undefined,
+    [gen, doc, netModel]
+  )
 
   // error → part/net highlight mapping (M4 leftover): scan the engine's raw
   // message lines for the device/node names this run's netlist used, so the
@@ -417,9 +431,13 @@ export function SimPanel({
           </div>
         )}
 
-        {isOp && result && <OpTable run={result} describe={describe} />}
+        {isOp && result && <OpTable run={result} describe={describe} labelFor={labelFor} />}
         {result && result.numPoints > 1 && (
-          <SimPlot run={result} mode={(analysis.kind === 'op' ? 'tran' : analysis.kind) as PlotMode} />
+          <SimPlot
+            run={result}
+            mode={(analysis.kind === 'op' ? 'tran' : analysis.kind) as PlotMode}
+            labelFor={labelFor}
+          />
         )}
 
         {showNetlist && gen && (
@@ -455,17 +473,24 @@ export function fmtSI(v: number, unit: string): string {
 
 function OpTable({
   run,
-  describe
+  describe,
+  labelFor
 }: {
   run: SimRun
   describe: (vecName: string) => string | undefined
+  labelFor?: (vecName: string) => string | undefined
 }): React.JSX.Element {
   const rows = run.vectors
     .filter((v) => v.values.length === 1)
     .map((v) => {
-      const isV = v.name.startsWith('v(')
+      const isV = v.name.startsWith('v(') || v.name.startsWith('vdiff(')
       const unit = isV ? 'V' : 'A'
-      return { name: v.name, value: fmtSI(v.values[0], unit), what: describe(v.name) }
+      const label = labelFor?.(v.name)
+      return {
+        name: label ? `${label} (${v.name})` : v.name,
+        value: fmtSI(v.values[0], unit),
+        what: describe(v.name)
+      }
     })
   return (
     <div className="grid grid-cols-[auto_auto_1fr] gap-x-6 gap-y-1 w-full max-w-[720px]">
