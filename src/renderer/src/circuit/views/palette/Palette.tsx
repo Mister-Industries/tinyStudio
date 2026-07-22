@@ -4,7 +4,7 @@
  * M2); drag a tile onto the canvas or double-click to drop it at centre.
  */
 
-import { ChevronDown, ChevronRight, CircuitBoard, Pencil, Plus } from 'lucide-react'
+import { ChevronDown, ChevronRight, CircuitBoard, Package, Pencil, Plus } from 'lucide-react'
 import React from 'react'
 import { getPart, partsByFamily, type PartMeta } from '../../../lib/partsLibrary'
 import type { ViewId } from '../../core/model'
@@ -54,7 +54,8 @@ export function Palette({
   onAdd,
   onAddNetLabel,
   onEditPart,
-  onNewPart
+  onNewPart,
+  onOpenPacks
 }: {
   view: ViewId
   wireColor: string
@@ -63,6 +64,7 @@ export function Palette({
   onAddNetLabel: (kind: string, name: string) => void
   onEditPart: (type: string) => void
   onNewPart: () => void
+  onOpenPacks: () => void
 }): React.JSX.Element {
   const [collapsed, setCollapsed] = React.useState<Set<string>>(new Set())
   const families = partsByFamily()
@@ -79,6 +81,13 @@ export function Palette({
     <div className="w-60 shrink-0 min-h-0 relative z-20 border-r border-border-default bg-bg-raised flex flex-col">
       <div className="h-9 flex items-center justify-between px-3 border-b border-border-default shrink-0">
         <span className="text-[13px] font-semibold text-text-body">Components</span>
+        <button
+          className="text-text-muted hover:text-brand"
+          title="Parts packs — install more components"
+          onClick={onOpenPacks}
+        >
+          <Package size={15} />
+        </button>
         <button className="text-text-muted hover:text-brand" title="New part…" onClick={onNewPart}>
           <Plus size={15} />
         </button>

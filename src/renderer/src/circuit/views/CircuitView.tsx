@@ -46,6 +46,7 @@ import { CircuitStore } from '../core/store'
 import { BREADBOARDS, generateBreadboard, isBreadboard } from '../parts/breadboard'
 import { SIM_SOURCES, generateSimSource, simSourceDefaultAttrs } from '../parts/simParts'
 import { SIM_PROBES, generateSimProbe, simProbeDefaultAttrs } from '../parts/simProbes'
+import { PackManager } from './packs/PackManager'
 import { snapNetLabel } from '../parts/netLabels'
 import { Canvas, emptySel, type Cam, type CanvasHandle, type Selection } from './canvas/Canvas'
 import { exportPng, exportSvg } from './exportImage'
@@ -90,6 +91,7 @@ export function CircuitViewV2({
   const [wireColor, setWireColor] = React.useState(WIRE_COLORS[0])
   const [cam, setCam] = React.useState<Cam>({ scale: 1, tx: 40, ty: 40 })
   const [editorPart, setEditorPart] = React.useState<PartDef | null | undefined>(undefined)
+  const [showPacks, setShowPacks] = React.useState(false)
   const [showErc, setShowErc] = React.useState(false)
   const [showSim, setShowSim] = React.useState(false)
   const [sim, setSim] = React.useState<SimState>({ run: null, netlist: null })
@@ -328,6 +330,7 @@ export function CircuitViewV2({
           onAddNetLabel={(kind, name) => addNetLabel(kind as NetLabelKind, name)}
           onEditPart={(type) => void editExisting(type)}
           onNewPart={() => setEditorPart(null)}
+          onOpenPacks={() => setShowPacks(true)}
         />
       )}
 
@@ -600,6 +603,10 @@ export function CircuitViewV2({
             setEditorPart(undefined)
           }}
         />
+      )}
+
+      {showPacks && (
+        <PackManager onClose={() => setShowPacks(false)} onInstalled={() => bumpDefs()} />
       )}
     </div>
   )
