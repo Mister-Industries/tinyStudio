@@ -102,6 +102,12 @@
   --brand-on: var(--blue-on);
   --brand-contrast: #ffffff;
 
+  /* top/bottom bar accent — deliberately independent of --brand so the
+     window chrome can be recolored without touching buttons/selection/focus */
+  --bar-accent: var(--green);
+  --bar-accent-deep: var(--green-deep);
+  --bar-accent-contrast: #ffffff;
+
   /* status (board state, compile, etc.) */
   --status-ok: var(--green);
   --status-error: var(--red);
@@ -315,6 +321,10 @@
   --yellow: #f5d426;
   --yellow-deep: #cdae1f;
   --yellow-on: #f4e29a;
+
+  --bar-accent: var(--green);
+  --bar-accent-deep: var(--green-deep);
+  --bar-accent-contrast: #06243b;
 
   /* surfaces — Discord-ish cold grey ladder */
   --bg: #2b2d31;

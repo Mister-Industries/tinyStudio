@@ -1,16 +1,31 @@
-import { selectOpenFiles, setPanelOpen, useAppDispatch, useAppSelector } from '@renderer/redux'
+import {
+  selectDocsTab,
+  setDocsTab,
+  setPanelOpen,
+  useAppDispatch,
+  useAppSelector
+} from '@renderer/redux'
+import type { DocsTab } from '@renderer/redux/editorSlice'
 import { BookOpen, Sparkles, X, Zap } from 'lucide-react'
 import { AIAssistant } from './AIAssistant'
 import { ExamplesContent } from './ExamplesContent'
 import { ReadmeContent } from './ReferenceContent'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs'
 
+// Per-tab accent color, overriding the shared TabsTrigger's brand-blue
+// underline/active-state. Docs is left alone (brand blue is already the
+// intended scheme); Examples gets yellow; Studio AI gets a light grape purple.
+const examplesAccent =
+  'after:bg-[var(--yellow)] hover:text-[var(--yellow-deep)] data-[state=active]:text-[var(--yellow-deep)] focus-visible:text-[var(--yellow-deep)]'
+const aiAccent =
+  'after:bg-[#9c6c9c] hover:text-[#9c6c9c] data-[state=active]:text-[#9c6c9c] focus-visible:text-[#9c6c9c]'
+
 export function DocsPanel(): React.JSX.Element {
   const dispatch = useAppDispatch()
-  // On a fresh start with nothing open, land on Examples so there's somewhere to
-  // go; once a project is open, default to Docs. (Uncontrolled — only the initial
-  // tab; the user can switch freely after.)
-  const initialTab = useAppSelector(selectOpenFiles).length === 0 ? 'examples' : 'readme'
+  // Controlled: starts on 'examples' (see editorSlice initialState) and
+  // activateWorkspace() flips it to 'readme' whenever a folder or example
+  // is opened. The user can still switch freely afterward.
+  const activeTab = useAppSelector(selectDocsTab)
 
   const handleCloseDocsPanel = (): void => {
     dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
@@ -18,18 +33,22 @@ export function DocsPanel(): React.JSX.Element {
 
   return (
     <div className="size-full flex flex-col bg-[var(--bg-raised)] border-l border-[var(--border-default)]">
-      <Tabs defaultValue={initialTab} className="size-full flex flex-col gap-0">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => dispatch(setDocsTab(v as DocsTab))}
+        className="size-full flex flex-col gap-0"
+      >
         <div className="flex items-stretch h-[36px] gap-1 pl-3 pr-1 border-b-[1.5px] border-[var(--border-default)]">
           <TabsList className="flex-1 border-0 gap-1">
             <TabsTrigger value="readme" className="flex-1 justify-center">
               <BookOpen size={15} />
               Docs
             </TabsTrigger>
-            <TabsTrigger value="examples" className="flex-1 justify-center">
+            <TabsTrigger value="examples" className={`flex-1 justify-center ${examplesAccent}`}>
               <Zap size={15} />
               Examples
             </TabsTrigger>
-            <TabsTrigger value="ai" className="flex-1 justify-center">
+            <TabsTrigger value="ai" className={`flex-1 justify-center ${aiAccent}`}>
               <Sparkles size={15} />
               Studio AI
             </TabsTrigger>
@@ -54,4 +73,4 @@ export function DocsPanel(): React.JSX.Element {
       </Tabs>
     </div>
   )
-}
+}

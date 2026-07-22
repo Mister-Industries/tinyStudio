@@ -194,8 +194,7 @@ export function AIAssistant(): React.JSX.Element {
       {/* Slim toolbar */}
       <div className="flex items-center gap-1 px-3 py-1.5 border-b border-navy-600 text-xs text-fg-3">
         <Sparkles size={13} className="text-pink" />
-        <span className="font-medium text-fg-2">Studio AI</span>
-        <span className="text-fg-4">· Claude Opus 4.8</span>
+        <span className="font-medium text-fg-2">Claude Opus 4.8</span>
         <div className="flex-1" />
         <Button
           variant="ghost"

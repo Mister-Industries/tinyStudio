@@ -2,6 +2,7 @@ import { Dispatch } from '@reduxjs/toolkit'
 import { fileSystem, FileSystemItem } from '@renderer/lib/fileSystem'
 import { fetchRepoFolder, loadAccount } from '@renderer/lib/github'
 import { VIRTUAL_PREFIX, virtualFileSystem } from '@renderer/lib/virtualFileSystem'
+import { setDocsTab } from '@renderer/redux/editorSlice'
 import {
   BaseFileItem,
   closeFile,
@@ -168,6 +169,9 @@ async function activateWorkspace(workspace: Workspace, dispatch: Dispatch): Prom
   // old workspace's tabs/tree/README/diagram.
   dispatch(closeWorkspace())
   dispatch(openWorkspace(workspace))
+  // Opening a project (folder or example) means there's now something to read —
+  // switch the docs panel off the Examples tab and onto Docs.
+  dispatch(setDocsTab('readme'))
 
   const readme = fileItems.find((file) => file.name === 'README.md')
   if (readme) {
