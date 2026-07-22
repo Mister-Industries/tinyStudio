@@ -81,7 +81,7 @@ export function ExamplesContent(): React.JSX.Element {
                   {example.board && (
                     <p className="mb-3 text-xs text-muted-foreground">Board: {example.board}</p>
                   )}
-                  <Button onClick={() => open(example)} disabled={opening}>
+                  <Button variant="warning" onClick={() => open(example)} disabled={opening}>
                     {opening ? <Loader2 className="animate-spin" /> : <Zap />}
                     {opening ? 'Opening…' : 'Open example'}
                   </Button>

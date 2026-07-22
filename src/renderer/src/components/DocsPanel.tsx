@@ -12,13 +12,9 @@ import { ExamplesContent } from './ExamplesContent'
 import { ReadmeContent } from './ReferenceContent'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs'
 
-// Per-tab accent color, overriding the shared TabsTrigger's brand-blue
-// underline/active-state. Docs is left alone (brand blue is already the
-// intended scheme); Examples gets yellow; Studio AI gets a light grape purple.
-const examplesAccent =
-  'after:bg-[var(--yellow)] hover:text-[var(--yellow-deep)] data-[state=active]:text-[var(--yellow-deep)] focus-visible:text-[var(--yellow-deep)]'
-const aiAccent =
-  'after:bg-[#9c6c9c] hover:text-[#9c6c9c] data-[state=active]:text-[#9c6c9c] focus-visible:text-[#9c6c9c]'
+// All three tabs share the shared TabsTrigger's brand-blue underline/active
+// state — the accent colors below live in the tab content instead (Examples'
+// buttons are yellow, Studio AI's bubbles and send button are purple).
 
 export function DocsPanel(): React.JSX.Element {
   const dispatch = useAppDispatch()
@@ -44,11 +40,11 @@ export function DocsPanel(): React.JSX.Element {
               <BookOpen size={15} />
               Docs
             </TabsTrigger>
-            <TabsTrigger value="examples" className={`flex-1 justify-center ${examplesAccent}`}>
+            <TabsTrigger value="examples" className="flex-1 justify-center">
               <Zap size={15} />
               Examples
             </TabsTrigger>
-            <TabsTrigger value="ai" className={`flex-1 justify-center ${aiAccent}`}>
+            <TabsTrigger value="ai" className="flex-1 justify-center">
               <Sparkles size={15} />
               Studio AI
             </TabsTrigger>

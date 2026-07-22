@@ -58,6 +58,16 @@
   --yellow: #f3cb00;
   --yellow-deep: #c6a500;
   --yellow-on: #6b5800;
+  /* text on the solid --yellow swatch specifically (button fills, badges) —
+     always dark since the gold stays bright in both themes, unlike --yellow-on
+     which is tuned for the soft tinted surface and flips in dark mode */
+  --yellow-contrast: #3d2f00;
+
+  /* PURPLE — Studio AI accent (chat bubbles, send button) */
+  --purple-soft: #efe3fb;
+  --purple: #9d5fd6;
+  --purple-deep: #7c3fb0;
+  --purple-on: #5a2a82;
 
   /* ── COLD NEUTRAL RAMP — white → slate ───────────────────────────────────── */
   --warm-50: #fbfcfd;
@@ -104,8 +114,8 @@
 
   /* top/bottom bar accent — deliberately independent of --brand so the
      window chrome can be recolored without touching buttons/selection/focus */
-  --bar-accent: var(--green);
-  --bar-accent-deep: var(--green-deep);
+  --bar-accent: var(--blue);
+  --bar-accent-deep: var(--blue-deep);
   --bar-accent-contrast: #ffffff;
 
   /* status (board state, compile, etc.) */
@@ -321,9 +331,15 @@
   --yellow: #f5d426;
   --yellow-deep: #cdae1f;
   --yellow-on: #f4e29a;
+  --yellow-contrast: #3d2f00;
 
-  --bar-accent: var(--green);
-  --bar-accent-deep: var(--green-deep);
+  --purple-soft: #2f2140;
+  --purple: #b47ee8;
+  --purple-deep: #9757c9;
+  --purple-on: #ecd6fb;
+
+  --bar-accent: var(--blue);
+  --bar-accent-deep: var(--blue-deep);
   --bar-accent-contrast: #06243b;
 
   /* surfaces — Discord-ish cold grey ladder */

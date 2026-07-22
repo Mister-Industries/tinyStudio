@@ -256,7 +256,7 @@ export function AIAssistant(): React.JSX.Element {
           </button>
         ) : (
           <button
-            className="px-3 rounded-lg bg-cyan text-[var(--fg-on-cyan)] disabled:opacity-50"
+            className="px-3 rounded-lg bg-[var(--purple)] text-white disabled:opacity-50"
             onClick={send}
             disabled={!input.trim()}
           >
@@ -333,8 +333,8 @@ function TimelineRow({ item }: { item: TimelineItem }): React.JSX.Element {
 function AiBubble({ text }: { text: string }): React.JSX.Element {
   return (
     <div
-      className="self-start rounded-xl bg-navy-600 text-fg-1 py-2 px-4 mr-8 max-w-[90%] text-sm leading-relaxed"
-      style={{ border: '1px solid var(--pink-line)' }}
+      className="self-start rounded-xl bg-[var(--purple-soft)] text-[var(--purple-on)] py-2 px-4 mr-8 max-w-[90%] text-sm leading-relaxed"
+      style={{ border: '1px solid var(--purple)' }}
     >
       <Markdown>{text}</Markdown>
     </div>
@@ -343,7 +343,7 @@ function AiBubble({ text }: { text: string }): React.JSX.Element {
 
 function UserBubble({ text }: { text: string }): React.JSX.Element {
   return (
-    <div className="self-end rounded-xl border border-navy-400 bg-navy-700 text-fg-2 py-2 px-4 ml-8 w-fit text-sm whitespace-pre-wrap">
+    <div className="self-end rounded-xl border border-[var(--purple-deep)] bg-[var(--purple)] text-white py-2 px-4 ml-8 w-fit text-sm whitespace-pre-wrap">
       {text}
     </div>
   )
