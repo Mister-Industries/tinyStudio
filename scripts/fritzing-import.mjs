@@ -386,6 +386,7 @@ function extractView(fzp, view, srcRoot) {
 
   // resolve each connector's pin point
   const pins = {}
+  const legPins = []
   const unresolved = []
   const usedNames = new Set()
   for (const c of fzp.connectors) {
@@ -430,6 +431,10 @@ function extractView(fzp, view, srcRoot) {
     while (usedNames.has(n)) n = `${name}.${i++}`
     usedNames.add(n)
     pins[n] = [round(canvas.x), round(canvas.y)]
+    // bendable rubber-band leg (LED/resistor class parts, breadboard view
+    // only — cv.legId is only ever set there): tag the pin so the editor
+    // knows it can be dragged independent of the part body (Placement.legs).
+    if (cv.legId) legPins.push(n)
   }
 
   // normalize the SVG for inline rendering: strip width/height, keep viewBox
@@ -444,6 +449,7 @@ function extractView(fzp, view, srcRoot) {
     w: round(wPx != null ? wPx : vbw * sx),
     h: round(hPx != null ? hPx : vbh * sy),
     pins,
+    legs: legPins.length ? legPins : undefined,
     unresolved
   }
 }
@@ -586,7 +592,13 @@ function main() {
       if (!VIEW_DIR[view]) continue
       const res = extractView(fzp, view, srcRoot)
       if (res.skip) continue
-      def.views[view] = { svg: minifySvg(res.svg), w: res.w, h: res.h, pins: res.pins }
+      def.views[view] = {
+        svg: minifySvg(res.svg),
+        w: res.w,
+        h: res.h,
+        pins: res.pins,
+        ...(res.legs ? { legs: res.legs } : {})
+      }
       anyView = true
       if (res.unresolved && res.unresolved.length) anyUnresolved = true
     }

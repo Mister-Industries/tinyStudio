@@ -24,6 +24,9 @@ export interface PartView {
   w: number
   h: number
   pins: Record<string, [number, number]>
+  /** pin names with a bendable rubber-band leg in this view (Fritzing
+   * legId — LED/resistor class parts). Breadboard view only in practice. */
+  legs?: string[]
 }
 
 export interface PartDef {

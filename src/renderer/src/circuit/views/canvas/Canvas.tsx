@@ -486,6 +486,58 @@ export function Canvas({
     window.addEventListener('pointerup', up)
   }
 
+  // drag a bendable leg tip (LED/resistor class parts, breadboard view only —
+  // M2 leftover, spec §6.2/§7.4). `base` is the pin's leg offset at grab time
+  // ([0,0] if it was resting). Live-dispatches like onLabelDown (merged
+  // commands per move) so wires re-anchor to the tip in real time without a
+  // separate dragOverrides path — nothing else needs to know this isn't a
+  // normal edit. A real (>=3px) drag suppresses the trailing click so it
+  // doesn't also arm/complete a wire from this pin.
+  const beginLegDrag = (
+    e: React.PointerEvent,
+    partId: string,
+    pin: string,
+    base: [number, number]
+  ): void => {
+    const startClient = { x: e.clientX, y: e.clientY }
+    let moved = false
+    const move = (ev: PointerEvent): void => {
+      const dxs = (ev.clientX - startClient.x) / scale
+      const dys = (ev.clientY - startClient.y) / scale
+      if (!moved && Math.hypot(dxs, dys) < 3) return
+      moved = true
+      const cur = doc.parts.find((p) => p.id === partId)?.[view]
+      if (!cur) return
+      // legOffset is added to the local pin coord BEFORE rotate/flip
+      // (core/geometry pinWorld) — invert that so dragging the tip on
+      // screen moves it the direction the user is actually dragging.
+      const rad = (-(cur.rotate ?? 0) * Math.PI) / 180
+      let ldx = dxs * Math.cos(rad) - dys * Math.sin(rad)
+      let ldy = dxs * Math.sin(rad) + dys * Math.cos(rad)
+      if (cur.flip) ldx = -ldx
+      const next: [number, number] = [
+        Math.round((base[0] + ldx) * 100) / 100,
+        Math.round((base[1] + ldy) * 100) / 100
+      ]
+      store.dispatch(
+        cmd.placePart(
+          partId,
+          view,
+          { ...cur, legs: { ...(cur.legs ?? {}), [pin]: next } },
+          [],
+          true
+        )
+      )
+    }
+    const up = (): void => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      if (moved) suppressClick.current = true
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
   // drag / select a schematic net label (moves its sch placement + reroutes wires)
   const onNetLabelDown = (e: React.PointerEvent, id: string): void => {
     if ((e.target as HTMLElement).closest('.pin-hit')) return
@@ -1492,7 +1544,11 @@ export function Canvas({
                 {editable &&
                   Object.keys(vis.v.pins).length <= 60 &&
                   Object.keys(vis.v.pins).map((pin) => {
-                    const [px, py] = vis.v.pins[pin]
+                    const [restX, restY] = vis.v.pins[pin]
+                    const isLeg = view === 'bb' && (vis.v.legs?.includes(pin) ?? false)
+                    const legOff = isLeg ? pl.legs?.[pin] : undefined
+                    const px = restX + (legOff?.[0] ?? 0)
+                    const py = restY + (legOff?.[1] ?? 0)
                     const armedHere = armed?.from === `${part.id}:${pin}`
                     const hovered = hoverPin?.id === part.id && hoverPin?.pin === pin
                     const netIdx = netModel.pinToNet.get(`${part.id}:${pin}`)
@@ -1507,7 +1563,7 @@ export function Canvas({
                       <div
                         key={pin}
                         className="pin-hit"
-                        title={pin}
+                        title={isLeg ? `${pin} (drag to bend the leg)` : pin}
                         style={{
                           position: 'absolute',
                           left: px - 8,
@@ -1517,12 +1573,37 @@ export function Canvas({
                           zIndex: 3,
                           cursor: 'crosshair'
                         }}
-                        onPointerDown={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => {
+                          e.stopPropagation()
+                          if (editable && isLeg && !armed)
+                            beginLegDrag(e, part.id, pin, legOff ?? [0, 0])
+                        }}
+                        onDoubleClick={(e) => {
+                          if (!editable || !isLeg || !legOff) return
+                          e.stopPropagation()
+                          const cur = doc.parts.find((p) => p.id === part.id)?.[view]
+                          if (!cur?.legs?.[pin]) return
+                          const legs = { ...cur.legs }
+                          delete legs[pin]
+                          store.dispatch(
+                            cmd.placePart(part.id, view, {
+                              ...cur,
+                              legs: Object.keys(legs).length ? legs : undefined
+                            })
+                          )
+                        }}
                         onPointerEnter={() => setHoverPin({ id: part.id, pin })}
                         onPointerLeave={() =>
                           setHoverPin((h) => (h?.id === part.id && h?.pin === pin ? null : h))
                         }
-                        onClick={(e) => onPinClick(e, part.id, pin)}
+                        onClick={(e) => {
+                          if (suppressClick.current) {
+                            suppressClick.current = false
+                            e.stopPropagation()
+                            return
+                          }
+                          onPinClick(e, part.id, pin)
+                        }}
                       >
                         <svg width="16" height="16">
                           {onHotNet && !on && (
@@ -1542,6 +1623,34 @@ export function Canvas({
                       </div>
                     )
                   })}
+                {view === 'bb' && vis.v.legs && vis.v.legs.length > 0 && (
+                  // bent-leg indicator: a simple ink line from the rest pin to
+                  // the dragged tip, overlaid on the (static) Fritzing art —
+                  // real per-instance leg-path warping is future work.
+                  <svg
+                    className="absolute inset-0 pointer-events-none overflow-visible"
+                    width={vis.v.w}
+                    height={vis.v.h}
+                  >
+                    {vis.v.legs.map((pin) => {
+                      const off = pl.legs?.[pin]
+                      if (!off || (off[0] === 0 && off[1] === 0)) return null
+                      const [rx, ry] = vis.v.pins[pin]
+                      return (
+                        <line
+                          key={pin}
+                          x1={rx}
+                          y1={ry}
+                          x2={rx + off[0]}
+                          y2={ry + off[1]}
+                          stroke="var(--text-strong)"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                        />
+                      )
+                    })}
+                  </svg>
+                )}
                 <div
                   className="absolute text-[11px] whitespace-nowrap select-none"
                   style={{

@@ -27,7 +27,7 @@ export interface FzpzResult {
 interface FzpConnector {
   id: string
   name: string
-  views: Partial<Record<string, { svgId?: string; terminalId?: string }>>
+  views: Partial<Record<string, { svgId?: string; terminalId?: string; legId?: string }>>
 }
 
 interface Fzp {
@@ -188,7 +188,8 @@ function parseFzp(xml: string): Fzp {
         if (!p) continue
         views[vname] = {
           svgId: p.getAttribute('svgId') ?? undefined,
-          terminalId: p.getAttribute('terminalId') ?? undefined
+          terminalId: p.getAttribute('terminalId') ?? undefined,
+          legId: p.getAttribute('legId') ?? undefined
         }
       }
       connectors.push({ id, name: c.getAttribute('name') || id, views })
@@ -224,6 +225,7 @@ function extractView(
 
   const tag = VIEW_TAG[view]
   const pins: Record<string, [number, number]> = {}
+  const legPins: string[] = []
   const unresolved: string[] = []
   const usedNames = new Set<string>()
   for (const c of fzp.connectors) {
@@ -267,6 +269,9 @@ function extractView(
     while (usedNames.has(n)) n = `${name}.${i++}`
     usedNames.add(n)
     pins[n] = [round((pt.x - vbx) * sx), round((pt.y - vby) * sy)]
+    // bendable rubber-band leg (LED/resistor class parts) — see scripts/
+    // fritzing-import.mjs for the matching bulk-importer half of this.
+    if (cv.legId) legPins.push(n)
   }
   if (!Object.keys(pins).length) return null
 
@@ -281,7 +286,8 @@ function extractView(
       svg: svgStr,
       w: round(wPx != null ? wPx : vbw * sx),
       h: round(hPx != null ? hPx : vbh * sy),
-      pins
+      pins,
+      ...(legPins.length ? { legs: legPins } : {})
     },
     unresolved: unresolved.map((id) => `${view}: ${id}`)
   }
