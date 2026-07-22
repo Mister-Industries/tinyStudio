@@ -342,9 +342,14 @@ export interface Seat {
 }
 
 /**
- * Derive implicit pin-in-hole connections: every placed non-breadboard pin
- * within SEAT_RADIUS of a breadboard hole. Grid-snapped placement makes the
- * common case an exact coordinate match.
+ * Derive implicit pin-in-hole connections: a part seats as a rigid body —
+ * ALL of its pins must land within SEAT_RADIUS of a breadboard hole at the
+ * part's current placement/rotation, or NONE of them seat (Fritzing rule:
+ * a component either fully plugs in or it's just resting on top). This
+ * avoids a part with one pin near a hole and another dangling off-grid
+ * reporting a single spurious connection while silently leaving the rest
+ * of its pins unconnected. Grid-snapped placement makes the common case an
+ * exact coordinate match.
  */
 export function implicitSeats(doc: CircuitDoc): Seat[] {
   const hash = new SpatialHash<string>()
@@ -366,13 +371,20 @@ export function implicitSeats(doc: CircuitDoc): Seat[] {
   for (const part of doc.parts) {
     if (!part.bb || isBreadboard(part.type)) continue
     const vis = bbVisual(part.type)
-    if (!vis) continue
-    for (const pin of Object.keys(vis.v.pins)) {
+    const pins = vis ? Object.keys(vis.v.pins) : []
+    if (!pins.length) continue
+    const candidates: Seat[] = []
+    let allSeated = true
+    for (const pin of pins) {
       const p = pinWorldOf(part, pin)
-      if (!p) continue
-      const hit = hash.nearest(p, SEAT_RADIUS)
-      if (hit) seats.push({ pin: `${part.id}:${pin}`, hole: hit.v, pos: hit.p })
+      const hit = p ? hash.nearest(p, SEAT_RADIUS) : null
+      if (!hit) {
+        allSeated = false
+        break
+      }
+      candidates.push({ pin: `${part.id}:${pin}`, hole: hit.v, pos: hit.p })
     }
+    if (allSeated) seats.push(...candidates)
   }
   return seats
 }
