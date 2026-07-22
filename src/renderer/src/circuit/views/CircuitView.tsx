@@ -172,6 +172,20 @@ export function CircuitViewV2({
     })
     return out
   }, [sim, netModel, doc, view])
+  // per-net voltage lookup for the breadboard hole tooltip (M4 leftover) —
+  // same DC (.op) result as the canvas chips, keyed by net index instead of
+  // pre-picking one representative pin, so every hole in the net can show it.
+  const simVoltageForNet = React.useCallback(
+    (netIdx: number): string | undefined => {
+      if (!sim.run || sim.run.numPoints !== 1 || !sim.netlist) return undefined
+      const node = sim.netlist.nodeOfNet[netIdx]
+      if (!node || node === '0') return undefined
+      const vec = sim.run.vectors.find((v) => v.name.toLowerCase() === `v(${node.toLowerCase()})`)
+      if (!vec || vec.values.length !== 1) return undefined
+      return fmtSI(vec.values[0], 'V')
+    },
+    [sim]
+  )
   // nets satisfied elsewhere but unrouted here → dashed guidance (spec §8.2)
   const rats = React.useMemo(() => ratsnest(doc, view, netModel), [doc, view, netModel, defsTick])
   // ERC: net-model rules + view-side floating-pin findings (spec §9)
@@ -530,6 +544,7 @@ export function CircuitViewV2({
           onDropNetLabel={(kind, name, at) => addNetLabel(kind, name, at)}
           onImportFiles={(files, at) => void importFzpzFiles(files, at)}
           annotations={simAnnotations}
+          simVoltageForNet={simVoltageForNet}
           onRequestEdit={enterEdit}
         />
 

@@ -151,6 +151,7 @@ export function Canvas({
   onDropNetLabel,
   onImportFiles,
   annotations,
+  simVoltageForNet,
   onRequestEdit
 }: {
   store: CircuitStore
@@ -177,6 +178,8 @@ export function Canvas({
   onImportFiles?: (files: File[], at: Pt) => void
   /** world-anchored value chips (DC sim annotations) */
   annotations?: { x: number; y: number; text: string }[]
+  /** DC (.op) net voltage lookup, for the breadboard hole tooltip */
+  simVoltageForNet?: (netIdx: number) => string | undefined
   /** tray "attach to cursor" placement: id being placed + drop callback */
   /** double-clicking a component asks the shell to enter edit mode */
   onRequestEdit: () => void
@@ -1657,7 +1660,9 @@ export function Canvas({
               {hoverHole.pin}
               {(() => {
                 const idx = netModel.pinToNet.get(`${hoverHole.id}:${hoverHole.pin}`)
-                return idx != null ? ` · net: ${describeNet(netModel, idx)}` : ''
+                if (idx == null) return ''
+                const v = simVoltageForNet?.(idx)
+                return ` · net: ${describeNet(netModel, idx)}${v ? ` · ${v}` : ''}`
               })()}
             </div>
           )}

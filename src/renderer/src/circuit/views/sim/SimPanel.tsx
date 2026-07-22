@@ -51,6 +51,7 @@ export function SimPanel({
   const [gen, setGen] = React.useState<NetlistResult | null>(null)
   const [error, setError] = React.useState<{ message: string; details?: string[] } | null>(null)
   const [showNetlist, setShowNetlist] = React.useState(false)
+  const [autoRerun, setAutoRerun] = React.useState(false)
 
   const setAnalysis = (patch: Partial<Analysis>): void => {
     store.dispatch(cmd.setAnalyses([{ ...analysis, ...patch }]))
@@ -70,7 +71,11 @@ export function SimPanel({
     [doc.parts, familyOf]
   )
 
+  const runningRef = React.useRef(false)
+
   const run = async (): Promise<void> => {
+    if (runningRef.current) return // one in-flight run at a time (esp. for auto-rerun)
+    runningRef.current = true
     setRunning(true)
     setError(null)
     const g = generateNetlist(doc, netModel, { familyOf, title: 'tinyStudio circuit' })
@@ -88,14 +93,30 @@ export function SimPanel({
           : { message: err instanceof Error ? err.message : String(err) }
       )
     } finally {
+      runningRef.current = false
       setRunning(false)
     }
   }
 
   const cancel = (): void => {
     getSimBackend().cancel()
+    runningRef.current = false
     setRunning(false)
   }
+
+  // auto-rerun (spec/M4 leftover): once enabled, every doc change re-runs the
+  // active analysis after a short debounce — same "Run" path, so results and
+  // canvas DC annotations refresh without a manual click. Skipped while a run
+  // is already in flight; the trailing edit still gets its own debounce timer.
+  const runRef = React.useRef(run)
+  runRef.current = run
+  const lastAutoDoc = React.useRef(doc)
+  React.useEffect(() => {
+    if (!autoRerun || doc === lastAutoDoc.current) return
+    lastAutoDoc.current = doc
+    const t = setTimeout(() => void runRef.current(), 400)
+    return () => clearTimeout(t)
+  }, [doc, autoRerun])
 
   const isOp = result != null && result.numPoints === 1
 
@@ -261,6 +282,22 @@ export function SimPanel({
         )}
 
         <div className="flex-1" />
+        <label
+          className="flex items-center gap-1.5 text-[11px] text-text-muted cursor-pointer select-none"
+          title="Automatically re-run the active analysis after each edit"
+        >
+          <input
+            type="checkbox"
+            checked={autoRerun}
+            onChange={(e) => {
+              const on = e.target.checked
+              setAutoRerun(on)
+              lastAutoDoc.current = doc
+              if (on) void run()
+            }}
+          />
+          auto-rerun
+        </label>
         {result && result.numPoints > 1 && (
           <button
             className="flex items-center gap-1 text-[11px] text-text-faint hover:text-text-body"
