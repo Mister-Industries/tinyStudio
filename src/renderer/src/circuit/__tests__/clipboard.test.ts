@@ -2,7 +2,12 @@
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { buildClipboard, materializePaste, parseClipboard, CLIPBOARD_FORMAT } from '../core/clipboard'
+import {
+  buildClipboard,
+  materializePaste,
+  parseClipboard,
+  CLIPBOARD_FORMAT
+} from '../core/clipboard'
 import { emptyDoc, type CircuitDoc, type JunctionEnd } from '../core/model'
 
 function fixture(): CircuitDoc {
@@ -26,7 +31,10 @@ test('buildClipboard keeps only wires fully inside the selection', () => {
   assert.equal(payload.parts.length, 2)
   // w1 is between R1 and R2 → kept; w2 leaves the selection → dropped;
   // w3 is a junction on w1 but its pin end (LED1) is outside → dropped.
-  assert.deepEqual(payload.wires.map((w) => w.id), ['w1'])
+  assert.deepEqual(
+    payload.wires.map((w) => w.id),
+    ['w1']
+  )
 })
 
 test('buildClipboard keeps junction riders when the host and both parts are in', () => {
@@ -74,7 +82,9 @@ test('materializePaste rewrites junction hosts to the new wire ids', () => {
   const payload = buildClipboard(doc, ['R1', 'R2', 'LED1'])!
   const { wires } = materializePaste(doc, payload, { x: 0, y: 0 })
   const oldW1 = payload.wires.find((w) => w.id === 'w1')!
-  const newW1 = wires.find((w) => w.from.toString().startsWith('R') && (w.to as string).toString().startsWith('R'))!
+  const newW1 = wires.find(
+    (w) => w.from.toString().startsWith('R') && (w.to as string).toString().startsWith('R')
+  )!
   const rider = wires.find((w) => typeof w.to === 'object')!
   assert.notEqual(newW1.id, oldW1.id)
   assert.equal((rider.to as JunctionEnd).wire, newW1.id)

@@ -109,6 +109,45 @@ export function renamePart(oldId: string, next: string): Command {
 }
 
 /**
+ * Rename many parts at once.
+ *
+ * Renaming one at a time would collide the moment a new name is already in
+ * use by a part further down the list (renumbering `led`→`LED1` while another
+ * part is called `LED1`), and `renamePart`'s uniqueness guard would silently
+ * no-op. This applies the whole mapping in a single pass instead, rewriting
+ * every wire endpoint and net-label-adjacent reference with it.
+ */
+export function renumberParts(mapping: Record<string, string>): Command {
+  const count = Object.keys(mapping).length
+  return {
+    label: count === 1 ? 'Rename part' : `Renumber ${count} parts`,
+    apply: (doc) => {
+      if (!count) return doc
+      const fixEnd = (e: WireEnd): WireEnd => {
+        if (typeof e !== 'string') return e
+        const { part, pin } = splitPinRef(e)
+        const next = mapping[part]
+        return next ? `${next}:${pin}` : e
+      }
+      return {
+        ...doc,
+        parts: doc.parts.map((p) => (mapping[p.id] ? { ...p, id: mapping[p.id] } : p)),
+        wires: doc.wires.map((w) => ({ ...w, from: fixEnd(w.from), to: fixEnd(w.to) })),
+        sim: doc.sim?.probes
+          ? {
+              ...doc.sim,
+              probes: doc.sim.probes.map((pr) => {
+                const { part, pin } = splitPinRef(pr.at)
+                return mapping[part] ? { ...pr, at: `${mapping[part]}:${pin}` } : pr
+              })
+            }
+          : doc.sim
+      }
+    }
+  }
+}
+
+/**
  * Delete parts (both views) and cascade: wires touching them are removed,
  * junction riders on removed wires are repaired (§ junction cascade).
  */
@@ -270,6 +309,62 @@ export function setProbes(probes: Probe[]): Command {
   return {
     label: 'Update probes',
     apply: (doc) => ({ ...doc, sim: { ...(doc.sim ?? {}), probes } })
+  }
+}
+
+/** Drop a measurement tag on a node (the Simulate panel's picker). */
+export function addProbe(probe: Probe): Command {
+  return {
+    label: `Probe ${probe.label ?? probe.at}`,
+    apply: (doc) => ({
+      ...doc,
+      sim: { ...(doc.sim ?? {}), probes: [...(doc.sim?.probes ?? []), probe] }
+    })
+  }
+}
+
+export function removeProbe(id: string): Command {
+  return {
+    label: 'Remove probe',
+    apply: (doc) => ({
+      ...doc,
+      sim: { ...(doc.sim ?? {}), probes: (doc.sim?.probes ?? []).filter((p) => p.id !== id) }
+    })
+  }
+}
+
+/** Reposition a probe's tag in one view. Merges so a drag is one undo step. */
+export function moveProbe(id: string, view: ViewId, offset: [number, number]): Command {
+  return {
+    label: 'Move probe',
+    mergeKey: `probe:${view}:${id}`,
+    apply: (doc) => ({
+      ...doc,
+      sim: {
+        ...(doc.sim ?? {}),
+        probes: (doc.sim?.probes ?? []).map((p) => (p.id === id ? { ...p, [view]: offset } : p))
+      }
+    })
+  }
+}
+
+/** Re-anchor a probe to a different node (drag its tag onto another wire/pin). */
+export function reanchorProbe(
+  id: string,
+  at: string,
+  offset: [number, number],
+  view: ViewId
+): Command {
+  return {
+    label: 'Move probe',
+    mergeKey: `probe:${view}:${id}`,
+    apply: (doc) => ({
+      ...doc,
+      sim: {
+        ...(doc.sim ?? {}),
+        probes: (doc.sim?.probes ?? []).map((p) => (p.id === id ? { ...p, at, [view]: offset } : p))
+      }
+    })
   }
 }
 

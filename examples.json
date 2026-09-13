@@ -5,7 +5,14 @@
     "owner": "Mister-Industries",
     "repo": "tinyStudio",
     "path": "demo/Blink Example",
-    "board": "tinyCore / Arduino"
+    "board": "tinyCore / Arduino",
+    "tags": [
+      "tinycore",
+      "blink",
+      "led",
+      "digital-io",
+      "visual"
+    ]
   },
   {
     "title": "Fade LED",
@@ -13,7 +20,14 @@
     "owner": "Mister-Industries",
     "repo": "tinyStudio",
     "path": "demo/Fade Example",
-    "board": "tinyCore / Arduino"
+    "board": "tinyCore / Arduino",
+    "tags": [
+      "tinycore",
+      "pwm",
+      "led",
+      "plotter",
+      "visual"
+    ]
   },
   {
     "title": "Joystick",
@@ -21,6 +35,13 @@
     "owner": "Mister-Industries",
     "repo": "tinyStudio",
     "path": "demo/Joystick Example",
-    "board": "tinyCore + Qwiic Joystick"
+    "board": "tinyCore + Qwiic Joystick",
+    "tags": [
+      "tinycore",
+      "qwiic",
+      "joystick",
+      "i2c",
+      "visual"
+    ]
   }
 ]

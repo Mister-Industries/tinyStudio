@@ -132,6 +132,35 @@ interface AppAPI {
   getExamplesDir: () => Promise<string>
 }
 
+/** A signed-in GitHub account. The token is held in memory by the renderer only. */
+export interface GitHubAccountInfo {
+  login: string
+  name: string
+  avatarUrl: string
+  token: string
+}
+
+export interface DeviceFlowStart {
+  deviceCode: string
+  /** the short code the user types on github.com */
+  userCode: string
+  verificationUri: string
+  expiresIn: number
+  interval: number
+}
+
+interface GitHubAuthAPI {
+  /** False when no OAuth client ID was built in — the UI falls back to a token. */
+  isConfigured: () => Promise<boolean>
+  getAccount: () => Promise<GitHubAccountInfo | null>
+  startDeviceFlow: () => Promise<DeviceFlowStart>
+  /** Resolves only once the user finishes authorising on github.com. */
+  poll: (deviceCode: string, interval: number, expiresIn: number) => Promise<GitHubAccountInfo>
+  cancelSignIn: () => Promise<void>
+  signOut: () => Promise<void>
+  signInWithToken: (token: string) => Promise<GitHubAccountInfo>
+}
+
 interface ServiceAPI {
   /** Real ws:// URL of the spawned tinyService backend (port may differ from 3000). */
   getUrl: () => Promise<string>
@@ -177,6 +206,7 @@ declare global {
       fs: FileSystemAPI
       arduino: ArduinoAPI
       settings: SettingsAPI
+      github: GitHubAuthAPI
       agent: AgentAPI
       app: AppAPI
       service: ServiceAPI

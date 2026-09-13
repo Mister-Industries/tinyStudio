@@ -90,7 +90,10 @@ test('LED maps anode/cathode by name, model card emitted once', () => {
   assert.equal(model.length, 1, 'one model card for two LEDs')
   // anode before cathode in the D card
   const d1 = res.netlist.split('\n').find((l) => l.startsWith('DLED1'))!
-  const anodeNet = res.netlist.split('\n').find((l) => l.startsWith('RR1'))!.split(' ')[2]
+  const anodeNet = res.netlist
+    .split('\n')
+    .find((l) => l.startsWith('RR1'))!
+    .split(' ')[2]
   assert.equal(d1.split(' ')[1], anodeNet)
 })
 

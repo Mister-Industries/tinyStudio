@@ -13,7 +13,15 @@
  *    wires get fresh ids, endpoints are rewritten, placements are offset.
  */
 
-import { newId, splitPinRef, isJunction, type CircuitDoc, type CircuitPart, type CircuitWire, type WireEnd } from './model'
+import {
+  newId,
+  splitPinRef,
+  isJunction,
+  type CircuitDoc,
+  type CircuitPart,
+  type CircuitWire,
+  type WireEnd
+} from './model'
 
 export const CLIPBOARD_FORMAT = 'tinystudio-circuit-clipboard'
 

@@ -1,16 +1,18 @@
 /**
- * SourceControl — GitHub panel for the file explorer. Connect with a Personal
- * Access Token, link the workspace to a repo, then Push / Pull / Publish.
+ * SourceControl — GitHub panel for the file explorer. Sign in (see
+ * GitHubSignIn), link the workspace to a repo, then Push / Pull / Publish.
  * The push set is the working tree diffed against the last-synced baseline.
  */
 
-import { RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
+import { AdoptCopiedProjectCommand, RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
+import { GitHubSignInButton } from '@renderer/components/GitHubSignIn'
 import { useGitHubAccount } from '@renderer/hooks/useGitHubAccount'
 import { useAppSelector } from '@renderer/redux'
 import {
+  canPushTo,
   changedPaths,
   collectWorkspaceFiles,
-  ghCreateRepo,
+  copyProjectToNewRepo,
   ghRepoMeta,
   loadLink,
   pullWorkspace,
@@ -21,7 +23,6 @@ import {
 import {
   ArrowDownToLine,
   ArrowUpToLine,
-  ExternalLink,
   GitBranch,
   Github,
   Loader2,
@@ -36,12 +37,16 @@ import { ScrollArea } from '../ui/ScrollArea'
 export function SourceControl(): React.JSX.Element {
   const workspace = useAppSelector((state) => state.file.workspace)
   // Shared with the header sign-in, so connecting in either place updates both.
-  const { account, connect: connectAccount, signOut } = useGitHubAccount()
-  const [token, setToken] = React.useState('')
+  const { account, signOut } = useGitHubAccount()
   const [link, setLink] = React.useState<RepoLink | null>(null)
   const [changed, setChanged] = React.useState<string[]>([])
   const [repoInput, setRepoInput] = React.useState('')
   const [busy, setBusy] = React.useState<string | null>(null)
+  // null = not linked / unknown. Whether the *token* can push to the linked repo
+  // — asked of GitHub rather than inferred from who we think the user is, so a
+  // collaborator gets write access with no extra wiring and everyone else gets a
+  // truthful read-only state.
+  const [writable, setWritable] = React.useState<boolean | null>(null)
 
   // Load this workspace's repo link + compute the change set.
   const refreshChanges = React.useCallback(async () => {
@@ -51,39 +56,44 @@ export function SourceControl(): React.JSX.Element {
     if (l) {
       const current = await collectWorkspaceFiles(workspace)
       setChanged(changedPaths(current, l.base))
+      const [owner, repo] = l.remote.split('/')
+      setWritable(await canPushTo(owner, repo, account?.token))
     } else {
       setChanged([])
+      setWritable(null)
     }
-  }, [workspace])
+  }, [workspace, account?.token])
 
   React.useEffect(() => {
     refreshChanges()
   }, [refreshChanges])
 
-  const connect = async (): Promise<void> => {
-    if (!token.trim()) return
-    setBusy('connect')
-    try {
-      const acct = await connectAccount(token)
-      setToken('')
-      toast.success(`Signed in as ${acct.login}`)
-    } catch (e) {
-      toast.error('Sign-in failed', { description: e instanceof Error ? e.message : 'Unknown error' })
-    } finally {
-      setBusy(null)
-    }
-  }
-
   const linkRepo = async (): Promise<void> => {
     if (!workspace || !repoInput.trim()) return
     setBusy('link')
     try {
+      const cleaned = repoInput.trim().replace(/\.git$/, '')
       const m =
-        repoInput.trim().replace(/\.git$/, '').match(/github\.com\/([^/]+)\/([^/?#]+)/) ||
-        repoInput.trim().match(/^([^/\s]+)\/([^/\s]+)$/)
+        cleaned.match(/github\.com\/([^/]+)\/([^/?#]+)(?:\/(?:tree\/[^/]+\/)?([^?#]*))?/) ||
+        cleaned.match(/^([^/\s]+)\/([^/\s]+)(?:\/(.*))?$/)
       if (!m) throw new Error('Enter a repo as owner/name or a github.com URL')
       const meta = await ghRepoMeta(m[1], m[2], account?.token)
-      const newLink: RepoLink = { remote: meta.fullName, branch: meta.branch, base: {} }
+      // A workspace opened from a repo subfolder must stay pinned to that
+      // subfolder, or push flattens the project onto the repo root.
+      const sameRepo =
+        workspace.source &&
+        `${workspace.source.owner}/${workspace.source.repo}`.toLowerCase() ===
+          meta.fullName.toLowerCase()
+      const repoPath = (m[3] || (sameRepo ? workspace.source!.path : '') || '').replace(
+        /^\/+|\/+$/g,
+        ''
+      )
+      const newLink: RepoLink = {
+        remote: meta.fullName,
+        branch: meta.branch,
+        path: repoPath,
+        base: {}
+      }
       // Pull to populate the baseline + working tree from the remote.
       const base = await pullWorkspace(workspace, newLink, account?.token, (msg) => setBusy(msg))
       newLink.base = base
@@ -93,7 +103,9 @@ export function SourceControl(): React.JSX.Element {
       await refreshChanges()
       toast.success(`Linked ${meta.fullName}`)
     } catch (e) {
-      toast.error('Could not link repo', { description: e instanceof Error ? e.message : 'Unknown error' })
+      toast.error('Could not link repo', {
+        description: e instanceof Error ? e.message : 'Unknown error'
+      })
     } finally {
       setBusy(null)
     }
@@ -111,10 +123,19 @@ export function SourceControl(): React.JSX.Element {
         (msg) => setBusy(msg)
       )
       const updated = { ...link, base }
-      saveLink(workspace.path, updated)
       setLink(updated)
       setChanged([])
       toast.success(pushed > 0 ? `Pushed ${pushed} file(s)` : 'Nothing to push')
+      // The push already landed on GitHub; only the local baseline can fail
+      // here, and reporting that as "Push failed" would send people looking in
+      // the wrong place.
+      try {
+        saveLink(workspace.path, updated)
+      } catch (e) {
+        toast.error('Pushed, but could not save the sync baseline', {
+          description: e instanceof Error ? e.message : 'Unknown error'
+        })
+      }
     } catch (e) {
       toast.error('Push failed', { description: e instanceof Error ? e.message : 'Unknown error' })
     } finally {
@@ -144,27 +165,41 @@ export function SourceControl(): React.JSX.Element {
     if (!workspace || !account || !repoInput.trim()) return
     setBusy('Publishing…')
     try {
-      // Create the repo PUBLIC so GitHub Pages works on the free plan (Pages on
-      // private repos needs a paid plan) and so the project can be shared.
-      const repo = await ghCreateRepo(
-        repoInput.trim(),
-        account.token,
-        false,
-        `${workspace.name} — built with tinyStudio`
-      )
-      // Fresh repo → empty baseline so every file is pushed.
-      const newLink: RepoLink = { remote: repo.fullName, branch: repo.branch, base: {} }
-      const { base } = await pushWorkspace(workspace, newLink, account.token, 'Initial commit via tinyStudio', (msg) =>
-        setBusy(msg)
-      )
-      const linked = { ...newLink, base }
-      saveLink(workspace.path, linked)
+      // Repos are created PUBLIC so GitHub Pages works on the free plan (Pages
+      // on private repos needs a paid plan) and so the project can be shared.
+      //
+      // This goes through the same copy path as "Make it mine" so a project
+      // opened from an example publishes *complete* — including the files whose
+      // bytes were never downloaded, which a plain push of the working tree
+      // would leave behind.
+      const {
+        link: linked,
+        copied,
+        failed
+      } = await copyProjectToNewRepo({
+        name: repoInput.trim(),
+        token: account.token,
+        isPrivate: false,
+        description: `${workspace.name} — built with tinyStudio`,
+        files: await collectWorkspaceFiles(workspace),
+        source: workspace.source,
+        onProgress: (msg) => setBusy(msg)
+      })
+      await new AdoptCopiedProjectCommand(workspace, linked, account.login).execute()
       setLink(linked)
       setRepoInput('')
       await refreshChanges()
-      toast.success(`Published ${repo.fullName}`)
+      if (failed.length > 0) {
+        toast.warning(`Published ${linked.remote} — ${failed.length} file(s) failed`, {
+          description: failed.slice(0, 4).join(', ') + (failed.length > 4 ? '…' : '')
+        })
+      } else {
+        toast.success(`Published ${linked.remote}`, { description: `${copied} file(s) copied.` })
+      }
     } catch (e) {
-      toast.error('Publish failed', { description: e instanceof Error ? e.message : 'Unknown error' })
+      toast.error('Publish failed', {
+        description: e instanceof Error ? e.message : 'Unknown error'
+      })
     } finally {
       setBusy(null)
     }
@@ -176,43 +211,36 @@ export function SourceControl(): React.JSX.Element {
   return (
     <div className="h-full flex flex-col">
       {!workspace ? (
-        <div className="p-4 text-sm text-fg-4 text-center">Open a project to use source control.</div>
+        <div className="p-4 text-sm text-fg-4 text-center">
+          Open a project to use source control.
+        </div>
       ) : !account ? (
         <div className="p-4 flex flex-col gap-3">
           <div className="flex items-center gap-2 text-sm text-fg-2">
             <Github size={16} /> Connect to GitHub
           </div>
-          <input
-            className={input}
-            type="password"
-            placeholder="Personal Access Token (repo scope)"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && connect()}
-          />
-          <Button onClick={connect} disabled={busy === 'connect' || !token.trim()} className="w-full">
-            {busy === 'connect' ? <Loader2 size={15} className="animate-spin" /> : <Github size={15} />}
-            Connect
-          </Button>
-          <a
-            href="https://github.com/settings/tokens/new?scopes=repo&description=tinyStudio"
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs text-cyan hover:text-cyan-bright flex items-center gap-1 justify-center"
-          >
-            Create a token <ExternalLink size={12} />
-          </a>
+          <p className="text-xs text-fg-3">
+            Sign in to link this project to a repository, push your changes, and publish to GitHub
+            Pages.
+          </p>
+          <GitHubSignInButton block />
         </div>
       ) : (
         <div className="flex-1 flex flex-col min-h-0">
           {/* account */}
           <div className="flex items-center gap-2 px-4 py-2 border-b border-navy-600">
-            {account.avatarUrl && <img src={account.avatarUrl} alt="" className="w-6 h-6 rounded-full" />}
+            {account.avatarUrl && (
+              <img src={account.avatarUrl} alt="" className="w-6 h-6 rounded-full" />
+            )}
             <div className="flex-1 min-w-0">
               <div className="text-xs text-fg-1 truncate">{account.name}</div>
               <div className="text-[10px] text-fg-4 truncate">@{account.login}</div>
             </div>
-            <button className="text-fg-4 hover:text-signal-error" title="Sign out" onClick={signOut}>
+            <button
+              className="text-fg-4 hover:text-signal-error"
+              title="Sign out"
+              onClick={signOut}
+            >
               <LogOut size={14} />
             </button>
           </div>
@@ -230,8 +258,17 @@ export function SourceControl(): React.JSX.Element {
                 onChange={(e) => setRepoInput(e.target.value)}
               />
               <div className="flex gap-2">
-                <Button onClick={linkRepo} disabled={!!busy || !repoInput.trim()} className="flex-1" variant="outline">
-                  {busy === 'link' ? <Loader2 size={15} className="animate-spin" /> : <ArrowDownToLine size={15} />}
+                <Button
+                  onClick={linkRepo}
+                  disabled={!!busy || !repoInput.trim()}
+                  className="flex-1"
+                  variant="outline"
+                >
+                  {busy === 'link' ? (
+                    <Loader2 size={15} className="animate-spin" />
+                  ) : (
+                    <ArrowDownToLine size={15} />
+                  )}
                   Link & pull
                 </Button>
                 <Button onClick={publish} disabled={!!busy || !repoInput.trim()} className="flex-1">
@@ -248,7 +285,10 @@ export function SourceControl(): React.JSX.Element {
             <>
               <div className="px-4 py-2 border-b border-navy-600 flex items-center gap-2 text-xs">
                 <GitBranch size={13} className="text-cyan" />
-                <span className="text-fg-1 truncate flex-1">{link.remote}</span>
+                <span className="text-fg-1 truncate flex-1">
+                  {link.remote}
+                  {link.path ? <span className="text-fg-4">/{link.path}</span> : null}
+                </span>
                 <span className="font-mono text-fg-4">{link.branch}</span>
               </div>
               <div className="px-4 py-1 text-[11px] font-semibold tracking-wider text-fg-3">
@@ -257,7 +297,9 @@ export function SourceControl(): React.JSX.Element {
               <ScrollArea className="flex-1">
                 <div className="px-4 pb-3 flex flex-col gap-0.5">
                   {changed.length === 0 ? (
-                    <div className="text-xs text-fg-4 py-2">Working tree matches the last sync.</div>
+                    <div className="text-xs text-fg-4 py-2">
+                      Working tree matches the last sync.
+                    </div>
                   ) : (
                     changed.map((p) => (
                       <div key={p} className="flex items-center gap-2 text-xs text-fg-2 py-0.5">
@@ -268,8 +310,21 @@ export function SourceControl(): React.JSX.Element {
                   )}
                 </div>
               </ScrollArea>
+              {writable === false && (
+                <div className="px-4 py-2 text-[11px] text-fg-3 border-t border-navy-600">
+                  You don&apos;t have write access to{' '}
+                  <span className="text-fg-2">{link.remote}</span>. Your edits are saved locally —
+                  publish a copy to keep them on GitHub.
+                </div>
+              )}
               <div className="px-4 py-2 flex gap-2">
-                <Button onClick={push} disabled={!!busy} className="flex-1" size="sm">
+                <Button
+                  onClick={push}
+                  disabled={!!busy || writable === false}
+                  className="flex-1"
+                  size="sm"
+                  title={writable === false ? 'Read-only: no write access to this repo' : undefined}
+                >
                   {busy && busy.startsWith('Push') ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
@@ -277,7 +332,13 @@ export function SourceControl(): React.JSX.Element {
                   )}
                   Push{changed.length > 0 ? ` (${changed.length})` : ''}
                 </Button>
-                <Button onClick={pull} disabled={!!busy} variant="outline" className="flex-1" size="sm">
+                <Button
+                  onClick={pull}
+                  disabled={!!busy}
+                  variant="outline"
+                  className="flex-1"
+                  size="sm"
+                >
                   {busy && busy.startsWith('Pull') ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
@@ -289,7 +350,9 @@ export function SourceControl(): React.JSX.Element {
             </>
           )}
           {busy && busy.includes('·') && (
-            <div className="px-4 py-1.5 text-[11px] text-fg-3 border-t border-navy-600 truncate">{busy}</div>
+            <div className="px-4 py-1.5 text-[11px] text-fg-3 border-t border-navy-600 truncate">
+              {busy}
+            </div>
           )}
         </div>
       )}

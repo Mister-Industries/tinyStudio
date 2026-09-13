@@ -38,14 +38,19 @@ test('svgNs sanitizes weird part ids', () => {
 })
 
 test('stripSvgSize removes root width/height only', () => {
-  const out = stripSvgSize('<svg width="10" height="20" viewBox="0 0 10 20"><rect width="5"/></svg>')
+  const out = stripSvgSize(
+    '<svg width="10" height="20" viewBox="0 0 10 20"><rect width="5"/></svg>'
+  )
   assert.ok(!/^<svg[^>]*width="10"/.test(out))
   assert.ok(out.includes('<rect width="5"/>'))
   assert.ok(out.includes('viewBox="0 0 10 20"'))
 })
 
 test('escapeXml escapes the five specials', () => {
-  assert.equal(escapeXml(`<a href="x">R&D's</a>`), '&lt;a href=&quot;x&quot;&gt;R&amp;D&apos;s&lt;/a&gt;')
+  assert.equal(
+    escapeXml(`<a href="x">R&D's</a>`),
+    '&lt;a href=&quot;x&quot;&gt;R&amp;D&apos;s&lt;/a&gt;'
+  )
 })
 
 test('prepareSvgForEmbed strips prolog/doctype and root x/y/width/height (Fritzing exports)', () => {
@@ -67,7 +72,9 @@ test('prepareSvgForEmbed strips prolog/doctype and root x/y/width/height (Fritzi
 })
 
 test('prepareSvgForEmbed keeps inner-element geometry attributes', () => {
-  const out = prepareSvgForEmbed('<svg width="10" viewBox="0 0 10 10"><rect x="1" y="2" width="3" height="4"/></svg>')
+  const out = prepareSvgForEmbed(
+    '<svg width="10" viewBox="0 0 10 10"><rect x="1" y="2" width="3" height="4"/></svg>'
+  )
   assert.ok(out.includes('<rect x="1" y="2" width="3" height="4"/>'))
 })
 

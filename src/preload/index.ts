@@ -74,6 +74,38 @@ const api = {
     clearApiKey: (): Promise<void> => ipcRenderer.invoke('settings:clear-key')
   },
 
+  // GitHub sign-in. The device flow and the token both live in main; the
+  // renderer receives the token in memory only and never persists it.
+  github: {
+    isConfigured: (): Promise<boolean> => ipcRenderer.invoke('github:configured'),
+    getAccount: (): Promise<{
+      login: string
+      name: string
+      avatarUrl: string
+      token: string
+    } | null> => ipcRenderer.invoke('github:account'),
+    startDeviceFlow: (): Promise<{
+      deviceCode: string
+      userCode: string
+      verificationUri: string
+      expiresIn: number
+      interval: number
+    }> => ipcRenderer.invoke('github:start-device'),
+    // Resolves only once the user has finished authorising on github.com.
+    poll: (
+      deviceCode: string,
+      interval: number,
+      expiresIn: number
+    ): Promise<{ login: string; name: string; avatarUrl: string; token: string }> =>
+      ipcRenderer.invoke('github:poll', deviceCode, interval, expiresIn),
+    cancelSignIn: (): Promise<void> => ipcRenderer.invoke('github:cancel-sign-in'),
+    signOut: (): Promise<void> => ipcRenderer.invoke('github:sign-out'),
+    signInWithToken: (
+      token: string
+    ): Promise<{ login: string; name: string; avatarUrl: string; token: string }> =>
+      ipcRenderer.invoke('github:sign-in-token', token)
+  },
+
   // Studio AI agent. send() returns immediately; results stream over onEvent().
   agent: {
     send: (args: {

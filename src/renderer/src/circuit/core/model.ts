@@ -87,12 +87,29 @@ export interface Analysis {
   enabled?: boolean
   [k: string]: unknown
 }
+/**
+ * A placed measurement tag (spec §10.4). Unlike the `sim-probe-*` PARTS, a
+ * probe is not in the circuit: it is a label pinned to a node, the thing you
+ * get by clicking a wire with the Simulate panel's picker on. It says what an
+ * analysis should report and where its tag sits, and nothing else — no pins,
+ * no SPICE card, no effect on the netlist.
+ */
 export interface Probe {
   id: string
   kind: 'voltage' | 'current' | 'diff'
+  /**
+   * What it measures, as a core/simOutputs reference: `v@<part>:<pin>` for the
+   * node that pin sits on, `i@<part>` for the current through a source,
+   * `d@<part>` for a differential probe part's own reading. Deliberately NOT a
+   * SPICE vector name — node names are assigned in net order and move whenever
+   * a wire is added.
+   */
   at: string
   label?: string
   color?: string
+  /** Tag offset from its anchor, per view, in world units. */
+  bb?: [number, number]
+  sch?: [number, number]
 }
 
 export interface PackRef {
@@ -194,7 +211,8 @@ export function parseCircuitFile(text: string): ParseResult {
   let raw: Record<string, unknown>
   try {
     raw = JSON.parse(text || '{}')
-    if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('not an object')
+    if (raw === null || typeof raw !== 'object' || Array.isArray(raw))
+      throw new Error('not an object')
   } catch (e) {
     return {
       doc: emptyDoc(),
@@ -212,9 +230,17 @@ export function parseCircuitFile(text: string): ParseResult {
   }
   if (Array.isArray(raw.parts) || Array.isArray(raw.wires)) {
     // half-formed v2-ish content — salvage what we can
-    return { doc: normalizeV2({ format: 'tinystudio-circuit', version: 2, ...raw }, warnings), migrated: false, warnings }
+    return {
+      doc: normalizeV2({ format: 'tinystudio-circuit', version: 2, ...raw }, warnings),
+      migrated: false,
+      warnings
+    }
   }
-  return { doc: emptyDoc(), migrated: false, warnings: ['Unknown circuit file shape; starting empty.'] }
+  return {
+    doc: emptyDoc(),
+    migrated: false,
+    warnings: ['Unknown circuit file shape; starting empty.']
+  }
 }
 
 function normalizeV2(raw: Record<string, unknown>, warnings: string[]): CircuitDoc {
@@ -277,7 +303,11 @@ type V1Conn = [unknown, unknown, string?, string[]?]
  */
 function migrateV1(raw: Record<string, unknown>, warnings: string[]): CircuitDoc {
   const doc = emptyDoc(typeof raw.author === 'string' ? raw.author : undefined)
-  const sch = (raw.schematic as { pos?: Record<string, [number, number]>; routes?: Record<string, string[]> }) || {}
+  const sch =
+    (raw.schematic as {
+      pos?: Record<string, [number, number]>
+      routes?: Record<string, string[]>
+    }) || {}
 
   for (const p of (raw.parts as Record<string, unknown>[]) ?? []) {
     if (!p || p.id == null || p.type == null) continue
@@ -287,13 +317,16 @@ function migrateV1(raw: Record<string, unknown>, warnings: string[]): CircuitDoc
       bb: {
         x: Number(p.left ?? p.x ?? 0),
         y: Number(p.top ?? p.y ?? 0),
-        ...(p.rotate ? { rotate: (((Number(p.rotate) % 360) + 360) % 360) as 0 | 90 | 180 | 270 } : {})
+        ...(p.rotate
+          ? { rotate: (((Number(p.rotate) % 360) + 360) % 360) as 0 | 90 | 180 | 270 }
+          : {})
       }
     }
     const attrs = p.attrs as Record<string, string | number | boolean> | undefined
     if (attrs && Object.keys(attrs).length) {
       const { labelOffset, ...rest } = attrs as Record<string, unknown>
-      if (Array.isArray(labelOffset) && part.bb) part.bb.labelOffset = labelOffset as [number, number]
+      if (Array.isArray(labelOffset) && part.bb)
+        part.bb.labelOffset = labelOffset as [number, number]
       if (Object.keys(rest).length) part.attrs = rest as Record<string, string | number | boolean>
     }
     const sp = sch.pos?.[part.id]
@@ -324,7 +357,13 @@ function migrateV1(raw: Record<string, unknown>, warnings: string[]): CircuitDoc
       })
       const schRoute = sch.routes?.[key]
       if (schRoute) {
-        doc.wires.push({ id: newId('w'), from: c[0], to: c[1], view: 'sch', route: schRoute.slice() })
+        doc.wires.push({
+          id: newId('w'),
+          from: c[0],
+          to: c[1],
+          view: 'sch',
+          route: schRoute.slice()
+        })
       }
     } else {
       pending.push({ conn: c, key })
@@ -357,7 +396,9 @@ function migrateV1(raw: Record<string, unknown>, warnings: string[]): CircuitDoc
       color: typeof color === 'string' ? color : undefined,
       route: normalizeJourney(route)
     })
-    warnings.push('A junction endpoint was migrated as a pending junction (resolved on first render).')
+    warnings.push(
+      'A junction endpoint was migrated as a pending junction (resolved on first render).'
+    )
   }
 
   // Preserve Wokwi/foreign keys.
@@ -382,7 +423,9 @@ function migrateV1(raw: Record<string, unknown>, warnings: string[]): CircuitDoc
 export function normalizeJourney(route: unknown): string[] | undefined {
   if (!Array.isArray(route)) return undefined
   const out = route.filter(
-    (s) => typeof s === 'string' && (/^[hv]-?[\d.]+$/.test(s) || /^d-?[\d.]+,-?[\d.]+$/.test(s) || s === '*')
+    (s) =>
+      typeof s === 'string' &&
+      (/^[hv]-?[\d.]+$/.test(s) || /^d-?[\d.]+,-?[\d.]+$/.test(s) || s === '*')
   ) as string[]
   return out.length ? out : undefined
 }

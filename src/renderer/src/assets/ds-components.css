@@ -319,19 +319,36 @@
 
 /* ── TAG / CHIP — libraries, board capabilities, filters ─────────────────── */
 .ts-tag {
+  /* Three variables drive every chip. The defaults below are the neutral
+     (topic) chip; a board chip re-points them at its solder-mask ramp via an
+     inline style from lib/exampleTags#tagChipStyle, and everything else —
+     hover, selected, the remove affordance — follows automatically. */
+  --tag-soft: var(--bg-sunken);
+  --tag-line: var(--border-soft);
+  --tag-ink: var(--text-body);
+
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   font-weight: var(--fw-medium);
-  color: var(--text-body);
-  background: var(--bg-sunken);
+  color: var(--tag-ink);
+  background: var(--tag-soft);
   border: 1.5px solid var(--border-soft);
   border-radius: var(--radius-sm);
   padding: 4px 8px;
   line-height: 1.2;
   white-space: nowrap;
+}
+
+/* Board / expansion chip — colour-matched to the physical PCB. The mask
+   colour shows as a solid rail down the leading edge (a strong, consistent
+   read even at a glance) with the tint carrying the fill behind it. */
+.ts-tag--board {
+  border-color: color-mix(in srgb, var(--tag-line) 34%, transparent);
+  border-left: 3px solid var(--tag-line);
+  padding-left: 7px;
 }
 .ts-tag--clickable {
   cursor: pointer;
@@ -340,21 +357,36 @@
     border-color var(--dur-fast);
 }
 .ts-tag--clickable:hover {
-  background: var(--surface-card);
-  border-color: var(--border-interactive);
+  border-color: color-mix(in srgb, var(--tag-line) 65%, transparent);
+  background: color-mix(in srgb, var(--tag-soft) 70%, var(--surface-card));
 }
-.ts-tag--selected {
-  background: var(--brand-soft);
-  border-color: var(--brand);
-  color: var(--brand-on);
+/* Selected filter chip — the tag's own colour goes solid so an active board
+   filter is unmistakable, rather than every selection turning brand blue. */
+.ts-tag--selected,
+.ts-tag--clickable.ts-tag--selected:hover {
+  background: var(--tag-soft);
+  border-color: var(--tag-line);
+  color: var(--tag-ink);
+  box-shadow: inset 0 0 0 1px var(--tag-line);
+}
+.ts-tag--selected:not(.ts-tag--board) {
+  --tag-soft: var(--brand-soft);
+  --tag-line: var(--brand);
+  --tag-ink: var(--brand-on);
 }
 .ts-tag__ico {
   display: inline-flex;
   line-height: 0;
-  color: var(--text-muted);
+  color: currentColor;
+  opacity: 0.75;
 }
 .ts-tag--selected .ts-tag__ico {
-  color: var(--brand-on);
+  opacity: 1;
+}
+/* Count badge on a filter chip. */
+.ts-tag__count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
 }
 .ts-tag__x {
   display: inline-flex;
@@ -731,4 +763,93 @@
 }
 .notif__link:hover {
   filter: brightness(1.1);
+}
+
+/* ── toasts (sonner) ────────────────────────────────────────────────────────
+   A toast and a bell entry are the same notification shown two ways (see
+   lib/notify.ts, which writes to both), so they share one look. sonner ships
+   its own palette resolved from `data-sonner-theme`; we repaint every part
+   from the design tokens instead, mirroring the .notif__* rules above.
+
+   Specificity note: sonner injects its stylesheet at runtime, so source order
+   can't be relied on. Every selector here pairs [data-sonner-toast] with the
+   .ts-toast class (set via toastOptions.className in main.tsx) to outrank
+   sonner's own rules without !important. */
+[data-sonner-toast].ts-toast {
+  width: 320px;
+  padding: 12px 14px;
+  gap: 9px;
+  background: var(--surface-overlay);
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft-lg);
+  font-family: var(--font-sans);
+  color: var(--text-body);
+}
+
+/* Tone marker: the bell uses a coloured dot rather than a glyph, so drop
+   sonner's icon and reuse .notif__dot's geometry. */
+[data-sonner-toast].ts-toast [data-icon] {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin: 5px 0 0;
+  border-radius: 50%;
+  background: var(--blue);
+}
+[data-sonner-toast].ts-toast [data-icon] > * {
+  display: none;
+}
+[data-sonner-toast].ts-toast[data-type='success'] [data-icon] {
+  background: var(--green);
+}
+[data-sonner-toast].ts-toast[data-type='error'] [data-icon] {
+  background: var(--red);
+}
+[data-sonner-toast].ts-toast[data-type='warning'] [data-icon] {
+  background: var(--yellow);
+}
+
+[data-sonner-toast].ts-toast [data-title] {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+[data-sonner-toast].ts-toast [data-description] {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: pre-wrap;
+}
+
+/* Action button — matches .notif__link. */
+[data-sonner-toast].ts-toast [data-button] {
+  flex: none;
+  align-self: center;
+  height: auto;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--brand);
+  color: var(--text-on-brand, #fff);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+}
+[data-sonner-toast].ts-toast [data-button]:hover {
+  filter: brightness(1.1);
+  background: var(--brand);
+}
+
+[data-sonner-toast].ts-toast [data-close-button] {
+  background: var(--surface-overlay);
+  border: 1.5px solid var(--border-default);
+  color: var(--text-muted);
+}
+[data-sonner-toast].ts-toast [data-close-button]:hover {
+  background: var(--bg-sunken);
+  color: var(--text-strong);
 }

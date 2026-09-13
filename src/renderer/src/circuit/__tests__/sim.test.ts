@@ -144,5 +144,8 @@ test('current probe (M4 leftover): engine reports the divider branch current', a
   assert.ok(i, `i(vamm1) present (got: ${res.data.map((d) => d.name).join(', ')})`)
   // 5V across 14.7k, current flows V+ -> AMM1 -> R1 -> R2 -> V- (into V- => negative by SPICE convention)
   const expected = 5 / 14700
-  assert.ok(Math.abs(Math.abs(i![0]) - expected) / expected < 0.01, `i(vamm1)=${i![0]} ≈ ±${expected}`)
+  assert.ok(
+    Math.abs(Math.abs(i![0]) - expected) / expected < 0.01,
+    `i(vamm1)=${i![0]} ≈ ±${expected}`
+  )
 })

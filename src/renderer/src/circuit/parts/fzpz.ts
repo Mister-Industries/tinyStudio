@@ -112,7 +112,10 @@ function localAnchor(el: Element): Anchor | null {
     }
   }
   if (tag === 'polygon' || tag === 'polyline') {
-    const pts = (el.getAttribute('points') || '').trim().split(/[\s,]+/).map(parseFloat)
+    const pts = (el.getAttribute('points') || '')
+      .trim()
+      .split(/[\s,]+/)
+      .map(parseFloat)
     if (pts.length >= 2) return bboxCenter(chunk(pts))
   }
   if (tag === 'path') {
@@ -211,7 +214,10 @@ function extractView(
   const svg = doc.getElementsByTagName('svg')[0]
   if (!svg) return null
 
-  let vb = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(parseFloat)
+  let vb = (svg.getAttribute('viewBox') || '')
+    .trim()
+    .split(/[\s,]+/)
+    .map(parseFloat)
   const wPx = toPx(svg.getAttribute('width'))
   const hPx = toPx(svg.getAttribute('height'))
   if (vb.length !== 4 || vb.some(Number.isNaN)) {
@@ -235,8 +241,7 @@ function extractView(
       continue
     }
     // terminal is the precise wire point in schematic; pin element in breadboard
-    const ids =
-      view === 'schematic' ? [cv.terminalId, cv.svgId] : [cv.svgId, cv.terminalId]
+    const ids = view === 'schematic' ? [cv.terminalId, cv.svgId] : [cv.svgId, cv.terminalId]
     let pt: Pt2 | null = null
     for (const id of ids) {
       if (!id) continue
@@ -322,9 +327,7 @@ export async function importFzpz(bytes: Uint8Array, fileName?: string): Promise<
 
   // "part.<name>.fzp" → <name>; fall back to the dropped filename / title
   const base =
-    /^part\.(.+)\.fzp$/i.exec(fzpEntry.name)?.[1] ??
-    fileName?.replace(/\.fzpz$/i, '') ??
-    fzp.title
+    /^part\.(.+)\.fzp$/i.exec(fzpEntry.name)?.[1] ?? fileName?.replace(/\.fzpz$/i, '') ?? fzp.title
   const type = slug(base)
 
   // view image "breadboard/foo.svg" is stored flat as "svg.breadboard.foo.svg"

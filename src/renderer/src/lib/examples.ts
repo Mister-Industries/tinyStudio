@@ -5,8 +5,9 @@
 // onboarding can also *download* them to a local folder so they live on disk and
 // can be flashed straight away.
 
-import { fetchRepoFolder } from './github'
+import { fetchRepoProject } from './github'
 import { fileSystem } from './fileSystem'
+import { canonicalizeTags, compareTags, getTagMeta, isKnownTag } from './exampleTags'
 
 // One project the user can open. `owner/repo/path` are GitHub coordinates, so
 // examples may live across multiple repos.
@@ -17,37 +18,163 @@ export interface ExampleEntry {
   repo: string
   path: string
   board?: string
+  /** Grouping for the Examples tab: 'demos' | 'basics' | 'advanced' | 'hats'. */
+  category?: string
+  /** The tinyDocs page this example was generated from. */
+  docsUrl?: string
+  /**
+   * Search/filter keywords, canonicalised to the vocabulary in
+   * lib/exampleTags. Board tags ('tinycore', 'tinysniff', 'qwiic') colour the
+   * card's chips to the real PCB; topic tags ('i2c', 'pwm') stay neutral.
+   * Optional — a manifest without tags still loads and still searches on
+   * title/description/board (see `searchHaystack`).
+   *
+   * Populated by scripts/gen-example-tags.mjs, which reads each project's
+   * .ino and README, so this rarely needs hand-editing.
+   */
+  tags?: string[]
 }
 
-// Where the manifest lives. Interim: examples.json at the root of the main repo
-// (must be on `main` for this raw URL to resolve). When the dedicated public
-// examples repo is set up, repoint this to
-// https://raw.githubusercontent.com/Mister-Industries/tinyStudio-examples/main/examples.json.
+// Where the manifest lives. The dedicated examples repo is canonical; the copy
+// at the root of the main repo is the fallback, so the Examples tab keeps
+// working if the examples repo isn't published (or reachable) yet. Both must be
+// on `main` for these raw URLs to resolve.
+//
+// Entries carry `owner`/`repo`/`path` per project, so one manifest can span
+// repos — the tinyHAT examples point straight at tinySniff / tinySpeak rather
+// than being copied.
+//
 // Overridable (like tinyservice.url) for testing against a fork or branch via
 // localStorage["tinystudio.examples.url"].
 const DEFAULT_MANIFEST_URL =
+  'https://raw.githubusercontent.com/Mister-Industries/tinyStudio-examples/main/examples.json'
+const FALLBACK_MANIFEST_URL =
   'https://raw.githubusercontent.com/Mister-Industries/tinyStudio/main/examples.json'
 
-export function resolveManifestUrl(): string {
+export function resolveManifestUrl(): string | null {
   try {
-    return localStorage.getItem('tinystudio.examples.url') || DEFAULT_MANIFEST_URL
+    return localStorage.getItem('tinystudio.examples.url')
   } catch {
-    return DEFAULT_MANIFEST_URL
+    return null
   }
 }
 
-/** Fetch and parse the examples manifest. */
-export async function fetchExamplesManifest(): Promise<ExampleEntry[]> {
-  const r = await fetch(resolveManifestUrl())
+/**
+ * Normalise one manifest entry. Tags are folded onto their canonical slugs so
+ * an entry written as "I2C" / "Wire" / "i2c" all filter as one tag, and a
+ * board named only in the free-text `board` field still gets a board chip —
+ * which keeps older manifests (and hand-written entries) working.
+ */
+function normalizeEntry(raw: ExampleEntry): ExampleEntry {
+  // Declared tags are trusted as-is, unknown slugs included — that is what
+  // lets the manifest introduce vocabulary ahead of the app.
+  const tags = canonicalizeTags(raw.tags)
+  // Board-derived tags are the opposite: `board` is free text a human typed,
+  // so only fragments that resolve to a *known* tag are accepted. Without
+  // that, "tinyCore (ESP32-S3)" ships a junk `tinycore-esp32-s3` chip beside
+  // the real `tinyCore` one, and "/ Arduino" becomes a tag of its own.
+  for (const t of knownTagsIn(raw.board)) if (!tags.includes(t)) tags.push(t)
+  return tags.length > 0 ? { ...raw, tags: tags.sort(compareTags) } : raw
+}
+
+/**
+ * Pull recognised tags out of a free-text board field.
+ *
+ * Real values this has to survive, from the published manifest:
+ *   "tinyCore (ESP32-S3)"       -> tinycore          (parenthetical is a qualifier)
+ *   "tinyCore + tinySpeak HAT"  -> tinycore, tinyspeak   ("HAT" is a form factor)
+ *   "tinyCore + Qwiic Joystick" -> tinycore, qwiic, joystick
+ *   "tinyCore / Arduino"        -> tinycore          ("Arduino" is not a tag)
+ */
+function knownTagsIn(board: string | undefined): string[] {
+  if (!board) return []
+  const fragments = board
+    // Parentheses and brackets delimit a qualifier, not a separate board, but
+    // what's inside can still be a recognised alias — so split, don't strip.
+    .split(/[+/,&()[\]]|\bwith\b|\band\b/i)
+    .flatMap((part) => {
+      const trimmed = part
+        .trim()
+        .replace(/\b(hat|board|module|breakout)\b/gi, '')
+        .trim()
+      // "Qwiic Joystick" should yield both `qwiic` and `joystick`, so offer the
+      // whole fragment and its individual words as candidates.
+      return trimmed.includes(' ') ? [trimmed, ...trimmed.split(/\s+/)] : [trimmed]
+    })
+    .filter(Boolean)
+
+  const out: string[] = []
+  for (const f of fragments) {
+    const meta = getTagMeta(f)
+    // getTagMeta synthesises a meta for anything it doesn't know; a synthesised
+    // one has no facet entry in the vocabulary, so compare against the real list.
+    if (isKnownTag(meta.slug) && !out.includes(meta.slug)) out.push(meta.slug)
+  }
+  return out
+}
+
+/** Normalise a whole manifest. Exported so the rules above are testable. */
+export function normalizeManifest(raw: ExampleEntry[]): ExampleEntry[] {
+  return raw.map(normalizeEntry)
+}
+
+async function fetchManifestFrom(url: string): Promise<ExampleEntry[]> {
+  const r = await fetch(url)
   if (!r.ok) throw new Error(`Manifest ${r.status}`)
   const data = await r.json()
-  return Array.isArray(data) ? (data as ExampleEntry[]) : []
+  return Array.isArray(data) ? normalizeManifest(data as ExampleEntry[]) : []
+}
+
+/**
+ * The lowercased text one example matches free-text search against: its title,
+ * description, board, category and every tag (slug *and* display label, so
+ * typing "bluetooth" finds an entry tagged `ble`).
+ */
+export function searchHaystack(ex: ExampleEntry): string {
+  const parts = [ex.title, ex.description, ex.board ?? '', ex.category ?? '']
+  for (const t of ex.tags ?? []) {
+    const meta = getTagMeta(t)
+    parts.push(meta.slug, meta.label, ...(meta.aliases ?? []))
+  }
+  return parts.join(' ').toLowerCase()
+}
+
+/**
+ * Free-text match. Whitespace-separated terms are AND-ed and matched as
+ * substrings, so "wifi server" finds the WiFi web-server example regardless of
+ * word order, and a partial word ("blue") still matches while typing.
+ */
+export function matchesQuery(ex: ExampleEntry, query: string): boolean {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean)
+  if (terms.length === 0) return true
+  const hay = searchHaystack(ex)
+  return terms.every((t) => hay.includes(t))
+}
+
+/**
+ * Fetch and parse the examples manifest. An explicit localStorage override is
+ * used alone (a failure there should be loud); otherwise the examples repo is
+ * tried first and the main repo is the fallback.
+ */
+export async function fetchExamplesManifest(): Promise<ExampleEntry[]> {
+  const override = resolveManifestUrl()
+  if (override) return fetchManifestFrom(override)
+  try {
+    return await fetchManifestFrom(DEFAULT_MANIFEST_URL)
+  } catch {
+    return fetchManifestFrom(FALLBACK_MANIFEST_URL)
+  }
 }
 
 /** Folder name to store an example under (its path basename, else the repo). */
+/**
+ * Where an example lands on disk. Namespaced by owner/repo because example
+ * folder names are not unique across repos — two `blink/` examples used to
+ * install over each other.
+ */
 function exampleFolderName(ex: ExampleEntry): string {
   const base = ex.path ? ex.path.split('/').filter(Boolean).pop() : ''
-  return base || ex.repo
+  return [ex.owner, ex.repo, base || ex.repo].join('/')
 }
 
 /**
@@ -70,12 +197,12 @@ export async function installExamplesToDisk(
   for (let i = 0; i < manifest.length; i++) {
     const ex = manifest[i]
     onProgress?.(`Downloading ${i + 1}/${manifest.length} · ${ex.title}`)
-    const files = await fetchRepoFolder(ex.owner, ex.repo, ex.path)
+    const project = await fetchRepoProject(ex.owner, ex.repo, ex.path)
     const folder = `${dir}/${exampleFolderName(ex)}`
-    for (const [rel, content] of Object.entries(files)) {
+    for (const [rel, content] of Object.entries(project.files)) {
       await fileSystem.writeFile(`${folder}/${rel}`, content)
     }
-    if (Object.keys(files).length > 0) installed++
+    if (Object.keys(project.files).length > 0) installed++
   }
 
   return { dir, installed }

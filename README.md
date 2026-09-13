@@ -15,11 +15,11 @@
 
 > ### ⚠️ WARNING - This is a ROUGH Alpha. Please read this first
 >
-> Because ya'll are impatient, I have decided to release tinyStudio in **Alpha** (Although that's giving it a lot.). Right now it's a ***demonstration of the concept***, not a
-> finished product. It's buggy, incomplete, and quite rough around the edges. 
+> Because ya'll are impatient, I have decided to release tinyStudio in **Alpha** (Although that's giving it a lot.). Right now it's a **_demonstration of the concept_**, not a
+> finished product. It's buggy, incomplete, and quite rough around the edges.
 > Almost everything you see here is **subject to change**. Some of it will probably (definitely) be ripped out and redone.
 >
->You may notice there's a fair amount of agentic code in this repo. 
+> You may notice there's a fair amount of agentic code in this repo.
 >
 > Treat it as a preview, not a tool you'd rely on yet. If you want to follow along or experiment,
 > hell yeah Batman. Just go in expecting stuff to break. See [Known bugs](#known-bugs) and
@@ -60,6 +60,7 @@ Keep the alpha warning above in mind, all of these things work, but they're... e
 | `tinyProto`   | Prototyping / Breakout board      |
 | `tinySpeak`   | Microphone and Speaker AI module  |
 | `tinySniff`   | MEMS Gas Sensor Array             |
+| `tinyDisplay` | Round LCD module                  |
 
 These ship as built-in parts in the Circuit view (see
 [`partsLibrary.ts`](src/renderer/src/lib/partsLibrary.ts)).
@@ -112,10 +113,10 @@ Windows packaging notes live in [docs/packaging-windows.md](docs/packaging-windo
 The [`demo/`](demo) folder holds ready-to-open projects. Clone the repo, and open one the folders in the editor,
 then pick your board and port and hit **Verify** / **Upload**.
 
-| Project                                | What it shows                                            |
-| -------------------------------------- | -------------------------------------------------------- |
-| [Blink Example](demo/Blink%20Example)  | Blink an LED and mirror its state in the Visual view     |
-| [Fade Example](demo/Fade%20Example)    | PWM-fade an LED and chart the brightness curve live      |
+| Project                                     | What it shows                                          |
+| ------------------------------------------- | ------------------------------------------------------ |
+| [Blink Example](demo/Blink%20Example)       | Blink an LED and mirror its state in the Visual view   |
+| [Fade Example](demo/Fade%20Example)         | PWM-fade an LED and chart the brightness curve live    |
 | [Joystick Example](demo/Joystick%20Example) | Read a Qwiic joystick and visualize the stick position |
 
 Each project is a folder with the same structure:
@@ -171,7 +172,7 @@ This is an alpha, so the list is short only because we haven't written everythin
 Known issues right now:
 
 - **Chat sessions don't persist between tabbing.** Switch away from the AI assistant and back,
-conversation is gone.
+  conversation is gone.
 
 ## Roadmap
 

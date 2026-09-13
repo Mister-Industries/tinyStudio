@@ -4,8 +4,9 @@ import {
   RefreshWorkspaceCommand
 } from '@renderer/commands/fileCommands'
 import { loader } from '@monaco-editor/react'
+import { useIsReadOnlyProject } from '@renderer/hooks/useIsReadOnlyProject'
 import { fileSystem } from '@renderer/lib/fileSystem'
-import { enablePages, loadAccount, loadLink, pushFile } from '@renderer/lib/github'
+import { enablePages, loadAccount, loadLink, pushFile, toRepoPath } from '@renderer/lib/github'
 import { buildVisualExportHtml } from '@renderer/lib/visualExport'
 import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
 import { selectEditorView, setEditorView, setPanelOpen } from '@renderer/redux/editorSlice'
@@ -35,6 +36,7 @@ import { notify as toast } from '@renderer/lib/notify'
 import { BlocklyEditor } from './BlocklyEditor'
 import { emptyDoc, parseCircuitFile, serializeDoc } from '../circuit'
 import { CircuitViewV2 } from '../circuit/views/CircuitView'
+import { MakeItMine } from './MakeItMine'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
 import {
   Dialog,
@@ -213,6 +215,9 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
 
   return (
     <div className="flex flex-col bg-navy-900" style={{ height: `${pixelSize}px` }}>
+      {/* Read-only example notice — above the view switch so it is visible from
+          Code, Circuit and Visual alike. */}
+      <MakeItMine />
       {editorView === 'circuit' ? (
         <CircuitView />
       ) : editorView === 'visual' ? (
@@ -227,6 +232,9 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
 // ── Code view: the normal tabbed IDE ────────────────────────────────────────
 
 function CodeView(): React.JSX.Element {
+  const readOnly = useIsReadOnlyProject()
+  // Latches so the "saved locally" hint fires once, not on every Ctrl+S.
+  const readOnlySaveHinted = useRef(false)
   const allOpenFiles = useAppSelector(selectOpenFiles)
   // Background buffers (diagram.json / visual.js loaded for the Circuit/Visual
   // views) are hidden from the tab bar until revealed via their code button.
@@ -290,13 +298,30 @@ function CodeView(): React.JSX.Element {
 
   const handleSaveFile = async (content: string, fileId: string): Promise<void> => {
     const file = openFiles.find((f) => f.id === fileId)
-    if (file && file.path) {
-      try {
-        await fileSystem.writeFile(file.path, content)
-        dispatch(saveFileWithContent({ id: file.id, content }))
-      } catch (error) {
-        console.error('Failed to save file:', error)
+    if (!file || !file.path) return
+    try {
+      await fileSystem.writeFile(file.path, content)
+      dispatch(saveFileWithContent({ id: file.id, content }))
+
+      // First save on a read-only example: mention the copy path once, without
+      // interrupting. The banner carries the offer from here on.
+      if (readOnly && !readOnlySaveHinted.current) {
+        readOnlySaveHinted.current = true
+        toast.info('Saved locally', {
+          description: fileSystem.isElectron()
+            ? 'This is a copy of an example — use “Make it mine” to put it on GitHub.'
+            : 'Saved in this browser — use “Make it mine” to keep it on GitHub.'
+        })
       }
+    } catch (error) {
+      // This used to be a bare console.error, so a failed save looked identical
+      // to a successful one apart from the dirty dot staying put — and in the
+      // browser it is the common case, because File System Access permission is
+      // dropped on reload.
+      console.error('Failed to save file:', error)
+      toast.error(`Could not save ${file.name}`, {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
     }
   }
 
@@ -526,7 +551,9 @@ function VisualView(): React.JSX.Element {
       await pushFile(
         link.remote,
         link.branch,
-        'index.html',
+        // A project that lives in a repo subfolder must publish its page there,
+        // not over the repo root's index.html.
+        toRepoPath(link, 'index.html'),
         html,
         account.token,
         'Publish web export via tinyStudio'

@@ -194,6 +194,46 @@ class VirtualFileSystemService {
     }
   }
 
+  /**
+   * Move a whole project from one mem:// root to another, carrying its cached
+   * copies with it. Used when a read-only example becomes the user's own repo:
+   * without this the edits stay filed under the *example's* key, so they look
+   * lost in the new project and keep shadowing the original example forever.
+   *
+   * Content is re-cached under the new root rather than renamed, because the
+   * seeded base was never in the cache — only edits were — and the copy is now
+   * the user's own project, which should survive a reload in full.
+   */
+  async rerootTo(oldRoot: string, newRoot: string): Promise<void> {
+    const from = stripTrailingSlash(oldRoot)
+    const to = stripTrailingSlash(newRoot)
+    if (from === to) return
+    const owned = (p: string): boolean => p === from || p.startsWith(from + '/')
+    const remap = (p: string): string => (p === from ? to : to + p.slice(from.length))
+
+    for (const [key, content] of [...this.files]) {
+      if (!owned(key)) continue
+      const next = remap(key)
+      this.files.set(next, content)
+      this.files.delete(key)
+      const mtime = this.mtimes.get(key)
+      if (mtime != null) {
+        this.mtimes.set(next, mtime)
+        this.mtimes.delete(key)
+      }
+      await webCache.put(next, content)
+      await webCache.remove(key)
+    }
+
+    for (const folder of [...this.folders]) {
+      if (!owned(folder)) continue
+      this.folders.delete(folder)
+      this.folders.add(remap(folder))
+    }
+    this.folders.add(to)
+    this.addAncestors(to)
+  }
+
   /** Drop a project from memory (its cache entries persist for next load). */
   clear(rootPath?: string): void {
     if (!rootPath) {

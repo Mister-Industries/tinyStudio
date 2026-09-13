@@ -51,7 +51,11 @@ export function PackManager({
       .catch((err) =>
         setEntries((e) => ({
           ...e,
-          [url]: { loading: false, error: err instanceof Error ? err.message : String(err), packs: [] }
+          [url]: {
+            loading: false,
+            error: err instanceof Error ? err.message : String(err),
+            packs: []
+          }
         }))
       )
   }, [])
@@ -87,16 +91,21 @@ export function PackManager({
     setProgress(null)
     try {
       const manifest = await fetchManifest(pack.url)
-      const res = await installPack(manifest, pack.url, (done, total) => setProgress({ done, total }))
+      const res = await installPack(manifest, pack.url, (done, total) =>
+        setProgress({ done, total })
+      )
       setInstalled(getInstalledPacks())
       if (res.installed.length) onInstalled()
       if (res.failed.length) {
-        toast.error(`${pack.name}: ${res.installed.length} installed, ${res.failed.length} failed`, {
-          description: res.failed
-            .slice(0, 4)
-            .map((f) => `${f.type}: ${f.error}`)
-            .join('\n')
-        })
+        toast.error(
+          `${pack.name}: ${res.installed.length} installed, ${res.failed.length} failed`,
+          {
+            description: res.failed
+              .slice(0, 4)
+              .map((f) => `${f.type}: ${f.error}`)
+              .join('\n')
+          }
+        )
       } else {
         toast.success(`${pack.name} v${manifest.version} installed`, {
           description: `${res.installed.length} part${res.installed.length === 1 ? '' : 's'}`
@@ -165,7 +174,10 @@ export function PackManager({
             return (
               <div key={url} className="rounded-lg border border-border-default overflow-hidden">
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-bg-sunken">
-                  <span className="text-[11px] text-text-muted font-mono truncate flex-1" title={url}>
+                  <span
+                    className="text-[11px] text-text-muted font-mono truncate flex-1"
+                    title={url}
+                  >
                     {url}
                   </span>
                   <button
@@ -205,10 +217,13 @@ export function PackManager({
                       >
                         <div className="min-w-0 flex-1">
                           <div className="text-xs font-medium text-text-strong truncate">
-                            {pack.name} <span className="text-text-faint font-normal">v{pack.version}</span>
+                            {pack.name}{' '}
+                            <span className="text-text-faint font-normal">v{pack.version}</span>
                           </div>
                           {pack.description && (
-                            <div className="text-[11px] text-text-muted truncate">{pack.description}</div>
+                            <div className="text-[11px] text-text-muted truncate">
+                              {pack.description}
+                            </div>
                           )}
                         </div>
                         {curVersion && (

@@ -12,18 +12,22 @@
  */
 
 import {
+  ChevronDown,
   CircleAlert,
   CodeXml,
+  Download,
   Eye,
   FileCode2,
   Grid3x3,
   ImageDown,
   Info,
+  ListOrdered,
   Maximize,
   Pencil,
   Play,
   Redo2,
   ShieldCheck,
+  Share,
   TriangleAlert,
   Undo2,
   X,
@@ -31,28 +35,52 @@ import {
   ZoomOut
 } from 'lucide-react'
 import React from 'react'
-import { ensureParts, getPart, loadPart, registerPart, type PartDef } from '../../lib/partsLibrary'
+import {
+  PART_MANIFEST,
+  ensureParts,
+  getPart,
+  loadPart,
+  registerPart,
+  type PartDef
+} from '../../lib/partsLibrary'
 import { toast } from 'sonner'
 import { initUserParts, saveUserPart } from '../../lib/userParts'
 import { importFzpz } from '../parts/fzpz'
 import { PartsEditor } from '../../components/PartsEditor'
 import * as cmd from '../core/commands'
-import { newId, type NetLabelKind, type Pt, type ViewId } from '../core/model'
+import {
+  newId,
+  type NetLabelKind,
+  type Placement,
+  type Probe,
+  type Pt,
+  type ViewId
+} from '../core/model'
 import { buildNets } from '../core/nets'
-import type { SimIssueRef } from '../core/netlist'
+import { nodeNamesForNets, type SimIssueRef } from '../core/netlist'
 import { runErc, type ErcIssue, type ErcSeverity } from '../core/erc'
-import { nextRefdes, prefixForFamily } from '../core/refdes'
+import { looksLikeSlug, nextRefdes, prefixForFamily, renumberAll } from '../core/refdes'
 import { CircuitStore } from '../core/store'
 import { BREADBOARDS, generateBreadboard, isBreadboard } from '../parts/breadboard'
+import { defaultAttrsFor, resolveNaming } from '../parts/naming'
 import { SIM_SOURCES, generateSimSource, simSourceDefaultAttrs } from '../parts/simParts'
 import { SIM_PROBES, generateSimProbe, simProbeDefaultAttrs } from '../parts/simProbes'
 import { PackManager } from './packs/PackManager'
 import { snapNetLabel } from '../parts/netLabels'
-import { Canvas, emptySel, type Cam, type CanvasHandle, type Selection } from './canvas/Canvas'
-import { exportPng, exportSvg } from './exportImage'
+import {
+  Canvas,
+  emptySel,
+  type Cam,
+  type CanvasHandle,
+  type ProbeTag,
+  type Selection
+} from './canvas/Canvas'
+import { playCaptureAnimation } from './captureAnimation'
+import { renderPng, saveImage, exportSvg } from './exportImage'
 import { InspectorRail } from './inspector/Inspector'
 import { Palette, WIRE_COLORS } from './palette/Palette'
 import {
+  autoPlacementFor,
   circuitBuses,
   ercFloatingPins,
   findFreePlacement,
@@ -60,7 +88,28 @@ import {
   pinWorldOf,
   ratsnest
 } from './partsAdapter'
+import {
+  makeProbe,
+  netLabelFor,
+  netOutputRefByIndex,
+  probeAnchor,
+  probeFor,
+  vectorForOutput,
+  PROBE_DEFAULT_OFFSET,
+  type OutputRef
+} from '../core/simOutputs'
+import { getSimBackend } from '../sim'
 import { SimPanel, fmtSI, type SimState } from './sim/SimPanel'
+
+/**
+ * Which panel the right-hand rail is showing.
+ *
+ * The rail is not always there: Properties belongs to editing and Simulate
+ * belongs to the schematic, so the breadboard in view-only mode has no rail at
+ * all and the canvas gets the whole width. `railVisible` below is the single
+ * place that rule lives.
+ */
+type RailTab = 'properties' | 'simulate'
 
 export function CircuitViewV2({
   content,
@@ -93,10 +142,23 @@ export function CircuitViewV2({
   const [editorPart, setEditorPart] = React.useState<PartDef | null | undefined>(undefined)
   const [showPacks, setShowPacks] = React.useState(false)
   const [showErc, setShowErc] = React.useState(false)
-  const [showSim, setShowSim] = React.useState(false)
+  // Simulate is opened explicitly (the toolbar button) and only ever shows on
+  // the schematic; Properties only shows while editing.
+  const [simOpen, setSimOpen] = React.useState(false)
+  const [railPref, setRailPref] = React.useState<RailTab>('properties')
+  const [picking, setPicking] = React.useState(false)
+  const [exportOpen, setExportOpen] = React.useState(false)
   const [sim, setSim] = React.useState<SimState>({ run: null, netlist: null })
   const [defsTick, bumpDefs] = React.useReducer((n: number) => n + 1, 0)
   const canvasRef = React.useRef<CanvasHandle>(null)
+  // stage + export button anchor the capture animation; the chip is the
+  // "download landed" affordance it flies into
+  const stageRef = React.useRef<HTMLDivElement>(null)
+  const exportBtnRef = React.useRef<HTMLButtonElement>(null)
+  // {name, id}: the id re-arms the chip when the same file is exported twice
+  const [savedFile, setSavedFile] = React.useState<{ name: string; id: number } | null>(null)
+  const saveSeq = React.useRef(0)
+  const [exporting, setExporting] = React.useState(false)
 
   // ── file sync ───────────────────────────────────────────────────────────────
 
@@ -125,6 +187,22 @@ export function CircuitViewV2({
       else if (n) bumpDefs()
     })
   }, [doc.parts])
+
+  // The components rail draws each tile from the part's SCHEMATIC symbol when
+  // the schematic is open, and symbols are generated from the part definition
+  // — which is lazily loaded. Without this the rail fell back to `meta.icon`,
+  // the Fritzing breadboard photo, so the schematic palette showed pictures of
+  // components instead of symbols. Warm the whole catalogue once on entry.
+  React.useEffect(() => {
+    if (view !== 'sch') return
+    let live = true
+    void ensureParts(PART_MANIFEST.map((m) => m.type)).then(() => {
+      if (live) bumpDefs()
+    })
+    return () => {
+      live = false
+    }
+  }, [view])
 
   // drop selection entries that no longer exist (undo, delete, external edit)
   React.useEffect(() => {
@@ -237,6 +315,19 @@ export function CircuitViewV2({
     return bits
   }, [trayParts, rats, ercCount])
 
+  // A migrated diagram.json has breadboard placements only, so the schematic
+  // opened completely empty with everything sitting in the tray. If a view has
+  // nothing placed at all but the document has parts for it, lay them out —
+  // one undoable step, and only ever on an empty sheet, so this can't shuffle
+  // a layout the user has arranged.
+  const autoPlacedViews = React.useRef<Set<ViewId>>(new Set())
+  React.useEffect(() => {
+    if (!trayParts.length || autoPlacedViews.current.has(view)) return
+    if (doc.parts.some((p) => p[view])) return // the view already has a layout
+    autoPlacedViews.current.add(view)
+    placeAllUnplacedIn(view)
+  }, [view, trayParts, doc])
+
   // switching views: selection is per-view state, wires especially
   const switchView = (v: ViewId): void => {
     if (v === view) return
@@ -249,6 +340,150 @@ export function CircuitViewV2({
     if (editable) return
     setEditable(true)
     onEditChange?.(true)
+  }
+
+  // ── right rail visibility ───────────────────────────────────────────────────
+  // Simulate: schematic only, and only once the user has asked for it.
+  // Properties: editing only. Neither ⇒ no rail, canvas gets the full width.
+  const showSim = simOpen && view === 'sch'
+  const showProps = editable
+  const railVisible = showSim || showProps
+  const rail: RailTab = showSim && showProps ? railPref : showSim ? 'simulate' : 'properties'
+
+  /** The Simulate button makes its own precondition true: schematic + panel. */
+  const toggleSimulate = (): void => {
+    if (showSim) {
+      setSimOpen(false)
+      setPicking(false)
+      return
+    }
+    if (view !== 'sch') switchView('sch')
+    setSimOpen(true)
+    setRailPref('simulate')
+    // start the ~20 MB engine download now so the first Run isn't a cold start
+    void getSimBackend()
+      .warmup()
+      .catch(() => {
+        /* surfaced in the panel's engine status, not as a toast */
+      })
+  }
+
+  // picking is a mode of the open Simulate panel — it can't outlive it
+  React.useEffect(() => {
+    if (!showSim && picking) setPicking(false)
+  }, [showSim, picking])
+
+  // ── sim probes (CircuitLab-style measurement tags) ──────────────────────────
+  // A picked output is a TAG on the sheet, not a highlight: it says what it
+  // reads, it can be dragged, and it can be thrown away. doc.sim.probes is the
+  // single source of truth — the Outputs list in the panel is a view of it.
+
+  const probes = React.useMemo(() => doc.sim?.probes ?? [], [doc.sim])
+  const nodeNames = React.useMemo(() => nodeNamesForNets(netModel), [netModel])
+
+  /** Where a probe hangs off the circuit, in this view's world coordinates. */
+  const anchorWorldOf = React.useCallback(
+    (ref: string): Pt | null => {
+      const a = probeAnchor(ref)
+      if (!a) return null
+      const part = doc.parts.find((p) => p.id === a.part)
+      if (!part) return null
+      if (a.pin) return pinWorldOf(part, a.pin, undefined, view)
+      const pl = part[view]
+      return pl ? { x: pl.x, y: pl.y } : null
+    },
+    // defsTick: pin geometry only exists once the part def has loaded
+    [doc.parts, view, defsTick]
+  )
+
+  const labelOfProbe = React.useCallback(
+    (p: Probe): string => {
+      const a = probeAnchor(p.at)
+      if (!a) return p.at
+      if (a.kind === 'i') return `I(${a.part})`
+      if (a.kind === 'd')
+        return String(doc.parts.find((x) => x.id === a.part)?.attrs?.label ?? a.part)
+      const idx = netModel.pinToNet.get(`${a.part}:${a.pin}`)
+      return idx != null ? netLabelFor(netModel, idx, nodeNames) : a.part
+    },
+    [doc.parts, netModel, nodeNames]
+  )
+
+  /** A probe shows a number only when the run produced one (a DC operating
+   * point); for a sweep the reading lives in the plot, not on the sheet. */
+  const valueOfProbe = React.useCallback(
+    (p: Probe): string | undefined => {
+      if (!sim.run || sim.run.numPoints !== 1 || !sim.netlist) return undefined
+      const name = vectorForOutput(p.at, netModel, sim.netlist)
+      if (!name) return undefined
+      const vec = sim.run.vectors.find((v) => v.name.toLowerCase() === name)
+      if (!vec || vec.values.length !== 1) return undefined
+      return fmtSI(vec.values[0], p.kind === 'current' ? 'A' : 'V')
+    },
+    [sim, netModel]
+  )
+
+  const probeTags = React.useMemo<ProbeTag[]>(() => {
+    const out: ProbeTag[] = []
+    for (const p of probes) {
+      const anchor = anchorWorldOf(p.at)
+      if (!anchor) continue // unplaced in this view — nothing to hang the tag on
+      const [dx, dy] = p[view] ?? PROBE_DEFAULT_OFFSET
+      out.push({
+        id: p.id,
+        ax: anchor.x,
+        ay: anchor.y,
+        x: anchor.x + dx,
+        y: anchor.y + dy,
+        label: labelOfProbe(p),
+        value: valueOfProbe(p),
+        kind: p.kind
+      })
+    }
+    return out
+  }, [probes, view, anchorWorldOf, labelOfProbe, valueOfProbe])
+
+  /** Outputs the panel shows as picked — exactly what has a tag on the sheet. */
+  const pickedOutputs = React.useMemo<OutputRef[]>(() => probes.map((p) => p.at), [probes])
+
+  /** Add a tag for an output (or remove the one that is already there). */
+  const toggleOutput = (ref: OutputRef, at?: Pt): void => {
+    const existing = probeFor(store.getDoc().sim?.probes ?? [], ref)
+    if (existing) {
+      store.dispatch(cmd.removeProbe(existing.id))
+      return
+    }
+    const anchor = at ? anchorWorldOf(ref) : null
+    const offset: [number, number] =
+      at && anchor
+        ? [at.x - anchor.x + 6, at.y - anchor.y - 22]
+        : ([...PROBE_DEFAULT_OFFSET] as [number, number])
+    store.dispatch(cmd.addProbe(makeProbe(ref, view, offset)))
+  }
+
+  /** Canvas click in pick mode: drop a tag on that net, right where clicked. */
+  const pickNetAt = (netIndex: number, at: Pt): void => {
+    const ref = netOutputRefByIndex(netModel, netIndex)
+    if (ref) toggleOutput(ref, at)
+  }
+
+  /** Tag dragged. A drop on a wire or pin re-anchors it to that node. */
+  const moveProbeTo = (id: string, at: Pt, netIndex?: number): void => {
+    const current = (store.getDoc().sim?.probes ?? []).find((p) => p.id === id)
+    if (!current) return
+    let ref = current.at
+    if (netIndex != null) {
+      const next = netOutputRefByIndex(netModel, netIndex)
+      if (next) ref = next
+    }
+    const anchor = anchorWorldOf(ref)
+    if (!anchor) return
+    const offset: [number, number] = [at.x - anchor.x, at.y - anchor.y]
+    store.dispatch(
+      ref === current.at
+        ? cmd.moveProbe(id, view, offset)
+        : cmd.reanchorProbe(id, ref, offset, view)
+    )
   }
 
   // Placing an unplaced part: drop it straight onto a free slot (no second
@@ -264,17 +499,95 @@ export function CircuitViewV2({
 
   // ── actions ─────────────────────────────────────────────────────────────────
 
+  /**
+   * Placement for a part in the view the user is NOT looking at. Breadboards
+   * never enter the schematic (spec §10.2 — they're electrically transparent
+   * there), so they get no counterpart placement; everything else does, which
+   * is what keeps the tray empty for parts the user just added.
+   */
+  const counterpartPlacement = (type: string, other: ViewId): Placement | undefined => {
+    if (other === 'sch' && isBreadboard(type)) return undefined
+    return autoPlacementFor(store.getDoc(), type, other)
+  }
+
   const addPartAt = async (type: string, at?: Pt): Promise<void> => {
     const def = getPart(type) || (await loadPart(type))
     if (!def) return
     bumpDefs()
     const p = at ?? canvasRef.current?.centerWorld() ?? { x: 300, y: 200 }
-    const id = nextRefdes(store.getDoc(), prefixForFamily(`${def.family ?? ''} ${def.type}`))
-    const pl = findFreePlacement(store.getDoc(), type, view, p)
-    const attrs = simSourceDefaultAttrs(type) ?? simProbeDefaultAttrs(type)
-    store.dispatch(cmd.addPart({ id, type, ...(attrs ? { attrs } : {}), [view]: pl }))
+    const id = nextRefdes(
+      store.getDoc(),
+      prefixForFamily(`${def.simFamily ?? def.family ?? ''} ${def.type}`, def.prefix)
+    )
+    const attrs = simSourceDefaultAttrs(type) ?? simProbeDefaultAttrs(type) ?? defaultAttrsFor(type)
+    // The part lands where the user dropped it in this view, and auto-places
+    // (collision-avoided) in the other one — add an LED on the breadboard and
+    // its symbol is already sitting on the schematic.
+    const other: ViewId = view === 'bb' ? 'sch' : 'bb'
+    const placements: Partial<Record<ViewId, Placement>> = {
+      [view]: findFreePlacement(store.getDoc(), type, view, p)
+    }
+    const counterpart = counterpartPlacement(type, other)
+    if (counterpart) placements[other] = counterpart
+    store.dispatch(cmd.addPart({ id, type, ...(attrs ? { attrs } : {}), ...placements }))
     setSel({ parts: new Set([id]), wires: new Set() })
   }
+
+  /**
+   * Refdes prefix for a type. Prefers the loaded part definition (a pack can
+   * declare its own), and falls back to the static naming table so this works
+   * before a part's JSON has been lazily loaded.
+   */
+  const prefixForType = React.useCallback((type: string): string => {
+    const def = getPart(type)
+    const naming = resolveNaming(type, def?.label, def?.simFamily ?? def?.family)
+    return prefixForFamily(`${naming.sim} ${type}`, def?.prefix ?? naming.prefix)
+  }, [])
+
+  /** True when the document still carries part-file slugs as reference designators
+   * (`led`, `battery-aa_y90`) — what a migrated v1 diagram.json leaves behind. */
+  const needsRenumber = React.useMemo(() => doc.parts.some((p) => looksLikeSlug(p.id)), [doc.parts])
+
+  /** Rewrite every part id to a conventional refdes (R1, C2, LED3…). */
+  const renumber = (): void => {
+    const mapping = renumberAll(store.getDoc(), prefixForType, view)
+    const n = Object.keys(mapping).length
+    if (!n) {
+      toast.info('Reference designators are already in order.')
+      return
+    }
+    store.dispatch(cmd.renumberParts(mapping))
+    setSel(emptySel())
+    toast.success(`Renumbered ${n} part${n > 1 ? 's' : ''}`, {
+      description: Object.entries(mapping)
+        .slice(0, 3)
+        .map(([from, to]) => `${from} → ${to}`)
+        .join(' · ')
+    })
+  }
+
+  /** Auto-place every part missing from a view, in one undo step. */
+  const placeAllUnplacedIn = (target: ViewId, select = false): void => {
+    const current = store.getDoc()
+    const missing = current.parts.filter(
+      (p) => !p[target] && (target === 'bb' ? p.sch : p.bb && !isBreadboard(p.type))
+    )
+    if (!missing.length) return
+    let next = current
+    const steps: cmd.Command[] = []
+    for (const part of missing) {
+      const step = cmd.placePart(part.id, target, autoPlacementFor(next, part.type, target))
+      steps.push(step)
+      next = step.apply(next)
+    }
+    store.dispatch(cmd.composite(`Place ${steps.length} part${steps.length > 1 ? 's' : ''}`, steps))
+    if (select) {
+      setSel({ parts: new Set(missing.map((p) => p.id)), wires: new Set(), labels: new Set() })
+      enterEdit()
+    }
+  }
+
+  const placeAllUnplaced = (): void => placeAllUnplacedIn(view, true)
 
   // .fzpz dropped on the canvas: convert → persist → place at the cursor
   const importFzpzFiles = async (files: File[], at: Pt): Promise<void> => {
@@ -284,10 +597,13 @@ export function CircuitViewV2({
         await saveUserPart(def)
         bumpDefs()
         await addPartAt(def.type, at)
-        toast.success(`Imported ${def.label}`, {
+        // saveUserPart registers it, which is where naming/categorisation is
+        // applied — report the display name, not the raw Fritzing title.
+        const shown = getPart(def.type) ?? def
+        toast.success(`Imported ${shown.label}`, {
           description: warnings.length
             ? `${warnings.length} pin${warnings.length === 1 ? '' : 's'} could not be resolved`
-            : `${def.family} · now in the palette`
+            : `${shown.family} · now in the palette`
         })
       } catch (err) {
         toast.error(`Couldn't import ${f.name}`, {
@@ -316,8 +632,64 @@ export function CircuitViewV2({
     if (def) setEditorPart(def)
   }
 
+  // ── image export ────────────────────────────────────────────────────────────
+  // Render first, play the shutter/fly-to-corner animation against the real
+  // image, then hand the blob to the browser — so the download shows up right
+  // where the animation lands.
+  const savePng = React.useCallback(async (): Promise<void> => {
+    if (exporting) return
+    setExporting(true)
+    try {
+      const shot = await renderPng(doc, view)
+      if (!shot) {
+        toast.error('Nothing to export — this view is empty.')
+        return
+      }
+      await playCaptureAnimation({
+        stage: stageRef.current,
+        target: exportBtnRef.current,
+        imageUrl: shot.previewUrl
+      })
+      saveImage(shot)
+      setSavedFile({ name: shot.name, id: ++saveSeq.current })
+    } catch (err) {
+      console.error('circuit PNG export failed', err)
+      toast.error(`PNG export failed — ${(err as Error)?.message ?? String(err)}`)
+    } finally {
+      setExporting(false)
+    }
+  }, [doc, view, exporting])
+
+  const saveSvg = React.useCallback((): void => {
+    try {
+      const shot = exportSvg(doc, view)
+      if (!shot) {
+        toast.error('Nothing to export — this view is empty.')
+        return
+      }
+      setSavedFile({ name: shot.name, id: ++saveSeq.current })
+    } catch (err) {
+      console.error('circuit SVG export failed', err)
+      toast.error(`SVG export failed — ${(err as Error)?.message ?? String(err)}`)
+    }
+  }, [doc, view])
+
+  // the download chip is transient
+  const savedId = savedFile?.id
+  React.useEffect(() => {
+    if (!savedId) return
+    const t = setTimeout(() => setSavedFile(null), 3600)
+    return () => clearTimeout(t)
+  }, [savedId])
+
   const tool =
     'tactile-bordered h-8 px-2.5 flex items-center gap-1.5 rounded-md bg-surface-card text-text-muted text-xs hover:text-text-body active:translate-y-px'
+  // filled actions, matching the Upload button in the main toolbar: green for
+  // "run it", brand blue for "take it away with you"
+  const toolFilled =
+    'tactile h-8 px-2.5 flex items-center gap-1.5 rounded-md text-white text-xs font-medium'
+  const toolGreen = `${toolFilled} bg-[var(--green)] [--_edge:var(--green-deep)]`
+  const toolBrand = `${toolFilled} bg-[var(--brand)] [--_edge:var(--brand-deep)]`
 
   return (
     <div className="size-full relative flex bg-bg overflow-hidden pb-7">
@@ -334,7 +706,7 @@ export function CircuitViewV2({
         />
       )}
 
-      <div className="flex-1 relative min-w-0 overflow-hidden flex">
+      <div ref={stageRef} className="flex-1 relative min-w-0 overflow-hidden flex">
         {/* left toolbar: edit toggle + undo/redo */}
         <div className="absolute top-3 left-3 z-10 flex gap-1.5">
           <button
@@ -369,6 +741,13 @@ export function CircuitViewV2({
               </button>
             </>
           )}
+          <button
+            className={`${tool} w-8 justify-center px-0 ${grid ? 'text-brand' : ''}`}
+            onClick={() => setGrid((g) => !g)}
+            title="Toggle grid"
+          >
+            <Grid3x3 size={15} />
+          </button>
         </div>
 
         {/* view toggle: Breadboard | Schematic */}
@@ -397,6 +776,15 @@ export function CircuitViewV2({
         {trayParts.length > 0 && (
           <div className="absolute top-14 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 items-center flex-wrap max-w-[70%] justify-center">
             <span className="text-[10px] text-text-faint">unplaced here:</span>
+            {trayParts.length > 1 && (
+              <button
+                className="px-2 py-0.5 rounded-full bg-brand/15 border border-brand/40 text-[11px] text-brand hover:bg-brand/25"
+                title="Auto-place every unplaced part in this view"
+                onClick={placeAllUnplaced}
+              >
+                place all
+              </button>
+            )}
             {trayParts.map((part) => (
               <button
                 key={part.id}
@@ -410,36 +798,61 @@ export function CircuitViewV2({
           </div>
         )}
 
-        {/* right toolbar: export / grid / code */}
-        <div className="absolute top-3 right-3.5 z-10 flex gap-1.5">
+        {/* right toolbar: simulate · export · code */}
+        <div className="absolute top-3 right-3.5 z-30 flex gap-1.5">
           <button
-            className={`${tool} w-8 justify-center px-0 ${showSim ? 'text-brand' : ''}`}
-            onClick={() => setShowSim((s) => !s)}
-            title="Simulate"
+            className={`${toolGreen} ${showSim ? 'ring-2 ring-[var(--green-deep)]' : ''}`}
+            onClick={toggleSimulate}
+            title={
+              showSim
+                ? 'Close the simulator'
+                : 'Simulate this circuit — opens the schematic and the Simulate panel'
+            }
           >
-            <Play size={15} />
+            <Play size={14} /> Simulate
           </button>
-          <button
-            className={`${tool} w-8 justify-center px-0`}
-            onClick={() => exportPng(doc, view)}
-            title="Export as PNG"
-          >
-            <ImageDown size={15} />
-          </button>
-          <button
-            className={`${tool} w-8 justify-center px-0`}
-            onClick={() => exportSvg(doc, view)}
-            title="Export as SVG"
-          >
-            <FileCode2 size={15} />
-          </button>
-          <button
-            className={`${tool} w-8 justify-center px-0 ${grid ? 'text-brand' : ''}`}
-            onClick={() => setGrid((g) => !g)}
-            title="Toggle grid"
-          >
-            <Grid3x3 size={15} />
-          </button>
+
+          {/* one export control, two formats — the two icon buttons that used
+              to sit here read as unrelated actions */}
+          <div className="relative">
+            <button
+              ref={exportBtnRef}
+              className={`${toolBrand} disabled:opacity-60`}
+              disabled={exporting}
+              onClick={() => setExportOpen((o) => !o)}
+              title="Export this view as an image"
+            >
+              <Share size={14} /> Export
+              <ChevronDown size={13} className="-ml-0.5 opacity-80" />
+            </button>
+            {exportOpen && (
+              <>
+                {/* click-away catcher */}
+                <div className="fixed inset-0 z-10" onClick={() => setExportOpen(false)} />
+                <div className="absolute right-0 top-9 z-20 w-40 rounded-md border border-border-default bg-surface-card shadow-lg overflow-hidden">
+                  <button
+                    className="w-full flex items-center gap-2 px-3 h-8 text-xs text-text-body hover:bg-bg-sunken"
+                    onClick={() => {
+                      setExportOpen(false)
+                      void savePng()
+                    }}
+                  >
+                    <ImageDown size={14} className="text-brand" /> PNG image
+                  </button>
+                  <button
+                    className="w-full flex items-center gap-2 px-3 h-8 text-xs text-text-body hover:bg-bg-sunken"
+                    onClick={() => {
+                      setExportOpen(false)
+                      saveSvg()
+                    }}
+                  >
+                    <FileCode2 size={14} className="text-brand" /> SVG vector
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
           {onOpenCode && (
             <button
               className={`${tool} w-8 justify-center px-0`}
@@ -450,6 +863,9 @@ export function CircuitViewV2({
             </button>
           )}
         </div>
+
+        {/* download chip — the animation lands here, then this confirms it */}
+        {savedFile && <DownloadChip key={savedFile.id} name={savedFile.name} />}
 
         {/* zoom cluster */}
         <div className="absolute bottom-3 right-3.5 z-10 flex gap-1.5">
@@ -500,6 +916,15 @@ export function CircuitViewV2({
               <span className="px-2.5 py-1 rounded-full bg-surface-card border border-brand/40 text-brand">
                 migrated from diagram.json
               </span>
+            )}
+            {needsRenumber && (
+              <button
+                className="px-2.5 py-1 rounded-full bg-surface-card border border-brand/40 text-brand flex items-center gap-1.5 hover:bg-brand/10"
+                title="Rename parts to conventional reference designators (R1, C2, D3…) — the ids an imported diagram.json left behind are part-file slugs"
+                onClick={renumber}
+              >
+                <ListOrdered size={12} /> renumber refdes
+              </button>
             )}
             {warnings.length > 0 && (
               <span
@@ -560,37 +985,100 @@ export function CircuitViewV2({
           onImportFiles={(files, at) => void importFzpzFiles(files, at)}
           annotations={simAnnotations}
           simVoltageForNet={simVoltageForNet}
+          pickNets={picking && showSim}
+          onPickNet={pickNetAt}
+          probes={probeTags}
+          onMoveProbe={moveProbeTo}
+          onDeleteProbe={(id) => store.dispatch(cmd.removeProbe(id))}
           onRequestEdit={enterEdit}
         />
 
-        {showSim && (
-          <SimPanel
-            doc={doc}
-            netModel={netModel}
-            store={store}
-            familyOf={(t) => getPart(t)?.family}
-            onClose={() => setShowSim(false)}
-            onResult={setSim}
-            onSelectIssue={selectSimIssue}
-          />
-        )}
-
         {/* watermark — matches the header wordmark: thin 'tiny', bold 'Studio' */}
-        <div className="absolute bottom-8 right-6 z-0 pointer-events-none select-none text-[60px] leading-none tracking-[-0.02em] text-text-faint/25">
+        <div className="absolute bottom-16 right-5 z-0 pointer-events-none select-none max-w-full truncate text-[46px] leading-[1.15] pb-1 tracking-[-0.02em] text-text-faint/25">
           <span className="font-light">tiny</span>
           <span className="font-extrabold">Studio</span>
         </div>
       </div>
 
-      {editable && (
-        <InspectorRail
-          doc={doc}
-          store={store}
-          sel={sel}
-          setSel={setSel}
-          netModel={netModel}
-          view={view}
-        />
+      {/* Right rail. Properties is an editing tool and Simulate is a
+          schematic tool, so the rail only exists when one of them applies —
+          the breadboard in view-only mode has no sidebar at all. */}
+      {railVisible && (
+        <div
+          className={`${showSim ? 'w-80' : 'w-64'} shrink-0 min-h-0 relative z-20 border-l border-border-default bg-bg-raised flex flex-col`}
+        >
+          {showSim && showProps ? (
+            <div className="h-9 shrink-0 flex items-stretch border-b border-border-default">
+              {(
+                [
+                  ['properties', 'Properties'],
+                  ['simulate', 'Simulate']
+                ] as [RailTab, string][]
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  className={`flex-1 text-[12px] font-semibold border-b-2 -mb-px ${
+                    rail === id
+                      ? 'border-brand text-text-body'
+                      : 'border-transparent text-text-muted hover:text-text-body'
+                  }`}
+                  onClick={() => setRailPref(id)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="h-9 shrink-0 flex items-center gap-2 px-3 border-b border-border-default">
+              <span className="text-[12px] font-semibold text-text-body">
+                {showSim ? 'Simulate' : 'Properties'}
+              </span>
+              {showSim && (
+                <button
+                  className="ml-auto text-text-faint hover:text-text-body"
+                  onClick={() => {
+                    setSimOpen(false)
+                    setPicking(false)
+                  }}
+                  title="Close the simulator"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+          )}
+          {rail === 'properties' ? (
+            <InspectorRail
+              doc={doc}
+              store={store}
+              sel={sel}
+              setSel={setSel}
+              netModel={netModel}
+              view={view}
+              editable={editable}
+              onRenumber={renumber}
+            />
+          ) : (
+            <SimPanel
+              variant="rail"
+              doc={doc}
+              netModel={netModel}
+              store={store}
+              familyOf={(t) => getPart(t)?.simFamily ?? getPart(t)?.family}
+              onClose={() => {
+                setSimOpen(false)
+                setPicking(false)
+              }}
+              onResult={setSim}
+              onSelectIssue={selectSimIssue}
+              picking={picking}
+              onPickingChange={setPicking}
+              picked={pickedOutputs}
+              onToggleOutput={(ref) => toggleOutput(ref)}
+              onClearOutputs={() => store.dispatch(cmd.setProbes([]))}
+            />
+          )}
+        </div>
       )}
 
       {editorPart !== undefined && (
@@ -608,6 +1096,36 @@ export function CircuitViewV2({
       {showPacks && (
         <PackManager onClose={() => setShowPacks(false)} onInstalled={() => bumpDefs()} />
       )}
+    </div>
+  )
+}
+
+/**
+ * The little "saved" chip that pops in under the export button — the landing
+ * pad the capture animation flies into, so the download has somewhere to be.
+ */
+function DownloadChip({ name }: { name: string }): React.JSX.Element {
+  const ref = React.useRef<HTMLDivElement>(null)
+  React.useEffect(() => {
+    const el = ref.current
+    if (!el || typeof el.animate !== 'function') return
+    el.animate(
+      [
+        { opacity: 0, transform: 'translateY(-8px) scale(0.9)' },
+        { opacity: 1, transform: 'translateY(0) scale(1)', offset: 0.35 },
+        { opacity: 1, transform: 'translateY(0) scale(1)', offset: 0.85 },
+        { opacity: 0, transform: 'translateY(-4px) scale(0.98)' }
+      ],
+      { duration: 3600, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)', fill: 'both' }
+    )
+  }, [name])
+  return (
+    <div
+      ref={ref}
+      className="absolute top-[52px] right-3.5 z-20 pointer-events-none flex items-center gap-1.5 rounded-md bg-surface-card border border-border-default shadow-lg px-2.5 h-8 text-[11px] text-text-body"
+    >
+      <Download size={13} className="text-brand" />
+      <span className="font-medium">{name}</span>
     </div>
   )
 }

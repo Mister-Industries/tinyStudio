@@ -16,7 +16,13 @@ test('v2 round-trip is lossless and stable', () => {
   const doc: CircuitDoc = {
     ...emptyDoc('geoff'),
     parts: [
-      { id: 'R1', type: 'resistor', attrs: { value: '220' }, bb: { x: 96, y: 48 }, sch: { x: 10, y: 10, rotate: 90 } }
+      {
+        id: 'R1',
+        type: 'resistor',
+        attrs: { value: '220' },
+        bb: { x: 96, y: 48 },
+        sch: { x: 10, y: 10, rotate: 90 }
+      }
     ],
     wires: [{ id: 'w1', from: 'R1:1', to: 'R1:2', view: 'bb', color: '#2fa46a', route: ['h10'] }]
   }
@@ -76,12 +82,10 @@ test('v1 tinyStudio diagram.json migrates: placements, wires, schematic overlay'
       { type: 'tinycore', id: 'tinycore', left: 150, top: 240 },
       { type: 'resistor', id: 'resistor', left: 520, top: 230, rotate: 90, attrs: { value: '1k' } }
     ],
-    connections: [
-      ['tinycore:SIG', 'resistor:Pin 0', '#36c46b', ['v-22.73', 'h-179.8']]
-    ],
+    connections: [['tinycore:D13', 'resistor:Pin 0', '#36c46b', ['v-22.73', 'h-179.8']]],
     schematic: {
       pos: { resistor: [40, 60] },
-      routes: { 'tinycore:SIG>resistor:Pin 0': ['h20'] }
+      routes: { 'tinycore:D13>resistor:Pin 0': ['h20'] }
     }
   })
   const { doc, migrated } = parseCircuitFile(v1)

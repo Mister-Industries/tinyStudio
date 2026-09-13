@@ -26,7 +26,12 @@ function buildZip(files: { name: string; data: Uint8Array; store?: boolean }[]):
   const enc = new TextEncoder()
 
   const u16 = (n: number): number[] => [n & 0xff, (n >> 8) & 0xff]
-  const u32 = (n: number): number[] => [n & 0xff, (n >> 8) & 0xff, (n >> 16) & 0xff, (n >> 24) & 0xff]
+  const u32 = (n: number): number[] => [
+    n & 0xff,
+    (n >> 8) & 0xff,
+    (n >> 16) & 0xff,
+    (n >> 24) & 0xff
+  ]
 
   for (const f of files) {
     const name = enc.encode(f.name)
@@ -34,15 +39,38 @@ function buildZip(files: { name: string; data: Uint8Array; store?: boolean }[]):
     const comp = f.store ? f.data : new Uint8Array(deflateRawSync(f.data))
     const crc = crc32(f.data)
     const local = new Uint8Array([
-      ...u32(0x04034b50), ...u16(20), ...u16(0), ...u16(method), ...u16(0), ...u16(0),
-      ...u32(crc), ...u32(comp.length), ...u32(f.data.length), ...u16(name.length), ...u16(0)
+      ...u32(0x04034b50),
+      ...u16(20),
+      ...u16(0),
+      ...u16(method),
+      ...u16(0),
+      ...u16(0),
+      ...u32(crc),
+      ...u32(comp.length),
+      ...u32(f.data.length),
+      ...u16(name.length),
+      ...u16(0)
     ])
     chunks.push(local, name, comp)
     central.push(
       new Uint8Array([
-        ...u32(0x02014b50), ...u16(20), ...u16(20), ...u16(0), ...u16(method), ...u16(0), ...u16(0),
-        ...u32(crc), ...u32(comp.length), ...u32(f.data.length), ...u16(name.length), ...u16(0),
-        ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(offset)
+        ...u32(0x02014b50),
+        ...u16(20),
+        ...u16(20),
+        ...u16(0),
+        ...u16(method),
+        ...u16(0),
+        ...u16(0),
+        ...u32(crc),
+        ...u32(comp.length),
+        ...u32(f.data.length),
+        ...u16(name.length),
+        ...u16(0),
+        ...u16(0),
+        ...u16(0),
+        ...u16(0),
+        ...u32(0),
+        ...u32(offset)
       ]),
       name
     )
@@ -52,8 +80,14 @@ function buildZip(files: { name: string; data: Uint8Array; store?: boolean }[]):
   let cenLen = 0
   for (const c of central) cenLen += c.length
   const eocd = new Uint8Array([
-    ...u32(0x06054b50), ...u16(0), ...u16(0), ...u16(files.length), ...u16(files.length),
-    ...u32(cenLen), ...u32(cenStart), ...u16(0)
+    ...u32(0x06054b50),
+    ...u16(0),
+    ...u16(0),
+    ...u16(files.length),
+    ...u16(files.length),
+    ...u32(cenLen),
+    ...u32(cenStart),
+    ...u16(0)
   ])
   const total = offset + cenLen + eocd.length
   const out = new Uint8Array(total)

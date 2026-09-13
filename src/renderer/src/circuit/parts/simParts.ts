@@ -12,11 +12,9 @@
  */
 
 import type { PartDef, PartView } from '../../lib/partsLibrary'
-import { GRID_BB } from '../core/model'
+import { FONT_SYMBOL, INK, SCH_GRID, STROKE, circle, line, symbolSvg, text } from './style'
 
-const P = GRID_BB // 9.6
-const INK = 'var(--text-strong)'
-const STROKE = 2
+const P = SCH_GRID // 9.6
 
 export interface SimSourceSpec {
   type: string
@@ -65,14 +63,17 @@ export function generateSimSource(spec: SimSourceSpec): PartDef {
   const cy = 3 * P
   const r = 1.5 * P
 
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">` +
-    `<line x1="${cx}" y1="0" x2="${cx}" y2="${cy - r}" stroke="${INK}" stroke-width="${STROKE}"/>` +
-    `<line x1="${cx}" y1="${cy + r}" x2="${cx}" y2="${h}" stroke="${INK}" stroke-width="${STROKE}"/>` +
-    `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${INK}" stroke-width="${STROKE}"/>` +
-    `<text x="${cx + r + 3}" y="${cy - r}" fill="${INK}" font-family="monospace" font-size="7">+</text>` +
-    spec.glyph(cx, cy, r) +
-    `</svg>`
+  const svg = symbolSvg(
+    line(cx, 0, cx, cy - r) +
+      line(cx, cy + r, cx, h) +
+      circle(cx, cy, r) +
+      // polarity beside the positive lead — at the symbol's right edge it
+      // was clipped by the viewBox
+      text(cx + 4, cy - r - 3, '+', { size: FONT_SYMBOL }) +
+      spec.glyph(cx, cy, r),
+    w,
+    h
+  )
 
   const view: PartView = {
     svg,

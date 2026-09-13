@@ -23,7 +23,7 @@
     }
   ],
   "connections": [
-    ["tinycore:SIG", "resistor:Pin 0", "#36c46b"],
+    ["tinycore:D13", "resistor:Pin 0", "#36c46b"],
     ["resistor:Pin 1", "led:anode", "#36c46b"],
     ["led:cathode", "tinycore:GND", "#8b94c8"]
   ]

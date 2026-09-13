@@ -11,8 +11,14 @@ test('every hole sits on a GRID_BB multiple (snap-by-first-pin keeps holes on gr
     const { def } = generateBreadboard(spec)
     const pins = def.views.breadboard!.pins
     for (const [name, [x, y]] of Object.entries(pins)) {
-      assert.ok(Math.abs(x / GRID_BB - Math.round(x / GRID_BB)) < 1e-9, `${spec.type} ${name} x=${x}`)
-      assert.ok(Math.abs(y / GRID_BB - Math.round(y / GRID_BB)) < 1e-9, `${spec.type} ${name} y=${y}`)
+      assert.ok(
+        Math.abs(x / GRID_BB - Math.round(x / GRID_BB)) < 1e-9,
+        `${spec.type} ${name} x=${x}`
+      )
+      assert.ok(
+        Math.abs(y / GRID_BB - Math.round(y / GRID_BB)) < 1e-9,
+        `${spec.type} ${name} y=${y}`
+      )
     }
   }
 })

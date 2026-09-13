@@ -1,4 +1,7 @@
 import { createEntityAdapter, createSelector, EntityState, PayloadAction } from '@reduxjs/toolkit'
+// Type-only: erased at compile time, so this does not create a runtime cycle
+// with lib/github (which imports Workspace from here).
+import type { RepoFileEntry } from '@renderer/lib/github'
 import { createAppSlice } from './createAppSlice'
 
 export interface EditorFile {
@@ -16,11 +19,34 @@ export interface EditorFile {
   hidden?: boolean
 }
 
+/**
+ * Where a workspace came from, when it was opened out of a GitHub repo.
+ *
+ * `manifest` lists EVERY file in the source folder, including binaries whose
+ * bytes were never downloaded. That record is what lets a later "make a copy"
+ * reproduce the project faithfully instead of copying only what the editor
+ * happened to load.
+ */
+export interface WorkspaceSource {
+  owner: string
+  repo: string
+  branch: string
+  /** folder within the repo ('' = repo root) */
+  path: string
+  manifest: RepoFileEntry[]
+  /** the source listing was incomplete (repo too large) */
+  truncated: boolean
+  /** the signed-in user can push to this repo */
+  canPush: boolean
+}
+
 export interface Workspace {
   id: string
   name: string
   path: string
   root: BaseFileItem[]
+  /** Set when this workspace was opened from a GitHub repo (example / deep link). */
+  source?: WorkspaceSource
 }
 
 export interface BaseFileItem {
@@ -234,6 +260,28 @@ export const fileSlice = createAppSlice({
         state.highlightedFileId = file.id
       }
     }),
+    /**
+     * Rewrite the path of every open buffer under `from` to sit under `to`.
+     *
+     * Open tabs hold their own copy of a file's path, and nothing else updates
+     * it — so after a rename or a move the tab still points at the old path and
+     * the next save writes there, quietly recreating the file the user just
+     * renamed away. Callers that move files on disk must dispatch this.
+     */
+    rebaseOpenFiles: create.reducer(
+      (state, payload: PayloadAction<{ from: string; to: string }>) => {
+        const { from, to } = payload.payload
+        if (from === to) return
+        const all = editorObjectAdapter.getSelectors().selectAll(state.openFiles)
+        for (const f of all) {
+          if (f.path !== from && !f.path.startsWith(from + '/')) continue
+          state.openFiles = editorObjectAdapter.updateOne(state.openFiles, {
+            id: f.id,
+            changes: { path: f.path === from ? to : to + f.path.slice(from.length) }
+          })
+        }
+      }
+    ),
     // Promote a hidden background buffer (Circuit/Visual) into a visible code
     // tab and focus it. Used by the in-view "open code" buttons.
     revealFile: create.reducer((state, payload: PayloadAction<string>) => {
@@ -402,6 +450,7 @@ export const fileSlice = createAppSlice({
 export const {
   createNewFile,
   openFile,
+  rebaseOpenFiles,
   revealFile,
   updateFileContent,
   updateReadmeContent,

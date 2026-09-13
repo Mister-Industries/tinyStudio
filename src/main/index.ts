@@ -5,6 +5,15 @@ import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 import { AgentService, type AgentSendArgs } from './AgentService'
 import { ServiceManager } from './ServiceManager'
+import {
+  cancelSignIn as ghCancelSignIn,
+  getAccount as ghGetAccount,
+  isConfigured as ghIsConfigured,
+  pollForToken as ghPollForToken,
+  signInWithToken as ghSignInWithToken,
+  signOut as ghSignOut,
+  startDeviceFlow as ghStartDeviceFlow
+} from './githubAuth'
 import { clearApiKey, getStatus, setApiKey } from './settings'
 
 // Initialize ServiceManager
@@ -125,6 +134,21 @@ app.whenReady().then(async () => {
   ipcMain.handle('agent:permission-response', (_, id: string, allow: boolean) => {
     agentService.resolvePermission(id, allow)
   })
+
+  // --- GitHub sign-in (OAuth device flow) ---
+  // These live in main because GitHub's OAuth endpoints send no CORS headers, so
+  // the renderer cannot call them — and because the token is then stored with
+  // safeStorage instead of sitting in renderer localStorage.
+  ipcMain.handle('github:configured', () => ghIsConfigured())
+  ipcMain.handle('github:account', () => ghGetAccount())
+  ipcMain.handle('github:start-device', () => ghStartDeviceFlow())
+  // Long-running on purpose: resolves once the user finishes on github.com.
+  ipcMain.handle('github:poll', (_, deviceCode: string, interval: number, expiresIn: number) =>
+    ghPollForToken(deviceCode, interval, expiresIn)
+  )
+  ipcMain.handle('github:cancel-sign-in', () => ghCancelSignIn())
+  ipcMain.handle('github:sign-out', () => ghSignOut())
+  ipcMain.handle('github:sign-in-token', (_, token: string) => ghSignInWithToken(token))
 
   // Window control handlers
   ipcMain.on('window:minimize', (event) => {

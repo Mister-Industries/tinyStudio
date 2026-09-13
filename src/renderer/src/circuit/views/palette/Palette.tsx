@@ -21,13 +21,6 @@ function iconFor(meta: PartMeta, view: ViewId): string | undefined {
   return meta.icon
 }
 
-function titleCase(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/\b([a-z])/g, (m) => m.toUpperCase())
-    .replace(/\bIc\b/, 'IC')
-}
-
 function Thumb({ svg, size = 40 }: { svg?: string; size?: number }): React.JSX.Element {
   if (!svg)
     return (
@@ -139,7 +132,7 @@ export function Palette({
               onClick={() => toggleFam(group.family)}
             >
               {isOpen(group.family) ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-              <span className="truncate">{titleCase(group.family)}</span>
+              <span className="truncate">{group.family}</span>
               <span className="ml-auto text-text-faint/70">{group.parts.length}</span>
             </button>
             {isOpen(group.family) && (

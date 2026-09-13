@@ -47,7 +47,8 @@ export function probesIn(doc: CircuitDoc): ProbeInfo[] {
 }
 
 function vectorOfNode(run: SimRun, node: string): SimVector | undefined {
-  if (node === '0') return { name: 'v(0)', type: 'voltage', values: new Array(run.numPoints).fill(0) }
+  if (node === '0')
+    return { name: 'v(0)', type: 'voltage', values: new Array(run.numPoints).fill(0) }
   const key = `v(${node.toLowerCase()})`
   return run.vectors.find((v) => v.name.toLowerCase() === key)
 }
@@ -97,7 +98,12 @@ export function diffProbeVectors(
  * the raw SPICE name: `v(n3)` → "Probe1" when a voltage probe sits on that
  * node; `i(v<id>)` → the current probe's label; `vdiff(<id>)` → its label.
  */
-export function probeLabelFor(vecName: string, doc: CircuitDoc, net: NetModel, gen: NetlistResult): string | undefined {
+export function probeLabelFor(
+  vecName: string,
+  doc: CircuitDoc,
+  net: NetModel,
+  gen: NetlistResult
+): string | undefined {
   const diffM = /^vdiff\((.+)\)$/i.exec(vecName)
   if (diffM) {
     const p = doc.parts.find((p) => p.id.toLowerCase() === diffM[1].toLowerCase())
@@ -105,7 +111,9 @@ export function probeLabelFor(vecName: string, doc: CircuitDoc, net: NetModel, g
   }
   const iM = /^i\(v(.+)\)$/i.exec(vecName)
   if (iM) {
-    const p = doc.parts.find((p) => p.type === 'sim-probe-i' && p.id.toLowerCase() === iM[1].toLowerCase())
+    const p = doc.parts.find(
+      (p) => p.type === 'sim-probe-i' && p.id.toLowerCase() === iM[1].toLowerCase()
+    )
     return p ? String(p.attrs?.label ?? p.id) : undefined
   }
   const vM = /^v\((.+)\)$/i.exec(vecName)

@@ -1,0 +1,1064 @@
+[
+  {
+    "title": "Blink LED (Circuit + Visual)",
+    "description": "Blink the onboard LED and mirror its state in the Visual view.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio",
+    "path": "demo/Blink Example",
+    "board": "tinyCore / Arduino",
+    "category": "demos",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
+    "tags": [
+      "tinycore",
+      "blink",
+      "led"
+    ]
+  },
+  {
+    "title": "Fade LED (Circuit + Visual)",
+    "description": "PWM-fade an LED and chart the brightness curve live.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio",
+    "path": "demo/Fade Example",
+    "board": "tinyCore / Arduino",
+    "category": "demos",
+    "docsUrl": "https://tinydocs.cc/5_reference/advanced/pwm/",
+    "tags": [
+      "tinycore",
+      "pwm",
+      "plotter",
+      "led"
+    ]
+  },
+  {
+    "title": "Joystick (Circuit + Visual)",
+    "description": "Read a Qwiic joystick and visualize the stick position.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio",
+    "path": "demo/Joystick Example",
+    "board": "tinyCore + Qwiic Joystick",
+    "category": "demos",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/read-sensor-value/",
+    "tags": [
+      "tinycore",
+      "qwiic",
+      "joystick"
+    ]
+  },
+  {
+    "title": "Alternating Blink Pattern",
+    "description": "Hint: Try changing the values of the delay() functions to create different speeds.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/blink-alternate",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
+    "tags": [
+      "tinycore",
+      "blink",
+      "led",
+      "digital-io"
+    ]
+  },
+  {
+    "title": "Appending to a File",
+    "description": "Appending to a File — from the tinyDocs “How to use SD Cards on the tinyCore” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/sdcard-append-file",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
+    "tags": [
+      "tinycore",
+      "sd-card",
+      "file-io"
+    ]
+  },
+  {
+    "title": "Basic beeping code",
+    "description": "But don't worry - the ESP32's PWM system is actually way more powerful and flexible than the old tone() function.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/buzzer-basic-beep",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/buzz-buzzer/",
+    "tags": [
+      "tinycore",
+      "buzzer",
+      "pwm"
+    ]
+  },
+  {
+    "title": "Basic BLE Server Example",
+    "description": "Basic BLE Server Example — from the tinyDocs “Bluetooth Low Energy (BLE)” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/bluetooth-ble-server",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/bluetooth/",
+    "tags": [
+      "tinycore",
+      "bluetooth"
+    ]
+  },
+  {
+    "title": "Basic Blink Program",
+    "description": "Both LEDs on your tinyCore should now be flashing On and Off like the GIF above.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/blink-basic",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
+    "tags": [
+      "tinycore",
+      "blink",
+      "led",
+      "digital-io"
+    ]
+  },
+  {
+    "title": "Basic button reading",
+    "description": "You'll see it constantly telling you whether the button is pressed or not.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/button-press-basic",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/button-press/",
+    "tags": [
+      "tinycore",
+      "button"
+    ]
+  },
+  {
+    "title": "Basic Code: Write and Read a File",
+    "description": "Basic Code: Write and Read a File — from the tinyDocs “What is an SD Card?” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/sd-card-write-and-read",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/5_reference/basics/sd-card/",
+    "tags": [
+      "tinycore",
+      "sd-card"
+    ]
+  },
+  {
+    "title": "Basic output example",
+    "description": "Make sure the baud rate dropdown (bottom right) is set to 115200 to match your code.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/serial-monitor-basic-output",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
+    "tags": [
+      "tinycore"
+    ]
+  },
+  {
+    "title": "Basic Web Server",
+    "description": "Basic Web Server — from the tinyDocs “WiFi” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/wifi-basic-web-server",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/wifi/",
+    "tags": [
+      "tinycore",
+      "wifi",
+      "web-server",
+      "serial",
+      "led",
+      "digital-io"
+    ]
+  },
+  {
+    "title": "Basic WiFi Connection",
+    "description": "Basic WiFi Connection — from the tinyDocs “WiFi” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/wifi-basic-connection",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/wifi/",
+    "tags": [
+      "tinycore",
+      "wifi"
+    ]
+  },
+  {
+    "title": "Code for External LED",
+    "description": "Code for External LED — from the tinyDocs “How to Control LEDs with the tinyCore” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/blink-external-led",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
+    "tags": [
+      "tinycore",
+      "blink",
+      "led",
+      "digital-io"
+    ]
+  },
+  {
+    "title": "CSV Data Logging",
+    "description": "CSV Data Logging — from the tinyDocs “How to use SD Cards on the tinyCore” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/sdcard-csv-logger",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
+    "tags": [
+      "tinycore",
+      "sd-card",
+      "file-io"
+    ]
+  },
+  {
+    "title": "Debugging with timestamps",
+    "description": "This creates professional-looking debug logs with timestamps, making it easier to understand the timing of events in your code.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/serial-monitor-timestamps",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
+    "tags": [
+      "tinycore"
+    ]
+  },
+  {
+    "title": "Delete and List Files",
+    "description": "Delete and List Files — from the tinyDocs “How to use SD Cards on the tinyCore” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/sdcard-delete-and-list",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
+    "tags": [
+      "tinycore",
+      "sd-card"
+    ]
+  },
+  {
+    "title": "Detecting button events",
+    "description": "Constantly checking if a button is pressed gets annoying fast.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/button-press-events",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/button-press/",
+    "tags": [
+      "tinycore",
+      "button"
+    ]
+  },
+  {
+    "title": "Flash the tinyCore",
+    "description": "Our IMU example demonstrates how to initialize the IMU and view it’s data graphed out via the Serial Plotter in Arduino.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/imu-serial-plotter",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/1_get-started/imu/",
+    "tags": [
+      "tinycore",
+      "i2c",
+      "imu",
+      "plotter",
+      "serial",
+      "digital-io"
+    ]
+  },
+  {
+    "title": "Flash the tinyCore",
+    "description": "Our IMU example demonstrates how to initialize the IMU and view it’s data graphed out via the Serial Plotter in Arduino.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/imu-motion-plotter",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/detect-motion/",
+    "tags": [
+      "tinycore",
+      "i2c",
+      "imu",
+      "plotter",
+      "serial",
+      "digital-io"
+    ]
+  },
+  {
+    "title": "Hello World (Text on Screen!)",
+    "description": "The tinyCore does all the math in its own memory first, and then blasts the entire finished frame to the OLED all at once.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/i2c-display-hello-world",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/i2c-display/",
+    "tags": [
+      "tinycore",
+      "i2c",
+      "oled",
+      "serial"
+    ]
+  },
+  {
+    "title": "Initializing the SD Card",
+    "description": "Initializing the SD Card — from the tinyDocs “How to use SD Cards on the tinyCore” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/sdcard-init",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
+    "tags": [
+      "tinycore",
+      "sd-card"
+    ]
+  },
+  {
+    "title": "Interactive buzzer",
+    "description": "Interactive buzzer — from the tinyDocs “How to Control a Buzzer (Analog Output)” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/buzzer-interactive",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/buzz-buzzer/",
+    "tags": [
+      "tinycore",
+      "buzzer"
+    ]
+  },
+  {
+    "title": "Interactive Physics: The IMU Digital Hourglass",
+    "description": "Displaying static text is great, but your tinyCore has a built-in 6DOF IMU!",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/i2c-display-imu-hourglass",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/i2c-display/",
+    "tags": [
+      "tinycore",
+      "i2c",
+      "imu",
+      "digital-io"
+    ]
+  },
+  {
+    "title": "Light sensor (photoresistor)",
+    "description": "An LDR (Light Dependent Resistor) changes its resistance based on how much light hits it.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/read-sensor-photoresistor",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/read-sensor-value/",
+    "tags": [
+      "tinycore",
+      "light-sensor"
+    ]
+  },
+  {
+    "title": "Manual Brightness Control",
+    "description": "Manual Brightness Control — from the tinyDocs “How to Control LEDs with the tinyCore” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/blink-brightness",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
+    "tags": [
+      "tinycore",
+      "blink",
+      "pwm",
+      "led"
+    ]
+  },
+  {
+    "title": "Memory and performance monitoring",
+    "description": "Memory and performance monitoring — from the tinyDocs “How to use the Serial Monitor and Serial Plotter” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/serial-monitor-memory-stats",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
+    "tags": [
+      "tinycore",
+      "plotter",
+      "serial"
+    ]
+  },
+  {
+    "title": "MQTT Client",
+    "description": "MQTT Client — from the tinyDocs “WiFi” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/wifi-mqtt-client",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/wifi/",
+    "tags": [
+      "tinycore",
+      "wifi",
+      "mqtt",
+      "serial",
+      "timing"
+    ]
+  },
+  {
+    "title": "Multiple buttons, multiple behaviors",
+    "description": "This gives you two different interaction modes: button 1 toggles the LED state permanently, while button 2 makes it flash rapidly but only while you hold it down.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/button-press-multiple-buttons",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/button-press/",
+    "tags": [
+      "tinycore",
+      "button",
+      "led"
+    ]
+  },
+  {
+    "title": "Multiple sensors at once",
+    "description": "Multiple sensors at once — from the tinyDocs “How to Read Sensor Values (Analog Input)” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/read-sensor-multiple-sensors",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/read-sensor-value/",
+    "tags": [
+      "tinycore",
+      "adc"
+    ]
+  },
+  {
+    "title": "Multiple variable plotting",
+    "description": "This creates four different colored lines on the plotter.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/serial-plotter-multi-variable",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
+    "tags": [
+      "tinycore",
+      "plotter"
+    ]
+  },
+  {
+    "title": "On the tinyCore",
+    "description": "ESP-NOW is built into the ESP32-S3 — no libraries to install, no extra hardware.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/esp-now-basic",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/5_reference/basics/esp-now/",
+    "tags": [
+      "tinycore",
+      "esp-now"
+    ]
+  },
+  {
+    "title": "OTA (Over-the-Air) Updates",
+    "description": "OTA (Over-the-Air) Updates — from the tinyDocs “WiFi” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/wifi-ota-updates",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/wifi/",
+    "tags": [
+      "tinycore",
+      "wifi",
+      "web-server",
+      "ota"
+    ]
+  },
+  {
+    "title": "Play a real song",
+    "description": "Play a real song — from the tinyDocs “How to Control a Buzzer (Analog Output)” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/buzzer-song",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/buzz-buzzer/",
+    "tags": [
+      "tinycore",
+      "buzzer"
+    ]
+  },
+  {
+    "title": "Playing different tones",
+    "description": "Playing different tones — from the tinyDocs “How to Control a Buzzer (Analog Output)” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/buzzer-tones",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/buzz-buzzer/",
+    "tags": [
+      "tinycore",
+      "buzzer"
+    ]
+  },
+  {
+    "title": "PWM Control for All Three LEDs",
+    "description": "PWM Control for All Three LEDs — from the tinyDocs “How to Control LEDs with the tinyCore” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/blink-pwm-wave",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
+    "tags": [
+      "tinycore",
+      "blink",
+      "pwm",
+      "led"
+    ]
+  },
+  {
+    "title": "Reading a potentiometer",
+    "description": "Middle pin of potentiometer → GPIO 1 on tinyCore 3.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/read-sensor-potentiometer",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/read-sensor-value/",
+    "tags": [
+      "tinycore",
+      "potentiometer"
+    ]
+  },
+  {
+    "title": "Reading from a File",
+    "description": "Reading from a File — from the tinyDocs “How to use SD Cards on the tinyCore” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/sdcard-read-file",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
+    "tags": [
+      "tinycore",
+      "sd-card"
+    ]
+  },
+  {
+    "title": "Reading input from Serial Monitor",
+    "description": "The Serial Monitor isn't just for output - you can send commands to your tinyCore too.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/serial-monitor-read-input",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
+    "tags": [
+      "tinycore",
+      "serial"
+    ]
+  },
+  {
+    "title": "Real sensor data visualization",
+    "description": "This example shows how to plot real sensor data alongside simulated signals.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/serial-plotter-sensor-data",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
+    "tags": [
+      "tinycore",
+      "plotter"
+    ]
+  },
+  {
+    "title": "RGB Mood Light Controller",
+    "description": "RGB Mood Light Controller — from the tinyDocs “Bluetooth Low Energy (BLE)” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/bluetooth-rgb-mood-light",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/bluetooth/",
+    "tags": [
+      "tinycore",
+      "bluetooth",
+      "rgb-led",
+      "led"
+    ]
+  },
+  {
+    "title": "Single variable plotting",
+    "description": "You'll see a beautiful sine wave scrolling across the screen in real-time.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/serial-plotter-single-variable",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
+    "tags": [
+      "tinycore",
+      "plotter"
+    ]
+  },
+  {
+    "title": "Smart LED control",
+    "description": "Cover the sensor to make it \"dark\" and watch the LED turn on.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/read-sensor-smart-led",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/read-sensor-value/",
+    "tags": [
+      "tinycore",
+      "led"
+    ]
+  },
+  {
+    "title": "Smooth Breathing Effect",
+    "description": "You should see your LEDs fading off and on smoothly, almost like two fireflies!",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/blink-breathing",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
+    "tags": [
+      "tinycore",
+      "blink",
+      "pwm",
+      "led"
+    ]
+  },
+  {
+    "title": "SOS Signal",
+    "description": "SOS Signal — from the tinyDocs “How to Control LEDs with the tinyCore” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/blink-sos",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
+    "tags": [
+      "tinycore",
+      "blink",
+      "led",
+      "digital-io"
+    ]
+  },
+  {
+    "title": "The Complete Motion Tracker Code",
+    "description": "The Complete Motion Tracker Code — from the tinyDocs “Building Your First Project: A Smart Motion Tracker” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/motion-tracker",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/1_get-started/motion-tracker/",
+    "tags": [
+      "tinycore",
+      "wifi",
+      "i2c",
+      "spi",
+      "imu",
+      "sd-card"
+    ]
+  },
+  {
+    "title": "The I2C Scanner: Your Best Debugging Tool",
+    "description": "An I2C scanner is a short program that checks every possible address (1–127) and reports which ones respond.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/i2c-scanner",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/5_reference/basics/i2c/",
+    "tags": [
+      "tinycore",
+      "i2c"
+    ]
+  },
+  {
+    "title": "Toggle behavior vs direct control",
+    "description": "This is like a light switch in your house - press once for on, press again for off.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/button-press-toggle-vs-direct",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/button-press/",
+    "tags": [
+      "tinycore",
+      "button"
+    ]
+  },
+  {
+    "title": "Understanding NOT logic",
+    "description": "The LED should be glowing when you're not touching the button, and turn off the moment you press it.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/button-press-not-logic",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/button-press/",
+    "tags": [
+      "tinycore",
+      "button",
+      "led"
+    ]
+  },
+  {
+    "title": "Using It in Code",
+    "description": "The tinyCore reads the LSM6DSOX via I2C using the Adafruit LSM6DS Arduino library.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/imu-read-orientation",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/5_reference/basics/imu/",
+    "tags": [
+      "tinycore",
+      "i2c",
+      "imu"
+    ]
+  },
+  {
+    "title": "Visualizing with Serial Plotter",
+    "description": "Reading numbers is okay, but seeing the data as a graph is way cooler.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/read-sensor-plotter",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/read-sensor-value/",
+    "tags": [
+      "tinycore",
+      "plotter",
+      "serial"
+    ]
+  },
+  {
+    "title": "WebSocket Server",
+    "description": "WebSocket Server — from the tinyDocs “WiFi” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/wifi-websocket-server",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/wifi/",
+    "tags": [
+      "tinycore",
+      "wifi",
+      "websocket",
+      "serial",
+      "timing"
+    ]
+  },
+  {
+    "title": "Writing to a File",
+    "description": "Writing to a File — from the tinyDocs “How to use SD Cards on the tinyCore” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "basics/sdcard-write-file",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
+    "tags": [
+      "tinycore",
+      "sd-card"
+    ]
+  },
+  {
+    "title": "Basic Connection Code",
+    "description": "That IP is what you type into a browser to reach a web server running on the tinyCore.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "advanced/wifi-connect-reference",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "advanced",
+    "docsUrl": "https://tinydocs.cc/5_reference/advanced/wifi/",
+    "tags": [
+      "tinycore",
+      "wifi",
+      "web-server"
+    ]
+  },
+  {
+    "title": "Fade an LED",
+    "description": "Fade an LED — from the tinyDocs “What is PWM?” guide.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "advanced/pwm-fade-led",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "advanced",
+    "docsUrl": "https://tinydocs.cc/5_reference/advanced/pwm/",
+    "tags": [
+      "tinycore",
+      "pwm",
+      "led"
+    ]
+  },
+  {
+    "title": "MCP4725 (I2C, 12-bit)",
+    "description": "One output channel, 4,096 voltage steps, dead-simple I2C interface.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "advanced/dac-mcp4725",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "advanced",
+    "docsUrl": "https://tinydocs.cc/5_reference/advanced/dac/",
+    "tags": [
+      "tinycore",
+      "qwiic",
+      "i2c",
+      "dac",
+      "digital-io"
+    ]
+  },
+  {
+    "title": "Play a Tone on a Buzzer",
+    "description": "The Arduino analogWrite() and tone() functions don't work on ESP32.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "advanced/pwm-play-tone-buzzer",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "advanced",
+    "docsUrl": "https://tinydocs.cc/5_reference/advanced/pwm/",
+    "tags": [
+      "tinycore",
+      "buzzer",
+      "pwm"
+    ]
+  },
+  {
+    "title": "Reading an Analog Value",
+    "description": "The ESP32-S3 stores factory calibration data in its eFuse memory, and analogReadMilliVolts() applies it automatically.",
+    "owner": "Mister-Industries",
+    "repo": "tinyStudio-examples",
+    "path": "advanced/adc-read-analog",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "advanced",
+    "docsUrl": "https://tinydocs.cc/5_reference/advanced/adc/",
+    "tags": [
+      "tinycore",
+      "adc"
+    ]
+  },
+  {
+    "title": "tinySniff: Basic Demo",
+    "description": "Reads all three tinySniff MEMS gas sensors and streams them out as a graph.",
+    "owner": "Mister-Industries",
+    "repo": "tinySniff",
+    "path": "Software/Arduino/Examples/tinySniff_Monitor",
+    "board": "tinyCore + tinySniff HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinysniff/example-code/",
+    "tags": [
+      "tinycore",
+      "tinysniff",
+      "plotter"
+    ]
+  },
+  {
+    "title": "tinySniff: Google Sheets",
+    "description": "Logs all three tinySniff gas sensors to a Google Sheet in real time over WiFi.",
+    "owner": "Mister-Industries",
+    "repo": "tinySniff",
+    "path": "Software/Arduino/Examples/tinySniff_Sheets",
+    "board": "tinyCore + tinySniff HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinysniff/example-code/",
+    "tags": [
+      "tinycore",
+      "tinysniff",
+      "wifi"
+    ]
+  },
+  {
+    "title": "tinySniff: SD Card Logger",
+    "description": "Logs all three tinySniff MEMS gas sensors to a timestamped CSV file on the SD card.",
+    "owner": "Mister-Industries",
+    "repo": "tinySniff",
+    "path": "Software/Arduino/Examples/tinySniff_SDLogger",
+    "board": "tinyCore + tinySniff HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinysniff/example-code/",
+    "tags": [
+      "tinycore",
+      "tinysniff",
+      "sd-card",
+      "file-io"
+    ]
+  },
+  {
+    "title": "tinySniff: Text Notifications",
+    "description": "Monitors all three tinySniff gas sensors against configurable thresholds and sends an email alert when any channel exceeds its limit.",
+    "owner": "Mister-Industries",
+    "repo": "tinySniff",
+    "path": "Software/Arduino/Examples/tinySniff_Alarm",
+    "board": "tinyCore + tinySniff HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinysniff/example-code/",
+    "tags": [
+      "tinycore",
+      "tinysniff"
+    ]
+  },
+  {
+    "title": "tinySpeak: tinyAIText",
+    "description": "A text-based AI assistant.",
+    "owner": "Mister-Industries",
+    "repo": "tinySpeak",
+    "path": "Software/Arduino/Examples/tinyAIText",
+    "board": "tinyCore + tinySpeak HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
+    "tags": [
+      "tinycore",
+      "tinyspeak"
+    ]
+  },
+  {
+    "title": "tinySpeak: tinyAIVoice",
+    "description": "Full Voice Assistant Pipeline.",
+    "owner": "Mister-Industries",
+    "repo": "tinySpeak",
+    "path": "Software/Arduino/Examples/tinyAIVoice",
+    "board": "tinyCore + tinySpeak HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
+    "tags": [
+      "tinycore",
+      "tinyspeak"
+    ]
+  },
+  {
+    "title": "tinySpeak: tinyAIVoice (ElevenLabs)",
+    "description": "Premium Voice Assistant Pipeline using ElevenLabs TTS.",
+    "owner": "Mister-Industries",
+    "repo": "tinySpeak",
+    "path": "Software/Arduino/Examples/tinyAIVoice_EL",
+    "board": "tinyCore + tinySpeak HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
+    "tags": [
+      "tinycore",
+      "tinyspeak"
+    ]
+  },
+  {
+    "title": "tinySpeak: tinyMP3Player",
+    "description": "Plays MP3 files from the SD card.",
+    "owner": "Mister-Industries",
+    "repo": "tinySpeak",
+    "path": "Software/Arduino/Examples/tinyMP3Player",
+    "board": "tinyCore + tinySpeak HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
+    "tags": [
+      "tinycore",
+      "tinyspeak",
+      "sd-card"
+    ]
+  },
+  {
+    "title": "tinySpeak: tinyRecorder",
+    "description": "A standalone voice recorder.",
+    "owner": "Mister-Industries",
+    "repo": "tinySpeak",
+    "path": "Software/Arduino/Examples/tinyRecorder",
+    "board": "tinyCore + tinySpeak HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
+    "tags": [
+      "tinycore",
+      "tinyspeak"
+    ]
+  },
+  {
+    "title": "tinySpeak: tinySoundboard",
+    "description": "A motion-triggered soundboard.",
+    "owner": "Mister-Industries",
+    "repo": "tinySpeak",
+    "path": "Software/Arduino/Examples/tinySoundboard",
+    "board": "tinyCore + tinySpeak HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
+    "tags": [
+      "tinycore",
+      "tinyspeak",
+      "imu"
+    ]
+  },
+  {
+    "title": "tinySpeak: tinyTheremin",
+    "description": "A motion-controlled musical instrument.",
+    "owner": "Mister-Industries",
+    "repo": "tinySpeak",
+    "path": "Software/Arduino/Examples/tinyTheremin",
+    "board": "tinyCore + tinySpeak HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
+    "tags": [
+      "tinycore",
+      "tinyspeak",
+      "imu"
+    ]
+  },
+  {
+    "title": "tinySpeak: tinyWalkieTalkie",
+    "description": "Push-to-Talk Intercom using ESP-NOW.",
+    "owner": "Mister-Industries",
+    "repo": "tinySpeak",
+    "path": "Software/Arduino/Examples/tinyWalkieTalkie",
+    "board": "tinyCore + tinySpeak HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
+    "tags": [
+      "tinycore",
+      "tinyspeak",
+      "esp-now"
+    ]
+  },
+  {
+    "title": "tinySpeak: tinyWebSynth",
+    "description": "Chiptune synthesizer: live piano, 2-track melodic step sequencer, 3-track drum machine (Kick, Snare, Hi-Hat).",
+    "owner": "Mister-Industries",
+    "repo": "tinySpeak",
+    "path": "Software/Arduino/Examples/tinyWebSynth",
+    "board": "tinyCore + tinySpeak HAT",
+    "category": "hats",
+    "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
+    "tags": [
+      "tinycore",
+      "tinyspeak"
+    ]
+  }
+]

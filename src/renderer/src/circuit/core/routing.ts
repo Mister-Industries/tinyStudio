@@ -108,7 +108,9 @@ export function decodeJourney(source: Pt, target: Pt, instr?: string[]): Pt[] {
 
   const a = fromSrc[fromSrc.length - 1]
   const b = fromTgt[0]
-  const mid: Pt[] = samePoint(a, b) ? [] : calculateOrthogonalPath(a.x, a.y, b.x, b.y, false).slice(1, -1)
+  const mid: Pt[] = samePoint(a, b)
+    ? []
+    : calculateOrthogonalPath(a.x, a.y, b.x, b.y, false).slice(1, -1)
   return simplifyWirePoints([...fromSrc, ...mid, ...fromTgt])
 }
 
@@ -235,7 +237,10 @@ export function vertexDrag(orig: Pt[], index: number, x: number, y: number): Pt[
   points[index].x = x
   points[index].y = y
   if (index > 0) {
-    if (Math.abs(points[index - 1].y - points[index].y) < Math.abs(points[index - 1].x - points[index].x)) {
+    if (
+      Math.abs(points[index - 1].y - points[index].y) <
+      Math.abs(points[index - 1].x - points[index].x)
+    ) {
       if (index - 1 > 0) points[index - 1].y = points[index].y
       else points[index].y = points[index - 1].y
     } else {
@@ -244,7 +249,10 @@ export function vertexDrag(orig: Pt[], index: number, x: number, y: number): Pt[
     }
   }
   if (index < points.length - 1) {
-    if (Math.abs(points[index + 1].y - points[index].y) < Math.abs(points[index + 1].x - points[index].x)) {
+    if (
+      Math.abs(points[index + 1].y - points[index].y) <
+      Math.abs(points[index + 1].x - points[index].x)
+    ) {
       if (index + 1 < points.length - 1) points[index + 1].y = points[index].y
       else points[index].y = points[index + 1].y
     } else {
@@ -276,7 +284,8 @@ export function clampOntoSegment(p1: Pt, p2: Pt, x: number, y: number): Pt {
 /** Total polyline length. */
 export function polylineLength(pts: Pt[]): number {
   let l = 0
-  for (let i = 1; i < pts.length; i++) l += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)
+  for (let i = 1; i < pts.length; i++)
+    l += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)
   return l
 }
 

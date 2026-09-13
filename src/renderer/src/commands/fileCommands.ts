@@ -1,7 +1,13 @@
 import { Dispatch } from '@reduxjs/toolkit'
 import { fileSystem, FileSystemItem } from '@renderer/lib/fileSystem'
-import { fetchRepoFolder, loadAccount } from '@renderer/lib/github'
-import { VIRTUAL_PREFIX, virtualFileSystem } from '@renderer/lib/virtualFileSystem'
+import {
+  canPushTo,
+  fetchRepoProject,
+  loadAccount,
+  saveLink,
+  type RepoLink
+} from '@renderer/lib/github'
+import { isVirtualPath, VIRTUAL_PREFIX, virtualFileSystem } from '@renderer/lib/virtualFileSystem'
 import { setDocsTab } from '@renderer/redux/editorSlice'
 import {
   BaseFileItem,
@@ -11,10 +17,14 @@ import {
   finishCreateItem,
   openFile,
   openWorkspace,
+  rebaseOpenFiles,
+  selectOpenFiles,
   setFolderOpen,
+  setViewingFile,
   updateDiagramSvgContent,
   updateReadmeContent,
-  Workspace
+  Workspace,
+  WorkspaceSource
 } from '@renderer/redux/fileSlice'
 import { store } from '@renderer/redux/store'
 import { Command, UndoableCommand } from './command'
@@ -197,12 +207,16 @@ async function activateWorkspace(workspace: Workspace, dispatch: Dispatch): Prom
 
 export class OpenWorkspaceCommand implements Command {
   private filePath: string | undefined
+  private source: WorkspaceSource | undefined
   private get dispatch(): Dispatch {
     return store.dispatch
   }
 
-  constructor(file: string | undefined) {
+  // `source` is set when the folder was materialized from a GitHub repo, so the
+  // opened workspace still knows where it came from and what else lives there.
+  constructor(file: string | undefined, source?: WorkspaceSource) {
     this.filePath = file
+    this.source = source
   }
 
   async execute(): Promise<void> {
@@ -247,7 +261,8 @@ export class OpenWorkspaceCommand implements Command {
       id: crypto.randomUUID(),
       name: 'Workspace',
       path: workspacePath,
-      root: fileItems
+      root: fileItems,
+      source: this.source
     }
 
     // Activation (close previous, open this, load README/diagram, auto-open the
@@ -275,14 +290,24 @@ export class LoadGitHubProjectCommand implements Command {
   ) {}
 
   async execute(): Promise<void> {
-    // A signed-in token (if any) just raises the GitHub rate limit; public
-    // repos load fine without one.
+    // A signed-in token raises the rate limit, unlocks private repos, and is
+    // what lets us tell whether this user can push to the source repo.
     const token = loadAccount()?.token
-    const files = await fetchRepoFolder(this.owner, this.repo, this.path, this.branch, token)
-    if (Object.keys(files).length === 0) {
+    const project = await fetchRepoProject(this.owner, this.repo, this.path, this.branch, token)
+    if (project.manifest.length === 0) {
       throw new Error(
         `No files found at ${this.owner}/${this.repo}${this.path ? '/' + this.path : ''}`
       )
+    }
+
+    const source: WorkspaceSource = {
+      owner: this.owner,
+      repo: this.repo,
+      branch: project.branch,
+      path: project.path,
+      manifest: project.manifest,
+      truncated: project.truncated,
+      canPush: await canPushTo(this.owner, this.repo, token)
     }
 
     const name = this.path ? this.path.split('/').pop()! : this.repo
@@ -293,17 +318,21 @@ export class LoadGitHubProjectCommand implements Command {
     // write to, so it falls back to the virtual workspace (view/edit only; the
     // Arduino service guards mem:// compile/upload with a clear message).
     if (fileSystem.isElectron()) {
-      const dir = `${await window.api.app.getExamplesDir()}/${name}`
-      for (const [rel, content] of Object.entries(files)) {
+      // Namespaced by owner/repo: two examples that share a folder name (two
+      // repos each with a `blink/`) used to land on the same path, and the
+      // second silently overwrote the first.
+      const examplesDir = await window.api.app.getExamplesDir()
+      const dir = [examplesDir, this.owner, this.repo, this.path].filter(Boolean).join('/')
+      for (const [rel, content] of Object.entries(project.files)) {
         await fileSystem.writeFile(`${dir}/${rel}`, content)
       }
-      await new OpenWorkspaceCommand(dir).execute()
+      await new OpenWorkspaceCommand(dir, source).execute()
       return
     }
 
     const root = `${VIRTUAL_PREFIX}${this.owner}/${this.repo}${this.path ? '/' + this.path : ''}`
     virtualFileSystem.clear(root)
-    await virtualFileSystem.seed(root, files)
+    await virtualFileSystem.seed(root, project.files)
     // Overlay any prior in-editor edits saved to the cache for this project.
     await virtualFileSystem.hydrateFromCache(root)
     fileSystem.setCurrentWorkspace(root)
@@ -315,9 +344,119 @@ export class LoadGitHubProjectCommand implements Command {
       id: crypto.randomUUID(),
       name,
       path: root,
-      root: fileItems
+      root: fileItems,
+      source
     }
     await activateWorkspace(workspace, this.dispatch)
+  }
+}
+
+/**
+ * Re-point an open workspace at the repo the user just copied it into.
+ *
+ * This is the fiddly half of "make it mine": four things have to move together
+ * or the result is worse than not moving at all —
+ *   1. the in-memory project and its cached copies (web only; on desktop the
+ *      folder already belongs to the user and stays where it is),
+ *   2. the paths held by open editor tabs, which nothing else updates,
+ *   3. the tree, rebuilt from the new root,
+ *   4. the URL, so a refresh reopens *their* project and not the example.
+ */
+export class AdoptCopiedProjectCommand implements Command {
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
+
+  constructor(
+    private workspace: Workspace,
+    private link: RepoLink,
+    private newOwner: string
+  ) {}
+
+  /**
+   * The repo already exists on GitHub by the time we get here, so a failure to
+   * write the local baseline must not read as "the copy failed" — that sends
+   * people looking for a repo that is sitting there fine.
+   */
+  private persistLink(workspacePath: string): void {
+    try {
+      saveLink(workspacePath, this.link)
+    } catch (e) {
+      throw new Error(
+        `${this.link.remote} was created and your files were copied, but the local sync ` +
+          `baseline could not be saved: ${e instanceof Error ? e.message : 'unknown error'}`
+      )
+    }
+  }
+
+  async execute(): Promise<void> {
+    const [, repoName] = this.link.remote.split('/')
+    const source: WorkspaceSource = {
+      owner: this.newOwner,
+      repo: repoName,
+      branch: this.link.branch,
+      path: '',
+      // The copy is complete, so nothing is outstanding to fetch any more.
+      manifest: [],
+      truncated: false,
+      canPush: true
+    }
+
+    // Desktop: the workspace is already a real folder the user owns. Nothing
+    // moves — just record the link and that it is now writable.
+    if (!isVirtualPath(this.workspace.path)) {
+      this.dispatch(openWorkspace({ ...this.workspace, source }))
+      this.persistLink(this.workspace.path)
+      return
+    }
+
+    const oldRoot = this.workspace.path
+    const newRoot = `${VIRTUAL_PREFIX}${this.newOwner}/${repoName}`
+
+    const openPaths = selectOpenFiles(store.getState()).map((f) => f.path)
+    const viewingPath = selectOpenFiles(store.getState()).find(
+      (f) => f.id === store.getState().file.viewingFileId
+    )?.path
+
+    await virtualFileSystem.rerootTo(oldRoot, newRoot)
+    fileSystem.setCurrentWorkspace(newRoot)
+    this.dispatch(rebaseOpenFiles({ from: oldRoot, to: newRoot }))
+
+    const fsItems = await fileSystem.readDirectory(newRoot, true)
+    const workspace: Workspace = {
+      ...this.workspace,
+      name: repoName,
+      path: newRoot,
+      root: buildNestedStructure(fsItems),
+      source
+    }
+    this.dispatch(openWorkspace(workspace))
+    this.persistLink(newRoot)
+
+    // Re-open each tab against the rebuilt tree so tab ids line up with tree ids
+    // again (that is what keeps highlighting and close-from-tree working).
+    const rebased = openPaths.map((p) =>
+      p.startsWith(oldRoot) ? newRoot + p.slice(oldRoot.length) : p
+    )
+    for (const path of rebased) {
+      const item = findFileInTree(workspace.root, (i) => i.path === path)
+      if (item) await new OpenFileCommand(item).execute()
+    }
+    if (viewingPath) {
+      const want = viewingPath.startsWith(oldRoot)
+        ? newRoot + viewingPath.slice(oldRoot.length)
+        : viewingPath
+      const item = findFileInTree(workspace.root, (i) => i.path === want)
+      if (item) this.dispatch(setViewingFile(item.id))
+    }
+
+    // A refresh should land on the user's own project from here on. The URL is
+    // built inline rather than imported from projectRouting, which imports this
+    // module — keeping that dependency one-way.
+    const url = `/${encodeURIComponent(this.newOwner)}/${encodeURIComponent(repoName)}`
+    if (typeof window !== 'undefined' && window.location.pathname !== url) {
+      window.history.pushState({ owner: this.newOwner, repo: repoName, path: '' }, '', url)
+    }
   }
 }
 
@@ -484,6 +623,9 @@ export class RenameFileCommand implements UndoableCommand {
     const newPath = directoryPath ? `${directoryPath}/${this.newName}` : this.newName
 
     await fileSystem.renameFile(oldPath, newPath)
+    // Without this the open tab keeps the old path and the next save recreates
+    // the file under its former name.
+    this.dispatch(rebaseOpenFiles({ from: oldPath, to: newPath }))
     this.dispatch(finishCreateItem(this.item))
   }
 
@@ -497,6 +639,7 @@ export class RenameFileCommand implements UndoableCommand {
     const newPath = directoryPath ? `${directoryPath}/${this.newName}` : this.newName
 
     await fileSystem.renameFile(newPath, originalPath)
+    this.dispatch(rebaseOpenFiles({ from: newPath, to: originalPath }))
   }
 }
 

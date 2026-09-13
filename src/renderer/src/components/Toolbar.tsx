@@ -6,6 +6,7 @@ import {
   useAppDispatch,
   useAppSelector
 } from '@renderer/redux'
+import { notify as toast } from '@renderer/lib/notify'
 import { RefreshCw, Save } from 'lucide-react'
 import React from 'react'
 import { UploadButton, VerifyButton } from './arduino/ArduinoButtons'
@@ -27,13 +28,14 @@ export function Toolbar(): React.JSX.Element {
     const file = openFiles.find((f) => f.id === viewingFileId)
     if (file && file.path) {
       try {
-        console.log(`Saving file: ${file.name} (${file.id}) to ${file.path}`)
         await fileSystem.writeFile(file.path, file.content)
         // Save with content to ensure state is properly synced
         dispatch(saveFileWithContent({ id: file.id, content: file.content }))
-        console.log(`Successfully saved: ${file.name}`)
       } catch (error) {
         console.error('Failed to save file:', error)
+        toast.error(`Could not save ${file.name}`, {
+          description: error instanceof Error ? error.message : 'Unknown error'
+        })
       }
     } else {
       console.error('Cannot save file: file path is undefined')

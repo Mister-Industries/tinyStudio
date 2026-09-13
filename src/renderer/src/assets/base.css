@@ -247,6 +247,51 @@
   --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: var(--brand-contrast);
   --sidebar-accent: var(--bg-sunken);
+
+  /* ── BOARD INKS — one ramp per tinyBoard, keyed to its real solder mask ────
+     These are the colours the Examples tab paints board tags with, so a tag
+     matches the PCB in your hand. Base values are the same masks
+     lib/partsLibrary paints the Circuit view with; *-soft is the chip fill and
+     *-on is accessible text on that fill. (LIGHT values; dark brightens.) */
+
+  /* tinyCore — ESP32-S3, black mask */
+  --board-tinycore: #2c3a37;
+  --board-tinycore-soft: #e6eae9;
+  --board-tinycore-on: #1b2422;
+
+  /* tinyGlow — 3-channel LED driver, blue mask */
+  --board-tinyglow: #1d4bad;
+  --board-tinyglow-soft: #e0e7fa;
+  --board-tinyglow-on: #16357d;
+
+  /* tinyProto — prototyping / breakout, green mask */
+  --board-tinyproto: #0a9950;
+  --board-tinyproto-soft: #daf2e5;
+  --board-tinyproto-on: #076e3a;
+
+  /* tinySniff — MEMS gas sensor array, yellow mask. Deepened from the literal
+     mask (#efb812): a 3px rail of the true gold scores 1.6:1 against its own
+     pale-yellow fill and effectively disappears. The fill still carries the
+     yellow identity; the rail just has to be visible. */
+  --board-tinysniff: #a87a09;
+  --board-tinysniff-soft: #fbf0cb;
+  --board-tinysniff-on: #6f5405;
+
+  /* tinySpeak — microphone + speaker, red mask */
+  --board-tinyspeak: #e8382c;
+  --board-tinyspeak-soft: #fce1de;
+  --board-tinyspeak-on: #a3221a;
+
+  /* tinyDisplay — round LCD module, teal mask */
+  --board-tinydisplay: #0e7d6c;
+  --board-tinydisplay-soft: #d7f0ec;
+  --board-tinydisplay-on: #0a5a4e;
+
+  /* Qwiic — not a tinyBoard, but plug-in hardware, so it gets a ramp too */
+  --board-qwiic: #8a4fc4;
+  --board-qwiic-soft: #efe4fb;
+  --board-qwiic-on: #5a2a82;
+
   --sidebar-accent-foreground: var(--text-strong);
   --sidebar-border: var(--border-default);
   --sidebar-ring: var(--ring-ink);
@@ -311,6 +356,37 @@
    (shadcn vars, legacy aliases) flips automatically. ────────────────────────── */
 .dark,
 :root[data-theme='dark'] {
+  /* brightened board inks — the mask hue survives, lightened enough to read
+     on charcoal. tinyCore's black mask becomes a light graphite here, since a
+     black chip on a dark panel would vanish. */
+  --board-tinycore: #9aa8a5;
+  --board-tinycore-soft: #23292b;
+  --board-tinycore-on: #d3dcda;
+
+  --board-tinyglow: #5b86e8;
+  --board-tinyglow-soft: #1a2547;
+  --board-tinyglow-on: #c6d5fa;
+
+  --board-tinyproto: #35c47e;
+  --board-tinyproto-soft: #11291e;
+  --board-tinyproto-on: #b6edd0;
+
+  --board-tinysniff: #f0c542;
+  --board-tinysniff-soft: #2f2810;
+  --board-tinysniff-on: #f6e3a6;
+
+  --board-tinyspeak: #f2695e;
+  --board-tinyspeak-soft: #3a201d;
+  --board-tinyspeak-on: #f9c9c4;
+
+  --board-tinydisplay: #35bda7;
+  --board-tinydisplay-soft: #0f2b27;
+  --board-tinydisplay-on: #b2e9df;
+
+  --board-qwiic: #b184e0;
+  --board-qwiic-soft: #2a1d3a;
+  --board-qwiic-on: #ddc9f4;
+
   /* brightened inks */
   --red-soft: #3a2421;
   --red: #f26d63;

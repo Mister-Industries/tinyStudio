@@ -12,11 +12,7 @@
  */
 
 import type { Command } from './commands'
-import {
-  parseCircuitFile,
-  serializeDoc,
-  type CircuitDoc
-} from './model'
+import { parseCircuitFile, serializeDoc, type CircuitDoc } from './model'
 
 const MAX_UNDO = 200
 /** Consecutive same-mergeKey commands within this window merge (ms). */
@@ -76,9 +72,7 @@ export class CircuitStore {
     const now = Date.now()
     const top = this.undoStack[this.undoStack.length - 1]
     const merged =
-      cmd.mergeKey !== undefined &&
-      top?.mergeKey === cmd.mergeKey &&
-      now - top.at < MERGE_WINDOW
+      cmd.mergeKey !== undefined && top?.mergeKey === cmd.mergeKey && now - top.at < MERGE_WINDOW
 
     if (!merged) {
       this.undoStack.push({ doc: this.doc, label: cmd.label, mergeKey: cmd.mergeKey, at: now })

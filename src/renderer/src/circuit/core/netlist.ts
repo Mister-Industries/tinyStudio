@@ -46,6 +46,24 @@ function nodeToken(name: string): string {
   return name.replace(/[^A-Za-z0-9_.]+/g, '_')
 }
 
+/**
+ * Node name per net index (spec §10.2.2): a net named GND is `0`, other named
+ * nets keep their sanitized label, everything else is `n<k>` in net order.
+ *
+ * Exported because the canvas needs the same names the netlist will use — a
+ * probe tag reading `n3` while SPICE calls that node `n4` is worse than no
+ * label at all, so there is exactly one implementation and both callers use it.
+ */
+export function nodeNamesForNets(net: NetModel): string[] {
+  let seq = 1
+  return net.nets.map((_members, i) => {
+    const name = net.netNames[i]
+    if (name && name.toUpperCase() === 'GND') return '0'
+    if (name) return nodeToken(name)
+    return `n${seq++}`
+  })
+}
+
 // ── part mapping ─────────────────────────────────────────────────────────────
 
 export interface SpiceCard {
@@ -60,6 +78,14 @@ export type MappingKind = 'element' | 'transparent' | 'board' | 'unknown'
 export interface NetlistOptions {
   /** family for a part type (from the parts registry); improves matching */
   familyOf?: (type: string) => string | undefined
+  /**
+   * Per-part starting values (parts/naming PART_DEFAULT_ATTRS), consulted
+   * before this table's generic keyword defaults. Without it a 2xAA pack that
+   * the user never edited would simulate as the generic 5 V source while the
+   * schematic prints 3 V beside it — the sheet must never disagree with what
+   * SPICE is given.
+   */
+  defaultAttrsOf?: (type: string) => Record<string, string> | undefined
   title?: string
 }
 
@@ -210,8 +236,7 @@ const EMITTERS: {
     emit: (c) => {
       const plus = c.pins.find((p) => PLUS.some((re) => re.test(p)))
       const minus = c.pins.find((p) => MINUS.some((re) => re.test(p)))
-      const [a, b] =
-        plus && minus ? [c.nodeOf(plus), c.nodeOf(minus)] : two(c)
+      const [a, b] = plus && minus ? [c.nodeOf(plus), c.nodeOf(minus)] : two(c)
       return { lines: [`C${c.part.id} ${a} ${b} ${c.attr(['capacitance', 'value'], '100n')}`] }
     }
   },
@@ -310,7 +335,16 @@ function spiceScale(total: string, frac: number): string {
   const m = total.match(/^([0-9.eE+-]+)\s*(Meg|[kKmunpfgt])?$/)
   if (!m) return total
   const mult: Record<string, number> = {
-    Meg: 1e6, k: 1e3, K: 1e3, m: 1e-3, u: 1e-6, n: 1e-9, p: 1e-12, f: 1e-15, g: 1e9, t: 1e12
+    Meg: 1e6,
+    k: 1e3,
+    K: 1e3,
+    m: 1e-3,
+    u: 1e-6,
+    n: 1e-9,
+    p: 1e-12,
+    f: 1e-15,
+    g: 1e9,
+    t: 1e12
   }
   const base = parseFloat(m[1]) * (m[2] ? mult[m[2]] : 1)
   const v = base * frac
@@ -334,13 +368,7 @@ export function generateNetlist(
   const excluded: string[] = []
 
   // node names per net (spec §10.2.2)
-  let seq = 1
-  const nodeOfNet = net.nets.map((_members, i) => {
-    const name = net.netNames[i]
-    if (name && name.toUpperCase() === 'GND') return '0'
-    if (name) return nodeToken(name)
-    return `n${seq++}`
-  })
+  const nodeOfNet = nodeNamesForNets(net)
   let ncSeq = 1
 
   const lines: string[] = []
@@ -359,7 +387,9 @@ export function generateNetlist(
     if (entry.kind === 'transparent') continue
     if (entry.kind === 'board') {
       excluded.push(part.id)
-      warnings.push(`${part.id} (${part.type}) is a board — not simulated; drive its pins with sources`)
+      warnings.push(
+        `${part.id} (${part.type}) is a board — not simulated; drive its pins with sources`
+      )
       continue
     }
 
@@ -381,8 +411,9 @@ export function generateNetlist(
         return nodeOfNet[idx]
       },
       attr: (names, fallback) => {
+        const defaults = opts.defaultAttrsOf?.(part.type)
         for (const n of names) {
-          const v = part.attrs?.[n]
+          const v = part.attrs?.[n] ?? defaults?.[n]
           if (v !== undefined) return spiceNum(v, fallback)
         }
         return fallback
@@ -482,3 +513,75 @@ export function mapSimIssues(lines: string[], gen: NetlistResult): SimIssueRef {
   }
   return { parts: [...parts], nets: [...nets] }
 }
+
+// ── analysis sizing (crash guard) ────────────────────────────────────────────
+
+const SPICE_SUFFIX: Record<string, number> = {
+  meg: 1e6,
+  t: 1e12,
+  g: 1e9,
+  k: 1e3,
+  m: 1e-3,
+  u: 1e-6,
+  n: 1e-9,
+  p: 1e-12,
+  f: 1e-15
+}
+
+/** Numeric value of a SPICE-ish quantity ("10u", "4.7k", "1Meg", "1e3"). */
+export function spiceValue(v: string | number | boolean | undefined, fallback = NaN): number {
+  if (v === undefined || typeof v === 'boolean') return fallback
+  if (typeof v === 'number') return v
+  const s = spiceNum(v, '').toLowerCase()
+  const m = /^([-+]?(?:[0-9]*\.)?[0-9]+(?:e[-+]?[0-9]+)?)\s*(meg|[tgkmunpf])?/.exec(s)
+  if (!m) return fallback
+  const base = parseFloat(m[1])
+  if (!Number.isFinite(base)) return fallback
+  return m[2] ? base * SPICE_SUFFIX[m[2]] : base
+}
+
+/**
+ * Points an analysis will produce. ngspice materializes every vector at every
+ * point, so this is the number that decides whether a run costs a megabyte or
+ * eats the renderer: `.tran 1n 10` is ten billion points, and asking for it
+ * used to take the whole app down with it. The panel refuses anything past
+ * MAX_SIM_POINTS and says which knob to turn.
+ */
+export function estimatePoints(a: Analysis): number {
+  const n = (k: string, d: number): number => {
+    const v = spiceValue(a[k] as string | number | undefined, NaN)
+    return Number.isFinite(v) ? v : d
+  }
+  switch (a.kind) {
+    case 'op':
+      return 1
+    case 'tran': {
+      const step = n('step', 10e-6)
+      const stop = n('stop', 10e-3)
+      const start = n('start', 0)
+      if (!(step > 0) || !(stop > start)) return 0
+      return Math.floor((stop - start) / step) + 1
+    }
+    case 'dc': {
+      const step = Math.abs(n('step', 0.1))
+      const span = Math.abs(n('to', 5) - n('from', 0))
+      if (!(step > 0)) return 0
+      return Math.floor(span / step) + 1
+    }
+    case 'ac': {
+      const pts = Math.max(1, n('points', 20))
+      const f0 = n('fstart', 1)
+      const f1 = n('fstop', 1e6)
+      if (!(f1 > 0) || !(f0 > 0) || f1 <= f0) return Math.round(pts)
+      const variation = String(a.variation ?? 'dec')
+      if (variation === 'lin') return Math.round(pts)
+      const spans = variation === 'oct' ? Math.log2(f1 / f0) : Math.log10(f1 / f0)
+      return Math.round(pts * spans) + 1
+    }
+    default:
+      return 0
+  }
+}
+
+/** Above this an analysis is refused before it reaches the engine. */
+export const MAX_SIM_POINTS = 250_000

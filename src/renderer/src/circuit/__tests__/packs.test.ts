@@ -49,7 +49,11 @@ function stubFetch(routes: Record<string, unknown | (() => unknown) | { status: 
     const hit = routes[url]
     if (hit === undefined) return { ok: false, status: 404, json: async () => ({}) } as Response
     if (typeof hit === 'object' && hit !== null && 'status' in hit && !('json' in hit)) {
-      return { ok: false, status: (hit as { status: number }).status, json: async () => ({}) } as Response
+      return {
+        ok: false,
+        status: (hit as { status: number }).status,
+        json: async () => ({})
+      } as Response
     }
     const body = typeof hit === 'function' ? (hit as () => unknown)() : hit
     return { ok: true, status: 200, json: async () => body } as Response
@@ -93,7 +97,10 @@ test('fetchManifest validates { id, parts: [...] } shape', async () => {
   })
   const man = await fetchManifest('https://example.com/pack.json')
   assert.equal(man.id, 'core')
-  await assert.rejects(() => fetchManifest('https://example.com/bad.json'), /not a valid pack manifest/)
+  await assert.rejects(
+    () => fetchManifest('https://example.com/bad.json'),
+    /not a valid pack manifest/
+  )
 })
 
 // ── installPack ──────────────────────────────────────────────────────────────

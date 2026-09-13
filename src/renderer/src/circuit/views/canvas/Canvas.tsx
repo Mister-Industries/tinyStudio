@@ -11,7 +11,7 @@
  * (camera, hover, armed wire, marquee, edit buffer) never touches the doc.
  */
 
-import { CircuitBoard, Zap } from 'lucide-react'
+import { CircuitBoard, Crosshair, X, Zap } from 'lucide-react'
 import React from 'react'
 import { buildClipboard, materializePaste, parseClipboard } from '../../core/clipboard'
 import * as cmd from '../../core/commands'
@@ -30,6 +30,8 @@ import {
 import { describeNet, type NetModel } from '../../core/nets'
 import { isBreadboard } from '../../parts/breadboard'
 import { netLabelVisualOf, snapNetLabel } from '../../parts/netLabels'
+import { labelLayout, refdesOf, valueOf } from '../../parts/labels'
+import { FONT_REFDES, FONT_VALUE, WIRE_STROKE } from '../../parts/style'
 import {
   calculateOrthogonalPath,
   clampOntoSegment,
@@ -65,10 +67,15 @@ import {
 
 // wire look (identical to DiagramEditor / tinySchematic)
 const WIRE_W = 2.8
-const WIRE_SCH_W = 1 // schematic ink: thin single stroke (no outline/glow)
+// schematic ink: one stroke, same weight as a symbol's pin lead so a wire
+// reads as a continuation of the lead it lands on (parts/style.ts)
+const WIRE_SCH_W = WIRE_STROKE
 const WIRE_OUTLINE_W = WIRE_W + 1.8
 const WIRE_GLOW_W = WIRE_W + 5
 const WIRE_CORNER = 4
+// schematics turn square: a filleted corner reads as a hand-drawn sketch,
+// and every schematic convention (and CircuitLab) uses a hard 90°
+const WIRE_CORNER_SCH = 0
 const NET_GLOW = 'rgba(243, 203, 0, 0.30)'
 
 export interface Selection {
@@ -87,6 +94,24 @@ export interface Cam {
   scale: number
   tx: number
   ty: number
+}
+
+/**
+ * A placed measurement tag, already resolved to this view's world coordinates
+ * by the shell (which owns pin geometry). `ax/ay` is the node it reads —
+ * where the leader line starts; `x/y` is where the label sits, which is the
+ * part the user drags.
+ */
+export interface ProbeTag {
+  id: string
+  ax: number
+  ay: number
+  x: number
+  y: number
+  label: string
+  /** last measured value, when the run produced a single number */
+  value?: string
+  kind: 'voltage' | 'current' | 'diff'
 }
 
 export interface CanvasHandle {
@@ -152,6 +177,11 @@ export function Canvas({
   onImportFiles,
   annotations,
   simVoltageForNet,
+  pickNets = false,
+  onPickNet,
+  probes,
+  onMoveProbe,
+  onDeleteProbe,
   onRequestEdit
 }: {
   store: CircuitStore
@@ -180,6 +210,22 @@ export function Canvas({
   annotations?: { x: number; y: number; text: string }[]
   /** DC (.op) net voltage lookup, for the breadboard hole tooltip */
   simVoltageForNet?: (netIdx: number) => string | undefined
+  /**
+   * Sim output picking (spec §10.4, CircuitLab-style): while on, a click on a
+   * wire or a pin toggles that net as an analysis output instead of selecting
+   * it. Works in view-only mode too — picking what to measure is not editing.
+   */
+  pickNets?: boolean
+  /** a pick: the net that was hit, and where on the sheet it was clicked */
+  onPickNet?: (netIndex: number, at: Pt) => void
+  /** placed measurement tags for this view, already resolved to world coords */
+  probes?: ProbeTag[]
+  /**
+   * A tag was dragged. `at` is its new world position; `netIndex` is set only
+   * when the drop landed squarely on a wire or pin, which re-anchors it.
+   */
+  onMoveProbe?: (id: string, at: Pt, netIndex?: number) => void
+  onDeleteProbe?: (id: string) => void
   /** tray "attach to cursor" placement: id being placed + drop callback */
   /** double-clicking a component asks the shell to enter edit mode */
   onRequestEdit: () => void
@@ -631,10 +677,34 @@ export function Canvas({
     setArmed(null)
   }
 
+  /** Output picking: resolve a click to its net and hand it to the shell,
+   * along with the point clicked — that is where the tag lands. */
+  const pickNetOf = (key: string, from: 'pin' | 'wire', at: Pt): boolean => {
+    if (!pickNets) return false
+    const idx = from === 'pin' ? netModel.pinToNet.get(key) : netModel.wireToNet.get(key)
+    if (idx == null) return false
+    onPickNet?.(idx, at)
+    return true
+  }
+
+  /** The net under a world point, if the point is on a wire or a pin. */
+  const netAtWorld = (wx: number, wy: number): number | undefined => {
+    const pin = pinAtWorld(doc, wx, wy, 10 / scale, view)
+    if (pin) return netModel.pinToNet.get(`${pin.id}:${pin.pin}`)
+    const hit = hitWire(wx, wy, geomForHit, scale)
+    if (hit) return netModel.wireToNet.get(hit.id)
+    return undefined
+  }
+
   const onPinClick = (e: React.MouseEvent, partId: string, pin: string): void => {
+    const ref = `${partId}:${pin}`
+    if (pickNets) {
+      e.stopPropagation()
+      pickNetOf(ref, 'pin', resolve(ref) ?? canvasPoint(e))
+      return
+    }
     if (!editable) return
     e.stopPropagation()
-    const ref = `${partId}:${pin}`
     const pos = resolve(ref)
     if (pos) pinInteract(ref, pos)
   }
@@ -779,6 +849,10 @@ export function Canvas({
 
   const onWireClick = (e: React.MouseEvent, wireId: string): void => {
     e.stopPropagation()
+    if (pickNets) {
+      pickNetOf(wireId, 'wire', canvasPoint(e))
+      return
+    }
     if (armed) {
       const cp = canvasPoint(e)
       setMouse(cp)
@@ -1183,10 +1257,47 @@ export function Canvas({
     return out
   }, [doc, resolve])
 
+  // ── probe tags ──────────────────────────────────────────────────────────────
+  // A tag is dragged by its label. Dropping it on a wire or a pin re-anchors it
+  // to that node; dropping it anywhere else just moves the label.
+
+  const probeDrag = React.useRef<{ id: string; offX: number; offY: number } | null>(null)
+  const [draggingProbe, setDraggingProbe] = React.useState<string | null>(null)
+
+  const onProbeDown = (e: React.PointerEvent, tag: ProbeTag): void => {
+    if (e.button !== 0) return
+    e.stopPropagation()
+    e.preventDefault()
+    const start = canvasPoint(e)
+    const d = { id: tag.id, offX: tag.x - start.x, offY: tag.y - start.y }
+    probeDrag.current = d
+    setDraggingProbe(tag.id)
+    const move = (ev: PointerEvent): void => {
+      if (!probeDrag.current) return
+      const p = canvasPoint(ev)
+      suppressClick.current = true
+      onMoveProbe?.(d.id, { x: p.x + d.offX, y: p.y + d.offY })
+    }
+    const up = (ev: PointerEvent): void => {
+      probeDrag.current = null
+      setDraggingProbe(null)
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      const p = canvasPoint(ev)
+      onMoveProbe?.(d.id, { x: p.x + d.offX, y: p.y + d.offY }, netAtWorld(p.x, p.y))
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
   // Contextual hint only while actively wiring/editing — no idle 'scroll to
   // zoom' / 'view-only' bubbles cluttering the canvas.
-  const hint: { icon: React.JSX.Element | null; text: string } | null =
-    editable && armed
+  const hint: { icon: React.JSX.Element | null; text: string } | null = pickNets
+    ? {
+        icon: <Crosshair size={12} />,
+        text: 'Click a wire or a pin to drop a probe · drag a tag to move it · drop a tag on a wire to re-anchor it'
+      }
+    : editable && armed
       ? {
           icon: <Zap size={12} />,
           text: `Click a pin or wire to connect · click for a bend${view === 'bb' ? ' · hold Space for straight' : ''} · Esc to cancel`
@@ -1205,7 +1316,7 @@ export function Canvas({
         className="size-full overflow-hidden"
         style={{
           touchAction: 'none',
-          cursor: armed ? 'crosshair' : 'default',
+          cursor: armed || pickNets ? 'crosshair' : 'default',
           // schematic reads as paper (lighter surface, finer dot grid — spec §8.1)
           backgroundColor: view === 'sch' ? 'var(--bg)' : 'var(--bg-sunken)',
           backgroundImage: grid
@@ -1270,11 +1381,14 @@ export function Canvas({
               const outline = view === 'sch' ? 'rgba(0,0,0,0.45)' : darken(w.color || '#2fa46a')
               // schematic ink is a single thin stroke — no color outline, no glow.
               const coreW = view === 'sch' ? WIRE_SCH_W : WIRE_W
-              const d = roundedPath(pts)
+              const d = roundedPath(pts, view === 'sch' ? WIRE_CORNER_SCH : WIRE_CORNER)
               return (
                 <g
                   key={w.id}
-                  style={{ cursor: editable ? 'pointer' : 'default', pointerEvents: 'stroke' }}
+                  style={{
+                    cursor: pickNets ? 'crosshair' : editable ? 'pointer' : 'default',
+                    pointerEvents: 'stroke'
+                  }}
                   onPointerEnter={() => setHoverWire(w.id)}
                   onPointerLeave={() => setHoverWire((h) => (h === w.id ? null : h))}
                   onClick={(e) => onWireClick(e, w.id)}
@@ -1345,7 +1459,7 @@ export function Canvas({
 
             {previewPts && (
               <path
-                d={roundedPath(previewPts)}
+                d={roundedPath(previewPts, view === 'sch' ? WIRE_CORNER_SCH : WIRE_CORNER)}
                 fill="none"
                 stroke={view === 'sch' ? ink : wireColor}
                 strokeWidth={view === 'sch' ? WIRE_SCH_W : WIRE_W}
@@ -1474,202 +1588,247 @@ export function Canvas({
             }
             const selected = sel.parts.has(part.id)
             const labelOff = pl.labelOffset || [0, 0]
+            // labels live OUTSIDE the rotated container, anchored to the box
+            // the symbol visibly occupies (parts/labels.ts) — inside it they
+            // would inherit the rotation and need a counter-transform that
+            // slides them off the part
+            const lay = labelLayout(vis.v.w, vis.v.h, vis.v.pins, pl.rotate)
+            const valueText =
+              view === 'sch' ? valueOf(part, vis.def.simFamily ?? vis.def.family) : ''
             return (
-              <div
-                key={part.id}
-                style={{
-                  position: 'absolute',
-                  left: pl.x,
-                  top: pl.y,
-                  width: vis.v.w,
-                  height: vis.v.h,
-                  // boards sit under every other part (and under the z5 wire layer)
-                  zIndex: isBreadboard(part.type) ? 1 : 2,
-                  transform:
-                    pl.rotate || pl.flip
-                      ? `${pl.rotate ? `rotate(${pl.rotate}deg)` : ''}${pl.flip ? ' scaleX(-1)' : ''}`
-                      : undefined,
-                  transformOrigin: 'center',
-                  outline: selected ? '2px solid var(--brand)' : 'none',
-                  outlineOffset: 4,
-                  borderRadius: 6,
-                  cursor: editable ? 'move' : 'default'
-                }}
-                onPointerDown={(e) => onPartDown(e, part.id)}
-                onDoubleClick={(e) => {
-                  e.stopPropagation()
-                  if (!editable) onRequestEdit()
-                }}
-                onPointerMove={(e) => {
-                  if (!editable || view !== 'bb' || !isBreadboard(part.type) || partDrag.current)
-                    return
-                  const cp = canvasPoint(e)
-                  const hole = holeAt(doc, part.id, cp.x, cp.y, 6 / Math.min(scale, 1))
-                  setHoverHole(hole ? { id: part.id, pin: hole.pin, pos: hole.pos } : null)
-                }}
-                onPointerLeave={() => setHoverHole((h) => (h?.id === part.id ? null : h))}
-                onClick={(e) => e.stopPropagation()}
-                onContextMenu={(e) => {
-                  if (!editable) return
-                  e.preventDefault()
-                  // breadboards rotate as a rigid assembly (seated parts + wires
-                  // turn with the board); other parts rotate in place.
-                  if (view === 'bb' && isBreadboard(part.type)) {
-                    rotateBoardAssembly(part.id)
-                    return
-                  }
-                  const cur = doc.parts.find((p) => p.id === part.id)?.[view]
-                  if (!cur) return
-                  const next = (((((cur.rotate ?? 0) + 90) % 360) + 360) % 360) as
-                    | 0
-                    | 90
-                    | 180
-                    | 270
-                  const frozen = collectFrozen(doc, new Set([part.id]), view)
-                  const placements = new Map([[part.id, { ...cur, rotate: next || undefined }]])
-                  store.dispatch(
-                    cmd.placePart(
-                      part.id,
-                      view,
-                      placements.get(part.id),
-                      reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view)
-                    )
-                  )
-                }}
-              >
+              <React.Fragment key={part.id}>
                 <div
-                  className="size-full [&>svg]:size-full [&>svg]:block pointer-events-none select-none"
-                  dangerouslySetInnerHTML={{ __html: partArtFor(part, vis, view) }}
-                />
-                {editable &&
-                  Object.keys(vis.v.pins).length <= 60 &&
-                  Object.keys(vis.v.pins).map((pin) => {
-                    const [restX, restY] = vis.v.pins[pin]
-                    const isLeg = view === 'bb' && (vis.v.legs?.includes(pin) ?? false)
-                    const legOff = isLeg ? pl.legs?.[pin] : undefined
-                    const px = restX + (legOff?.[0] ?? 0)
-                    const py = restY + (legOff?.[1] ?? 0)
-                    const armedHere = armed?.from === `${part.id}:${pin}`
-                    const hovered = hoverPin?.id === part.id && hoverPin?.pin === pin
-                    const netIdx = netModel.pinToNet.get(`${part.id}:${pin}`)
-                    const onHotNet = highlightNet >= 0 && netIdx === highlightNet
-                    // a pin sharing a net with anything else is connected — its
-                    // "open lead" dot disappears (still clickable to re-wire).
-                    const connected =
-                      netIdx !== undefined && (netModel.nets[netIdx]?.length ?? 0) >= 2
-                    const on = armedHere || hovered
-                    const showDot = on || onHotNet || !connected
-                    return (
-                      <div
-                        key={pin}
-                        className="pin-hit"
-                        title={isLeg ? `${pin} (drag to bend the leg)` : pin}
-                        style={{
-                          position: 'absolute',
-                          left: px - 8,
-                          top: py - 8,
-                          width: 16,
-                          height: 16,
-                          zIndex: 3,
-                          cursor: 'crosshair'
-                        }}
-                        onPointerDown={(e) => {
-                          e.stopPropagation()
-                          if (editable && isLeg && !armed)
-                            beginLegDrag(e, part.id, pin, legOff ?? [0, 0])
-                        }}
-                        onDoubleClick={(e) => {
-                          if (!editable || !isLeg || !legOff) return
-                          e.stopPropagation()
-                          const cur = doc.parts.find((p) => p.id === part.id)?.[view]
-                          if (!cur?.legs?.[pin]) return
-                          const legs = { ...cur.legs }
-                          delete legs[pin]
-                          store.dispatch(
-                            cmd.placePart(part.id, view, {
-                              ...cur,
-                              legs: Object.keys(legs).length ? legs : undefined
-                            })
-                          )
-                        }}
-                        onPointerEnter={() => setHoverPin({ id: part.id, pin })}
-                        onPointerLeave={() =>
-                          setHoverPin((h) => (h?.id === part.id && h?.pin === pin ? null : h))
-                        }
-                        onClick={(e) => {
-                          if (suppressClick.current) {
-                            suppressClick.current = false
-                            e.stopPropagation()
-                            return
-                          }
-                          onPinClick(e, part.id, pin)
-                        }}
-                      >
-                        <svg width="16" height="16">
-                          {onHotNet && !on && (
-                            <circle cx="8" cy="8" r="5.5" fill="var(--yellow)" fillOpacity={0.4} />
-                          )}
-                          {showDot && (
-                            <circle
-                              cx="8"
-                              cy="8"
-                              r={on ? 3.4 : 2.6}
-                              fill={on || connected ? 'var(--brand)' : 'var(--yellow)'}
-                              stroke={on || connected ? 'var(--brand)' : 'var(--border-strong)'}
-                              strokeWidth="1"
-                            />
-                          )}
-                        </svg>
-                      </div>
-                    )
-                  })}
-                {view === 'bb' && vis.v.legs && vis.v.legs.length > 0 && (
-                  // bent-leg indicator: a simple ink line from the rest pin to
-                  // the dragged tip, overlaid on the (static) Fritzing art —
-                  // real per-instance leg-path warping is future work.
-                  <svg
-                    className="absolute inset-0 pointer-events-none overflow-visible"
-                    width={vis.v.w}
-                    height={vis.v.h}
-                  >
-                    {vis.v.legs.map((pin) => {
-                      const off = pl.legs?.[pin]
-                      if (!off || (off[0] === 0 && off[1] === 0)) return null
-                      const [rx, ry] = vis.v.pins[pin]
-                      return (
-                        <line
-                          key={pin}
-                          x1={rx}
-                          y1={ry}
-                          x2={rx + off[0]}
-                          y2={ry + off[1]}
-                          stroke="var(--text-strong)"
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                        />
-                      )
-                    })}
-                  </svg>
-                )}
-                <div
-                  className="absolute text-[11px] whitespace-nowrap select-none"
                   style={{
-                    left: labelOff[0],
-                    top: vis.v.h + 4 + labelOff[1],
+                    position: 'absolute',
+                    left: pl.x,
+                    top: pl.y,
+                    width: vis.v.w,
+                    height: vis.v.h,
+                    // boards sit under every other part (and under the z5 wire layer)
+                    zIndex: isBreadboard(part.type) ? 1 : 2,
                     transform:
                       pl.rotate || pl.flip
-                        ? `${pl.flip ? 'scaleX(-1) ' : ''}${pl.rotate ? `rotate(${-pl.rotate}deg)` : ''}`
+                        ? `${pl.rotate ? `rotate(${pl.rotate}deg)` : ''}${pl.flip ? ' scaleX(-1)' : ''}`
                         : undefined,
-                    transformOrigin: 'left top',
-                    color: selected ? 'var(--brand)' : 'var(--text-muted)',
+                    transformOrigin: 'center',
+                    outline: selected ? '2px solid var(--brand)' : 'none',
+                    outlineOffset: 4,
+                    borderRadius: 6,
+                    cursor: editable ? 'move' : 'default'
+                  }}
+                  onPointerDown={(e) => onPartDown(e, part.id)}
+                  onDoubleClick={(e) => {
+                    e.stopPropagation()
+                    if (!editable) onRequestEdit()
+                  }}
+                  onPointerMove={(e) => {
+                    if (!editable || view !== 'bb' || !isBreadboard(part.type) || partDrag.current)
+                      return
+                    const cp = canvasPoint(e)
+                    const hole = holeAt(doc, part.id, cp.x, cp.y, 6 / Math.min(scale, 1))
+                    setHoverHole(hole ? { id: part.id, pin: hole.pin, pos: hole.pos } : null)
+                  }}
+                  onPointerLeave={() => setHoverHole((h) => (h?.id === part.id ? null : h))}
+                  onClick={(e) => e.stopPropagation()}
+                  onContextMenu={(e) => {
+                    if (!editable) return
+                    e.preventDefault()
+                    // breadboards rotate as a rigid assembly (seated parts + wires
+                    // turn with the board); other parts rotate in place.
+                    if (view === 'bb' && isBreadboard(part.type)) {
+                      rotateBoardAssembly(part.id)
+                      return
+                    }
+                    const cur = doc.parts.find((p) => p.id === part.id)?.[view]
+                    if (!cur) return
+                    const next = (((((cur.rotate ?? 0) + 90) % 360) + 360) % 360) as
+                      | 0
+                      | 90
+                      | 180
+                      | 270
+                    const frozen = collectFrozen(doc, new Set([part.id]), view)
+                    const placements = new Map([[part.id, { ...cur, rotate: next || undefined }]])
+                    store.dispatch(
+                      cmd.placePart(
+                        part.id,
+                        view,
+                        placements.get(part.id),
+                        reroutesFor(doc, frozen, placements, { x: 0, y: 0 }, view)
+                      )
+                    )
+                  }}
+                >
+                  <div
+                    className="size-full [&>svg]:size-full [&>svg]:block pointer-events-none select-none"
+                    dangerouslySetInnerHTML={{ __html: partArtFor(part, vis, view) }}
+                  />
+                  {(editable || pickNets) &&
+                    !isBreadboard(part.type) &&
+                    Object.keys(vis.v.pins).length <= 256 &&
+                    Object.keys(vis.v.pins).map((pin) => {
+                      const [restX, restY] = vis.v.pins[pin]
+                      const isLeg = view === 'bb' && (vis.v.legs?.includes(pin) ?? false)
+                      const legOff = isLeg ? pl.legs?.[pin] : undefined
+                      const px = restX + (legOff?.[0] ?? 0)
+                      const py = restY + (legOff?.[1] ?? 0)
+                      const armedHere = armed?.from === `${part.id}:${pin}`
+                      const hovered = hoverPin?.id === part.id && hoverPin?.pin === pin
+                      const netIdx = netModel.pinToNet.get(`${part.id}:${pin}`)
+                      const onHotNet = highlightNet >= 0 && netIdx === highlightNet
+                      // a pin sharing a net with anything else is connected — its
+                      // "open lead" dot disappears (still clickable to re-wire).
+                      const connected =
+                        netIdx !== undefined && (netModel.nets[netIdx]?.length ?? 0) >= 2
+                      const on = armedHere || hovered
+                      // a prototyping field (tinyProto) has too many holes to dot
+                      // them all at rest — show one on hover, like a breadboard.
+                      const dense = Object.keys(vis.v.pins).length > 60
+                      const showDot = on || onHotNet || (!connected && !dense)
+                      return (
+                        <div
+                          key={pin}
+                          className="pin-hit"
+                          title={isLeg ? `${pin} (drag to bend the leg)` : pin}
+                          style={{
+                            position: 'absolute',
+                            left: px - 8,
+                            top: py - 8,
+                            width: 16,
+                            height: 16,
+                            zIndex: 3,
+                            cursor: 'crosshair'
+                          }}
+                          onPointerDown={(e) => {
+                            // in pick mode the pin is only a click target — let
+                            // the press through so panning still works there
+                            if (pickNets && !editable) return
+                            e.stopPropagation()
+                            if (editable && isLeg && !armed)
+                              beginLegDrag(e, part.id, pin, legOff ?? [0, 0])
+                          }}
+                          onDoubleClick={(e) => {
+                            if (!editable || !isLeg || !legOff) return
+                            e.stopPropagation()
+                            const cur = doc.parts.find((p) => p.id === part.id)?.[view]
+                            if (!cur?.legs?.[pin]) return
+                            const legs = { ...cur.legs }
+                            delete legs[pin]
+                            store.dispatch(
+                              cmd.placePart(part.id, view, {
+                                ...cur,
+                                legs: Object.keys(legs).length ? legs : undefined
+                              })
+                            )
+                          }}
+                          onPointerEnter={() => setHoverPin({ id: part.id, pin })}
+                          onPointerLeave={() =>
+                            setHoverPin((h) => (h?.id === part.id && h?.pin === pin ? null : h))
+                          }
+                          onClick={(e) => {
+                            if (suppressClick.current) {
+                              suppressClick.current = false
+                              e.stopPropagation()
+                              return
+                            }
+                            onPinClick(e, part.id, pin)
+                          }}
+                        >
+                          <svg width="16" height="16">
+                            {onHotNet && !on && (
+                              <circle
+                                cx="8"
+                                cy="8"
+                                r="5.5"
+                                fill="var(--yellow)"
+                                fillOpacity={0.4}
+                              />
+                            )}
+                            {showDot && (
+                              <circle
+                                cx="8"
+                                cy="8"
+                                r={on ? 3.4 : 2.6}
+                                fill={on || connected ? 'var(--brand)' : 'var(--yellow)'}
+                                stroke={on || connected ? 'var(--brand)' : 'var(--border-strong)'}
+                                strokeWidth="1"
+                              />
+                            )}
+                          </svg>
+                        </div>
+                      )
+                    })}
+                  {view === 'bb' && vis.v.legs && vis.v.legs.length > 0 && (
+                    // bent-leg indicator: a simple ink line from the rest pin to
+                    // the dragged tip, overlaid on the (static) Fritzing art —
+                    // real per-instance leg-path warping is future work.
+                    <svg
+                      className="absolute inset-0 pointer-events-none overflow-visible"
+                      width={vis.v.w}
+                      height={vis.v.h}
+                    >
+                      {vis.v.legs.map((pin) => {
+                        const off = pl.legs?.[pin]
+                        if (!off || (off[0] === 0 && off[1] === 0)) return null
+                        const [rx, ry] = vis.v.pins[pin]
+                        return (
+                          <line
+                            key={pin}
+                            x1={rx}
+                            y1={ry}
+                            x2={rx + off[0]}
+                            y2={ry + off[1]}
+                            stroke="var(--text-strong)"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                          />
+                        )
+                      })}
+                    </svg>
+                  )}
+                </div>
+                {/* Schematic text: refdes above the symbol, value below it
+                  (spec §8). The breadboard keeps its single muted caption —
+                  a value on a physical part would be noise. */}
+                <div
+                  className="absolute whitespace-nowrap select-none"
+                  style={{
+                    left: pl.x + (view === 'sch' ? lay.refdes[0] : lay.box.left) + labelOff[0],
+                    top:
+                      view === 'sch'
+                        ? pl.y + lay.refdes[1] + labelOff[1]
+                        : pl.y + lay.box.top + lay.box.h + 4 + labelOff[1],
+                    zIndex: 4,
+                    fontSize: view === 'sch' ? FONT_REFDES : 11,
+                    fontFamily: 'var(--font-sans)',
+                    fontWeight: view === 'sch' ? 600 : 400,
+                    color: selected
+                      ? 'var(--brand)'
+                      : view === 'sch'
+                        ? 'var(--text-strong)'
+                        : 'var(--text-muted)',
                     cursor: editable ? 'move' : 'default',
                     pointerEvents: editable ? 'auto' : 'none'
                   }}
                   onPointerDown={(e) => onLabelDown(e, part.id)}
                 >
-                  {String(part.attrs?.label ?? part.id)}
+                  {refdesOf(part)}
                 </div>
-              </div>
+                {valueText && (
+                  <div
+                    className="absolute whitespace-nowrap select-none pointer-events-none"
+                    style={{
+                      left: pl.x + lay.value[0] + labelOff[0],
+                      top: pl.y + lay.value[1] + labelOff[1],
+                      zIndex: 4,
+                      fontSize: FONT_VALUE,
+                      fontFamily: 'var(--font-sans)',
+                      color: selected ? 'var(--brand)' : 'var(--text-body)'
+                    }}
+                  >
+                    {valueText}
+                  </div>
+                )}
+              </React.Fragment>
             )
           })}
 
@@ -1784,6 +1943,76 @@ export function Canvas({
               style={{ position: 'absolute', left: a.x + 7, top: a.y - 21, zIndex: 4 }}
             >
               {a.text}
+            </div>
+          ))}
+
+          {/* probe tags: leader lines + anchor dots (labels follow, above) */}
+          {probes && probes.length > 0 && (
+            <svg
+              style={{
+                position: 'absolute',
+                inset: 0,
+                overflow: 'visible',
+                zIndex: 6,
+                pointerEvents: 'none'
+              }}
+            >
+              {probes.map((t) => (
+                <g key={t.id} opacity={draggingProbe === t.id ? 0.75 : 1}>
+                  <line
+                    x1={t.ax}
+                    y1={t.ay}
+                    x2={t.x}
+                    y2={t.y}
+                    stroke="var(--brand)"
+                    strokeWidth={1}
+                    strokeDasharray="3 2"
+                    opacity={0.8}
+                  />
+                  <circle cx={t.ax} cy={t.ay} r={3.2} fill="var(--brand)" />
+                  <circle cx={t.ax} cy={t.ay} r={6} fill="var(--brand)" fillOpacity={0.18} />
+                </g>
+              ))}
+            </svg>
+          )}
+
+          {probes?.map((t) => (
+            <div
+              key={t.id}
+              className={`group absolute flex items-center gap-1 rounded-md border bg-surface-card shadow-sm pl-1.5 pr-1 h-[18px] text-[10px] font-mono whitespace-nowrap select-none ${
+                draggingProbe === t.id
+                  ? 'border-brand ring-1 ring-brand text-brand'
+                  : 'border-brand/50 text-brand hover:border-brand'
+              }`}
+              style={{
+                left: t.x,
+                top: t.y,
+                zIndex: 7,
+                transform: `scale(${1 / scale})`,
+                transformOrigin: 'left top',
+                cursor: 'move',
+                touchAction: 'none'
+              }}
+              title={`${t.label} — drag to move, drop on a wire to re-anchor`}
+              onPointerDown={(e) => onProbeDown(e, t)}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="text-[8px] opacity-70">
+                {t.kind === 'current' ? 'A' : t.kind === 'diff' ? '\u0394' : 'V'}
+              </span>
+              <span className="font-semibold">{t.label}</span>
+              {t.value && <span className="text-text-body">{t.value}</span>}
+              <button
+                className="opacity-0 group-hover:opacity-100 text-text-faint hover:text-status-danger leading-none px-0.5"
+                title="Remove this probe"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDeleteProbe?.(t.id)
+                }}
+              >
+                <X size={9} />
+              </button>
             </div>
           ))}
 

@@ -16,12 +16,7 @@
  * canonicalization for everyone — no more refKey/refStr divergence).
  */
 
-import {
-  isJunction,
-  splitPinRef,
-  type CircuitDoc,
-  type WireEnd
-} from './model'
+import { isJunction, splitPinRef, type CircuitDoc, type WireEnd } from './model'
 
 /** Canonical endpoint key: pins are "part:pin", junctions collapse to the host wire. */
 export function endKey(end: WireEnd): string {

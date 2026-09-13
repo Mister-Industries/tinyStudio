@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { emptyDoc, type CircuitDoc } from '../core/model'
 import { journeyFromPoints } from '../core/routing'
+import { WIRE_STROKE } from '../parts/style'
 import { composeSceneSvg } from '../views/exportImage'
 
 test('composeSceneSvg (sch) renders ink wires + net labels with balanced svg tags', () => {
@@ -28,7 +29,9 @@ test('composeSceneSvg (sch) renders ink wires + net labels with balanced svg tag
   ]
   const svg = composeSceneSvg(doc, '#ffffff', 'sch')
   assert.ok(svg, 'expected a scene svg')
-  assert.ok(svg!.includes('stroke-width="1"'), 'schematic ink wire present')
+  // one shared weight for schematic ink (parts/style.ts) — a wire must draw
+  // at the same width as the pin lead it lands on
+  assert.ok(svg!.includes(`stroke-width="${WIRE_STROKE}"`), 'schematic ink wire present')
   assert.ok(svg!.includes('Studio'), 'watermark present')
   const opens = (svg!.match(/<svg/g) || []).length
   const closes = (svg!.match(/<\/svg>/g) || []).length

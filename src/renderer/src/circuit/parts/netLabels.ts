@@ -13,10 +13,9 @@
 import type { PartView } from '../../lib/partsLibrary'
 import { pinWorld, snapPlacementToPinGrid } from '../core/geometry'
 import { GRID_BB, type NetLabel, type NetLabelKind, type Placement, type Pt } from '../core/model'
+import { FONT_NET, INK, SCH_GRID, STROKE, symbolSvg, text } from './style'
 
-const P = GRID_BB // 9.6
-const INK = 'var(--text-strong)'
-const STROKE = 2
+const P = SCH_GRID // 9.6
 export const NET_LABEL_PIN = '1'
 
 export interface NetLabelKindSpec {
@@ -66,7 +65,7 @@ export function snapNetLabel(kind: NetLabelKind, name: string, pl: Placement): P
 
 function wrap(inner: string, w: number, h: number, pin: [number, number]): PartView {
   return {
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${inner}</svg>`,
+    svg: symbolSvg(inner, w, h),
     w,
     h,
     pins: { [NET_LABEL_PIN]: pin }
@@ -98,7 +97,7 @@ function powerGlyph(name: string): PartView {
   const h = 2 * P
   const cx = w / 2
   const inner =
-    `<text x="${cx}" y="${P - 5}" fill="${INK}" font-family="monospace" font-size="8" text-anchor="middle">${escape(name)}</text>` +
+    text(cx, P - 5, name, { size: FONT_NET, anchor: 'middle' }) +
     `<line x1="${cx - P}" y1="${P}" x2="${cx + P}" y2="${P}" stroke="${INK}" stroke-width="${STROKE}" stroke-linecap="round"/>` +
     `<line x1="${cx}" y1="${P}" x2="${cx}" y2="${2 * P}" stroke="${INK}" stroke-width="${STROKE}"/>`
   return wrap(inner, w, h, [cx, 2 * P])
@@ -113,10 +112,6 @@ function netGlyph(name: string): PartView {
   const inner =
     `<line x1="0" y1="${cy}" x2="${stub}" y2="${cy}" stroke="${INK}" stroke-width="${STROKE}"/>` +
     `<rect x="${stub}" y="${cy - 7}" width="${tagW - 2}" height="14" rx="3" fill="none" stroke="${INK}" stroke-width="${STROKE}"/>` +
-    `<text x="${stub + (tagW - 2) / 2}" y="${cy + 3}" fill="${INK}" font-family="monospace" font-size="8" text-anchor="middle">${escape(name)}</text>`
+    text(stub + (tagW - 2) / 2, cy + 3, name, { size: FONT_NET, anchor: 'middle' })
   return wrap(inner, w, h, [0, cy])
-}
-
-function escape(s: string): string {
-  return s.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[c] as string)
 }

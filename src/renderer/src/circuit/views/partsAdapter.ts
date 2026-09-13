@@ -12,7 +12,13 @@
  *   - frozen-bend reroutes for part moves (the collectFrozen behavior)
  */
 
-import { getPart, viewFor, type PartDef, type PartView } from '../../lib/partsLibrary'
+import {
+  getPart,
+  TINYPROTO_BUSES,
+  viewFor,
+  type PartDef,
+  type PartView
+} from '../../lib/partsLibrary'
 import { schematicVisual } from '../parts/symbols'
 import { netLabelPinWorld, netLabelVisualOf, snapNetLabel } from '../parts/netLabels'
 import { decorateResistor, hasResistorBands } from '../parts/resistorBands'
@@ -328,8 +334,10 @@ import { breadboardBuses, isBreadboard } from '../parts/breadboard'
 /** Seat radius: half a hole pitch (spec §7.3). */
 const SEAT_RADIUS = GRID_BB / 2
 
-/** buses resolver for buildNets — breadboards today, PartDef v2 packs later. */
+/** buses resolver for buildNets — breadboards, tinyProto's power rails, and
+ * PartDef v2 packs later. */
 export function circuitBuses(type: string): string[][] | undefined {
+  if (type === 'tinyproto') return TINYPROTO_BUSES
   return breadboardBuses(type)
 }
 
@@ -564,6 +572,33 @@ export function occupiedBoxes(doc: CircuitDoc, view: ViewId, exclude?: Set<strin
     }
   }
   return out
+}
+
+/**
+ * Where a part should land when the editor places it for the user rather
+ * than the user dropping it — the cross-view auto-placement anchor.
+ *
+ * Parts added in one view are placed in BOTH views (spec §10.2: the two views
+ * share one electrical model, so a part that exists in the breadboard should
+ * exist in the schematic too). For the view the user isn't looking at we have
+ * no cursor to place near, so we anchor just right of whatever is already
+ * there and let findFreePlacement's ring search resolve collisions. Empty
+ * views start at a fixed origin so the first few parts line up.
+ */
+export function autoPlacementFor(
+  doc: CircuitDoc,
+  type: string,
+  view: ViewId,
+  exclude?: Set<string>
+): Placement {
+  const b = viewBounds(doc, view)
+  const vis = visualFor(type, view)
+  const w = vis?.v.w ?? 80
+  const h = vis?.v.h ?? 40
+  const preferred = b
+    ? { x: b.maxX + GRID_BB * 3 + w / 2, y: b.minY + h / 2 }
+    : { x: GRID_BB * 12, y: GRID_BB * 12 }
+  return findFreePlacement(doc, type, view, preferred, exclude)
 }
 
 /** Grid-snapped placement for a new `type` near `preferred` that clears the
