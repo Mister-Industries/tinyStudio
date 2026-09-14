@@ -24,7 +24,12 @@ export function Tag({
 }: TagProps): React.ReactElement {
   return (
     <span
-      className={cn('ts-tag', onClick && 'ts-tag--clickable', selected && 'ts-tag--selected', className)}
+      className={cn(
+        'ts-tag',
+        onClick && 'ts-tag--clickable',
+        selected && 'ts-tag--selected',
+        className
+      )}
       onClick={onClick}
       {...rest}
     >

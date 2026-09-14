@@ -40,7 +40,8 @@ export function IconButton({
         variant === 'ghost' &&
           !active &&
           'bg-transparent text-[var(--text-body)] hover:bg-[var(--bg-sunken)]',
-        active && 'border-[1.5px] border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-on)]',
+        active &&
+          'border-[1.5px] border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-on)]',
         className
       )}
       {...rest}

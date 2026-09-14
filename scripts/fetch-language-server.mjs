@@ -148,7 +148,9 @@ async function main() {
     .slice(2)
     .map((a) => (a === 'current' || a === '--current' ? hostPlatform() : a))
   const platforms = requested.length ? requested : Object.keys(TARGETS)
-  console.log(`Fetching arduino-language-server (nightly) + clangd ${CLANGD_VERSION} for: ${platforms.join(', ')}`)
+  console.log(
+    `Fetching arduino-language-server (nightly) + clangd ${CLANGD_VERSION} for: ${platforms.join(', ')}`
+  )
   for (const p of platforms) {
     await fetchOne(p)
   }

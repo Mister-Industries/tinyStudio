@@ -62,7 +62,8 @@ export function PortPicker(): React.JSX.Element {
       onValueChange={handleChange}
       disabled={!isAgentConnected}
     >
-      <SelectTrigger size="sm"
+      <SelectTrigger
+        size="sm"
         className={`${PILL} [&>svg]:hidden`}
         onPointerDown={(e) => {
           // Active = connected: a click disconnects rather than opening the menu.

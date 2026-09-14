@@ -55,7 +55,13 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
             d.file &&
             d.line &&
             diagnosticMatchesFile(
-              { file: d.file, line: d.line ?? 1, column: d.column ?? 1, severity: 'error', message: d.message },
+              {
+                file: d.file,
+                line: d.line ?? 1,
+                column: d.column ?? 1,
+                severity: 'error',
+                message: d.message
+              },
               filePath
             )
         )

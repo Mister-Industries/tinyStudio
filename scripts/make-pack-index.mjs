@@ -95,4 +95,6 @@ else index.packs.push(entry)
 writeFileSync(indexPath, JSON.stringify(index, null, 2))
 
 console.log(`Wrote ${packDir}/pack.json (${parts.length} parts)`)
-console.log(`Updated ${indexPath} (${index.packs.length} pack${index.packs.length === 1 ? '' : 's'} listed)`)
+console.log(
+  `Updated ${indexPath} (${index.packs.length} pack${index.packs.length === 1 ? '' : 's'} listed)`
+)

@@ -20,7 +20,15 @@
 // on Windows, where this works out of the box.
 
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, copyFileSync, chmodSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+  copyFileSync,
+  chmodSync
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -62,7 +70,8 @@ async function download(url, dest) {
 
 async function fetchOne(platform) {
   const target = TARGETS[platform]
-  if (!target) throw new Error(`Unknown platform "${platform}". Valid: ${Object.keys(TARGETS).join(', ')}`)
+  if (!target)
+    throw new Error(`Unknown platform "${platform}". Valid: ${Object.keys(TARGETS).join(', ')}`)
 
   const outDir = join(vendorRoot, platform)
   const outBin = join(outDir, target.bin)

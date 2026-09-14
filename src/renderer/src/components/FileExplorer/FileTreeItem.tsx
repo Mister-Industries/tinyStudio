@@ -66,13 +66,13 @@ function getFileIcon(fileName: string | null, isSelected = false): React.ReactNo
 
   switch (iconType) {
     case 'image':
-      return <Image size={14} className={isSelected ? 'text-current' : 'text-[var(--text-muted)]'} />
+      return (
+        <Image size={14} className={isSelected ? 'text-current' : 'text-[var(--text-muted)]'} />
+      )
     case 'code':
       return <Code size={14} className={isSelected ? 'text-current' : 'text-[var(--brand)]'} />
     case 'file':
-      return (
-        <File size={14} className={isSelected ? 'text-current' : 'text-[var(--text-faint)]'} />
-      )
+      return <File size={14} className={isSelected ? 'text-current' : 'text-[var(--text-faint)]'} />
     default:
       return null
   }

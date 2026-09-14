@@ -121,7 +121,9 @@ export function VerifyButton({
     try {
       await saveAll() // compile the current code, not the last saved version
       await compileSketch(sketchDir || workspace.path, selectedBoard.config)
-      toast.success('Compile complete', { description: `${selectedBoard.config.name} sketch verified.` })
+      toast.success('Compile complete', {
+        description: `${selectedBoard.config.name} sketch verified.`
+      })
     } catch (error) {
       console.error('Compilation error:', error)
       toast.error('Compilation failed', {

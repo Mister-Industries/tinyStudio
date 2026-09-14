@@ -594,9 +594,7 @@ export class WebSocketArduinoService implements ArduinoService {
         return {
           compile: {
             success: uploadResult.success,
-            output: uploadResult.success
-              ? 'Compiled and uploaded'
-              : uploadResult.output || '',
+            output: uploadResult.success ? 'Compiled and uploaded' : uploadResult.output || '',
             errors: uploadResult.success
               ? undefined
               : [{ message: uploadResult.error || 'Compilation failed', severity: 'fatal' }]

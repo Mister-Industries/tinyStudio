@@ -97,7 +97,9 @@ function NotificationBell(): React.JSX.Element {
           <Backdrop onClose={() => setOpen(false)} />
           <div className="notif__pop z-50" role="dialog" aria-label="Notifications">
             <div className="notif__head">
-              <span className="font-sans text-[13px] font-semibold text-[var(--text-strong)]">Notifications</span>
+              <span className="font-sans text-[13px] font-semibold text-[var(--text-strong)]">
+                Notifications
+              </span>
               <div className="notif__hbtns">
                 <button
                   className="notif__hbtn"
@@ -128,7 +130,12 @@ function NotificationBell(): React.JSX.Element {
                       <div className="notif__title">{n.title}</div>
                       {n.msg && <div className="notif__msg">{n.msg}</div>}
                       {n.link && (
-                        <a className="notif__link" href={n.link.href} target="_blank" rel="noreferrer">
+                        <a
+                          className="notif__link"
+                          href={n.link.href}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           {n.link.label}
                         </a>
                       )}

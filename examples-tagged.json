@@ -8,12 +8,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
-    "tags": [
-      "tinycore",
-      "blink",
-      "led",
-      "digital-io"
-    ]
+    "tags": ["tinycore", "blink", "led", "digital-io"]
   },
   {
     "title": "Appending to a File",
@@ -24,11 +19,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
-    "tags": [
-      "tinycore",
-      "sd-card",
-      "file-io"
-    ]
+    "tags": ["tinycore", "sd-card", "file-io"]
   },
   {
     "title": "Basic beeping code",
@@ -39,11 +30,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/buzz-buzzer/",
-    "tags": [
-      "tinycore",
-      "buzzer",
-      "pwm"
-    ]
+    "tags": ["tinycore", "buzzer", "pwm"]
   },
   {
     "title": "Basic BLE Server Example",
@@ -54,10 +41,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/bluetooth/",
-    "tags": [
-      "tinycore",
-      "bluetooth"
-    ]
+    "tags": ["tinycore", "bluetooth"]
   },
   {
     "title": "Basic Blink Program",
@@ -68,13 +52,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
-    "tags": [
-      "tinycore",
-      "blink",
-      "led",
-      "digital-io",
-      "visual"
-    ]
+    "tags": ["tinycore", "blink", "led", "digital-io", "visual"]
   },
   {
     "title": "Basic button reading",
@@ -85,10 +63,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/button-press/",
-    "tags": [
-      "tinycore",
-      "button"
-    ]
+    "tags": ["tinycore", "button"]
   },
   {
     "title": "Basic Code: Write and Read a File",
@@ -99,10 +74,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/5_reference/basics/sd-card/",
-    "tags": [
-      "tinycore",
-      "sd-card"
-    ]
+    "tags": ["tinycore", "sd-card"]
   },
   {
     "title": "Basic output example",
@@ -113,9 +85,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
-    "tags": [
-      "tinycore"
-    ]
+    "tags": ["tinycore"]
   },
   {
     "title": "Basic Web Server",
@@ -126,14 +96,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/wifi/",
-    "tags": [
-      "tinycore",
-      "wifi",
-      "web-server",
-      "serial",
-      "led",
-      "digital-io"
-    ]
+    "tags": ["tinycore", "wifi", "web-server", "serial", "led", "digital-io"]
   },
   {
     "title": "Basic WiFi Connection",
@@ -144,10 +107,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/wifi/",
-    "tags": [
-      "tinycore",
-      "wifi"
-    ]
+    "tags": ["tinycore", "wifi"]
   },
   {
     "title": "Code for External LED",
@@ -158,12 +118,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
-    "tags": [
-      "tinycore",
-      "blink",
-      "led",
-      "digital-io"
-    ]
+    "tags": ["tinycore", "blink", "led", "digital-io"]
   },
   {
     "title": "CSV Data Logging",
@@ -174,11 +129,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
-    "tags": [
-      "tinycore",
-      "sd-card",
-      "file-io"
-    ]
+    "tags": ["tinycore", "sd-card", "file-io"]
   },
   {
     "title": "Debugging with timestamps",
@@ -189,9 +140,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
-    "tags": [
-      "tinycore"
-    ]
+    "tags": ["tinycore"]
   },
   {
     "title": "Delete and List Files",
@@ -202,10 +151,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
-    "tags": [
-      "tinycore",
-      "sd-card"
-    ]
+    "tags": ["tinycore", "sd-card"]
   },
   {
     "title": "Detecting button events",
@@ -216,10 +162,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/button-press/",
-    "tags": [
-      "tinycore",
-      "button"
-    ]
+    "tags": ["tinycore", "button"]
   },
   {
     "title": "Flash the tinyCore",
@@ -230,14 +173,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/1_get-started/imu/",
-    "tags": [
-      "tinycore",
-      "i2c",
-      "imu",
-      "plotter",
-      "serial",
-      "digital-io"
-    ]
+    "tags": ["tinycore", "i2c", "imu", "plotter", "serial", "digital-io"]
   },
   {
     "title": "Flash the tinyCore",
@@ -248,14 +184,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/detect-motion/",
-    "tags": [
-      "tinycore",
-      "i2c",
-      "imu",
-      "plotter",
-      "serial",
-      "digital-io"
-    ]
+    "tags": ["tinycore", "i2c", "imu", "plotter", "serial", "digital-io"]
   },
   {
     "title": "Hello World (Text on Screen!)",
@@ -266,12 +195,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/i2c-display/",
-    "tags": [
-      "tinycore",
-      "i2c",
-      "oled",
-      "serial"
-    ]
+    "tags": ["tinycore", "i2c", "oled", "serial"]
   },
   {
     "title": "Initializing the SD Card",
@@ -282,10 +206,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
-    "tags": [
-      "tinycore",
-      "sd-card"
-    ]
+    "tags": ["tinycore", "sd-card"]
   },
   {
     "title": "Interactive buzzer",
@@ -296,10 +217,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/buzz-buzzer/",
-    "tags": [
-      "tinycore",
-      "buzzer"
-    ]
+    "tags": ["tinycore", "buzzer"]
   },
   {
     "title": "Interactive Physics: The IMU Digital Hourglass",
@@ -310,12 +228,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/i2c-display/",
-    "tags": [
-      "tinycore",
-      "i2c",
-      "imu",
-      "digital-io"
-    ]
+    "tags": ["tinycore", "i2c", "imu", "digital-io"]
   },
   {
     "title": "Light sensor (photoresistor)",
@@ -326,10 +239,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/read-sensor-value/",
-    "tags": [
-      "tinycore",
-      "light-sensor"
-    ]
+    "tags": ["tinycore", "light-sensor"]
   },
   {
     "title": "Manual Brightness Control",
@@ -340,12 +250,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
-    "tags": [
-      "tinycore",
-      "blink",
-      "pwm",
-      "led"
-    ]
+    "tags": ["tinycore", "blink", "pwm", "led"]
   },
   {
     "title": "Memory and performance monitoring",
@@ -356,11 +261,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
-    "tags": [
-      "tinycore",
-      "plotter",
-      "serial"
-    ]
+    "tags": ["tinycore", "plotter", "serial"]
   },
   {
     "title": "MQTT Client",
@@ -371,13 +272,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/wifi/",
-    "tags": [
-      "tinycore",
-      "wifi",
-      "mqtt",
-      "serial",
-      "timing"
-    ]
+    "tags": ["tinycore", "wifi", "mqtt", "serial", "timing"]
   },
   {
     "title": "Multiple buttons, multiple behaviors",
@@ -388,11 +283,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/button-press/",
-    "tags": [
-      "tinycore",
-      "button",
-      "led"
-    ]
+    "tags": ["tinycore", "button", "led"]
   },
   {
     "title": "Multiple sensors at once",
@@ -403,10 +294,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/read-sensor-value/",
-    "tags": [
-      "tinycore",
-      "adc"
-    ]
+    "tags": ["tinycore", "adc"]
   },
   {
     "title": "Multiple variable plotting",
@@ -417,10 +305,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
-    "tags": [
-      "tinycore",
-      "plotter"
-    ]
+    "tags": ["tinycore", "plotter"]
   },
   {
     "title": "On the tinyCore",
@@ -431,10 +316,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/5_reference/basics/esp-now/",
-    "tags": [
-      "tinycore",
-      "esp-now"
-    ]
+    "tags": ["tinycore", "esp-now"]
   },
   {
     "title": "OTA (Over-the-Air) Updates",
@@ -445,12 +327,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/wifi/",
-    "tags": [
-      "tinycore",
-      "wifi",
-      "web-server",
-      "ota"
-    ]
+    "tags": ["tinycore", "wifi", "web-server", "ota"]
   },
   {
     "title": "Play a real song",
@@ -461,10 +338,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/buzz-buzzer/",
-    "tags": [
-      "tinycore",
-      "buzzer"
-    ]
+    "tags": ["tinycore", "buzzer"]
   },
   {
     "title": "Playing different tones",
@@ -475,10 +349,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/buzz-buzzer/",
-    "tags": [
-      "tinycore",
-      "buzzer"
-    ]
+    "tags": ["tinycore", "buzzer"]
   },
   {
     "title": "PWM Control for All Three LEDs",
@@ -489,12 +360,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
-    "tags": [
-      "tinycore",
-      "blink",
-      "pwm",
-      "led"
-    ]
+    "tags": ["tinycore", "blink", "pwm", "led"]
   },
   {
     "title": "Qwiic Joystick",
@@ -504,13 +370,7 @@
     "path": "basics/qwiic-joystick",
     "board": "tinyCore + Qwiic Joystick",
     "category": "basics",
-    "tags": [
-      "tinycore",
-      "qwiic",
-      "joystick",
-      "i2c",
-      "visual"
-    ]
+    "tags": ["tinycore", "qwiic", "joystick", "i2c", "visual"]
   },
   {
     "title": "Reading a potentiometer",
@@ -521,10 +381,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/read-sensor-value/",
-    "tags": [
-      "tinycore",
-      "potentiometer"
-    ]
+    "tags": ["tinycore", "potentiometer"]
   },
   {
     "title": "Reading from a File",
@@ -535,10 +392,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
-    "tags": [
-      "tinycore",
-      "sd-card"
-    ]
+    "tags": ["tinycore", "sd-card"]
   },
   {
     "title": "Reading input from Serial Monitor",
@@ -549,10 +403,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
-    "tags": [
-      "tinycore",
-      "serial"
-    ]
+    "tags": ["tinycore", "serial"]
   },
   {
     "title": "Real sensor data visualization",
@@ -563,10 +414,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
-    "tags": [
-      "tinycore",
-      "plotter"
-    ]
+    "tags": ["tinycore", "plotter"]
   },
   {
     "title": "RGB Mood Light Controller",
@@ -577,12 +425,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/bluetooth/",
-    "tags": [
-      "tinycore",
-      "bluetooth",
-      "rgb-led",
-      "led"
-    ]
+    "tags": ["tinycore", "bluetooth", "rgb-led", "led"]
   },
   {
     "title": "Single variable plotting",
@@ -593,10 +436,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/serial-monitor-plotter/",
-    "tags": [
-      "tinycore",
-      "plotter"
-    ]
+    "tags": ["tinycore", "plotter"]
   },
   {
     "title": "Smart LED control",
@@ -607,10 +447,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/read-sensor-value/",
-    "tags": [
-      "tinycore",
-      "led"
-    ]
+    "tags": ["tinycore", "led"]
   },
   {
     "title": "Smooth Breathing Effect",
@@ -621,13 +458,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
-    "tags": [
-      "tinycore",
-      "blink",
-      "pwm",
-      "led",
-      "visual"
-    ]
+    "tags": ["tinycore", "blink", "pwm", "led", "visual"]
   },
   {
     "title": "SOS Signal",
@@ -638,12 +469,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
-    "tags": [
-      "tinycore",
-      "blink",
-      "led",
-      "digital-io"
-    ]
+    "tags": ["tinycore", "blink", "led", "digital-io"]
   },
   {
     "title": "The Complete Motion Tracker Code",
@@ -654,14 +480,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/1_get-started/motion-tracker/",
-    "tags": [
-      "tinycore",
-      "wifi",
-      "i2c",
-      "spi",
-      "imu",
-      "sd-card"
-    ]
+    "tags": ["tinycore", "wifi", "i2c", "spi", "imu", "sd-card"]
   },
   {
     "title": "The I2C Scanner: Your Best Debugging Tool",
@@ -672,10 +491,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/5_reference/basics/i2c/",
-    "tags": [
-      "tinycore",
-      "i2c"
-    ]
+    "tags": ["tinycore", "i2c"]
   },
   {
     "title": "Toggle behavior vs direct control",
@@ -686,10 +502,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/button-press/",
-    "tags": [
-      "tinycore",
-      "button"
-    ]
+    "tags": ["tinycore", "button"]
   },
   {
     "title": "Understanding NOT logic",
@@ -700,11 +513,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/button-press/",
-    "tags": [
-      "tinycore",
-      "button",
-      "led"
-    ]
+    "tags": ["tinycore", "button", "led"]
   },
   {
     "title": "Using It in Code",
@@ -715,11 +524,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/5_reference/basics/imu/",
-    "tags": [
-      "tinycore",
-      "i2c",
-      "imu"
-    ]
+    "tags": ["tinycore", "i2c", "imu"]
   },
   {
     "title": "Visualizing with Serial Plotter",
@@ -730,11 +535,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/read-sensor-value/",
-    "tags": [
-      "tinycore",
-      "plotter",
-      "serial"
-    ]
+    "tags": ["tinycore", "plotter", "serial"]
   },
   {
     "title": "WebSocket Server",
@@ -745,13 +546,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/wifi/",
-    "tags": [
-      "tinycore",
-      "wifi",
-      "websocket",
-      "serial",
-      "timing"
-    ]
+    "tags": ["tinycore", "wifi", "websocket", "serial", "timing"]
   },
   {
     "title": "Writing to a File",
@@ -762,10 +557,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/save-data-to-sdcard/",
-    "tags": [
-      "tinycore",
-      "sd-card"
-    ]
+    "tags": ["tinycore", "sd-card"]
   },
   {
     "title": "Basic Connection Code",
@@ -776,11 +568,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "advanced",
     "docsUrl": "https://tinydocs.cc/5_reference/advanced/wifi/",
-    "tags": [
-      "tinycore",
-      "wifi",
-      "web-server"
-    ]
+    "tags": ["tinycore", "wifi", "web-server"]
   },
   {
     "title": "Fade an LED",
@@ -791,11 +579,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "advanced",
     "docsUrl": "https://tinydocs.cc/5_reference/advanced/pwm/",
-    "tags": [
-      "tinycore",
-      "pwm",
-      "led"
-    ]
+    "tags": ["tinycore", "pwm", "led"]
   },
   {
     "title": "MCP4725 (I2C, 12-bit)",
@@ -806,13 +590,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "advanced",
     "docsUrl": "https://tinydocs.cc/5_reference/advanced/dac/",
-    "tags": [
-      "tinycore",
-      "qwiic",
-      "i2c",
-      "dac",
-      "digital-io"
-    ]
+    "tags": ["tinycore", "qwiic", "i2c", "dac", "digital-io"]
   },
   {
     "title": "Play a Tone on a Buzzer",
@@ -823,11 +601,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "advanced",
     "docsUrl": "https://tinydocs.cc/5_reference/advanced/pwm/",
-    "tags": [
-      "tinycore",
-      "buzzer",
-      "pwm"
-    ]
+    "tags": ["tinycore", "buzzer", "pwm"]
   },
   {
     "title": "Reading an Analog Value",
@@ -838,10 +612,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "advanced",
     "docsUrl": "https://tinydocs.cc/5_reference/advanced/adc/",
-    "tags": [
-      "tinycore",
-      "adc"
-    ]
+    "tags": ["tinycore", "adc"]
   },
   {
     "title": "tinySniff: Basic Demo",
@@ -852,11 +623,7 @@
     "board": "tinyCore + tinySniff HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinysniff/example-code/",
-    "tags": [
-      "tinycore",
-      "tinysniff",
-      "plotter"
-    ]
+    "tags": ["tinycore", "tinysniff", "plotter"]
   },
   {
     "title": "tinySniff: Google Sheets",
@@ -867,11 +634,7 @@
     "board": "tinyCore + tinySniff HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinysniff/example-code/",
-    "tags": [
-      "tinycore",
-      "tinysniff",
-      "wifi"
-    ]
+    "tags": ["tinycore", "tinysniff", "wifi"]
   },
   {
     "title": "tinySniff: SD Card Logger",
@@ -882,12 +645,7 @@
     "board": "tinyCore + tinySniff HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinysniff/example-code/",
-    "tags": [
-      "tinycore",
-      "tinysniff",
-      "sd-card",
-      "file-io"
-    ]
+    "tags": ["tinycore", "tinysniff", "sd-card", "file-io"]
   },
   {
     "title": "tinySniff: Text Notifications",
@@ -898,10 +656,7 @@
     "board": "tinyCore + tinySniff HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinysniff/example-code/",
-    "tags": [
-      "tinycore",
-      "tinysniff"
-    ]
+    "tags": ["tinycore", "tinysniff"]
   },
   {
     "title": "tinySpeak: tinyAIText",
@@ -912,10 +667,7 @@
     "board": "tinyCore + tinySpeak HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
-    "tags": [
-      "tinycore",
-      "tinyspeak"
-    ]
+    "tags": ["tinycore", "tinyspeak"]
   },
   {
     "title": "tinySpeak: tinyAIVoice",
@@ -926,10 +678,7 @@
     "board": "tinyCore + tinySpeak HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
-    "tags": [
-      "tinycore",
-      "tinyspeak"
-    ]
+    "tags": ["tinycore", "tinyspeak"]
   },
   {
     "title": "tinySpeak: tinyAIVoice (ElevenLabs)",
@@ -940,10 +689,7 @@
     "board": "tinyCore + tinySpeak HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
-    "tags": [
-      "tinycore",
-      "tinyspeak"
-    ]
+    "tags": ["tinycore", "tinyspeak"]
   },
   {
     "title": "tinySpeak: tinyMP3Player",
@@ -954,11 +700,7 @@
     "board": "tinyCore + tinySpeak HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
-    "tags": [
-      "tinycore",
-      "tinyspeak",
-      "sd-card"
-    ]
+    "tags": ["tinycore", "tinyspeak", "sd-card"]
   },
   {
     "title": "tinySpeak: tinyRecorder",
@@ -969,10 +711,7 @@
     "board": "tinyCore + tinySpeak HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
-    "tags": [
-      "tinycore",
-      "tinyspeak"
-    ]
+    "tags": ["tinycore", "tinyspeak"]
   },
   {
     "title": "tinySpeak: tinySoundboard",
@@ -983,11 +722,7 @@
     "board": "tinyCore + tinySpeak HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
-    "tags": [
-      "tinycore",
-      "tinyspeak",
-      "imu"
-    ]
+    "tags": ["tinycore", "tinyspeak", "imu"]
   },
   {
     "title": "tinySpeak: tinyTheremin",
@@ -998,11 +733,7 @@
     "board": "tinyCore + tinySpeak HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
-    "tags": [
-      "tinycore",
-      "tinyspeak",
-      "imu"
-    ]
+    "tags": ["tinycore", "tinyspeak", "imu"]
   },
   {
     "title": "tinySpeak: tinyWalkieTalkie",
@@ -1013,11 +744,7 @@
     "board": "tinyCore + tinySpeak HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
-    "tags": [
-      "tinycore",
-      "tinyspeak",
-      "esp-now"
-    ]
+    "tags": ["tinycore", "tinyspeak", "esp-now"]
   },
   {
     "title": "tinySpeak: tinyWebSynth",
@@ -1028,9 +755,6 @@
     "board": "tinyCore + tinySpeak HAT",
     "category": "hats",
     "docsUrl": "https://tinydocs.cc/3_tiny-hats/tinyspeak/example-code/",
-    "tags": [
-      "tinycore",
-      "tinyspeak"
-    ]
+    "tags": ["tinycore", "tinyspeak"]
   }
 ]

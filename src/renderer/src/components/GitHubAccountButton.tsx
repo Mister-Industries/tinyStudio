@@ -38,9 +38,7 @@ export function GitHubAccountButton(): React.JSX.Element {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => openExternal(`https://github.com/${account.login}`)}
-          >
+          <DropdownMenuItem onClick={() => openExternal(`https://github.com/${account.login}`)}>
             <ExternalLink size={14} className="mr-2" /> Open GitHub profile
           </DropdownMenuItem>
           <DropdownMenuItem onClick={signOut} className="text-destructive">

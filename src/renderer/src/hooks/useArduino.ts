@@ -89,9 +89,7 @@ export interface UseArduinoReturn {
     name: string,
     version?: string
   ) => Promise<{ success: boolean; output: string; error?: string }>
-  uninstallLibrary: (
-    name: string
-  ) => Promise<{ success: boolean; output: string; error?: string }>
+  uninstallLibrary: (name: string) => Promise<{ success: boolean; output: string; error?: string }>
 
   // Boards manager
   searchCores: (query: string) => Promise<PlatformEntry[]>

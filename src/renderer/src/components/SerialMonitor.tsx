@@ -46,8 +46,7 @@ export function SerialMonitor(): React.JSX.Element {
       return
     }
     if (userPinnedTab.current) return
-    const failed =
-      lastCompileResult?.success === false || lastUploadResult?.success === false
+    const failed = lastCompileResult?.success === false || lastUploadResult?.success === false
     if (failed) return // leave the errors visible
     // Short delay rides over the brief gap between the compile and upload
     // phases of an Upload so we don't flash back to Serial mid-operation.
@@ -67,7 +66,11 @@ export function SerialMonitor(): React.JSX.Element {
     else clearLogs()
   }
 
-  const tab = (id: 'serial' | 'output', label: string, Icon: typeof Terminal): React.JSX.Element => (
+  const tab = (
+    id: 'serial' | 'output',
+    label: string,
+    Icon: typeof Terminal
+  ): React.JSX.Element => (
     <button
       data-active={activeTab === id}
       onClick={() => selectTab(id)}
@@ -131,13 +134,26 @@ function formatTs(ts: number): string {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`
 }
 
-export function SerialMonitorTab({ autoScroll = true }: { autoScroll?: boolean }): React.JSX.Element {
+export function SerialMonitorTab({
+  autoScroll = true
+}: {
+  autoScroll?: boolean
+}): React.JSX.Element {
   const { isAgentConnected } = useArduinoContext()
   // The connection itself is owned by SerialProvider (app-level) so it persists
   // across view switches; this tab just displays it and sends lines. The live
   // connection status (COM @ baud) now lives in the bottom StatusBar.
-  const { lines, connected, lastError, port, baud, setBaud, eol, setEol, send: sendLine } =
-    useSerial()
+  const {
+    lines,
+    connected,
+    lastError,
+    port,
+    baud,
+    setBaud,
+    eol,
+    setEol,
+    send: sendLine
+  } = useSerial()
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 

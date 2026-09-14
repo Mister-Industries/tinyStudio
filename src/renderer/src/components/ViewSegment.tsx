@@ -23,7 +23,10 @@ import {
 import { CircuitBoard, Code2, Play } from 'lucide-react'
 import React from 'react'
 
-function findInTree(items: BaseFileItem[], match: (i: BaseFileItem) => boolean): BaseFileItem | null {
+function findInTree(
+  items: BaseFileItem[],
+  match: (i: BaseFileItem) => boolean
+): BaseFileItem | null {
   for (const item of items) {
     if (item.type === 'file' && item.name && match(item)) return item
     if (item.children) {

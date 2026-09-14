@@ -8,13 +8,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
-    "tags": [
-      "tinycore",
-      "blink",
-      "led",
-      "digital-io",
-      "visual"
-    ]
+    "tags": ["tinycore", "blink", "led", "digital-io", "visual"]
   },
   {
     "title": "Smooth Breathing Effect",
@@ -25,13 +19,7 @@
     "board": "tinyCore (ESP32-S3)",
     "category": "basics",
     "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
-    "tags": [
-      "tinycore",
-      "blink",
-      "pwm",
-      "led",
-      "visual"
-    ]
+    "tags": ["tinycore", "blink", "pwm", "led", "visual"]
   },
   {
     "title": "Qwiic Joystick",
@@ -41,12 +29,6 @@
     "path": "basics/qwiic-joystick",
     "board": "tinyCore + Qwiic Joystick",
     "category": "basics",
-    "tags": [
-      "tinycore",
-      "qwiic",
-      "joystick",
-      "i2c",
-      "visual"
-    ]
+    "tags": ["tinycore", "qwiic", "joystick", "i2c", "visual"]
   }
 ]

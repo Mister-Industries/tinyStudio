@@ -26,7 +26,10 @@ const srcRoot = resolve(__dirname, '..', 'src', 'renderer', 'src')
 // file in, with no change here. `outbase` below keeps the directory structure
 // in the temp build, so two suites may share a basename.
 const files = readdirSync(srcRoot, { recursive: true, withFileTypes: true })
-  .filter((e) => e.isFile() && e.name.endsWith('.test.ts') && basename(e.parentPath ?? e.path) === '__tests__')
+  .filter(
+    (e) =>
+      e.isFile() && e.name.endsWith('.test.ts') && basename(e.parentPath ?? e.path) === '__tests__'
+  )
   .map((e) => join(e.parentPath ?? e.path, e.name))
   .sort()
 if (files.length === 0) {

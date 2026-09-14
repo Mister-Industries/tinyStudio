@@ -44,7 +44,7 @@ export class ServiceManager {
   private sendErrorToRenderer(message: string, error: unknown): void {
     const errorMessage = error instanceof Error ? error.message : String(error)
     console.error(`[ServiceManager] ${message}:`, errorMessage)
-    
+
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
       this.mainWindow.webContents.send('service:error', {
         message,
@@ -250,7 +250,7 @@ export class ServiceManager {
       try {
         console.log(`[ServiceManager] Health check attempt ${attempt}/${maxRetries}`)
         const health = await this.checkServiceHealth()
-        
+
         if (health.status !== 'ok') {
           throw new Error(`Service health check returned status: ${health.status}`)
         }
@@ -262,19 +262,24 @@ export class ServiceManager {
         if (!health.arduinoCli.available) {
           const warningMessage = 'Arduino CLI is not available on the service'
           console.warn(`[ServiceManager] WARNING: ${warningMessage}`)
-          this.sendErrorToRenderer(warningMessage, new Error('Arduino CLI not found at configured path'))
+          this.sendErrorToRenderer(
+            warningMessage,
+            new Error('Arduino CLI not found at configured path')
+          )
         }
 
         return
       } catch (error) {
         console.warn(`[ServiceManager] Health check attempt ${attempt} failed:`, error)
-        
+
         if (attempt === maxRetries) {
-          throw new Error(`Service health check failed after ${maxRetries} attempts: ${error instanceof Error ? error.message : String(error)}`)
+          throw new Error(
+            `Service health check failed after ${maxRetries} attempts: ${error instanceof Error ? error.message : String(error)}`
+          )
         }
-        
+
         // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, retryDelayMs))
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
       }
     }
   }
@@ -316,7 +321,9 @@ export class ServiceManager {
         stdio: ['ignore', 'pipe', 'pipe']
       })
 
-      this.child.stdout?.on('data', (d: Buffer) => console.log(`[tinyService] ${d.toString().trim()}`))
+      this.child.stdout?.on('data', (d: Buffer) =>
+        console.log(`[tinyService] ${d.toString().trim()}`)
+      )
       this.child.stderr?.on('data', (d: Buffer) =>
         console.error(`[tinyService] ${d.toString().trim()}`)
       )

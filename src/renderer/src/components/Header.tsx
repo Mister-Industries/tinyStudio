@@ -122,7 +122,10 @@ export function Header(): React.JSX.Element {
         </DropdownMenu>
         {workspace && (
           <div className="flex items-center gap-2 min-w-0">
-            <ChevronRight size={13} className="text-white/55 dark:text-[var(--text-faint)] shrink-0" />
+            <ChevronRight
+              size={13}
+              className="text-white/55 dark:text-[var(--text-faint)] shrink-0"
+            />
             <span className="text-[13px] text-white/[0.78] dark:text-[var(--text-muted)] truncate">
               {workspace.name}
             </span>

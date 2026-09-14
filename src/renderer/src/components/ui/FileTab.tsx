@@ -50,7 +50,7 @@ function FileTabTrigger({ className, file, onFileClose, ...props }: FileTabTrigg
     <TabsPrimitive.Trigger
       data-slot="file-tab-trigger"
       className={cn(
-        "relative text-[13px] justify-start px-3.5 h-full text-[var(--text-muted)] data-[state=active]:bg-[var(--surface-card)] data-[state=active]:text-[var(--text-strong)] data-[state=active]:shadow-[inset_0_2.5px_0_0_var(--brand)] hover:text-[var(--text-body)] transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap border-r-[1.5px] border-[var(--border-soft)]",
+        'relative text-[13px] justify-start px-3.5 h-full text-[var(--text-muted)] data-[state=active]:bg-[var(--surface-card)] data-[state=active]:text-[var(--text-strong)] data-[state=active]:shadow-[inset_0_2.5px_0_0_var(--brand)] hover:text-[var(--text-body)] transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap border-r-[1.5px] border-[var(--border-soft)]',
         className
       )}
       {...props}
