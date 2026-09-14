@@ -1,19 +1,16 @@
-appId: com.electron.app
+appId: cc.tinystudio.app
 productName: tinyStudio
 directories:
   buildResources: build
+# Ship the built app and its manifest. electron-builder adds the production
+# dependencies from node_modules on its own; nothing else in the repo (docs,
+# scripts, sources, fetched binaries) belongs in the install.
 files:
-  - '!**/.vscode/*'
-  - '!src/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-# asar is disabled because the main process loads tinyService via a dynamic ESM
-# import(). Electron's require() shim can read inside app.asar, but its ESM loader
-# cannot — so an ESM dependency must live on the real filesystem to be importable.
-# Keeping the app unpacked is the simplest reliable fix (same files, just not
-# archived). Revisit post-alpha if we move tinyService to a spawned sidecar.
+  - out/**/*
+  - package.json
+# asar is disabled: tinyService runs as a child Node process that imports
+# @mister-industries/tinyservice (an ESM package) from node_modules, which Node's
+# ESM loader can't do from inside an asar archive.
 asar: false
 extraResources:
   # arduino-cli binaries are fetched into vendor/ by scripts/fetch-arduino-cli.mjs
@@ -54,11 +51,6 @@ nsis:
   createDesktopShortcut: always
 mac:
   entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
 dmg:
   artifactName: ${name}-${version}.${ext}
@@ -67,13 +59,8 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
-  category: Utility
+  maintainer: MR.INDUSTRIES
+  category: Development
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates
-electronDownload:
-  mirror: https://npmmirror.com/mirrors/electron/

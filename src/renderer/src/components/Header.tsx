@@ -14,6 +14,7 @@ import {
 } from './ui/DropdownMenu'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
 import { GitHubAccountButton } from './GitHubAccountButton'
+import { AboutDialog } from './AboutDialog'
 
 /**
  * Top bar (38px). Brand wordmark + breadcrumb on the left; theme toggle, GitHub
@@ -26,6 +27,7 @@ import { GitHubAccountButton } from './GitHubAccountButton'
  */
 export function Header(): React.JSX.Element {
   const [isMaximized, setIsMaximized] = useState(false)
+  const [aboutOpen, setAboutOpen] = useState(false)
   const workspace = useAppSelector((state) => state.file.workspace)
   const openFiles = useAppSelector(selectOpenFiles)
   const viewingFileId = useAppSelector((state) => state.file.viewingFileId)
@@ -118,6 +120,10 @@ export function Header(): React.JSX.Element {
             <DropdownMenuItem disabled={!workspace} onSelect={afterMenuClose(closeWorkspace)}>
               Close Workspace
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={afterMenuClose(() => setAboutOpen(true))}>
+              About tinyStudio
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         {workspace && (
@@ -200,6 +206,7 @@ export function Header(): React.JSX.Element {
           </div>
         )}
       </div>
+      <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
     </div>
   )
 }

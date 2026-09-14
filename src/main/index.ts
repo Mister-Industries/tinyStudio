@@ -101,7 +101,9 @@ function createWindow(): void {
 }
 
 app.whenReady().then(async () => {
-  electronApp.setAppUserModelId('com.electron')
+  // Matches appId in electron-builder.yml; Windows groups taskbar icons and
+  // notifications by it.
+  electronApp.setAppUserModelId('cc.tinystudio.app')
 
   // Register standard edit/view accelerators (undo/redo/cut/copy/paste/select-all,
   // reload, devtools). The window is frameless so this menu stays hidden, but
