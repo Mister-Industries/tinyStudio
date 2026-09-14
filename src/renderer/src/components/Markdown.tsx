@@ -13,27 +13,34 @@ import remarkGfm from 'remark-gfm'
 
 // Initialize mermaid once for the whole renderer. `startOnLoad: false` because
 // we drive rendering ourselves from <MermaidDiagram />.
-let mermaidReady = false
-function ensureMermaid(): void {
-  if (mermaidReady) return
+let mermaidTheme: 'dark' | 'default' | null = null
+
+/** Configure mermaid for the app's light or dark mode; a no-op when unchanged. */
+function ensureMermaid(dark: boolean): void {
+  const theme = dark ? 'dark' : 'default'
+  if (mermaidTheme === theme) return
   mermaid.initialize({
     startOnLoad: false,
     securityLevel: 'strict',
     // Never let mermaid inject its "Syntax error" bomb graphic into the DOM —
     // we render our own inline fallback instead.
     suppressErrorRendering: true,
-    theme: 'dark',
-    themeVariables: {
-      fontFamily: 'inherit',
-      primaryColor: '#1e2a4a',
-      primaryTextColor: '#e6ecff',
-      primaryBorderColor: '#3a4a6a',
-      lineColor: '#5a6a8a',
-      secondaryColor: '#243156',
-      tertiaryColor: '#1a2540'
-    }
+    theme,
+    themeVariables: { fontFamily: 'inherit' }
   })
-  mermaidReady = true
+  mermaidTheme = theme
+}
+
+/** True while the app is in dark mode (ThemeProvider puts `dark` on <html>). */
+function useDarkMode(): boolean {
+  const read = (): boolean => document.documentElement.classList.contains('dark')
+  const [dark, setDark] = React.useState(read)
+  React.useEffect(() => {
+    const observer = new MutationObserver(() => setDark(read()))
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+  return dark
 }
 
 /** Recursively flatten React markdown children into plain text. */
@@ -59,9 +66,10 @@ function getCodeInfo(children: React.ReactNode): { lang: string | null; text: st
 function MermaidDiagram({ chart }: { chart: string }): React.JSX.Element {
   const ref = React.useRef<HTMLDivElement>(null)
   const [error, setError] = React.useState<string | null>(null)
+  const dark = useDarkMode()
 
   React.useEffect(() => {
-    ensureMermaid()
+    ensureMermaid(dark)
     let cancelled = false
     const id = `mermaid-${Math.random().toString(36).slice(2)}`
     ;(async () => {
@@ -85,7 +93,7 @@ function MermaidDiagram({ chart }: { chart: string }): React.JSX.Element {
     return () => {
       cancelled = true
     }
-  }, [chart])
+  }, [chart, dark])
 
   if (error) {
     return (

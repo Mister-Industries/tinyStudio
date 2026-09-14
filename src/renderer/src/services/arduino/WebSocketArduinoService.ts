@@ -151,15 +151,23 @@ export class WebSocketArduinoService implements ArduinoService {
       autoReconnect: true,
       reconnectInterval: 3000,
       maxReconnectAttempts: 10,
-      debug: true
+      debug: false
     })
 
-    // Connect to the service
     this.client.connect()
 
-    // Set up global error handler
-    this.client.onError((error) => {
-      console.error('Arduino service error:', error)
+    // A failed attempt is normal while tinyService starts (and on the web, until
+    // the user runs it), and the client retries on its own. Say so once per
+    // outage rather than logging an error for every attempt, and never while a
+    // connection is up.
+    let warned = false
+    this.client.onConnect(() => {
+      warned = false
+    })
+    this.client.onError(() => {
+      if (warned || this.client.isConnected()) return
+      warned = true
+      console.warn(`tinyService isn't reachable at ${this.serviceUrl} — retrying.`)
     })
   }
 

@@ -1,24 +1,29 @@
 /**
  * AIAssistant — Studio AI agent panel.
  *
- * Talks to the agent: sends a prompt, streams the reply, shows each tool call as
- * it happens, and surfaces an Allow/Deny dialog whenever the agent wants to
- * write, edit, or delete a file. On desktop the agent runs in the main process
- * and the Anthropic API key is stored (encrypted) there; in the web build the
- * same agent runs in the page with the key kept in browser storage.
+ * Sends prompts, streams the reply, shows each tool call as it happens, and
+ * surfaces an Allow/Deny dialog whenever the agent wants to write, edit, or
+ * delete a file. The conversation lives in lib/agentChat, so it survives this
+ * panel closing. On desktop the agent runs in the main process and the Anthropic
+ * API key is stored (encrypted) there; in the web build the same agent runs in
+ * the page with the key kept in browser storage.
  */
 
-import {
-  refreshFileContentFromDisk,
-  selectOpenFiles,
-  useAppDispatch,
-  useAppSelector
-} from '@renderer/redux'
-import { updateReadmeContent } from '@renderer/redux/fileSlice'
-import type { AgentEvent, AgentPermissionRequest } from '@renderer/lib/agentTypes'
-import { fileSystem } from '@renderer/lib/fileSystem'
-import { webAgent, webSettings } from '@renderer/lib/webAgent'
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
+import {
+  agentSettings as settings,
+  getChatState,
+  isDesktopAgent as isDesktop,
+  respondToPermission,
+  sendToAgent,
+  startNewChat,
+  stopAgent,
+  subscribeChat,
+  type TimelineItem
+} from '@renderer/lib/agentChat'
+import type { AgentPermissionRequest } from '@renderer/lib/agentTypes'
+import { openExternal } from '@renderer/lib/utils'
+import { selectOpenFiles, useAppSelector } from '@renderer/redux'
 import {
   Activity,
   BookOpen,
@@ -52,26 +57,8 @@ import {
 import { Input } from './ui/Input'
 import { ScrollArea } from './ui/ScrollArea'
 
-type TimelineItem =
-  | { kind: 'user'; text: string }
-  | { kind: 'ai'; text: string }
-  | { kind: 'tool'; id: string; name: string; summary: string; ok: boolean; running: boolean }
-  | { kind: 'error'; text: string }
-
 const GREETING =
   "I'm Studio AI ✦ — I can read and edit the files in your open workspace. Ask me to explain code, wire a circuit, fix a build error, or write a sketch. I'll ask before changing any file."
-
-// Desktop: the agent runs in the Electron main process, reached via the preload
-// bridge, so the API key never enters the renderer. Web: there is no main
-// process, so the same agent core runs in the page (lib/webAgent.ts).
-const isDesktop = typeof window !== 'undefined' && window.api != null
-const agent = isDesktop ? window.api.agent : webAgent
-const settings = isDesktop ? window.api.settings : webSettings
-
-const openExternal = (url: string): void => {
-  if (isDesktop) void window.api.fs.openExternal(url)
-  else window.open(url, '_blank', 'noopener,noreferrer')
-}
 
 const TOOL_ICON: Record<string, React.ReactNode> = {
   list_dir: <Folder size={13} />,
@@ -87,64 +74,23 @@ const TOOL_ICON: Record<string, React.ReactNode> = {
 }
 
 export function AIAssistant(): React.JSX.Element {
-  const dispatch = useAppDispatch()
   const workspace = useAppSelector((s) => s.file.workspace)
   const viewingFileId = useAppSelector((s) => s.file.viewingFileId)
   const editorView = useAppSelector((s) => s.editor.editorView)
   const openFiles = useAppSelector(selectOpenFiles)
   const { selectedBoard, lastCompileResult } = useArduinoContext()
+  const { items, busy, permission } = React.useSyncExternalStore(subscribeChat, getChatState)
 
-  const [items, setItems] = React.useState<TimelineItem[]>([])
   const [input, setInput] = React.useState('')
-  const [busy, setBusy] = React.useState(false)
   const [keyConfigured, setKeyConfigured] = React.useState<boolean | null>(null)
   const [showSettings, setShowSettings] = React.useState(false)
-  const [permission, setPermission] = React.useState<AgentPermissionRequest | null>(null)
 
   const scrollRef = React.useRef<HTMLDivElement>(null)
-  // Latest open files, read inside the agent callback without re-subscribing.
-  const openFilesRef = React.useRef(openFiles)
-  openFilesRef.current = openFiles
 
   // Check whether an API key is configured.
   React.useEffect(() => {
     settings.getStatus().then((s) => setKeyConfigured(s.configured))
   }, [])
-
-  // Subscribe to the agent's streamed events.
-  React.useEffect(() => {
-    const off = agent.onEvent((evt: AgentEvent) => {
-      setItems((prev) => applyEvent(prev, evt))
-      if (evt.type === 'done' || evt.type === 'error') setBusy(false)
-    })
-    return off
-  }, [])
-
-  // Surface permission prompts.
-  React.useEffect(() => {
-    return agent.onPermissionRequest((req) => setPermission(req))
-  }, [])
-
-  // When the agent changes a file that's open in the editor, reload it from disk.
-  React.useEffect(() => {
-    return agent.onFileChanged(({ path }) => {
-      const norm = path.replace(/\\/g, '/')
-      const match = openFilesRef.current.find((f) => f.path.replace(/\\/g, '/') === norm)
-      if (match) {
-        fileSystem
-          .readFile(match.path)
-          .then((content) => dispatch(refreshFileContentFromDisk({ id: match.id, content })))
-      }
-      // Keep the Documentation tab live when the agent rewrites the README —
-      // it reads from readmeContent, which otherwise only updates on a manual edit.
-      if (/(^|\/)README\.md$/i.test(norm)) {
-        fileSystem
-          .readFile(path)
-          .then((content) => dispatch(updateReadmeContent(content)))
-          .catch((e) => console.error('Failed to refresh README:', e))
-      }
-    })
-  }, [dispatch])
 
   React.useEffect(() => {
     const el = scrollRef.current?.querySelector('[data-radix-scroll-area-viewport]')
@@ -159,10 +105,8 @@ export function AIAssistant(): React.JSX.Element {
       return
     }
     setInput('')
-    setItems((prev) => [...prev, { kind: 'user', text }])
-    setBusy(true)
     const viewing = openFiles.find((f) => f.id === viewingFileId)
-    agent.send({
+    sendToAgent({
       text,
       workspaceRoot: workspace?.path ?? null,
       context: {
@@ -173,21 +117,6 @@ export function AIAssistant(): React.JSX.Element {
           lastCompileResult && !lastCompileResult.success ? lastCompileResult.output : undefined
       }
     })
-  }
-
-  const stop = (): void => {
-    agent.abort()
-    setBusy(false)
-  }
-
-  const newChat = (): void => {
-    agent.reset()
-    setItems([])
-  }
-
-  const respond = (allow: boolean): void => {
-    if (permission) agent.respondPermission(permission.id, allow)
-    setPermission(null)
   }
 
   return (
@@ -202,7 +131,7 @@ export function AIAssistant(): React.JSX.Element {
           size="icon"
           className="size-7 text-fg-3 hover:text-fg-1"
           title="New chat"
-          onClick={newChat}
+          onClick={startNewChat}
         >
           <Trash2 size={14} />
         </Button>
@@ -252,7 +181,11 @@ export function AIAssistant(): React.JSX.Element {
           onKeyDown={(e) => e.key === 'Enter' && send()}
         />
         {busy ? (
-          <button className="px-3 rounded-lg bg-navy-500 text-fg-1" onClick={stop} title="Stop">
+          <button
+            className="px-3 rounded-lg bg-navy-500 text-fg-1"
+            onClick={stopAgent}
+            title="Stop"
+          >
             <Square size={16} />
           </button>
         ) : (
@@ -273,38 +206,9 @@ export function AIAssistant(): React.JSX.Element {
         onSaved={() => setKeyConfigured(true)}
         onCleared={() => setKeyConfigured(false)}
       />
-      <PermissionDialog request={permission} onRespond={respond} />
+      <PermissionDialog request={permission} onRespond={respondToPermission} />
     </div>
   )
-}
-
-/** Fold a streamed agent event into the timeline. */
-function applyEvent(prev: TimelineItem[], evt: AgentEvent): TimelineItem[] {
-  switch (evt.type) {
-    case 'text_delta': {
-      const last = prev[prev.length - 1]
-      if (last && last.kind === 'ai') {
-        return [...prev.slice(0, -1), { ...last, text: last.text + evt.text }]
-      }
-      return [...prev, { kind: 'ai', text: evt.text }]
-    }
-    case 'tool_use':
-      return [
-        ...prev,
-        { kind: 'tool', id: evt.id, name: evt.name, summary: '', ok: true, running: true }
-      ]
-    case 'tool_result':
-      return prev.map((it) =>
-        it.kind === 'tool' && it.id === evt.id
-          ? { ...it, running: false, ok: evt.ok, summary: evt.summary }
-          : it
-      )
-    case 'error':
-      return [...prev, { kind: 'error', text: evt.message }]
-    case 'done':
-    default:
-      return prev
-  }
 }
 
 function TimelineRow({ item }: { item: TimelineItem }): React.JSX.Element {

@@ -2017,7 +2017,7 @@ export function Canvas({
               <div>
                 {editable
                   ? 'Drag parts from the components rail — or double-click one to drop it here.'
-                  : 'Empty circuit — click edit to start placing parts.'}
+                  : 'Empty circuit — click Edit to start placing parts.'}
               </div>
             </div>
           )}

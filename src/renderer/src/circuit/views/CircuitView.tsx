@@ -770,16 +770,18 @@ export function CircuitViewV2({
         {/* left toolbar: edit toggle + undo/redo */}
         <div className="absolute top-3 left-3 z-10 flex gap-1.5">
           <button
-            className={`${tool} w-8 justify-center px-0 ${editable ? 'text-brand' : ''}`}
+            className={`${tool} ${editable ? 'text-brand' : ''}`}
             onClick={() => {
               const next = !editable
               setEditable(next)
               setSel(emptySel())
               onEditChange?.(next)
             }}
-            title={editable ? 'Editing — click for view-only' : 'View-only — click to edit'}
+            aria-pressed={editable}
+            title={editable ? 'Stop editing (view only)' : 'Edit the circuit'}
           >
             {editable ? <Eye size={15} /> : <Pencil size={15} />}
+            {editable ? 'Done' : 'Edit'}
           </button>
           {editable && (
             <>
