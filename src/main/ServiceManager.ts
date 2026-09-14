@@ -1,9 +1,9 @@
 import { spawn, type ChildProcess } from 'child_process'
 import { app, BrowserWindow } from 'electron'
 import { existsSync } from 'fs'
-import net from 'net'
 import os from 'os'
 import path from 'path'
+import { findFreePort } from './freePort'
 import { decideAfterExit } from './serviceRestart'
 
 interface ServiceConfig {
@@ -224,44 +224,19 @@ export class ServiceManager {
   }
 
   /**
-   * Find a free TCP port, starting at the preferred one. Port 3000 is a very
-   * popular dev-server default, so never assume it's ours: a foreign process
-   * on 3000 would make the backend fail to bind.
-   *
-   * The probe binds the wildcard address, the way tinyService itself does.
-   * Probing 127.0.0.1 alone misses a listener on 0.0.0.0 or [::] (Windows
-   * allows both binds at once), which is exactly what the installed tray
-   * tinyService is: the child then died with EADDRINUSE while the health check
-   * talked to the tray service and passed.
+   * ws:// URL of the running service (port may differ from the default 3000).
+   * 127.0.0.1 rather than localhost: tinyService 1.2 binds IPv4 loopback only,
+   * and a client that resolves localhost to ::1 first would be refused.
    */
-  private async findFreePort(preferred: number, attempts = 10): Promise<number> {
-    for (let port = preferred; port < preferred + attempts; port++) {
-      const free = await new Promise<boolean>((resolve) => {
-        const probe = net
-          .createServer()
-          .once('error', () => resolve(false))
-          .once('listening', () => {
-            probe.close(() => resolve(true))
-          })
-        probe.listen(port)
-      })
-      if (free) return port
-    }
-    throw new Error(
-      `No free port found in ${preferred}-${preferred + attempts - 1} for TinyService`
-    )
-  }
-
-  /** ws:// URL of the running service (port may differ from the default 3000). */
   getServiceUrl(): string {
-    return `ws://localhost:${this.config.port}`
+    return `ws://127.0.0.1:${this.config.port}`
   }
 
   /**
    * Check service health via HTTP endpoint
    */
   private async checkServiceHealth(): Promise<HealthCheckResponse> {
-    const response = await fetch(`http://localhost:${this.config.port}/health`)
+    const response = await fetch(`http://127.0.0.1:${this.config.port}/health`)
     if (!response.ok) {
       throw new Error(`Health check failed with status ${response.status}`)
     }
@@ -340,7 +315,7 @@ export class ServiceManager {
       // Bind to a free port — 3000 may be taken by another dev server. Only on
       // the first start: restarts keep the port (see portChosen).
       if (!this.portChosen) {
-        this.config.port = await this.findFreePort(this.config.port)
+        this.config.port = await findFreePort(this.config.port)
         this.portChosen = true
       }
 
@@ -373,12 +348,13 @@ export class ServiceManager {
         void this.handleExit(code, signal)
       })
 
-      // Give the spawned process time to boot, then confirm it's serving.
-      await this.verifyServiceHealth(10, 1000)
+      // Give the spawned process time to boot, then confirm it's serving. A
+      // cold start on a busy or slow machine can take well over ten seconds.
+      await this.verifyServiceHealth(30, 1000)
 
       this.isRunning = true
       this.lastError = null
-      console.log(`[ServiceManager] TinyService started on ws://localhost:${this.config.port}`)
+      console.log(`[ServiceManager] TinyService started on ${this.getServiceUrl()}`)
     } catch (error) {
       if (this.child) {
         this.child.kill()

@@ -4,7 +4,7 @@ tinyService is the local backend that compiles, uploads and talks to boards. It 
 a WebSocket and HTTP server around `arduino-cli`, published on npm as
 [`@mister-industries/tinyservice`](https://www.npmjs.com/package/@mister-industries/tinyservice),
 with its client and protocol types in `@mister-industries/shared`. tinyStudio
-needs tinyService 1.1.0 or later.
+needs tinyService 1.2.0 or later.
 
 This guide covers how the desktop app runs it, how the renderer finds it, and how
 the browser build uses it.
@@ -76,11 +76,13 @@ disk.
 
 ## Security
 
-`ServiceManager` passes `allowedOrigins` (the packaged app, the dev server and
-`https://app.tinystudio.cc`), but tinyService 1.1.0 doesn't check it and listens on
-all network interfaces. Until a tinyService release binds to `127.0.0.1` and
-checks the `Origin` header, any web page open on the computer, and anything on the
-local network, can reach the backend.
+tinyService 1.2.0 listens on `127.0.0.1` only and refuses any browser request
+whose `Origin` isn't allowed. `ServiceManager` passes `allowedOrigins`: the
+packaged app (`file://`), the dev server on any port (`http://localhost:*`) and
+the hosted web app (`https://studio.tinycore.cc`, and `https://app.tinystudio.cc`
+until it forwards). Requests with no `Origin` header, such as the health check,
+are accepted. A standalone tinyService (the tray app, or `npx`) uses the same
+defaults.
 
 ## Troubleshooting
 

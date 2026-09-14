@@ -149,17 +149,14 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
 
 ### Security
 
+- tinyService 1.2.0 listens on this computer only and refuses browser origins
+  it doesn't know, so another website can't reach your boards through it.
 - File access on desktop is limited to folders you've opened, plus downloaded
   examples. Projects opened in an earlier version ask for their folder once.
 - Only web and email links open outside the app, and only documents and images
   open in other programs.
 - Part art from packs and imports is sanitised before it's shown.
 - A strict Content Security Policy in the built app.
-
-### Known issues
-
-- tinyService 1.1.0 accepts connections from any website and listens on all
-  network interfaces. The fix needs a tinyService release.
 
 ## 0.3.0 — not released
 

@@ -23,10 +23,16 @@ import { TINYSERVICE_DEFAULT_PORT } from '../shared/tinyservice'
 
 const serviceManager = new ServiceManager({
   port: TINYSERVICE_DEFAULT_PORT,
-  // The desktop renderer, the dev server and the hosted web app. tinyService
-  // 1.1.0 doesn't check the WebSocket Origin header yet; this list takes
-  // effect once it does.
-  allowedOrigins: ['file://', 'http://localhost:5173', 'https://app.tinystudio.cc']
+  // Browser origins tinyService accepts: the packaged renderer, the dev server
+  // (any port: 5173 is often taken) and the hosted web app on both of its
+  // addresses. Requests with no Origin header, such as the health check, are
+  // always accepted.
+  allowedOrigins: [
+    'file://',
+    'http://localhost:*',
+    'https://studio.tinycore.cc',
+    'https://app.tinystudio.cc'
+  ]
 })
 
 // Studio AI agent — one instance, bound to the main window.

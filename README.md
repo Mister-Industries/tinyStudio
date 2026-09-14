@@ -150,8 +150,8 @@ my-example/
   README.md         ← shown in the Docs panel
 ```
 
-Older projects with a `diagram.json` convert to `circuit.json` the first time the
-Circuit view opens them, and keep the original as `diagram.json.bak`.
+Older projects with a `diagram.json` get a **Convert** button in the Circuit
+view; it writes `circuit.json` and keeps the original as `diagram.json.bak`.
 
 ## Extending the library
 
@@ -191,8 +191,6 @@ Where to read more:
 
 ## Known issues
 
-- tinyService 1.1.0 accepts connections from any website and listens on every
-  network interface, not only this computer. The fix needs a tinyService release.
 - Desktop projects opened in an earlier version ask you to choose their folder once.
 
 ## Roadmap

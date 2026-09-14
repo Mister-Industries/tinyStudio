@@ -44,7 +44,7 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "@mister-industries/shared": "^1.2.0",
-    "@mister-industries/tinyservice": "^1.1.0",
+    "@mister-industries/tinyservice": "^1.2.0",
     "@monaco-editor/react": "^4.7.0-rc.0",
     "@radix-ui/react-alert-dialog": "^1.1.23",
     "@radix-ui/react-dialog": "^1.1.23",
