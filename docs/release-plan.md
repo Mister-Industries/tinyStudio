@@ -313,11 +313,29 @@ In order.
    unchanged art; make the art follow the leg.
 5. **Simulation that runs the sketch, like Wokwi.** Start with a written
    comparison for the owner before building anything:
+
    - **Emulators to evaluate:** Wokwi's open-source emulators for AVR and RP2040,
      and Espressif's QEMU fork for ESP32 and ESP32-S3.
    - **How emulated pins and serial would drive circuit parts:** LEDs, buttons,
      the Serial Monitor.
    - **What happens to the SPICE simulator.**
+
+   **Findings from 0.4.0 step 7a (2026-09-14).** Tried in the web build, DC
+   operating point unless noted:
+
+   - A 5 V source into two 1 kΩ resistors gives 2.500 V at the midpoint and
+     2.50 mA. Correct.
+   - 5 V through 220 Ω into the 5 mm LED gives 2.646 V forward and 10.7 mA,
+     and the DC sweep plots all three signals. Plausible.
+   - A tinyCore driving the same LED from D13 to GND reports every node at
+     0 V with the notice "U1 (tinycore) is a board — not simulated; drive
+     its pins with sources". The netlist has no ground node either, since
+     the board's GND pin is not a ground label. This is almost certainly
+     what "simulation doesn't seem to work" means: the circuits people draw
+     have a board in them. Until the sketch runs (this step), at least the
+     board's power pins (3V3, 5V, GND) could be modelled as fixed sources.
+   - No crashes in any of the three.
+
 6. **Milestone M5 [GAP-1], all of it.** KiCad netlist export, `.kicad_sch`
    export, Wokwi `diagram.json` import and export with a lint check, and `.fzz`
    import, as specified in `docs/circuit-view-tech-spec.md`.

@@ -881,7 +881,7 @@ export function CircuitViewV2({
             title={
               showSim
                 ? 'Close the simulator'
-                : 'Simulate this circuit — opens the schematic and the Simulate panel'
+                : 'Simulate this circuit (experimental) — opens the schematic and the Simulate panel'
             }
           >
             <Play size={14} /> Simulate

@@ -65,6 +65,9 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
   symbol set, ground, power and net labels, reference designators above each
   symbol and simulated values below, ratsnest lines, and an electrical rule
   check.
+- **Simulate** is labelled Experimental, with a note that results may be
+  wrong. Circuits that contain a board read 0 V everywhere; the board's pins
+  aren't modelled yet.
 - **Simulation:** ngspice runs in the app (downloaded on first use, about
   20 MB) with DC operating point, DC sweep, transient and AC analyses; charts
   with cursors, zoom, log axes, dB and phase; CSV export; voltage and current

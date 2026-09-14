@@ -21,6 +21,7 @@
 
 import { Crosshair, Download, Loader2, Play, Square, X } from 'lucide-react'
 import React from 'react'
+import { Badge } from '../../../components/ui/Badge'
 import * as cmd from '../../core/commands'
 import type { Analysis, CircuitDoc } from '../../core/model'
 import { describeNet, type NetModel } from '../../core/nets'
@@ -273,6 +274,11 @@ export function SimPanel({
           : 'absolute bottom-0 left-0 right-0 z-20 border-t border-border-default bg-bg-raised flex flex-col max-h-[45%]'
       }
     >
+      {/* The simulator is shipped as-is in 0.4: say so wherever the panel opens. */}
+      <div className="flex items-center gap-2 px-3 py-1.5 shrink-0 border-b border-border-default text-[11px] text-text-muted">
+        <Badge tone="yellow">Experimental</Badge>
+        <span>Simulation is experimental and results may be wrong.</span>
+      </div>
       {/* controls: analysis kind and its parameters */}
       <div
         className={
