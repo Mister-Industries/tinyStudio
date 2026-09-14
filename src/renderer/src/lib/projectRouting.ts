@@ -1,7 +1,10 @@
 // Deep-link routing for opening GitHub projects in the editor.
 //
-// URL scheme: app.tinyStudio.cc/<owner>/<repo>/<optional/sub/path>
+// URL scheme: studio.tinycore.cc/<owner>/<repo>/<optional/sub/path>
 //   e.g. /Mister-Industries/tinyStudio-examples/blink
+//
+// Paths under /auth/ belong to sign-in (lib/githubWebAuth) and are never
+// read as a project.
 //
 // There is no router dependency — the app parses window.location on startup (and
 // on back/forward) and loads the matching project via loadGitHubProject.
@@ -25,7 +28,7 @@ export function parseProjectRoute(
     .split('/')
     .filter(Boolean)
     .map(decodeURIComponent)
-  if (segs.length < 2) return null
+  if (segs.length < 2 || segs[0] === 'auth') return null
   const [owner, repo, ...rest] = segs
   return { owner, repo, path: rest.join('/') }
 }

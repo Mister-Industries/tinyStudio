@@ -23,23 +23,19 @@ import { safeStorage } from 'electron'
 import { promises as fs } from 'fs'
 import { join } from 'path'
 import { app } from 'electron'
+import { GITHUB_CLIENT_ID_DEFAULT, GITHUB_SCOPE as SCOPE } from '../shared/githubApp'
 
 const DEVICE_CODE_URL = 'https://github.com/login/device/code'
 const TOKEN_URL = 'https://github.com/login/oauth/access_token'
 const API = 'https://api.github.com'
 
 /**
- * Public client id — safe to ship; it is not a secret. Override at build time
- * with VITE_GITHUB_CLIENT_ID, or at run time with GITHUB_CLIENT_ID for dev.
+ * Public client id — safe to ship; it is not a secret. The tinyStudio app's id
+ * is built in (shared/githubApp); override at build time with
+ * VITE_GITHUB_CLIENT_ID, or at run time with GITHUB_CLIENT_ID for dev.
  */
-const CLIENT_ID = process.env.GITHUB_CLIENT_ID || process.env.VITE_GITHUB_CLIENT_ID || ''
-
-/**
- * `public_repo` covers reading and writing public repositories and creating new
- * ones — everything tinyStudio does. It deliberately cannot touch private
- * repos. Widen to `repo` only if private copies become a requirement.
- */
-const SCOPE = 'public_repo'
+const CLIENT_ID =
+  process.env.GITHUB_CLIENT_ID || process.env.VITE_GITHUB_CLIENT_ID || GITHUB_CLIENT_ID_DEFAULT
 
 export interface DeviceCode {
   userCode: string

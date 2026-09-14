@@ -1,8 +1,20 @@
 # GitHub sign-in
 
-tinyStudio signs users in with the GitHub **OAuth device flow** — the user gets
-a short code, types it on github.com, and the app polls until GitHub says yes.
-No token to paste, and nothing secret ships inside the app.
+tinyStudio signs users in to GitHub two ways, both with the same OAuth app and
+without shipping anything secret in the app:
+
+- **Desktop:** the OAuth **device flow**. The user gets a short code, types it
+  on github.com, and the app polls until GitHub says yes.
+- **Browser:** the OAuth **authorization-code flow with PKCE**. The page goes
+  to github.com and comes back to `/auth/github/callback` on the same host; a
+  Netlify function swaps the code for a token.
+
+Pasting a personal access token stays available behind **Advanced** for
+enterprise and air-gapped setups.
+
+The app's registration, the domains and what else the account is for are in
+[accounts-and-domains.md](accounts-and-domains.md); this file is the
+implementation.
 
 ## Why an OAuth App and not a GitHub App
 
@@ -13,52 +25,44 @@ creation needs an OAuth scope, so an OAuth App it is.
 
 To keep the ask as small as possible we request `public_repo`, not `repo`:
 
-| scope | what it allows |
-| --- | --- |
+| scope         | what it allows                                                                     |
+| ------------- | ---------------------------------------------------------------------------------- |
 | `public_repo` | read/write **public** repos, and create new ones. Cannot see private repos at all. |
-| `repo` | everything above **plus full access to every private repo** the user can reach. |
+| `repo`        | everything above **plus full access to every private repo** the user can reach.    |
 
-`public_repo` is strictly less access than the full-`repo` Personal Access Token
-the app used to ask people to paste. The trade-off is that copies can only be
-public — which suits GitHub Pages anyway, since Pages needs a public repo on the
-free plan. If private copies ever become a requirement, widen `SCOPE` in
-[`src/main/githubAuth.ts`](../src/main/githubAuth.ts) to `repo` and re-enable the
-private option in `MakeItMine`.
+The trade-off is that copies can only be public, which suits GitHub Pages
+anyway, since Pages needs a public repo on the free plan. If private copies ever
+become a requirement, widen `GITHUB_SCOPE` in
+[`src/shared/githubApp.ts`](../src/shared/githubApp.ts) to `repo` and re-enable
+the private option in `MakeItMine`.
 
-## Registering the app (one-time)
+## The app
 
-1. GitHub → **Settings → Developer settings → OAuth Apps → New OAuth App**.
-2. Fill in:
-   - **Application name**: `tinyStudio`
-   - **Homepage URL**: `https://app.tinystudio.cc`
-   - **Authorization callback URL**: `https://app.tinystudio.cc/auth/callback`
-     (unused by the device flow; required by the form, and needed later for the
-     web build's PKCE flow)
-3. Create it, then on the app's page tick **Enable Device Flow** and save.
-   Without this, sign-in fails with `device_flow_disabled`.
-4. Copy the **Client ID**. It is public — it is fine in the repo, in the built
-   app, and in CI.
+One OAuth app, owned by the Mister-Industries organization, named `tinyStudio`.
+Its **client id is public** and built in as the default in
+[`src/shared/githubApp.ts`](../src/shared/githubApp.ts); `VITE_GITHUB_CLIENT_ID`
+overrides it at build time (or `GITHUB_CLIENT_ID` at run time, for main-process
+development).
 
-Do **not** generate a client secret for the desktop app. The device flow does
-not use one, and anything shipped in a desktop binary is not a secret.
+Registered on the app:
 
-## Wiring it in
+- **Device Flow: on.** Without it desktop sign-in fails with
+  `device_flow_disabled`.
+- **Callback URLs**, one per host the web flow can start from:
+  `https://studio.tinycore.cc/auth/github/callback`,
+  `https://app.tinystudio.cc/auth/github/callback` (until that address
+  forwards), `https://preview.tinystudio.cc/auth/github/callback` with the
+  subdomain wildcard on (deploy previews), and
+  `http://localhost:5173/auth/github/callback` plus `:5174` for development.
+- **The client secret** exists only in the tinyStudio Netlify site's
+  environment, as `GITHUB_CLIENT_SECRET`. It is never in the repo, the built
+  app, a `.env` file that gets committed, or chat.
 
-Set `VITE_GITHUB_CLIENT_ID` at build time:
+The path is `/auth/github/callback`, not `/auth/callback`: the tinyCore
+sign-in uses `/auth/callback` on every tinycore.cc site, and the two must not
+collide.
 
-```bash
-# local dev
-VITE_GITHUB_CLIENT_ID=Ov23li... npm run dev
-
-# packaged build
-VITE_GITHUB_CLIENT_ID=Ov23li... npm run build:win
-```
-
-Or put it in a `.env` file at the repo root. Without it the app still runs and
-falls back to the Personal Access Token path, with a message saying no client ID
-is configured.
-
-## How it fits together
+## How the desktop flow works
 
 - [`src/main/githubAuth.ts`](../src/main/githubAuth.ts) runs the flow and stores
   the token with Electron `safeStorage` (OS keychain / DPAPI), the same way the
@@ -66,18 +70,37 @@ is configured.
   GitHub's OAuth endpoints send no CORS headers — a renderer `fetch` to them
   fails outright.
 - The renderer receives the token **in memory only** (`initAccount()` in
-  `lib/github.ts`) and never writes it to `localStorage`, which is where it used
-  to sit in plaintext.
-- [`components/GitHubSignIn.tsx`](../src/renderer/src/components/GitHubSignIn.tsx)
-  is the one sign-in surface, used by both the header control and the GitHub
-  sidebar tab. Pasting a token is still available behind "Advanced" for
-  enterprise and air-gapped setups.
+  `lib/github.ts`) and never writes it to `localStorage`.
 
-## Still to do: the web build
+## How the web flow works
 
-`app.tinyStudio.cc` still uses the token path. The device flow cannot run there:
-the browser cannot call GitHub's OAuth endpoints (no CORS), so the web build
-needs the authorization-code flow with PKCE plus a small Netlify Function
-holding the client secret to do the code→token exchange. That is the next piece
-of work; everything else — the account store, the sign-in UI, the permission
-checks — is already shared.
+1. [`lib/githubWebAuth.ts`](../src/renderer/src/lib/githubWebAuth.ts) makes a
+   random `state` and a PKCE verifier, keeps both in `sessionStorage` with the
+   page the user was on, and sends the browser to
+   `github.com/login/oauth/authorize` with `redirect_uri` set to this host's
+   own `/auth/github/callback`.
+2. GitHub sends the browser back with a `code`. `App.tsx` sees the callback
+   path, and `completeWebSignIn()` checks the state and POSTs the code, the
+   verifier and the redirect URI to the token function.
+3. [`netlify/functions/github-token.ts`](../netlify/functions/github-token.ts)
+   accepts only the app's own origins (production, the transitional
+   `app.tinystudio.cc`, deploy previews at
+   `deploy-preview-N.preview.tinystudio.cc`, and localhost), checks that the
+   redirect URI belongs to the calling origin, and asks GitHub for the token
+   with the client secret. GitHub requires the secret here even with PKCE.
+4. The page loads the profile, stores the account the way a pasted token was
+   stored, and returns to the page the user started on, which may be a project
+   deep link.
+
+A dev server at `http://localhost:5173` or `:5174` has no function of its own,
+so it calls the hosted app's (`https://studio.tinycore.cc/.netlify/functions/github-token`);
+`VITE_GITHUB_TOKEN_ENDPOINT` points it elsewhere, for instance at `netlify dev`.
+The token endpoint's host has to be in the page's Content Security Policy
+(`connect-src` in `src/renderer/index.html`).
+
+## Sign-in surfaces
+
+[`components/GitHubSignIn.tsx`](../src/renderer/src/components/GitHubSignIn.tsx)
+is the one sign-in surface, used by both the header control and the GitHub
+sidebar tab. It picks the device flow on desktop, the web flow in the browser,
+and offers the pasted token under **Advanced** in both.

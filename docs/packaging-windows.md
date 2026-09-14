@@ -38,9 +38,9 @@ On the build machine only:
 - **Node.js 22** and npm.
 - **Windows.** electron-builder can cross-build from macOS or Linux, but the NSIS
   step then needs Wine.
-- **A GitHub OAuth client id** for desktop sign-in, set as
-  `VITE_GITHUB_CLIENT_ID`. It's baked in at build time; a build without it shows
-  an error when someone tries to sign in. See [github-auth.md](github-auth.md).
+- Nothing for GitHub sign-in: the tinyStudio OAuth app's client id is built in.
+  Set `VITE_GITHUB_CLIENT_ID` only to build against another app. See
+  [github-auth.md](github-auth.md).
 
 ```powershell
 npm install
@@ -75,7 +75,6 @@ Without it, the installer builds and the editor works without code intelligence.
 ## 4. Build
 
 ```powershell
-$env:VITE_GITHUB_CLIENT_ID = "Ov23li..."
 $env:CSC_IDENTITY_AUTO_DISCOVERY = "false"   # unsigned build; see section 7
 npm run build:win
 ```
@@ -170,7 +169,6 @@ electron-builder signs both `tinystudio.exe` and the installer.
 
 ```
 [ ] npm install
-[ ] VITE_GITHUB_CLIENT_ID set
 [ ] npm run fetch:language-server (if shipping code intelligence)
 [ ] Developer Mode on, or an Administrator terminal (first build on the machine)
 [ ] Signing set up, or CSC_IDENTITY_AUTO_DISCOVERY=false

@@ -2,14 +2,16 @@
  * GitHubSignIn — the single sign-in surface, shared by the header profile
  * control and the GitHub sidebar tab.
  *
- * The default path is the OAuth **device flow**: the user gets a short code,
- * types it on github.com, and the app polls until GitHub says yes. No token to
- * paste, nothing confidential shipped in the app, and the resulting token is
- * held by the main process in the OS keychain.
+ * On desktop the default path is the OAuth **device flow**: the user gets a
+ * short code, types it on github.com, and the app polls until GitHub says yes.
+ * No token to paste, nothing confidential shipped in the app, and the resulting
+ * token is held by the main process in the OS keychain. In the browser it is
+ * the **web flow**: the page goes to github.com and comes straight back
+ * signed in (lib/githubWebAuth).
  *
- * Pasting a Personal Access Token stays available behind "Advanced" — it is
- * still the only route on the web build, and enterprise/air-gapped setups need
- * it — but it is not what a normal user is asked to do.
+ * Pasting a Personal Access Token stays available behind "Advanced" for
+ * enterprise and air-gapped setups, but it is not what a normal user is asked
+ * to do.
  */
 
 import { useGitHubAccount, type DeviceCodePrompt } from '@renderer/hooks/useGitHubAccount'
@@ -28,8 +30,15 @@ export function GitHubSignInButton({
   className?: string
   block?: boolean
 }): React.JSX.Element {
-  const { connect, connecting, canUseDeviceFlow, signInWithDevice, cancelDeviceSignIn } =
-    useGitHubAccount()
+  const {
+    connect,
+    connecting,
+    canUseDeviceFlow,
+    canUseWebFlow,
+    signInWithDevice,
+    signInWithWeb,
+    cancelDeviceSignIn
+  } = useGitHubAccount()
   const [open, setOpen] = React.useState(false)
   const [prompt, setPrompt] = React.useState<DeviceCodePrompt | null>(null)
   const [showToken, setShowToken] = React.useState(false)
@@ -40,7 +49,15 @@ export function GitHubSignInButton({
     setPrompt(null)
     setToken('')
     setCopied(false)
-    setShowToken(!canUseDeviceFlow)
+    setShowToken(!canUseDeviceFlow && !canUseWebFlow)
+  }
+
+  const continueOnGitHub = async (): Promise<void> => {
+    try {
+      await signInWithWeb()
+    } catch (e) {
+      toast.error('Sign-in failed', { description: e instanceof Error ? e.message : String(e) })
+    }
   }
 
   const start = async (): Promise<void> => {
@@ -176,7 +193,7 @@ export function GitHubSignInButton({
                   Connect
                 </Button>
               </div>
-              {canUseDeviceFlow && (
+              {(canUseDeviceFlow || canUseWebFlow) && (
                 <button
                   className="self-start text-[11px] text-[var(--text-muted)] hover:text-[var(--text-body)]"
                   onClick={() => {
@@ -187,6 +204,21 @@ export function GitHubSignInButton({
                   ← Back to signing in with GitHub
                 </button>
               )}
+            </div>
+          ) : canUseWebFlow ? (
+            <div className="flex flex-col gap-3">
+              <p className="text-xs text-[var(--text-muted)]">
+                GitHub will ask you to approve tinyStudio, then send you straight back here.
+                tinyStudio asks for access to public repositories only.
+              </p>
+              <Button onClick={continueOnGitHub} disabled={connecting}>
+                {connecting ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <ExternalLink size={15} />
+                )}{' '}
+                Continue on GitHub
+              </Button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 py-4 text-xs text-[var(--text-muted)]">

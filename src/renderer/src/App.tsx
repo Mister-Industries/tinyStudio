@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { reportError } from './lib/notify'
+import { notify as toast, reportError } from './lib/notify'
+import { completeWebSignIn, isCallbackUrl } from './lib/githubWebAuth'
 import { BackendPrompt } from './components/BackendPrompt'
 import { loadGitHubProject, openRecentFolder, openFolder } from './commands/fileCommands'
 import { listRecentProjects } from './lib/projectStore'
@@ -115,6 +116,23 @@ export default function App(): React.JSX.Element {
   useEffect(() => {
     if (reopenedRef.current) return
     reopenedRef.current = true
+
+    // Back from github.com (web build): finish signing in, then carry on from
+    // the page the user was on, which may itself be a project deep link.
+    if (!fileSystem.isElectron() && isCallbackUrl()) {
+      void completeWebSignIn().then((result) => {
+        window.history.replaceState(null, '', result.returnTo)
+        if (result.account) toast.success(`Signed in as ${result.account.login}`)
+        else if (result.error) toast.error('GitHub sign-in failed', { description: result.error })
+        const back = parseProjectRoute(new URL(result.returnTo, window.location.origin).pathname)
+        if (back) {
+          loadGitHubProject(back.owner, back.repo, back.path).catch((e) =>
+            reportError('Could not open that project', e)
+          )
+        }
+      })
+      return
+    }
 
     const route = parseProjectRoute()
     if (route) {

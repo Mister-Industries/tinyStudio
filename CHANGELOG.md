@@ -28,6 +28,9 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
   keychain instead of browser storage. A personal access token is still accepted
   under **Advanced**.
 - Sign-in asks only for access to public repositories.
+- The browser build signs in through github.com and comes straight back, no
+  token to paste. The web app's address is `studio.tinycore.cc`;
+  `app.tinystudio.cc` forwards to it.
 - **Make it mine** copies an example into a new public repo in your account,
   images included, and keeps you editing there.
 - Link, Push, Pull and Publish from the GitHub tab. A project opened from a repo

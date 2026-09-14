@@ -12,6 +12,8 @@ export const STORAGE_KEYS = {
   lastWorkspace: 'tinystudio.lastWorkspace',
   recentProjects: 'tinystudio.recentProjects',
   githubAccount: 'tinystudio.github.account',
+  // sessionStorage: the state and PKCE verifier of a web sign-in in progress
+  githubOAuthPending: 'tinystudio.github.oauth',
   anthropicApiKey: 'tinystudio.anthropicApiKey',
   agentModel: 'tinystudio.agent.model',
   examplesManifestUrl: 'tinystudio.examples.url',

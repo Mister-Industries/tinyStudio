@@ -48,7 +48,9 @@ These block specific steps below. Raise them early.
    art or the tests are right, don't run `npm run parts:sync`.
 3. **Write access to tinyStudio-examples** (step 11).
 4. **The GitHub OAuth client id** (step 6), and the client secret set in Netlify's
-   environment.
+   environment. The id arrived 2026-09-14; the secret, the callback URLs and the
+   deploy-preview subdomain are the owner's Netlify and GitHub settings
+   ([accounts-and-domains.md](accounts-and-domains.md), "Change now").
 5. **`npm audit`** reports 21 vulnerabilities, 1 critical. Show the owner the
    critical one; apply fixes that don't need a major version bump.
 
@@ -137,26 +139,37 @@ unchanged. Remove the matching Known issue from `README.md`.
 
 ### 6. GitHub sign-in in the browser [GAP-2, REL-5, B.1]
 
-1. **Client id [REL-5].** Ask the owner for the OAuth app's client id. Make it the
-   default in `src/main/githubAuth.ts` and `electron.vite.config.ts`, keeping
-   `VITE_GITHUB_CLIENT_ID` as an override. A client id is public. Update
-   `docs/github-auth.md`, the checklist in `docs/packaging-windows.md` and the
-   README.
+The domains and the OAuth app's registration are decided in
+[accounts-and-domains.md](accounts-and-domains.md); this step follows it.
+
+1. **Client id [REL-5].** The tinyStudio OAuth app's client id is public. Make
+   it the default in `src/shared/githubApp.ts`, used by `src/main/githubAuth.ts`,
+   `electron.vite.config.ts` and the web build, keeping `VITE_GITHUB_CLIENT_ID`
+   as an override. Update `docs/github-auth.md`, the checklist in
+   `docs/packaging-windows.md` and the README.
 2. **Web flow.** GitHub's web OAuth flow needs the client secret for the token
-   exchange, so that exchange runs server-side:
+   exchange even with PKCE, so that exchange runs server-side:
    - **Netlify function.** Add `netlify/functions/github-token.ts` and wire it in
      `netlify.toml`. It swaps the code for a token using `GITHUB_CLIENT_SECRET`
-     from Netlify's environment. Allow only `https://app.tinystudio.cc` and
-     `http://localhost:5173`.
-   - **PKCE.** Add it (`code_challenge`) if GitHub supports it for OAuth apps;
-     check GitHub's current docs.
+     from Netlify's environment. Origins it accepts: `https://studio.tinycore.cc`,
+     `https://app.tinystudio.cc` until it forwards,
+     `https://deploy-preview-<n>.preview.tinystudio.cc`, `http://localhost:5173`
+     and `http://localhost:5174`.
+   - **PKCE.** GitHub supports `code_challenge` (S256) for OAuth apps; use it.
    - **Scope:** `public_repo` only. The owner decided against private-repo access.
-   - **Callback.** Add a route such as `/auth/github/callback`. Make
-     `lib/projectRouting.ts` ignore it, so it isn't read as `/<owner>/<repo>`.
-   - **Local development.** An OAuth app has one callback URL, so it may need a
-     second app. Ask the owner.
+   - **Callback.** `/auth/github/callback` (not `/auth/callback`, which the
+     tinyCore sign-in uses). Build `redirect_uri` from `window.location.origin`,
+     so every host returns to itself. Make `lib/projectRouting.ts` ignore
+     `/auth/*`, so it isn't read as `/<owner>/<repo>`.
+   - **Local development.** An OAuth app allows up to 10 callback URLs, so no
+     second app is needed; the localhost callbacks are registered on the one app.
    - **Token field.** The pasted token stays under **Advanced**.
-3. Done when a Netlify deploy preview signs in without a pasted token.
+3. **Domain references.** `app.tinystudio.cc` becomes `studio.tinycore.cc` in
+   `netlify.toml`, `lib/projectRouting.ts`, `src/shared/agentGuides/tinystudio.md`,
+   `docs/github-auth.md`, `INTEGRATION_GUIDE.md` and this plan. Links to
+   `https://tinystudio.cc` stay: that address becomes the landing page.
+4. Done when `studio.tinycore.cc` and a deploy preview at
+   `deploy-preview-N.preview.tinystudio.cc` both sign in without a pasted token.
 
 ### 7. Circuit editor [B.4]
 

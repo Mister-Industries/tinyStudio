@@ -100,8 +100,9 @@ from the
 different address, set `localStorage["tinyservice.url"]`. More in
 [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md).
 
-GitHub sign-in on desktop needs an OAuth app client id at build time; see
-[docs/github-auth.md](docs/github-auth.md).
+GitHub sign-in works out of the box on desktop (device flow) and in the browser
+(web flow); the app's OAuth client id is built in. How it works, and what the
+Netlify site needs for the browser flow: [docs/github-auth.md](docs/github-auth.md).
 
 ### Check
 

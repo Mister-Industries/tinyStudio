@@ -1,12 +1,18 @@
-# Netlify configuration for the tinyStudio web build (app.tinyStudio.cc).
+# Netlify configuration for the tinyStudio web build (studio.tinycore.cc).
 #
 # The same renderer that ships in the Electron desktop app is built as a static
 # bundle by `npm run build:web` (see web.vite.config.mts) into dist-web/. Netlify
-# serves that bundle.
+# serves that bundle, plus one function: the GitHub sign-in's token exchange
+# (netlify/functions/github-token.ts), which needs GITHUB_CLIENT_SECRET in the
+# site's environment. See docs/accounts-and-domains.md for the domains.
 
 [build]
   command = "npm run build:web"
   publish = "dist-web"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 [build.environment]
   # Pin Node so cloud builds match local dev (package.json requires Node 18+).

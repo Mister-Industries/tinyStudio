@@ -3,15 +3,19 @@
  * header profile, the GitHub source-control tab, and the Visual "Publish"
  * button — stays in sync when you sign in or out.
  *
- * Two ways in:
- *   • **Device flow** (desktop, preferred). No token to paste, no client secret
- *     in the app. Runs in the main process because GitHub's OAuth endpoints
- *     send no CORS headers, and the token lands in the OS keychain.
- *   • **Personal Access Token** (web today, and an escape hatch on desktop for
- *     enterprise setups). On desktop this now also stores via the keychain.
+ * Three ways in:
+ *   • **Device flow** (desktop). No token to paste, no client secret in the
+ *     app. Runs in the main process because GitHub's OAuth endpoints send no
+ *     CORS headers, and the token lands in the OS keychain.
+ *   • **Web flow** (browser). The page goes to github.com and comes back to
+ *     /auth/github/callback; a Netlify function swaps the code for a token
+ *     (lib/githubWebAuth).
+ *   • **Personal Access Token**, behind "Advanced", for enterprise and
+ *     air-gapped setups. On desktop this also stores via the keychain.
  */
 
 import { ghUser, GitHubAccount, initAccount, loadAccount, saveAccount } from '@renderer/lib/github'
+import { canUseWebFlow, startWebSignIn } from '@renderer/lib/githubWebAuth'
 import { useCallback, useEffect, useState } from 'react'
 
 const ACCOUNT_EVENT = 'tinystudio:github-account'
@@ -26,10 +30,14 @@ export interface UseGitHubAccount {
   connecting: boolean
   /** True on desktop with an OAuth client ID built in — i.e. no PAT needed. */
   canUseDeviceFlow: boolean
-  /** Paste-a-token path. Still the only option on the web build for now. */
+  /** True in the browser build: sign-in goes through github.com and comes back. */
+  canUseWebFlow: boolean
+  /** Paste-a-token path, behind "Advanced". */
   connect: (token: string) => Promise<GitHubAccount>
   /** `onPrompt` fires with the code to show the user, then resolves when done. */
   signInWithDevice: (onPrompt: (p: DeviceCodePrompt) => void) => Promise<GitHubAccount>
+  /** Leaves for github.com; the app finishes the sign-in when the page comes back. */
+  signInWithWeb: () => Promise<void>
   cancelDeviceSignIn: () => void
   signOut: () => void
 }
@@ -101,6 +109,16 @@ export function useGitHubAccount(): UseGitHubAccount {
     bridge()?.cancelSignIn()
   }, [])
 
+  const signInWithWeb = useCallback(async (): Promise<void> => {
+    setConnecting(true)
+    try {
+      await startWebSignIn()
+    } catch (e) {
+      setConnecting(false)
+      throw e
+    }
+  }, [])
+
   const signOut = useCallback((): void => {
     bridge()?.signOut()
     saveAccount(null)
@@ -111,8 +129,10 @@ export function useGitHubAccount(): UseGitHubAccount {
     account,
     connecting,
     canUseDeviceFlow,
+    canUseWebFlow: canUseWebFlow(),
     connect,
     signInWithDevice,
+    signInWithWeb,
     cancelDeviceSignIn,
     signOut
   }

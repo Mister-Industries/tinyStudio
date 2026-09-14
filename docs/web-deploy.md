@@ -1,16 +1,21 @@
-# Deploying the web build to Netlify (app.tinyStudio.cc)
+# Deploying the web build to Netlify (studio.tinycore.cc)
 
 The same React renderer that ships in the desktop app is built as a static
 bundle and hosted in the browser. This is the cloud-hosted IDE at
-`app.tinyStudio.cc`. Compile/upload/serial still run through **tinyService** on
-the user's own machine — the hosted page just connects to it over a local
-WebSocket.
+`studio.tinycore.cc` (`app.tinystudio.cc` and `tinystudio.cc` forward to it;
+the domain plan is in [accounts-and-domains.md](accounts-and-domains.md)).
+Compile/upload/serial still run through **tinyService** on the user's own
+machine — the hosted page just connects to it over a local WebSocket.
 
 ## 1. What's in the repo
 
 - [`netlify.toml`](../netlify.toml) — build command (`npm run build:web`), publish
-  dir (`dist-web`), Node version, and the SPA fallback redirect that makes
-  `/<owner>/<repo>/<path>` deep links work.
+  dir (`dist-web`), Node version, the functions folder, and the SPA fallback
+  redirect that makes `/<owner>/<repo>/<path>` deep links work.
+- [`netlify/functions/github-token.ts`](../netlify/functions/github-token.ts) —
+  the one server-side step of GitHub sign-in in the browser. It needs
+  `GITHUB_CLIENT_SECRET` in the site's environment variables
+  ([github-auth.md](github-auth.md)).
 - The web build's asset base is `/` (see [`web.vite.config.mts`](../web.vite.config.mts))
   so assets resolve from any deep path.
 
@@ -19,31 +24,30 @@ WebSocket.
 1. Netlify → **Add new site → Import an existing project** → pick this GitHub repo.
 2. Build settings are read from `netlify.toml`; you shouldn't need to change them.
    (If asked: build command `npm run build:web`, publish directory `dist-web`.)
-3. Choose the branch to deploy (e.g. `main`). Deploy.
+3. Site configuration → Environment variables: add `GITHUB_CLIENT_SECRET`, the
+   tinyStudio OAuth app's secret.
+4. Domain management → Automatic deploy subdomains → Deploy Previews: domain
+   `tinystudio.cc`, subdomain `preview`, so previews get
+   `deploy-preview-N.preview.tinystudio.cc` and can sign in.
+5. Choose the branch to deploy (e.g. `main`). Deploy.
 
 You now have a `*.netlify.app` URL. Confirm the app loads and that a deep link
 like `https://<site>.netlify.app/Mister-Industries/tinyStudio-examples/basics/blink-basic`
 opens that project (proves the SPA redirect works).
 
-## 3. Point app.tinyStudio.cc at it
+## 3. Point studio.tinycore.cc at it
 
-1. Netlify → **Domain settings → Add a domain** → `app.tinyStudio.cc`.
-2. At your DNS provider for `tinyStudio.cc`, add the record Netlify shows. Usually:
-
-   | Type  | Name  | Value                     |
-   | ----- | ----- | ------------------------- |
-   | CNAME | `app` | `<your-site>.netlify.app` |
-
-   (Netlify may instead give you their `apex`/`ALIAS` instructions — follow what
-   the dashboard shows for the subdomain.)
-
-3. Netlify auto-provisions a Let's Encrypt certificate once DNS resolves. The
-   apex `tinyStudio.cc` is left free for the marketing homepage (a separate repo,
-   later).
+1. Netlify → **Domain settings → Add a domain** → `studio.tinycore.cc`. All four
+   domains use Netlify DNS, so the record is created for you.
+2. Netlify auto-provisions a Let's Encrypt certificate once DNS resolves.
+3. Make it the primary domain, and forward the old address with the rule in
+   [accounts-and-domains.md](accounts-and-domains.md) (`app.tinystudio.cc/*` →
+   `studio.tinycore.cc/:splat`). The apex `tinystudio.cc` becomes the landing
+   page, a separate site that forwards every non-landing path to the app.
 
 ## 4. Deep links to GitHub projects
 
-Scheme: `app.tinyStudio.cc/<owner>/<repo>/<optional/sub/path>`
+Scheme: `studio.tinycore.cc/<owner>/<repo>/<optional/sub/path>`
 
 - `…/Mister-Industries/tinyStudio-examples/basics/blink-basic` opens that folder.
 - The folder is fetched from the repo's **default branch** via the GitHub API +
