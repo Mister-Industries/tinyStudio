@@ -94,30 +94,30 @@ export interface TinypartsSnapshot {
 
 export const SNAPSHOT: TinypartsSnapshot = {
   "repo": "Mister-Industries/tinyparts",
-  "commit": "d5f96b87e90329350bcc1af60eeb4549e3d99710",
-  "dirty": true,
+  "commit": "0085e41a8cc546272c2bd78bc9f4bd8e9293f0f8",
+  "dirty": false,
   "packs": [
     {
       "id": "tinyboards",
       "files": {
         "pack.json": "4b9bac9f7c8d70e613ce00d1c87c4ff4281d1ec5",
-        "parts/tinycore/breadboard.svg": "ecdb1524fcecf0bfb866d1326dbb64e71f013103",
-        "parts/tinycore/icon.svg": "e369d2be9e1bd9f084fde8f828ab88318db0768b",
+        "parts/tinycore/breadboard.svg": "1779cf14d778fc1a9344ff7a79fd2c4ecc3c968f",
+        "parts/tinycore/icon.svg": "334dfafa8d2954026c2448486a7aafeadac28e51",
         "parts/tinycore/part.json": "4168f74b75e81176d4d09a3bbc36cc0782e5322b",
-        "parts/tinydisplay/breadboard.svg": "fdcfce392199d25ca2748a61c5e93510f520b8b8",
-        "parts/tinydisplay/icon.svg": "369745278920993cc2313c7d8e2e12b58f724792",
+        "parts/tinydisplay/breadboard.svg": "411211170cdd786ed66bf34ce09190a928661c5c",
+        "parts/tinydisplay/icon.svg": "5c090fc0fe43c4250087c233f68feab4a616c1e9",
         "parts/tinydisplay/part.json": "2fc0bf7f33de43eb5d2069fade89b327a0414a1c",
         "parts/tinyglow/breadboard.svg": "cec2d1227f82df2bd3e0e376d509fa1bbe7230c9",
         "parts/tinyglow/icon.svg": "f30714fbc20507685d08595d35282577a228d845",
         "parts/tinyglow/part.json": "b75e1713e62cf730b0806b5392b7a5c6edd0d7b9",
-        "parts/tinyproto/breadboard.svg": "671e72a2c338615ed0a2c02e9caa7e31a13dfd69",
-        "parts/tinyproto/icon.svg": "f1e8055f61e451117bf2df94c2ccf4215557ce9c",
+        "parts/tinyproto/breadboard.svg": "3772b77d543b004105083515e9de76bb49dc0b9c",
+        "parts/tinyproto/icon.svg": "3772b77d543b004105083515e9de76bb49dc0b9c",
         "parts/tinyproto/part.json": "5f8707d4a2f3d2344443b7638eb0863104615af9",
         "parts/tinysniff/breadboard.svg": "1f2919cefb222c0db630bcf4db8db192e457ae0e",
         "parts/tinysniff/icon.svg": "92f9363ecb9755bca44ad5bc3eed9212202c39e6",
         "parts/tinysniff/part.json": "8ceeef62e1b245133d19a76694fd24deaf0810ce",
-        "parts/tinyspeak/breadboard.svg": "5b9e6c177cb6e4d6c5c7cd4df11b56cec3034c1b",
-        "parts/tinyspeak/icon.svg": "82af5701f2fc3dafc7f96de19344bf65f35e77e3",
+        "parts/tinyspeak/breadboard.svg": "e9dcf76268ab87f0f3f7b7e9a601b62ab8c69221",
+        "parts/tinyspeak/icon.svg": "e9dcf76268ab87f0f3f7b7e9a601b62ab8c69221",
         "parts/tinyspeak/part.json": "8a33d2ae8283ecd4de172154f79bc673d0a36e54"
       }
     },

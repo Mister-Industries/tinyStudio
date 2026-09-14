@@ -48,6 +48,7 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
 - The Parts Packs panel is reorganised into Built in, Developer, This computer
   and More packs. Installed packs stay linked to GitHub.
 - Fritzing art ships with its CC-BY-SA attribution.
+- New breadboard art for the tinyCore, tinyDisplay, tinyProto and tinySpeak.
 
 ### Circuit view
 

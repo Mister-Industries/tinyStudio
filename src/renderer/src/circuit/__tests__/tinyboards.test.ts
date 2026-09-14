@@ -194,11 +194,11 @@ test('only the five ringed groups are bussed; every other hole is an island', as
 test('moving a pad in the art moves the pin — nothing else to update', async () => {
   const def = getPart('tinycore') ?? (await ensureParts(['tinycore']), getPart('tinycore')!)
   const src = def.source!
-  // shift pin-GND (tinyCore's pads are socket <rect>s) one pitch — 7.2
-  // viewBox units, 9.6px — to the right
+  // shift pin-GND (tinyCore's pads are <circle>s) one pitch — 5.4 viewBox
+  // units, 7.2px — to the right
   const edited = src.raw!.breadboard!.replace(
-    /(<rect id="pin-GND" x=")([\d.]+)/,
-    (_m, head: string, x: string) => `${head}${(parseFloat(x) + 7.2).toFixed(2)}`
+    /(<circle id="pin-GND"[^>]*?cx=")([\d.]+)/,
+    (_m, head: string, x: string) => `${head}${(parseFloat(x) + 5.4).toFixed(2)}`
   )
   assert.notEqual(edited, src.raw!.breadboard)
   const moved = await buildFolderPart(
@@ -206,7 +206,7 @@ test('moving a pad in the art moves the pin — nothing else to update', async (
     async (p) => (p.endsWith('/breadboard.svg') ? edited : readBundled(p)),
     { layer: 'dev', pack: src.pack, dir: src.dir! }
   )
-  assert.deepEqual(moved.views.breadboard!.pins['GND'], [16.8, 57.6])
+  assert.deepEqual(moved.views.breadboard!.pins['GND'], [14.4, 57.6])
   assert.deepEqual(moved.views.breadboard!.pins['3V3'], def.views.breadboard!.pins['3V3'])
 })
 

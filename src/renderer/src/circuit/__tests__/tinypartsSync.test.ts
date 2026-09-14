@@ -48,8 +48,8 @@ test('a pushed art edit downloads just that file, and the app serves it', async 
   const before = getPart('tinycore')!.views.breadboard!.pins['GND']
   const path = 'packs/tinyboards/parts/tinycore/breadboard.svg'
   const art = (await readBundled(path)).replace(
-    /(<rect id="pin-GND" x=")([\d.]+)/,
-    (_m, head: string, x: string) => `${head}${(parseFloat(x) + 7.2).toFixed(2)}`
+    /(<circle id="pin-GND"[^>]*?cx=")([\d.]+)/,
+    (_m, head: string, x: string) => `${head}${(parseFloat(x) + 5.4).toFixed(2)}`
   )
   const tree = bundledTree('tinyboards')
   tree.set(path, 'e'.repeat(40))
@@ -64,7 +64,7 @@ test('a pushed art edit downloads just that file, and the app serves it', async 
 
   await ensureParts(['tinycore'])
   assert.equal(PART_MANIFEST.find((m) => m.type === 'tinycore')?.layer, 'remote')
-  assert.deepEqual(getPart('tinycore')!.views.breadboard!.pins['GND'], [before[0] + 9.6, before[1]])
+  assert.deepEqual(getPart('tinycore')!.views.breadboard!.pins['GND'], [before[0] + 7.2, before[1]])
   // untouched boards still resolve (served from the cache copy of bundled files)
   await ensureParts(['tinyglow'])
   assert.ok(getPart('tinyglow'))
