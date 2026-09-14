@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { notify as toast } from './lib/notify'
+import { reportError } from './lib/notify'
 import { BackendPrompt } from './components/BackendPrompt'
 import { loadGitHubProject, openRecentFolder, openFolder } from './commands/fileCommands'
 import { listRecentProjects } from './lib/projectStore'
@@ -118,12 +118,9 @@ export default function App(): React.JSX.Element {
 
     const route = parseProjectRoute()
     if (route) {
-      loadGitHubProject(route.owner, route.repo, route.path).catch((e) => {
-        console.error('Failed to load project from URL:', e)
-        toast.error('Could not open that project', {
-          description: e instanceof Error ? e.message : String(e)
-        })
-      })
+      loadGitHubProject(route.owner, route.repo, route.path).catch((e) =>
+        reportError('Could not open that project', e)
+      )
       return
     }
 
@@ -136,7 +133,7 @@ export default function App(): React.JSX.Element {
       const entry = listRecentProjects().find((r) => r.kind === 'folder' && r.location === last)
       if (entry) {
         openRecentFolder(entry, { prompt: false }).catch((e) =>
-          console.error('Failed to reopen last folder:', e)
+          console.warn('Could not reopen the last folder at launch:', e)
         )
       }
       return
@@ -147,7 +144,7 @@ export default function App(): React.JSX.Element {
         // A folder from before access was tracked waits under Recent until it's chosen again.
         else if (allowed) void openFolder(last)
       })
-      .catch((e) => console.error('Failed to reopen last workspace:', e))
+      .catch((e) => console.warn('Could not reopen the last workspace at launch:', e))
   }, [])
 
   // Honor browser back/forward between projects.
@@ -156,7 +153,7 @@ export default function App(): React.JSX.Element {
       const route = parseProjectRoute()
       if (route) {
         loadGitHubProject(route.owner, route.repo, route.path).catch((e) =>
-          console.error('Failed to load project on navigation:', e)
+          reportError('Could not open that project', e)
         )
       }
     }

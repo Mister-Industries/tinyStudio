@@ -184,6 +184,7 @@ Where to read more:
 | The circuit editor                 | [docs/circuit-view-tech-spec.md](docs/circuit-view-tech-spec.md)                                             |
 | Parts, packs and art               | [docs/parts-and-art.md](docs/parts-and-art.md), [docs/tinyparts-pack-setup.md](docs/tinyparts-pack-setup.md) |
 | Where state lives                  | [docs/state-management.md](docs/state-management.md)                                                         |
+| Code conventions                   | [docs/code-conventions.md](docs/code-conventions.md)                                                         |
 | Opening and saving files           | [docs/file-editing-flow.md](docs/file-editing-flow.md)                                                       |
 | GitHub sign-in                     | [docs/github-auth.md](docs/github-auth.md)                                                                   |
 | What is planned for 0.4.0 and beta | [docs/release-plan.md](docs/release-plan.md), from [the September 2026 audit](docs/audit-2026-09.md)         |

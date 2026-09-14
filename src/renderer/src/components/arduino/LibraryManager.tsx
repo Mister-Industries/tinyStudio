@@ -16,7 +16,7 @@ import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { LibraryEntry } from '@renderer/services/arduino/types'
 import { Check, Download, Library, Loader2, Package, Search, Trash2 } from 'lucide-react'
 import React from 'react'
-import { notify as toast } from '@renderer/lib/notify'
+import { notify as toast, reportError } from '@renderer/lib/notify'
 
 export function LibraryManager(): React.JSX.Element {
   const { isAgentConnected, searchLibraries, listLibraries, installLibrary, uninstallLibrary } =
@@ -33,7 +33,7 @@ export function LibraryManager(): React.JSX.Element {
     try {
       setInstalled(await listLibraries())
     } catch (e) {
-      console.error('Failed to list libraries:', e)
+      reportError('Could not list the installed libraries', e)
     }
   }, [listLibraries])
 

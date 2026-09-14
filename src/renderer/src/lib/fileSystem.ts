@@ -49,7 +49,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         return result
       }
     } catch (error) {
-      console.error('Error selecting folder:', error)
       throw new Error(`Failed to select folder: ${(error as Error).message}`)
     }
   }
@@ -72,7 +71,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         return await webFileSystem.readDirectory(dirPath, recursive)
       }
     } catch (error) {
-      console.error('Error reading directory:', error)
       throw new Error(`Failed to read directory: ${(error as Error).message}`)
     }
   }
@@ -98,7 +96,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
           return cached
         }
       }
-      console.error('Error reading file:', error)
       throw new Error(`Failed to read file: ${(error as Error).message}`)
     }
   }
@@ -118,7 +115,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         void webCache.put(filePath, content)
       }
     } catch (error) {
-      console.error('Error writing file:', error)
       throw new Error(`Failed to write file: ${(error as Error).message}`)
     }
   }
@@ -137,7 +133,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         void webCache.put(filePath, content)
       }
     } catch (error) {
-      console.error('Error creating file:', error)
       throw new Error(`Failed to create file: ${(error as Error).message}`)
     }
   }
@@ -155,7 +150,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         void webCache.rename(oldPath, newPath)
       }
     } catch (error) {
-      console.error('Error renaming file:', error)
       throw new Error(`Failed to rename file: ${(error as Error).message}`)
     }
   }
@@ -173,7 +167,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         await webFileSystem.createFolder(folderPath)
       }
     } catch (error) {
-      console.error('Error creating folder:', error)
       throw new Error(`Failed to create folder: ${(error as Error).message}`)
     }
   }
@@ -192,7 +185,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         void webCache.remove(targetPath)
       }
     } catch (error) {
-      console.error('Error deleting file/folder:', error)
       throw new Error(`Failed to delete file/folder: ${(error as Error).message}`)
     }
   }
@@ -209,7 +201,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         return await webFileSystem.pathExists(targetPath)
       }
     } catch (error) {
-      console.error('Error checking path existence:', error)
+      console.warn('pathExists treated as false:', targetPath, error)
       return false
     }
   }
@@ -226,7 +218,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         return await webFileSystem.getFileStats(filePath)
       }
     } catch (error) {
-      console.error('Error getting file stats:', error)
       throw new Error(`Failed to get file stats: ${(error as Error).message}`)
     }
   }
@@ -389,7 +380,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
 
       return null
     } catch (error) {
-      console.error('Error finding/reading README:', error)
+      console.warn('README lookup failed; treated as no README:', error)
       return null
     }
   }

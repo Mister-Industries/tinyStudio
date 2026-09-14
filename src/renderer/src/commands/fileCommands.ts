@@ -14,7 +14,7 @@ import {
   saveLink,
   type RepoLink
 } from '@renderer/lib/github'
-import { notify as toast } from '@renderer/lib/notify'
+import { notify as toast, reportError } from '@renderer/lib/notify'
 import { STORAGE_KEYS } from '@renderer/lib/storageKeys'
 import { flattenSketchLayout, suggestProjectName } from '@renderer/lib/projectLayout'
 import {
@@ -187,7 +187,7 @@ async function activateWorkspace(workspace: Workspace): Promise<void> {
     fileSystem
       .readFile(readme.path)
       .then((content) => dispatch(updateReadmeContent(content)))
-      .catch((e) => console.error('Failed to read README:', e))
+      .catch((e) => console.warn('README not read for the Docs tab:', readme.path, e))
   }
 
   const diagram = fileItems.find((file) => file.name === 'diagram.svg')
@@ -195,7 +195,7 @@ async function activateWorkspace(workspace: Workspace): Promise<void> {
     fileSystem
       .readFile(diagram.path)
       .then((content) => dispatch(updateDiagramSvgContent(content)))
-      .catch((e) => console.error('Failed to read diagram.svg:', e))
+      .catch((e) => console.warn('diagram.svg not read for the README preview:', diagram.path, e))
   }
 
   const sketch =
@@ -560,10 +560,7 @@ export async function saveProjectToComputer(): Promise<void> {
       description: `${where}From now on, Save writes straight to this folder.${linked}`
     })
   } catch (e) {
-    console.error('Save to computer failed:', e)
-    toast.error('Could not save to your computer', {
-      description: e instanceof Error ? e.message : String(e)
-    })
+    reportError('Could not save to your computer', e)
   } finally {
     dispatch(setSavingToComputer(false))
   }

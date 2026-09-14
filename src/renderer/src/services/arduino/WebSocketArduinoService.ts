@@ -368,7 +368,7 @@ export class WebSocketArduinoService implements ArduinoService {
       })
 
       errorUnsubscribe = this.client.onError((error) => {
-        console.error(`[${action}] WebSocket error:`, error)
+        console.warn(`[${action}] WebSocket error (the request is rejected with it):`, error)
         safeReject(error instanceof Error ? error : new Error(String(error)))
       })
     })
@@ -448,7 +448,10 @@ export class WebSocketArduinoService implements ArduinoService {
           }
         }
       } catch (parseError) {
-        console.error('Error parsing board list:', parseError)
+        console.warn(
+          'Board list from tinyService could not be parsed; keeping the last one:',
+          parseError
+        )
       }
 
       // Cache the successful result
@@ -456,7 +459,6 @@ export class WebSocketArduinoService implements ArduinoService {
 
       return boards
     } catch (error) {
-      console.error('Error listing boards:', error)
       throw new Error(
         `Failed to list boards: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
@@ -495,7 +497,6 @@ export class WebSocketArduinoService implements ArduinoService {
 
       throw new Error(`Board not found on port ${port}`)
     } catch (error) {
-      console.error('Error getting board info:', error)
       throw new Error(
         `Failed to get board info: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
@@ -532,7 +533,6 @@ export class WebSocketArduinoService implements ArduinoService {
         errors: result.error ? [{ message: result.error, severity: 'fatal' as const }] : undefined
       }
     } catch (error) {
-      console.error('Error compiling sketch:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       return {
         success: false,
@@ -583,7 +583,6 @@ export class WebSocketArduinoService implements ArduinoService {
         error: result.error
       }
     } catch (error) {
-      console.error('Error uploading sketch:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       return {
         success: false,

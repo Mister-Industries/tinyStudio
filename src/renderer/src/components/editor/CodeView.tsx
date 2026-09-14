@@ -3,7 +3,7 @@
 import { promptSaveToComputer } from '@renderer/commands/fileCommands'
 import { useIsReadOnlyProject } from '@renderer/hooks/useIsReadOnlyProject'
 import { fileSystem } from '@renderer/lib/fileSystem'
-import { notify as toast } from '@renderer/lib/notify'
+import { notify as toast, reportError } from '@renderer/lib/notify'
 import { matches } from '@renderer/lib/shortcuts'
 import { isVirtualPath } from '@renderer/lib/virtualFileSystem'
 import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
@@ -105,10 +105,7 @@ export function CodeView(): React.JSX.Element {
     } catch (error) {
       // A failed save must be loud: in the browser it is the common case,
       // because File System Access permission is dropped on reload.
-      console.error('Failed to save file:', error)
-      toast.error(`Could not save ${file.name}`, {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      reportError(`Could not save ${file.name}`, error)
     }
   }
 

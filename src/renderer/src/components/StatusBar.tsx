@@ -169,7 +169,10 @@ export function StatusBar(): React.JSX.Element {
     try {
       await checkAgentStatus()
     } catch (error) {
-      console.error('Failed to check Arduino service status:', error)
+      console.warn(
+        'tinyService status check failed; the status bar keeps showing Disconnected:',
+        error
+      )
     }
   }
 

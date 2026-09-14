@@ -35,6 +35,7 @@ import {
   ZoomOut
 } from 'lucide-react'
 import React from 'react'
+import { reportError } from '../../lib/notify'
 import { keysOf } from '../../lib/shortcuts'
 import {
   PART_MANIFEST,
@@ -727,8 +728,7 @@ export function CircuitViewV2({
       saveImage(shot)
       setSavedFile({ name: shot.name, id: ++saveSeq.current })
     } catch (err) {
-      console.error('circuit PNG export failed', err)
-      toast.error(`PNG export failed — ${(err as Error)?.message ?? String(err)}`)
+      reportError('PNG export failed', err)
     } finally {
       setExporting(false)
     }
@@ -743,8 +743,7 @@ export function CircuitViewV2({
       }
       setSavedFile({ name: shot.name, id: ++saveSeq.current })
     } catch (err) {
-      console.error('circuit SVG export failed', err)
-      toast.error(`SVG export failed — ${(err as Error)?.message ?? String(err)}`)
+      reportError('SVG export failed', err)
     }
   }, [doc, view])
 

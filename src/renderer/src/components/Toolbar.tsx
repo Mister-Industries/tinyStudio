@@ -7,7 +7,7 @@ import {
   useAppDispatch,
   useAppSelector
 } from '@renderer/redux'
-import { notify as toast } from '@renderer/lib/notify'
+import { reportError } from '@renderer/lib/notify'
 import { RefreshCw, Save } from 'lucide-react'
 import React from 'react'
 import { UploadButton, VerifyButton } from './arduino/ArduinoButtons'
@@ -35,13 +35,10 @@ export function Toolbar(): React.JSX.Element {
         // Browser-only project: ask where it should live for real.
         promptSaveToComputer()
       } catch (error) {
-        console.error('Failed to save file:', error)
-        toast.error(`Could not save ${file.name}`, {
-          description: error instanceof Error ? error.message : 'Unknown error'
-        })
+        reportError(`Could not save ${file.name}`, error)
       }
     } else if (!promptSaveToComputer()) {
-      console.error('Cannot save file: file path is undefined')
+      console.warn('Save: the open file has no path, nothing written', file?.name)
     }
   }
 

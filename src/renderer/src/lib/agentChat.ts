@@ -76,14 +76,14 @@ function reloadChangedFile(path: string): void {
     fileSystem
       .readFile(open.path)
       .then((content) => store.dispatch(refreshFileContentFromDisk({ id: open.id, content })))
-      .catch((e) => console.error('Failed to reload a file Studio AI changed:', e))
+      .catch((e) => console.warn('A file Studio AI changed was not reloaded:', open.path, e))
   }
   // The Documentation tab reads readmeContent, which otherwise updates only on a manual edit.
   if (/(^|\/)README\.md$/i.test(norm)) {
     fileSystem
       .readFile(path)
       .then((content) => store.dispatch(updateReadmeContent(content)))
-      .catch((e) => console.error('Failed to refresh README:', e))
+      .catch((e) => console.warn('README not refreshed after Studio AI changed it:', path, e))
   }
 }
 

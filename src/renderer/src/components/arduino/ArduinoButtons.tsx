@@ -17,7 +17,7 @@ import { AlertCircle, Check, Loader2, Upload } from 'lucide-react'
 import React from 'react'
 // Route build/upload feedback through notify so it also lands in the status-bar
 // notification bell (not just a transient toast).
-import { notify as toast } from '@renderer/lib/notify'
+import { notify as toast, reportError } from '@renderer/lib/notify'
 
 /**
  * Flush all unsaved editor buffers to disk. Verify/Upload compile the sketch
@@ -125,10 +125,7 @@ export function VerifyButton({
         description: `${selectedBoard.config.name} sketch verified.`
       })
     } catch (error) {
-      console.error('Compilation error:', error)
-      toast.error('Compilation failed', {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      reportError('Compilation failed', error)
     }
   }
 
@@ -227,10 +224,7 @@ export function UploadButton({
       }
       toast.success('Upload complete', { description: 'Your sketch is running on the board.' })
     } catch (error) {
-      console.error('Upload error:', error)
-      toast.error('Upload failed', {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      reportError('Upload failed', error)
     }
   }
 

@@ -47,7 +47,7 @@ import {
   Usb
 } from 'lucide-react'
 import React from 'react'
-import { notify as toast } from '@renderer/lib/notify'
+import { notify as toast, reportError } from '@renderer/lib/notify'
 
 const PILL =
   'h-[30px] flex items-center gap-[7px] px-2.5 rounded-[var(--radius-sm)] bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] text-[13px] font-semibold text-[var(--text-strong)] hover:border-[var(--border-interactive)] transition-colors outline-none disabled:opacity-50'
@@ -113,7 +113,7 @@ export function BoardManager(): React.JSX.Element {
     try {
       setInstalled(await listCores())
     } catch (e) {
-      console.error('Failed to list platforms:', e)
+      reportError('Could not list the installed platforms', e)
     }
   }, [listCores])
 
@@ -121,7 +121,7 @@ export function BoardManager(): React.JSX.Element {
     try {
       setAllBoards(await listAllBoards())
     } catch (e) {
-      console.error('Failed to list boards:', e)
+      reportError('Could not list the available boards', e)
     }
   }, [listAllBoards])
 
@@ -129,7 +129,7 @@ export function BoardManager(): React.JSX.Element {
     try {
       setUrls(await listBoardUrls())
     } catch (e) {
-      console.error('Failed to list board URLs:', e)
+      reportError('Could not list the board manager URLs', e)
     }
   }, [listBoardUrls])
 

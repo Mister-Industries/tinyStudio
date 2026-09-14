@@ -87,7 +87,8 @@ export function CreateProjectDialog({
         })
       }
     } catch (e) {
-      console.error('Failed to create project:', e)
+      // Shown inline in the dialog; the console copy keeps the stack for a bug report.
+      console.warn('Create project failed:', e)
       setError(e instanceof Error ? e.message : 'Failed to create project. Please try again.')
     } finally {
       setBusy(false)
