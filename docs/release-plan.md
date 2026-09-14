@@ -8,7 +8,12 @@ brackets (BUG-4, GAP-2) are the audit's, kept so work can be traced back.
 
 **Where things stand.** Branch `v0.4-dev`. Every flagged audit fix is committed
 locally and not pushed (`git log origin/v0.4-dev..HEAD`). Typecheck passes, lint
-has 0 errors, 243 tests pass, the web build succeeds.
+has 0 errors, 277 tests pass, the web build succeeds.
+
+**Progress (2026-09-14).** Steps 1–5, 7a, 7c, 8, 9, 10, 11 and 12 are committed.
+Waiting on the owner: step 6 (client id), 7b (decisions on the parts worksheet),
+7d (the symbol editor mock). Blocker 2 is settled (the art was right; two boards'
+pins were snapped back onto the grid in tinyparts) and blocker 5 is done.
 
 **Rules from the owner**
 
@@ -282,7 +287,9 @@ finds tests. Keep tested functions free of `electron` imports, or stub them.
 ### 13. Release prep
 
 - **BUG-9:** the blink-alternate example opens as "Empty circuit" although it has
-  a `circuit.json`. Find out whether the file or the parser is wrong.
+  a `circuit.json`. Found: the file was empty (`parts: []`), written by 0.3's
+  Circuit view on open and committed by a web-export push. Removed from the
+  examples repo; the parser is right.
 - **Changelog and docs:** finish the 0.4.0 section of `CHANGELOG.md` and the
   README's Known issues.
 - **Owner:** the hardware smoke test (below), then tagging and release.
