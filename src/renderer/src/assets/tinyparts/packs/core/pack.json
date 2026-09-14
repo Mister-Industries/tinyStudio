@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "id": "core",
+  "name": "Core",
+  "version": "2.0.0",
+  "group": "tinyStudio",
+  "icon": "Co",
+  "bundled": true,
+  "description": "Everyday components that ship with tinyStudio: resistors, LEDs, switches, sensors and more.",
+  "parts": [
+    {
+      "type": "switch-spst",
+      "dir": "parts/switch-spst"
+    },
+    {
+      "type": "smd-inductor-0805",
+      "dir": "parts/smd-inductor-0805"
+    },
+    {
+      "type": "battery-aa",
+      "dir": "parts/battery-aa"
+    },
+    {
+      "type": "transistor-signal-npn-to92-ebc",
+      "dir": "parts/transistor-signal-npn-to92-ebc"
+    },
+    {
+      "type": "transistor-signal-pnp-to92-ebc",
+      "dir": "parts/transistor-signal-pnp-to92-ebc"
+    },
+    {
+      "type": "capacitor-ceramic-100mil",
+      "dir": "parts/capacitor-ceramic-100mil"
+    },
+    {
+      "type": "capacitor-ceramic-200mil",
+      "dir": "parts/capacitor-ceramic-200mil"
+    },
+    {
+      "type": "capacitor-electrolytic-medium",
+      "dir": "parts/capacitor-electrolytic-medium"
+    },
+    {
+      "type": "7segment-100-cat",
+      "dir": "parts/7segment-100-cat"
+    },
+    {
+      "type": "diode-1n4001-300mil",
+      "dir": "parts/diode-1n4001-300mil"
+    },
+    {
+      "type": "diode-zener-0-5w-3-6v-300mil",
+      "dir": "parts/diode-zener-0-5w-3-6v-300mil"
+    },
+    {
+      "type": "ir-receiver-v14",
+      "dir": "parts/ir-receiver-v14"
+    },
+    {
+      "type": "led-generic-3mm",
+      "dir": "parts/led-generic-3mm"
+    },
+    {
+      "type": "led-generic-5mm",
+      "dir": "parts/led-generic-5mm"
+    },
+    {
+      "type": "buzzer-v15",
+      "dir": "parts/buzzer-v15"
+    },
+    {
+      "type": "ldr-photocell-300mil-v5",
+      "dir": "parts/ldr-photocell-300mil-v5"
+    },
+    {
+      "type": "piezo-sensor",
+      "dir": "parts/piezo-sensor"
+    },
+    {
+      "type": "potentiometer-trimmer-6mm-5",
+      "dir": "parts/potentiometer-trimmer-6mm-5"
+    },
+    {
+      "type": "potentiometer-rotary-16mm-5",
+      "dir": "parts/potentiometer-rotary-16mm-5"
+    },
+    {
+      "type": "reedswitch-500mil",
+      "dir": "parts/reedswitch-500mil"
+    },
+    {
+      "type": "resistor",
+      "dir": "parts/resistor"
+    },
+    {
+      "type": "servo",
+      "dir": "parts/servo"
+    },
+    {
+      "type": "sparkfun-sensors-mic-electret-smd",
+      "dir": "parts/sparkfun-sensors-mic-electret-smd"
+    },
+    {
+      "type": "sparkfun-passives-fuse-x20mm",
+      "dir": "parts/sparkfun-passives-fuse-x20mm"
+    },
+    {
+      "type": "sparkfun-discretesemi-mosfet-nchannel-pth",
+      "dir": "parts/sparkfun-discretesemi-mosfet-nchannel-pth"
+    },
+    {
+      "type": "pushbutton",
+      "dir": "parts/pushbutton"
+    },
+    {
+      "type": "te-relay",
+      "dir": "parts/te-relay"
+    },
+    {
+      "type": "thermistor-300mil",
+      "dir": "parts/thermistor-300mil"
+    },
+    {
+      "type": "voltage-regulator-7805",
+      "dir": "parts/voltage-regulator-7805"
+    }
+  ]
+}

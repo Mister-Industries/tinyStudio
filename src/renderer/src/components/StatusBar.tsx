@@ -169,27 +169,26 @@ export function StatusBar(): React.JSX.Element {
   const busy = isUploading || isCompiling
   const busyLabel = isUploading ? 'Uploading…' : isCompiling ? 'Compiling…' : 'Ready'
 
-  // Links must read on the green bar (light) and the grey bar (dark). Uses
-  // --bar-accent (not --brand) so this stays independent of button/selection color.
-  const link =
-    'underline underline-offset-2 text-white/90 hover:text-white dark:text-[var(--bar-accent)] dark:no-underline dark:hover:underline'
+  // The bar is the same grey in both themes; its --sb-* palette lives on
+  // .ts-statusbar in ds-components.css.
+  const link = 'underline-offset-2 text-[var(--sb-link)] hover:underline'
 
   return (
-    <footer className="ts-statusbar flex items-center justify-between shrink-0 h-[27px] px-3 text-[11.5px] font-sans bg-[var(--bar-accent)] text-white/[0.88] shadow-[inset_0_1px_0_0_rgba(0,0,0,0.14)] dark:bg-[var(--bg-raised)] dark:text-[var(--text-muted)] dark:border-t dark:border-[var(--border-default)] dark:shadow-none">
+    <footer className="ts-statusbar flex items-center justify-between shrink-0 h-[27px] px-3 text-[11.5px] font-sans bg-[var(--sb-bg)] text-[var(--sb-text)] border-t border-[var(--sb-border)]">
       <div className="flex items-center">
         <StatusPill status={busy ? 'warn' : 'idle'} pulse={busy} bare>
           {busyLabel}
         </StatusPill>
         {selectedBoard && (
           <>
-            <span className="text-white dark:text-[var(--text-faint)] mx-2">·</span>
+            <span className="text-[var(--sb-faint)] mx-2">·</span>
             <span className="inline-flex items-center gap-1">
               <Cpu size={12} />
               {selectedBoard.config.name}
             </span>
           </>
         )}
-        <span className="text-white dark:text-[var(--text-faint)] mx-2">·</span>
+        <span className="text-[var(--sb-faint)] mx-2">·</span>
         <span
           className="inline-flex items-center gap-1"
           style={!isAgentConnected ? { color: 'var(--status-error)' } : undefined}
@@ -199,7 +198,7 @@ export function StatusBar(): React.JSX.Element {
         </span>
         {isAgentConnected && port && (
           <>
-            <span className="text-white dark:text-[var(--text-faint)] mx-2">·</span>
+            <span className="text-[var(--sb-faint)] mx-2">·</span>
             <span className="inline-flex items-center gap-1.5">
               {disconnected
                 ? 'Serial released'
@@ -222,16 +221,18 @@ export function StatusBar(): React.JSX.Element {
       </div>
       <div className="flex items-center">
         <span>UTF-8</span>
-        <span className="text-white dark:text-[var(--text-faint)] mx-2">·</span>
+        <span className="text-[var(--sb-faint)] mx-2">·</span>
         <span>Arduino (C++)</span>
-        <span className="text-white dark:text-[var(--text-faint)] mx-2">·</span>
+        <span className="text-[var(--sb-faint)] mx-2">·</span>
         <span>tinyStudio {appVersion}</span>
         <span className="ml-2.5">
-          <Badge tone="yellow" variant="solid">
+          {/* Matches the "Try an example" lightning tile: pale yellow, deep-yellow text.
+              `!` because ds-components.css is unlayered and outranks utilities. */}
+          <Badge tone="yellow" variant="soft" className="!text-[var(--yellow-deep)]">
             alpha
           </Badge>
         </span>
-        <span className="w-[1.5px] h-[15px] bg-white/[0.32] dark:bg-[var(--border-default)] mx-2.5" />
+        <span className="w-[1.5px] h-[15px] bg-[var(--sb-border)] mx-2.5" />
         <PanelMenu />
         <NotificationBell />
       </div>

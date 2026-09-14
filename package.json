@@ -1,6 +1,6 @@
 {
   "name": "tinystudio",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "An open-source desktop + web IDE for building, wiring, simulating, and flashing tiny hardware projects — code, circuit, and visual views in one place.",
   "main": "./out/main/index.js",
   "author": "MR.INDUSTRIES",
@@ -20,6 +20,9 @@
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "test:circuit": "node scripts/test-circuit.mjs",
+    "parts:sync": "node scripts/sync-tinyparts.mjs",
+    "parts:check": "node scripts/parts-tool.mjs check",
+    "parts:new": "node scripts/parts-tool.mjs new",
     "start": "electron-vite preview",
     "fetch:arduino-cli": "node scripts/fetch-arduino-cli.mjs",
     "fetch:language-server": "node scripts/fetch-language-server.mjs",

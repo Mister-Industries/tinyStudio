@@ -22,7 +22,7 @@ WebSocket.
 3. Choose the branch to deploy (e.g. `main`). Deploy.
 
 You now have a `*.netlify.app` URL. Confirm the app loads and that a deep link
-like `https://<site>.netlify.app/Mister-Industries/tinyStudio/demo/Blink%20Example`
+like `https://<site>.netlify.app/Mister-Industries/tinyStudio-examples/basics/blink-basic`
 opens that project (proves the SPA redirect works).
 
 ## 3. Point app.tinyStudio.cc at it
@@ -44,7 +44,7 @@ opens that project (proves the SPA redirect works).
 
 Scheme: `app.tinyStudio.cc/<owner>/<repo>/<optional/sub/path>`
 
-- `…/Mister-Industries/tinyStudio/demo/Blink%20Example` opens that folder.
+- `…/Mister-Industries/tinyStudio-examples/basics/blink-basic` opens that folder.
 - The folder is fetched from the repo's **default branch** via the GitHub API +
   `raw.githubusercontent.com`, loaded into an in-memory workspace, and opened —
   no local folder pick, no clone.
@@ -65,8 +65,8 @@ The **Examples** tab (in the right-hand docs panel) reads a manifest:
 ### Moving to a dedicated examples repo (the intended end state)
 
 1. Create a public repo, e.g. `Mister-Industries/tinyStudio-examples`, with an
-   `examples.json` at its root and one folder per example (same project layout as
-   `demo/`: `sketch/sketch.ino`, `diagram.json`, `visual.js`, `README.md`).
+   `examples.json` at its root and one folder per example (`basics/<name>/<name>.ino`,
+   plus an optional `diagram.json`, `visual.js` and a `README.md`).
 2. Point each manifest entry's `owner`/`repo`/`path` at that repo.
 3. Repoint `DEFAULT_MANIFEST_URL` in
    [`ExamplesContent.tsx`](../src/renderer/src/components/ExamplesContent.tsx) to

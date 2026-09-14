@@ -3,11 +3,20 @@
 
 // Type declarations for File System Access API
 declare global {
+  interface DirectoryPickerOptions {
+    /** remembers the last folder per id, so the picker reopens where you left off */
+    id?: string
+    mode?: 'read' | 'readwrite'
+    startIn?: FileSystemHandle | 'desktop' | 'documents' | 'downloads'
+  }
   interface Window {
-    showDirectoryPicker(): Promise<FileSystemDirectoryHandle>
+    showDirectoryPicker(options?: DirectoryPickerOptions): Promise<FileSystemDirectoryHandle>
     showOpenFilePicker(): Promise<FileSystemFileHandle[]>
   }
 }
+
+/** Shared picker id: opening and saving projects both start in the same place. */
+export const PROJECTS_PICKER_ID = 'tinystudio-projects'
 
 export interface FileSystemItem {
   name: string
@@ -40,6 +49,21 @@ class WebFileSystemService {
     return this.directoryHandle?.name || null
   }
 
+  /** The folder every path is resolved against. */
+  getRoot(): FileSystemDirectoryHandle | null {
+    return this.directoryHandle
+  }
+
+  /**
+   * Point the service at a folder it didn't pick itself — one tinyStudio just
+   * created for a saved project, or one reopened from the recent list. Cached
+   * file handles belong to the previous root, so they go too.
+   */
+  setRoot(handle: FileSystemDirectoryHandle): void {
+    this.directoryHandle = handle
+    this.fileHandles.clear()
+  }
+
   // Select folder using File System Access API
   async selectFolder(): Promise<string | null> {
     try {
@@ -47,7 +71,8 @@ class WebFileSystemService {
         throw new Error('File System Access API not supported')
       }
 
-      this.directoryHandle = await window.showDirectoryPicker()
+      // readwrite up front, so the first save doesn't stop to ask again.
+      this.setRoot(await window.showDirectoryPicker({ id: PROJECTS_PICKER_ID, mode: 'readwrite' }))
       return this.directoryHandle?.name || null
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
@@ -88,12 +113,19 @@ class WebFileSystemService {
       const items: FileSystemItem[] = []
 
       // If dirPath is empty or matches the root directory name, use the root directory handle
+      // Returned paths always start with the root folder's name ("blink/blink.ino").
+      // Every other method strips that prefix back off (see normalizePath), and
+      // it gives the workspace a real path to hang off: bare "blink.ino" paths
+      // left it with none, so anything built from `${workspace.path}/…` — new
+      // files, circuit.json, the repo link — pointed somewhere that didn't exist.
+      const rootName = this.directoryHandle.name
       let targetHandle: FileSystemDirectoryHandle | null
-      if (!dirPath || dirPath === this.directoryHandle.name) {
+      if (!dirPath || dirPath === rootName) {
         targetHandle = this.directoryHandle
-        dirPath = '' // Ensure we use empty string for root directory
+        dirPath = rootName
       } else {
         targetHandle = await this.getDirectoryHandle(dirPath)
+        dirPath = `${rootName}/${this.normalizePath(dirPath)}`
       }
 
       if (!targetHandle) {

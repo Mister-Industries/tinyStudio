@@ -1,0 +1,31 @@
+{
+  "type": "smd-inductor-0805",
+  "label": "Inductor",
+  "family": "air-core inductor",
+  "description": "Inductor",
+  "source": {
+    "fzp": "SMD_inductor_0805.fzp",
+    "moduleId": "805InductorModuleID"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 41.12,
+      "height": 16.92,
+      "pins": {
+        "pin 0": [2.37, 10.82],
+        "pin 1": [38.46, 10.85]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 5.76,
+      "height": 58.53,
+      "pins": {
+        "pin 0": [0.48, 0.47],
+        "pin 1": [0.48, 58.07]
+      }
+    }
+  }
+}

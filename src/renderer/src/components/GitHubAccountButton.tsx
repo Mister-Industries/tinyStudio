@@ -6,6 +6,7 @@
  */
 
 import { useGitHubAccount } from '@renderer/hooks/useGitHubAccount'
+import { openExternal } from '@renderer/lib/utils'
 import { ExternalLink, LogOut } from 'lucide-react'
 import React from 'react'
 import { GitHubSignInButton } from './GitHubSignIn'
@@ -38,7 +39,7 @@ export function GitHubAccountButton(): React.JSX.Element {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            onClick={() => window.api.fs.openExternal(`https://github.com/${account.login}`)}
+            onClick={() => openExternal(`https://github.com/${account.login}`)}
           >
             <ExternalLink size={14} className="mr-2" /> Open GitHub profile
           </DropdownMenuItem>

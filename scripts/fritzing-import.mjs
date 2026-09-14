@@ -14,7 +14,8 @@
  *   pin_px = (coord_vb - viewBoxMin) * (realWidthPx / viewBoxWidth)
  *   realWidthPx = toPx(svg width attr):  in*96 · mm*3.7795 · cm*37.795 · pt*1.333 · px*1
  *
- * Output (default → src/renderer/src/assets/parts):
+ * Output (default → tmp/fritzing-import; then `node scripts/parts-tool.mjs
+ * explode --from tmp/fritzing-import --pack <id>` turns it into tinyparts folders):
  *   <out>/<family>/<type>.json   one file per part   (lazy-loaded by the editor)
  *   <out>/index.json             lightweight manifest (palette + grouping)
  *   <out>/_report.json           per-part ok / partial / failed / skipped
@@ -70,7 +71,7 @@ Options
   --src <dir>     Path to the cloned fritzing-parts repo
                   (default: ../fritzing-parts next to tinyStudio)
   --out <dir>     Output directory
-                  (default: src/renderer/src/assets/parts)
+                  (default: tmp/fritzing-import)
   --views <list>  Comma list of views to extract: breadboard,schematic
                   (default: breadboard)
   --only <list>   Comma list of .fzp basenames or moduleIds to import
@@ -529,7 +530,8 @@ function main() {
   }
 
   const srcRoot = resolve(args.src || resolve(REPO, '..', 'fritzing-parts'))
-  const outRoot = resolve(args.out || join(REPO, 'src', 'renderer', 'src', 'assets', 'parts'))
+  // a staging folder: explode it into tinyparts with scripts/parts-tool.mjs
+  const outRoot = resolve(args.out || join(REPO, 'tmp', 'fritzing-import'))
   const coreDir = join(srcRoot, 'core')
 
   if (!existsSync(coreDir)) {

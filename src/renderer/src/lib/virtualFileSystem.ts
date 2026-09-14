@@ -27,6 +27,9 @@ class VirtualFileSystemService {
   private files = new Map<string, string>() // full path -> content
   private folders = new Set<string>() // full folder paths
   private mtimes = new Map<string, number>() // full path -> last modified
+  // root -> the content it was seeded with, before any edits. Lets a project
+  // saved out of the browser keep an accurate sync baseline for its repo.
+  private bases = new Map<string, Record<string, string>>()
 
   /** The parent directory of a path, or null at/above the mem:// root. */
   private parentOf(path: string): string | null {
@@ -56,6 +59,7 @@ class VirtualFileSystemService {
   async seed(rootPath: string, files: Record<string, string>): Promise<void> {
     const root = stripTrailingSlash(rootPath)
     this.folders.add(root)
+    this.bases.set(root, { ...files })
     const now = Date.now()
     for (const [rel, content] of Object.entries(files)) {
       const full = `${root}/${rel.replace(/^\/+/, '')}`
@@ -208,6 +212,11 @@ class VirtualFileSystemService {
     const from = stripTrailingSlash(oldRoot)
     const to = stripTrailingSlash(newRoot)
     if (from === to) return
+    const base = this.bases.get(from)
+    if (base) {
+      this.bases.set(to, base)
+      this.bases.delete(from)
+    }
     const owned = (p: string): boolean => p === from || p.startsWith(from + '/')
     const remap = (p: string): string => (p === from ? to : to + p.slice(from.length))
 
@@ -234,15 +243,35 @@ class VirtualFileSystemService {
     this.addAncestors(to)
   }
 
+  /** The files a root was seeded with, before any edits (null if never seeded). */
+  baseOf(rootPath: string): Record<string, string> | null {
+    return this.bases.get(stripTrailingSlash(rootPath)) ?? null
+  }
+
+  /**
+   * Drop a project from memory AND its cached edits. For a project that now
+   * lives somewhere else (saved to a folder): left in the cache, those edits
+   * would overlay the original example the next time anyone opened it.
+   */
+  async discard(rootPath: string): Promise<void> {
+    const root = stripTrailingSlash(rootPath)
+    this.clear(root)
+    for (const key of await webCache.keys()) {
+      if (key === root || key.startsWith(root + '/')) await webCache.remove(key)
+    }
+  }
+
   /** Drop a project from memory (its cache entries persist for next load). */
   clear(rootPath?: string): void {
     if (!rootPath) {
       this.files.clear()
       this.folders.clear()
       this.mtimes.clear()
+      this.bases.clear()
       return
     }
     const root = stripTrailingSlash(rootPath)
+    this.bases.delete(root)
     const prefix = root + '/'
     for (const f of [...this.files.keys()]) {
       if (f === root || f.startsWith(prefix)) {

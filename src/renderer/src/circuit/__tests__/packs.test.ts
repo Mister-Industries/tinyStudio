@@ -1,21 +1,24 @@
-/** Tests for parts/packs — index/manifest fetch+validate, install, settings.
- * Network (fetch) and localStorage are stubbed; registerPart/getPart are the
- * real in-memory registry (no DOM needed), so installPack is exercised
- * end-to-end against it. */
+/** Tests for parts/packs — index/manifest fetch+validate, install into the
+ * parts cache (served as the registry's remote layer), settings. Network
+ * (fetch) and localStorage are stubbed; the cache falls back to memory under
+ * node, and the registry is the real one. */
 
 import assert from 'node:assert/strict'
 import { beforeEach, test } from 'node:test'
-import { getPart } from '../../lib/partsLibrary'
+import { PART_MANIFEST, getPart, loadPart } from '../../lib/partsLibrary'
 import {
   DEFAULT_INDEX_URL,
   fetchIndex,
   fetchManifest,
   getIndexUrls,
   getInstalledPacks,
+  githubOrigin,
   installPack,
   setIndexUrls,
+  uninstallPack,
   type PackManifest
 } from '../parts/packs'
+import { getCachedPack } from '../parts/partsCache'
 
 // ── in-memory localStorage stub (Node has no browser globals) ──────────────
 
@@ -42,21 +45,26 @@ beforeEach(() => {
 
 // ── fetch stub ───────────────────────────────────────────────────────────────
 
-function stubFetch(routes: Record<string, unknown | (() => unknown) | { status: number }>): void {
+type Route = unknown | { status: number }
+
+function stubFetch(routes: Record<string, Route>): void {
   ;(globalThis as unknown as { fetch: typeof fetch }).fetch = (async (
     url: string
   ): Promise<Response> => {
     const hit = routes[url]
-    if (hit === undefined) return { ok: false, status: 404, json: async () => ({}) } as Response
-    if (typeof hit === 'object' && hit !== null && 'status' in hit && !('json' in hit)) {
-      return {
-        ok: false,
-        status: (hit as { status: number }).status,
-        json: async () => ({})
-      } as Response
-    }
-    const body = typeof hit === 'function' ? (hit as () => unknown)() : hit
-    return { ok: true, status: 200, json: async () => body } as Response
+    const fail = (status: number): Response =>
+      ({ ok: false, status, json: async () => ({}), text: async () => '' }) as unknown as Response
+    if (hit === undefined) return fail(404)
+    if (typeof hit === 'object' && hit !== null && 'status' in hit)
+      return fail((hit as { status: number }).status)
+    const text = typeof hit === 'string' ? hit : JSON.stringify(hit)
+    return {
+      ok: true,
+      status: 200,
+      json: async () => JSON.parse(text),
+      text: async () => text,
+      arrayBuffer: async () => new TextEncoder().encode(text).buffer
+    } as unknown as Response
   }) as typeof fetch
 }
 
@@ -103,6 +111,18 @@ test('fetchManifest validates { id, parts: [...] } shape', async () => {
   )
 })
 
+test('githubOrigin recognises a tinyparts-shaped raw URL and nothing else', () => {
+  assert.deepEqual(
+    githubOrigin('https://raw.githubusercontent.com/me/tinyparts/dev/packs/leds/pack.json', 'leds'),
+    { kind: 'github', repo: 'me/tinyparts', ref: 'dev', commit: '' }
+  )
+  assert.equal(
+    githubOrigin('https://raw.githubusercontent.com/me/r/main/other/pack.json', 'leds'),
+    null
+  )
+  assert.equal(githubOrigin('https://example.com/packs/leds/pack.json', 'leds'), null)
+})
+
 // ── installPack ──────────────────────────────────────────────────────────────
 
 const RESISTOR_DEF = {
@@ -112,42 +132,63 @@ const RESISTOR_DEF = {
   views: { breadboard: { svg: '<svg/>', w: 10, h: 10, pins: { '1': [0, 5], '2': [10, 5] } } }
 }
 
-test('installPack registers every valid part via saveUserPart, continues past one bad part', async () => {
+const FOLDER_ART =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><circle id="pin-A" cx="5" cy="5" r="1"/><circle id="pin-B" cx="15" cy="5" r="1"/></svg>'
+
+test('installPack caches every valid part (single-file and folder), continues past bad ones', async () => {
   const manifest: PackManifest = {
     schema: 1,
-    id: 'core',
-    name: 'Core',
+    id: 'pack-test',
+    name: 'Pack Test',
     version: '2.0.0',
     parts: [
       { type: 'pack-test-resistor', file: 'parts/resistor.json' },
+      { type: 'pack-test-folder', dir: 'parts/pack-test-folder' },
       { type: 'pack-test-missing', file: 'parts/missing.json' }, // 404
       { type: 'pack-test-malformed', file: 'parts/malformed.json' } // not a PartDef
     ]
   }
   stubFetch({
     'https://example.com/parts/resistor.json': RESISTOR_DEF,
+    'https://example.com/parts/pack-test-folder/part.json': {
+      type: 'pack-test-folder',
+      label: 'Folder Part',
+      family: 'Passive',
+      views: { breadboard: { svg: 'breadboard.svg', width: 20, height: 10 } }
+    },
+    'https://example.com/parts/pack-test-folder/breadboard.svg': FOLDER_ART,
     'https://example.com/parts/malformed.json': { not: 'a part' }
-    // parts/missing.json intentionally absent -> 404
   })
   const progress: [number, number][] = []
   const res = await installPack(manifest, 'https://example.com/pack.json', (done, total) =>
     progress.push([done, total])
   )
-  assert.deepEqual(res.installed, ['pack-test-resistor'])
+  assert.deepEqual(res.installed, ['pack-test-resistor', 'pack-test-folder'])
   assert.equal(res.failed.length, 2)
   assert.ok(res.failed.some((f) => f.type === 'pack-test-missing' && /HTTP 404/.test(f.error)))
   assert.ok(res.failed.some((f) => f.type === 'pack-test-malformed'))
-  assert.equal(progress.length, 3)
-  assert.deepEqual(progress[2], [3, 3])
+  assert.deepEqual(progress[3], [4, 4])
 
-  // the successfully-installed part is live in the registry
-  assert.ok(getPart('pack-test-resistor'))
+  // live in the registry, from the remote layer
+  assert.ok(getPart('pack-test-resistor'), 'single-file parts are ready immediately')
+  const folder = await loadPart('pack-test-folder')
+  assert.deepEqual(folder?.views.breadboard?.pins, { A: [5, 5], B: [15, 5] })
+  assert.equal(PART_MANIFEST.find((m) => m.type === 'pack-test-folder')?.layer, 'remote')
 
-  // a pack with at least one success is marked installed at its version
-  assert.equal(getInstalledPacks().core, '2.0.0')
+  // stored with blob shas, and the stored manifest lists only what landed
+  const rec = await getCachedPack('pack-test')
+  assert.ok(rec)
+  assert.match(rec!.files['parts/pack-test-folder/breadboard.svg'], /^[0-9a-f]{40}$/)
+  assert.deepEqual(rec!.origin, { kind: 'url', url: 'https://example.com/pack.json' })
+  assert.equal(getInstalledPacks()['pack-test'], '2.0.0')
+
+  await uninstallPack('pack-test')
+  assert.equal(getPart('pack-test-resistor'), undefined)
+  assert.equal(await getCachedPack('pack-test'), undefined)
+  assert.equal(getInstalledPacks()['pack-test'], undefined)
 })
 
-test('installPack does not mark a pack installed when every part fails', async () => {
+test('installPack does not store or mark a pack when every part fails', async () => {
   const manifest: PackManifest = {
     schema: 1,
     id: 'all-bad',
@@ -159,6 +200,7 @@ test('installPack does not mark a pack installed when every part fails', async (
   const res = await installPack(manifest, 'https://example.com/pack.json')
   assert.equal(res.installed.length, 0)
   assert.equal(getInstalledPacks()['all-bad'], undefined)
+  assert.equal(await getCachedPack('all-bad'), undefined)
 })
 
 // ── settings (index URL list) ───────────────────────────────────────────────

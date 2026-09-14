@@ -1,13 +1,20 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { notify as toast } from './lib/notify'
 import { BackendPrompt } from './components/BackendPrompt'
-import { LoadGitHubProjectCommand, OpenWorkspaceCommand } from './commands/fileCommands'
+import {
+  LoadGitHubProjectCommand,
+  OpenRecentFolderCommand,
+  OpenWorkspaceCommand
+} from './commands/fileCommands'
+import { listRecentProjects } from './lib/projectStore'
 import { parseProjectRoute } from './lib/projectRouting'
+import { serveStudioRequests } from './lib/studioBridge'
 import { DocsPanel } from './components/DocsPanel'
 import { EditorPanel } from './components/EditorPanel'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { FileExplorer } from './components/FileExplorer'
 import { Header } from './components/Header'
+import { ProjectDialogs } from './components/ProjectDialogs'
 import { SerialMonitor } from './components/SerialMonitor'
 import { StatusBar } from './components/StatusBar'
 import { Toolbar } from './components/Toolbar'
@@ -29,6 +36,9 @@ export default function App(): React.JSX.Element {
   const { isFileExplorerOpen, isSerialMonitorOpen, isDocsPanelOpen } =
     useAppSelector(selectPanelState)
   const editorView = useAppSelector(selectEditorView)
+  // A boolean, not the workspace itself: a file-tree refresh swaps the object,
+  // and that mustn't re-open a monitor the user closed.
+  const hasWorkspace = useAppSelector((state) => state.file.workspace !== null)
   const dispatch = useAppDispatch()
   const [editorSize, setEditorSize] = useState(50)
 
@@ -74,11 +84,17 @@ export default function App(): React.JSX.Element {
     return () => cancelAnimationFrame(id)
   }, [isDocsPanelOpen, isSerialMonitorOpen, isFileExplorerOpen, applyFilePanelWidth])
 
-  // The serial monitor / output dock only makes sense while coding — close it
-  // when switching to the full-window Circuit or Visual views, reopen on Code.
+  // The serial monitor / output dock only makes sense while coding a project —
+  // close it for the full-window Circuit or Visual views and when nothing is
+  // open (the start screen gets the whole column), reopen on Code once a
+  // project is.
   useEffect(() => {
-    dispatch(setPanelOpen({ panel: 'monitor', isOpen: editorView === 'code' }))
-  }, [editorView, dispatch])
+    dispatch(setPanelOpen({ panel: 'monitor', isOpen: editorView === 'code' && hasWorkspace }))
+  }, [editorView, hasWorkspace, dispatch])
+
+  // Desktop: Studio AI runs in the main process, but the parts registry and the
+  // serial buffer its tools read live here (lib/studioBridge).
+  useEffect(() => serveStudioRequests(), [])
 
   // Cleanup Arduino service on unmount
   useEffect(() => {
@@ -117,6 +133,18 @@ export default function App(): React.JSX.Element {
 
     const last = localStorage.getItem('tinystudio.lastWorkspace')
     if (!last) return
+    if (!fileSystem.isElectron()) {
+      // Browser: a folder only comes back through its stored handle, and only
+      // while access is still granted. Asking again needs a click, so otherwise
+      // it waits under Recent on the start screen.
+      const entry = listRecentProjects().find((r) => r.kind === 'folder' && r.location === last)
+      if (entry) {
+        new OpenRecentFolderCommand(entry, { prompt: false })
+          .execute()
+          .catch((e) => console.error('Failed to reopen last folder:', e))
+      }
+      return
+    }
     fileSystem
       .pathExists(last)
       .then((exists) => {
@@ -202,6 +230,7 @@ export default function App(): React.JSX.Element {
           </ResizablePanelGroup>
           <StatusBar />
           <BackendPrompt />
+          <ProjectDialogs />
         </div>
       </SerialProvider>
     </ArduinoProvider>

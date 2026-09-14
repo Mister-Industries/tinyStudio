@@ -1,3 +1,4 @@
+import { promptSaveToComputer } from '@renderer/commands/fileCommands'
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import {
@@ -31,13 +32,15 @@ export function Toolbar(): React.JSX.Element {
         await fileSystem.writeFile(file.path, file.content)
         // Save with content to ensure state is properly synced
         dispatch(saveFileWithContent({ id: file.id, content: file.content }))
+        // Browser-only project: ask where it should live for real.
+        promptSaveToComputer()
       } catch (error) {
         console.error('Failed to save file:', error)
         toast.error(`Could not save ${file.name}`, {
           description: error instanceof Error ? error.message : 'Unknown error'
         })
       }
-    } else {
+    } else if (!promptSaveToComputer()) {
       console.error('Cannot save file: file path is undefined')
     }
   }

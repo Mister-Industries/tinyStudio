@@ -21,6 +21,12 @@
 
 @import 'tailwindcss';
 
+/* The bundled tinyparts snapshot (assets/tinyparts, ~1 MB of part art + JSON)
+   has no class names in it. Keep Tailwind from scanning it: every scanned file
+   becomes a CSS dependency, so when `npm run parts:sync` removes one the
+   running dev server fails to rebuild the stylesheet (ENOENT). */
+@source not './tinyparts';
+
 @import 'tw-animate-css';
 
 @import './ds-components.css';

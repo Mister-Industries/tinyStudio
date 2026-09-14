@@ -1,0 +1,249 @@
+<!-- tinyDisplay breadboard art. Edit freely (Illustrator is fine). Pins are the shapes whose id is "pin-<NAME>" - keep those names; see tinyparts/README.md. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1.9in" height="1.9in" viewBox="0 0 136.8 136.8">
+  <title>tinyDisplay</title>
+  <g id="breadboard">
+    <defs>
+      <linearGradient id="td-mask" x1="0.12" y1="0" x2="0.8" y2="1">
+        <stop offset="0" stop-color="#0e7d6c"/>
+        <stop offset="1" stop-color="#065247"/>
+      </linearGradient>
+      <linearGradient id="td-metal" x1="0" y1="0" x2="0.2" y2="1">
+        <stop offset="0" stop-color="#eceff3"/>
+        <stop offset="0.45" stop-color="#b6bbc4"/>
+        <stop offset="0.6" stop-color="#d2d7dd"/>
+        <stop offset="1" stop-color="#8e949d"/>
+      </linearGradient>
+      <linearGradient id="td-green" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6fc784"/>
+        <stop offset="0.45" stop-color="#33984f"/>
+        <stop offset="1" stop-color="#1a6733"/>
+      </linearGradient>
+      <radialGradient id="td-lcd" cx="0.36" cy="0.28" r="0.92">
+        <stop offset="0" stop-color="#212f63"/>
+        <stop offset="0.55" stop-color="#101a44"/>
+        <stop offset="1" stop-color="#070c26"/>
+      </radialGradient>
+    </defs>
+    <polygon points="40.07,0.00 96.73,0.00 136.80,40.07 136.80,96.73 96.73,136.80 40.07,136.80 0.00,96.73 0.00,40.07" fill="url(#td-mask)"/>
+    <polygon points="40.30,0.55 96.50,0.55 136.25,40.30 136.25,96.50 96.50,136.25 40.30,136.25 0.55,96.50 0.55,40.30" fill="none" stroke="#032b25" stroke-width="1.1" opacity="0.30"/>
+    <circle cx="46.00" cy="12.5" r="2.6" fill="#c9a03c"/>
+    <circle cx="46.00" cy="12.5" r="1.2" fill="#0a3b33"/>
+    <circle cx="58.00" cy="12.5" r="2.6" fill="#c9a03c"/>
+    <circle cx="58.00" cy="12.5" r="1.2" fill="#0a3b33"/>
+    <circle cx="79.00" cy="12.5" r="2.6" fill="#c9a03c"/>
+    <circle cx="79.00" cy="12.5" r="1.2" fill="#0a3b33"/>
+    <circle cx="91.00" cy="12.5" r="2.6" fill="#c9a03c"/>
+    <circle cx="91.00" cy="12.5" r="1.2" fill="#0a3b33"/>
+    <g transform="translate(68.40,118.00) rotate(0)">
+      <rect x="-15.00" y="-3.00" width="30.00" height="6.00" rx="0.6" fill="#1e2b52" stroke="#101828" stroke-width="0.35"/>
+      <rect x="-13.60" y="-1.80" width="27.20" height="3.20" fill="#2f4a86"/>
+    </g>
+    <g transform="translate(46.00,118.50) rotate(0)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(91.00,118.50) rotate(0)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <rect x="1.70" y="39.50" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="1.70" y="46.70" width="7.40" height="50.60" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="127.70" y="89.90" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="127.70" y="39.50" width="7.40" height="50.60" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="93.50" y="124.10" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="35.90" y="124.10" width="57.80" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle id="pin-GND" cx="5.40" cy="43.20" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="43.20" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="43.20" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-3V3" cx="5.40" cy="50.40" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="50.40" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="50.40" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A5" cx="5.40" cy="57.60" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="57.60" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="57.60" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A4" cx="5.40" cy="64.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="64.80" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="64.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A3" cx="5.40" cy="72.00" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="72.00" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="72.00" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A2" cx="5.40" cy="79.20" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="79.20" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="79.20" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A1" cx="5.40" cy="86.40" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="86.40" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="86.40" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A0" cx="5.40" cy="93.60" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="93.60" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="93.60" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D8" cx="131.40" cy="43.20" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="43.20" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="43.20" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D9" cx="131.40" cy="50.40" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="50.40" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="50.40" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D10" cx="131.40" cy="57.60" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="57.60" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="57.60" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D11" cx="131.40" cy="64.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="64.80" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="64.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D12" cx="131.40" cy="72.00" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="72.00" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="72.00" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D13" cx="131.40" cy="79.20" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="79.20" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="79.20" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-3V3.2" cx="131.40" cy="86.40" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="86.40" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="86.40" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-GND.2" cx="131.40" cy="93.60" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="93.60" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="93.60" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-SCK" cx="39.60" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="39.60" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="39.60" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-MO" cx="46.80" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="46.80" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="46.80" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-MI" cx="54.00" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="54.00" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="54.00" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-RX" cx="61.20" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="61.20" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="61.20" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-TX" cx="68.40" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="68.40" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="68.40" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-SDA" cx="75.60" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="75.60" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="75.60" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-SCL" cx="82.80" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="82.80" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="82.80" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-PWR" cx="90.00" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="90.00" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="90.00" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-GND.3" cx="97.20" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="97.20" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="97.20" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <text x="10.00" y="43.20" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,10.00,43.20)">GND</text>
+    <text x="10.00" y="50.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,10.00,50.40)">3V3</text>
+    <text x="10.00" y="57.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,10.00,57.60)">A5</text>
+    <text x="10.00" y="64.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,10.00,64.80)">A4</text>
+    <text x="10.00" y="72.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,10.00,72.00)">A3</text>
+    <text x="10.00" y="79.20" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,10.00,79.20)">A2</text>
+    <text x="10.00" y="86.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,10.00,86.40)">A1</text>
+    <text x="10.00" y="93.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,10.00,93.60)">A0</text>
+    <text x="126.80" y="43.20" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,126.80,43.20)">8</text>
+    <text x="126.80" y="50.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,126.80,50.40)">9</text>
+    <text x="126.80" y="57.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,126.80,57.60)">10</text>
+    <text x="126.80" y="64.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,126.80,64.80)">11</text>
+    <text x="126.80" y="72.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,126.80,72.00)">12</text>
+    <text x="126.80" y="79.20" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,126.80,79.20)">13</text>
+    <text x="126.80" y="86.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,126.80,86.40)">3V3</text>
+    <text x="126.80" y="93.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,126.80,93.60)">GND</text>
+    <text x="39.60" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">SCK</text>
+    <text x="46.80" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">MO</text>
+    <text x="54.00" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">MI</text>
+    <text x="61.20" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">RX</text>
+    <text x="68.40" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">TX</text>
+    <text x="75.60" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">SDA</text>
+    <text x="82.80" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">SCL</text>
+    <text x="90.00" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">PWR</text>
+    <text x="97.20" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">GND</text>
+    <g transform="translate(25.10,102.60)">
+      <rect x="-4.75" y="-4.75" width="9.50" height="9.50" rx="1.24" fill="none" stroke="#f4f6f8" stroke-width="1.00"/>
+      <line x1="-2.85" y1="-4.75" x2="-2.85" y2="-5.99" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="-2.85" y1="4.75" x2="-2.85" y2="5.99" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="-4.75" y1="-2.85" x2="-5.99" y2="-2.85" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="4.75" y1="-2.85" x2="5.99" y2="-2.85" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="-0.95" y1="-4.75" x2="-0.95" y2="-5.99" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="-0.95" y1="4.75" x2="-0.95" y2="5.99" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="-4.75" y1="-0.95" x2="-5.99" y2="-0.95" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="4.75" y1="-0.95" x2="5.99" y2="-0.95" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="0.95" y1="-4.75" x2="0.95" y2="-5.99" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="0.95" y1="4.75" x2="0.95" y2="5.99" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="-4.75" y1="0.95" x2="-5.99" y2="0.95" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="4.75" y1="0.95" x2="5.99" y2="0.95" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="2.85" y1="-4.75" x2="2.85" y2="-5.99" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="2.85" y1="4.75" x2="2.85" y2="5.99" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="-4.75" y1="2.85" x2="-5.99" y2="2.85" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <line x1="4.75" y1="2.85" x2="5.99" y2="2.85" stroke="#f4f6f8" stroke-width="1.00" stroke-linecap="round"/>
+      <text x="0.00" y="1.90" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.80" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="italic">tiny</text>
+    </g>
+    <text x="107.93" y="107.93" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.50" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" letter-spacing="0.35" transform="rotate(-45,107.93,107.93)">BOARD DESIGN BY:</text>
+    <text x="104.82" y="104.82" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.50" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" letter-spacing="0.35" transform="rotate(-45,104.82,104.82)">GEOFF McINTYRE</text>
+    <circle cx="68.60" cy="66.40" r="50.00" fill="#000" opacity="0.30"/>
+    <circle cx="67.60" cy="65.00" r="49.00" fill="#111318"/>
+    <circle cx="67.60" cy="65.00" r="47.28" fill="#07080b"/>
+    <circle cx="67.60" cy="65.00" r="44.30" fill="url(#td-lcd)"/>
+    <line x1="67.60" y1="23.36" x2="67.60" y2="28.01" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="71.95" y1="23.59" x2="71.70" y2="26.01" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="76.26" y1="24.27" x2="75.75" y2="26.65" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="80.47" y1="25.40" x2="79.72" y2="27.71" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="84.54" y1="26.96" x2="83.55" y2="29.18" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="88.42" y1="28.94" x2="86.10" y2="32.97" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="92.08" y1="31.31" x2="90.64" y2="33.28" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="95.46" y1="34.05" x2="93.83" y2="35.86" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="98.55" y1="37.14" x2="96.74" y2="38.77" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="101.29" y1="40.52" x2="99.32" y2="41.96" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="103.66" y1="44.18" x2="99.63" y2="46.50" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="105.64" y1="48.06" x2="103.42" y2="49.05" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="107.20" y1="52.13" x2="104.89" y2="52.88" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="108.33" y1="56.34" x2="105.95" y2="56.85" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="109.01" y1="60.65" x2="106.59" y2="60.90" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="109.24" y1="65.00" x2="104.59" y2="65.00" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="109.01" y1="69.35" x2="106.59" y2="69.10" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="108.33" y1="73.66" x2="105.95" y2="73.15" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="107.20" y1="77.87" x2="104.89" y2="77.12" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="105.64" y1="81.94" x2="103.42" y2="80.95" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="103.66" y1="85.82" x2="99.63" y2="83.50" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="101.29" y1="89.48" x2="99.32" y2="88.04" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="98.55" y1="92.86" x2="96.74" y2="91.23" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="95.46" y1="95.95" x2="93.83" y2="94.14" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="92.08" y1="98.69" x2="90.64" y2="96.72" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="88.42" y1="101.06" x2="86.10" y2="97.03" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="84.54" y1="103.04" x2="83.55" y2="100.82" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="80.47" y1="104.60" x2="79.72" y2="102.29" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="76.26" y1="105.73" x2="75.75" y2="103.35" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="71.95" y1="106.41" x2="71.70" y2="103.99" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="67.60" y1="106.64" x2="67.60" y2="101.99" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="63.25" y1="106.41" x2="63.50" y2="103.99" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="58.94" y1="105.73" x2="59.45" y2="103.35" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="54.73" y1="104.60" x2="55.48" y2="102.29" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="50.66" y1="103.04" x2="51.65" y2="100.82" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="46.78" y1="101.06" x2="49.10" y2="97.03" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="43.12" y1="98.69" x2="44.56" y2="96.72" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="39.74" y1="95.95" x2="41.37" y2="94.14" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="36.65" y1="92.86" x2="38.46" y2="91.23" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="33.91" y1="89.48" x2="35.88" y2="88.04" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="31.54" y1="85.82" x2="35.57" y2="83.50" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="29.56" y1="81.94" x2="31.78" y2="80.95" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="28.00" y1="77.87" x2="30.31" y2="77.12" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="26.87" y1="73.66" x2="29.25" y2="73.15" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="26.19" y1="69.35" x2="28.61" y2="69.10" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="25.96" y1="65.00" x2="30.61" y2="65.00" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="26.19" y1="60.65" x2="28.61" y2="60.90" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="26.87" y1="56.34" x2="29.25" y2="56.85" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="28.00" y1="52.13" x2="30.31" y2="52.88" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="29.56" y1="48.06" x2="31.78" y2="49.05" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="31.54" y1="44.18" x2="35.57" y2="46.50" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="33.91" y1="40.52" x2="35.88" y2="41.96" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="36.65" y1="37.14" x2="38.46" y2="38.77" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="39.74" y1="34.05" x2="41.37" y2="35.86" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="43.12" y1="31.31" x2="44.56" y2="33.28" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="46.78" y1="28.94" x2="49.10" y2="32.97" stroke="#e6ecff" stroke-width="0.89" opacity="0.92" stroke-linecap="round"/>
+    <line x1="50.66" y1="26.96" x2="51.65" y2="29.18" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="54.73" y1="25.40" x2="55.48" y2="27.71" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="58.94" y1="24.27" x2="59.45" y2="26.65" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="63.25" y1="23.59" x2="63.50" y2="26.01" stroke="#e6ecff" stroke-width="0.49" opacity="0.92" stroke-linecap="round"/>
+    <line x1="67.60" y1="65.00" x2="54.31" y2="40.19" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="67.60" y1="65.00" x2="86.21" y2="41.96" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="67.60" y1="65.00" x2="81.78" y2="92.47" stroke="#f2622f" stroke-width="1.1" stroke-linecap="round"/>
+    <text x="60.51" y="82.72" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="5.09" fill="#dfe6ff" text-anchor="middle" font-weight="normal" font-style="normal">2:05</text>
+    <ellipse cx="55.20" cy="51.71" rx="18.61" ry="7.09" fill="#ffffff" opacity="0.05"/>
+  </g>
+</svg>

@@ -1,0 +1,30 @@
+{
+  "type": "buzzer-v15",
+  "label": "LilyPad Buzzer",
+  "family": "microcontroller board (lilypad)",
+  "description": "This is a small buzzer for the LilyPad system. Use 2 I/O pins on the LilyPad main board and create different noises based on the different frequency of I/O toggling. Loud enough to hear inside a pocket but not obtrusively loud.\n\nPlease note: This is an inductive buzzer meaning that is will act as a short to ground if you are not actively driving it. We recommend you put both I/O pins to low (0V) when the buzzer is not used. Also, it's come to our attention that washing these buzzers will damage them. Until we've figured out a solution to this, avoid washing any portion of your project that contains one of these buzzers.\n\nLilyPad is a wearable e-textile technology developed by Leah Buechley and cooperatively designed by Leah and SparkFun. Each LilyPad was creatively designed to have large connecting pads to allow them to be sewn into clothing. Various input, output, power, and sensor boards are available. They're even washable!\n\nNote: A portion of this sale is given back to Dr. Leah Buechley for continued development and education of e-textiles.\n\nDimensions:\n\n20mm outer diameter\nThin 0.8mm PCB",
+  "source": {
+    "fzp": "Buzzer-v15.fzp",
+    "moduleId": "Buzzer-v15"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 56.69,
+      "height": 56.69,
+      "pins": {
+        "-": [9.92, 17.72],
+        "+": [46.74, 38.98]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 28.8,
+      "height": 76.8,
+      "pins": {
+        "-": [9.6, 76.8],
+        "+": [9.6, 0]
+      }
+    }
+  }
+}

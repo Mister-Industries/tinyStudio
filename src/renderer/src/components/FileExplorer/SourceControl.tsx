@@ -15,6 +15,7 @@ import {
   copyProjectToNewRepo,
   ghRepoMeta,
   loadLink,
+  parseRepoRef,
   pullWorkspace,
   pushWorkspace,
   saveLink,
@@ -72,25 +73,22 @@ export function SourceControl(): React.JSX.Element {
     if (!workspace || !repoInput.trim()) return
     setBusy('link')
     try {
-      const cleaned = repoInput.trim().replace(/\.git$/, '')
-      const m =
-        cleaned.match(/github\.com\/([^/]+)\/([^/?#]+)(?:\/(?:tree\/[^/]+\/)?([^?#]*))?/) ||
-        cleaned.match(/^([^/\s]+)\/([^/\s]+)(?:\/(.*))?$/)
-      if (!m) throw new Error('Enter a repo as owner/name or a github.com URL')
-      const meta = await ghRepoMeta(m[1], m[2], account?.token)
+      const ref = parseRepoRef(repoInput)
+      if (!ref) throw new Error('Enter a repo as owner/name or a github.com URL')
+      const meta = await ghRepoMeta(ref.owner, ref.repo, account?.token)
       // A workspace opened from a repo subfolder must stay pinned to that
       // subfolder, or push flattens the project onto the repo root.
       const sameRepo =
         workspace.source &&
         `${workspace.source.owner}/${workspace.source.repo}`.toLowerCase() ===
           meta.fullName.toLowerCase()
-      const repoPath = (m[3] || (sameRepo ? workspace.source!.path : '') || '').replace(
+      const repoPath = (ref.path || (sameRepo ? workspace.source!.path : '') || '').replace(
         /^\/+|\/+$/g,
         ''
       )
       const newLink: RepoLink = {
         remote: meta.fullName,
-        branch: meta.branch,
+        branch: ref.branch || meta.branch,
         path: repoPath,
         base: {}
       }

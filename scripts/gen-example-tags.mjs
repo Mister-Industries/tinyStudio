@@ -41,9 +41,7 @@
  *
  * Examples:
  *   node scripts/gen-example-tags.mjs tinyStudio-examples-old --report
- *   node scripts/gen-example-tags.mjs demo --category demos --repo tinyStudio \
- *     --merge examples.json --out examples.json
- *   node scripts/gen-example-tags.mjs tinyStudio-examples-old demo \
+ *   node scripts/gen-example-tags.mjs tinyStudio-examples-old \
  *     --manifest remote.json --out examples-tagged.json --report
  *
  * Node stdlib only — no install step, runs anywhere the repo is checked out.

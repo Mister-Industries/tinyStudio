@@ -1,0 +1,317 @@
+<!-- tinySniff breadboard art. Edit freely (Illustrator is fine). Pins are the shapes whose id is "pin-<NAME>" - keep those names; see tinyparts/README.md. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1.9in" height="1.9in" viewBox="0 0 136.8 136.8">
+  <title>tinySniff</title>
+  <g id="breadboard">
+    <defs>
+      <linearGradient id="ts-mask" x1="0.12" y1="0" x2="0.8" y2="1">
+        <stop offset="0" stop-color="#efb812"/>
+        <stop offset="1" stop-color="#c8900a"/>
+      </linearGradient>
+      <linearGradient id="ts-metal" x1="0" y1="0" x2="0.2" y2="1">
+        <stop offset="0" stop-color="#eceff3"/>
+        <stop offset="0.45" stop-color="#b6bbc4"/>
+        <stop offset="0.6" stop-color="#d2d7dd"/>
+        <stop offset="1" stop-color="#8e949d"/>
+      </linearGradient>
+      <linearGradient id="ts-green" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6fc784"/>
+        <stop offset="0.45" stop-color="#33984f"/>
+        <stop offset="1" stop-color="#1a6733"/>
+      </linearGradient>
+    </defs>
+    <polygon points="40.07,0.00 96.73,0.00 136.80,40.07 136.80,96.73 96.73,136.80 40.07,136.80 0.00,96.73 0.00,40.07" fill="url(#ts-mask)"/>
+    <polygon points="40.30,0.55 96.50,0.55 136.25,40.30 136.25,96.50 96.50,136.25 40.30,136.25 0.55,96.50 0.55,40.30" fill="none" stroke="#7d5c06" stroke-width="1.1" opacity="0.30"/>
+    <polygon points="29.00,14.00 67.20,14.00 67.20,68.50 16.00,68.50 16.00,27.00" fill="none" stroke="#f4f6f8" stroke-width="0.65" opacity="0.9"/>
+    <polygon points="69.60,14.00 108.00,14.00 121.00,27.00 121.00,68.50 69.60,68.50" fill="none" stroke="#f4f6f8" stroke-width="0.65" opacity="0.9"/>
+    <polygon points="45.00,70.50 121.00,70.50 121.00,121.00 45.00,121.00" fill="none" stroke="#f4f6f8" stroke-width="0.65" opacity="0.9"/>
+    <text x="60.50" y="41.25" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" letter-spacing="0.5" transform="rotate(-90,60.50,41.25)">HYDROGEN</text>
+    <text x="75.00" y="41.25" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" letter-spacing="0.5" transform="rotate(-90,75.00,41.25)">METHANE</text>
+    <text x="92.00" y="95.75" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" letter-spacing="0.5" transform="rotate(-90,92.00,95.75)">HYDROGEN SULFIDE</text>
+    <g transform="translate(23.10,33.60) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="23.10" y="28.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C12</text>
+    <g transform="translate(23.30,42.30) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="23.30" y="50.30" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C9</text>
+    <g transform="translate(52.70,33.90) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="52.70" y="28.70" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C11</text>
+    <g transform="translate(52.80,42.40) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="52.80" y="50.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C10</text>
+    <g transform="translate(41.90,24.00) rotate(0)">
+      <rect x="-3.70" y="-1.80" width="7.40" height="3.60" fill="#cbcfd5"/>
+      <rect x="-2.75" y="-1.80" width="5.50" height="3.60" fill="#232428"/>
+      <text x="0.00" y="1.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">472</text>
+    </g>
+    <text x="41.90" y="19.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">R6</text>
+    <g transform="translate(31.00,54.00) rotate(0)">
+      <rect x="-3.20" y="-1.70" width="6.40" height="3.40" fill="#cbcfd5"/>
+      <rect x="-2.25" y="-1.70" width="4.50" height="3.40" fill="#232428"/>
+      <text x="0.00" y="0.90" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">104</text>
+    </g>
+    <text x="31.00" y="59.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">R5</text>
+    <g transform="translate(41.60,54.40) rotate(0)">
+      <rect x="-4.20" y="-1.70" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-4.20" y="0.50" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="3.15" y="-0.58" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-3.20" y="-2.20" width="6.40" height="4.40" rx="0.35" fill="#26272b"/>
+      <rect x="-3.20" y="-2.20" width="6.40" height="1.32" fill="#3c3e44" opacity="0.7"/>
+    </g>
+    <g transform="translate(37.60,38.40) rotate(0)">
+      <rect x="-7.75" y="-7.75" width="15.50" height="15.50" rx="0.9" fill="#8d7c52"/>
+      <rect x="-7.05" y="-7.05" width="14.10" height="14.10" rx="0.7" fill="#cbbf9b"/>
+      <rect x="-4.65" y="-4.65" width="9.30" height="9.30" rx="0.5" fill="#b6a884"/>
+      <circle cx="-2.94" cy="-2.94" r="0.85" fill="#26241c"/>
+      <circle cx="-2.94" cy="0.00" r="0.85" fill="#26241c"/>
+      <circle cx="-2.94" cy="2.94" r="0.85" fill="#26241c"/>
+      <circle cx="0.00" cy="-2.94" r="0.85" fill="#26241c"/>
+      <circle cx="0.00" cy="0.00" r="0.85" fill="#26241c"/>
+      <circle cx="0.00" cy="2.94" r="0.85" fill="#26241c"/>
+      <circle cx="2.94" cy="-2.94" r="0.85" fill="#26241c"/>
+      <circle cx="2.94" cy="0.00" r="0.85" fill="#26241c"/>
+      <circle cx="2.94" cy="2.94" r="0.85" fill="#26241c"/>
+      <rect x="-7.75" y="-7.75" width="15.50" height="15.50" rx="0.9" fill="none" stroke="#6f6142" stroke-width="0.4"/>
+    </g>
+    <g transform="translate(83.80,32.90) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="83.80" y="27.70" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C4</text>
+    <g transform="translate(84.00,41.60) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="84.00" y="49.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C1</text>
+    <g transform="translate(113.40,33.20) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="113.40" y="28.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C3</text>
+    <g transform="translate(113.50,41.70) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="113.50" y="49.70" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C2</text>
+    <g transform="translate(102.60,23.30) rotate(0)">
+      <rect x="-3.70" y="-1.80" width="7.40" height="3.60" fill="#cbcfd5"/>
+      <rect x="-2.75" y="-1.80" width="5.50" height="3.60" fill="#232428"/>
+      <text x="0.00" y="1.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">472</text>
+    </g>
+    <text x="102.60" y="19.10" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">R2</text>
+    <g transform="translate(91.70,53.30) rotate(0)">
+      <rect x="-3.20" y="-1.70" width="6.40" height="3.40" fill="#cbcfd5"/>
+      <rect x="-2.25" y="-1.70" width="4.50" height="3.40" fill="#232428"/>
+      <text x="0.00" y="0.90" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">104</text>
+    </g>
+    <text x="91.70" y="58.70" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">R1</text>
+    <g transform="translate(102.30,53.70) rotate(0)">
+      <rect x="-4.20" y="-1.70" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-4.20" y="0.50" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="3.15" y="-0.58" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-3.20" y="-2.20" width="6.40" height="4.40" rx="0.35" fill="#26272b"/>
+      <rect x="-3.20" y="-2.20" width="6.40" height="1.32" fill="#3c3e44" opacity="0.7"/>
+    </g>
+    <g transform="translate(98.30,37.70) rotate(0)">
+      <rect x="-7.75" y="-7.75" width="15.50" height="15.50" rx="0.9" fill="#8d7c52"/>
+      <rect x="-7.05" y="-7.05" width="14.10" height="14.10" rx="0.7" fill="#cbbf9b"/>
+      <rect x="-4.65" y="-4.65" width="9.30" height="9.30" rx="0.5" fill="#b6a884"/>
+      <circle cx="-2.94" cy="-2.94" r="0.85" fill="#26241c"/>
+      <circle cx="-2.94" cy="0.00" r="0.85" fill="#26241c"/>
+      <circle cx="-2.94" cy="2.94" r="0.85" fill="#26241c"/>
+      <circle cx="0.00" cy="-2.94" r="0.85" fill="#26241c"/>
+      <circle cx="0.00" cy="0.00" r="0.85" fill="#26241c"/>
+      <circle cx="0.00" cy="2.94" r="0.85" fill="#26241c"/>
+      <circle cx="2.94" cy="-2.94" r="0.85" fill="#26241c"/>
+      <circle cx="2.94" cy="0.00" r="0.85" fill="#26241c"/>
+      <circle cx="2.94" cy="2.94" r="0.85" fill="#26241c"/>
+      <rect x="-7.75" y="-7.75" width="15.50" height="15.50" rx="0.9" fill="none" stroke="#6f6142" stroke-width="0.4"/>
+    </g>
+    <g transform="translate(54.70,95.80) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="54.70" y="90.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C6</text>
+    <g transform="translate(54.90,104.50) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="54.90" y="112.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C7</text>
+    <g transform="translate(84.30,96.10) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="84.30" y="90.90" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C5</text>
+    <g transform="translate(84.40,104.60) rotate(90)">
+      <rect x="-3.80" y="-2.50" width="7.60" height="5.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="5.00" fill="#cfc0a2"/>
+      <rect x="-2.75" y="-2.50" width="5.50" height="1.50" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <text x="84.40" y="112.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">C8</text>
+    <g transform="translate(73.50,86.20) rotate(0)">
+      <rect x="-3.70" y="-1.80" width="7.40" height="3.60" fill="#cbcfd5"/>
+      <rect x="-2.75" y="-1.80" width="5.50" height="3.60" fill="#232428"/>
+      <text x="0.00" y="1.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">472</text>
+    </g>
+    <text x="73.50" y="82.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">R3</text>
+    <g transform="translate(62.60,116.20) rotate(0)">
+      <rect x="-3.20" y="-1.70" width="6.40" height="3.40" fill="#cbcfd5"/>
+      <rect x="-2.25" y="-1.70" width="4.50" height="3.40" fill="#232428"/>
+      <text x="0.00" y="0.90" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">104</text>
+    </g>
+    <text x="62.60" y="121.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">R4</text>
+    <g transform="translate(73.20,116.60) rotate(0)">
+      <rect x="-4.20" y="-1.70" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-4.20" y="0.50" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="3.15" y="-0.58" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-3.20" y="-2.20" width="6.40" height="4.40" rx="0.35" fill="#26272b"/>
+      <rect x="-3.20" y="-2.20" width="6.40" height="1.32" fill="#3c3e44" opacity="0.7"/>
+    </g>
+    <g transform="translate(69.20,100.60) rotate(0)">
+      <rect x="-7.75" y="-7.75" width="15.50" height="15.50" rx="0.9" fill="#8d7c52"/>
+      <rect x="-7.05" y="-7.05" width="14.10" height="14.10" rx="0.7" fill="#cbbf9b"/>
+      <rect x="-4.65" y="-4.65" width="9.30" height="9.30" rx="0.5" fill="#b6a884"/>
+      <circle cx="-2.94" cy="-2.94" r="0.85" fill="#26241c"/>
+      <circle cx="-2.94" cy="0.00" r="0.85" fill="#26241c"/>
+      <circle cx="-2.94" cy="2.94" r="0.85" fill="#26241c"/>
+      <circle cx="0.00" cy="-2.94" r="0.85" fill="#26241c"/>
+      <circle cx="0.00" cy="0.00" r="0.85" fill="#26241c"/>
+      <circle cx="0.00" cy="2.94" r="0.85" fill="#26241c"/>
+      <circle cx="2.94" cy="-2.94" r="0.85" fill="#26241c"/>
+      <circle cx="2.94" cy="0.00" r="0.85" fill="#26241c"/>
+      <circle cx="2.94" cy="2.94" r="0.85" fill="#26241c"/>
+      <rect x="-7.75" y="-7.75" width="15.50" height="15.50" rx="0.9" fill="none" stroke="#6f6142" stroke-width="0.4"/>
+    </g>
+    <circle cx="31.60" cy="75.50" r="4.40" fill="#f6efdc"/>
+    <circle cx="31.60" cy="75.50" r="3.96" fill="#0e0f11" opacity="0.25"/>
+    <circle cx="105.60" cy="75.50" r="4.40" fill="#f6efdc"/>
+    <circle cx="105.60" cy="75.50" r="3.96" fill="#0e0f11" opacity="0.25"/>
+    <rect x="1.70" y="39.50" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="1.70" y="46.70" width="7.40" height="50.60" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="127.70" y="89.90" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="127.70" y="39.50" width="7.40" height="50.60" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="93.50" y="124.10" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="35.90" y="124.10" width="57.80" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle id="pin-GND" cx="5.40" cy="43.20" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="43.20" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="43.20" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-3V3" cx="5.40" cy="50.40" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="50.40" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="50.40" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A5" cx="5.40" cy="57.60" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="57.60" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="57.60" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A4" cx="5.40" cy="64.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="64.80" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="64.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A3" cx="5.40" cy="72.00" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="72.00" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="72.00" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A2" cx="5.40" cy="79.20" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="79.20" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="79.20" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A1" cx="5.40" cy="86.40" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="86.40" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="86.40" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-A0" cx="5.40" cy="93.60" r="2.90" fill="#c9a03c"/>
+    <circle cx="5.40" cy="93.60" r="2.26" fill="#e6c979"/>
+    <circle cx="5.40" cy="93.60" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D8" cx="131.40" cy="43.20" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="43.20" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="43.20" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D9" cx="131.40" cy="50.40" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="50.40" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="50.40" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D10" cx="131.40" cy="57.60" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="57.60" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="57.60" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D11" cx="131.40" cy="64.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="64.80" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="64.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D12" cx="131.40" cy="72.00" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="72.00" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="72.00" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-D13" cx="131.40" cy="79.20" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="79.20" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="79.20" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-3V3.2" cx="131.40" cy="86.40" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="86.40" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="86.40" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-GND.2" cx="131.40" cy="93.60" r="2.90" fill="#c9a03c"/>
+    <circle cx="131.40" cy="93.60" r="2.26" fill="#e6c979"/>
+    <circle cx="131.40" cy="93.60" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-SCK" cx="39.60" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="39.60" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="39.60" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-MO" cx="46.80" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="46.80" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="46.80" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-MI" cx="54.00" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="54.00" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="54.00" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-RX" cx="61.20" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="61.20" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="61.20" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-TX" cx="68.40" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="68.40" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="68.40" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-SDA" cx="75.60" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="75.60" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="75.60" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-SCL" cx="82.80" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="82.80" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="82.80" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-PWR" cx="90.00" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="90.00" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="90.00" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <circle id="pin-GND.3" cx="97.20" cy="127.80" r="2.90" fill="#c9a03c"/>
+    <circle cx="97.20" cy="127.80" r="2.26" fill="#e6c979"/>
+    <circle cx="97.20" cy="127.80" r="1.16" fill="#1b1a15"/>
+    <text x="10.00" y="80.28" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="start" font-weight="normal" font-style="normal">A2-H2</text>
+    <text x="10.00" y="87.48" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="start" font-weight="normal" font-style="normal">A1-H2S</text>
+    <text x="10.00" y="94.68" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="start" font-weight="normal" font-style="normal">A0-CH4</text>
+    <text x="68.40" y="10.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="8.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="italic" letter-spacing="0.6">tinySniff</text>
+    <text x="124.00" y="66.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.70" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" letter-spacing="0.3" transform="rotate(-90,124.00,66.00)">83070014A_Y1.09_250122</text>
+    <g transform="translate(107.10,94.90)">
+      <rect x="-6.95" y="-6.95" width="13.90" height="13.90" rx="1.81" fill="none" stroke="#f4f6f8" stroke-width="1.46"/>
+      <line x1="-4.17" y1="-6.95" x2="-4.17" y2="-8.76" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="-4.17" y1="6.95" x2="-4.17" y2="8.76" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="-6.95" y1="-4.17" x2="-8.76" y2="-4.17" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="6.95" y1="-4.17" x2="8.76" y2="-4.17" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="-1.39" y1="-6.95" x2="-1.39" y2="-8.76" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="-1.39" y1="6.95" x2="-1.39" y2="8.76" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="-6.95" y1="-1.39" x2="-8.76" y2="-1.39" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="6.95" y1="-1.39" x2="8.76" y2="-1.39" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="1.39" y1="-6.95" x2="1.39" y2="-8.76" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="1.39" y1="6.95" x2="1.39" y2="8.76" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="-6.95" y1="1.39" x2="-8.76" y2="1.39" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="6.95" y1="1.39" x2="8.76" y2="1.39" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="4.17" y1="-6.95" x2="4.17" y2="-8.76" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="4.17" y1="6.95" x2="4.17" y2="8.76" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="-6.95" y1="4.17" x2="-8.76" y2="4.17" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <line x1="6.95" y1="4.17" x2="8.76" y2="4.17" stroke="#f4f6f8" stroke-width="1.46" stroke-linecap="round"/>
+      <text x="0.00" y="2.78" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="5.56" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="italic">tiny</text>
+    </g>
+    <text x="107.93" y="107.93" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.20" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" letter-spacing="0.35" transform="rotate(-45,107.93,107.93)">BOARD DESIGN BY:</text>
+    <text x="104.82" y="104.82" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.20" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" letter-spacing="0.35" transform="rotate(-45,104.82,104.82)">GEOFF McINTYRE</text>
+  </g>
+</svg>

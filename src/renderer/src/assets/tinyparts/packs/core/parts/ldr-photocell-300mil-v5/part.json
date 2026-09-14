@@ -1,0 +1,31 @@
+{
+  "type": "ldr-photocell-300mil-v5",
+  "label": "Photocell (LDR)",
+  "family": "Photo-Resistor",
+  "description": "A generic light dependent resistor (LDR)",
+  "source": {
+    "fzp": "LDR_photocell_300mil_v5.fzp",
+    "moduleId": "2010BBCD20113PhotocellModuleID"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 32.44,
+      "height": 14.58,
+      "pins": {
+        "pin 0": [1.05, 6.38],
+        "pin 1": [29.85, 6.38]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 43.9,
+      "height": 15.12,
+      "pins": {
+        "pin 0": [0.35, 7.56],
+        "pin 1": [43.55, 7.56]
+      }
+    }
+  }
+}

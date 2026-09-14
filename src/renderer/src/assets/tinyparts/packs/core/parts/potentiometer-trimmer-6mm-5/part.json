@@ -1,0 +1,33 @@
+{
+  "type": "potentiometer-trimmer-6mm-5",
+  "label": "6mm Trimmer Potentiometer",
+  "family": "Potentiometer",
+  "description": "A standard 6mm trimmer potentiometer.",
+  "source": {
+    "fzp": "potentiometer_trimmer_6mm_5.fzp",
+    "moduleId": "potentiometer_trimmer_6mm_5_PotentiometerModuleID"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 23.73,
+      "height": 31.68,
+      "pins": {
+        "leg1": [2.27, 30.24],
+        "wiper": [11.87, 1.44],
+        "leg2": [21.47, 30.24]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 24.02,
+      "height": 39.38,
+      "pins": {
+        "leg1": [4.35, 38.88],
+        "wiper": [23.54, 19.68],
+        "leg2": [4.35, 0.48]
+      }
+    }
+  }
+}

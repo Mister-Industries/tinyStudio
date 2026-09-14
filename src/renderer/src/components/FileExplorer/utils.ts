@@ -4,6 +4,7 @@
  */
 
 import { fileSystem } from '../../lib/fileSystem'
+import { toSketchName } from '../../lib/projectLayout'
 
 /**
  * Get icon type for a file based on its name and type
@@ -30,13 +31,15 @@ export function getFileIconType(fileName: string | null): 'image' | 'code' | 'fi
 
 /**
  * Create default project files for a new Arduino project
- * @param projectTitle - The title of the project
- * @returns Array of file objects with path and content
+ * @param projectTitle - The title of the project, as the user typed it
+ * @param sketchName - The folder/.ino name; the Arduino IDE needs them to match
+ * @returns Map of project-relative path to content
  */
 export function createDefaultProjectFiles(
-  projectTitle: string
-): Array<{ path: string; content: string }> {
-  return [
+  projectTitle: string,
+  sketchName = toSketchName(projectTitle)
+): Record<string, string> {
+  const files = [
     {
       path: 'README.md',
       content: `# ${projectTitle}
@@ -61,7 +64,7 @@ Add your circuit diagram and connections here.
 `
     },
     {
-      path: `${projectTitle.replace(/\s+/g, '_')}.ino`,
+      path: `${sketchName}.ino`,
       content: `/*
   ${projectTitle}
   
@@ -99,6 +102,7 @@ void loop() {
 `
     }
   ]
+  return Object.fromEntries(files.map((f) => [f.path, f.content]))
 }
 
 /**

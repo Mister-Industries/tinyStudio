@@ -3,8 +3,9 @@
  * Main file explorer with tabs for file browser and source control
  */
 
+import { useAppSelector } from '@renderer/redux'
 import { Folder, Github } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FileExplorerContent } from './FileExplorerContent'
 import { SourceControl } from './SourceControl'
 
@@ -13,6 +14,15 @@ export type FileExplorerTab = 'file-explorer' | 'source-control'
 
 export function FileExplorer(): React.JSX.Element {
   const [openTab, setOpenTab] = useState<FileExplorerTab>('file-explorer')
+
+  // New file/folder can be started from the header menu while the GitHub tab is
+  // up — jump back to Files so the inline name field is visible.
+  const isCreatingAtRoot = useAppSelector(
+    (state) => state.file.workspace?.root.some((item) => !item.name) ?? false
+  )
+  useEffect(() => {
+    if (isCreatingAtRoot) setOpenTab('file-explorer')
+  }, [isCreatingAtRoot])
 
   // Underline tab — the two tabs split the strip evenly and center their labels.
   const tab =

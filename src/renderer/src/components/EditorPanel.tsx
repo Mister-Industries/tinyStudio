@@ -1,12 +1,14 @@
 import {
   OpenFileCommand,
-  OpenWorkspaceCommand,
+  promptSaveToComputer,
   RefreshWorkspaceCommand
 } from '@renderer/commands/fileCommands'
 import { loader } from '@monaco-editor/react'
 import { useIsReadOnlyProject } from '@renderer/hooks/useIsReadOnlyProject'
 import { fileSystem } from '@renderer/lib/fileSystem'
+import { isVirtualPath } from '@renderer/lib/virtualFileSystem'
 import { enablePages, loadAccount, loadLink, pushFile, toRepoPath } from '@renderer/lib/github'
+import { isElectron, openExternal } from '@renderer/lib/utils'
 import { buildVisualExportHtml } from '@renderer/lib/visualExport'
 import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
 import { selectEditorView, setEditorView, setPanelOpen } from '@renderer/redux/editorSlice'
@@ -21,15 +23,7 @@ import {
   updateFileContent,
   updateReadmeContent
 } from '@renderer/redux/fileSlice'
-import {
-  CircuitBoard,
-  CodeXml,
-  ExternalLink,
-  FolderOpen,
-  Loader2,
-  Plus,
-  UploadCloud
-} from 'lucide-react'
+import { CodeXml, ExternalLink, Loader2, Plus, UploadCloud } from 'lucide-react'
 import * as monaco from 'monaco-editor'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { notify as toast } from '@renderer/lib/notify'
@@ -38,6 +32,8 @@ import { emptyDoc, parseCircuitFile, serializeDoc } from '../circuit'
 import { CircuitViewV2 } from '../circuit/views/CircuitView'
 import { MakeItMine } from './MakeItMine'
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor'
+import { StartScreen } from './StartScreen'
+import { UnsavedProjectBanner } from './UnsavedProjectBanner'
 import {
   Dialog,
   DialogContent,
@@ -55,19 +51,20 @@ import { VisualPreview } from './VisualPreview'
 loader.config({ monaco })
 const DEFAULT_VISUAL = `// visual.js — Serial Plotter
 // Graphs the latest number printed over Serial (serialValue()) as a scrolling
-// line, auto-scaling to the data. Try Serial.println(analogRead(A0)) on the
-// board. Switch to Code to edit this sketch; Visual to run it.
+// line, auto-scaling to the data. Try Serial.println(analogRead(A5)) on the
+// board. Colours come from \`theme\`, so the plot follows light and dark mode.
+// Switch to Code to edit this sketch; Visual to run it.
 
 let data = [];
 const MAX = 240; // points kept on screen
 
 function setup() {
-  createCanvas(480, 280);
-  textFont('monospace');
+  createCanvas(480, 480);
 }
 
 function draw() {
-  background(7, 11, 34);
+  background(theme.bg);
+  const pad = 28;
 
   // pull the most recent serial value each frame
   data.push(serialValue());
@@ -78,34 +75,47 @@ function draw() {
   let hi = Math.max(...data, 1);
   if (hi === lo) hi = lo + 1;
 
-  // grid
-  stroke(26, 31, 77);
+  // label + latest value
+  noStroke();
+  fill(theme.muted);
+  textFont(theme.font);
+  textStyle(BOLD);
+  textSize(13);
+  textAlign(LEFT, TOP);
+  text('SERIAL PLOTTER', pad, pad);
+  fill(theme.text);
+  textFont(theme.mono);
+  textStyle(NORMAL);
+  textSize(40);
+  text(serialAvailable() ? serialValue().toFixed(2) : '—', pad, pad + 24);
+
+  // grid + range labels
+  const top = 130;
+  const bottom = height - pad;
+  const left = pad + 40;
+  const right = width - pad;
+  stroke(theme.grid);
   strokeWeight(1);
   for (let i = 0; i <= 4; i++) {
-    let y = map(i, 0, 4, 20, height - 24);
-    line(40, y, width - 12, y);
+    const y = map(i, 0, 4, top, bottom);
+    line(left, y, right, y);
   }
+  noStroke();
+  fill(theme.muted);
+  textSize(11);
+  textAlign(RIGHT, CENTER);
+  text(hi.toFixed(0), left - 8, top);
+  text(lo.toFixed(0), left - 8, bottom);
 
   // plotted line
   noFill();
-  stroke(0, 240, 255);
+  stroke(theme.accent);
   strokeWeight(2);
   beginShape();
   for (let i = 0; i < data.length; i++) {
-    let x = map(i, 0, MAX - 1, 40, width - 12);
-    let y = map(data[i], lo, hi, height - 24, 20);
-    vertex(x, y);
+    vertex(map(i, 0, MAX - 1, left, right), map(data[i], lo, hi, bottom, top));
   }
   endShape();
-
-  // readouts
-  noStroke();
-  fill(235, 238, 255);
-  textSize(12);
-  text('value: ' + serialValue().toFixed(2), 44, 16);
-  fill(120, 130, 170);
-  text(hi.toFixed(0), 8, 24);
-  text(lo.toFixed(0), 8, height - 24);
 }
 `
 
@@ -143,22 +153,22 @@ const sketchTemplate = (title: string): string => `// ${title} — p5.js sketch.
 // Switch to Code to edit this sketch; Visual to run it.
 
 let x = 240;
-let y = 140;
+let y = 240;
 let dx = 3;
 let dy = 2;
 
 function setup() {
-  createCanvas(480, 280);
+  createCanvas(480, 480);
   noStroke();
 }
 
 function draw() {
-  background(7, 11, 34);
+  background(theme.bg);
   x += dx;
   y += dy;
   if (x < 20 || x > width - 20) dx = -dx;
   if (y < 20 || y > height - 20) dy = -dy;
-  fill(0, 240, 255);
+  fill(theme.accent);
   circle(x, y, 40);
 }
 `
@@ -202,6 +212,7 @@ function useProjectFile(name: string, makeDefault?: () => string): EditorFile | 
 
 export function EditorPanel({ size }: { size: number }): React.JSX.Element {
   const editorView = useAppSelector(selectEditorView)
+  const hasWorkspace = useAppSelector((s) => s.file.workspace !== null)
   // Track viewport height so the panel re-measures on resize / fullscreen toggle
   // (otherwise the height is computed once from a stale window.innerHeight and
   // the layout — and its buttons — break after going fullscreen).
@@ -215,10 +226,16 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
 
   return (
     <div className="flex flex-col bg-navy-900" style={{ height: `${pixelSize}px` }}>
-      {/* Read-only example notice — above the view switch so it is visible from
-          Code, Circuit and Visual alike. */}
+      {/* Project notices — above the view switch so they're visible from Code,
+          Circuit and Visual alike. At most one shows: "only in your browser"
+          first, then (once saved) the read-only example's "make it mine". */}
+      <UnsavedProjectBanner />
       <MakeItMine />
-      {editorView === 'circuit' ? (
+      {/* Until a project is open, the start screen stands in for every view —
+          switching to Circuit or Visual has nothing to show without one. */}
+      {!hasWorkspace ? (
+        <StartScreen />
+      ) : editorView === 'circuit' ? (
         <CircuitView />
       ) : editorView === 'visual' ? (
         <VisualView />
@@ -241,7 +258,6 @@ function CodeView(): React.JSX.Element {
   const openFiles = allOpenFiles.filter((f) => !f.hidden)
   const viewingFileId = useAppSelector(selectViewingFileId)
   const editorMode = useAppSelector((state) => state.editor.editorMode)
-  const workspace = useAppSelector((s) => s.file.workspace)
   const dispatch = useAppDispatch()
   const monacoEditorRef = useRef<MonacoEditorRef>(null)
 
@@ -303,14 +319,20 @@ function CodeView(): React.JSX.Element {
       await fileSystem.writeFile(file.path, content)
       dispatch(saveFileWithContent({ id: file.id, content }))
 
+      // A project that only lives in the browser: an explicit Save is the
+      // moment to ask where it should live for real.
+      if (promptSaveToComputer()) return
+
       // First save on a read-only example: mention the copy path once, without
       // interrupting. The banner carries the offer from here on.
       if (readOnly && !readOnlySaveHinted.current) {
         readOnlySaveHinted.current = true
         toast.info('Saved locally', {
-          description: fileSystem.isElectron()
-            ? 'This is a copy of an example — use “Make it mine” to put it on GitHub.'
-            : 'Saved in this browser — use “Make it mine” to keep it on GitHub.'
+          // Browser projects can now live in a real folder too, so ask the
+          // file where it went rather than which build this is.
+          description: isVirtualPath(file.path)
+            ? 'Saved in this browser — use “Make it mine” to keep it on GitHub.'
+            : 'This is a copy of an example — use “Make it mine” to put it on GitHub.'
         })
       }
     } catch (error) {
@@ -327,18 +349,9 @@ function CodeView(): React.JSX.Element {
 
   if (openFiles.length === 0) {
     return (
-      <div className="size-full flex flex-col items-center justify-center text-sm gap-5">
-        <div className="text-center">
-          <div className="text-fg-1 text-base font-semibold">No project open</div>
-          <div className="text-fg-3 text-xs mt-1">Open a folder to start building.</div>
-        </div>
-        <Button
-          size="lg"
-          className="rounded-full px-6 shadow-[0_0_18px_rgba(0,240,255,0.25)]"
-          onClick={() => new OpenWorkspaceCommand(workspace?.path).execute()}
-        >
-          <FolderOpen size={16} /> Open Folder
-        </Button>
+      <div className="size-full flex flex-col items-center justify-center gap-1 text-center">
+        <div className="text-fg-1 text-base font-semibold">No file open</div>
+        <div className="text-fg-3 text-xs">Pick a file from the Files panel to start editing.</div>
       </div>
     )
   }
@@ -391,7 +404,7 @@ function CodeView(): React.JSX.Element {
  * open of a project that only has a v1 `diagram.json`, migrate it on disk:
  * write `circuit.json` (converted) and `diagram.json.bak` (verbatim copy).
  */
-function CircuitView(): React.JSX.Element {
+function CircuitView(): React.JSX.Element | null {
   const workspace = useAppSelector((s) => s.file.workspace)
   const [ready, setReady] = useState(false)
   const adopting = useRef(false)
@@ -425,7 +438,8 @@ function CircuitView(): React.JSX.Element {
     })()
   }, [workspace])
 
-  if (!workspace) return <EmptyHint icon="circuit" label="Open a project to design its circuit." />
+  // EditorPanel shows the start screen until a project is open.
+  if (!workspace) return null
   if (!ready) return <LoadingHint label="Preparing circuit…" />
   return <CircuitV2Inner />
 }
@@ -454,7 +468,7 @@ function CircuitV2Inner(): React.JSX.Element {
 
 // ── Visual view: full-window p5 sketch with an Edit-code button ─────────────
 
-function VisualView(): React.JSX.Element {
+function VisualView(): React.JSX.Element | null {
   const workspace = useAppSelector((s) => s.file.workspace)
   const dispatch = useAppDispatch()
 
@@ -486,7 +500,8 @@ function VisualView(): React.JSX.Element {
     activeSketch === 'visual.js' ? () => DEFAULT_VISUAL : undefined
   )
 
-  if (!workspace) return <EmptyHint icon="circuit" label="Open a project to run its visual." />
+  // EditorPanel shows the start screen until a project is open.
+  if (!workspace) return null
 
   const ws = workspace
 
@@ -515,7 +530,27 @@ function VisualView(): React.JSX.Element {
   const preview = async (): Promise<void> => {
     const path = `${ws.path}/index.html`
     try {
-      await window.api.fs.writeFile(path, buildHtml())
+      const html = buildHtml()
+      if (!isElectron()) {
+        // No shell to open a local file on the web — show the page from a blob
+        // URL instead. Open it before any await so the popup blocker allows it.
+        const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }))
+        const win = window.open(url, '_blank')
+        setTimeout(() => URL.revokeObjectURL(url), 60_000)
+        if (!win) {
+          toast.error('Could not open preview', {
+            description: 'Your browser blocked the new tab — allow pop-ups for this site.'
+          })
+          return
+        }
+        // Keep index.html in the project too, as on desktop (best-effort).
+        await fileSystem
+          .writeFile(path, html)
+          .then(() => new RefreshWorkspaceCommand(ws).execute())
+          .catch((e) => console.warn('Could not save index.html:', e))
+        return
+      }
+      await window.api.fs.writeFile(path, html)
       await new RefreshWorkspaceCommand(ws).execute()
       const err = await window.api.fs.openPath(path)
       if (err) toast.error('Could not open preview', { description: err })
@@ -546,7 +581,7 @@ function VisualView(): React.JSX.Element {
     setPublishing(true)
     try {
       const html = buildHtml()
-      await window.api.fs.writeFile(`${ws.path}/index.html`, html)
+      await fileSystem.writeFile(`${ws.path}/index.html`, html)
       await new RefreshWorkspaceCommand(ws).execute()
       await pushFile(
         link.remote,
@@ -562,7 +597,7 @@ function VisualView(): React.JSX.Element {
       toast.success('Published to GitHub Pages', {
         description: `${url} — the first build can take a minute.`
       })
-      window.api.fs.openExternal(url)
+      openExternal(url)
     } catch (e) {
       toast.error('Publish failed', {
         description: e instanceof Error ? e.message : 'Unknown error'
@@ -716,15 +751,6 @@ function NewSketchDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
-
-function EmptyHint({ label }: { icon: string; label: string }): React.JSX.Element {
-  return (
-    <div className="size-full flex flex-col items-center justify-center gap-3 text-center text-fg-3">
-      <CircuitBoard size={40} className="opacity-40" />
-      <p className="text-sm">{label}</p>
-    </div>
   )
 }
 

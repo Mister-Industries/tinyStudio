@@ -46,13 +46,29 @@ const api = {
     // Open a local file with the OS default app (e.g. exported HTML in a browser).
     openPath: (targetPath: string): Promise<string> => ipcRenderer.invoke('open-path', targetPath),
     // Open an external URL in the default browser.
-    openExternal: (url: string): Promise<void> => ipcRenderer.invoke('open-external', url)
+    openExternal: (url: string): Promise<void> => ipcRenderer.invoke('open-external', url),
+    // Reveal a file or folder in Explorer / Finder.
+    showInFolder: (targetPath: string): Promise<void> =>
+      ipcRenderer.invoke('show-item-in-folder', targetPath)
+  },
+
+  // Parts development (npm run dev): watch a local tinyparts checkout.
+  parts: {
+    watch: (dir: string): Promise<void> => ipcRenderer.invoke('parts:watch', dir),
+    unwatch: (): Promise<void> => ipcRenderer.invoke('parts:unwatch'),
+    onChanged: (cb: (info: { dir: string; paths: string[] }) => void): (() => void) => {
+      const handler = (_e: unknown, info: { dir: string; paths: string[] }): void => cb(info)
+      ipcRenderer.on('parts:changed', handler)
+      return () => ipcRenderer.removeListener('parts:changed', handler)
+    }
   },
 
   // App-level paths/info.
   app: {
     // Default folder for downloaded example projects (Documents/tinyStudio Examples).
-    getExamplesDir: (): Promise<string> => ipcRenderer.invoke('app:get-examples-dir')
+    getExamplesDir: (): Promise<string> => ipcRenderer.invoke('app:get-examples-dir'),
+    // True when running unpackaged (npm run dev): parts-development features.
+    isDev: (): boolean => ipcRenderer.sendSync('app:is-dev')
   },
 
   // Backend (tinyService) info.
@@ -111,7 +127,12 @@ const api = {
     send: (args: {
       text: string
       workspaceRoot: string | null
-      context?: { board?: string; openFile?: string; lastError?: string }
+      context?: {
+        board?: string
+        openFile?: string
+        lastError?: string
+        view?: 'code' | 'circuit' | 'visual'
+      }
     }): Promise<void> => ipcRenderer.invoke('agent:send', args),
     abort: (): Promise<void> => ipcRenderer.invoke('agent:abort'),
     reset: (): Promise<void> => ipcRenderer.invoke('agent:reset'),
@@ -131,7 +152,15 @@ const api = {
       const handler = (_e: unknown, info: { path: string }): void => cb(info)
       ipcRenderer.on('agent:file-changed', handler)
       return () => ipcRenderer.removeListener('agent:file-changed', handler)
-    }
+    },
+    // The agent asking the renderer for live app state (lib/studioBridge.ts).
+    onStudioRequest: (cb: (req: unknown) => void): (() => void) => {
+      const handler = (_e: unknown, req: unknown): void => cb(req)
+      ipcRenderer.on('agent:studio-request', handler)
+      return () => ipcRenderer.removeListener('agent:studio-request', handler)
+    },
+    respondStudio: (id: string, answer: { ok: boolean; value: string }): Promise<void> =>
+      ipcRenderer.invoke('agent:studio-response', id, answer)
   }
 }
 

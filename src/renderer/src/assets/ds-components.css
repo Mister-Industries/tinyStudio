@@ -91,6 +91,36 @@
     0 2px 0 0 var(--_edge);
 }
 
+/* Outline tactile (icon-only neutral keys: Save, undo/redo…) — the same real
+   1.5px border as the board/port pickers, in the darker interactive grey, over
+   a 1.5px ledge. (A sub-pixel 0.5px ledge vanished at 100% scaling and left the
+   key looking flat.) Lifts on hover, presses flat on click. */
+.tactile-outline {
+  border: 1.5px solid var(--border-interactive);
+  box-shadow:
+    0 1.5px 0 0 var(--border-interactive),
+    0 4px 10px rgba(20, 19, 16, 0.16);
+  transition:
+    transform var(--dur-fast) var(--ease-snap),
+    box-shadow var(--dur-fast) var(--ease-snap),
+    background-color var(--dur-fast) var(--ease-snap);
+}
+.tactile-outline:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    0 2.5px 0 0 var(--border-interactive),
+    0 7px 16px rgba(20, 19, 16, 0.2);
+}
+.tactile-outline:active:not(:disabled) {
+  transform: translateY(1.5px);
+  box-shadow:
+    0 0 0 0 var(--border-interactive),
+    0 1px 3px rgba(20, 19, 16, 0.18);
+}
+.tactile-outline:disabled {
+  box-shadow: 0 1.5px 0 0 var(--border-interactive);
+}
+
 /* ── CHECKBOX — tactile, hard-edged ──────────────────────────────────────── */
 .ts-check {
   display: inline-flex;
@@ -467,23 +497,65 @@
     opacity: 0;
   }
 }
+
+/* One-shot "over here" flash: an overlay with a brand ring + tint that pulses
+   once and fades. Drop it inside a positioned container; the Examples panel
+   mounts one when the start screen's "Try an example" card sends you there.
+   Re-trigger by remounting it (a React key). */
+.ts-attention-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--brand-soft);
+  box-shadow: inset 0 0 0 2.5px var(--brand);
+  opacity: 0;
+  animation: ts-attention-flash 1.1s var(--ease-out) forwards;
+}
+@keyframes ts-attention-flash {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ts-attention-flash {
+    animation-duration: 1.6s;
+    animation-timing-function: linear;
+  }
+}
 .ts-status__label b {
   font-weight: var(--fw-semibold);
   color: var(--text-strong);
 }
 
 /* ── STATUS BAR chrome — icon buttons, bell + history, panel menu ──────────
-   The status bar (like the top bar) is brand-blue in light, raised-grey in
-   dark; these classes flip via .ts-statusbar / .dark .ts-statusbar. */
+   The status bar is the raised surface: white in light, grey in dark. */
+.ts-statusbar {
+  --sb-bg: var(--bg-raised);
+  --sb-border: var(--border-default);
+  --sb-text: var(--text-muted);
+  --sb-faint: var(--text-faint);
+  --sb-body: var(--text-body);
+  --sb-strong: var(--text-strong);
+  --sb-hover: var(--bg-sunken);
+  --sb-on: #e2e6eb;
+  --sb-link: var(--bar-accent);
+}
+.dark .ts-statusbar {
+  --sb-on: var(--surface-card);
+}
 
-/* StatusPill label sits on the colored bar */
+/* StatusPill label sits on the bar */
 .ts-statusbar .ts-status__label,
 .ts-statusbar .ts-status__label b {
-  color: #fff;
-}
-.dark .ts-statusbar .ts-status__label,
-.dark .ts-statusbar .ts-status__label b {
-  color: var(--text-body);
+  color: var(--sb-body);
 }
 
 /* status-bar icon buttons (panel menu + bell triggers) */
@@ -509,26 +581,15 @@
   color: var(--brand);
 }
 .ts-statusbar .st-iconbtn {
-  color: #fff;
+  color: var(--sb-text);
 }
 .ts-statusbar .st-iconbtn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
+  background: var(--sb-hover);
+  color: var(--sb-body);
 }
 .ts-statusbar .st-iconbtn--on {
-  background: rgba(255, 255, 255, 0.24);
-  color: #fff;
-}
-.dark .ts-statusbar .st-iconbtn {
-  color: var(--text-muted);
-}
-.dark .ts-statusbar .st-iconbtn:hover {
-  background: var(--bg-sunken);
-  color: var(--text-body);
-}
-.dark .ts-statusbar .st-iconbtn--on {
-  background: var(--surface-card);
-  color: var(--text-strong);
+  background: var(--sb-on);
+  color: var(--sb-strong);
 }
 
 .st-bell-badge {
@@ -549,10 +610,7 @@
   box-shadow: 0 0 0 1.5px var(--bg-raised);
 }
 .ts-statusbar .st-bell-badge {
-  box-shadow: 0 0 0 1.5px var(--brand);
-}
-.dark .ts-statusbar .st-bell-badge {
-  box-shadow: 0 0 0 1.5px var(--bg-raised);
+  box-shadow: 0 0 0 1.5px var(--sb-bg);
 }
 
 /* ── notification bell + history popover (anchored bottom-right) ──────────── */

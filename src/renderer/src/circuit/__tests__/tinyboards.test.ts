@@ -1,21 +1,18 @@
 /**
- * Tests for the built-in tinyBoard parts — the shared 25-pin stack connector,
- * tinyProto's prototyping cross and its power buses, and the SVG invariants
- * the Circuit view depends on (namespaced gradient ids, Fritzing connectors).
+ * Tests for the tinyBoard family as it ships: the bundled tinyparts `tinyboards`
+ * pack, whose pins are read out of the real SVG files. These pin the family's
+ * physical contract — the shared 25-pin stack connector at fixed positions,
+ * tinyProto's hole lattice and power buses — so an art edit that nudges a pad
+ * off the 0.1in grid fails here instead of in someone's circuit.
  */
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { GRID_BB } from '../core/model'
+import { GRID_BB, emptyDoc } from '../core/model'
 import { buildNets } from '../core/nets'
-import { emptyDoc } from '../core/model'
-import {
-  PART_MANIFEST,
-  TINYPROTO_BUSES,
-  getPart,
-  viewFor,
-  type PartView
-} from '../../lib/partsLibrary'
+import { PART_MANIFEST, ensureParts, getPart, viewFor, type PartView } from '../../lib/partsLibrary'
+import { buildFolderPart } from '../parts/folderPart'
+import { readBundled } from '../parts/bundled'
 
 const FAMILY = ['tinycore', 'tinyglow', 'tinyproto', 'tinysniff', 'tinyspeak', 'tinydisplay']
 const STACK = [
@@ -46,42 +43,59 @@ const STACK = [
   'GND.3'
 ]
 
-function bb(type: string): PartView {
+async function bb(type: string): Promise<PartView> {
+  await ensureParts([type])
   const def = getPart(type)
-  assert.ok(def, `${type} should be a built-in`)
+  assert.ok(def, `${type} should ship bundled`)
   const v = viewFor(def!, 'breadboard')
   assert.ok(v, `${type} should have a breadboard view`)
   return v!
 }
 
-test('the whole family is registered and 1.9in square', () => {
+test('the whole family ships bundled, 1.9in square, and loads without warnings', async () => {
   for (const type of FAMILY) {
-    const v = bb(type)
+    const v = await bb(type)
     assert.equal(v.w, 182.4, type)
     assert.equal(v.h, 182.4, type)
-    assert.ok(
-      PART_MANIFEST.some((m) => m.type === type && m.builtin),
-      type
+    const meta = PART_MANIFEST.find((m) => m.type === type)
+    assert.ok(meta?.builtin, `${type} is marked builtin`)
+    assert.equal(meta?.layer, 'bundled', type)
+    assert.ok(meta?.icon?.startsWith('<svg'), `${type} has a palette icon`)
+    assert.deepEqual(getPart(type)!.source?.warnings, [], type)
+    assert.equal(
+      getPart(type)!.source?.pinsFromSvg?.breadboard,
+      true,
+      `${type} pins come from its art`
     )
   }
 })
 
-test('every board carries the same 25-pin stack connector at the same places', () => {
-  const ref = bb('tinycore').pins
-  for (const name of STACK) assert.ok(ref[name], `tinycore missing ${name}`)
+test('the stack connector is where it has always been (pins read from the SVG)', async () => {
+  // the positions the family was drawn to; saved circuits depend on them
+  const pins = (await bb('tinycore')).pins
+  assert.deepEqual(pins['GND'], [7.2, 57.6])
+  assert.deepEqual(pins['A0'], [7.2, 124.8])
+  assert.deepEqual(pins['D8'], [175.2, 57.6])
+  assert.deepEqual(pins['GND.2'], [175.2, 124.8])
+  assert.deepEqual(pins['SCK'], [52.8, 170.4])
+  assert.deepEqual(pins['GND.3'], [129.6, 170.4])
+  assert.deepEqual(Object.keys(pins), STACK, 'pin order follows part.json')
+})
+
+test('every board carries the same 25-pin stack connector at the same places', async () => {
+  const ref = (await bb('tinycore')).pins
   for (const type of FAMILY) {
-    const pins = bb(type).pins
+    const pins = (await bb(type)).pins
     for (const name of STACK) {
       assert.deepEqual(pins[name], ref[name], `${type}:${name} must stack onto tinycore`)
     }
   }
 })
 
-test('each header is on a 0.1in pitch', () => {
-  const pins = bb('tinycore').pins
+test('each header is on a 0.1in pitch', async () => {
+  const pins = (await bb('tinycore')).pins
   const step = (a: string, b: string, axis: 0 | 1): number =>
     Math.abs(pins[b]![axis] - pins[a]![axis])
-  // left and right run top to bottom, the bottom header left to right
   const near = (got: number, want: number, what: string): void =>
     assert.ok(Math.abs(got - want) < 1e-6, `${what}: ${got} != ${want}`)
   for (const [a, b] of [
@@ -104,32 +118,27 @@ test('each header is on a 0.1in pitch', () => {
   near(pins['D8']![0] - pins['GND']![0], 17.5 * GRID_BB, 'header separation')
 })
 
-test('tinyProto adds a 183-hole cross: 15 cols x 8 header rows + 9 cols x 15 rows', () => {
-  const pins = bb('tinyproto').pins
+test('tinyProto adds a 183-hole cross: 15 cols x 8 header rows + 9 cols x 15 rows', async () => {
+  const pins = (await bb('tinyproto')).pins
   const holes = Object.keys(pins).filter((k) => /^[A-O]\.\d+$/.test(k))
   assert.equal(holes.length, 183)
   assert.equal(Object.keys(pins).length, 183 + 25)
-  // the horizontal band spans all 15 columns at each of the 8 header rows
   for (const row of [5, 6, 7, 8, 9, 10, 11, 12]) {
     for (const col of 'ABCDEFGHIJKLMNO') assert.ok(pins[`${col}.${row}`], `${col}.${row}`)
   }
-  // the vertical band spans all 15 rows in the 9 bottom-header columns
   for (const col of 'DEFGHIJKL') {
     for (let row = 1; row <= 15; row++) assert.ok(pins[`${col}.${row}`], `${col}.${row}`)
   }
-  // and nothing outside the cross
   assert.equal(pins['A.1'], undefined)
   assert.equal(pins['O.15'], undefined)
 })
 
-test('proto holes share the header lattice — a hole lines up with its header pin', () => {
-  const pins = bb('tinyproto').pins
-  assert.equal(pins['A.5']![1], pins['GND']![1]) // first header row
-  assert.equal(pins['O.12']![1], pins['A0']![1]) // last header row
-  assert.equal(pins['D.15']![0], pins['SCK']![0]) // first bottom column
-  assert.equal(pins['L.15']![0], pins['GND.3']![0]) // last bottom column
-  // the whole field is one lattice: every hole is a whole number of pitches
-  // from A.5 in both axes
+test('proto holes share the header lattice — a hole lines up with its header pin', async () => {
+  const pins = (await bb('tinyproto')).pins
+  assert.equal(pins['A.5']![1], pins['GND']![1])
+  assert.equal(pins['O.12']![1], pins['A0']![1])
+  assert.equal(pins['D.15']![0], pins['SCK']![0])
+  assert.equal(pins['L.15']![0], pins['GND.3']![0])
   const [ox, oy] = pins['A.5']!
   for (const [name, [x, y]] of Object.entries(pins)) {
     if (!/^[A-O]\.\d+$/.test(name)) continue
@@ -140,11 +149,12 @@ test('proto holes share the header lattice — a hole lines up with its header p
   }
 })
 
-test('only the five ringed groups are bussed; every other hole is an island', () => {
-  const pins = bb('tinyproto').pins
-  assert.equal(TINYPROTO_BUSES.length, 5)
+test('only the five ringed groups are bussed; every other hole is an island', async () => {
+  const pins = (await bb('tinyproto')).pins
+  const buses = getPart('tinyproto')!.buses!
+  assert.equal(buses.length, 5)
   const bussed = new Set<string>()
-  for (const bus of TINYPROTO_BUSES) {
+  for (const bus of buses) {
     for (const p of bus) {
       assert.ok(pins[p], `bus references unknown hole ${p}`)
       assert.ok(!bussed.has(p), `${p} is in two buses`)
@@ -152,8 +162,8 @@ test('only the five ringed groups are bussed; every other hole is an island', ()
     }
   }
   assert.equal(bussed.size, 21)
-  // wire two holes of the left GND bus (a bare board lists no nets at all) and
-  // check the bus joined them — including across the L-bend into column D
+  await ensureParts(['resistor'])
+  const busesFor = (t: string): string[][] | undefined => getPart(t)?.buses
   const doc = emptyDoc()
   doc.parts = [
     { id: 'P1', type: 'tinyproto', bb: { x: 0, y: 0 } },
@@ -161,7 +171,7 @@ test('only the five ringed groups are bussed; every other hole is an island', ()
     { id: 'R2', type: 'resistor', bb: { x: 400, y: 90 } }
   ]
   const nets = buildNets(doc, {
-    busesFor: (t) => (t === 'tinyproto' ? TINYPROTO_BUSES : undefined),
+    busesFor,
     implicit: [
       ['R1:1', 'P1:C.5'], // right-hand end of the left GND row
       ['R2:1', 'P1:D.2'] // top of the column that bends off it
@@ -171,43 +181,47 @@ test('only the five ringed groups are bussed; every other hole is an island', ()
   const b = nets.pinToNet.get('R2:1')
   assert.ok(a != null && b != null)
   assert.equal(a, b, 'the L-shaped GND bus is one net')
-  // a neighbouring hole is not on it
   const nets2 = buildNets(doc, {
-    busesFor: (t) => (t === 'tinyproto' ? TINYPROTO_BUSES : undefined),
+    busesFor,
     implicit: [
       ['R1:1', 'P1:C.5'],
-      ['R2:1', 'P1:C.7'] // a plain hole one row down — its own island
+      ['R2:1', 'P1:C.7']
     ]
   })
   assert.notEqual(nets2.pinToNet.get('R1:1'), nets2.pinToNet.get('R2:1'))
 })
 
-test('each board namespaces its gradient ids (shared ids made every board go black)', () => {
-  const seen = new Map<string, string>()
-  for (const type of FAMILY) {
-    const svg = bb(type).svg
-    const ids = [...svg.matchAll(/id="([a-z]{2}-[a-z]+)"/g)].map((m) => m[1])
-    assert.ok(ids.length > 0, `${type} should define namespaced gradients`)
-    for (const id of ids) {
-      const prev = seen.get(id)
-      assert.equal(prev, undefined, `id "${id}" is shared by ${prev} and ${type}`)
-      seen.set(id, type)
-    }
-    for (const ref of [...svg.matchAll(/url\(#([^)]+)\)/g)].map((m) => m[1])) {
-      assert.ok(ids.includes(ref), `${type} references #${ref} but does not define it`)
-    }
-  }
+test('moving a pad in the art moves the pin — nothing else to update', async () => {
+  const def = getPart('tinycore') ?? (await ensureParts(['tinycore']), getPart('tinycore')!)
+  const src = def.source!
+  // shift pin-GND (tinyCore's pads are socket <rect>s) one pitch — 7.2
+  // viewBox units, 9.6px — to the right
+  const edited = src.raw!.breadboard!.replace(
+    /(<rect id="pin-GND" x=")([\d.]+)/,
+    (_m, head: string, x: string) => `${head}${(parseFloat(x) + 7.2).toFixed(2)}`
+  )
+  assert.notEqual(edited, src.raw!.breadboard)
+  const moved = await buildFolderPart(
+    src.json!,
+    async (p) => (p.endsWith('/breadboard.svg') ? edited : readBundled(p)),
+    { layer: 'dev', pack: src.pack, dir: src.dir! }
+  )
+  assert.deepEqual(moved.views.breadboard!.pins['GND'], [16.8, 57.6])
+  assert.deepEqual(moved.views.breadboard!.pins['3V3'], def.views.breadboard!.pins['3V3'])
 })
 
-test('the art follows Fritzing conventions', () => {
-  for (const type of FAMILY) {
-    const svg = bb(type).svg
-    assert.match(svg, /width="1\.9in" height="1\.9in"/, type)
-    assert.match(svg, /viewBox="0 0 136\.8 136\.8"/, type)
-    assert.match(svg, /<g id="breadboard">/, type)
-    for (let i = 0; i < 25; i++) {
-      assert.ok(svg.includes(`id="connector${i}pin"`), `${type} connector${i}pin`)
-      assert.ok(svg.includes(`id="connector${i}terminal"`), `${type} connector${i}terminal`)
+test('no two bundled parts share a referenced id or style class once inlined', async () => {
+  await ensureParts(PART_MANIFEST.filter((m) => m.layer === 'bundled').map((m) => m.type))
+  const owner = new Map<string, string>()
+  for (const meta of PART_MANIFEST.filter((m) => m.layer === 'bundled')) {
+    const def = getPart(meta.type)!
+    for (const v of Object.values(def.views)) {
+      const refs = new Set([...v!.svg.matchAll(/url\(\s*['"]?#([^'")\s]+)/g)].map((m) => m[1]))
+      for (const id of refs) {
+        const prev = owner.get(id)
+        assert.ok(!prev || prev === meta.type, `#${id} is defined by both ${prev} and ${meta.type}`)
+        owner.set(id, meta.type)
+      }
     }
   }
 })

@@ -14,19 +14,12 @@
 
 import { useGitHubAccount, type DeviceCodePrompt } from '@renderer/hooks/useGitHubAccount'
 import { notify as toast } from '@renderer/lib/notify'
+import { openExternal } from '@renderer/lib/utils'
 import { Check, Copy, ExternalLink, Github, Loader2 } from 'lucide-react'
 import React from 'react'
 import { Button } from './ui/Button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Dialog'
 import { Input } from './ui/Input'
-
-const openExternal = (url: string): void => {
-  if (typeof window !== 'undefined' && window.api?.fs?.openExternal) {
-    void window.api.fs.openExternal(url)
-  } else {
-    window.open(url, '_blank', 'noreferrer')
-  }
-}
 
 export function GitHubSignInButton({
   className,

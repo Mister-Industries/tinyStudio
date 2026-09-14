@@ -16,8 +16,9 @@
 // your way into an empty list by accident.
 
 import { BookOpen, Loader2, Search, SlidersHorizontal, X, Zap } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { notify as toast } from '@renderer/lib/notify'
+import { selectExamplesFlash, useAppSelector } from '@renderer/redux'
 import { fetchExamplesManifest, matchesQuery, type ExampleEntry } from '@renderer/lib/examples'
 import {
   compareTags,
@@ -36,9 +37,8 @@ import { ExampleTag } from './ExampleTag'
 // Display order + labels for the manifest's `category` field. Anything with an
 // unknown (or missing) category falls into "More examples" at the bottom, so a
 // new category added to the manifest still shows up rather than disappearing.
-const CATEGORY_ORDER = ['demos', 'basics', 'advanced', 'hats'] as const
+const CATEGORY_ORDER = ['basics', 'advanced', 'hats'] as const
 const CATEGORY_LABEL: Record<string, string> = {
-  demos: 'tinyStudio demos',
   basics: 'Basics',
   advanced: 'Advanced',
   hats: 'tinyHATs',
@@ -67,9 +67,22 @@ function matchesTags(ex: ExampleEntry, selected: string[]): boolean {
   return selected.every((t) => tags.includes(t))
 }
 
+// The last "Try an example" flash that focused the search box (module scope, so
+// a remount doesn't steal focus again for an old one).
+let flashFocused = 0
+
 export function ExamplesContent(): React.JSX.Element {
   const [examples, setExamples] = useState<ExampleEntry[]>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const flash = useAppSelector(selectExamplesFlash)
+  const searchRef = useRef<HTMLInputElement>(null)
+
+  // Sent here from the start screen: land in the search box, ready to type.
+  useEffect(() => {
+    if (status !== 'ready' || flash <= flashFocused) return
+    flashFocused = flash
+    searchRef.current?.focus({ preventScroll: true })
+  }, [flash, status])
   const [openingPath, setOpeningPath] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -178,6 +191,7 @@ export function ExamplesContent(): React.JSX.Element {
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]"
               />
               <Input
+                ref={searchRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search examples — try “i2c”, “blink”, “tinySniff”…"

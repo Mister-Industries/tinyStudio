@@ -34,7 +34,9 @@ export function IconButton({
       className={cn(
         'inline-flex items-center justify-center rounded-[var(--radius-sm)] leading-none outline-none transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50',
         sizes[size],
-        variant === 'default' && !active && 'tactile-bordered bg-card text-[var(--text-strong)]',
+        variant === 'default' &&
+          !active &&
+          'tactile-outline bg-[var(--surface-card)] text-[var(--text-strong)]',
         variant === 'ghost' &&
           !active &&
           'bg-transparent text-[var(--text-body)] hover:bg-[var(--bg-sunken)]',

@@ -12,13 +12,7 @@
  *   - frozen-bend reroutes for part moves (the collectFrozen behavior)
  */
 
-import {
-  getPart,
-  TINYPROTO_BUSES,
-  viewFor,
-  type PartDef,
-  type PartView
-} from '../../lib/partsLibrary'
+import { getPart, viewFor, type PartDef, type PartView } from '../../lib/partsLibrary'
 import { schematicVisual } from '../parts/symbols'
 import { netLabelPinWorld, netLabelVisualOf, snapNetLabel } from '../parts/netLabels'
 import { decorateResistor, hasResistorBands } from '../parts/resistorBands'
@@ -334,11 +328,10 @@ import { breadboardBuses, isBreadboard } from '../parts/breadboard'
 /** Seat radius: half a hole pitch (spec §7.3). */
 const SEAT_RADIUS = GRID_BB / 2
 
-/** buses resolver for buildNets — breadboards, tinyProto's power rails, and
- * PartDef v2 packs later. */
+/** buses resolver for buildNets — a part's own `buses` (tinyProto's power
+ * rails, from its part.json), else the generated breadboards'. */
 export function circuitBuses(type: string): string[][] | undefined {
-  if (type === 'tinyproto') return TINYPROTO_BUSES
-  return breadboardBuses(type)
+  return getPart(type)?.buses ?? breadboardBuses(type)
 }
 
 export interface Seat {

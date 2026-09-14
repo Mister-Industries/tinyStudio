@@ -110,21 +110,23 @@ Windows packaging notes live in [docs/packaging-windows.md](docs/packaging-windo
 
 ## Example projects
 
-The [`demo/`](demo) folder holds ready-to-open projects. Clone the repo, and open one the folders in the editor,
-then pick your board and port and hit **Verify** / **Upload**.
+Ready-to-open projects live in the
+[tinyStudio-examples](https://github.com/Mister-Industries/tinyStudio-examples) repo and show up in
+the app's **Examples** tab. Open one, then pick your board and port and hit **Verify** / **Upload**.
 
-| Project                                     | What it shows                                          |
-| ------------------------------------------- | ------------------------------------------------------ |
-| [Blink Example](demo/Blink%20Example)       | Blink an LED and mirror its state in the Visual view   |
-| [Fade Example](demo/Fade%20Example)         | PWM-fade an LED and chart the brightness curve live    |
-| [Joystick Example](demo/Joystick%20Example) | Read a Qwiic joystick and visualize the stick position |
+These Basics also come with a circuit and a live visual:
+
+| Project                                                                                                            | What it shows                                                        |
+| ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| [Basic Blink Program](https://github.com/Mister-Industries/tinyStudio-examples/tree/main/basics/blink-basic)         | Blink an LED and mirror its state in the Visual view                 |
+| [Smooth Breathing Effect](https://github.com/Mister-Industries/tinyStudio-examples/tree/main/basics/blink-breathing) | PWM-fade an LED and chart the brightness curve live                  |
+| [Qwiic Joystick](https://github.com/Mister-Industries/tinyStudio-examples/tree/main/basics/qwiic-joystick)           | Read a Qwiic joystick and play Asteroids or Pong in the Visual view  |
 
 Each project is a folder with the same structure:
 
 ```
-My Example/
-  my_sketch/
-    my_sketch.ino   ← the Arduino sketch (its own folder, per Arduino convention)
+my-example/
+  my-example.ino    ← the Arduino sketch (it shares its folder's name, per Arduino convention)
   diagram.json      ← the circuit (Circuit view)
   visual.js         ← the p5 sketch (Visual view)
   README.md         ← how to run it
@@ -141,12 +143,13 @@ walkthrough has been documented in:
 
 TL;DR:
 
-- **A custom part** is a JSON file in
-  [`src/renderer/src/assets/parts/`](src/renderer/src/assets/parts) plus one entry in
-  [`index.json`](src/renderer/src/assets/parts/index.json). You can hand-author it or generate
-  it from a Fritzing part using
-  [`scripts/fritzing-import.mjs`](scripts/fritzing-import.mjs).
-- **An example project** is just a new folder under [`demo/`](demo) following the layout above.
+- **Parts and their art** live in the [tinyparts](https://github.com/Mister-Industries/tinyparts)
+  repo, one folder per part with real `.svg` files you can edit in Illustrator. The app bundles a
+  snapshot and picks up pushes to tinyparts on launch. Where everything is and how to edit it:
+  📖 **[docs/parts-and-art.md](docs/parts-and-art.md)**.
+- **An example project** is just a new folder in
+  [tinyStudio-examples](https://github.com/Mister-Industries/tinyStudio-examples) following the
+  layout above.
 
 ## Architecture
 
@@ -158,7 +161,6 @@ src/
   renderer/   the React UI (Code / Circuit / Visual), Redux store,
               parts library, services, and the p5 visual runtime
 scripts/      arduino-cli fetcher + Fritzing parts importer
-demo/         bundled example projects
 docs/         contributor & packaging docs
 ```
 

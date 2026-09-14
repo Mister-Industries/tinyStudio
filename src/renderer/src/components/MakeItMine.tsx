@@ -11,6 +11,7 @@
 
 import { AdoptCopiedProjectCommand } from '@renderer/commands/fileCommands'
 import { useGitHubAccount } from '@renderer/hooks/useGitHubAccount'
+import { useIsBrowserOnlyProject } from '@renderer/hooks/useIsBrowserOnlyProject'
 import { useIsReadOnlyProject } from '@renderer/hooks/useIsReadOnlyProject'
 import {
   collectWorkspaceFiles,
@@ -39,6 +40,9 @@ export function MakeItMine(): React.JSX.Element | null {
   const dispatch = useAppDispatch()
   const { account } = useGitHubAccount()
   const readOnly = useIsReadOnlyProject()
+  // A browser-only project gets the "save to computer" banner instead — one
+  // notice at a time. This offer returns once the project has a folder.
+  const browserOnly = useIsBrowserOnlyProject()
 
   const [dismissed, setDismissed] = React.useState(false)
   const [open, setOpen] = React.useState(false)
@@ -54,7 +58,7 @@ export function MakeItMine(): React.JSX.Element | null {
     setDismissed(false)
   }, [sourceKey])
 
-  if (!workspace || !readOnly || dismissed) return null
+  if (!workspace || !readOnly || dismissed || browserOnly) return null
 
   const deferred = workspace.source?.manifest.filter((m) => m.skipped).length ?? 0
 
@@ -132,8 +136,7 @@ export function MakeItMine(): React.JSX.Element | null {
           <span className="text-[var(--text-body)]">
             {workspace.source?.owner}/{workspace.source?.repo}
           </span>
-          . Changes save {fileSystem.isElectron() ? 'to this folder' : 'in your browser'} — make a
-          copy to keep them on GitHub.
+          . Changes save to this folder — make a copy to keep them on GitHub.
         </span>
         <Button size="sm" className="h-6 shrink-0 px-2 text-[12px]" onClick={openDialog}>
           Make it mine

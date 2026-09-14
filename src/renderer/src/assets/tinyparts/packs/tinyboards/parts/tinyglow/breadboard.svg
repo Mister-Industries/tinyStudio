@@ -1,0 +1,409 @@
+<!-- tinyGlow breadboard art. Edit freely (Illustrator is fine). Pins are the shapes whose id is "pin-<NAME>" - keep those names; see tinyparts/README.md. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1.9in" height="1.9in" viewBox="0 0 136.8 136.8">
+  <title>tinyGlow</title>
+  <g id="breadboard">
+    <defs>
+      <linearGradient id="tg-mask" x1="0.12" y1="0" x2="0.8" y2="1">
+        <stop offset="0" stop-color="#1d4bad"/>
+        <stop offset="1" stop-color="#0e2c73"/>
+      </linearGradient>
+      <linearGradient id="tg-metal" x1="0" y1="0" x2="0.2" y2="1">
+        <stop offset="0" stop-color="#eceff3"/>
+        <stop offset="0.45" stop-color="#b6bbc4"/>
+        <stop offset="0.6" stop-color="#d2d7dd"/>
+        <stop offset="1" stop-color="#8e949d"/>
+      </linearGradient>
+      <linearGradient id="tg-green" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6fc784"/>
+        <stop offset="0.45" stop-color="#33984f"/>
+        <stop offset="1" stop-color="#1a6733"/>
+      </linearGradient>
+    </defs>
+    <polygon points="40.07,0.00 96.73,0.00 136.80,40.07 136.80,96.73 96.73,136.80 40.07,136.80 0.00,96.73 0.00,40.07" fill="url(#tg-mask)"/>
+    <polygon points="40.30,0.55 96.50,0.55 136.25,40.30 136.25,96.50 96.50,136.25 40.30,136.25 0.55,96.50 0.55,40.30" fill="none" stroke="#04102e" stroke-width="1.1" opacity="0.30"/>
+    <g transform="translate(33.80,11.30) rotate(-45)">
+      <rect x="-15.00" y="-8.75" width="30.00" height="17.50" rx="1.2" fill="url(#tg-green)"/>
+      <rect x="-15.00" y="-8.75" width="30.00" height="3.85" fill="#8fd8a2" opacity="0.30"/>
+      <rect x="-15.00" y="5.15" width="30.00" height="3.60" fill="#0f4a24" opacity="0.35"/>
+      <circle cx="-10.00" cy="-3.55" r="3.60" fill="#7d838c"/>
+      <circle cx="-10.00" cy="-3.55" r="3.00" fill="url(#tg-metal)"/>
+      <rect x="-12.60" y="-4.25" width="5.20" height="1.35" rx="0.4" fill="#5b6068" transform="rotate(-45,-10.00,-3.55)"/>
+      <rect x="-13.00" y="1.75" width="6.00" height="4.4" rx="0.8" fill="#0b3d1c"/>
+      <circle cx="0.00" cy="-3.55" r="3.60" fill="#7d838c"/>
+      <circle cx="0.00" cy="-3.55" r="3.00" fill="url(#tg-metal)"/>
+      <rect x="-2.60" y="-4.25" width="5.20" height="1.35" rx="0.4" fill="#5b6068" transform="rotate(-8,0.00,-3.55)"/>
+      <rect x="-3.00" y="1.75" width="6.00" height="4.4" rx="0.8" fill="#0b3d1c"/>
+      <line x1="-5.00" y1="-8.75" x2="-5.00" y2="8.75" stroke="#12481f" stroke-width="0.55" opacity="0.8"/>
+      <circle cx="10.00" cy="-3.55" r="3.60" fill="#7d838c"/>
+      <circle cx="10.00" cy="-3.55" r="3.00" fill="url(#tg-metal)"/>
+      <rect x="7.40" y="-4.25" width="5.20" height="1.35" rx="0.4" fill="#5b6068" transform="rotate(29,10.00,-3.55)"/>
+      <rect x="7.00" y="1.75" width="6.00" height="4.4" rx="0.8" fill="#0b3d1c"/>
+      <line x1="5.00" y1="-8.75" x2="5.00" y2="8.75" stroke="#12481f" stroke-width="0.55" opacity="0.8"/>
+      <rect x="-15.00" y="-8.75" width="30.00" height="17.50" rx="1.2" fill="none" stroke="#0d3d1c" stroke-width="0.55"/>
+    </g>
+    <g transform="translate(68.40,4.30) rotate(0)">
+      <rect x="-15.00" y="-8.75" width="30.00" height="17.50" rx="1.2" fill="url(#tg-green)"/>
+      <rect x="-15.00" y="-8.75" width="30.00" height="3.85" fill="#8fd8a2" opacity="0.30"/>
+      <rect x="-15.00" y="5.15" width="30.00" height="3.60" fill="#0f4a24" opacity="0.35"/>
+      <circle cx="-10.00" cy="-3.55" r="3.60" fill="#7d838c"/>
+      <circle cx="-10.00" cy="-3.55" r="3.00" fill="url(#tg-metal)"/>
+      <rect x="-12.60" y="-4.25" width="5.20" height="1.35" rx="0.4" fill="#5b6068" transform="rotate(-45,-10.00,-3.55)"/>
+      <rect x="-13.00" y="1.75" width="6.00" height="4.4" rx="0.8" fill="#0b3d1c"/>
+      <circle cx="0.00" cy="-3.55" r="3.60" fill="#7d838c"/>
+      <circle cx="0.00" cy="-3.55" r="3.00" fill="url(#tg-metal)"/>
+      <rect x="-2.60" y="-4.25" width="5.20" height="1.35" rx="0.4" fill="#5b6068" transform="rotate(-8,0.00,-3.55)"/>
+      <rect x="-3.00" y="1.75" width="6.00" height="4.4" rx="0.8" fill="#0b3d1c"/>
+      <line x1="-5.00" y1="-8.75" x2="-5.00" y2="8.75" stroke="#12481f" stroke-width="0.55" opacity="0.8"/>
+      <circle cx="10.00" cy="-3.55" r="3.60" fill="#7d838c"/>
+      <circle cx="10.00" cy="-3.55" r="3.00" fill="url(#tg-metal)"/>
+      <rect x="7.40" y="-4.25" width="5.20" height="1.35" rx="0.4" fill="#5b6068" transform="rotate(29,10.00,-3.55)"/>
+      <rect x="7.00" y="1.75" width="6.00" height="4.4" rx="0.8" fill="#0b3d1c"/>
+      <line x1="5.00" y1="-8.75" x2="5.00" y2="8.75" stroke="#12481f" stroke-width="0.55" opacity="0.8"/>
+      <rect x="-15.00" y="-8.75" width="30.00" height="17.50" rx="1.2" fill="none" stroke="#0d3d1c" stroke-width="0.55"/>
+    </g>
+    <g transform="translate(103.70,11.70) rotate(45)">
+      <rect x="-15.00" y="-8.75" width="30.00" height="17.50" rx="1.2" fill="url(#tg-green)"/>
+      <rect x="-15.00" y="-8.75" width="30.00" height="3.85" fill="#8fd8a2" opacity="0.30"/>
+      <rect x="-15.00" y="5.15" width="30.00" height="3.60" fill="#0f4a24" opacity="0.35"/>
+      <circle cx="-10.00" cy="-3.55" r="3.60" fill="#7d838c"/>
+      <circle cx="-10.00" cy="-3.55" r="3.00" fill="url(#tg-metal)"/>
+      <rect x="-12.60" y="-4.25" width="5.20" height="1.35" rx="0.4" fill="#5b6068" transform="rotate(-45,-10.00,-3.55)"/>
+      <rect x="-13.00" y="1.75" width="6.00" height="4.4" rx="0.8" fill="#0b3d1c"/>
+      <circle cx="0.00" cy="-3.55" r="3.60" fill="#7d838c"/>
+      <circle cx="0.00" cy="-3.55" r="3.00" fill="url(#tg-metal)"/>
+      <rect x="-2.60" y="-4.25" width="5.20" height="1.35" rx="0.4" fill="#5b6068" transform="rotate(-8,0.00,-3.55)"/>
+      <rect x="-3.00" y="1.75" width="6.00" height="4.4" rx="0.8" fill="#0b3d1c"/>
+      <line x1="-5.00" y1="-8.75" x2="-5.00" y2="8.75" stroke="#12481f" stroke-width="0.55" opacity="0.8"/>
+      <circle cx="10.00" cy="-3.55" r="3.60" fill="#7d838c"/>
+      <circle cx="10.00" cy="-3.55" r="3.00" fill="url(#tg-metal)"/>
+      <rect x="7.40" y="-4.25" width="5.20" height="1.35" rx="0.4" fill="#5b6068" transform="rotate(29,10.00,-3.55)"/>
+      <rect x="7.00" y="1.75" width="6.00" height="4.4" rx="0.8" fill="#0b3d1c"/>
+      <line x1="5.00" y1="-8.75" x2="5.00" y2="8.75" stroke="#12481f" stroke-width="0.55" opacity="0.8"/>
+      <rect x="-15.00" y="-8.75" width="30.00" height="17.50" rx="1.2" fill="none" stroke="#0d3d1c" stroke-width="0.55"/>
+    </g>
+    <text x="28.00" y="30.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,28.00,30.00)">CH3</text>
+    <text x="63.00" y="32.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,63.00,32.00)">CH2</text>
+    <text x="98.50" y="30.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,98.50,30.00)">CH1</text>
+    <text x="18.50" y="24.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-45,18.50,24.50)">4A MAX</text>
+    <text x="68.40" y="22.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">4A MAX</text>
+    <text x="118.00" y="24.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(45,118.00,24.50)">4A MAX</text>
+    <rect x="30.30" y="35.90" width="21.0" height="21.0" fill="none" stroke="#f4f6f8" stroke-width="0.5" opacity="0.7"/>
+    <g transform="translate(40.80,46.40) rotate(0)">
+      <rect x="-9.25" y="-9.25" width="18.50" height="18.50" rx="1.3" fill="#3a3d42"/>
+      <rect x="-8.35" y="-8.35" width="16.70" height="16.70" rx="1.1" fill="#4c5057"/>
+      <rect x="-5.55" y="-8.55" width="6.29" height="3.70" rx="0.7" fill="#d8dce1"/>
+      <rect x="-0.74" y="4.25" width="6.29" height="3.70" rx="0.7" fill="#d8dce1"/>
+      <rect x="-8.55" y="5.55" width="3.70" height="3.15" rx="0.7" fill="#c2c7cd"/>
+      <rect x="4.25" y="-8.70" width="3.70" height="3.15" rx="0.7" fill="#c2c7cd"/>
+      <text x="-1.11" y="1.85" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.70" fill="#2b2e33" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-30,-1.11,1.85)">4R7</text>
+    </g>
+    <g transform="translate(28.80,35.50) rotate(0)">
+      <rect x="-3.30" y="-1.42" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-3.30" y="0.22" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="2.25" y="-0.58" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="3.30" rx="0.35" fill="#26272b"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="0.99" fill="#3c3e44" opacity="0.7"/>
+    </g>
+    <g transform="translate(25.30,29.00) rotate(0)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(25.30,34.50) rotate(0)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(37.80,27.50) rotate(0)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(31.30,60.50) rotate(0)">
+      <rect x="-2.20" y="-1.20" width="4.40" height="2.40" fill="#cbcfd5"/>
+      <rect x="-1.25" y="-1.20" width="2.50" height="2.40" fill="#232428"/>
+      <text x="0.00" y="0.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">103</text>
+    </g>
+    <g transform="translate(37.80,60.50) rotate(0)">
+      <rect x="-2.20" y="-1.20" width="4.40" height="2.40" fill="#cbcfd5"/>
+      <rect x="-1.25" y="-1.20" width="2.50" height="2.40" fill="#232428"/>
+      <text x="0.00" y="0.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">472</text>
+    </g>
+    <g transform="translate(51.30,39.50) rotate(90)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(55.80,39.50) rotate(90)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(31.80,72.50) rotate(0)">
+      <rect x="-3.30" y="-1.42" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-3.30" y="0.22" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="2.25" y="-0.58" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="3.30" rx="0.35" fill="#26272b"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="0.99" fill="#3c3e44" opacity="0.7"/>
+    </g>
+    <rect x="65.90" y="36.60" width="21.0" height="21.0" fill="none" stroke="#f4f6f8" stroke-width="0.5" opacity="0.7"/>
+    <g transform="translate(76.40,47.10) rotate(0)">
+      <rect x="-9.25" y="-9.25" width="18.50" height="18.50" rx="1.3" fill="#3a3d42"/>
+      <rect x="-8.35" y="-8.35" width="16.70" height="16.70" rx="1.1" fill="#4c5057"/>
+      <rect x="-5.55" y="-8.55" width="6.29" height="3.70" rx="0.7" fill="#d8dce1"/>
+      <rect x="-0.74" y="4.25" width="6.29" height="3.70" rx="0.7" fill="#d8dce1"/>
+      <rect x="-8.55" y="5.55" width="3.70" height="3.15" rx="0.7" fill="#c2c7cd"/>
+      <rect x="4.25" y="-8.70" width="3.70" height="3.15" rx="0.7" fill="#c2c7cd"/>
+      <text x="-1.11" y="1.85" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.70" fill="#2b2e33" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-30,-1.11,1.85)">4R7</text>
+    </g>
+    <g transform="translate(64.40,35.50) rotate(0)">
+      <rect x="-3.30" y="-1.42" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-3.30" y="0.22" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="2.25" y="-0.58" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="3.30" rx="0.35" fill="#26272b"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="0.99" fill="#3c3e44" opacity="0.7"/>
+    </g>
+    <g transform="translate(60.90,29.00) rotate(0)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(60.90,34.50) rotate(0)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(73.40,27.50) rotate(0)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(66.90,60.50) rotate(0)">
+      <rect x="-2.20" y="-1.20" width="4.40" height="2.40" fill="#cbcfd5"/>
+      <rect x="-1.25" y="-1.20" width="2.50" height="2.40" fill="#232428"/>
+      <text x="0.00" y="0.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">103</text>
+    </g>
+    <g transform="translate(73.40,60.50) rotate(0)">
+      <rect x="-2.20" y="-1.20" width="4.40" height="2.40" fill="#cbcfd5"/>
+      <rect x="-1.25" y="-1.20" width="2.50" height="2.40" fill="#232428"/>
+      <text x="0.00" y="0.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">472</text>
+    </g>
+    <g transform="translate(86.90,39.50) rotate(90)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(91.40,39.50) rotate(90)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(67.40,72.50) rotate(0)">
+      <rect x="-3.30" y="-1.42" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-3.30" y="0.22" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="2.25" y="-0.58" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="3.30" rx="0.35" fill="#26272b"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="0.99" fill="#3c3e44" opacity="0.7"/>
+    </g>
+    <rect x="103.40" y="36.70" width="21.0" height="21.0" fill="none" stroke="#f4f6f8" stroke-width="0.5" opacity="0.7"/>
+    <g transform="translate(113.90,47.20) rotate(0)">
+      <rect x="-9.25" y="-9.25" width="18.50" height="18.50" rx="1.3" fill="#3a3d42"/>
+      <rect x="-8.35" y="-8.35" width="16.70" height="16.70" rx="1.1" fill="#4c5057"/>
+      <rect x="-5.55" y="-8.55" width="6.29" height="3.70" rx="0.7" fill="#d8dce1"/>
+      <rect x="-0.74" y="4.25" width="6.29" height="3.70" rx="0.7" fill="#d8dce1"/>
+      <rect x="-8.55" y="5.55" width="3.70" height="3.15" rx="0.7" fill="#c2c7cd"/>
+      <rect x="4.25" y="-8.70" width="3.70" height="3.15" rx="0.7" fill="#c2c7cd"/>
+      <text x="-1.11" y="1.85" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.70" fill="#2b2e33" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-30,-1.11,1.85)">4R7</text>
+    </g>
+    <g transform="translate(101.90,35.50) rotate(0)">
+      <rect x="-3.30" y="-1.42" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-3.30" y="0.22" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="2.25" y="-0.58" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="3.30" rx="0.35" fill="#26272b"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="0.99" fill="#3c3e44" opacity="0.7"/>
+    </g>
+    <g transform="translate(98.40,29.00) rotate(0)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(98.40,34.50) rotate(0)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(110.90,27.50) rotate(0)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(104.40,60.50) rotate(0)">
+      <rect x="-2.20" y="-1.20" width="4.40" height="2.40" fill="#cbcfd5"/>
+      <rect x="-1.25" y="-1.20" width="2.50" height="2.40" fill="#232428"/>
+      <text x="0.00" y="0.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">103</text>
+    </g>
+    <g transform="translate(110.90,60.50) rotate(0)">
+      <rect x="-2.20" y="-1.20" width="4.40" height="2.40" fill="#cbcfd5"/>
+      <rect x="-1.25" y="-1.20" width="2.50" height="2.40" fill="#232428"/>
+      <text x="0.00" y="0.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">472</text>
+    </g>
+    <g transform="translate(124.40,39.50) rotate(90)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(128.90,39.50) rotate(90)">
+      <rect x="-2.30" y="-1.50" width="4.60" height="3.00" rx="0.35" fill="#b9bec6"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="3.00" fill="#cfc0a2"/>
+      <rect x="-1.25" y="-1.50" width="2.50" height="0.90" fill="#ffffff" opacity="0.16"/>
+    </g>
+    <g transform="translate(104.90,72.50) rotate(0)">
+      <rect x="-3.30" y="-1.42" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-3.30" y="0.22" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="2.25" y="-0.58" width="1.05" height="1.15" fill="#c6cbd2"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="3.30" rx="0.35" fill="#26272b"/>
+      <rect x="-2.30" y="-1.65" width="4.60" height="0.99" fill="#3c3e44" opacity="0.7"/>
+    </g>
+    <circle cx="29.70" cy="77.50" r="4.20" fill="#dfe4ea"/>
+    <circle cx="29.70" cy="77.50" r="3.78" fill="#0e0f11" opacity="0.25"/>
+    <circle cx="102.90" cy="76.00" r="4.20" fill="#dfe4ea"/>
+    <circle cx="102.90" cy="76.00" r="3.78" fill="#0e0f11" opacity="0.25"/>
+    <g transform="translate(39.20,97.00) rotate(0)">
+      <rect x="-2.55" y="-14.80" width="5.10" height="2.6" rx="0.6" fill="#aeb3ba"/>
+      <rect x="-2.55" y="12.20" width="5.10" height="2.6" rx="0.6" fill="#aeb3ba"/>
+      <rect x="-5.80" y="-13.00" width="11.60" height="26.00" rx="1.0" fill="url(#tg-metal)" stroke="#767c85" stroke-width="0.45"/>
+      <rect x="-3.80" y="-10.40" width="7.60" height="20.80" rx="0.6" fill="#1d1f23"/>
+      <rect x="-3.20" y="-9.60" width="6.40" height="10.40" rx="0.5" fill="#0a0b0d"/>
+      <rect x="-2.60" y="-8.80" width="5.20" height="7.28" rx="0.4" fill="#585d65"/>
+    </g>
+    <text x="38.70" y="82.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.40" fill="#f4f6f8" text-anchor="middle" font-weight="bold" font-style="normal">ON</text>
+    <text x="32.80" y="116.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="4.60" fill="#f4f6f8" text-anchor="middle" font-weight="bold" font-style="normal">S3</text>
+    <text x="46.20" y="116.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.20" fill="#f4f6f8" text-anchor="middle" font-weight="bold" font-style="normal">OFF</text>
+    <g transform="translate(47.70,97.00) rotate(90)">
+      <rect x="-2.20" y="-1.20" width="4.40" height="2.40" fill="#cbcfd5"/>
+      <rect x="-1.25" y="-1.20" width="2.50" height="2.40" fill="#232428"/>
+      <text x="0.00" y="0.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">103</text>
+    </g>
+    <g transform="translate(62.70,97.00) rotate(0)">
+      <rect x="-2.55" y="-14.80" width="5.10" height="2.6" rx="0.6" fill="#aeb3ba"/>
+      <rect x="-2.55" y="12.20" width="5.10" height="2.6" rx="0.6" fill="#aeb3ba"/>
+      <rect x="-5.80" y="-13.00" width="11.60" height="26.00" rx="1.0" fill="url(#tg-metal)" stroke="#767c85" stroke-width="0.45"/>
+      <rect x="-3.80" y="-10.40" width="7.60" height="20.80" rx="0.6" fill="#1d1f23"/>
+      <rect x="-3.20" y="-9.60" width="6.40" height="10.40" rx="0.5" fill="#0a0b0d"/>
+      <rect x="-2.60" y="-8.80" width="5.20" height="7.28" rx="0.4" fill="#585d65"/>
+    </g>
+    <text x="62.20" y="82.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.40" fill="#f4f6f8" text-anchor="middle" font-weight="bold" font-style="normal">ON</text>
+    <text x="56.30" y="116.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="4.60" fill="#f4f6f8" text-anchor="middle" font-weight="bold" font-style="normal">S2</text>
+    <text x="69.70" y="116.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.20" fill="#f4f6f8" text-anchor="middle" font-weight="bold" font-style="normal">OFF</text>
+    <g transform="translate(71.20,97.00) rotate(90)">
+      <rect x="-2.20" y="-1.20" width="4.40" height="2.40" fill="#cbcfd5"/>
+      <rect x="-1.25" y="-1.20" width="2.50" height="2.40" fill="#232428"/>
+      <text x="0.00" y="0.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">103</text>
+    </g>
+    <g transform="translate(86.00,97.00) rotate(0)">
+      <rect x="-2.55" y="-14.80" width="5.10" height="2.6" rx="0.6" fill="#aeb3ba"/>
+      <rect x="-2.55" y="12.20" width="5.10" height="2.6" rx="0.6" fill="#aeb3ba"/>
+      <rect x="-5.80" y="-13.00" width="11.60" height="26.00" rx="1.0" fill="url(#tg-metal)" stroke="#767c85" stroke-width="0.45"/>
+      <rect x="-3.80" y="-10.40" width="7.60" height="20.80" rx="0.6" fill="#1d1f23"/>
+      <rect x="-3.20" y="-9.60" width="6.40" height="10.40" rx="0.5" fill="#0a0b0d"/>
+      <rect x="-2.60" y="-8.80" width="5.20" height="7.28" rx="0.4" fill="#585d65"/>
+    </g>
+    <text x="85.50" y="82.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.40" fill="#f4f6f8" text-anchor="middle" font-weight="bold" font-style="normal">ON</text>
+    <text x="79.60" y="116.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="4.60" fill="#f4f6f8" text-anchor="middle" font-weight="bold" font-style="normal">S1</text>
+    <text x="93.00" y="116.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.20" fill="#f4f6f8" text-anchor="middle" font-weight="bold" font-style="normal">OFF</text>
+    <g transform="translate(94.50,97.00) rotate(90)">
+      <rect x="-2.20" y="-1.20" width="4.40" height="2.40" fill="#cbcfd5"/>
+      <rect x="-1.25" y="-1.20" width="2.50" height="2.40" fill="#232428"/>
+      <text x="0.00" y="0.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="1.60" fill="#eceff3" text-anchor="middle" font-weight="normal" font-style="normal">103</text>
+    </g>
+    <text x="112.50" y="100.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.90" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,112.50,100.00)">+VIN</text>
+    <text x="118.00" y="100.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.90" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,118.00,100.00)">GND</text>
+    <text x="106.50" y="112.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.90" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-45,106.50,112.00)">5V - 24V</text>
+    <circle cx="112.50" cy="108.5" r="2.7" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="112.50" cy="108.5" r="1.35" fill="#101114"/>
+    <circle cx="119.00" cy="108.5" r="2.7" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="119.00" cy="108.5" r="1.35" fill="#101114"/>
+    <rect x="1.70" y="39.50" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="1.70" y="46.70" width="7.40" height="50.60" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="127.70" y="89.90" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="127.70" y="39.50" width="7.40" height="50.60" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="93.50" y="124.10" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="35.90" y="124.10" width="57.80" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle id="pin-GND" cx="5.40" cy="43.20" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="5.40" cy="43.20" r="1.30" fill="#141414"/>
+    <circle id="pin-3V3" cx="5.40" cy="50.40" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="5.40" cy="50.40" r="1.30" fill="#141414"/>
+    <circle id="pin-A5" cx="5.40" cy="57.60" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="5.40" cy="57.60" r="1.30" fill="#141414"/>
+    <circle id="pin-A4" cx="5.40" cy="64.80" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="5.40" cy="64.80" r="1.30" fill="#141414"/>
+    <circle id="pin-A3" cx="5.40" cy="72.00" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="5.40" cy="72.00" r="1.30" fill="#141414"/>
+    <circle id="pin-A2" cx="5.40" cy="79.20" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="5.40" cy="79.20" r="1.30" fill="#141414"/>
+    <circle id="pin-A1" cx="5.40" cy="86.40" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="5.40" cy="86.40" r="1.30" fill="#141414"/>
+    <circle id="pin-A0" cx="5.40" cy="93.60" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="5.40" cy="93.60" r="1.30" fill="#141414"/>
+    <circle id="pin-D8" cx="131.40" cy="43.20" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="131.40" cy="43.20" r="1.30" fill="#141414"/>
+    <circle id="pin-D9" cx="131.40" cy="50.40" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="131.40" cy="50.40" r="1.30" fill="#141414"/>
+    <circle id="pin-D10" cx="131.40" cy="57.60" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="131.40" cy="57.60" r="1.30" fill="#141414"/>
+    <circle id="pin-D11" cx="131.40" cy="64.80" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="131.40" cy="64.80" r="1.30" fill="#141414"/>
+    <circle id="pin-D12" cx="131.40" cy="72.00" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="131.40" cy="72.00" r="1.30" fill="#141414"/>
+    <circle id="pin-D13" cx="131.40" cy="79.20" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="131.40" cy="79.20" r="1.30" fill="#141414"/>
+    <circle id="pin-3V3.2" cx="131.40" cy="86.40" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="131.40" cy="86.40" r="1.30" fill="#141414"/>
+    <circle id="pin-GND.2" cx="131.40" cy="93.60" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="131.40" cy="93.60" r="1.30" fill="#141414"/>
+    <circle id="pin-SCK" cx="39.60" cy="127.80" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="39.60" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-MO" cx="46.80" cy="127.80" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="46.80" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-MI" cx="54.00" cy="127.80" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="54.00" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-RX" cx="61.20" cy="127.80" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="61.20" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-TX" cx="68.40" cy="127.80" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="68.40" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-SDA" cx="75.60" cy="127.80" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="75.60" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-SCL" cx="82.80" cy="127.80" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="82.80" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-PWR" cx="90.00" cy="127.80" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="90.00" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-GND.3" cx="97.20" cy="127.80" r="2.60" fill="#d7ab48" stroke="#9b7a24" stroke-width="0.3"/>
+    <circle cx="97.20" cy="127.80" r="1.30" fill="#141414"/>
+    <text x="123.00" y="43.20" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,123.00,43.20)">CH</text>
+    <text x="126.80" y="43.20" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,126.80,43.20)">1</text>
+    <text x="123.00" y="50.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,123.00,50.40)">CH</text>
+    <text x="126.80" y="50.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,126.80,50.40)">2</text>
+    <text x="123.00" y="57.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,123.00,57.60)">CH</text>
+    <text x="126.80" y="57.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,126.80,57.60)">3</text>
+    <g transform="translate(23.00,96.50)">
+      <rect x="-8.60" y="-8.60" width="17.20" height="17.20" rx="2.24" fill="none" stroke="#f4f6f8" stroke-width="1.81"/>
+      <line x1="-5.16" y1="-8.60" x2="-5.16" y2="-10.84" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="-5.16" y1="8.60" x2="-5.16" y2="10.84" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="-8.60" y1="-5.16" x2="-10.84" y2="-5.16" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="8.60" y1="-5.16" x2="10.84" y2="-5.16" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="-1.72" y1="-8.60" x2="-1.72" y2="-10.84" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="-1.72" y1="8.60" x2="-1.72" y2="10.84" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="-8.60" y1="-1.72" x2="-10.84" y2="-1.72" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="8.60" y1="-1.72" x2="10.84" y2="-1.72" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="1.72" y1="-8.60" x2="1.72" y2="-10.84" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="1.72" y1="8.60" x2="1.72" y2="10.84" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="-8.60" y1="1.72" x2="-10.84" y2="1.72" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="8.60" y1="1.72" x2="10.84" y2="1.72" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="5.16" y1="-8.60" x2="5.16" y2="-10.84" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="5.16" y1="8.60" x2="5.16" y2="10.84" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="-8.60" y1="5.16" x2="-10.84" y2="5.16" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <line x1="8.60" y1="5.16" x2="10.84" y2="5.16" stroke="#f4f6f8" stroke-width="1.81" stroke-linecap="round"/>
+      <text x="0.00" y="3.44" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="6.88" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="italic">tiny</text>
+    </g>
+  </g>
+</svg>

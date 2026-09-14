@@ -1,0 +1,20 @@
+{
+  "type": "tinyglow",
+  "label": "tinyGlow",
+  "family": "tinyStudio",
+  "sub": "3-channel LED driver",
+  "accent": "var(--pink)",
+  "builtin": true,
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": "1.9in",
+      "height": "1.9in",
+      "pins": [
+        "GND", "3V3", "A5", "A4", "A3", "A2", "A1", "A0", "D8", "D9", "D10", "D11", "D12", "D13",
+        "3V3.2", "GND.2", "SCK", "MO", "MI", "RX", "TX", "SDA", "SCL", "PWR", "GND.3"
+      ]
+    }
+  }
+}

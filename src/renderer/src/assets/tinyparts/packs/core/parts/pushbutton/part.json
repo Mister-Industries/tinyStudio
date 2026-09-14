@@ -1,0 +1,31 @@
+{
+  "type": "pushbutton",
+  "label": "Round Pushbutton",
+  "family": "Switch - 2 pin",
+  "description": "A generic pushbutton.",
+  "source": {
+    "fzp": "Pushbutton.fzp",
+    "moduleId": "33b94ebdb1ef4e7cf0f8425956cfca60"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 67.42,
+      "height": 74.89,
+      "pins": {
+        "leg0": [28.19, 72.79],
+        "leg1": [37.83, 72.79]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 6.62,
+      "height": 29.5,
+      "pins": {
+        "leg0": [4.74, 29.14],
+        "leg1": [4.74, 0.3]
+      }
+    }
+  }
+}

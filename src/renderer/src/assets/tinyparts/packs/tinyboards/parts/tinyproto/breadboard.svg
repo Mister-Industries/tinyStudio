@@ -1,0 +1,548 @@
+<!-- tinyProto breadboard art. Edit freely (Illustrator is fine). Pins are the shapes whose id is "pin-<NAME>" - keep those names; see tinyparts/README.md. -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1.9in" height="1.9in" viewBox="0 0 136.8 136.8">
+  <title>tinyProto</title>
+  <g id="breadboard">
+    <defs>
+      <linearGradient id="tp-mask" x1="0.12" y1="0" x2="0.8" y2="1">
+        <stop offset="0" stop-color="#0a9950"/>
+        <stop offset="1" stop-color="#046f39"/>
+      </linearGradient>
+      <linearGradient id="tp-metal" x1="0" y1="0" x2="0.2" y2="1">
+        <stop offset="0" stop-color="#eceff3"/>
+        <stop offset="0.45" stop-color="#b6bbc4"/>
+        <stop offset="0.6" stop-color="#d2d7dd"/>
+        <stop offset="1" stop-color="#8e949d"/>
+      </linearGradient>
+      <linearGradient id="tp-green" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6fc784"/>
+        <stop offset="0.45" stop-color="#33984f"/>
+        <stop offset="1" stop-color="#1a6733"/>
+      </linearGradient>
+    </defs>
+    <polygon points="40.07,0.00 96.73,0.00 136.80,40.07 136.80,96.73 96.73,136.80 40.07,136.80 0.00,96.73 0.00,40.07" fill="url(#tp-mask)"/>
+    <polygon points="40.30,0.55 96.50,0.55 136.25,40.30 136.25,96.50 96.50,136.25 40.30,136.25 0.55,96.50 0.55,40.30" fill="none" stroke="#03361c" stroke-width="1.1" opacity="0.30"/>
+    <circle id="pin-A.5" cx="18.00" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="18.00" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-A.6" cx="18.00" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="18.00" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-A.7" cx="18.00" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="18.00" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-A.8" cx="18.00" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="18.00" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-A.9" cx="18.00" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="18.00" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-A.10" cx="18.00" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="18.00" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-A.11" cx="18.00" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="18.00" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-A.12" cx="18.00" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="18.00" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-B.5" cx="25.20" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="25.20" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-B.6" cx="25.20" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="25.20" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-B.7" cx="25.20" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="25.20" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-B.8" cx="25.20" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="25.20" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-B.9" cx="25.20" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="25.20" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-B.10" cx="25.20" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="25.20" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-B.11" cx="25.20" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="25.20" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-B.12" cx="25.20" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="25.20" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-C.5" cx="32.40" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="32.40" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-C.6" cx="32.40" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="32.40" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-C.7" cx="32.40" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="32.40" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-C.8" cx="32.40" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="32.40" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-C.9" cx="32.40" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="32.40" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-C.10" cx="32.40" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="32.40" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-C.11" cx="32.40" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="32.40" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-C.12" cx="32.40" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="32.40" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.1" cx="39.60" cy="14.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="14.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.2" cx="39.60" cy="21.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="21.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.3" cx="39.60" cy="28.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="28.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.4" cx="39.60" cy="36.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="36.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.5" cx="39.60" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.6" cx="39.60" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.7" cx="39.60" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.8" cx="39.60" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.9" cx="39.60" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.10" cx="39.60" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.11" cx="39.60" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.12" cx="39.60" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.13" cx="39.60" cy="100.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="100.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.14" cx="39.60" cy="108.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="108.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-D.15" cx="39.60" cy="115.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="39.60" cy="115.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.1" cx="46.80" cy="14.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="14.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.2" cx="46.80" cy="21.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="21.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.3" cx="46.80" cy="28.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="28.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.4" cx="46.80" cy="36.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="36.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.5" cx="46.80" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.6" cx="46.80" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.7" cx="46.80" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.8" cx="46.80" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.9" cx="46.80" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.10" cx="46.80" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.11" cx="46.80" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.12" cx="46.80" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.13" cx="46.80" cy="100.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="100.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.14" cx="46.80" cy="108.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="108.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-E.15" cx="46.80" cy="115.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="46.80" cy="115.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.1" cx="54.00" cy="14.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="14.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.2" cx="54.00" cy="21.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="21.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.3" cx="54.00" cy="28.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="28.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.4" cx="54.00" cy="36.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="36.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.5" cx="54.00" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.6" cx="54.00" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.7" cx="54.00" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.8" cx="54.00" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.9" cx="54.00" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.10" cx="54.00" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.11" cx="54.00" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.12" cx="54.00" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.13" cx="54.00" cy="100.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="100.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.14" cx="54.00" cy="108.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="108.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-F.15" cx="54.00" cy="115.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="54.00" cy="115.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.1" cx="61.20" cy="14.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="14.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.2" cx="61.20" cy="21.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="21.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.3" cx="61.20" cy="28.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="28.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.4" cx="61.20" cy="36.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="36.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.5" cx="61.20" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.6" cx="61.20" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.7" cx="61.20" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.8" cx="61.20" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.9" cx="61.20" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.10" cx="61.20" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.11" cx="61.20" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.12" cx="61.20" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.13" cx="61.20" cy="100.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="100.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.14" cx="61.20" cy="108.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="108.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-G.15" cx="61.20" cy="115.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="61.20" cy="115.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.1" cx="68.40" cy="14.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="14.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.2" cx="68.40" cy="21.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="21.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.3" cx="68.40" cy="28.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="28.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.4" cx="68.40" cy="36.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="36.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.5" cx="68.40" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.6" cx="68.40" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.7" cx="68.40" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.8" cx="68.40" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.9" cx="68.40" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.10" cx="68.40" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.11" cx="68.40" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.12" cx="68.40" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.13" cx="68.40" cy="100.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="100.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.14" cx="68.40" cy="108.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="108.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-H.15" cx="68.40" cy="115.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="68.40" cy="115.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.1" cx="75.60" cy="14.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="14.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.2" cx="75.60" cy="21.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="21.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.3" cx="75.60" cy="28.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="28.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.4" cx="75.60" cy="36.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="36.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.5" cx="75.60" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.6" cx="75.60" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.7" cx="75.60" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.8" cx="75.60" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.9" cx="75.60" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.10" cx="75.60" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.11" cx="75.60" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.12" cx="75.60" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.13" cx="75.60" cy="100.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="100.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.14" cx="75.60" cy="108.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="108.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-I.15" cx="75.60" cy="115.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="75.60" cy="115.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.1" cx="82.80" cy="14.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="14.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.2" cx="82.80" cy="21.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="21.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.3" cx="82.80" cy="28.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="28.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.4" cx="82.80" cy="36.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="36.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.5" cx="82.80" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.6" cx="82.80" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.7" cx="82.80" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.8" cx="82.80" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.9" cx="82.80" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.10" cx="82.80" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.11" cx="82.80" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.12" cx="82.80" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.13" cx="82.80" cy="100.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="100.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.14" cx="82.80" cy="108.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="108.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-J.15" cx="82.80" cy="115.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="82.80" cy="115.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.1" cx="90.00" cy="14.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="14.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.2" cx="90.00" cy="21.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="21.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.3" cx="90.00" cy="28.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="28.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.4" cx="90.00" cy="36.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="36.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.5" cx="90.00" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.6" cx="90.00" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.7" cx="90.00" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.8" cx="90.00" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.9" cx="90.00" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.10" cx="90.00" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.11" cx="90.00" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.12" cx="90.00" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.13" cx="90.00" cy="100.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="100.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.14" cx="90.00" cy="108.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="108.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-K.15" cx="90.00" cy="115.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="90.00" cy="115.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.1" cx="97.20" cy="14.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="14.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.2" cx="97.20" cy="21.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="21.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.3" cx="97.20" cy="28.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="28.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.4" cx="97.20" cy="36.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="36.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.5" cx="97.20" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.6" cx="97.20" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.7" cx="97.20" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.8" cx="97.20" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.9" cx="97.20" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.10" cx="97.20" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.11" cx="97.20" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.12" cx="97.20" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.13" cx="97.20" cy="100.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="100.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.14" cx="97.20" cy="108.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="108.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-L.15" cx="97.20" cy="115.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="97.20" cy="115.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-M.5" cx="104.40" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="104.40" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-M.6" cx="104.40" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="104.40" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-M.7" cx="104.40" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="104.40" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-M.8" cx="104.40" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="104.40" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-M.9" cx="104.40" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="104.40" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-M.10" cx="104.40" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="104.40" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-M.11" cx="104.40" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="104.40" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-M.12" cx="104.40" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="104.40" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-N.5" cx="111.60" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="111.60" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-N.6" cx="111.60" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="111.60" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-N.7" cx="111.60" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="111.60" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-N.8" cx="111.60" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="111.60" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-N.9" cx="111.60" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="111.60" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-N.10" cx="111.60" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="111.60" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-N.11" cx="111.60" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="111.60" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-N.12" cx="111.60" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="111.60" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-O.5" cx="118.80" cy="43.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="118.80" cy="43.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-O.6" cx="118.80" cy="50.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="118.80" cy="50.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-O.7" cx="118.80" cy="57.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="118.80" cy="57.60" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-O.8" cx="118.80" cy="64.80" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="118.80" cy="64.80" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-O.9" cx="118.80" cy="72.00" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="118.80" cy="72.00" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-O.10" cx="118.80" cy="79.20" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="118.80" cy="79.20" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-O.11" cx="118.80" cy="86.40" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="118.80" cy="86.40" r="1.3" fill="#0a4a26"/>
+    <circle id="pin-O.12" cx="118.80" cy="93.60" r="2.55" fill="#c9ced4" stroke="#8d939b" stroke-width="0.25"/>
+    <circle cx="118.80" cy="93.60" r="1.3" fill="#0a4a26"/>
+    <rect x="14.40" y="39.60" width="21.60" height="7.20" rx="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="36.00" y="18.00" width="7.20" height="21.60" rx="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="34.80" y1="40.80" x2="37.20" y2="24.00" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="14.40" y="46.80" width="21.60" height="7.20" rx="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="100.80" y="82.80" width="21.60" height="7.20" rx="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="100.80" y="90.00" width="21.60" height="7.20" rx="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="93.60" y="97.20" width="7.20" height="21.60" rx="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="121.20" y1="91.20" x2="94.80" y2="103.20" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="86.40" y="97.20" width="7.20" height="21.60" rx="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="9.20" y1="43.20" x2="36.00" y2="43.20" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="118.80" cy="43.20" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="127.60" y1="43.20" x2="122.40" y2="43.20" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="9.20" y1="50.40" x2="36.00" y2="50.40" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="118.80" cy="50.40" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="127.60" y1="50.40" x2="122.40" y2="50.40" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="18.00" cy="57.60" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="9.20" y1="57.60" x2="14.40" y2="57.60" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="118.80" cy="57.60" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="127.60" y1="57.60" x2="122.40" y2="57.60" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="18.00" cy="64.80" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="9.20" y1="64.80" x2="14.40" y2="64.80" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="118.80" cy="64.80" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="127.60" y1="64.80" x2="122.40" y2="64.80" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="18.00" cy="72.00" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="9.20" y1="72.00" x2="14.40" y2="72.00" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="118.80" cy="72.00" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="127.60" y1="72.00" x2="122.40" y2="72.00" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="18.00" cy="79.20" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="9.20" y1="79.20" x2="14.40" y2="79.20" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="118.80" cy="79.20" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="127.60" y1="79.20" x2="122.40" y2="79.20" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="18.00" cy="86.40" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="9.20" y1="86.40" x2="14.40" y2="86.40" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="127.60" y1="86.40" x2="100.80" y2="86.40" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="18.00" cy="93.60" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="9.20" y1="93.60" x2="14.40" y2="93.60" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="127.60" y1="93.60" x2="100.80" y2="93.60" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="39.60" cy="115.20" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="39.60" y1="124.00" x2="39.60" y2="118.80" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="46.80" cy="115.20" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="46.80" y1="124.00" x2="46.80" y2="118.80" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="54.00" cy="115.20" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="54.00" y1="124.00" x2="54.00" y2="118.80" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="61.20" cy="115.20" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="61.20" y1="124.00" x2="61.20" y2="118.80" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="68.40" cy="115.20" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="68.40" y1="124.00" x2="68.40" y2="118.80" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="75.60" cy="115.20" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="75.60" y1="124.00" x2="75.60" y2="118.80" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle cx="82.80" cy="115.20" r="3.6" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="82.80" y1="124.00" x2="82.80" y2="118.80" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="90.00" y1="124.00" x2="90.00" y2="97.20" stroke="#f4f6f8" stroke-width="0.6"/>
+    <line x1="97.20" y1="124.00" x2="97.20" y2="97.20" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="1.70" y="39.50" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="1.70" y="46.70" width="7.40" height="50.60" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="127.70" y="89.90" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="127.70" y="39.50" width="7.40" height="50.60" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="93.50" y="124.10" width="7.40" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <rect x="35.90" y="124.10" width="57.80" height="7.40" rx="0.90" fill="none" stroke="#f4f6f8" stroke-width="0.6"/>
+    <circle id="pin-GND" cx="5.40" cy="43.20" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="5.40" cy="43.20" r="1.30" fill="#141414"/>
+    <circle id="pin-3V3" cx="5.40" cy="50.40" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="5.40" cy="50.40" r="1.30" fill="#141414"/>
+    <circle id="pin-A5" cx="5.40" cy="57.60" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="5.40" cy="57.60" r="1.30" fill="#141414"/>
+    <circle id="pin-A4" cx="5.40" cy="64.80" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="5.40" cy="64.80" r="1.30" fill="#141414"/>
+    <circle id="pin-A3" cx="5.40" cy="72.00" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="5.40" cy="72.00" r="1.30" fill="#141414"/>
+    <circle id="pin-A2" cx="5.40" cy="79.20" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="5.40" cy="79.20" r="1.30" fill="#141414"/>
+    <circle id="pin-A1" cx="5.40" cy="86.40" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="5.40" cy="86.40" r="1.30" fill="#141414"/>
+    <circle id="pin-A0" cx="5.40" cy="93.60" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="5.40" cy="93.60" r="1.30" fill="#141414"/>
+    <circle id="pin-D8" cx="131.40" cy="43.20" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="131.40" cy="43.20" r="1.30" fill="#141414"/>
+    <circle id="pin-D9" cx="131.40" cy="50.40" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="131.40" cy="50.40" r="1.30" fill="#141414"/>
+    <circle id="pin-D10" cx="131.40" cy="57.60" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="131.40" cy="57.60" r="1.30" fill="#141414"/>
+    <circle id="pin-D11" cx="131.40" cy="64.80" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="131.40" cy="64.80" r="1.30" fill="#141414"/>
+    <circle id="pin-D12" cx="131.40" cy="72.00" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="131.40" cy="72.00" r="1.30" fill="#141414"/>
+    <circle id="pin-D13" cx="131.40" cy="79.20" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="131.40" cy="79.20" r="1.30" fill="#141414"/>
+    <circle id="pin-3V3.2" cx="131.40" cy="86.40" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="131.40" cy="86.40" r="1.30" fill="#141414"/>
+    <circle id="pin-GND.2" cx="131.40" cy="93.60" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="131.40" cy="93.60" r="1.30" fill="#141414"/>
+    <circle id="pin-SCK" cx="39.60" cy="127.80" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="39.60" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-MO" cx="46.80" cy="127.80" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="46.80" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-MI" cx="54.00" cy="127.80" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="54.00" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-RX" cx="61.20" cy="127.80" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="61.20" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-TX" cx="68.40" cy="127.80" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="68.40" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-SDA" cx="75.60" cy="127.80" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="75.60" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-SCL" cx="82.80" cy="127.80" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="82.80" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-PWR" cx="90.00" cy="127.80" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="90.00" cy="127.80" r="1.30" fill="#141414"/>
+    <circle id="pin-GND.3" cx="97.20" cy="127.80" r="2.60" fill="#cbd0d6" stroke="#8d939b" stroke-width="0.3"/>
+    <circle cx="97.20" cy="127.80" r="1.30" fill="#141414"/>
+    <text x="9.80" y="43.20" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,9.80,43.20)">GND</text>
+    <text x="9.80" y="50.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,9.80,50.40)">3V3</text>
+    <text x="9.80" y="57.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,9.80,57.60)">A5</text>
+    <text x="9.80" y="64.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,9.80,64.80)">A4</text>
+    <text x="9.80" y="72.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,9.80,72.00)">A3</text>
+    <text x="9.80" y="79.20" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,9.80,79.20)">A2</text>
+    <text x="9.80" y="86.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,9.80,86.40)">A1</text>
+    <text x="9.80" y="93.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,9.80,93.60)">A0</text>
+    <text x="127.00" y="43.20" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,127.00,43.20)">8</text>
+    <text x="127.00" y="50.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,127.00,50.40)">9</text>
+    <text x="127.00" y="57.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,127.00,57.60)">10</text>
+    <text x="127.00" y="64.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,127.00,64.80)">11</text>
+    <text x="127.00" y="72.00" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,127.00,72.00)">12</text>
+    <text x="127.00" y="79.20" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,127.00,79.20)">13</text>
+    <text x="127.00" y="86.40" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,127.00,86.40)">3V3</text>
+    <text x="127.00" y="93.60" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="3.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" transform="rotate(-90,127.00,93.60)">GND</text>
+    <text x="39.60" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">SCK</text>
+    <text x="46.80" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">MO</text>
+    <text x="54.00" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">MI</text>
+    <text x="61.20" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">RX</text>
+    <text x="68.40" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">TX</text>
+    <text x="75.60" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">SDA</text>
+    <text x="82.80" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">SCL</text>
+    <text x="90.00" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">PWR</text>
+    <text x="97.20" y="122.80" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal">GND</text>
+    <text x="68.00" y="9.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="8.60" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="italic" letter-spacing="0.7">tinyProto</text>
+    <text x="107.93" y="107.93" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.20" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" letter-spacing="0.35" transform="rotate(-45,107.93,107.93)">BOARD DESIGN BY:</text>
+    <text x="104.82" y="104.82" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="2.20" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="normal" letter-spacing="0.35" transform="rotate(-45,104.82,104.82)">GEOFF McINTYRE</text>
+    <g transform="translate(23.00,103.00)">
+      <rect x="-6.25" y="-6.25" width="12.50" height="12.50" rx="1.62" fill="none" stroke="#f4f6f8" stroke-width="1.31"/>
+      <line x1="-3.75" y1="-6.25" x2="-3.75" y2="-7.88" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="-3.75" y1="6.25" x2="-3.75" y2="7.88" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="-6.25" y1="-3.75" x2="-7.88" y2="-3.75" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="6.25" y1="-3.75" x2="7.88" y2="-3.75" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="-1.25" y1="-6.25" x2="-1.25" y2="-7.88" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="-1.25" y1="6.25" x2="-1.25" y2="7.88" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="-6.25" y1="-1.25" x2="-7.88" y2="-1.25" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="6.25" y1="-1.25" x2="7.88" y2="-1.25" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="1.25" y1="-6.25" x2="1.25" y2="-7.88" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="1.25" y1="6.25" x2="1.25" y2="7.88" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="-6.25" y1="1.25" x2="-7.88" y2="1.25" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="6.25" y1="1.25" x2="7.88" y2="1.25" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="3.75" y1="-6.25" x2="3.75" y2="-7.88" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="3.75" y1="6.25" x2="3.75" y2="7.88" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="-6.25" y1="3.75" x2="-7.88" y2="3.75" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <line x1="6.25" y1="3.75" x2="7.88" y2="3.75" stroke="#f4f6f8" stroke-width="1.31" stroke-linecap="round"/>
+      <text x="0.00" y="2.50" font-family="DejaVu Sans, Verdana, Arial, Helvetica, sans-serif" font-size="5.00" fill="#f4f6f8" text-anchor="middle" font-weight="normal" font-style="italic">tiny</text>
+    </g>
+  </g>
+</svg>

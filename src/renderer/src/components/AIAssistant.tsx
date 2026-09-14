@@ -1,11 +1,11 @@
 /**
  * AIAssistant — Studio AI agent panel.
  *
- * Talks to the agent running in the main process: sends a prompt, streams the
- * reply, shows each tool call as it happens, and surfaces an Allow/Deny dialog
- * whenever the agent wants to write, edit, or delete a file. The Anthropic API
- * key is configured here but stored (encrypted) in the main process — it never
- * lives in the renderer.
+ * Talks to the agent: sends a prompt, streams the reply, shows each tool call as
+ * it happens, and surfaces an Allow/Deny dialog whenever the agent wants to
+ * write, edit, or delete a file. On desktop the agent runs in the main process
+ * and the Anthropic API key is stored (encrypted) there; in the web build the
+ * same agent runs in the page with the key kept in browser storage.
  */
 
 import {
@@ -16,8 +16,13 @@ import {
 } from '@renderer/redux'
 import { updateReadmeContent } from '@renderer/redux/fileSlice'
 import type { AgentEvent, AgentPermissionRequest } from '@renderer/lib/agentTypes'
+import { fileSystem } from '@renderer/lib/fileSystem'
+import { webAgent, webSettings } from '@renderer/lib/webAgent'
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import {
+  Activity,
+  BookOpen,
+  CircuitBoard,
   FileEdit,
   FilePlus,
   FileSearch,
@@ -25,6 +30,7 @@ import {
   Folder,
   KeyRound,
   Loader2,
+  Package,
   Search,
   Send,
   Settings,
@@ -55,10 +61,17 @@ type TimelineItem =
 const GREETING =
   "I'm Studio AI ✦ — I can read and edit the files in your open workspace. Ask me to explain code, wire a circuit, fix a build error, or write a sketch. I'll ask before changing any file."
 
-// The agent runs in the Electron main process, reached via the preload bridge.
-// In a plain browser (the web build) that bridge doesn't exist, so the panel
-// degrades to an explanatory message instead of throwing.
-const apiAvailable = (): boolean => typeof window !== 'undefined' && window.api != null
+// Desktop: the agent runs in the Electron main process, reached via the preload
+// bridge, so the API key never enters the renderer. Web: there is no main
+// process, so the same agent core runs in the page (lib/webAgent.ts).
+const isDesktop = typeof window !== 'undefined' && window.api != null
+const agent = isDesktop ? window.api.agent : webAgent
+const settings = isDesktop ? window.api.settings : webSettings
+
+const openExternal = (url: string): void => {
+  if (isDesktop) void window.api.fs.openExternal(url)
+  else window.open(url, '_blank', 'noopener,noreferrer')
+}
 
 const TOOL_ICON: Record<string, React.ReactNode> = {
   list_dir: <Folder size={13} />,
@@ -66,13 +79,18 @@ const TOOL_ICON: Record<string, React.ReactNode> = {
   grep: <Search size={13} />,
   write_file: <FilePlus size={13} />,
   edit_file: <FileEdit size={13} />,
-  delete_file: <FileX size={13} />
+  delete_file: <FileX size={13} />,
+  read_guide: <BookOpen size={13} />,
+  inspect_circuit: <CircuitBoard size={13} />,
+  find_parts: <Package size={13} />,
+  read_serial: <Activity size={13} />
 }
 
 export function AIAssistant(): React.JSX.Element {
   const dispatch = useAppDispatch()
   const workspace = useAppSelector((s) => s.file.workspace)
   const viewingFileId = useAppSelector((s) => s.file.viewingFileId)
+  const editorView = useAppSelector((s) => s.editor.editorView)
   const openFiles = useAppSelector(selectOpenFiles)
   const { selectedBoard, lastCompileResult } = useArduinoContext()
 
@@ -84,20 +102,18 @@ export function AIAssistant(): React.JSX.Element {
   const [permission, setPermission] = React.useState<AgentPermissionRequest | null>(null)
 
   const scrollRef = React.useRef<HTMLDivElement>(null)
-  // Latest open files, read inside the IPC callback without re-subscribing.
+  // Latest open files, read inside the agent callback without re-subscribing.
   const openFilesRef = React.useRef(openFiles)
   openFilesRef.current = openFiles
 
   // Check whether an API key is configured.
   React.useEffect(() => {
-    if (!apiAvailable()) return
-    window.api.settings.getStatus().then((s) => setKeyConfigured(s.configured))
+    settings.getStatus().then((s) => setKeyConfigured(s.configured))
   }, [])
 
   // Subscribe to the agent's streamed events.
   React.useEffect(() => {
-    if (!apiAvailable()) return
-    const off = window.api.agent.onEvent((evt: AgentEvent) => {
+    const off = agent.onEvent((evt: AgentEvent) => {
       setItems((prev) => applyEvent(prev, evt))
       if (evt.type === 'done' || evt.type === 'error') setBusy(false)
     })
@@ -106,25 +122,23 @@ export function AIAssistant(): React.JSX.Element {
 
   // Surface permission prompts.
   React.useEffect(() => {
-    if (!apiAvailable()) return
-    return window.api.agent.onPermissionRequest((req) => setPermission(req))
+    return agent.onPermissionRequest((req) => setPermission(req))
   }, [])
 
   // When the agent changes a file that's open in the editor, reload it from disk.
   React.useEffect(() => {
-    if (!apiAvailable()) return
-    return window.api.agent.onFileChanged(({ path }) => {
+    return agent.onFileChanged(({ path }) => {
       const norm = path.replace(/\\/g, '/')
       const match = openFilesRef.current.find((f) => f.path.replace(/\\/g, '/') === norm)
       if (match) {
-        window.api.fs
+        fileSystem
           .readFile(match.path)
           .then((content) => dispatch(refreshFileContentFromDisk({ id: match.id, content })))
       }
       // Keep the Documentation tab live when the agent rewrites the README —
       // it reads from readmeContent, which otherwise only updates on a manual edit.
       if (/(^|\/)README\.md$/i.test(norm)) {
-        window.api.fs
+        fileSystem
           .readFile(path)
           .then((content) => dispatch(updateReadmeContent(content)))
           .catch((e) => console.error('Failed to refresh README:', e))
@@ -148,11 +162,12 @@ export function AIAssistant(): React.JSX.Element {
     setItems((prev) => [...prev, { kind: 'user', text }])
     setBusy(true)
     const viewing = openFiles.find((f) => f.id === viewingFileId)
-    window.api.agent.send({
+    agent.send({
       text,
       workspaceRoot: workspace?.path ?? null,
       context: {
         board: selectedBoard?.config.name,
+        view: editorView,
         openFile: viewing?.name,
         lastError:
           lastCompileResult && !lastCompileResult.success ? lastCompileResult.output : undefined
@@ -161,32 +176,18 @@ export function AIAssistant(): React.JSX.Element {
   }
 
   const stop = (): void => {
-    window.api.agent.abort()
+    agent.abort()
     setBusy(false)
   }
 
   const newChat = (): void => {
-    window.api.agent.reset()
+    agent.reset()
     setItems([])
   }
 
   const respond = (allow: boolean): void => {
-    if (permission) window.api.agent.respondPermission(permission.id, allow)
+    if (permission) agent.respondPermission(permission.id, allow)
     setPermission(null)
-  }
-
-  // Web build: the agent lives in the Electron main process and isn't reachable
-  // from a browser. Show why instead of crashing on the missing bridge.
-  if (!apiAvailable()) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center gap-3 text-center text-fg-3 px-6">
-        <Sparkles size={32} className="text-pink opacity-80" />
-        <p className="text-sm text-fg-2">Studio AI is only available in the desktop app.</p>
-        <p className="text-xs text-fg-4">
-          Open tinyStudio on your computer to let the assistant read and edit your project files.
-        </p>
-      </div>
-    )
   }
 
   return (
@@ -398,15 +399,18 @@ function SettingsDialog({
   const save = async (): Promise<void> => {
     if (!key.trim()) return
     setSaving(true)
-    await window.api.settings.setApiKey(key.trim())
-    setSaving(false)
+    try {
+      await settings.setApiKey(key.trim())
+    } finally {
+      setSaving(false)
+    }
     setKey('')
     onSaved()
     onOpenChange(false)
   }
 
   const clear = async (): Promise<void> => {
-    await window.api.settings.clearApiKey()
+    await settings.clearApiKey()
     onCleared()
   }
 
@@ -416,8 +420,9 @@ function SettingsDialog({
         <DialogHeader>
           <DialogTitle>Studio AI settings</DialogTitle>
           <DialogDescription>
-            Your Anthropic API key is stored encrypted on this device and is only used by the main
-            process — it never leaves your machine except to call the Anthropic API.
+            {isDesktop
+              ? 'Your Anthropic API key is stored encrypted on this device and is only used by the main process — it never leaves your machine except to call the Anthropic API.'
+              : "Your Anthropic API key is saved in this browser and is only sent to the Anthropic API. Anyone who can use this browser profile can read it, so remove it when you're done on a shared computer."}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2">
@@ -433,9 +438,7 @@ function SettingsDialog({
           />
           <a
             className="text-xs text-[var(--brand)] hover:underline cursor-pointer"
-            onClick={() =>
-              window.api.fs.openExternal('https://console.anthropic.com/settings/keys')
-            }
+            onClick={() => openExternal('https://console.anthropic.com/settings/keys')}
           >
             Get an API key →
           </a>

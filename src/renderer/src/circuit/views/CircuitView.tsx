@@ -40,13 +40,23 @@ import {
   ensureParts,
   getPart,
   loadPart,
+  onPartsChanged,
   registerPart,
   type PartDef
 } from '../../lib/partsLibrary'
 import { toast } from 'sonner'
-import { initUserParts, saveUserPart } from '../../lib/userParts'
+import { isLocalEdit, resetUserPart, saveUserPart } from '../../lib/userParts'
 import { importFzpz } from '../parts/fzpz'
 import { PartsEditor } from '../../components/PartsEditor'
+import { initPartsLibrary } from '../parts/partsBoot'
+import {
+  devFolderActive,
+  devTargetPacks,
+  getDevStatus,
+  onDevStatus,
+  savePartToFolder
+} from '../parts/devFolder'
+import { getSyncStatus, onSyncStatus } from '../parts/tinypartsSync'
 import * as cmd from '../core/commands'
 import {
   newId,
@@ -140,6 +150,8 @@ export function CircuitViewV2({
   const [wireColor, setWireColor] = React.useState(WIRE_COLORS[0])
   const [cam, setCam] = React.useState<Cam>({ scale: 1, tx: 40, ty: 40 })
   const [editorPart, setEditorPart] = React.useState<PartDef | null | undefined>(undefined)
+  // packs in the dev tinyparts folder a Parts Editor save can target
+  const [devPacks, setDevPacks] = React.useState<{ id: string; name: string }[]>()
   const [showPacks, setShowPacks] = React.useState(false)
   const [showErc, setShowErc] = React.useState(false)
   // Simulate is opened explicitly (the toolbar button) and only ever shows on
@@ -178,15 +190,67 @@ export function CircuitViewV2({
     return () => clearTimeout(t)
   }, [revision, store, onChange])
 
-  // restore persisted user parts (B7), then lazy-load part defs through the
-  // legacy adapter — user parts must land first so custom types resolve
+  // bring the parts layers up (cached packs, saved parts, the dev folder), then
+  // lazy-load the defs this doc uses — saved parts must land first so custom
+  // types resolve
   React.useEffect(() => {
-    void initUserParts().then((n) => {
+    void initPartsLibrary().then(() => {
       const missing = doc.parts.map((p) => p.type).filter((t) => !getPart(t))
       if (missing.length) void ensureParts(missing).then(bumpDefs)
-      else if (n) bumpDefs()
+      else bumpDefs()
     })
   }, [doc.parts])
+
+  // a part's source changed (an update from GitHub, art saved in the tinyparts
+  // folder, a local edit reset): its old geometry is gone — reload what's used
+  React.useEffect(
+    () =>
+      onPartsChanged((types) => {
+        bumpDefs()
+        const used = new Set(store.getDoc().parts.map((p) => p.type))
+        const reload = types.filter((t) => used.has(t))
+        if (reload.length) void ensureParts(reload).then(bumpDefs)
+      }),
+    [store]
+  )
+
+  // let whoever is editing art know their save landed
+  React.useEffect(() => {
+    let seenReload = getDevStatus().loadedAt
+    let seenCommit = getSyncStatus().commit
+    const offDev = onDevStatus(() => {
+      const s = getDevStatus()
+      if (!s.lastReload?.length || s.loadedAt === seenReload) return
+      seenReload = s.loadedAt
+      const packs = s.packs.filter((p) => s.lastReload!.includes(p.id))
+      const names = packs.map((p) => p.name).join(', ')
+      const issues = packs.flatMap((p) => [...p.errors, ...p.warnings])
+      if (issues.length)
+        toast.warning(
+          `Reloaded ${names} — ${issues.length} issue${issues.length === 1 ? '' : 's'}`,
+          {
+            description: issues.slice(0, 3).join('\n')
+          }
+        )
+      else toast.success(`Reloaded ${names} from your tinyparts folder`)
+    })
+    const offSync = onSyncStatus(() => {
+      const s = getSyncStatus()
+      if (s.state !== 'ok' || s.commit === seenCommit) return
+      seenCommit = s.commit
+      if (s.updated.length)
+        toast.info('Parts updated from tinyparts', { description: s.updated.join(', ') })
+    })
+    return () => {
+      offDev()
+      offSync()
+    }
+  }, [])
+
+  React.useEffect(() => {
+    if (editorPart === undefined || !devFolderActive()) return
+    void devTargetPacks().then(setDevPacks)
+  }, [editorPart])
 
   // The components rail draws each tile from the part's SCHEMATIC symbol when
   // the schematic is open, and symbols are generated from the part definition
@@ -683,7 +747,7 @@ export function CircuitViewV2({
   }, [savedId])
 
   const tool =
-    'tactile-bordered h-8 px-2.5 flex items-center gap-1.5 rounded-md bg-surface-card text-text-muted text-xs hover:text-text-body active:translate-y-px'
+    'tactile-outline h-8 px-2.5 flex items-center gap-1.5 rounded-md bg-surface-card text-text-muted text-xs hover:text-text-body'
   // filled actions, matching the Upload button in the main toolbar: green for
   // "run it", brand blue for "take it away with you"
   const toolFilled =
@@ -1084,12 +1148,50 @@ export function CircuitViewV2({
       {editorPart !== undefined && (
         <PartsEditor
           initial={editorPart}
+          localEdit={!!editorPart && isLocalEdit(editorPart.type)}
+          onReset={
+            editorPart
+              ? async () => {
+                  await resetUserPart(editorPart.type)
+                  setEditorPart(undefined)
+                  toast.success(`${editorPart.label} is back to the shipped version`)
+                }
+              : undefined
+          }
+          folderPacks={devPacks}
           onClose={() => setEditorPart(undefined)}
-          onSave={(def: PartDef) => {
-            void saveUserPart(def)
+          onSave={async (def: PartDef) => {
+            await saveUserPart(def)
             bumpDefs()
             setEditorPart(undefined)
+            toast.success(`Saved ${def.label} on this computer`, {
+              description: isLocalEdit(def.type)
+                ? 'Only this computer sees this change. Reset it any time from the Parts editor or Parts Packs.'
+                : 'It’s in your components rail.'
+            })
           }}
+          onSaveToFolder={
+            devFolderActive()
+              ? async (def, info, pack) => {
+                  try {
+                    const dir = await savePartToFolder({ pack, def, ...info })
+                    bumpDefs()
+                    setEditorPart(undefined)
+                    toast.success(`Saved ${def.label} to tinyparts`, {
+                      description: `${dir} — commit and push tinyparts to share it`,
+                      // revealing a folder needs the desktop app
+                      action: window.api?.fs
+                        ? { label: 'Show', onClick: () => void window.api.fs.showInFolder(dir) }
+                        : undefined
+                    })
+                  } catch (e) {
+                    toast.error('Couldn’t save to tinyparts', {
+                      description: e instanceof Error ? e.message : String(e)
+                    })
+                  }
+                }
+              : undefined
+          }
         />
       )}
 

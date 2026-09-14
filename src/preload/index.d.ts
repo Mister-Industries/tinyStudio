@@ -32,6 +32,15 @@ interface FileSystemAPI {
   saveFileAs: (defaultName: string, content: string) => Promise<string | null>
   openPath: (targetPath: string) => Promise<string>
   openExternal: (url: string) => Promise<void>
+  showInFolder: (targetPath: string) => Promise<void>
+}
+
+/** Parts development: watch a local tinyparts checkout (npm run dev). */
+interface PartsDevAPI {
+  watch: (dir: string) => Promise<void>
+  unwatch: () => Promise<void>
+  /** batched file changes, as paths relative to the watched folder */
+  onChanged: (cb: (info: { dir: string; paths: string[] }) => void) => () => void
 }
 
 // Arduino API types
@@ -130,6 +139,8 @@ interface SettingsAPI {
 
 interface AppAPI {
   getExamplesDir: () => Promise<string>
+  /** running unpackaged (npm run dev) */
+  isDev: () => boolean
 }
 
 /** A signed-in GitHub account. The token is held in memory by the renderer only. */
@@ -186,7 +197,18 @@ export interface AgentPermissionRequest {
 interface AgentSendArgs {
   text: string
   workspaceRoot: string | null
-  context?: { board?: string; openFile?: string; lastError?: string }
+  context?: {
+    board?: string
+    openFile?: string
+    lastError?: string
+    view?: 'code' | 'circuit' | 'visual'
+  }
+}
+
+export interface AgentStudioRequest {
+  id: string
+  method: 'inspectCircuit' | 'findParts' | 'readSerial'
+  arg: string | number
 }
 
 interface AgentAPI {
@@ -197,6 +219,9 @@ interface AgentAPI {
   onEvent: (cb: (evt: AgentEvent) => void) => () => void
   onPermissionRequest: (cb: (req: AgentPermissionRequest) => void) => () => void
   onFileChanged: (cb: (info: { path: string }) => void) => () => void
+  /** Desktop only: the main-process agent asking the renderer for live app state. */
+  onStudioRequest?: (cb: (req: AgentStudioRequest) => void) => () => void
+  respondStudio?: (id: string, answer: { ok: boolean; value: string }) => Promise<void>
 }
 
 declare global {
@@ -210,6 +235,7 @@ declare global {
       agent: AgentAPI
       app: AppAPI
       service: ServiceAPI
+      parts: PartsDevAPI
     }
   }
 }

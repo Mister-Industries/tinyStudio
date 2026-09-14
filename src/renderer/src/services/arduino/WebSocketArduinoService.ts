@@ -33,30 +33,53 @@ import {
   PlatformEntry,
   UploadResult
 } from './types'
+import { fileSystem } from '@renderer/lib/fileSystem'
+import { isTextPath } from '@renderer/lib/github'
+import { isElectron } from '@renderer/lib/utils'
 import { isVirtualPath, virtualFileSystem } from '@renderer/lib/virtualFileSystem'
 
 const DEFAULT_SERVICE_URL = 'ws://localhost:3000'
 
 /**
- * Gather a `mem://` sketch's files into a flat `{ relativePath: content }` map
- * plus a sketch folder name. The browser can't hand tinyService a real disk
- * path (the File System Access API hides absolute paths, and examples live only
- * in memory), so the web build ships the sketch's contents instead and the
- * service materializes them to a temp dir to compile/upload. Desktop never
- * calls this — it passes a real path straight through.
+ * Whether a sketch has to travel to tinyService as file contents rather than a
+ * path. Everything the browser build compiles does: an in-memory project has no
+ * disk path at all, and a real folder opened through the File System Access API
+ * only exposes its *name*, which means nothing to the service. Desktop always
+ * has a real path and passes it straight through.
  */
-async function collectVirtualSketch(
+function mustShipFiles(sketchDir: string | undefined): sketchDir is string {
+  return !!sketchDir && (isVirtualPath(sketchDir) || !isElectron())
+}
+
+const IGNORED_SKETCH_DIRS = ['.git', 'node_modules']
+
+/**
+ * Gather a browser sketch's files into a flat `{ relativePath: content }` map
+ * plus a sketch folder name, for the service to materialize in a temp dir and
+ * compile/upload. Works for both in-memory (`mem://`) projects and local
+ * folders the user opened or saved to.
+ */
+async function collectBrowserSketch(
   sketchDir: string
 ): Promise<{ files: Record<string, string>; sketchName: string }> {
   const root = sketchDir.endsWith('/') ? sketchDir.slice(0, -1) : sketchDir
-  const items = await virtualFileSystem.readDirectory(root, true)
+  const virtual = isVirtualPath(root)
+  const items = virtual
+    ? await virtualFileSystem.readDirectory(root, true)
+    : await fileSystem.readDirectory(root, true)
   const files: Record<string, string> = {}
   for (const item of items) {
     if (item.isDirectory) continue
-    const rel = item.path.startsWith(root + '/')
-      ? item.path.slice(root.length + 1)
-      : item.name
-    files[rel] = await virtualFileSystem.readFile(item.path)
+    const rel = item.path.startsWith(root + '/') ? item.path.slice(root.length + 1) : item.name
+    if (!virtual) {
+      // A real folder can hold anything. Skip VCS/tooling noise, and binaries,
+      // which would arrive garbled after a round trip through text.
+      if (rel.split('/').some((seg) => IGNORED_SKETCH_DIRS.includes(seg))) continue
+      if (!isTextPath(rel)) continue
+    }
+    files[rel] = virtual
+      ? await virtualFileSystem.readFile(item.path)
+      : await fileSystem.readFile(item.path)
   }
   if (Object.keys(files).length === 0) {
     throw new Error(`No files found in ${root} to compile`)
@@ -471,8 +494,8 @@ export class WebSocketArduinoService implements ArduinoService {
       // the real path straight through.
       let files: Record<string, string> | undefined
       let sketchName: string | undefined
-      if (isVirtualPath(workspacePath)) {
-        ;({ files, sketchName } = await collectVirtualSketch(workspacePath))
+      if (mustShipFiles(workspacePath)) {
+        ;({ files, sketchName } = await collectBrowserSketch(workspacePath))
       }
 
       // Compile the sketch
@@ -519,8 +542,8 @@ export class WebSocketArduinoService implements ArduinoService {
       // present). Desktop passes the real path and relies on its prior compile.
       let files: Record<string, string> | undefined
       let sketchName: string | undefined
-      if (isVirtualPath(workspacePathOrBinary)) {
-        ;({ files, sketchName } = await collectVirtualSketch(workspacePathOrBinary!))
+      if (mustShipFiles(workspacePathOrBinary)) {
+        ;({ files, sketchName } = await collectBrowserSketch(workspacePathOrBinary))
       }
 
       // Upload the sketch
@@ -566,7 +589,7 @@ export class WebSocketArduinoService implements ArduinoService {
       // Browser: the service compiles the shipped files into a temp dir as part
       // of the upload, so a separate compile pass here would just build in a
       // throwaway dir and double the (slow) compile. Send one upload instead.
-      if (isVirtualPath(workspacePath)) {
+      if (mustShipFiles(workspacePath)) {
         const uploadResult = await this.uploadSketch(port, boardConfig, workspacePath)
         return {
           compile: {

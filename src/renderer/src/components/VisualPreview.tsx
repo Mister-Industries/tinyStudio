@@ -2,12 +2,36 @@
  * VisualPreview — runs a project's p5.js sketch (a .js file, conventionally
  * visual.js) live inside its editor tab. Uses a `with(p)` shim so global-style
  * sketches work, and exposes a Processing-style serial API (serialValue(),
- * serialEvent(line), …) fed from the serial monitor via window.__tinySerial.
+ * serialEvent(line), …) fed from the serial monitor via window.__tinySerial,
+ * plus the `theme` object (lib/sketchTheme) so sketches match the app.
  */
 
 import { AlertTriangle, Pause, Play, RotateCw } from 'lucide-react'
 import React from 'react'
+import { sketchTheme } from '../lib/sketchTheme'
 import { Button } from './ui/Button'
+
+/** p5 callbacks a global-style sketch may define; each is handed to the instance. */
+const SKETCH_CALLBACKS = [
+  'preload',
+  'setup',
+  'draw',
+  'mousePressed',
+  'mouseReleased',
+  'mouseClicked',
+  'mouseMoved',
+  'mouseDragged',
+  'mouseWheel',
+  'doubleClicked',
+  'keyPressed',
+  'keyReleased',
+  'keyTyped',
+  'touchStarted',
+  'touchMoved',
+  'touchEnded',
+  'windowResized',
+  'serialEvent'
+]
 
 declare global {
   interface Window {
@@ -62,18 +86,17 @@ export function VisualPreview({
     try {
       const factory = new Function(
         'p',
+        'theme',
         `with(p){
           ${serialPrelude}
           ${code}
-          p.setup = (typeof setup==='function')?setup:p.setup;
-          p.draw = (typeof draw==='function')?draw:p.draw;
-          if(typeof mousePressed==='function') p.mousePressed=mousePressed;
-          if(typeof serialEvent==='function') p.serialEvent=serialEvent;
+          ${SKETCH_CALLBACKS.map((n) => `if(typeof ${n}==='function') p.${n}=${n};`).join('\n')}
         }`
       )
+      const theme = sketchTheme()
       inst = new window.p5((p: any) => {
         try {
-          factory(p)
+          factory(p, theme)
         } catch (e) {
           setErr(String(e))
         }
@@ -160,7 +183,7 @@ export function VisualPreview({
           <div
             ref={holder}
             className="flex items-center justify-center aspect-square overflow-hidden rounded-[var(--radius-md)] border-[1.5px] border-[var(--border-default)] shadow-[var(--shadow-soft)] [&>canvas]:!w-full [&>canvas]:!h-full [&>canvas]:object-contain"
-            style={{ background: '#14161A', width: 'min(100cqw, 100cqh)' }}
+            style={{ background: 'var(--bg-raised)', width: 'min(100cqw, 100cqh)' }}
           >
             {err && (
               <div className="text-xs text-[var(--status-error)] font-mono max-w-md p-4">

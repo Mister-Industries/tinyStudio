@@ -15,7 +15,7 @@ import { build } from 'esbuild'
 import { spawnSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { basename, dirname, join, resolve } from 'node:path'
+import { basename, dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -53,6 +53,22 @@ const rawImports = {
   }
 }
 
+/** Vite's `?inline` suffix: the Studio AI guide screenshots, as base64 data URLs. */
+const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg' }
+const inlineImports = {
+  name: 'inline-imports',
+  setup(b) {
+    b.onResolve({ filter: /\?inline$/ }, (args) => ({
+      path: resolve(args.resolveDir, args.path.slice(0, -7)),
+      namespace: 'inline'
+    }))
+    b.onLoad({ filter: /.*/, namespace: 'inline' }, (args) => ({
+      contents: `data:${MIME[extname(args.path)]};base64,${readFileSync(args.path).toString('base64')}`,
+      loader: 'text'
+    }))
+  }
+}
+
 const out = mkdtempSync(join(tmpdir(), 'circuit-tests-'))
 try {
   await build({
@@ -67,7 +83,7 @@ try {
     external: ['node:*'],
     outExtension: { '.js': '.mjs' },
     logLevel: 'error',
-    plugins: [rawImports]
+    plugins: [rawImports, inlineImports]
   })
   const compiled = readdirSync(out, { recursive: true, withFileTypes: true })
     .filter((e) => e.isFile() && e.name.endsWith('.mjs'))

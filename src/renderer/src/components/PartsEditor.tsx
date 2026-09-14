@@ -1,23 +1,29 @@
 /**
- * PartsEditor — a top-level modal for authoring a custom part. Upload an SVG (or
- * start from a blank box), set its size, then click on the preview to drop pins
- * and drag them into place. Pins are named and saved into the live parts library
- * in the same schema as Fritzing-imported parts (pixel coords @ 96 DPI), so a
- * hand-made part wires up exactly like an imported one.
+ * PartsEditor — a top-level modal for authoring or editing a part. Upload an SVG
+ * (or start from a blank box), set its size, then click on the preview to drop
+ * pins and drag them into place. Pins are saved in the same schema as every
+ * other part (pixel coords @ 96 DPI), so a hand-made part wires up exactly like
+ * a shipped one.
  *
- * Both the breadboard and schematic views are editable via the view toggle —
- * each keeps its own art, size, and pin positions (pin NAMES are the cross-view
- * join key, so keep them consistent between views).
+ * Pins can also come straight from the art: any shape whose id is `pin-<NAME>`
+ * becomes a pin (name the object "pin-GND" in Illustrator). Uploading such an
+ * SVG fills the pin list, and as long as you don't drag them the part keeps
+ * reading pins from its file — so later art edits move the pins too.
  *
- * Styled with the tinyStudio design system: cold neutral surfaces, soft-elevation
- * floating dialog, dot-grid preview, brand-blue accents, sentence-case copy.
+ * Where a save goes (docs/parts-and-art.md):
+ *   - "Save on this computer" — a local copy that shadows the shipped part here
+ *     only; "Reset to default" throws it away.
+ *   - "Save to tinyparts" (npm run dev with a tinyparts folder set) — writes
+ *     part.json and the .svg files into the checkout; commit + push to share.
+ *
+ * Both views are editable via the toggle — each keeps its own art, size and pin
+ * positions (pin NAMES are the cross-view join key, so keep them consistent).
  */
 
-import { Plus, Trash2, UploadCloud, X } from 'lucide-react'
+import { FolderOpen, Plus, RotateCcw, Trash2, UploadCloud, X } from 'lucide-react'
 import React from 'react'
-import type { PartDef, PartView, ViewKind } from '../lib/partsLibrary'
-
-const PX_PER_MM = 96 / 25.4
+import type { PartDef, PartSource, PartView, ViewKind } from '../lib/partsLibrary'
+import { artPrefix, namespaceSvg, prepareArt, readSvgRoot, scanPins } from '../circuit/parts/svgArt'
 
 const slug = (s: string): string =>
   s
@@ -32,39 +38,127 @@ interface Pin {
 }
 
 interface ViewBuf {
+  /** what the preview draws (namespaced for this modal) */
   svg: string
+  /** the art file exactly as authored, when there is one */
+  raw?: string
   w: number
   h: number
   pins: Pin[]
+  /** pins were read from pin-* ids in the art */
+  fromSvg: boolean
+  pinsEdited: boolean
+  sizeEdited: boolean
+  artChanged: boolean
+}
+
+/** Everything a save needs beyond the definition itself. */
+export interface PartsEditorSaveInfo {
+  /** authored art per view, for views whose file must be (re)written */
+  art: Partial<Record<ViewKind, string>>
+  pinMode: Partial<Record<ViewKind, 'svg' | 'fixed'>>
+  sizeEdited: Partial<Record<ViewKind, boolean>>
+  labelEdited: boolean
 }
 
 const blankSvg = (w: number, h: number): string =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}"><rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" rx="4" fill="#383A40" stroke="#4A4D54"/></svg>`
 
-const seedView = (v: PartView | undefined, fallbackW = 80, fallbackH = 40): ViewBuf =>
-  v
-    ? {
-        svg: v.svg,
-        w: v.w,
-        h: v.h,
-        pins: Object.entries(v.pins).map(([n, [x, y]]) => ({ name: n, x, y }))
-      }
-    : { svg: blankSvg(fallbackW, fallbackH), w: fallbackW, h: fallbackH, pins: [] }
+const previewOf = (raw: string, kind: ViewKind): string =>
+  namespaceSvg(prepareArt(raw), artPrefix(`editor-${kind}`))
+
+function seedView(
+  v: PartView | undefined,
+  kind: ViewKind,
+  source: PartSource | undefined,
+  fallbackW = 80,
+  fallbackH = 40
+): ViewBuf {
+  if (!v) {
+    const raw = blankSvg(fallbackW, fallbackH)
+    return {
+      svg: raw,
+      raw,
+      w: fallbackW,
+      h: fallbackH,
+      pins: [],
+      fromSvg: false,
+      pinsEdited: false,
+      sizeEdited: false,
+      artChanged: false
+    }
+  }
+  return {
+    svg: v.svg,
+    raw: source?.raw?.[kind],
+    w: v.w,
+    h: v.h,
+    pins: Object.entries(v.pins).map(([n, [x, y]]) => ({ name: n, x, y })),
+    fromSvg: !!source?.pinsFromSvg?.[kind],
+    pinsEdited: false,
+    sizeEdited: false,
+    artChanged: false
+  }
+}
+
+function describeSource(def: PartDef | null | undefined, localEdit: boolean): string {
+  if (!def) return 'new part'
+  const s = def.source
+  const where = s?.dir ? `tinyparts/${s.dir}` : s?.pack ? `tinyparts pack “${s.pack}”` : ''
+  if (localEdit) return 'edited on this computer'
+  switch (s?.layer) {
+    case 'dev':
+      return `from your tinyparts folder · ${where}`
+    case 'remote':
+      return `updated from GitHub · ${where}`
+    case 'bundled':
+      return `ships with tinyStudio · ${where}`
+    case 'user':
+      return 'saved on this computer'
+    default:
+      return 'built in'
+  }
+}
 
 export function PartsEditor({
   initial,
   onClose,
-  onSave
+  onSave,
+  onSaveToFolder,
+  folderPacks,
+  localEdit = false,
+  onReset
 }: {
   initial?: PartDef | null
   onClose: () => void
-  onSave: (def: PartDef) => void
+  /** save on this computer only */
+  onSave: (def: PartDef, info: PartsEditorSaveInfo) => void | Promise<void>
+  /** dev only: write into the tinyparts checkout, in `pack` */
+  onSaveToFolder?: (def: PartDef, info: PartsEditorSaveInfo, pack: string) => void | Promise<void>
+  /** dev only: packs in the checkout a new part could go into */
+  folderPacks?: { id: string; name: string }[]
+  /** `initial` is a local edit shadowing a shipped part */
+  localEdit?: boolean
+  onReset?: () => void | Promise<void>
 }): React.JSX.Element {
   const [name, setName] = React.useState(initial?.label || 'My Part')
-  const [bb, setBb] = React.useState<ViewBuf>(() => seedView(initial?.views.breadboard))
-  const [sch, setSch] = React.useState<ViewBuf>(() => seedView(initial?.views.schematic))
-  const [editView, setEditView] = React.useState<ViewKind>('breadboard')
+  const [bb, setBb] = React.useState<ViewBuf>(() =>
+    seedView(initial?.views.breadboard, 'breadboard', initial?.source)
+  )
+  const [sch, setSch] = React.useState<ViewBuf>(() =>
+    seedView(initial?.views.schematic, 'schematic', initial?.source)
+  )
+  const [editView, setEditView] = React.useState<ViewKind>(
+    initial && !initial.views.breadboard && initial.views.schematic ? 'schematic' : 'breadboard'
+  )
   const [sel, setSel] = React.useState<number>(-1)
+  const [busy, setBusy] = React.useState(false)
+  const [targetPack, setTargetPack] = React.useState<string>(
+    initial?.source?.pack ??
+      folderPacks?.find((p) => p.id === 'core')?.id ??
+      folderPacks?.[0]?.id ??
+      ''
+  )
   const surfaceRef = React.useRef<HTMLDivElement>(null)
   const dragRef = React.useRef<number>(-1)
 
@@ -72,8 +166,9 @@ export function PartsEditor({
   const setBuf = editView === 'breadboard' ? setBb : setSch
   const { svg, w, h, pins } = buf
 
-  const patch = (p: Partial<ViewBuf>): void => setBuf((b) => ({ ...b, ...p }))
-  const setPins = (fn: (ps: Pin[]) => Pin[]): void => setBuf((b) => ({ ...b, pins: fn(b.pins) }))
+  // any hand change to pins pins them down in part.json from then on
+  const setPins = (fn: (ps: Pin[]) => Pin[]): void =>
+    setBuf((b) => ({ ...b, pins: fn(b.pins), pinsEdited: true }))
 
   const switchView = (v: ViewKind): void => {
     if (v === editView) return
@@ -125,56 +220,63 @@ export function PartsEditor({
     window.addEventListener('pointerup', up)
   }
 
+  /** pins read from the art at a given box size (null when the art has none) */
+  const pinsFromArt = (raw: string, bw: number, bh: number): Pin[] | null => {
+    const scan = scanPins(raw, bw, bh)
+    return scan.pins.length
+      ? scan.pins.map((p) => ({ name: p.name, x: p.at[0], y: p.at[1] }))
+      : null
+  }
+
   const onUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0]
+    e.target.value = ''
     if (!file) return
+    const kind = editView
     const reader = new FileReader()
     reader.onload = (evt) => {
-      const doc = new DOMParser().parseFromString(String(evt.target?.result), 'image/svg+xml')
-      const el = doc.querySelector('svg')
-      if (!el) return
-      const parseLen = (v: string | null): number | null => {
-        if (!v) return null
-        const m = v.trim().match(/^(-?[\d.]+)\s*(px|mm|cm|in|pt)?$/)
-        if (!m) return null
-        const n = parseFloat(m[1])
-        return m[2] === 'mm'
-          ? n * PX_PER_MM
-          : m[2] === 'cm'
-            ? n * PX_PER_MM * 10
-            : m[2] === 'in'
-              ? n * 96
-              : m[2] === 'pt'
-                ? n * (96 / 72)
-                : n
-      }
-      let nw = parseLen(el.getAttribute('width'))
-      let nh = parseLen(el.getAttribute('height'))
-      const vb = (el.getAttribute('viewBox') || '')
-        .trim()
-        .split(/[\s,]+/)
-        .map(parseFloat)
-      if ((nw == null || nh == null) && vb.length === 4) {
-        nw = nw ?? vb[2]
-        nh = nh ?? vb[3]
-      }
-      if (!el.getAttribute('xmlns')) el.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-      el.removeAttribute('width')
-      el.removeAttribute('height')
-      if (!el.getAttribute('viewBox') && nw && nh) el.setAttribute('viewBox', `0 0 ${nw} ${nh}`)
-      patch({
-        svg: el.outerHTML,
-        ...(nw && nh ? { w: Math.round(nw), h: Math.round(nh) } : {})
-      })
+      const raw = String(evt.target?.result ?? '')
+      if (!/<svg[\s>]/i.test(raw)) return
+      const root = readSvgRoot(raw)
+      const nw = Math.round((root.widthPx ?? root.vb[2]) * 100) / 100
+      const nh = Math.round((root.heightPx ?? root.vb[3]) * 100) / 100
+      const artPins = pinsFromArt(raw, nw, nh)
+      setBuf((b) => ({
+        ...b,
+        raw,
+        svg: previewOf(raw, kind),
+        w: nw,
+        h: nh,
+        artChanged: true,
+        sizeEdited: true,
+        ...(artPins ? { pins: artPins, fromSvg: true, pinsEdited: false } : { fromSvg: false })
+      }))
+      setSel(-1)
     }
     reader.readAsText(file)
   }
+
+  const resize = (nw: number, nh: number): void =>
+    setBuf((b) => {
+      const isBlank = !b.artChanged && !initial?.views[editView]
+      const raw = isBlank ? blankSvg(nw, nh) : b.raw
+      const artPins = b.fromSvg && !b.pinsEdited && raw ? pinsFromArt(raw, nw, nh) : null
+      return {
+        ...b,
+        w: nw,
+        h: nh,
+        sizeEdited: true,
+        ...(isBlank ? { raw, svg: raw } : {}),
+        ...(artPins ? { pins: artPins } : {})
+      }
+    })
 
   // arrow keys nudge the selected pin (Shift = ×10)
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (sel < 0) return
-      if (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return
+      if (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))
+        return
       const step = e.shiftKey ? 10 : 1
       const d: Record<string, [number, number]> = {
         ArrowLeft: [-step, 0],
@@ -208,28 +310,69 @@ export function PartsEditor({
 
   const canSave = bb.pins.length > 0 || sch.pins.length > 0
 
-  const save = (): void => {
+  const build = (): { def: PartDef; info: PartsEditorSaveInfo } => {
+    const type = initial ? initial.type : slug(name)
+    const info: PartsEditorSaveInfo = {
+      art: {},
+      pinMode: {},
+      sizeEdited: {},
+      labelEdited: name !== (initial?.label ?? '')
+    }
     const views: Partial<Record<ViewKind, PartView>> = {}
-    if (bb.pins.length || initial?.views.breadboard)
-      views.breadboard = { svg: bb.svg, w: bb.w, h: bb.h, pins: toMap(bb.pins) }
-    if (sch.pins.length || initial?.views.schematic)
-      views.schematic = { svg: sch.svg, w: sch.w, h: sch.h, pins: toMap(sch.pins) }
+    const raw: NonNullable<PartSource['raw']> = { ...initial?.source?.raw }
+    for (const [kind, b] of [
+      ['breadboard', bb],
+      ['schematic', sch]
+    ] as [ViewKind, ViewBuf][]) {
+      if (!(b.pins.length || initial?.views[kind])) continue
+      views[kind] = {
+        // "-edit": a kept icon may be this view's old file under the view prefix
+        svg: b.raw ? namespaceSvg(prepareArt(b.raw), artPrefix(type, `${kind}-edit`)) : b.svg,
+        w: b.w,
+        h: b.h,
+        pins: toMap(b.pins),
+        ...(initial?.views[kind]?.legs ? { legs: initial.views[kind]!.legs } : {})
+      }
+      if (b.raw && (b.artChanged || !initial?.source?.raw?.[kind])) {
+        info.art[kind] = b.raw
+        raw[kind] = b.raw
+      }
+      info.pinMode[kind] = b.fromSvg && !b.pinsEdited ? 'svg' : 'fixed'
+      info.sizeEdited[kind] = b.sizeEdited
+    }
     if (!views.breadboard && !views.schematic)
       views.breadboard = { svg: bb.svg, w: bb.w, h: bb.h, pins: toMap(bb.pins) }
-    onSave({
+    const def: PartDef = {
+      ...(initial ?? {}),
       // editing keeps the original identity so it updates in place (not a copy)
-      type: initial ? initial.type : slug(name),
+      type,
       label: name,
       family: initial?.family || 'Custom',
-      builtin: initial?.builtin,
-      // palette icon prefers the breadboard art, falls back to schematic
-      icon: bb.pins.length ? bb.svg : sch.svg,
-      views
-    })
+      // palette icon: keep a shipped part's own tile, else the first view's art
+      icon: initial?.icon ?? (views.breadboard ?? views.schematic)!.svg,
+      views,
+      source: initial?.source ? { ...initial.source, raw } : undefined,
+      origin: undefined
+    }
+    return { def, info }
+  }
+
+  const run = async (fn: () => void | Promise<void>): Promise<void> => {
+    setBusy(true)
+    try {
+      await fn()
+    } finally {
+      setBusy(false)
+    }
   }
 
   const numField =
     'w-20 bg-bg-sunken border border-border-default rounded px-2 py-1 text-sm text-text-strong focus:border-brand outline-none'
+
+  const artFile = initial?.source?.json?.views[editView]?.svg
+  const artPath = initial?.source?.absDir
+    ? `${initial.source.absDir}/${artFile ?? `${editView}.svg`}`
+    : undefined
 
   return (
     <div
@@ -238,19 +381,32 @@ export function PartsEditor({
       onClick={onClose}
     >
       <div
-        className="w-[860px] max-w-[94vw] h-[600px] max-h-[92vh] bg-surface-overlay border border-border-default rounded-xl flex flex-col overflow-hidden"
+        className="w-[900px] max-w-[94vw] h-[620px] max-h-[92vh] bg-surface-overlay border border-border-default rounded-xl flex flex-col overflow-hidden"
         style={{ boxShadow: 'var(--shadow-soft-lg)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* header */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border-default">
           <span className="text-text-strong font-semibold">Parts editor</span>
-          <span className="text-[11px] text-text-muted">
-            {initial ? `editing “${initial.label}”` : 'author a custom part'}
+          <span
+            className="text-[11px] text-text-muted truncate"
+            title={describeSource(initial, localEdit)}
+          >
+            {initial ? `“${initial.label}” — ${describeSource(initial, localEdit)}` : 'new part'}
           </span>
+          {localEdit && onReset && (
+            <button
+              className="h-6 px-2 rounded-md border border-border-default text-[11px] text-text-body hover:text-brand hover:border-brand flex items-center gap-1 shrink-0"
+              title="Delete this computer's copy and go back to the shipped part"
+              disabled={busy}
+              onClick={() => void run(onReset)}
+            >
+              <RotateCcw size={11} /> Reset to default
+            </button>
+          )}
           <div className="flex-1" />
           {/* view toggle: edit breadboard art or schematic symbol */}
-          <div className="flex rounded-md overflow-hidden border border-border-default">
+          <div className="flex rounded-md overflow-hidden border border-border-default shrink-0">
             {(
               [
                 ['breadboard', 'Breadboard'],
@@ -332,9 +488,6 @@ export function PartsEditor({
                   onChange={(e) => setName(e.target.value)}
                 />
               </label>
-              <div className="text-[11px] text-text-faint -mt-1">
-                Editing the <span className="text-text-muted">{editView}</span> view.
-              </div>
               <div className="flex gap-3">
                 <label className="flex flex-col gap-1">
                   <span className="text-[11px] text-text-muted">Width (px)</span>
@@ -342,15 +495,7 @@ export function PartsEditor({
                     type="number"
                     className={numField}
                     value={w}
-                    onChange={(e) => {
-                      const nv = Math.max(1, parseInt(e.target.value, 10) || 1)
-                      patch({
-                        w: nv,
-                        ...(svg.startsWith('<svg') && svg.includes('rx="4"')
-                          ? { svg: blankSvg(nv, h) }
-                          : {})
-                      })
-                    }}
+                    onChange={(e) => resize(Math.max(1, parseFloat(e.target.value) || 1), h)}
                   />
                 </label>
                 <label className="flex flex-col gap-1">
@@ -359,28 +504,50 @@ export function PartsEditor({
                     type="number"
                     className={numField}
                     value={h}
-                    onChange={(e) => {
-                      const nv = Math.max(1, parseInt(e.target.value, 10) || 1)
-                      patch({
-                        h: nv,
-                        ...(svg.startsWith('<svg') && svg.includes('rx="4"')
-                          ? { svg: blankSvg(w, nv) }
-                          : {})
-                      })
-                    }}
+                    onChange={(e) => resize(w, Math.max(1, parseFloat(e.target.value) || 1))}
                   />
                 </label>
               </div>
 
-              <label className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-dashed border-border-interactive text-sm text-text-body hover:border-brand hover:text-text-strong cursor-pointer">
-                <UploadCloud size={15} /> Upload SVG
-                <input
-                  type="file"
-                  accept=".svg,image/svg+xml"
-                  className="hidden"
-                  onChange={onUpload}
-                />
-              </label>
+              {/* where this view's art lives */}
+              <div className="rounded-lg border border-border-default bg-surface-card p-2 flex flex-col gap-1.5">
+                <div className="text-[11px] text-text-muted">
+                  {editView === 'breadboard' ? 'Breadboard' : 'Schematic'} art
+                </div>
+                <div className="text-[11px] text-text-body break-all">
+                  {buf.artChanged
+                    ? 'uploaded — not saved yet'
+                    : artFile && initial?.source?.dir
+                      ? `tinyparts/${initial.source.dir}/${artFile}`
+                      : initial?.views[editView]
+                        ? 'inside the part definition'
+                        : 'placeholder box'}
+                </div>
+                {artPath && !buf.artChanged && window.api?.fs && (
+                  <button
+                    className="self-start text-[11px] text-brand hover:underline flex items-center gap-1"
+                    onClick={() => void window.api?.fs?.showInFolder(artPath)}
+                  >
+                    <FolderOpen size={11} /> Show in folder
+                  </button>
+                )}
+                <label className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-md border border-dashed border-border-interactive text-xs text-text-body hover:border-brand hover:text-text-strong cursor-pointer">
+                  <UploadCloud size={14} /> Upload SVG…
+                  <input
+                    type="file"
+                    accept=".svg,image/svg+xml"
+                    className="hidden"
+                    onChange={onUpload}
+                  />
+                </label>
+                <div className="text-[10px] leading-snug text-text-faint">
+                  {buf.fromSvg && !buf.pinsEdited
+                    ? 'Pins come from the shapes named “pin-<NAME>” in the SVG, so moving them in Illustrator moves the pins.'
+                    : buf.fromSvg
+                      ? 'You moved pins by hand: their positions will be fixed in part.json and stop following the art.'
+                      : 'Tip: name pad shapes “pin-GND”, “pin-D8”… in Illustrator and upload — pins place themselves.'}
+                </div>
+              </div>
 
               <div className="flex items-center justify-between">
                 <span className="text-[11px] text-text-muted">Pins ({pins.length})</span>
@@ -419,7 +586,10 @@ export function PartsEditor({
                       }}
                       onBlur={(e) => {
                         const fixed = uniqueName(e.target.value || String(i + 1), i)
-                        setPins((ps) => ps.map((p, idx) => (idx === i ? { ...p, name: fixed } : p)))
+                        if (fixed !== pin.name)
+                          setPins((ps) =>
+                            ps.map((p, idx) => (idx === i ? { ...p, name: fixed } : p))
+                          )
                       }}
                     />
                     <span className="text-[10px] text-text-faint">
@@ -445,20 +615,61 @@ export function PartsEditor({
               </div>
             </div>
 
-            <div className="mt-auto p-3 border-t border-border-default flex gap-2">
-              <button
-                className="flex-1 px-3 py-2 rounded-lg bg-surface-card border border-border-default text-sm text-text-body hover:bg-bg-sunken"
-                onClick={onClose}
-              >
-                Cancel
-              </button>
-              <button
-                className="flex-1 px-3 py-2 rounded-lg bg-brand border border-brand text-sm text-brand-contrast font-medium hover:brightness-105 disabled:opacity-40"
-                disabled={!canSave}
-                onClick={save}
-              >
-                Save to library
-              </button>
+            <div className="mt-auto p-3 border-t border-border-default flex flex-col gap-2">
+              {onSaveToFolder && (
+                <div className="flex flex-col gap-1.5">
+                  {!initial?.source?.pack && folderPacks && folderPacks.length > 0 && (
+                    <label className="flex items-center gap-2 text-[11px] text-text-muted">
+                      Pack
+                      <select
+                        className="flex-1 bg-bg-sunken border border-border-default rounded px-1.5 py-1 text-xs text-text-strong outline-none"
+                        value={targetPack}
+                        onChange={(e) => setTargetPack(e.target.value)}
+                      >
+                        {folderPacks.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                  <button
+                    className="w-full px-3 py-2 rounded-lg bg-brand border border-brand text-sm text-brand-contrast font-medium hover:brightness-105 disabled:opacity-40"
+                    disabled={!canSave || busy || !targetPack}
+                    title="Write part.json and the .svg files into your tinyparts folder. Commit and push tinyparts to share."
+                    onClick={() => {
+                      const { def, info } = build()
+                      void run(() => onSaveToFolder(def, info, targetPack))
+                    }}
+                  >
+                    Save to tinyparts
+                  </button>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <button
+                  className="flex-1 px-3 py-2 rounded-lg bg-surface-card border border-border-default text-sm text-text-body hover:bg-bg-sunken"
+                  onClick={onClose}
+                >
+                  Cancel
+                </button>
+                <button
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-40 ${
+                    onSaveToFolder
+                      ? 'bg-surface-card border border-border-default text-text-body hover:bg-bg-sunken'
+                      : 'bg-brand border border-brand text-brand-contrast hover:brightness-105'
+                  }`}
+                  disabled={!canSave || busy}
+                  title="Keep this version on this computer only. It replaces the shipped part here until you reset it."
+                  onClick={() => {
+                    const { def, info } = build()
+                    void run(() => onSave(def, info))
+                  }}
+                >
+                  Save on this computer
+                </button>
+              </div>
             </div>
           </div>
         </div>

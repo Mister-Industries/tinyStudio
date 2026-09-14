@@ -1,11 +1,13 @@
 [
   {
-    "title": "Blink LED",
-    "description": "Blink the onboard LED and mirror its state in the Visual view.",
+    "title": "Basic Blink Program",
+    "description": "Both LEDs on your tinyCore should now be flashing On and Off like the GIF above.",
     "owner": "Mister-Industries",
-    "repo": "tinyStudio",
-    "path": "demo/Blink Example",
-    "board": "tinyCore / Arduino",
+    "repo": "tinyStudio-examples",
+    "path": "basics/blink-basic",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
     "tags": [
       "tinycore",
       "blink",
@@ -15,27 +17,30 @@
     ]
   },
   {
-    "title": "Fade LED",
-    "description": "PWM-fade an LED and chart the brightness curve live.",
+    "title": "Smooth Breathing Effect",
+    "description": "You should see your LEDs fading off and on smoothly, almost like two fireflies!",
     "owner": "Mister-Industries",
-    "repo": "tinyStudio",
-    "path": "demo/Fade Example",
-    "board": "tinyCore / Arduino",
+    "repo": "tinyStudio-examples",
+    "path": "basics/blink-breathing",
+    "board": "tinyCore (ESP32-S3)",
+    "category": "basics",
+    "docsUrl": "https://tinydocs.cc/2_tiny-core/basics/blink-led/",
     "tags": [
       "tinycore",
+      "blink",
       "pwm",
       "led",
-      "plotter",
       "visual"
     ]
   },
   {
-    "title": "Joystick",
-    "description": "Read a Qwiic joystick and visualize the stick position.",
+    "title": "Qwiic Joystick",
+    "description": "Read a Qwiic joystick and play Asteroids or Pong with it in the Visual view.",
     "owner": "Mister-Industries",
-    "repo": "tinyStudio",
-    "path": "demo/Joystick Example",
+    "repo": "tinyStudio-examples",
+    "path": "basics/qwiic-joystick",
     "board": "tinyCore + Qwiic Joystick",
+    "category": "basics",
     "tags": [
       "tinycore",
       "qwiic",

@@ -20,7 +20,8 @@ const buttonVariants = cva(
         destructive: 'tactile bg-[var(--red)] text-white [--_edge:var(--red-deep)]',
         success: 'tactile bg-[var(--green)] text-white [--_edge:var(--green-deep)]',
         warning:
-          'tactile bg-[var(--yellow)] text-[var(--yellow-contrast)] [--_edge:var(--yellow-deep)]',
+          // Softened: full-strength gold shouted over everything around it.
+          'tactile bg-[var(--yellow)]/70 text-[var(--yellow-contrast)] [--_edge:color-mix(in_oklab,var(--yellow-deep)_70%,transparent)]',
         // bordered tactile — neutral actions
         secondary: 'tactile-bordered bg-card text-[var(--text-strong)]',
         outline: 'tactile-bordered bg-background text-[var(--text-strong)]',

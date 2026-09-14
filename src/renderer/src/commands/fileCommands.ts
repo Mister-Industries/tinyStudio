@@ -2,13 +2,29 @@ import { Dispatch } from '@reduxjs/toolkit'
 import { fileSystem, FileSystemItem } from '@renderer/lib/fileSystem'
 import {
   canPushTo,
+  fetchBlobs,
   fetchRepoProject,
   loadAccount,
+  loadLink,
   saveLink,
   type RepoLink
 } from '@renderer/lib/github'
+import { notify as toast } from '@renderer/lib/notify'
+import { flattenSketchLayout, suggestProjectName } from '@renderer/lib/projectLayout'
+import {
+  canSaveToComputer,
+  chooseProjectTarget,
+  ensureFolderAccess,
+  folderLabel,
+  pickParentFolder,
+  recentFolderHandle,
+  rememberFolder,
+  writeProjectFolder,
+  type RecentProject
+} from '@renderer/lib/projectStore'
 import { isVirtualPath, VIRTUAL_PREFIX, virtualFileSystem } from '@renderer/lib/virtualFileSystem'
-import { setDocsTab } from '@renderer/redux/editorSlice'
+import { webFileSystem } from '@renderer/lib/webFileSystem'
+import { setDocsTab, setSavingToComputer, snoozeSavePrompt } from '@renderer/redux/editorSlice'
 import {
   BaseFileItem,
   closeFile,
@@ -18,6 +34,7 @@ import {
   openFile,
   openWorkspace,
   rebaseOpenFiles,
+  saveFileWithContent,
   selectOpenFiles,
   setFolderOpen,
   setViewingFile,
@@ -220,48 +237,37 @@ export class OpenWorkspaceCommand implements Command {
   }
 
   async execute(): Promise<void> {
-    let fileSystemItems: FileSystemItem[] = []
     let folderPath = this.filePath
-    if (folderPath) {
-      fileSystemItems = await fileSystem.readDirectory(folderPath, true)
-    } else {
+    if (!folderPath) {
       const selected = await fileSystem.selectFolder()
-      if (selected) {
-        folderPath = selected
-        fileSystemItems = await fileSystem.readDirectory(selected, true)
-      } else {
-        // User cancelled folder selection, don't create workspace
-        return
-      }
+      // User cancelled folder selection, don't create workspace
+      if (!selected) return
+      folderPath = selected
     }
 
-    // Remember the folder so the app can reopen it on next launch.
-    if (folderPath) {
+    // The workspace path is the folder itself, with forward slashes like the
+    // tree. (It used to be inferred from the first listed file's parent, which
+    // was wrong for a browser folder and empty for an empty one.)
+    const workspacePath = folderPath.replace(/\\/g, '/').replace(/\/+$/, '')
+    fileSystem.setCurrentWorkspace(workspacePath)
+    const fileSystemItems: FileSystemItem[] = await fileSystem.readDirectory(workspacePath, true)
+
+    if (!isVirtualPath(workspacePath)) {
+      // Remember the folder so the app can reopen it on next launch.
       try {
-        localStorage.setItem('tinystudio.lastWorkspace', folderPath)
+        localStorage.setItem('tinystudio.lastWorkspace', workspacePath)
       } catch {
         /* ignore */
       }
+      void rememberFolder(workspacePath)
+      leaveProjectRoute()
     }
-
-    const fileItems = buildNestedStructure(fileSystemItems)
-
-    // Extract workspace path from the first item or use empty string
-    // Normalize path to use forward slashes
-    const workspacePath =
-      fileSystemItems.length > 0
-        ? (() => {
-            const normalizedPath = fileSystemItems[0].path.replace(/\\/g, '/')
-            const lastSlashIndex = normalizedPath.lastIndexOf('/')
-            return lastSlashIndex > 0 ? normalizedPath.substring(0, lastSlashIndex) : normalizedPath
-          })()
-        : ''
 
     const workspace: Workspace = {
       id: crypto.randomUUID(),
-      name: 'Workspace',
+      name: workspacePath.split('/').pop() || 'Workspace',
       path: workspacePath,
-      root: fileItems,
+      root: buildNestedStructure(fileSystemItems),
       source: this.source
     }
 
@@ -336,6 +342,23 @@ export class LoadGitHubProjectCommand implements Command {
     // Overlay any prior in-editor edits saved to the cache for this project.
     await virtualFileSystem.hydrateFromCache(root)
     fileSystem.setCurrentWorkspace(root)
+
+    // A repo this user can push to opens already linked, so Push works straight
+    // away — and the link travels with the project if it's saved to a folder.
+    // The baseline is this fresh fetch, so edits cached from an earlier visit
+    // show up as changes instead of being absorbed into it.
+    if (source.canPush && !loadLink(root)) {
+      try {
+        saveLink(root, {
+          remote: `${this.owner}/${this.repo}`,
+          branch: project.branch,
+          path: project.path,
+          base: project.files
+        })
+      } catch (e) {
+        console.warn('Could not save repo link:', e)
+      }
+    }
 
     const fsItems = await fileSystem.readDirectory(root, true)
     const fileItems = buildNestedStructure(fsItems)
@@ -457,6 +480,258 @@ export class AdoptCopiedProjectCommand implements Command {
     if (typeof window !== 'undefined' && window.location.pathname !== url) {
       window.history.pushState({ owner: this.newOwner, repo: repoName, path: '' }, '', url)
     }
+  }
+}
+
+/**
+ * A local folder has no URL of its own. If the address bar still shows the
+ * example or repo that was open before, a reload would bring *that* back instead
+ * of this folder — so step off the project route.
+ */
+function leaveProjectRoute(): void {
+  if (fileSystem.isElectron() || typeof window === 'undefined') return
+  if (window.location.pathname !== '/') window.history.pushState(null, '', '/')
+}
+
+const base64ToBytes = (b64: string): Uint8Array =>
+  Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
+
+/**
+ * Called after an explicit Save. A project that only lives in the browser goes
+ * straight to the folder picker, so it can be kept for real. Cancelling the
+ * picker means "not yet": Save stops opening it for this project, and the
+ * banner still offers it. Returns true when the save to computer was started.
+ */
+export function promptSaveToComputer(): boolean {
+  const state = store.getState()
+  const path = state.file.workspace?.path
+  if (!path || !isVirtualPath(path) || fileSystem.isElectron() || !canSaveToComputer()) return false
+  if (state.editor.savePromptSnoozedFor === path || state.editor.projectDialog) return false
+  void saveProjectToComputer()
+  return true
+}
+
+/**
+ * Save the open browser-only project to the computer and report how it went.
+ * Shared by Save and the banner's "Save to computer" button. Call it straight
+ * from a click or key press: that's the only time the browser will show its
+ * folder picker.
+ */
+export async function saveProjectToComputer(): Promise<void> {
+  const state = store.getState()
+  const path = state.file.workspace?.path
+  if (!path || state.editor.savingToComputer) return
+  if (!canSaveToComputer()) {
+    toast.info("This browser can't save projects to folders", {
+      description:
+        'Open tinyStudio in Chrome or Edge, or use the desktop app. Until then, your changes are kept in this browser.'
+    })
+    return
+  }
+
+  store.dispatch(setSavingToComputer(true))
+  try {
+    const saved = await new SaveProjectToComputerCommand().execute()
+    if (!saved) {
+      store.dispatch(snoozeSavePrompt(path))
+      return
+    }
+    const where = saved.inPlace ? '' : `Created inside ${saved.parent}. `
+    const linked = saved.linkedTo ? ` Still linked to ${saved.linkedTo} for Push and Pull.` : ''
+    toast.success(`Saved to ${saved.folder}`, {
+      description: `${where}From now on, Save writes straight to this folder.${linked}`
+    })
+  } catch (e) {
+    console.error('Save to computer failed:', e)
+    toast.error('Could not save to your computer', {
+      description: e instanceof Error ? e.message : String(e)
+    })
+  } finally {
+    store.dispatch(setSavingToComputer(false))
+  }
+}
+
+export interface SavedToComputer {
+  /** the new project folder's name */
+  folder: string
+  /** the folder the user picked, which now holds the project folder */
+  parent: string
+  /** the user picked the (empty) project folder itself, so nothing was nested */
+  inPlace: boolean
+  /** the repo the project stays linked to, if any */
+  linkedTo?: string
+}
+
+/**
+ * Give a project that has only lived in the browser — an example, a GitHub
+ * repo, a scratch project — a permanent home: a new folder named after the
+ * project, inside whichever folder the user picks, laid out the way the Arduino
+ * IDE expects (see projectLayout). The workspace then switches to that folder,
+ * so every later Save writes to it.
+ *
+ * Asks for the location before doing anything else: the browser only shows its
+ * folder picker straight off a click, and awaiting writes first can use that up.
+ */
+export class SaveProjectToComputerCommand {
+  private get dispatch(): Dispatch {
+    return store.dispatch
+  }
+
+  /** Resolves to where the project went, or null if the user cancelled. */
+  async execute(): Promise<SavedToComputer | null> {
+    const workspace = store.getState().file.workspace
+    if (!workspace) return null
+    const parent = await pickParentFolder()
+    if (!parent) return null
+
+    const oldRoot = workspace.path
+    const source = workspace.source
+
+    // Flush unsaved buffers: the snapshot below reads the files, not the editor.
+    const openFiles = selectOpenFiles(store.getState())
+    for (const f of openFiles.filter((f) => f.modified && f.path)) {
+      await fileSystem.writeFile(f.path, f.content)
+      this.dispatch(saveFileWithContent({ id: f.id, content: f.content }))
+    }
+
+    const files: Record<string, string | Uint8Array> = {}
+    for (const item of await fileSystem.readDirectory(oldRoot, true)) {
+      if (item.isDirectory) continue
+      files[item.path.slice(oldRoot.length + 1)] = await fileSystem.readFile(item.path)
+    }
+    // Images and other binaries were listed but never downloaded when the
+    // project opened. Fetch them now, or the saved folder would be missing them.
+    const missing = source?.manifest.filter((m) => m.skipped && !(m.rel in files)) ?? []
+    if (source && missing.length > 0 && !fileSystem.isElectron()) {
+      const blobs = await fetchBlobs(source, missing, loadAccount()?.token)
+      for (const b of blobs) {
+        files[b.rel] = b.encoding === 'base64' ? base64ToBytes(b.data) : b.data
+      }
+    }
+
+    // A repo-linked project keeps its paths, or pushes would stop lining up.
+    const link = loadLink(oldRoot)
+    const keepPaths = !!link || !!source?.canPush
+    // The folder is named after the project — no questions asked. Its main
+    // sketch decides the name, since the Arduino IDE needs the two to match.
+    const name = suggestProjectName(Object.keys(files), workspace.name)
+    const target = await chooseProjectTarget(parent, name)
+    const layout = flattenSketchLayout(files, target.name, { keepPaths })
+    const newRoot = await writeProjectFolder(parent, target, layout.files)
+    if (link) {
+      try {
+        saveLink(newRoot, link)
+      } catch (e) {
+        console.warn('Could not carry the repo link to the saved folder:', e)
+      }
+    }
+
+    // Note which tabs were open, so they can reopen at their new paths.
+    const relOf = (p: string): string | null =>
+      p.startsWith(oldRoot + '/') ? p.slice(oldRoot.length + 1) : null
+    const newPathOf = (p: string): string | null => {
+      const rel = relOf(p)
+      return rel === null ? null : `${newRoot}/${layout.moved[rel] ?? rel}`
+    }
+    const tabPaths = openFiles
+      .filter((f) => !f.hidden)
+      .map((f) => newPathOf(f.path))
+      .filter((p): p is string => p !== null)
+    const viewing = openFiles.find((f) => f.id === store.getState().file.viewingFileId)
+    const viewingPath = viewing ? newPathOf(viewing.path) : null
+
+    await new OpenWorkspaceCommand(newRoot, source).execute()
+
+    const opened = store.getState().file.workspace
+    if (opened) {
+      for (const path of tabPaths) {
+        const item = findFileInTree(opened.root, (i) => i.path === path)
+        if (item) await new OpenFileCommand(item).execute()
+      }
+      const focus = viewingPath && findFileInTree(opened.root, (i) => i.path === viewingPath)
+      if (focus) this.dispatch(setViewingFile(focus.id))
+    }
+
+    // The project lives on disk now. Drop the browser copy and its cached edits,
+    // or they'd resurface over the original the next time it's opened.
+    if (isVirtualPath(oldRoot)) {
+      try {
+        saveLink(oldRoot, null)
+      } catch {
+        /* ignore */
+      }
+      await virtualFileSystem.discard(oldRoot)
+    }
+    this.dispatch(snoozeSavePrompt(null))
+    return {
+      folder: target.name,
+      parent: folderLabel(parent),
+      inPlace: target.inPlace,
+      linkedTo: link?.remote
+    }
+  }
+}
+
+/**
+ * Start a brand-new project that lives only in the browser — the fallback for
+ * browsers that can't write folders (Firefox, Safari). It behaves like an
+ * opened example: edits persist in browser storage, and the banner explains
+ * how to keep it.
+ */
+export class OpenScratchProjectCommand implements Command {
+  constructor(
+    private name: string,
+    private files: Record<string, string>
+  ) {}
+
+  async execute(): Promise<void> {
+    const root = `${VIRTUAL_PREFIX}local/${this.name}`
+    await virtualFileSystem.discard(root)
+    await virtualFileSystem.seed(root, this.files)
+    fileSystem.setCurrentWorkspace(root)
+    const items = await fileSystem.readDirectory(root, true)
+    const workspace: Workspace = {
+      id: crypto.randomUUID(),
+      name: this.name,
+      path: root,
+      root: buildNestedStructure(items)
+    }
+    await activateWorkspace(workspace, store.dispatch)
+  }
+}
+
+/**
+ * Reopen a folder from the recent list.
+ *
+ * In the browser that means re-granting access to its stored handle: a
+ * permission prompt, which the browser only allows from a click — so a
+ * launch-time restore passes `prompt: false` and quietly does nothing if access
+ * has lapsed.
+ */
+export class OpenRecentFolderCommand {
+  constructor(
+    private entry: RecentProject,
+    private opts: { prompt: boolean } = { prompt: true }
+  ) {}
+
+  async execute(): Promise<'opened' | 'missing' | 'denied'> {
+    if (fileSystem.isElectron()) {
+      if (!(await fileSystem.pathExists(this.entry.location))) return 'missing'
+      await new OpenWorkspaceCommand(this.entry.location).execute()
+      return 'opened'
+    }
+    const handle = await recentFolderHandle(this.entry.id)
+    if (!handle) return 'missing'
+    if (!(await ensureFolderAccess(handle, this.opts.prompt))) return 'denied'
+    webFileSystem.setRoot(handle)
+    try {
+      await new OpenWorkspaceCommand(handle.name).execute()
+    } catch (e) {
+      // A handle outlives its folder: listing a deleted one throws NotFoundError.
+      console.warn('Recent folder could not be read:', e)
+      return 'missing'
+    }
+    return 'opened'
   }
 }
 

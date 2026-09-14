@@ -1,0 +1,31 @@
+{
+  "type": "reedswitch-500mil",
+  "label": "Reed switch",
+  "family": "Reed Switch",
+  "description": "Reed switch",
+  "source": {
+    "fzp": "reedSwitch_500mil.fzp",
+    "moduleId": "c0e65b2d0c9003507cf4a3222e995a45"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 60.48,
+      "height": 10.56,
+      "pins": {
+        "pin 1": [0.67, 4.53],
+        "pin 2": [55.29, 4.53]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 36.02,
+      "height": 19.29,
+      "pins": {
+        "pin 1": [35.92, 10.11],
+        "pin 2": [0.16, 10.11]
+      }
+    }
+  }
+}

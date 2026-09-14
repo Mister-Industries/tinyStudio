@@ -291,7 +291,7 @@ function PartInspector({
                 ))}
               </select>
               <button
-                className="tactile-bordered rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand"
+                className="tactile-outline rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand"
                 title="Rotate 90°"
                 onClick={() => setRotation((pv.rotate || 0) + 90)}
               >
@@ -299,7 +299,7 @@ function PartInspector({
               </button>
               {view === 'sch' && (
                 <button
-                  className={`tactile-bordered rounded-md p-1.5 bg-surface-card hover:text-brand ${pv.flip ? 'text-brand' : 'text-text-muted'}`}
+                  className={`tactile-outline rounded-md p-1.5 bg-surface-card hover:text-brand ${pv.flip ? 'text-brand' : 'text-text-muted'}`}
                   title="Mirror horizontally (F)"
                   onClick={toggleFlip}
                 >
@@ -383,7 +383,7 @@ function PartInspector({
             }}
           />
           <button
-            className="tactile-bordered rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand shrink-0"
+            className="tactile-outline rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand shrink-0"
             title="Add property"
             onClick={() => {
               if (newAttr.trim()) {

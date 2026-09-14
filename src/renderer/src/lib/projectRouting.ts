@@ -45,10 +45,17 @@ export function projectRoutePath(owner: string, repo: string, path = ''): string
  * Push a project URL into history and load it. Used by the Examples browser and
  * any in-app "open this project" affordance.
  */
-export async function navigateToProject(owner: string, repo: string, path = ''): Promise<void> {
+export async function navigateToProject(
+  owner: string,
+  repo: string,
+  path = '',
+  // A non-default branch (from a pasted /tree/<branch>/ link). The URL scheme
+  // has no slot for it, so a reload falls back to the default branch.
+  branch?: string
+): Promise<void> {
   const url = projectRoutePath(owner, repo, path)
   if (url !== window.location.pathname) {
     window.history.pushState({ owner, repo, path }, '', url)
   }
-  await new LoadGitHubProjectCommand(owner, repo, path).execute()
+  await new LoadGitHubProjectCommand(owner, repo, path, branch).execute()
 }

@@ -1,0 +1,31 @@
+{
+  "type": "capacitor-ceramic-100mil",
+  "label": "Ceramic Capacitor",
+  "family": "Capacitor [bidirectional]",
+  "description": "100 nF multilayer Ceramic Capacitor",
+  "source": {
+    "fzp": "capacitor_ceramic_100mil.fzp",
+    "moduleId": "100milCeramicCapacitorModuleID"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 18.08,
+      "height": 23.83,
+      "pins": {
+        "0": [4.24, 14.71],
+        "1": [13.84, 14.71]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 15.36,
+      "height": 29.73,
+      "pins": {
+        "0": [7.68, 29.27],
+        "1": [7.68, 0.47]
+      }
+    }
+  }
+}

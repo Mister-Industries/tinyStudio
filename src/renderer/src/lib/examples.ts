@@ -18,7 +18,7 @@ export interface ExampleEntry {
   repo: string
   path: string
   board?: string
-  /** Grouping for the Examples tab: 'demos' | 'basics' | 'advanced' | 'hats'. */
+  /** Grouping for the Examples tab: 'basics' | 'advanced' | 'hats'. */
   category?: string
   /** The tinyDocs page this example was generated from. */
   docsUrl?: string

@@ -166,6 +166,52 @@ export function toWorkspaceRel(link: Pick<RepoLink, 'path'>, repoPath: string): 
   return repoPath.slice(base.length + 1)
 }
 
+export interface RepoRef {
+  owner: string
+  repo: string
+  /** folder within the repo ('' = root) */
+  path: string
+  branch?: string
+}
+
+const decodeSegments = (p: string): string => {
+  try {
+    return p.split('/').map(decodeURIComponent).join('/')
+  } catch {
+    return p
+  }
+}
+
+/**
+ * Read what someone pasted as "a repo": `owner/repo`, `owner/repo/some/folder`,
+ * or a github.com URL — including `/tree/<branch>/<folder>` links copied from
+ * the browser, and `/blob/…` links to a file, which open the folder holding it.
+ * Null for anything that isn't recognisably a GitHub repo.
+ */
+export function parseRepoRef(input: string): RepoRef | null {
+  const s = input
+    .trim()
+    .replace(/[?#].*$/, '')
+    .replace(/\/+$/, '')
+  if (!s) return null
+
+  const url = s.match(
+    /^(?:https?:\/\/)?(?:www\.)?github\.com\/([^/\s]+)\/([^/\s]+?)(?:\.git)?(?:\/(tree|blob)\/([^/\s]+)(?:\/(.*))?)?$/i
+  )
+  if (url) {
+    const [, owner, repo, kind, branch, rest = ''] = url
+    let path = rest.replace(/^\/+|\/+$/g, '')
+    if (kind === 'blob') path = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : ''
+    return { owner, repo, path: decodeSegments(path), branch }
+  }
+  if (/^[a-z]+:\/\//i.test(s) || /\.(com|org|net|io)\//i.test(s)) return null
+
+  const [owner, repo, ...rest] = s.replace(/^\/+/, '').split('/')
+  if (!owner || !repo) return null
+  if (!/^[A-Za-z0-9-]+$/.test(owner) || !/^[A-Za-z0-9._-]+$/.test(repo)) return null
+  return { owner, repo: repo.replace(/\.git$/, ''), path: rest.filter(Boolean).join('/') }
+}
+
 function ghHeaders(token?: string): Record<string, string> {
   const h: Record<string, string> = { Accept: 'application/vnd.github+json' }
   if (token) h.Authorization = 'Bearer ' + token

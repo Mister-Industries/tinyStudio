@@ -1,0 +1,33 @@
+{
+  "type": "servo",
+  "label": "Basic Servo",
+  "family": "Servo",
+  "description": "A generic servo.",
+  "source": {
+    "fzp": "servo.fzp",
+    "moduleId": "3234DBDC80leg"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 109.42,
+      "height": 88.03,
+      "pins": {
+        "gnd": [97.34, 70.58],
+        "vcc": [97.45, 67.87],
+        "pulse": [97.34, 65.2]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 47.1,
+      "height": 43.2,
+      "pins": {
+        "gnd": [0.17, 28.8],
+        "vcc": [0.17, 14.4],
+        "pulse": [0.17, 21.6]
+      }
+    }
+  }
+}

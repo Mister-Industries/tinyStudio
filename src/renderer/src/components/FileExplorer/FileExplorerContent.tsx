@@ -4,71 +4,26 @@
  * Main content area for the file explorer with workspace management
  */
 
-import {
-  CloseWorkspaceCommand,
-  OpenWorkspaceCommand,
-  RefreshWorkspaceCommand
-} from '@renderer/commands/fileCommands'
-import { BaseFileItem, startCreateItem, useAppDispatch, useAppSelector } from '@renderer/redux'
-import { Folder, FolderOpen, FolderPlus, FolderSync, FolderX, Plus } from 'lucide-react'
+import { useWorkspaceActions } from '@renderer/hooks/useWorkspaceActions'
+import { openProjectDialog, useAppDispatch, useAppSelector } from '@renderer/redux'
+import { FilePlus2, Folder, FolderOpen, FolderPlus, FolderSync, FolderX, Plus } from 'lucide-react'
 import React from 'react'
 import { Button } from '../ui/Button'
 import { ScrollArea } from '../ui/ScrollArea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/Tooltip'
-import { CreateProjectDialog } from './CreateProjectDialog'
 import { FileTreeItem } from './FileTreeItem'
 
 export function FileExplorerContent(): React.JSX.Element {
   const isLoading = false
   const workspace = useAppSelector((state) => state.file.workspace)
   const dispatch = useAppDispatch()
-
-  const handleSelectWorkspace = (): void => {
-    // Logic to select a workspace
-    const command = new OpenWorkspaceCommand(undefined)
-    command.execute()
-  }
-
-  const handleOpenWorkspace = (workspacePath: string): Promise<void> => {
-    const command = new OpenWorkspaceCommand(workspacePath)
-    command.execute()
-    return Promise.resolve()
-  }
-
-  const handleRefreshWorkspace = (): void => {
-    if (!workspace) return
-    const command = new RefreshWorkspaceCommand(workspace)
-    command.execute()
-  }
-
-  const handleCloseWorkspace = (): void => {
-    const command = new CloseWorkspaceCommand()
-    command.execute()
-  }
-
-  const handleNewFolder = (): void => {
-    dispatch(
-      startCreateItem({
-        id: crypto.randomUUID(),
-        parentId: 'root',
-        name: null,
-        path: workspace!.path,
-        type: 'folder',
-        children: []
-      } as BaseFileItem)
-    )
-  }
-
-  const handleNewFile = (): void => {
-    dispatch(
-      startCreateItem({
-        id: crypto.randomUUID(),
-        name: null,
-        path: workspace!.path,
-        type: 'file'
-      } as BaseFileItem)
-    )
-  }
+  const {
+    openWorkspace: handleSelectWorkspace,
+    refreshWorkspace: handleRefreshWorkspace,
+    closeWorkspace: handleCloseWorkspace,
+    newFolder: handleNewFolder,
+    newFile: handleNewFile
+  } = useWorkspaceActions()
 
   return (
     <div className="h-full flex flex-col">
@@ -159,17 +114,21 @@ export function FileExplorerContent(): React.JSX.Element {
       {/* Main Content Area */}
       <ScrollArea className="flex-1">
         {!workspace ? (
-          // No workspace — keep the sidebar minimal; the editor shows the
-          // primary "Open Folder" call to action.
+          // No workspace — the start screen's ways in, compact and in the same order.
           <div className="flex flex-col items-center justify-center py-10 px-4 gap-2">
-            <Button
-              variant="secondary"
-              onClick={handleSelectWorkspace}
-              className="w-40 gap-1.5"
-            >
+            <Button onClick={() => dispatch(openProjectDialog('create'))} className="w-40 gap-1.5">
+              <FilePlus2 size={15} /> Create Project!
+            </Button>
+            <Button variant="secondary" onClick={handleSelectWorkspace} className="w-40 gap-1.5">
               <FolderOpen size={15} /> Open Folder
             </Button>
-            <CreateProjectDialog openWorkspace={handleOpenWorkspace} />
+            <button
+              type="button"
+              onClick={() => dispatch(openProjectDialog('open'))}
+              className="mt-1 cursor-pointer text-xs font-medium text-[var(--brand)] hover:underline"
+            >
+              or open a GitHub repo
+            </button>
           </div>
         ) : isLoading ? (
           // Loading state

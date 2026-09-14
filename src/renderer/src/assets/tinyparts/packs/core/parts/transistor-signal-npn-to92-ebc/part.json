@@ -1,0 +1,33 @@
+{
+  "type": "transistor-signal-npn-to92-ebc",
+  "label": "NPN-Transistor",
+  "family": "Bipolar Transistor",
+  "description": "A standard NPN-transistor",
+  "source": {
+    "fzp": "transistor_signal_NPN_TO92_EBC.fzp",
+    "moduleId": "NPN-to92-ebc"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 22.04,
+      "height": 32.11,
+      "pins": {
+        "E": [1.44, 30.11],
+        "B": [11.01, 30.11],
+        "C": [20.6, 30.11]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 20.13,
+      "height": 39.33,
+      "pins": {
+        "E": [19.67, 38.87],
+        "B": [0.47, 19.67],
+        "C": [19.67, 0.47]
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { app, BrowserWindow, dialog, ipcMain, Menu, screen, shell } from 'electron'
-import { constants, promises as fs } from 'fs'
+import { constants, promises as fs, watch, type FSWatcher } from 'fs'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 import { AgentService, type AgentSendArgs } from './AgentService'
@@ -134,6 +134,12 @@ app.whenReady().then(async () => {
   ipcMain.handle('agent:permission-response', (_, id: string, allow: boolean) => {
     agentService.resolvePermission(id, allow)
   })
+  ipcMain.handle(
+    'agent:studio-response',
+    (_, id: string, answer: { ok: boolean; value: string }) => {
+      agentService.resolveStudio(id, answer)
+    }
+  )
 
   // --- GitHub sign-in (OAuth device flow) ---
   // These live in main because GitHub's OAuth endpoints send no CORS headers, so
@@ -179,6 +185,11 @@ app.whenReady().then(async () => {
   // Open an external URL (e.g. the GitHub Pages site) in the default browser.
   ipcMain.handle('open-external', async (_, url: string) => {
     await shell.openExternal(url)
+  })
+
+  // Unpackaged (npm run dev / npm start): unlocks parts-development features.
+  ipcMain.on('app:is-dev', (event) => {
+    event.returnValue = is.dev
   })
 
   // Default location for downloaded example projects (first-run onboarding).
@@ -310,6 +321,45 @@ app.whenReady().then(async () => {
     } catch {
       return false
     }
+  })
+
+  // Reveal a file or folder in Explorer / Finder (e.g. a part's art in tinyparts).
+  ipcMain.handle('show-item-in-folder', (_, targetPath: string) => {
+    shell.showItemInFolder(path.normalize(targetPath))
+  })
+
+  // --- Parts development: watch a local tinyparts checkout ---
+  // One recursive watcher per window. Changes are batched (editors like
+  // Illustrator save through temp files and renames) and sent as paths
+  // relative to the watched folder; the renderer decides what to reload.
+  const partWatchers = new Map<number, FSWatcher>()
+  ipcMain.handle('parts:watch', (event, dir: string) => {
+    const sender = event.sender
+    partWatchers.get(sender.id)?.close()
+    let pending = new Set<string>()
+    let timer: NodeJS.Timeout | null = null
+    const watcher = watch(dir, { recursive: true }, (_evt, file) => {
+      if (!file) return
+      const rel = file.toString().replace(/\\/g, '/')
+      if (rel === '.git' || rel.startsWith('.git/')) return
+      pending.add(rel)
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => {
+        if (!sender.isDestroyed()) sender.send('parts:changed', { dir, paths: [...pending] })
+        pending = new Set()
+      }, 250)
+    })
+    watcher.on('error', () => partWatchers.delete(sender.id))
+    if (!partWatchers.has(sender.id))
+      sender.once('destroyed', () => {
+        partWatchers.get(sender.id)?.close()
+        partWatchers.delete(sender.id)
+      })
+    partWatchers.set(sender.id, watcher)
+  })
+  ipcMain.handle('parts:unwatch', (event) => {
+    partWatchers.get(event.sender.id)?.close()
+    partWatchers.delete(event.sender.id)
   })
 
   ipcMain.handle('get-file-stats', async (_, filePath: string) => {
