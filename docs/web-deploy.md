@@ -30,12 +30,13 @@ opens that project (proves the SPA redirect works).
 1. Netlify → **Domain settings → Add a domain** → `app.tinyStudio.cc`.
 2. At your DNS provider for `tinyStudio.cc`, add the record Netlify shows. Usually:
 
-   | Type  | Name  | Value                         |
-   | ----- | ----- | ----------------------------- |
-   | CNAME | `app` | `<your-site>.netlify.app`     |
+   | Type  | Name  | Value                     |
+   | ----- | ----- | ------------------------- |
+   | CNAME | `app` | `<your-site>.netlify.app` |
 
    (Netlify may instead give you their `apex`/`ALIAS` instructions — follow what
    the dashboard shows for the subdomain.)
+
 3. Netlify auto-provisions a Let's Encrypt certificate once DNS resolves. The
    apex `tinyStudio.cc` is left free for the marketing homepage (a separate repo,
    later).
@@ -54,23 +55,21 @@ Scheme: `app.tinyStudio.cc/<owner>/<repo>/<optional/sub/path>`
 
 ## 5. Examples
 
-The **Examples** tab (in the right-hand docs panel) reads a manifest:
+The **Examples** tab (in the right-hand docs panel) reads a manifest from the
+examples repo:
 
-- Default URL: `https://raw.githubusercontent.com/Mister-Industries/tinyStudio/main/examples.json`
-  — i.e. [`examples.json`](../examples.json) **on the `main` branch**. It must be
-  on `main` for the live site to see it.
-- Each entry is `{ title, description, owner, repo, path, board? }`; clicking
-  **Open** loads it exactly like a deep link.
-
-### Moving to a dedicated examples repo (the intended end state)
-
-1. Create a public repo, e.g. `Mister-Industries/tinyStudio-examples`, with an
-   `examples.json` at its root and one folder per example (`basics/<name>/<name>.ino`,
-   plus an optional `diagram.json`, `visual.js` and a `README.md`).
-2. Point each manifest entry's `owner`/`repo`/`path` at that repo.
-3. Repoint `DEFAULT_MANIFEST_URL` in
-   [`ExamplesContent.tsx`](../src/renderer/src/components/ExamplesContent.tsx) to
-   the new repo's raw `examples.json`.
+- Default URL:
+  `https://raw.githubusercontent.com/Mister-Industries/tinyStudio-examples/main/examples.json`,
+  set in [`lib/examples.ts`](../src/renderer/src/lib/examples.ts). It must be on
+  that repo's `main` for the live site to see it.
+- Each entry is `{ title, description, owner, repo, path, board?, tags? }`;
+  clicking **Open** loads it exactly like a deep link. Entries can point at any
+  public repo, which is how the tinyHAT examples live in their own repos.
+- One folder per example (`basics/<name>/<name>.ino`, plus an optional
+  `circuit.json`, `visual.js` and a `README.md`).
+- The `tags` field is filled in by the examples repo's own workflow, which runs
+  `tools/gen-example-tags.mjs` over the sketches on every push to `main`. The
+  tag vocabulary has to match `lib/exampleTags.ts` here.
 
 ## 6. Local overrides (for testing)
 

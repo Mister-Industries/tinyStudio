@@ -36,10 +36,9 @@ export interface ExampleEntry {
   tags?: string[]
 }
 
-// Where the manifest lives. The dedicated examples repo is canonical; the copy
-// at the root of the main repo is the fallback, so the Examples tab keeps
-// working if the examples repo isn't published (or reachable) yet. Both must be
-// on `main` for these raw URLs to resolve.
+// Where the manifest lives: examples.json on the examples repo's `main`, which
+// is what the raw URL serves. Its tags are written there by the repo's own
+// workflow (tools/gen-example-tags.mjs).
 //
 // Entries carry `owner`/`repo`/`path` per project, so one manifest can span
 // repos — the tinyHAT examples point straight at tinySniff / tinySpeak rather
@@ -49,8 +48,6 @@ export interface ExampleEntry {
 // localStorage["tinystudio.examples.url"].
 const DEFAULT_MANIFEST_URL =
   'https://raw.githubusercontent.com/Mister-Industries/tinyStudio-examples/main/examples.json'
-const FALLBACK_MANIFEST_URL =
-  'https://raw.githubusercontent.com/Mister-Industries/tinyStudio/main/examples.json'
 
 export function resolveManifestUrl(): string | null {
   try {
@@ -153,18 +150,11 @@ export function matchesQuery(ex: ExampleEntry, query: string): boolean {
 }
 
 /**
- * Fetch and parse the examples manifest. An explicit localStorage override is
- * used alone (a failure there should be loud); otherwise the examples repo is
- * tried first and the main repo is the fallback.
+ * Fetch and parse the examples manifest, from the localStorage override when
+ * one is set (a failure there should be loud), else from the examples repo.
  */
 export async function fetchExamplesManifest(): Promise<ExampleEntry[]> {
-  const override = resolveManifestUrl()
-  if (override) return fetchManifestFrom(override)
-  try {
-    return await fetchManifestFrom(DEFAULT_MANIFEST_URL)
-  } catch {
-    return fetchManifestFrom(FALLBACK_MANIFEST_URL)
-  }
+  return fetchManifestFrom(resolveManifestUrl() ?? DEFAULT_MANIFEST_URL)
 }
 
 /**

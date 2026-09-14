@@ -120,6 +120,9 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
 
 ### Examples
 
+- Example tags are generated in the examples repo by its own workflow; the
+  app reads them from that repo's `examples.json` and no longer carries a copy
+  of the manifest.
 - Examples come from the
   [tinyStudio-examples](https://github.com/Mister-Industries/tinyStudio-examples)
   repo, with tags, search and filters. Board tags use each board's colour.
