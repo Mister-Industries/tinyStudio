@@ -316,7 +316,7 @@ interface FrequencySelectProps {
 }
 
 // Match the Arduino IDE's full baud list (plus 74880, which ESP chips use for
-// boot messages). The old 5-entry list couldn't even show ESP32 boot output.
+// boot messages).
 const BAUD_RATES = [
   '300',
   '1200',

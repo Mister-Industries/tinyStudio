@@ -16,7 +16,7 @@
  * The engine's own lifecycle is surfaced separately from the analysis: a cold
  * start is "loading the engine", not a run that timed out. And an analysis
  * whose point count would exhaust memory is refused here, before it reaches
- * the worker — that request used to take the whole app down.
+ * the worker — such a request would take the whole app down.
  */
 
 import { Crosshair, Download, Loader2, Play, Square, X } from 'lucide-react'

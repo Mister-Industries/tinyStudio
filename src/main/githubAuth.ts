@@ -9,14 +9,14 @@
  *   • GitHub's OAuth endpoints send no CORS headers, so a renderer `fetch` to
  *     them fails outright. This is not a workaround — it's the supported shape.
  *   • The resulting token is written with safeStorage (OS keychain / DPAPI),
- *     the same way the Anthropic key already is. It used to sit in plaintext in
- *     the renderer's localStorage, readable by any process running as the user.
+ *     the same way the Anthropic key is. A token in the renderer's localStorage
+ *     would be readable by any process running as the user.
  *
  * Why an OAuth App and not a GitHub App: a GitHub App *cannot create a
  * repository in a user's personal account*, which is the whole point of "make
  * it mine". Repo creation needs an OAuth scope. We ask for `public_repo`
- * rather than `repo`, which is strictly narrower than the full-`repo` PAT the
- * app used to ask people to paste.
+ * rather than `repo`, which is strictly narrower than a full-`repo` personal
+ * access token.
  */
 
 import { safeStorage } from 'electron'

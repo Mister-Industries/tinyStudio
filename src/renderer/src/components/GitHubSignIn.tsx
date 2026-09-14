@@ -9,7 +9,7 @@
  *
  * Pasting a Personal Access Token stays available behind "Advanced" — it is
  * still the only route on the web build, and enterprise/air-gapped setups need
- * it — but it is no longer what a normal user is asked to do.
+ * it — but it is not what a normal user is asked to do.
  */
 
 import { useGitHubAccount, type DeviceCodePrompt } from '@renderer/hooks/useGitHubAccount'

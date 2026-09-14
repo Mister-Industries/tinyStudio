@@ -2,7 +2,7 @@
  * ErrorBoundary — stops one component's crash from blanking the whole app.
  *
  * React unmounts the entire tree when an error escapes render or an effect,
- * which previously left only the navy background ("blue screen"). This catches
+ * which would leave only the navy background ("blue screen"). This catches
  * that error and shows a recoverable fallback instead. Use it at the app root
  * and around any panel that can fail independently.
  */

@@ -20,9 +20,8 @@ const GH_API = 'https://api.github.com'
  * as base64. That default is deliberate: an unknown type round-trips losslessly
  * as base64, whereas guessing "text" and decoding as UTF-8 corrupts it silently.
  *
- * This used to be the gate on whether a file was fetched at all, which meant
- * diagram.svg, index.html and every image simply did not exist as far as the
- * app was concerned. Now it only decides *how* a file is carried.
+ * The list decides only *how* a file is carried, never whether it exists to
+ * the app: every file in the repo folder is fetched or recorded in the manifest.
  */
 const TEXT_EXT = [
   // sketches / firmware
@@ -506,9 +505,8 @@ async function pooled<T, R>(
  * browser memory for files nobody is going to look at. `manifest` is the record
  * of what exists, so a later copy can fetch the rest and still be complete.
  *
- * This replaces the old behaviour where a non-text extension meant the file was
- * never fetched AND never recorded — which is why diagram.svg silently vanished
- * from examples.
+ * A file that isn't fetched is still recorded, so a diagram.svg or an image in
+ * an example is never silently dropped.
  */
 export async function fetchRepoProject(
   owner: string,
@@ -910,9 +908,8 @@ export async function pushWorkspace(
 
 /**
  * Pull the repo folder this link points at down to disk, then return the new
- * baseline snapshot. Keys are workspace-relative on both sides — mixing repo
- * paths into the baseline is what used to make every file read as changed the
- * moment a subfolder project was linked.
+ * baseline snapshot. Keys are workspace-relative on both sides — a repo path in
+ * the baseline would make every file of a subfolder project read as changed.
  */
 export async function pullWorkspace(
   workspace: Workspace,

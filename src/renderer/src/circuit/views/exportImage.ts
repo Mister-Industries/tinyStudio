@@ -211,10 +211,10 @@ function baseName(view: ViewId): string {
 /**
  * UTF-8-safe `data:` URL for an SVG string.
  *
- * This is why PNG export used to do nothing: the app CSP is
- * `img-src 'self' data: …` with no `blob:`, so pointing an <img> at an object
- * URL was blocked before it ever loaded — onerror fired, the canvas was never
- * painted, and no file was written. `data:` is on the allowlist.
+ * A `data:` URL rather than an object URL: the app CSP is
+ * `img-src 'self' data: …` with no `blob:`, so an <img> pointed at an object
+ * URL is blocked before it loads — onerror fires, the canvas is never painted,
+ * and no file is written. `data:` is on the allowlist.
  */
 export function svgDataUrl(svg: string): string {
   const bytes = new TextEncoder().encode(svg)

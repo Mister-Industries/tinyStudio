@@ -544,7 +544,7 @@ export function spiceValue(v: string | number | boolean | undefined, fallback = 
  * Points an analysis will produce. ngspice materializes every vector at every
  * point, so this is the number that decides whether a run costs a megabyte or
  * eats the renderer: `.tran 1n 10` is ten billion points, and asking for it
- * used to take the whole app down with it. The panel refuses anything past
+ * would take the whole app down with it. The panel refuses anything past
  * MAX_SIM_POINTS and says which knob to turn.
  */
 export function estimatePoints(a: Analysis): number {

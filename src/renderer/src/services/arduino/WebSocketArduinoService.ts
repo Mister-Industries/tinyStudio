@@ -115,8 +115,8 @@ function resolveServiceUrl(): string {
 /**
  * Convert a backend BoardInfo into the renderer's Board shape. The FQBN is
  * passed through untouched: collapsing every tinyCore variant to one FQBN
- * (the old behavior) forced all tinyCore boards to compile for the S3
- * no-PSRAM variant and made other variants unselectable.
+ * would force all tinyCore boards to compile for the S3 no-PSRAM variant and
+ * make other variants unselectable.
  */
 function toBoard(info: SharedBoardInfo): Board {
   return {

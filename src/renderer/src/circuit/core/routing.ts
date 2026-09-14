@@ -74,7 +74,7 @@ function step(cur: Pt, instr: string): Pt | null {
  *   pre-"*"  → walked forward from source
  *   post-"*" → walked in reverse from target
  *   gap      → auto-completed orthogonally
- * Journeys without "*" behave exactly like the old decoder.
+ * A journey without "*" is walked forward from source in full.
  */
 export function decodeJourney(source: Pt, target: Pt, instr?: string[]): Pt[] {
   const list = instr ?? []

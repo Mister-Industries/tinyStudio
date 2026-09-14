@@ -109,8 +109,8 @@ export default function App(): React.JSX.Element {
   // the last workspace (if it still exists on disk).
   //
   // Guard against running twice — StrictMode double-invokes effects in dev, and a
-  // second open rebuilds the tree with new ids, which previously opened a
-  // duplicate tab for the auto-opened sketch.
+  // second open rebuilds the tree with new ids, which would open a duplicate
+  // tab for the auto-opened sketch.
   const reopenedRef = useRef(false)
   useEffect(() => {
     if (reopenedRef.current) return

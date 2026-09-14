@@ -628,8 +628,8 @@ export function useArduino(): UseArduinoReturn {
   /**
    * Event-driven board detection: the backend watches
    * `arduino-cli board list --watch` and pushes the full board list on every
-   * plug/unplug. This replaces the old 8-second poll (which stopped polling
-   * once a board was found, so unplugs went unnoticed until manual refresh).
+   * plug/unplug. Event-driven rather than polled, so an unplug shows up at
+   * once instead of at the next manual refresh.
    * The selection is reconciled on every event: kept if the same port is
    * still present, cleared (with a heads-up) if its board was unplugged.
    */

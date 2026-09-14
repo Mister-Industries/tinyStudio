@@ -4,9 +4,9 @@
  * Everything that draws schematic ink — generated symbols, the hand-authored
  * symbol library, net labels, sources, probes, annotations, the canvas overlay
  * and the image exporter — pulls its stroke widths, ink colour, fonts and
- * grid pitch from here. Before this existed each module picked its own (2 px
- * here, 1.2 px there, `monospace` in one place and the UI font in another),
- * which is why symbols looked like they came from four different programs.
+ * grid pitch from here. One source is what keeps symbols from looking like
+ * they came from four different programs, which is what module-by-module
+ * choices of stroke, font and grid produce.
  *
  * The look is the conventional US/IEEE schematic style the tech spec asks for
  * (§8): black ink on paper, uniform 2 px bodies, thinner pin leads, sans-serif

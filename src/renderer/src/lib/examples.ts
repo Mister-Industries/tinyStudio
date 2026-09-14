@@ -167,11 +167,10 @@ export async function fetchExamplesManifest(): Promise<ExampleEntry[]> {
   }
 }
 
-/** Folder name to store an example under (its path basename, else the repo). */
 /**
  * Where an example lands on disk. Namespaced by owner/repo because example
- * folder names are not unique across repos — two `blink/` examples used to
- * install over each other.
+ * folder names are not unique across repos — two `blink/` examples from
+ * different repos would install over each other.
  */
 function exampleFolderName(ex: ExampleEntry): string {
   const base = ex.path ? ex.path.split('/').filter(Boolean).pop() : ''
