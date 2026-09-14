@@ -46,7 +46,6 @@ const CREDITS: Credit[] = [
   { name: 'p5.js', licence: 'LGPL-2.1', url: 'https://p5js.org', note: 'Visual sketches' },
   { name: 'Monaco Editor', licence: 'MIT', url: 'https://github.com/microsoft/monaco-editor' },
   { name: 'Electron', licence: 'MIT', url: 'https://www.electronjs.org' },
-  { name: 'Blockly', licence: 'Apache-2.0', url: 'https://github.com/google/blockly' },
   { name: 'Mermaid', licence: 'MIT', url: 'https://github.com/mermaid-js/mermaid' },
   { name: 'uPlot', licence: 'MIT', url: 'https://github.com/leeoniya/uPlot' },
   {

@@ -31,7 +31,6 @@ them on first compile under their own licences.
 | [ngspice](https://ngspice.sourceforge.io) via [eecircuit-engine](https://github.com/eelab-dev/EEcircuit-engine)                                                      | BSD-3-Clause (ngspice), MIT (eecircuit-engine) |
 | [p5.js](https://p5js.org)                                                                                                                                            | LGPL-2.1                                       |
 | [Monaco Editor](https://github.com/microsoft/monaco-editor)                                                                                                          | MIT                                            |
-| [Blockly](https://github.com/google/blockly)                                                                                                                         | Apache-2.0                                     |
 | [Mermaid](https://github.com/mermaid-js/mermaid)                                                                                                                     | MIT                                            |
 | [uPlot](https://github.com/leeoniya/uPlot)                                                                                                                           | MIT                                            |
 | [DOMPurify](https://github.com/cure53/DOMPurify)                                                                                                                     | MPL-2.0 or Apache-2.0                          |

@@ -15,7 +15,6 @@ export type EditorSliceState = {
   isFileExplorerOpen: boolean
   isSerialMonitorOpen: boolean
   isDocsPanelOpen: boolean
-  editorMode: 'code' | 'blocks'
   // How the active file renders: 'code' shows the text editor; 'circuit' renders
   // diagram.json interactively; 'visual' runs a p5 sketch (.js). The toolbar
   // segment sets this and auto-focuses the matching file.
@@ -40,7 +39,6 @@ const initialState: EditorSliceState = {
   isFileExplorerOpen: true,
   isSerialMonitorOpen: true,
   isDocsPanelOpen: true,
-  editorMode: 'code',
   editorView: 'code',
   docsTab: 'examples',
   projectDialog: null,
@@ -71,9 +69,6 @@ export const editorSlice = createAppSlice({
         }
       }
     ),
-    setEditorMode: create.reducer((state, payload: PayloadAction<'code' | 'blocks'>) => {
-      state.editorMode = payload.payload
-    }),
     setEditorView: create.reducer((state, payload: PayloadAction<EditorView>) => {
       state.editorView = payload.payload
     }),
@@ -122,7 +117,6 @@ export const editorSlice = createAppSlice({
 // Action creators are generated for each case reducer function.
 export const {
   setPanelOpen,
-  setEditorMode,
   setEditorView,
   setDocsTab,
   openProjectDialog,

@@ -118,6 +118,8 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
 - Links in project READMEs open in your browser instead of replacing the app.
 - The Windows installer has its own app identity and ships only the built app.
 - Your theme choice carries over from earlier versions.
+- The unfinished blocks editor (Blockly) is gone. It was bundled but could
+  never be switched on.
 
 ### Security
 

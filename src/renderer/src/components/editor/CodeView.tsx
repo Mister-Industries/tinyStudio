@@ -15,7 +15,6 @@ import {
   updateReadmeContent
 } from '@renderer/redux/fileSlice'
 import { useCallback, useEffect, useRef } from 'react'
-import { BlocklyEditor } from '../BlocklyEditor'
 import { MonacoEditor, MonacoEditorRef } from '../MonacoEditor'
 import { FileTabContent, FileTabs, FileTabsList, FileTabTrigger } from '../ui/FileTab'
 
@@ -28,7 +27,6 @@ export function CodeView(): React.JSX.Element {
   // views) are hidden from the tab bar until revealed via their code button.
   const openFiles = allOpenFiles.filter((f) => !f.hidden)
   const viewingFileId = useAppSelector(selectViewingFileId)
-  const editorMode = useAppSelector((state) => state.editor.editorMode)
   const dispatch = useAppDispatch()
   const monacoEditorRef = useRef<MonacoEditorRef>(null)
 
@@ -43,10 +41,10 @@ export function CodeView(): React.JSX.Element {
     (fileId: string): void => {
       dispatch(setViewingFile(fileId))
       setTimeout(() => {
-        if (monacoEditorRef.current && editorMode !== 'blocks') monacoEditorRef.current.focus()
+        if (monacoEditorRef.current) monacoEditorRef.current.focus()
       }, 50)
     },
-    [dispatch, editorMode]
+    [dispatch]
   )
 
   useEffect(() => {
@@ -147,16 +145,12 @@ export function CodeView(): React.JSX.Element {
       </FileTabsList>
       {openFiles.map((file) => (
         <FileTabContent key={`content-${file.id}`} value={file.id}>
-          {editorMode === 'blocks' ? (
-            <BlocklyEditor />
-          ) : (
-            <MonacoEditor
-              ref={monacoEditorRef}
-              activeFile={file}
-              onContentChange={(content) => handleContentChange(content, file.id)}
-              onSaveFile={(content) => handleSaveFile(content, file.id)}
-            />
-          )}
+          <MonacoEditor
+            ref={monacoEditorRef}
+            activeFile={file}
+            onContentChange={(content) => handleContentChange(content, file.id)}
+            onSaveFile={(content) => handleSaveFile(content, file.id)}
+          />
         </FileTabContent>
       ))}
     </FileTabs>
