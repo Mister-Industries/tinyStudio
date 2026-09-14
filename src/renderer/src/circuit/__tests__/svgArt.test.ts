@@ -9,6 +9,7 @@ import { test } from 'node:test'
 import {
   artPrefix,
   decodeIllustratorId,
+  movePinInArt,
   namespaceSvg,
   pinNameFromId,
   prepareArt,
@@ -125,6 +126,49 @@ test('a legacy Illustrator file (prolog, DOCTYPE subset, comments, CDATA) parses
 </svg>`
   // tinyBoards: 1.9in box, 136.8-unit viewBox
   assert.deepEqual(pinsOf(file, 182.4, 182.4).SCK, [52.8, 170.4])
+})
+
+// ── moving pins in the art ───────────────────────────────────────────────────
+
+test('movePinInArt shifts a circle pad by cx/cy and the pin follows, in box px', () => {
+  // 100-unit viewBox in a 200 px box: 1 px = 0.5 units
+  const s = svg(
+    '<circle id="pin-GND" cx="10" cy="20" r="2"/><rect id="pin-A0" x="40" y="40" width="4" height="4"/>'
+  )
+  const moved = movePinInArt(s, 'GND', 9.6, -4.8, 200, 200)
+  assert.ok(moved)
+  assert.deepEqual(moved!.at, [29.6, 35.2])
+  assert.match(moved!.svg, /<circle id="pin-GND" cx="14.8" cy="17.6" r="2"\/>/)
+  assert.deepEqual(pinsOf(moved!.svg, 200, 200)['A0'], [84, 84], 'other pins untouched')
+})
+
+test('movePinInArt moves rects by x/y and paths by a leading translate', () => {
+  const s = svg(
+    '<rect id="pin-A" x="10" y="10" width="4" height="4"/>' +
+      '<path id="pin-B" d="M50 50 h4 v4 h-4 z" transform="scale(2)"/>'
+  )
+  const a = movePinInArt(s, 'A', 1, 2, 100, 100)!
+  assert.match(a.svg, /<rect id="pin-A" x="11" y="12"/)
+  assert.deepEqual(a.at, [13, 14])
+  const b = movePinInArt(s, 'B', 3, 0, 100, 100)!
+  assert.match(b.svg, /transform="translate\(3 0\) scale\(2\)"/)
+  assert.deepEqual(b.at, [107, 104])
+})
+
+test('movePinInArt maps the delta through ancestor transforms', () => {
+  const s = svg(
+    '<g transform="translate(10 10) scale(2)"><circle id="pin-X" cx="5" cy="5" r="1"/></g>'
+  )
+  assert.deepEqual(pinsOf(s)['X'], [20, 20])
+  const m = movePinInArt(s, 'X', 4, 6, 100, 100)!
+  // 4 root units under scale(2) is 2 local units
+  assert.match(m.svg, /cx="7" cy="8"/)
+  assert.deepEqual(m.at, [24, 26])
+})
+
+test('movePinInArt returns null for an unknown pin and leaves the file alone', () => {
+  const s = svg('<circle id="pin-GND" cx="10" cy="20" r="2"/>')
+  assert.equal(movePinInArt(s, 'NOPE', 1, 1, 100, 100), null)
 })
 
 // ── preparing + namespacing ──────────────────────────────────────────────────

@@ -49,6 +49,10 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
   and More packs. Installed packs stay linked to GitHub.
 - Fritzing art ships with its CC-BY-SA attribution.
 - New breadboard art for the tinyCore, tinyDisplay, tinyProto and tinySpeak.
+- In the parts editor, arrow keys nudge the selected pin by one unit of the
+  art's own coordinates (Shift: 0.1 in). While pins come from `pin-*` shapes
+  the nudge moves the shape in the SVG, so the file stays the source of truth.
+  Ctrl+Z and Ctrl+Y undo and redo pin, size and art changes.
 
 ### Circuit view
 

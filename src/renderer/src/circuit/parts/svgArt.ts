@@ -414,6 +414,119 @@ export function scanPins(svg: string, w?: number | null, h?: number | null): Pin
   return out
 }
 
+// ── moving a pin in the art ──────────────────────────────────────────────────
+
+export interface MovedPin {
+  /** the art with the pin shape moved */
+  svg: string
+  /** where the pin now scans, px @ 96 DPI in the part box */
+  at: [number, number]
+}
+
+const fmt = (n: number): string => String(Math.round(n * 1000) / 1000)
+
+/** Set or replace one attribute in a raw start-tag string. */
+function setAttr(tag: string, name: string, value: string): string {
+  const re = new RegExp(String.raw`(\s${name}\s*=\s*)(?:"[^"]*"|'[^']*'|[^\s>]+)`)
+  if (re.test(tag)) return tag.replace(re, `$1"${value}"`)
+  const end = tag.endsWith('/>') ? tag.length - 2 : tag.length - 1
+  return `${tag.slice(0, end)} ${name}="${value}"${tag.slice(end)}`
+}
+
+/**
+ * Move the shape named `pin-<NAME>` by (dx, dy) part-box px, so the pin keeps
+ * coming from the file (the parts editor's arrow keys). The delta is mapped
+ * back through the box fit and every ancestor transform into the shape's own
+ * coordinates: circles and ellipses move by cx/cy, rects and the like by x/y,
+ * anything else (paths, groups) gets a translate() in front of its transform.
+ * The result is rescanned; if the pin didn't land where asked (an ancestor
+ * transform the edit can't express, a duplicate id) the call returns null and
+ * the caller falls back to a fixed pin position.
+ */
+export function movePinInArt(
+  svg: string,
+  name: string,
+  dx: number,
+  dy: number,
+  w?: number | null,
+  h?: number | null
+): MovedPin | null {
+  const before = scanPins(svg, w, h).pins.find((p) => p.name === name)
+  if (!before) return null
+  const root = readSvgRoot(svg)
+  const W = w ?? root.widthPx ?? root.vb[2]
+  const H = h ?? root.heightPx ?? root.vb[3]
+  const s = Math.min(W / root.vb[2], H / root.vb[3])
+  // delta in root viewBox units
+  const du = dx / s
+  const dv = dy / s
+
+  // Walk like scanPins does, but keep the source offsets so the tag can be
+  // rewritten in place.
+  const re = new RegExp(TAG_RE.source, 'gi')
+  const stack: { name: string; m: Mat }[] = []
+  let sawRoot = false
+  let m: RegExpExecArray | null
+  while ((m = re.exec(svg))) {
+    if (m[1]) {
+      const closing = localName(m[1])
+      for (let k = stack.length - 1; k >= 0; k--) {
+        if (stack[k].name === closing) {
+          stack.length = k
+          break
+        }
+      }
+      continue
+    }
+    if (!m[2]) continue
+    const tagName = localName(m[2])
+    const attrs = parseAttrs(m[3] || '')
+    const parentM = stack.length ? stack[stack.length - 1].m : IDENT
+    let own: Mat = IDENT
+    if ((tagName === 'svg' && sawRoot) || tagName === 'use')
+      own = [1, 0, 0, 1, num(attrs.x), num(attrs.y)]
+    if (tagName === 'svg') sawRoot = true
+    const selfClosing = m[4] === '/'
+
+    if (attrs.id && pinNameFromId(attrs.id) === name) {
+      // root → parent space: invert the linear part of the ancestors' matrix
+      const [a, b, c, d] = parentM
+      const det = a * d - b * c
+      if (!det) return null
+      const lx = (d * du - c * dv) / det
+      const ly = (-b * du + a * dv) / det
+      let tag = m[0]
+      if (tagName === 'circle' || tagName === 'ellipse') {
+        tag = setAttr(tag, 'cx', fmt(num(attrs.cx) + lx))
+        tag = setAttr(tag, 'cy', fmt(num(attrs.cy) + ly))
+      } else if (
+        tagName === 'rect' ||
+        tagName === 'use' ||
+        tagName === 'image' ||
+        tagName === 'text' ||
+        tagName === 'foreignobject'
+      ) {
+        tag = setAttr(tag, 'x', fmt(num(attrs.x) + lx))
+        tag = setAttr(tag, 'y', fmt(num(attrs.y) + ly))
+      } else {
+        const t = `translate(${fmt(lx)} ${fmt(ly)})`
+        tag = setAttr(tag, 'transform', attrs.transform ? `${t} ${attrs.transform}` : t)
+      }
+      const out = svg.slice(0, m.index) + tag + svg.slice(m.index + m[0].length)
+      const after = scanPins(out, w, h).pins.find((p) => p.name === name)
+      if (!after) return null
+      const want: [number, number] = [before.at[0] + dx, before.at[1] + dy]
+      if (Math.abs(after.at[0] - want[0]) > 0.02 || Math.abs(after.at[1] - want[1]) > 0.02)
+        return null
+      return { svg: out, at: after.at }
+    }
+
+    const cur = matMul(matMul(parentM, own), parseTransform(attrs.transform))
+    if (!selfClosing) stack.push({ name: tagName, m: cur })
+  }
+  return null
+}
+
 // ── preparing art for inlining ───────────────────────────────────────────────
 
 /**

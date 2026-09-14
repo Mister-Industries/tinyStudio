@@ -18,12 +18,26 @@
  *
  * Both views are editable via the toggle — each keeps its own art, size and pin
  * positions (pin NAMES are the cross-view join key, so keep them consistent).
+ *
+ * Arrow keys nudge the selected pin by one unit of the art's own coordinates
+ * (Shift: 0.1 in). While the pins come from `pin-*` shapes, a nudge moves the
+ * shape in the SVG itself, so the file stays the source of truth; only a drag
+ * pins the positions down in part.json. Ctrl+Z / Ctrl+Y undo and redo every
+ * pin, size and art change.
  */
 
 import { FolderOpen, Plus, RotateCcw, Trash2, UploadCloud, X } from 'lucide-react'
 import React from 'react'
 import type { PartDef, PartSource, PartView, ViewKind } from '../lib/partsLibrary'
-import { artPrefix, namespaceSvg, prepareArt, readSvgRoot, scanPins } from '../circuit/parts/svgArt'
+import { GRID_BB } from '../circuit/core/model'
+import {
+  artPrefix,
+  movePinInArt,
+  namespaceSvg,
+  prepareArt,
+  readSvgRoot,
+  scanPins
+} from '../circuit/parts/svgArt'
 import { sanitizeSvg } from '../lib/sanitizeSvg'
 
 const slug = (s: string): string =>
@@ -167,6 +181,42 @@ export function PartsEditor({
   const setBuf = editView === 'breadboard' ? setBb : setSch
   const { svg, w, h, pins } = buf
 
+  // Undo history: whole-editor snapshots taken before each change (a drag
+  // records once, at pointer-down). Kept in a ref so recording never re-renders.
+  interface Snap {
+    bb: ViewBuf
+    sch: ViewBuf
+    editView: ViewKind
+    sel: number
+  }
+  const history = React.useRef<{ past: Snap[]; future: Snap[] }>({ past: [], future: [] })
+  const record = (): void => {
+    const h = history.current
+    h.past.push({ bb, sch, editView, sel })
+    if (h.past.length > 100) h.past.shift()
+    h.future = []
+  }
+  const restore = (s: Snap): void => {
+    setBb(s.bb)
+    setSch(s.sch)
+    setEditView(s.editView)
+    setSel(s.sel)
+  }
+  const undo = (): void => {
+    const h = history.current
+    const s = h.past.pop()
+    if (!s) return
+    h.future.push({ bb, sch, editView, sel })
+    restore(s)
+  }
+  const redo = (): void => {
+    const h = history.current
+    const s = h.future.pop()
+    if (!s) return
+    h.past.push({ bb, sch, editView, sel })
+    restore(s)
+  }
+
   // any hand change to pins pins them down in part.json from then on
   const setPins = (fn: (ps: Pin[]) => Pin[]): void =>
     setBuf((b) => ({ ...b, pins: fn(b.pins), pinsEdited: true }))
@@ -198,6 +248,7 @@ export function PartsEditor({
   const onSurfaceClick = (e: React.MouseEvent): void => {
     if ((e.target as HTMLElement).closest('.editor-pin')) return
     const p = surfacePoint(e)
+    record()
     setPins((ps) => [...ps, { name: uniqueName(String(ps.length + 1)), x: p.x, y: p.y }])
     setSel(pins.length)
   }
@@ -205,6 +256,7 @@ export function PartsEditor({
   const onPinDown = (e: React.PointerEvent, i: number): void => {
     e.stopPropagation()
     setSel(i)
+    record()
     dragRef.current = i
     const move = (ev: PointerEvent): void => {
       const p = surfacePoint(ev)
@@ -242,6 +294,7 @@ export function PartsEditor({
       const nw = Math.round((root.widthPx ?? root.vb[2]) * 100) / 100
       const nh = Math.round((root.heightPx ?? root.vb[3]) * 100) / 100
       const artPins = pinsFromArt(raw, nw, nh)
+      record()
       setBuf((b) => ({
         ...b,
         raw,
@@ -257,7 +310,8 @@ export function PartsEditor({
     reader.readAsText(file)
   }
 
-  const resize = (nw: number, nh: number): void =>
+  const resize = (nw: number, nh: number): void => {
+    record()
     setBuf((b) => {
       const isBlank = !b.artChanged && !initial?.views[editView]
       const raw = isBlank ? blankSvg(nw, nh) : b.raw
@@ -271,14 +325,68 @@ export function PartsEditor({
         ...(artPins ? { pins: artPins } : {})
       }
     })
+  }
 
-  // arrow keys nudge the selected pin (Shift = ×10)
+  // One unit of the art's own coordinates, in part-box px: the viewBox is
+  // fitted into the box uniformly, the way the canvas draws it.
+  const artUnitPx = (): number => {
+    if (!buf.raw) return 1
+    const [, , vw, vh] = readSvgRoot(buf.raw).vb
+    return Math.min(w / vw, h / vh)
+  }
+
+  /** Move the selected pin by (dx, dy) px — through the art when it owns the pins. */
+  const nudge = (dx: number, dy: number): void => {
+    const pin = pins[sel]
+    if (!pin) return
+    record()
+    if (buf.fromSvg && !buf.pinsEdited && buf.raw) {
+      const moved = movePinInArt(buf.raw, pin.name, dx, dy, w, h)
+      if (moved) {
+        const kind = editView
+        setBuf((b) => ({
+          ...b,
+          raw: moved.svg,
+          svg: previewOf(moved.svg, kind),
+          artChanged: true,
+          pins: b.pins.map((p, i) => (i === sel ? { ...p, x: moved.at[0], y: moved.at[1] } : p))
+        }))
+        return
+      }
+    }
+    const r2 = (n: number): number => Math.round(n * 100) / 100
+    setPins((ps) =>
+      ps.map((p, i) =>
+        i === sel
+          ? {
+              ...p,
+              x: r2(Math.max(0, Math.min(w, p.x + dx))),
+              y: r2(Math.max(0, Math.min(h, p.y + dy)))
+            }
+          : p
+      )
+    )
+  }
+
+  // Keyboard: arrows nudge the selected pin one art unit (Shift: 0.1 in);
+  // Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z) undo and redo.
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
-      if (sel < 0) return
       if (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))
         return
-      const step = e.shiftKey ? 10 : 1
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault()
+        if (e.shiftKey) redo()
+        else undo()
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault()
+        redo()
+        return
+      }
+      if (sel < 0) return
+      const step = e.shiftKey ? GRID_BB : artUnitPx()
       const d: Record<string, [number, number]> = {
         ArrowLeft: [-step, 0],
         ArrowRight: [step, 0],
@@ -287,19 +395,12 @@ export function PartsEditor({
       }
       if (!d[e.key]) return
       e.preventDefault()
-      const [dx, dy] = d[e.key]
-      setPins((ps) =>
-        ps.map((p, i) =>
-          i === sel
-            ? { ...p, x: Math.max(0, Math.min(w, p.x + dx)), y: Math.max(0, Math.min(h, p.y + dy)) }
-            : p
-        )
-      )
+      nudge(d[e.key][0], d[e.key][1])
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sel, w, h, editView])
+  }, [sel, editView, bb, sch])
 
   const toMap = (ps: Pin[]): Record<string, [number, number]> => {
     const m: Record<string, [number, number]> = {}
@@ -556,6 +657,7 @@ export function PartsEditor({
                   className="text-text-muted hover:text-brand"
                   title="Add pin at centre"
                   onClick={() => {
+                    record()
                     setPins((ps) => [
                       ...ps,
                       {
@@ -581,6 +683,7 @@ export function PartsEditor({
                     <input
                       className="flex-1 min-w-0 bg-transparent text-sm text-text-strong outline-none"
                       value={pin.name}
+                      onFocus={record}
                       onChange={(e) => {
                         const v = e.target.value
                         setPins((ps) => ps.map((p, idx) => (idx === i ? { ...p, name: v } : p)))
@@ -594,12 +697,13 @@ export function PartsEditor({
                       }}
                     />
                     <span className="text-[10px] text-text-faint">
-                      {pin.x},{pin.y}
+                      {Math.round(pin.x * 100) / 100},{Math.round(pin.y * 100) / 100}
                     </span>
                     <button
                       className="text-text-faint hover:text-status-error"
                       onClick={(e) => {
                         e.stopPropagation()
+                        record()
                         setPins((ps) => ps.filter((_, idx) => idx !== i))
                         setSel(-1)
                       }}
@@ -608,9 +712,13 @@ export function PartsEditor({
                     </button>
                   </div>
                 ))}
-                {pins.length === 0 && (
+                {pins.length === 0 ? (
                   <div className="text-[11px] text-text-faint py-2">
                     Click the preview to drop pins for the {editView} view.
+                  </div>
+                ) : (
+                  <div className="text-[10px] leading-snug text-text-faint py-1">
+                    Arrow keys nudge the selected pin one art unit; Shift for 0.1 in. Ctrl+Z undoes.
                   </div>
                 )}
               </div>
