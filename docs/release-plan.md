@@ -10,10 +10,12 @@ brackets (BUG-4, GAP-2) are the audit's, kept so work can be traced back.
 locally and not pushed (`git log origin/v0.4-dev..HEAD`). Typecheck passes, lint
 has 0 errors, 277 tests pass, the web build succeeds.
 
-**Progress (2026-09-14).** Steps 1–5, 7a, 7c, 8, 9, 10, 11 and 12 are committed.
-Waiting on the owner: step 6 (client id), 7b (decisions on the parts worksheet),
-7d (the symbol editor mock). Blocker 2 is settled (the art was right; two boards'
-pins were snapped back onto the grid in tinyparts) and blocker 5 is done.
+**Progress (2026-09-14).** Steps 1–6, 7a, 7c, 7d, 8, 9, 10, 11 and 12 are
+committed. Waiting on the owner: 7b (decisions on the parts worksheet), and the
+publishing of tinyService 1.2.0 (the code here already targets it; run
+`npm install` afterwards so `package-lock.json` catches up). Blocker 2 is
+settled (the art was right; two boards' pins were snapped back onto the grid in
+tinyparts) and blocker 5 is done.
 
 **Rules from the owner**
 
@@ -39,9 +41,10 @@ pins were snapped back onto the grid in tinyparts) and blocker 5 is done.
 These block specific steps below. Raise them early.
 
 1. **tinyService release** [SEC-4]. tinyService 1.1.0 ignores `allowedOrigins`
-   and listens on every interface. It needs to bind `127.0.0.1` and check the
-   `Origin` header. After that release: bump the dependency and remove the Known
-   issue from `README.md` and `CHANGELOG.md`.
+   and listens on every interface. 1.2.0 binds `127.0.0.1` and checks the
+   `Origin` header; it is on tinyService's `release/1.2.0` branch and, on
+   2026-09-14, not yet on npm. tinyStudio already depends on `^1.2.0`; the owner
+   publishes, then runs `npm install` here to update the lockfile.
 2. **tinyparts art vs tests.** The local tinyparts commit `94dd94e` has newer
    tinyBoards art that fails 5 circuit tests (stack connector, 25-pin positions,
    0.1 in pitch, symmetry 182.66 vs 182.4, sync). Until the owner says whether the
