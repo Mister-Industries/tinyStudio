@@ -7,8 +7,9 @@
  *
  * Every pack whose index.json row says `"bundled": true` is copied to
  * src/renderer/src/assets/tinyparts/packs/<id>/ — just pack.json, each part's
- * part.json, and the art files those reference (stray .ai files, READMEs and
- * the like stay behind) — and snapshot.gen.ts is regenerated to index them.
+ * part.json, the art files those reference and the pack's ATTRIBUTION.md
+ * (stray .ai files, READMEs and the like stay behind) — and snapshot.gen.ts is
+ * regenerated to index them.
  *
  * Each copied file is recorded with its git blob sha. At launch the app asks
  * GitHub for the current tree and only downloads files whose sha differs, so
@@ -140,6 +141,15 @@ for (const row of bundled) {
     bytes += buf.length
     shas[rel] = sha
     ;(isEager(rel, packDir) ? eager : lazy).push(posix('packs', row.id, rel))
+  }
+  // The licence notice ships with the art (Fritzing-derived packs are CC-BY-SA),
+  // but stays out of the hash map: the launch-time update check compares only
+  // the files a pack loads, so listing it would make the pack look changed.
+  const attribution = join(packDir, 'ATTRIBUTION.md')
+  if (existsSync(attribution)) {
+    const dest = join(OUT, 'packs', row.id, 'ATTRIBUTION.md')
+    mkdirSync(dirname(dest), { recursive: true })
+    writeFileSync(dest, blob(attribution).buf)
   }
   snapshotPacks.push({ id: pack.id, files: shas })
   console.log(
