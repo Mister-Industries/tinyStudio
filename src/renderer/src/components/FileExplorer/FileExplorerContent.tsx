@@ -135,7 +135,6 @@ export function FileExplorerContent(): React.JSX.Element {
           </div>
         ) : (
           // File tree display
-          // TODO map through the open files
           <div className="px-2 py-1">
             {workspace.root.map((item) => (
               <FileTreeItem key={item.id} item={item} />

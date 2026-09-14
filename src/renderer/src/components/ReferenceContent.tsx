@@ -6,7 +6,7 @@ export function ReadmeContent(): React.JSX.Element {
   const readmeContent = useAppSelector((state) => state.file.readmeContent)
   if (readmeContent === null || readmeContent === '' || readmeContent === undefined) {
     return (
-      <div className="h-full w-full flex flex-col items-center justify-center gap-3 text-center text-fg-3 px-6">
+      <div className="h-full w-full flex flex-col items-center justify-center gap-3 text-center text-[var(--text-muted)] px-6">
         <Folder size={40} className="opacity-40" />
         <p className="text-sm">Open a project to view its documentation</p>
       </div>

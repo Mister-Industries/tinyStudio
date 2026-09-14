@@ -122,14 +122,14 @@ export function AIAssistant(): React.JSX.Element {
   return (
     <div className="h-full flex flex-col">
       {/* Slim toolbar */}
-      <div className="flex items-center gap-1 px-3 py-1.5 border-b border-navy-600 text-xs text-fg-3">
-        <Sparkles size={13} className="text-pink" />
-        <span className="font-medium text-fg-2">Claude Opus 4.8</span>
+      <div className="flex items-center gap-1 px-3 py-1.5 border-b border-[var(--border-default)] text-xs text-[var(--text-muted)]">
+        <Sparkles size={13} className="text-[var(--brand)]" />
+        <span className="font-medium text-[var(--text-body)]">Claude Opus 4.8</span>
         <div className="flex-1" />
         <Button
           variant="ghost"
           size="icon"
-          className="size-7 text-fg-3 hover:text-fg-1"
+          className="size-7 text-[var(--text-muted)] hover:text-[var(--text-strong)]"
           title="New chat"
           onClick={startNewChat}
         >
@@ -138,7 +138,7 @@ export function AIAssistant(): React.JSX.Element {
         <Button
           variant="ghost"
           size="icon"
-          className="size-7 text-fg-3 hover:text-fg-1"
+          className="size-7 text-[var(--text-muted)] hover:text-[var(--text-strong)]"
           title="AI settings"
           onClick={() => setShowSettings(true)}
         >
@@ -152,25 +152,26 @@ export function AIAssistant(): React.JSX.Element {
           {keyConfigured === false && (
             <button
               onClick={() => setShowSettings(true)}
-              className="self-start flex items-center gap-2 rounded-lg border border-pink/40 bg-navy-600 px-3 py-2 text-xs text-fg-2 hover:border-pink"
+              className="self-start flex items-center gap-2 rounded-lg border border-[var(--brand)]/40 bg-[var(--border-default)] px-3 py-2 text-xs text-[var(--text-body)] hover:border-[var(--brand)]"
             >
-              <KeyRound size={14} className="text-pink" /> Add your Anthropic API key to get started
+              <KeyRound size={14} className="text-[var(--brand)]" /> Add your Anthropic API key to
+              get started
             </button>
           )}
           {items.map((it, i) => (
             <TimelineRow key={i} item={it} />
           ))}
           {busy && (
-            <div className="self-start flex items-center gap-2 text-fg-3 text-xs px-2">
-              <Loader2 size={14} className="text-pink animate-spin" /> Working…
+            <div className="self-start flex items-center gap-2 text-[var(--text-muted)] text-xs px-2">
+              <Loader2 size={14} className="text-[var(--brand)] animate-spin" /> Working…
             </div>
           )}
         </div>
       </ScrollArea>
 
-      <div className="w-full border-t border-navy-600 p-3 flex gap-2">
+      <div className="w-full border-t border-[var(--border-default)] p-3 flex gap-2">
         <input
-          className="flex-1 bg-navy-900 border border-navy-400 rounded-lg px-3 py-2 text-sm text-fg-1 placeholder:text-fg-4 outline-none focus:border-cyan"
+          className="flex-1 bg-[var(--bg-raised)] border border-[var(--border-default)] rounded-lg px-3 py-2 text-sm text-[var(--text-strong)] placeholder:text-[var(--text-faint)] outline-none focus:border-[var(--brand)]"
           placeholder={
             workspace
               ? 'Ask Studio AI to edit your project…'
@@ -182,7 +183,7 @@ export function AIAssistant(): React.JSX.Element {
         />
         {busy ? (
           <button
-            className="px-3 rounded-lg bg-navy-500 text-fg-1"
+            className="px-3 rounded-lg bg-[var(--bg-sunken)] text-[var(--text-strong)]"
             onClick={stopAgent}
             title="Stop"
           >
@@ -222,13 +223,13 @@ function TimelineRow({ item }: { item: TimelineItem }): React.JSX.Element {
     )
   // tool chip
   return (
-    <div className="self-start flex items-center gap-2 rounded-full border border-navy-400 bg-navy-700 px-3 py-1 text-xs text-fg-3">
+    <div className="self-start flex items-center gap-2 rounded-full border border-[var(--border-default)] bg-[var(--bg-raised)] px-3 py-1 text-xs text-[var(--text-muted)]">
       {item.running ? (
-        <Loader2 size={13} className="animate-spin text-cyan" />
+        <Loader2 size={13} className="animate-spin text-[var(--brand)]" />
       ) : (
         (TOOL_ICON[item.name] ?? <Folder size={13} />)
       )}
-      <span className={item.ok ? 'text-fg-2' : 'text-red-300'}>
+      <span className={item.ok ? 'text-[var(--text-body)]' : 'text-red-300'}>
         {item.running ? `${item.name}…` : item.summary || item.name}
       </span>
     </div>

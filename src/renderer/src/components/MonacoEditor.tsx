@@ -92,7 +92,7 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
       return detach
     }, [selectedBoard?.config.fqbn, isAgentConnected, activeFile.path, editorReady])
 
-    function handleBeforeMount(monaco): void {
+    function handleBeforeMount(monaco: Monaco): void {
       // Design-system surfaces (cold charcoal dark / near-white light) with the
       // existing tinyForge syntax hues kept on dark; light uses deeper variants
       // of the same hues for contrast on a pale background.

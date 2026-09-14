@@ -97,7 +97,7 @@ function MermaidDiagram({ chart }: { chart: string }): React.JSX.Element {
 
   if (error) {
     return (
-      <pre className="bg-navy-1000 border border-red-500/50 text-red-300 p-3 rounded-lg overflow-x-auto text-xs mb-4 whitespace-pre-wrap">
+      <pre className="bg-[var(--bg-sunken)] border border-red-500/50 text-red-300 p-3 rounded-lg overflow-x-auto text-xs mb-4 whitespace-pre-wrap">
         {chart}
       </pre>
     )
@@ -139,7 +139,9 @@ const components: Components = {
   p: ({ children, className, ...props }) => (
     <p
       {...props}
-      className={[className, 'mb-3 text-sm text-fg-2 leading-relaxed'].filter(Boolean).join(' ')}
+      className={[className, 'mb-3 text-sm text-[var(--text-body)] leading-relaxed']
+        .filter(Boolean)
+        .join(' ')}
     >
       {children}
     </p>
@@ -165,24 +167,33 @@ const components: Components = {
     </ol>
   ),
   li: ({ children, className, ...props }) => (
-    <li {...props} className={[className, 'text-fg-2'].filter(Boolean).join(' ')}>
+    <li {...props} className={[className, 'text-[var(--text-body)]'].filter(Boolean).join(' ')}>
       {children}
     </li>
   ),
   strong: ({ children, className, ...props }) => (
-    <strong {...props} className={[className, 'font-bold text-fg-1'].filter(Boolean).join(' ')}>
+    <strong
+      {...props}
+      className={[className, 'font-bold text-[var(--text-strong)]'].filter(Boolean).join(' ')}
+    >
       {children}
     </strong>
   ),
   em: ({ children, className, ...props }) => (
-    <em {...props} className={[className, 'italic text-fg-2'].filter(Boolean).join(' ')}>
+    <em
+      {...props}
+      className={[className, 'italic text-[var(--text-body)]'].filter(Boolean).join(' ')}
+    >
       {children}
     </em>
   ),
   code: ({ children, className, ...props }) => (
     <code
       {...props}
-      className={[className, 'bg-navy-900 px-1.5 py-0.5 rounded text-sm font-mono text-pink']
+      className={[
+        className,
+        'bg-[var(--bg-raised)] px-1.5 py-0.5 rounded text-sm font-mono text-[var(--brand)]'
+      ]
         .filter(Boolean)
         .join(' ')}
     >
@@ -197,7 +208,7 @@ const components: Components = {
         {...props}
         className={[
           className,
-          'bg-navy-1000 border border-navy-600 p-3 rounded-lg overflow-x-auto max-w-full text-xs mb-4 [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-fg-2'
+          'bg-[var(--bg-sunken)] border border-[var(--border-default)] p-3 rounded-lg overflow-x-auto max-w-full text-xs mb-4 [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-[var(--text-body)]'
         ]
           .filter(Boolean)
           .join(' ')}
@@ -209,7 +220,10 @@ const components: Components = {
   blockquote: ({ children, className, ...props }) => (
     <blockquote
       {...props}
-      className={[className, 'border-l-4 border-cyan pl-4 italic text-fg-3 my-4']
+      className={[
+        className,
+        'border-l-4 border-[var(--brand)] pl-4 italic text-[var(--text-muted)] my-4'
+      ]
         .filter(Boolean)
         .join(' ')}
     >
@@ -229,7 +243,7 @@ const components: Components = {
         target={external ? '_blank' : undefined}
         rel={external ? 'noopener noreferrer' : undefined}
         onClick={external || inPage ? undefined : (e) => e.preventDefault()}
-        className={[className, 'text-cyan hover:text-cyan-bright underline']
+        className={[className, 'text-[var(--brand)] hover:text-[var(--brand)] underline']
           .filter(Boolean)
           .join(' ')}
       >
@@ -238,7 +252,10 @@ const components: Components = {
     )
   },
   hr: ({ className, ...props }) => (
-    <hr {...props} className={[className, 'border-navy-600 my-4'].filter(Boolean).join(' ')} />
+    <hr
+      {...props}
+      className={[className, 'border-[var(--border-default)] my-4'].filter(Boolean).join(' ')}
+    />
   ),
   table: ({ children, className, ...props }) => (
     <div className="overflow-x-auto mb-4">
@@ -255,7 +272,7 @@ const components: Components = {
       {...props}
       className={[
         className,
-        'border border-navy-600 px-3 py-1.5 text-left font-semibold text-fg-1 bg-navy-900'
+        'border border-[var(--border-default)] px-3 py-1.5 text-left font-semibold text-[var(--text-strong)] bg-[var(--bg-raised)]'
       ]
         .filter(Boolean)
         .join(' ')}
@@ -266,7 +283,10 @@ const components: Components = {
   td: ({ children, className, ...props }) => (
     <td
       {...props}
-      className={[className, 'border border-navy-600 px-3 py-1.5 text-fg-2']
+      className={[
+        className,
+        'border border-[var(--border-default)] px-3 py-1.5 text-[var(--text-body)]'
+      ]
         .filter(Boolean)
         .join(' ')}
     >

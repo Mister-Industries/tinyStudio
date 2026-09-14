@@ -57,7 +57,7 @@ function FileTabTrigger({ className, file, onFileClose, ...props }: FileTabTrigg
     >
       <span>{file.name}</span>
       {file.modified && (
-        <span className="w-2 h-2 bg-signal-warning rounded-full" title="Unsaved changes" />
+        <span className="w-2 h-2 bg-[var(--status-warn)] rounded-full" title="Unsaved changes" />
       )}
       <div
         className="size-4 p-0 rounded hover:bg-muted-foreground/20 flex items-center justify-center cursor-pointer"

@@ -52,7 +52,7 @@ import { notify as toast } from '@renderer/lib/notify'
 const PILL =
   'h-[30px] flex items-center gap-[7px] px-2.5 rounded-[var(--radius-sm)] bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] text-[13px] font-semibold text-[var(--text-strong)] hover:border-[var(--border-interactive)] transition-colors outline-none disabled:opacity-50'
 
-const SECTION_LABEL = 'text-[11px] font-semibold tracking-wider text-fg-3 mb-2'
+const SECTION_LABEL = 'text-[11px] font-semibold tracking-wider text-[var(--text-muted)] mb-2'
 
 // Sentinel dropdown values: "no boards" placeholder and "open the manager".
 const NO_BOARDS = '__none__'
@@ -271,15 +271,15 @@ export function BoardManager(): React.JSX.Element {
             <>
               {selectedBoard.config.name}
               {selectedBoard.config.architecture && (
-                <span className="text-[11px] font-medium text-fg-3">
+                <span className="text-[11px] font-medium text-[var(--text-muted)]">
                   {selectedBoard.config.architecture}
                 </span>
               )}
             </>
           ) : (
-            <span className="text-fg-3 font-medium">Select board</span>
+            <span className="text-[var(--text-muted)] font-medium">Select board</span>
           )}
-          <ChevronDown size={14} className="text-fg-4" />
+          <ChevronDown size={14} className="text-[var(--text-faint)]" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
@@ -315,7 +315,7 @@ export function BoardManager(): React.JSX.Element {
           </DialogHeader>
 
           {!isAgentConnected ? (
-            <div className="py-8 text-center text-signal-warning text-sm">
+            <div className="py-8 text-center text-[var(--status-warn)] text-sm">
               Arduino service not connected.
             </div>
           ) : (
@@ -327,7 +327,7 @@ export function BoardManager(): React.JSX.Element {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 rounded-lg text-xs text-fg-3"
+                    className="h-7 rounded-lg text-xs text-[var(--text-muted)]"
                     disabled={isLoadingBoards}
                     onClick={() => refreshBoards()}
                   >
@@ -336,7 +336,7 @@ export function BoardManager(): React.JSX.Element {
                   </Button>
                 </div>
                 {boards.length === 0 ? (
-                  <div className="text-xs text-fg-4 py-2">
+                  <div className="text-xs text-[var(--text-faint)] py-2">
                     No boards detected — plug a board in via USB and press Rescan.
                   </div>
                 ) : (
@@ -350,20 +350,22 @@ export function BoardManager(): React.JSX.Element {
                           key={`${b.port}:${b.config.fqbn}`}
                           className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                         >
-                          <Usb size={15} className="text-fg-4 shrink-0" />
+                          <Usb size={15} className="text-[var(--text-faint)] shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm text-fg-1 truncate">
+                            <div className="text-sm text-[var(--text-strong)] truncate">
                               {b.config.name || 'Unknown board'}{' '}
-                              <span className="text-[11px] font-mono text-fg-4">{b.port}</span>
+                              <span className="text-[11px] font-mono text-[var(--text-faint)]">
+                                {b.port}
+                              </span>
                             </div>
                             {b.config.fqbn && (
-                              <div className="text-xs text-fg-3 truncate font-mono">
+                              <div className="text-xs text-[var(--text-muted)] truncate font-mono">
                                 {b.config.fqbn}
                               </div>
                             )}
                           </div>
                           {active ? (
-                            <span className="flex items-center gap-1 text-xs text-signal-success shrink-0">
+                            <span className="flex items-center gap-1 text-xs text-[var(--status-ok)] shrink-0">
                               <Check size={15} /> Active
                             </span>
                           ) : (
@@ -386,7 +388,7 @@ export function BoardManager(): React.JSX.Element {
               {/* Manual board-type override */}
               <div className="flex flex-col">
                 <button
-                  className="flex items-center gap-1.5 text-fg-3 hover:text-fg-1 mb-2"
+                  className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-strong)] mb-2"
                   onClick={() => setShowOverride((v) => !v)}
                 >
                   <ChevronDown
@@ -408,10 +410,12 @@ export function BoardManager(): React.JSX.Element {
                         key={c.fqbn}
                         data-active={active}
                         onClick={() => selectBoardConfig(c)}
-                        className="px-2.5 py-1 rounded-full text-xs bg-navy-900 border border-navy-400 text-fg-1 hover:bg-[var(--bg-sunken)] transition-colors data-[active=true]:border-cyan data-[active=true]:text-cyan"
+                        className="px-2.5 py-1 rounded-full text-xs bg-[var(--bg-raised)] border border-[var(--border-default)] text-[var(--text-strong)] hover:bg-[var(--bg-sunken)] transition-colors data-[active=true]:border-[var(--brand)] data-[active=true]:text-[var(--brand)]"
                       >
                         {c.name}
-                        {c.architecture && <span className="text-fg-4 ml-1">{c.architecture}</span>}
+                        {c.architecture && (
+                          <span className="text-[var(--text-faint)] ml-1">{c.architecture}</span>
+                        )}
                       </button>
                     )
                   })}
@@ -420,9 +424,9 @@ export function BoardManager(): React.JSX.Element {
                 {showOverride && (
                   <>
                     <div className="flex items-center gap-2 bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] rounded-[var(--radius-sm)] px-3 mb-2">
-                      <Search size={15} className="text-fg-4" />
+                      <Search size={15} className="text-[var(--text-faint)]" />
                       <input
-                        className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-fg-1 placeholder:text-fg-4"
+                        className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-[var(--text-strong)] placeholder:text-[var(--text-faint)]"
                         placeholder="Filter boards — e.g. Uno, ESP32-S3…"
                         value={boardFilter}
                         onChange={(e) => setBoardFilter(e.target.value)}
@@ -436,13 +440,17 @@ export function BoardManager(): React.JSX.Element {
                             key={b.fqbn}
                             className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                           >
-                            <Cpu size={15} className="text-fg-4 shrink-0" />
+                            <Cpu size={15} className="text-[var(--text-faint)] shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm text-fg-1 truncate">{b.name}</div>
-                              <div className="text-xs text-fg-4 truncate font-mono">{b.fqbn}</div>
+                              <div className="text-sm text-[var(--text-strong)] truncate">
+                                {b.name}
+                              </div>
+                              <div className="text-xs text-[var(--text-faint)] truncate font-mono">
+                                {b.fqbn}
+                              </div>
                             </div>
                             {active ? (
-                              <Check size={16} className="text-signal-success shrink-0" />
+                              <Check size={16} className="text-[var(--status-ok)] shrink-0" />
                             ) : (
                               <Button
                                 variant="ghost"
@@ -457,14 +465,14 @@ export function BoardManager(): React.JSX.Element {
                         )
                       })}
                       {filteredBoards.length === 0 && (
-                        <div className="text-xs text-fg-4 py-2">
+                        <div className="text-xs text-[var(--text-faint)] py-2">
                           {allBoards.length === 0
                             ? 'No boards available — install a platform below.'
                             : 'No boards match your filter.'}
                         </div>
                       )}
                       {filteredBoards.length > 60 && (
-                        <div className="text-[11px] text-fg-4 py-1">
+                        <div className="text-[11px] text-[var(--text-faint)] py-1">
                           Showing 60 of {filteredBoards.length} — refine the filter to see more.
                         </div>
                       )}
@@ -480,9 +488,9 @@ export function BoardManager(): React.JSX.Element {
                 <div className={SECTION_LABEL}>INSTALL BOARD PACKAGES</div>
                 <div className="flex gap-2 mb-3">
                   <div className="flex-1 flex items-center gap-2 bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] rounded-[var(--radius-sm)] px-3">
-                    <Search size={15} className="text-fg-4" />
+                    <Search size={15} className="text-[var(--text-faint)]" />
                     <input
-                      className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-fg-1 placeholder:text-fg-4"
+                      className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-[var(--text-strong)] placeholder:text-[var(--text-faint)]"
                       placeholder="Search platforms — e.g. esp32, rp2040, avr…"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
@@ -507,23 +515,29 @@ export function BoardManager(): React.JSX.Element {
                     <div className={SECTION_LABEL}>SEARCH RESULTS</div>
                     <div className="max-h-[28vh] overflow-y-auto flex flex-col gap-1 pr-1">
                       {results.length === 0 && !searching ? (
-                        <div className="text-xs text-fg-4 py-2">No platforms found.</div>
+                        <div className="text-xs text-[var(--text-faint)] py-2">
+                          No platforms found.
+                        </div>
                       ) : (
                         results.map((p) => (
                           <div
                             key={p.id}
                             className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                           >
-                            <CircuitBoard size={15} className="text-fg-4 shrink-0" />
+                            <CircuitBoard size={15} className="text-[var(--text-faint)] shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm text-fg-1 truncate">
+                              <div className="text-sm text-[var(--text-strong)] truncate">
                                 {p.name}{' '}
-                                <span className="text-[11px] font-mono text-fg-4">{p.latest}</span>
+                                <span className="text-[11px] font-mono text-[var(--text-faint)]">
+                                  {p.latest}
+                                </span>
                               </div>
-                              <div className="text-xs text-fg-3 truncate font-mono">{p.id}</div>
+                              <div className="text-xs text-[var(--text-muted)] truncate font-mono">
+                                {p.id}
+                              </div>
                             </div>
                             {installedIds.has(p.id) ? (
-                              <Check size={16} className="text-signal-success shrink-0" />
+                              <Check size={16} className="text-[var(--status-ok)] shrink-0" />
                             ) : (
                               <Button
                                 variant="ghost"
@@ -554,23 +568,27 @@ export function BoardManager(): React.JSX.Element {
                       key={p.id}
                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                     >
-                      <CircuitBoard size={15} className="text-signal-success shrink-0" />
+                      <CircuitBoard size={15} className="text-[var(--status-ok)] shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm text-fg-1 truncate">
+                        <div className="text-sm text-[var(--text-strong)] truncate">
                           {p.name}{' '}
-                          <span className="text-[11px] font-mono text-fg-4">{p.installed}</span>
+                          <span className="text-[11px] font-mono text-[var(--text-faint)]">
+                            {p.installed}
+                          </span>
                           {p.latest && p.installed && p.latest !== p.installed && (
-                            <span className="text-[11px] text-signal-warning ml-1">
+                            <span className="text-[11px] text-[var(--status-warn)] ml-1">
                               → {p.latest}
                             </span>
                           )}
                         </div>
-                        <div className="text-xs text-fg-3 truncate font-mono">{p.id}</div>
+                        <div className="text-xs text-[var(--text-muted)] truncate font-mono">
+                          {p.id}
+                        </div>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-7 rounded-lg text-fg-3 hover:text-signal-error"
+                        className="size-7 rounded-lg text-[var(--text-muted)] hover:text-[var(--status-error)]"
                         disabled={busyCore !== null}
                         onClick={() => uninstall(p)}
                       >
@@ -583,7 +601,9 @@ export function BoardManager(): React.JSX.Element {
                     </div>
                   ))}
                   {installed.length === 0 && (
-                    <div className="text-xs text-fg-4 py-2">No platforms installed yet.</div>
+                    <div className="text-xs text-[var(--text-faint)] py-2">
+                      No platforms installed yet.
+                    </div>
                   )}
                 </div>
               </div>
@@ -595,9 +615,9 @@ export function BoardManager(): React.JSX.Element {
                 <div className={SECTION_LABEL}>ADDITIONAL BOARD URLS ({urls.length})</div>
                 <div className="flex gap-2 mb-2">
                   <div className="flex-1 flex items-center gap-2 bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] rounded-[var(--radius-sm)] px-3">
-                    <Link2 size={15} className="text-fg-4" />
+                    <Link2 size={15} className="text-[var(--text-faint)]" />
                     <input
-                      className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-fg-1 placeholder:text-fg-4"
+                      className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-[var(--text-strong)] placeholder:text-[var(--text-faint)]"
                       placeholder="https://…/package_…_index.json"
                       value={newUrl}
                       onChange={(e) => setNewUrl(e.target.value)}
@@ -622,14 +642,14 @@ export function BoardManager(): React.JSX.Element {
                       key={url}
                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                     >
-                      <Link2 size={14} className="text-fg-4 shrink-0" />
-                      <div className="flex-1 min-w-0 text-xs text-fg-3 truncate font-mono">
+                      <Link2 size={14} className="text-[var(--text-faint)] shrink-0" />
+                      <div className="flex-1 min-w-0 text-xs text-[var(--text-muted)] truncate font-mono">
                         {url}
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-7 rounded-lg text-fg-3 hover:text-signal-error"
+                        className="size-7 rounded-lg text-[var(--text-muted)] hover:text-[var(--status-error)]"
                         disabled={busyUrl !== null}
                         onClick={() => removeUrl(url)}
                       >
@@ -642,7 +662,7 @@ export function BoardManager(): React.JSX.Element {
                     </div>
                   ))}
                   {urls.length === 0 && (
-                    <div className="text-xs text-fg-4 py-2">
+                    <div className="text-xs text-[var(--text-faint)] py-2">
                       No extra URLs. Add one to install third-party boards.
                     </div>
                   )}

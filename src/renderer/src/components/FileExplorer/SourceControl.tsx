@@ -204,20 +204,20 @@ export function SourceControl(): React.JSX.Element {
   }
 
   const input =
-    'w-full bg-navy-900 border border-navy-400 rounded-lg px-3 py-2 text-sm text-fg-1 placeholder:text-fg-4 outline-none focus:border-cyan'
+    'w-full bg-[var(--bg-raised)] border border-[var(--border-default)] rounded-lg px-3 py-2 text-sm text-[var(--text-strong)] placeholder:text-[var(--text-faint)] outline-none focus:border-[var(--brand)]'
 
   return (
     <div className="h-full flex flex-col">
       {!workspace ? (
-        <div className="p-4 text-sm text-fg-4 text-center">
+        <div className="p-4 text-sm text-[var(--text-faint)] text-center">
           Open a project to use source control.
         </div>
       ) : !account ? (
         <div className="p-4 flex flex-col gap-3">
-          <div className="flex items-center gap-2 text-sm text-fg-2">
+          <div className="flex items-center gap-2 text-sm text-[var(--text-body)]">
             <Github size={16} /> Connect to GitHub
           </div>
-          <p className="text-xs text-fg-3">
+          <p className="text-xs text-[var(--text-muted)]">
             Sign in to link this project to a repository, push your changes, and publish to GitHub
             Pages.
           </p>
@@ -226,16 +226,16 @@ export function SourceControl(): React.JSX.Element {
       ) : (
         <div className="flex-1 flex flex-col min-h-0">
           {/* account */}
-          <div className="flex items-center gap-2 px-4 py-2 border-b border-navy-600">
+          <div className="flex items-center gap-2 px-4 py-2 border-b border-[var(--border-default)]">
             {account.avatarUrl && (
               <img src={account.avatarUrl} alt="" className="w-6 h-6 rounded-full" />
             )}
             <div className="flex-1 min-w-0">
-              <div className="text-xs text-fg-1 truncate">{account.name}</div>
-              <div className="text-[10px] text-fg-4 truncate">@{account.login}</div>
+              <div className="text-xs text-[var(--text-strong)] truncate">{account.name}</div>
+              <div className="text-[10px] text-[var(--text-faint)] truncate">@{account.login}</div>
             </div>
             <button
-              className="text-fg-4 hover:text-signal-error"
+              className="text-[var(--text-faint)] hover:text-[var(--status-error)]"
               title="Sign out"
               onClick={signOut}
             >
@@ -245,9 +245,9 @@ export function SourceControl(): React.JSX.Element {
 
           {!link ? (
             <div className="p-4 flex flex-col gap-3">
-              <div className="text-xs text-fg-3">
+              <div className="text-xs text-[var(--text-muted)]">
                 Link this project to a repository, or publish a new one. New repos are created{' '}
-                <span className="text-fg-2">public</span> so GitHub Pages works.
+                <span className="text-[var(--text-body)]">public</span> so GitHub Pages works.
               </div>
               <input
                 className={input}
@@ -281,27 +281,32 @@ export function SourceControl(): React.JSX.Element {
             </div>
           ) : (
             <>
-              <div className="px-4 py-2 border-b border-navy-600 flex items-center gap-2 text-xs">
-                <GitBranch size={13} className="text-cyan" />
-                <span className="text-fg-1 truncate flex-1">
+              <div className="px-4 py-2 border-b border-[var(--border-default)] flex items-center gap-2 text-xs">
+                <GitBranch size={13} className="text-[var(--brand)]" />
+                <span className="text-[var(--text-strong)] truncate flex-1">
                   {link.remote}
-                  {link.path ? <span className="text-fg-4">/{link.path}</span> : null}
+                  {link.path ? (
+                    <span className="text-[var(--text-faint)]">/{link.path}</span>
+                  ) : null}
                 </span>
-                <span className="font-mono text-fg-4">{link.branch}</span>
+                <span className="font-mono text-[var(--text-faint)]">{link.branch}</span>
               </div>
-              <div className="px-4 py-1 text-[11px] font-semibold tracking-wider text-fg-3">
+              <div className="px-4 py-1 text-[11px] font-semibold tracking-wider text-[var(--text-muted)]">
                 CHANGES ({changed.length})
               </div>
               <ScrollArea className="flex-1">
                 <div className="px-4 pb-3 flex flex-col gap-0.5">
                   {changed.length === 0 ? (
-                    <div className="text-xs text-fg-4 py-2">
+                    <div className="text-xs text-[var(--text-faint)] py-2">
                       Working tree matches the last sync.
                     </div>
                   ) : (
                     changed.map((p) => (
-                      <div key={p} className="flex items-center gap-2 text-xs text-fg-2 py-0.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-signal-warning shrink-0" />
+                      <div
+                        key={p}
+                        className="flex items-center gap-2 text-xs text-[var(--text-body)] py-0.5"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--status-warn)] shrink-0" />
                         <span className="truncate font-mono">{p}</span>
                       </div>
                     ))
@@ -309,10 +314,10 @@ export function SourceControl(): React.JSX.Element {
                 </div>
               </ScrollArea>
               {writable === false && (
-                <div className="px-4 py-2 text-[11px] text-fg-3 border-t border-navy-600">
+                <div className="px-4 py-2 text-[11px] text-[var(--text-muted)] border-t border-[var(--border-default)]">
                   You don&apos;t have write access to{' '}
-                  <span className="text-fg-2">{link.remote}</span>. Your edits are saved locally —
-                  publish a copy to keep them on GitHub.
+                  <span className="text-[var(--text-body)]">{link.remote}</span>. Your edits are
+                  saved locally — publish a copy to keep them on GitHub.
                 </div>
               )}
               <div className="px-4 py-2 flex gap-2">
@@ -348,7 +353,7 @@ export function SourceControl(): React.JSX.Element {
             </>
           )}
           {busy && busy.includes('·') && (
-            <div className="px-4 py-1.5 text-[11px] text-fg-3 border-t border-navy-600 truncate">
+            <div className="px-4 py-1.5 text-[11px] text-[var(--text-muted)] border-t border-[var(--border-default)] truncate">
               {busy}
             </div>
           )}

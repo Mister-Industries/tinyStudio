@@ -75,10 +75,17 @@ export function PortPicker(): React.JSX.Element {
           }
         }}
       >
-        <Usb size={14} className={disconnected ? 'text-fg-4' : 'text-fg-3'} />
-        {selectedBoard?.port || <span className="text-fg-3 font-medium">No port</span>}
-        {disconnected && <span className="text-[11px] font-medium text-fg-4">released</span>}
-        <ChevronDown size={14} className="text-fg-4" />
+        <Usb
+          size={14}
+          className={disconnected ? 'text-[var(--text-faint)]' : 'text-[var(--text-muted)]'}
+        />
+        {selectedBoard?.port || (
+          <span className="text-[var(--text-muted)] font-medium">No port</span>
+        )}
+        {disconnected && (
+          <span className="text-[11px] font-medium text-[var(--text-faint)]">released</span>
+        )}
+        <ChevronDown size={14} className="text-[var(--text-faint)]" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

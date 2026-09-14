@@ -133,12 +133,12 @@ export function LibraryManager(): React.JSX.Element {
             {/* Results */}
             {results !== null && (
               <div className="flex flex-col min-h-0">
-                <div className="text-[11px] font-semibold tracking-wider text-fg-3 mb-2">
+                <div className="text-[11px] font-semibold tracking-wider text-[var(--text-muted)] mb-2">
                   SEARCH RESULTS
                 </div>
                 <div className="max-h-[30vh] overflow-y-auto">
                   {results.length === 0 && !searching ? (
-                    <div className="text-xs text-fg-4 py-3">No libraries found.</div>
+                    <div className="text-xs text-[var(--text-faint)] py-3">No libraries found.</div>
                   ) : (
                     <div className="flex flex-col gap-1 pr-2">
                       {results.map((lib) => (
@@ -146,18 +146,20 @@ export function LibraryManager(): React.JSX.Element {
                           key={lib.name}
                           className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                         >
-                          <Package size={15} className="text-fg-4 shrink-0" />
+                          <Package size={15} className="text-[var(--text-faint)] shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm text-fg-1 truncate">
+                            <div className="text-sm text-[var(--text-strong)] truncate">
                               {lib.name}{' '}
-                              <span className="text-[11px] font-mono text-fg-4">{lib.version}</span>
+                              <span className="text-[11px] font-mono text-[var(--text-faint)]">
+                                {lib.version}
+                              </span>
                             </div>
-                            <div className="text-xs text-fg-3 truncate">
+                            <div className="text-xs text-[var(--text-muted)] truncate">
                               {lib.sentence || lib.author}
                             </div>
                           </div>
                           {installedNames.has(lib.name) ? (
-                            <Check size={16} className="text-signal-success shrink-0" />
+                            <Check size={16} className="text-[var(--status-ok)] shrink-0" />
                           ) : (
                             <Button
                               variant="ghost"
@@ -184,7 +186,7 @@ export function LibraryManager(): React.JSX.Element {
 
             {/* Installed */}
             <div className="flex flex-col min-h-0">
-              <div className="text-[11px] font-semibold tracking-wider text-fg-3 mb-2">
+              <div className="text-[11px] font-semibold tracking-wider text-[var(--text-muted)] mb-2">
                 INSTALLED ({installed.length})
               </div>
               <div className="max-h-[30vh] overflow-y-auto">
@@ -194,17 +196,19 @@ export function LibraryManager(): React.JSX.Element {
                       key={lib.name}
                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
                     >
-                      <Package size={15} className="text-signal-success shrink-0" />
+                      <Package size={15} className="text-[var(--status-ok)] shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm text-fg-1 truncate">
+                        <div className="text-sm text-[var(--text-strong)] truncate">
                           {lib.name}{' '}
-                          <span className="text-[11px] font-mono text-fg-4">{lib.version}</span>
+                          <span className="text-[11px] font-mono text-[var(--text-faint)]">
+                            {lib.version}
+                          </span>
                         </div>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-7 rounded-lg text-fg-3 hover:text-signal-error"
+                        className="size-7 rounded-lg text-[var(--text-muted)] hover:text-[var(--status-error)]"
                         disabled={busyLib !== null}
                         onClick={() => uninstall(lib.name)}
                       >
@@ -217,7 +221,9 @@ export function LibraryManager(): React.JSX.Element {
                     </div>
                   ))}
                   {installed.length === 0 && (
-                    <div className="text-xs text-fg-4 py-3">No libraries installed yet.</div>
+                    <div className="text-xs text-[var(--text-faint)] py-3">
+                      No libraries installed yet.
+                    </div>
                   )}
                 </div>
               </div>

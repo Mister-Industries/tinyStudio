@@ -65,10 +65,10 @@ export function StartScreen(): React.JSX.Element {
     <div className="size-full overflow-y-auto">
       <div className="min-h-full flex flex-col items-center justify-center gap-7 px-6 py-8">
         <div className="text-center">
-          <div className="text-fg-1 text-lg font-bold tracking-[-0.01em]">
+          <div className="text-[var(--text-strong)] text-lg font-bold tracking-[-0.01em]">
             What are we building today?
           </div>
-          <div className="text-fg-3 text-xs mt-1">
+          <div className="text-[var(--text-muted)] text-xs mt-1">
             Start fresh, pick up a project, or learn from an example.
           </div>
         </div>

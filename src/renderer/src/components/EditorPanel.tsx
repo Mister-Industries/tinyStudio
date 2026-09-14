@@ -225,7 +225,7 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
   const pixelSize = Math.round((size / 100) * (winHeight - 92))
 
   return (
-    <div className="flex flex-col bg-navy-900" style={{ height: `${pixelSize}px` }}>
+    <div className="flex flex-col bg-[var(--bg-raised)]" style={{ height: `${pixelSize}px` }}>
       {/* Project notices — above the view switch so they're visible from Code,
           Circuit and Visual alike. At most one shows: "only in your browser"
           first, then (once saved) the read-only example's "make it mine". */}
@@ -350,8 +350,10 @@ function CodeView(): React.JSX.Element {
   if (openFiles.length === 0) {
     return (
       <div className="size-full flex flex-col items-center justify-center gap-1 text-center">
-        <div className="text-fg-1 text-base font-semibold">No file open</div>
-        <div className="text-fg-3 text-xs">Pick a file from the Files panel to start editing.</div>
+        <div className="text-[var(--text-strong)] text-base font-semibold">No file open</div>
+        <div className="text-[var(--text-muted)] text-xs">
+          Pick a file from the Files panel to start editing.
+        </div>
       </div>
     )
   }
@@ -736,7 +738,7 @@ function NewSketchDialog({
             onKeyDown={(e) => e.key === 'Enter' && submit()}
           />
           {duplicate && (
-            <p className="text-xs text-signal-error">
+            <p className="text-xs text-[var(--status-error)]">
               A file named <span className="font-mono">{fileName}</span> already exists.
             </p>
           )}
@@ -756,8 +758,8 @@ function NewSketchDialog({
 
 function LoadingHint({ label }: { label: string }): React.JSX.Element {
   return (
-    <div className="size-full flex flex-col items-center justify-center gap-3 text-fg-3">
-      <Loader2 size={22} className="animate-spin text-cyan" />
+    <div className="size-full flex flex-col items-center justify-center gap-3 text-[var(--text-muted)]">
+      <Loader2 size={22} className="animate-spin text-[var(--brand)]" />
       <p className="text-sm">{label}</p>
     </div>
   )
