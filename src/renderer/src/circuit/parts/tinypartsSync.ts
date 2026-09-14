@@ -31,9 +31,10 @@ import {
   touchCachedPack
 } from './partsCache'
 import { setLayerParts } from '../../lib/partsLibrary'
+import { STORAGE_KEYS } from '../../lib/storageKeys'
 
-const LS_SOURCE = 'tinystudio.tinyparts.source'
-const LS_CHECKED = 'tinystudio.tinyparts.checked'
+const LS_SOURCE = STORAGE_KEYS.tinypartsSource
+const LS_CHECKED = STORAGE_KEYS.tinypartsLastCheck
 /** don't ask GitHub more often than this on launch (the button forces a check) */
 const MIN_INTERVAL_MS = 15 * 60 * 1000
 const TIMEOUT_MS = 20_000

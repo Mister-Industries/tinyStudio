@@ -1,36 +1,41 @@
 /**
- * Shared serial → visual bridge. Whoever owns the live serial connection (the
- * Serial Monitor panel in Code view, or the Visual view when the panel is
- * closed) pushes each incoming line here. It updates window.__tinySerial and
- * dispatches a `tinyserial` event so a running p5 sketch can react via
- * serialValue() / serialValues() / serialEvent(line).
+ * serialBus — the lines the board prints over serial, shared by everything that
+ * reads them: the Visual sketch runner (components/VisualPreview) and Studio AI's
+ * read_serial tool (lib/studioBridge). SerialProvider pushes each line here.
  */
 
-export interface TinySerialBuffer {
+export interface SerialBuffer {
+  /** the most recent lines, oldest first */
   lines: string[]
+  /** the first number in each of those lines (1 for HIGH / ON / true, else 0) */
   values: number[]
   last: string
   value: number
 }
 
-declare global {
-  interface Window {
-    __tinySerial?: TinySerialBuffer
+const MAX_LINES = 300
+
+let buffer: SerialBuffer = { lines: [], values: [], last: '', value: 0 }
+const listeners = new Set<(line: string) => void>()
+
+export const getSerialBuffer = (): SerialBuffer => buffer
+
+/** Call `listener` with each line as it arrives. Returns an unsubscribe. */
+export function onSerialLine(listener: (line: string) => void): () => void {
+  listeners.add(listener)
+  return () => {
+    listeners.delete(listener)
   }
 }
 
 export function pushSerialLine(line: string): void {
-  const m = line.match(/-?\d+(?:\.\d+)?/)
-  const value = m ? parseFloat(m[0]) : /(HIGH|\bON\b|true)/i.test(line) ? 1 : 0
-  const buf: TinySerialBuffer = window.__tinySerial || { lines: [], values: [], last: '', value: 0 }
-  buf.lines = [...buf.lines.slice(-300), line]
-  buf.values = [...buf.values.slice(-300), value]
-  buf.last = line
-  buf.value = value
-  window.__tinySerial = buf
-  try {
-    window.dispatchEvent(new CustomEvent('tinyserial', { detail: { line, value } }))
-  } catch {
-    /* ignore */
+  const match = line.match(/-?\d+(?:\.\d+)?/)
+  const value = match ? parseFloat(match[0]) : /(HIGH|\bON\b|true)/i.test(line) ? 1 : 0
+  buffer = {
+    lines: [...buffer.lines.slice(-(MAX_LINES - 1)), line],
+    values: [...buffer.values.slice(-(MAX_LINES - 1)), value],
+    last: line,
+    value
   }
+  for (const listener of listeners) listener(line)
 }

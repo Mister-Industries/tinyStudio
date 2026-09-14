@@ -65,7 +65,7 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
   // Resolve the theme before first paint: the viewer's saved choice, else the OS.
   (function () {
     var t = null;
-    try { t = localStorage.getItem('tinystudio-theme'); } catch (e) {}
+    try { t = localStorage.getItem('tinystudio.theme'); } catch (e) {}
     if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', t);
   })();
@@ -215,13 +215,13 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
   themeBtn.onclick = function () {
     var next = isDark() ? 'light' : 'dark';
     rootEl.setAttribute('data-theme', next);
-    try { localStorage.setItem('tinystudio-theme', next); } catch (e) {}
+    try { localStorage.setItem('tinystudio.theme', next); } catch (e) {}
     labelTheme();
   };
   try {
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
       var saved = null;
-      try { saved = localStorage.getItem('tinystudio-theme'); } catch (err) {}
+      try { saved = localStorage.getItem('tinystudio.theme'); } catch (err) {}
       if (!saved) { rootEl.setAttribute('data-theme', e.matches ? 'dark' : 'light'); labelTheme(); }
     });
   } catch (e) {}

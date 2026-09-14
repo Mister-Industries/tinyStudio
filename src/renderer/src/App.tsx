@@ -7,6 +7,7 @@ import {
   OpenWorkspaceCommand
 } from './commands/fileCommands'
 import { listRecentProjects } from './lib/projectStore'
+import { STORAGE_KEYS } from './lib/storageKeys'
 import { parseProjectRoute } from './lib/projectRouting'
 import { serveStudioRequests } from './lib/studioBridge'
 import { DocsPanel } from './components/DocsPanel'
@@ -130,7 +131,7 @@ export default function App(): React.JSX.Element {
       return
     }
 
-    const last = localStorage.getItem('tinystudio.lastWorkspace')
+    const last = localStorage.getItem(STORAGE_KEYS.lastWorkspace)
     if (!last) return
     if (!fileSystem.isElectron()) {
       // Browser: a folder only comes back through its stored handle, and only
@@ -146,7 +147,7 @@ export default function App(): React.JSX.Element {
     }
     Promise.all([fileSystem.pathExists(last), window.api.fs.hasAccess(last)])
       .then(([exists, allowed]) => {
-        if (!exists) localStorage.removeItem('tinystudio.lastWorkspace')
+        if (!exists) localStorage.removeItem(STORAGE_KEYS.lastWorkspace)
         // A folder from before access was tracked waits under Recent until it's chosen again.
         else if (allowed) void new OpenWorkspaceCommand(last).execute()
       })

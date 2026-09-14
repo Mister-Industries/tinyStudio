@@ -15,9 +15,15 @@
  */
 
 import { pushSerialLine } from '@renderer/lib/serialBus'
+import { monitorSettingsKey as settingsKey } from '@renderer/lib/storageKeys'
 import React, { useEffect, useRef, useState } from 'react'
 import { useArduinoContext } from './ArduinoContext'
-import { SerialContext, type SerialContextValue, type SerialEol, type SerialLine } from './SerialContext'
+import {
+  SerialContext,
+  type SerialContextValue,
+  type SerialEol,
+  type SerialLine
+} from './SerialContext'
 
 const EOL_CHARS: Record<SerialEol, string> = {
   none: '',
@@ -30,8 +36,6 @@ interface PortSettings {
   baud?: string
   eol?: SerialEol
 }
-
-const settingsKey = (port: string): string => `tinystudio.monitor.${port}`
 
 function loadPortSettings(port: string | undefined): PortSettings {
   if (!port) return {}

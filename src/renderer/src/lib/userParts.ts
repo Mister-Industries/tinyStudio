@@ -20,10 +20,11 @@
 
 import { artPrefix, namespaceSvg } from '../circuit/parts/svgArt'
 import { partLayers, registerPart, unregisterPart, type PartDef } from './partsLibrary'
+import { STORAGE_KEYS } from './storageKeys'
 
 const DB_NAME = 'tinystudio-user-parts'
 const STORE = 'parts'
-const LS_KEY = 'tinystudio.userParts'
+const LS_KEY = STORAGE_KEYS.userParts
 
 function idbAvailable(): boolean {
   try {

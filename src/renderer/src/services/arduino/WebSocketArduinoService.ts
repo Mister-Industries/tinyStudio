@@ -35,10 +35,12 @@ import {
 } from './types'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { isTextPath } from '@renderer/lib/github'
+import { STORAGE_KEYS } from '@renderer/lib/storageKeys'
 import { isElectron } from '@renderer/lib/utils'
+import { TINYSERVICE_DEFAULT_PORT } from '../../../../shared/tinyservice'
 import { isVirtualPath, virtualFileSystem } from '@renderer/lib/virtualFileSystem'
 
-const DEFAULT_SERVICE_URL = 'ws://localhost:3000'
+const DEFAULT_SERVICE_URL = `ws://localhost:${TINYSERVICE_DEFAULT_PORT}`
 
 /**
  * Whether a sketch has to travel to tinyService as file contents rather than a
@@ -95,7 +97,7 @@ async function collectBrowserSketch(
 function resolveServiceUrl(): string {
   try {
     if (typeof localStorage !== 'undefined') {
-      const override = localStorage.getItem('tinyservice.url')
+      const override = localStorage.getItem(STORAGE_KEYS.serviceUrl)
       if (override) return override
     }
   } catch {

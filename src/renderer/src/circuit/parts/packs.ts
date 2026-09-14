@@ -39,6 +39,7 @@ import {
   readCachedFile,
   type PackOrigin
 } from './partsCache'
+import { STORAGE_KEYS } from '../../lib/storageKeys'
 
 export type { PackPartRef }
 export type PackManifest = PackJson
@@ -64,8 +65,8 @@ export interface PackIndex {
 export const DEFAULT_INDEX_URL =
   'https://raw.githubusercontent.com/Mister-Industries/tinyparts/main/index.json'
 
-const LS_INDEX_URLS = 'tinystudio.packs.indexUrls'
-const LS_INSTALLED = 'tinystudio.packs.installed'
+const LS_INDEX_URLS = STORAGE_KEYS.packIndexUrls
+const LS_INSTALLED = STORAGE_KEYS.installedPacks
 
 function resolveUrl(file: string, base: string): string {
   try {

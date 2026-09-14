@@ -41,11 +41,7 @@ export type SketchTheme = Record<keyof typeof SKETCH_THEME_TOKENS, string> & {
   mono: string
 }
 
-declare global {
-  interface Window {
-    __tinyTheme?: SketchTheme
-  }
-}
+let liveTheme: SketchTheme | null = null
 
 /** Refill `theme` in place (sketches hold a reference to it) from the page's tokens. */
 function fill(theme: SketchTheme): void {
@@ -63,16 +59,16 @@ function fill(theme: SketchTheme): void {
  * watching the root element for ThemeProvider's light/dark class change.
  */
 export function sketchTheme(): SketchTheme {
-  if (!window.__tinyTheme) {
+  if (!liveTheme) {
     const theme = { ...SKETCH_FONTS } as SketchTheme
     fill(theme)
     new MutationObserver(() => fill(theme)).observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class', 'data-theme']
     })
-    window.__tinyTheme = theme
+    liveTheme = theme
   }
-  return window.__tinyTheme
+  return liveTheme
 }
 
 /**

@@ -10,6 +10,7 @@
 
 import { fileSystem } from './fileSystem'
 import type { Workspace, BaseFileItem, WorkspaceSource } from '@renderer/redux/fileSlice'
+import { githubLinkKey, STORAGE_KEYS } from './storageKeys'
 
 const GH_API = 'https://api.github.com'
 
@@ -1006,8 +1007,8 @@ export { ghRepoMeta }
 
 // ── persistence (localStorage) ───────────────────────────────────────────────
 
-const ACCOUNT_KEY = 'tinystudio.github.account'
-const linkKey = (workspacePath: string): string => `tinystudio.github.link.${workspacePath}`
+const ACCOUNT_KEY = STORAGE_KEYS.githubAccount
+const linkKey = githubLinkKey
 
 /** The desktop auth bridge, when running under Electron. */
 const desktopAuth = (): typeof window.api.github | undefined =>

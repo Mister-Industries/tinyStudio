@@ -9,11 +9,12 @@
  */
 
 import type { StudioBridge, StudioMethod } from '../../../shared/agentCore'
+import { getSerialBuffer } from './serialBus'
 
 const MAX_SERIAL_LINES = 300
 
 function readSerial(count: number): string {
-  const lines = window.__tinySerial?.lines ?? []
+  const lines = getSerialBuffer().lines
   if (lines.length === 0) {
     return 'No serial lines received since the app opened. Is the board plugged in, with its port selected and the sketch uploaded?'
   }

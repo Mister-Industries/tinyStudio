@@ -10,6 +10,7 @@ import {
   type RepoLink
 } from '@renderer/lib/github'
 import { notify as toast } from '@renderer/lib/notify'
+import { STORAGE_KEYS } from '@renderer/lib/storageKeys'
 import { flattenSketchLayout, suggestProjectName } from '@renderer/lib/projectLayout'
 import {
   canSaveToComputer,
@@ -255,7 +256,7 @@ export class OpenWorkspaceCommand implements Command {
     if (!isVirtualPath(workspacePath)) {
       // Remember the folder so the app can reopen it on next launch.
       try {
-        localStorage.setItem('tinystudio.lastWorkspace', workspacePath)
+        localStorage.setItem(STORAGE_KEYS.lastWorkspace, workspacePath)
       } catch {
         /* ignore */
       }
@@ -774,7 +775,7 @@ export class CloseWorkspaceCommand implements Command {
     // Forget the remembered folder so the app starts on the empty state next
     // launch instead of silently reopening the project the user just closed.
     try {
-      localStorage.removeItem('tinystudio.lastWorkspace')
+      localStorage.removeItem(STORAGE_KEYS.lastWorkspace)
     } catch {
       /* ignore */
     }

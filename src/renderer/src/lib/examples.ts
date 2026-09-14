@@ -8,6 +8,7 @@
 import { fetchRepoProject } from './github'
 import { fileSystem } from './fileSystem'
 import { canonicalizeTags, compareTags, getTagMeta, isKnownTag } from './exampleTags'
+import { STORAGE_KEYS } from './storageKeys'
 
 // One project the user can open. `owner/repo/path` are GitHub coordinates, so
 // examples may live across multiple repos.
@@ -53,7 +54,7 @@ const FALLBACK_MANIFEST_URL =
 
 export function resolveManifestUrl(): string | null {
   try {
-    return localStorage.getItem('tinystudio.examples.url')
+    return localStorage.getItem(STORAGE_KEYS.examplesManifestUrl)
   } catch {
     return null
   }

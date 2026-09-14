@@ -23,10 +23,11 @@ import {
 } from '../../../shared/agentCore'
 import { fileSystem } from './fileSystem'
 import { studioBridge } from './studioBridge'
+import { STORAGE_KEYS } from './storageKeys'
 import { isVirtualPath } from './virtualFileSystem'
 import { webFileSystem } from './webFileSystem'
 
-const KEY_STORAGE = 'tinystudio.anthropicApiKey'
+const KEY_STORAGE = STORAGE_KEYS.anthropicApiKey
 
 function readKey(): string | null {
   try {

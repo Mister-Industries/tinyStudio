@@ -11,7 +11,7 @@ import { store } from './redux'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="light">
       <Provider store={store}>
         <ErrorBoundary>
           <App />

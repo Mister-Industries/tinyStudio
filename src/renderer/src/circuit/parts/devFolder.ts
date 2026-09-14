@@ -44,9 +44,10 @@ import {
   type ReadText
 } from './folderPart'
 import { getInstalledPacks } from './packs'
+import { STORAGE_KEYS } from '../../lib/storageKeys'
 
-const LS_FOLDER = 'tinystudio.tinyparts.devFolder'
-const LS_OFF = 'tinystudio.tinyparts.live'
+const LS_FOLDER = STORAGE_KEYS.tinypartsDevFolder
+const LS_OFF = STORAGE_KEYS.tinypartsLive
 
 export interface DevPackStatus {
   id: string

@@ -27,7 +27,7 @@ export class ServiceManager {
   private isRunning = false
   private mainWindow: BrowserWindow | null = null
 
-  constructor(config: ServiceConfig = { port: 3000, allowedOrigins: ['*'] }) {
+  constructor(config: ServiceConfig) {
     this.config = config
   }
 

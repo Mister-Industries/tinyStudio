@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue
 } from './ui/Select'
+import { STORAGE_KEYS } from '@renderer/lib/storageKeys'
 
 export function SerialMonitor(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'serial' | 'output'>('serial')
@@ -160,7 +161,7 @@ export function SerialMonitorTab({
   // Timestamps toggle (persisted app-wide, like autoscroll in the Arduino IDE).
   const [showTs, setShowTs] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('tinystudio.monitor.timestamps') === '1'
+      return localStorage.getItem(STORAGE_KEYS.monitorTimestamps) === '1'
     } catch {
       return false
     }
@@ -168,7 +169,7 @@ export function SerialMonitorTab({
   const toggleTs = (): void => {
     setShowTs((v) => {
       try {
-        localStorage.setItem('tinystudio.monitor.timestamps', v ? '0' : '1')
+        localStorage.setItem(STORAGE_KEYS.monitorTimestamps, v ? '0' : '1')
       } catch {
         /* storage unavailable */
       }

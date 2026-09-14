@@ -11,6 +11,7 @@
 
 import { AlertTriangle, Pause, Play, RotateCw } from 'lucide-react'
 import React from 'react'
+import { getSerialBuffer, onSerialLine } from '../lib/serialBus'
 import { sketchTheme } from '../lib/sketchTheme'
 import { Button } from './ui/Button'
 
@@ -61,16 +62,13 @@ export function VisualPreview({
       return
     }
     setRunning(true)
-    post({ type: 'run', code, theme: { ...sketchTheme() }, serial: window.__tinySerial })
+    post({ type: 'run', code, theme: { ...sketchTheme() }, serial: getSerialBuffer() })
   }, [ready, code, runId, post])
 
   // Serial lines and light/dark switches reach the running sketch.
   React.useEffect(() => {
     if (!ready) return
-    const onLine = (event: Event): void => {
-      post({ type: 'serial', line: (event as CustomEvent<{ line: string }>).detail.line })
-    }
-    window.addEventListener('tinyserial', onLine)
+    const offLine = onSerialLine((line) => post({ type: 'serial', line }))
     // sketchTheme() refills its object on the same mutation, and its observer
     // was registered first, so the copy sent here is already current.
     const theme = sketchTheme()
@@ -80,7 +78,7 @@ export function VisualPreview({
       attributeFilter: ['class', 'data-theme']
     })
     return () => {
-      window.removeEventListener('tinyserial', onLine)
+      offLine()
       observer.disconnect()
     }
   }, [ready, post])

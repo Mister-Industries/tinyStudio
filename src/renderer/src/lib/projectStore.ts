@@ -13,6 +13,7 @@
 
 import { fileSystem } from './fileSystem'
 import { isElectron } from './utils'
+import { STORAGE_KEYS } from './storageKeys'
 import { PROJECTS_PICKER_ID, webFileSystem } from './webFileSystem'
 
 /** True where tinyStudio can write a real folder: desktop, or Chromium's File System Access API. */
@@ -184,7 +185,7 @@ export interface RecentProject {
   openedAt: number
 }
 
-const RECENTS_KEY = 'tinystudio.recentProjects'
+const RECENTS_KEY = STORAGE_KEYS.recentProjects
 const MAX_RECENTS = 8
 /** Fired on window whenever the recent list changes. */
 export const RECENTS_EVENT = 'tinystudio:recent-projects'
