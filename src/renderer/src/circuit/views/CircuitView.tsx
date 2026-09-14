@@ -77,18 +77,13 @@ import { SIM_SOURCES, generateSimSource, simSourceDefaultAttrs } from '../parts/
 import { SIM_PROBES, generateSimProbe, simProbeDefaultAttrs } from '../parts/simProbes'
 import { PackManager } from './packs/PackManager'
 import { snapNetLabel } from '../parts/netLabels'
-import {
-  Canvas,
-  emptySel,
-  type Cam,
-  type CanvasHandle,
-  type ProbeTag,
-  type Selection
-} from './canvas/Canvas'
+import { Canvas, type Cam, type CanvasHandle, type ProbeTag } from './canvas/Canvas'
+import { emptySel, type Selection } from './canvas/selection'
 import { playCaptureAnimation } from './captureAnimation'
 import { renderPng, saveImage, exportSvg } from './exportImage'
 import { InspectorRail } from './inspector/Inspector'
-import { Palette, WIRE_COLORS } from './palette/Palette'
+import { Palette } from './palette/Palette'
+import { WIRE_COLORS } from './palette/wireColors'
 import {
   autoPlacementFor,
   circuitBuses,
@@ -109,7 +104,8 @@ import {
   type OutputRef
 } from '../core/simOutputs'
 import { getSimBackend } from '../sim'
-import { SimPanel, fmtSI, type SimState } from './sim/SimPanel'
+import { fmtSI } from './sim/format'
+import { SimPanel, type SimState } from './sim/SimPanel'
 
 /**
  * Which panel the right-hand rail is showing.

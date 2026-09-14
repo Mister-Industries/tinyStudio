@@ -44,7 +44,9 @@ import { diffProbeVectors, probeLabelFor } from '../../core/probes'
 import type { CircuitStore } from '../../core/store'
 import { getSimBackend, SimError } from '../../sim'
 import type { EngineStatus, SimRun } from '../../sim'
-import { runToCsv, SimPlot, type PlotMode } from './Plot'
+import { fmtSI } from './format'
+import { SimPlot, type PlotMode } from './Plot'
+import { runToCsv } from './plotData'
 
 const field =
   'bg-bg-sunken border border-border-default rounded px-2 py-1 text-text-strong outline-none focus:border-brand w-20 text-xs'
@@ -733,17 +735,6 @@ function OutputPicker({
 }
 
 // ── DC table ─────────────────────────────────────────────────────────────────
-
-export function fmtSI(v: number, unit: string): string {
-  const a = Math.abs(v)
-  if (a >= 1e6) return `${(v / 1e6).toFixed(2)} M${unit}`
-  if (a >= 1e3) return `${(v / 1e3).toFixed(2)} k${unit}`
-  if (a >= 1) return `${v.toFixed(3)} ${unit}`
-  if (a >= 1e-3) return `${(v * 1e3).toFixed(2)} m${unit}`
-  if (a >= 1e-6) return `${(v * 1e6).toFixed(2)} µ${unit}`
-  if (a === 0) return `0 ${unit}`
-  return `${(v * 1e9).toFixed(2)} n${unit}`
-}
 
 function OpTable({
   run,

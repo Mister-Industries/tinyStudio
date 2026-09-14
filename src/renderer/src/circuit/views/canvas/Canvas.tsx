@@ -64,6 +64,7 @@ import {
   type RatsnestSegment,
   type Seat
 } from '../partsAdapter'
+import { emptySel, type Selection } from './selection'
 
 // wire look (identical to DiagramEditor / tinySchematic)
 const WIRE_W = 2.8
@@ -78,17 +79,7 @@ const WIRE_CORNER = 4
 const WIRE_CORNER_SCH = 0
 const NET_GLOW = 'rgba(243, 203, 0, 0.30)'
 
-export interface Selection {
-  parts: Set<string>
-  wires: Set<string>
-  /** selected net-label ids (schematic) */
-  labels?: Set<string>
-}
-export const emptySel = (): Selection => ({
-  parts: new Set(),
-  wires: new Set(),
-  labels: new Set()
-})
+export type { Selection } from './selection'
 
 export interface Cam {
   scale: number
@@ -559,7 +550,7 @@ export function Canvas({
       // screen moves it the direction the user is actually dragging.
       const rad = (-(cur.rotate ?? 0) * Math.PI) / 180
       let ldx = dxs * Math.cos(rad) - dys * Math.sin(rad)
-      let ldy = dxs * Math.sin(rad) + dys * Math.cos(rad)
+      const ldy = dxs * Math.sin(rad) + dys * Math.cos(rad)
       if (cur.flip) ldx = -ldx
       const next: [number, number] = [
         Math.round((base[0] + ldx) * 100) / 100,

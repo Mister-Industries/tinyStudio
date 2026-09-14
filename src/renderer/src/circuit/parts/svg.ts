@@ -63,7 +63,7 @@ export function stripSvgSize(svg: string): string {
  * root's viewBox is kept — it's what makes the injected width/height scale.
  */
 export function prepareSvgForEmbed(svg: string): string {
-  let s = svg
+  const s = svg
     .replace(/<\?xml[\s\S]*?\?>/g, '')
     .replace(/<!DOCTYPE[^>]*>/gi, '')
     .trim()

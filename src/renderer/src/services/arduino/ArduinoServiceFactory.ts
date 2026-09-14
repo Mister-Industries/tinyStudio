@@ -55,7 +55,7 @@ export class ArduinoServiceFactory {
   /**
    * Create new Arduino service instance (for testing or manual creation)
    */
-  static createService(_config?: ArduinoServiceConfig): ArduinoService {
+  static createService(): ArduinoService {
     const environment = this.detectEnvironment()
 
     if (environment === 'electron') {
@@ -116,7 +116,6 @@ export class ArduinoServiceFactory {
       'cleanup' in this.instance &&
       typeof this.instance.cleanup === 'function'
     ) {
-      console.log('Cleaning up Arduino service instance...')
       this.instance.cleanup()
     }
     this.instance = null

@@ -3,33 +3,21 @@
  *
  * Mounted once at the app root (not per-view), so switching Code / Circuit /
  * Visual or toggling the monitor panel does NOT close and reopen the port.
- * That matters because opening a serial port resets the Arduino (DTR), so the
- * old per-view ownership reset the board on every switch and took seconds to
- * re-stream. Now the port opens once (on connect), stays open across views, and
- * only reopens around an upload or when the port/baud changes.
+ * Opening a serial port resets the board (DTR), so the port opens once, stays
+ * open across views, and only reopens around an upload or when the port or
+ * baud changes.
  *
  * It accumulates the line buffer (for the Serial Monitor) and feeds the shared
- * serial bus (window.__tinySerial / `tinyserial`) for the Visual sketch.
+ * serial bus (lib/serialBus) for the Visual sketch.
  *
  * Monitor settings (baud + line ending) are persisted per port, so a board
  * you always run at 115200 comes back at 115200 (Arduino IDE parity).
  */
 
-import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { pushSerialLine } from '@renderer/lib/serialBus'
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
-
-/** One rendered line of the Serial Monitor. */
-export interface SerialLine {
-  text: string
-  /** Receive (or send) time, ms since epoch — rendered by the timestamps toggle. */
-  ts: number
-  /** True for lines the user sent (rendered in the accent color). */
-  tx?: boolean
-}
-
-/** Line ending appended to sent data (Arduino IDE parity). */
-export type SerialEol = 'none' | 'nl' | 'cr' | 'crlf'
+import React, { useEffect, useRef, useState } from 'react'
+import { useArduinoContext } from './ArduinoContext'
+import { SerialContext, type SerialContextValue, type SerialEol, type SerialLine } from './SerialContext'
 
 const EOL_CHARS: Record<SerialEol, string> = {
   none: '',
@@ -64,29 +52,6 @@ function savePortSettings(port: string | undefined, settings: PortSettings): voi
     /* storage may be unavailable */
   }
 }
-
-interface SerialContextValue {
-  lines: SerialLine[]
-  connected: boolean
-  /** User chose to release the port (e.g. so the browser can use it) */
-  disconnected: boolean
-  /** Last port-open failure reported by the backend (busy port etc.), if any */
-  lastError: string | null
-  port?: string
-  baud: string
-  setBaud: (b: string) => void
-  /** Line ending appended to sent data */
-  eol: SerialEol
-  setEol: (e: SerialEol) => void
-  send: (data: string) => void
-  clear: () => void
-  /** Release the serial port and stay disconnected until reconnect() */
-  disconnect: () => void
-  /** Resume the automatic connection */
-  reconnect: () => void
-}
-
-const SerialContext = createContext<SerialContextValue | null>(null)
 
 export function SerialProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
   const {
@@ -143,8 +108,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }): Rea
       }
       if (s.closed) setConnected(false)
       if (s.error) {
-        // The backend now surfaces WHY a port didn't open (busy, missing…)
-        // instead of silently flashing connected → disconnected.
+        // The backend reports why a port didn't open (busy, missing…).
         setConnected(false)
         setLastError(s.error)
         setLines((prev) => [...prev.slice(-1000), { text: `⚠ ${s.error}`, ts: Date.now() }])
@@ -197,10 +161,4 @@ export function SerialProvider({ children }: { children: React.ReactNode }): Rea
   }
 
   return <SerialContext.Provider value={value}>{children}</SerialContext.Provider>
-}
-
-export function useSerial(): SerialContextValue {
-  const ctx = useContext(SerialContext)
-  if (!ctx) throw new Error('useSerial must be used within SerialProvider')
-  return ctx
 }

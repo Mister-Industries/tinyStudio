@@ -168,7 +168,6 @@ export class WebSocketArduinoService implements ArduinoService {
    */
   public cleanup(): void {
     if (this.client) {
-      console.log('Disconnecting Arduino service client...')
       this.client.disconnect()
     }
   }
@@ -249,7 +248,6 @@ export class WebSocketArduinoService implements ArduinoService {
 
         // Check if the operation might have succeeded based on output
         if (action === 'compile' && output.includes('Sketch uses')) {
-          console.log(`[${action}] Detected successful compilation from output, resolving...`)
           safeResolve({
             success: !hasError,
             output: output,
@@ -263,7 +261,6 @@ export class WebSocketArduinoService implements ArduinoService {
             output.includes('Hash of data verified') ||
             output.includes('Hard resetting'))
         ) {
-          console.log(`[${action}] Detected successful upload from output, resolving...`)
           safeResolve({
             success: !hasError,
             output: output,
@@ -283,8 +280,6 @@ export class WebSocketArduinoService implements ArduinoService {
           return
         }
 
-        console.log(`[${action}] Received message:`, message.type, message.data) // Debug log
-
         if (message.type === 'output') {
           output += message.data.output + '\n'
         } else if (message.type === 'error') {
@@ -303,7 +298,6 @@ export class WebSocketArduinoService implements ArduinoService {
             error: errorMessage
           })
         } else if (message.type === 'complete') {
-          console.log(`[${action}] Operation completed:`, message.data) // Debug log
           cleanup()
 
           // Handle list-boards response differently
@@ -499,9 +493,6 @@ export class WebSocketArduinoService implements ArduinoService {
       }
 
       // Compile the sketch
-      console.log(
-        `Starting compile operation for workspace: ${workspacePath}, FQBN: ${boardConfig.fqbn}`
-      )
       const requestId = this.client.compile(workspacePath, boardConfig.fqbn, files, sketchName)
 
       // Wait for response with longer timeout for compilation
@@ -547,9 +538,6 @@ export class WebSocketArduinoService implements ArduinoService {
       }
 
       // Upload the sketch
-      console.log(
-        `Starting upload operation to port: ${port}, FQBN: ${boardConfig.fqbn}, workspace: ${workspacePathOrBinary}`
-      )
       const requestId = this.client.upload(
         workspacePathOrBinary || '',
         boardConfig.fqbn,

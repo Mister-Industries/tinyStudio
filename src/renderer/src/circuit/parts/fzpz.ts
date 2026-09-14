@@ -268,7 +268,7 @@ function extractView(
       unresolved.push(c.id)
       continue
     }
-    let name = c.name || c.id
+    const name = c.name || c.id
     let n = name
     let i = 2
     while (usedNames.has(n)) n = `${name}.${i++}`

@@ -90,7 +90,6 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
       if (!filePath || filePath.startsWith('mem://')) return
       const detach = attachLspToEditor(monaco, editor, filePath, fqbn)
       return detach
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedBoard?.config.fqbn, isAgentConnected, activeFile.path, editorReady])
 
     function handleBeforeMount(monaco): void {

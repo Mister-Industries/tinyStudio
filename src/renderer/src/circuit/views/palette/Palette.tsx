@@ -10,8 +10,7 @@ import { getPart, partsByFamily, type PartMeta } from '../../../lib/partsLibrary
 import type { ViewId } from '../../core/model'
 import { NET_LABEL_KINDS, netLabelView } from '../../parts/netLabels'
 import { schematicVisual } from '../../parts/symbols'
-
-export const WIRE_COLORS = ['#2fa46a', '#e5544b', '#42a5f5', '#f3cb00', '#ffffff', '#79818c']
+import { WIRE_COLORS } from './wireColors'
 
 function iconFor(meta: PartMeta, view: ViewId): string | undefined {
   if (view === 'sch') {

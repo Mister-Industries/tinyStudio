@@ -20,8 +20,8 @@ import { StatusBar } from './components/StatusBar'
 import { Toolbar } from './components/Toolbar'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './components/ui/Resizable'
 import { getPanelGroupElement, type ImperativePanelHandle } from 'react-resizable-panels'
-import { ArduinoProvider } from './contexts/ArduinoContext'
-import { SerialProvider } from './contexts/SerialContext'
+import { ArduinoProvider } from './contexts/ArduinoProvider'
+import { SerialProvider } from './contexts/SerialProvider'
 import { fileSystem } from './lib/fileSystem'
 import {
   selectEditorView,
@@ -99,7 +99,6 @@ export default function App(): React.JSX.Element {
   // Cleanup Arduino service on unmount
   useEffect(() => {
     return () => {
-      console.log('Cleaning up Arduino service on app unmount')
       ArduinoServiceFactory.cleanup()
     }
   }, [])

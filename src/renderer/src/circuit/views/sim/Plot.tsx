@@ -21,17 +21,8 @@ import React from 'react'
 import uPlot from 'uplot'
 import 'uplot/dist/uPlot.min.css'
 import type { SimRun, SimVector } from '../../sim'
-
-export const TRACES = [
-  '#4f9cf9',
-  '#f36e6e',
-  '#54c08a',
-  '#e5b567',
-  '#b78be5',
-  '#5bc8c8',
-  '#e08fd0',
-  '#9aa76b'
-]
+import { fmtEng } from './format'
+import { deg, mag, TRACES } from './plotData'
 
 export type PlotMode = 'tran' | 'dc' | 'ac'
 
@@ -45,9 +36,7 @@ function cssVar(name: string, fallback: string): string {
   return v || fallback
 }
 
-const mag = (re: number, im: number): number => Math.sqrt(re * re + im * im)
 const db = (m: number): number => 20 * Math.log10(Math.max(m, 1e-20))
-const deg = (re: number, im: number): number => (Math.atan2(im, re) * 180) / Math.PI
 
 const isCurrent = (name: string): boolean => /^i\(/i.test(name)
 const isVoltage = (name: string): boolean => /^(v|vdiff)\(/i.test(name)
@@ -167,17 +156,6 @@ function prepare(
   }
 }
 
-export function fmtEng(v: number): string {
-  const a = Math.abs(v)
-  if (a >= 1e6) return `${(v / 1e6).toFixed(2)}M`
-  if (a >= 1e3) return `${(v / 1e3).toFixed(2)}k`
-  if (a >= 1) return v.toFixed(2)
-  if (a >= 1e-3) return `${(v * 1e3).toFixed(2)}m`
-  if (a >= 1e-6) return `${(v * 1e6).toFixed(2)}µ`
-  if (a === 0) return '0'
-  return `${(v * 1e9).toFixed(2)}n`
-}
-
 export function SimPlot({
   run,
   mode,
@@ -287,21 +265,4 @@ export function SimPlot({
       </span>
     </div>
   )
-}
-
-/** CSV of every vector in the run (x first), raw numbers. */
-export function runToCsv(run: SimRun): string {
-  const cols: { name: string; values: number[] }[] = []
-  for (const v of run.vectors as SimVector[]) {
-    if (v.imag) {
-      cols.push({ name: `${v.name} (mag)`, values: v.values.map((re, k) => mag(re, v.imag![k])) })
-      cols.push({ name: `${v.name} (deg)`, values: v.values.map((re, k) => deg(re, v.imag![k])) })
-    } else {
-      cols.push({ name: v.name, values: v.values })
-    }
-  }
-  const n = Math.max(...cols.map((c) => c.values.length))
-  const lines = [cols.map((c) => JSON.stringify(c.name)).join(',')]
-  for (let i = 0; i < n; i++) lines.push(cols.map((c) => c.values[i] ?? '').join(','))
-  return lines.join('\n') + '\n'
 }

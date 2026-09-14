@@ -25,7 +25,7 @@ export function transformLocalPoint(
   rotate = 0,
   flip = false
 ): Pt {
-  let x = flip ? w - px : px
+  const x = flip ? w - px : px
   const y = py
   const rad = (rotate * Math.PI) / 180
   const cos = Math.cos(rad)

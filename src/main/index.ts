@@ -110,9 +110,6 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.handle('ping', () => 'pong')
-
   // The backend may bind to a non-default port (3000 can be taken by another
   // dev server); the renderer asks for the real URL instead of assuming.
   ipcMain.handle('service:get-url', () => serviceManager.getServiceUrl())
@@ -417,6 +414,3 @@ app.on('before-quit', async (event) => {
     }
   }
 })
-
-// In this file you can include the rest of your app"s main process
-// code. You can also put them in separate files and require them here.

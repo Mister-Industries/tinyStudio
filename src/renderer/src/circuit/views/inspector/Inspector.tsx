@@ -39,8 +39,8 @@ import {
   rotateBoardAssemblyCmd,
   rotateNetLabelCmd
 } from '../partsAdapter'
-import { WIRE_COLORS } from '../palette/Palette'
-import type { Selection } from '../canvas/Canvas'
+import { WIRE_COLORS } from '../palette/wireColors'
+import type { Selection } from '../canvas/selection'
 
 const field =
   'bg-bg-sunken border border-border-default rounded px-2 py-1 text-text-strong outline-none focus:border-brand w-full'

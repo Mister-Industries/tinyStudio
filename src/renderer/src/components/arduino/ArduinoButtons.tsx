@@ -133,13 +133,6 @@ export function VerifyButton({
   }
 
   const isDisabled = isCompiling || !selectedBoard || !isAgentConnected || !workspace
-  // console.log('VerifyButton isDisabled conditions:', {
-  //   isCompiling,
-  //   selectedBoard: !selectedBoard,
-  //   isAgentConnected: !isAgentConnected,
-  //   openFilesLength: openFiles.length === 0,
-  //   isDisabled
-  // })
 
   return (
     <Tooltip>

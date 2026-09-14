@@ -12,7 +12,7 @@
 // (download once from github.com/google/fonts ofl/plusjakartasans).
 
 import { createRequire } from 'node:module'
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { writeFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const req = createRequire(import.meta.url)
@@ -36,7 +36,6 @@ if (!existsSync(FONT)) {
   process.exit(1)
 }
 const font = fontkit.openSync(FONT).getVariation({ wght: 800 })
-const upm = font.unitsPerEm
 
 function glyph(ch) {
   const run = font.layout(ch)
