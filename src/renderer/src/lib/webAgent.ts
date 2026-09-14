@@ -21,6 +21,7 @@ import {
   type AgentPermissionRequest,
   type AgentWorkspace
 } from '../../../shared/agentCore'
+import { isAgentModel, resolveAgentModel } from '../../../shared/agentModels'
 import { fileSystem } from './fileSystem'
 import { studioBridge } from './studioBridge'
 import { STORAGE_KEYS } from './storageKeys'
@@ -130,6 +131,7 @@ function subscribe<T>(set: Set<T>, cb: T): () => void {
 
 const session = new AgentSession({
   getApiKey: async () => readKey(),
+  getModel: async () => resolveAgentModel(readSetting(STORAGE_KEYS.agentModel)),
   createClient: (apiKey) => new Anthropic({ apiKey, dangerouslyAllowBrowser: true }),
   openWorkspace: browserWorkspace,
   emit: (evt) => eventListeners.forEach((cb) => cb(evt)),
@@ -155,7 +157,20 @@ export const webAgent: Window['api']['agent'] = {
   onFileChanged: (cb) => subscribe(fileListeners, cb)
 }
 
+function readSetting(key: string): string | null {
+  try {
+    return localStorage.getItem(key)
+  } catch {
+    return null // localStorage can be unavailable (private mode)
+  }
+}
+
 export const webSettings: Window['api']['settings'] = {
+  getModel: async () => resolveAgentModel(readSetting(STORAGE_KEYS.agentModel)),
+  setModel: async (model) => {
+    if (!isAgentModel(model)) throw new Error(`Unknown model: ${model}`)
+    localStorage.setItem(STORAGE_KEYS.agentModel, model)
+  },
   getStatus: async () =>
     readKey() ? { configured: true, source: 'stored' } : { configured: false, source: 'none' },
   setApiKey: async (key) => {

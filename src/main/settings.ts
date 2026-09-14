@@ -1,7 +1,7 @@
 /**
  * settings — persistent app settings for the main process.
  *
- * Right now this only stores the Anthropic API key used by the Studio AI agent.
+ * Stores the Studio AI settings: the Anthropic API key and the model to use.
  * The key is encrypted at rest with Electron's safeStorage (OS keychain / DPAPI)
  * and written to userData. We never expose the key to the renderer — the renderer
  * only ever learns whether a key is configured, never its value.
@@ -10,12 +10,15 @@
 import { app, safeStorage } from 'electron'
 import { promises as fs } from 'fs'
 import { join } from 'path'
+import { isAgentModel, resolveAgentModel, type AgentModelId } from '../shared/agentModels'
 
 interface StoredSettings {
   /** base64 of the encrypted (or, if encryption is unavailable, plaintext) key */
   apiKeyEnc?: string
   /** true when apiKeyEnc was produced by safeStorage; false = plaintext fallback */
   apiKeyEncrypted?: boolean
+  /** Studio AI model id (shared/agentModels.ts); unset means the default */
+  model?: string
 }
 
 function settingsPath(): string {
@@ -71,6 +74,18 @@ export async function getApiKey(): Promise<string | null> {
     }
   }
   return process.env.ANTHROPIC_API_KEY ?? null
+}
+
+/** The chosen Studio AI model, or the default when none is stored or it's no longer offered. */
+export async function getModel(): Promise<AgentModelId> {
+  return resolveAgentModel((await read()).model)
+}
+
+export async function setModel(model: string): Promise<void> {
+  if (!isAgentModel(model)) throw new Error(`Unknown model: ${model}`)
+  const s = await read()
+  s.model = model
+  await write(s)
 }
 
 export type ApiKeySource = 'stored' | 'env' | 'none'

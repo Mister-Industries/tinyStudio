@@ -18,7 +18,7 @@ import { registerFileIpc } from './ipc/files'
 import { registerPartsIpc } from './ipc/parts'
 import { registerWindowIpc } from './ipc/window'
 import { ServiceManager } from './ServiceManager'
-import { clearApiKey, getStatus, setApiKey } from './settings'
+import { clearApiKey, getModel, getStatus, setApiKey, setModel } from './settings'
 import { TINYSERVICE_DEFAULT_PORT } from '../shared/tinyservice'
 
 const serviceManager = new ServiceManager({
@@ -148,6 +148,8 @@ app.whenReady().then(async () => {
   ipcMain.handle('settings:status', () => getStatus())
   ipcMain.handle('settings:set-key', (_, key: string) => setApiKey(key))
   ipcMain.handle('settings:clear-key', () => clearApiKey())
+  ipcMain.handle('settings:get-model', () => getModel())
+  ipcMain.handle('settings:set-model', (_, model: string) => setModel(model))
 
   // Fire-and-forget: the agent streams its work back over 'agent:event'.
   ipcMain.handle('agent:send', (_, args: AgentSendArgs) => {

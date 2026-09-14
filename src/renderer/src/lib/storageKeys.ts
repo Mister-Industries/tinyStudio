@@ -13,6 +13,7 @@ export const STORAGE_KEYS = {
   recentProjects: 'tinystudio.recentProjects',
   githubAccount: 'tinystudio.github.account',
   anthropicApiKey: 'tinystudio.anthropicApiKey',
+  agentModel: 'tinystudio.agent.model',
   examplesManifestUrl: 'tinystudio.examples.url',
   monitorTimestamps: 'tinystudio.monitor.timestamps',
   userParts: 'tinystudio.userParts',

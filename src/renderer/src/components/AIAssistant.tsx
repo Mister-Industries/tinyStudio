@@ -22,6 +22,7 @@ import {
   type TimelineItem
 } from '@renderer/lib/agentChat'
 import type { AgentPermissionRequest } from '@renderer/lib/agentTypes'
+import { AGENT_MODELS, DEFAULT_AGENT_MODEL } from '../../../shared/agentModels'
 import { openExternal } from '@renderer/lib/utils'
 import { selectOpenFiles, useAppSelector } from '@renderer/redux'
 import {
@@ -56,6 +57,7 @@ import {
 } from './ui/Dialog'
 import { Input } from './ui/Input'
 import { ScrollArea } from './ui/ScrollArea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/Select'
 
 const GREETING =
   "I'm Studio AI ✦ — I can read and edit the files in your open workspace. Ask me to explain code, wire a circuit, fix a build error, or write a sketch. I'll ask before changing any file."
@@ -84,12 +86,14 @@ export function AIAssistant(): React.JSX.Element {
   const [input, setInput] = React.useState('')
   const [keyConfigured, setKeyConfigured] = React.useState<boolean | null>(null)
   const [showSettings, setShowSettings] = React.useState(false)
+  const [model, setModel] = React.useState<string>(DEFAULT_AGENT_MODEL)
 
   const scrollRef = React.useRef<HTMLDivElement>(null)
 
-  // Check whether an API key is configured.
+  // Check whether an API key is configured, and which model was chosen.
   React.useEffect(() => {
     settings.getStatus().then((s) => setKeyConfigured(s.configured))
+    settings.getModel().then(setModel)
   }, [])
 
   React.useEffect(() => {
@@ -124,7 +128,9 @@ export function AIAssistant(): React.JSX.Element {
       {/* Slim toolbar */}
       <div className="flex items-center gap-1 px-3 py-1.5 border-b border-[var(--border-default)] text-xs text-[var(--text-muted)]">
         <Sparkles size={13} className="text-[var(--brand)]" />
-        <span className="font-medium text-[var(--text-body)]">Claude Opus 4.8</span>
+        <span className="font-medium text-[var(--text-body)]">
+          Claude {AGENT_MODELS.find((m) => m.id === model)?.label ?? model}
+        </span>
         <div className="flex-1" />
         <Button
           variant="ghost"
@@ -203,6 +209,8 @@ export function AIAssistant(): React.JSX.Element {
       <SettingsDialog
         open={showSettings}
         onOpenChange={setShowSettings}
+        model={model}
+        onModelChange={setModel}
         configured={!!keyConfigured}
         onSaved={() => setKeyConfigured(true)}
         onCleared={() => setKeyConfigured(false)}
@@ -289,17 +297,30 @@ function SettingsDialog({
   open,
   onOpenChange,
   configured,
+  model,
+  onModelChange,
   onSaved,
   onCleared
 }: {
   open: boolean
   onOpenChange: (o: boolean) => void
   configured: boolean
+  model: string
+  onModelChange: (model: string) => void
   onSaved: () => void
   onCleared: () => void
 }): React.JSX.Element {
   const [key, setKey] = React.useState('')
   const [saving, setSaving] = React.useState(false)
+
+  // Applies at once. The conversation so far was produced by the previous
+  // model, so a chat in progress starts over rather than mixing models.
+  const changeModel = async (next: string): Promise<void> => {
+    if (next === model) return
+    onModelChange(next)
+    await settings.setModel(next)
+    if (getChatState().items.length > 0) startNewChat()
+  }
 
   const save = async (): Promise<void> => {
     if (!key.trim()) return
@@ -330,6 +351,22 @@ function SettingsDialog({
               : "Your Anthropic API key is saved in this browser and is only sent to the Anthropic API. Anyone who can use this browser profile can read it, so remove it when you're done on a shared computer."}
           </DialogDescription>
         </DialogHeader>
+        <div className="flex flex-col gap-2">
+          <label className="text-xs text-[var(--text-muted)]">Model</label>
+          <Select value={model} onValueChange={(v) => void changeModel(v)}>
+            <SelectTrigger size="sm" aria-label="Model">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {AGENT_MODELS.map((m) => (
+                <SelectItem key={m.id} value={m.id}>
+                  {m.label} — {m.note}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-[var(--text-muted)]">Changing the model starts a new chat.</p>
+        </div>
         <div className="flex flex-col gap-2">
           <label className="text-xs text-[var(--text-muted)]">
             API key{' '}

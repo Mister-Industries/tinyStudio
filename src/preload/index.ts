@@ -108,7 +108,10 @@ const api = {
     getStatus: (): Promise<{ configured: boolean; source: 'stored' | 'env' | 'none' }> =>
       ipcRenderer.invoke('settings:status'),
     setApiKey: (key: string): Promise<void> => ipcRenderer.invoke('settings:set-key', key),
-    clearApiKey: (): Promise<void> => ipcRenderer.invoke('settings:clear-key')
+    clearApiKey: (): Promise<void> => ipcRenderer.invoke('settings:clear-key'),
+    // The Claude model Studio AI uses (shared/agentModels.ts).
+    getModel: (): Promise<string> => ipcRenderer.invoke('settings:get-model'),
+    setModel: (model: string): Promise<void> => ipcRenderer.invoke('settings:set-model', model)
   },
 
   // GitHub sign-in. The device flow and the token both live in main; the

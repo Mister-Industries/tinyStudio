@@ -137,6 +137,10 @@ interface SettingsAPI {
   getStatus: () => Promise<SettingsStatus>
   setApiKey: (key: string) => Promise<void>
   clearApiKey: () => Promise<void>
+  /** The Studio AI model id (shared/agentModels.ts), the default when none was chosen. */
+  getModel: () => Promise<string>
+  /** Rejects an id that isn't in the offered list. */
+  setModel: (model: string) => Promise<void>
 }
 
 interface AppAPI {

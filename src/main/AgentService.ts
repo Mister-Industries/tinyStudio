@@ -26,7 +26,7 @@ import {
   type StudioMethod
 } from '../shared/agentCore'
 import { hasAccess } from './folderAccess'
-import { getApiKey } from './settings'
+import { getApiKey, getModel } from './settings'
 
 export type { AgentSendArgs }
 
@@ -41,6 +41,7 @@ export class AgentService {
   private nextStudioId = 1
   private session = new AgentSession({
     getApiKey,
+    getModel,
     createClient: (apiKey) => new Anthropic({ apiKey }),
     // Only folders the user opened: the renderer names the root, main decides.
     openWorkspace: (root) => (root && hasAccess(root) ? nodeWorkspace(root) : null),

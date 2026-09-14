@@ -22,9 +22,9 @@ import type {
   ToolUseBlock
 } from '@anthropic-ai/sdk/resources/messages'
 import { GUIDE_IDS, type GuideId } from './agentGuides/catalog'
+import { thinkingOptionsFor, type AgentModelId } from './agentModels'
 import { STUDIO_SYSTEM_PROMPT } from './agentPrompt'
 
-export const AGENT_MODEL = 'claude-opus-4-8'
 const MAX_TOKENS = 16000
 const MAX_TURNS = 50 // hard stop on the tool loop, in case the model never settles
 const MAX_TOOL_OUTPUT = 60000 // chars returned to the model from a single tool
@@ -101,6 +101,8 @@ export type StudioMethod = keyof StudioBridge
 
 export interface AgentHost {
   getApiKey(): Promise<string | null>
+  /** The model the user picked in the Studio AI settings (agentModels.ts). */
+  getModel(): Promise<AgentModelId>
   /** Build the API client — the web host opts into browser mode here. */
   createClient(apiKey: string): Anthropic
   /** The workspace a request targets, or null when none is open. */
@@ -169,6 +171,7 @@ export class AgentSession {
     this.running = true
     this.aborted = false
     const client = host.createClient(apiKey)
+    const model = await host.getModel()
     const workspace = host.openWorkspace(args.workspaceRoot)
     this.conversation.push({ role: 'user', content: args.text })
 
@@ -182,13 +185,12 @@ export class AgentSession {
         }
 
         const stream = client.messages.stream({
-          model: AGENT_MODEL,
+          model,
           max_tokens: MAX_TOKENS,
           system,
           messages: this.conversation,
           tools: TOOLS,
-          thinking: { type: 'adaptive' },
-          output_config: { effort: 'high' }
+          ...thinkingOptionsFor(model, MAX_TOKENS)
         })
         this.stream = stream
 

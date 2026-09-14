@@ -107,6 +107,8 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
   output. Guides cover the app, the tinyCore pinout, `visual.js`, serial and
   `circuit.json`.
 - The conversation stays when you switch to another tab.
+- Pick the model in the Studio AI settings: Opus 5 (the default), Sonnet 5 or
+  Haiku 4.5. Earlier builds were pinned to Opus 4.8.
 
 ### Examples
 
