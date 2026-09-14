@@ -82,7 +82,24 @@ const api = {
     // Synchronous variant for construction-time use: the WebSocket service
     // client is created synchronously at renderer startup, and the backend is
     // already running by then (main starts it before creating the window).
-    getUrlSync: (): string => ipcRenderer.sendSync('service:get-url-sync')
+    getUrlSync: (): string => ipcRenderer.sendSync('service:get-url-sync'),
+    // Whether the backend is running, and why not if it isn't.
+    getStatus: (): Promise<{ running: boolean; error: string | null }> =>
+      ipcRenderer.invoke('service:get-status'),
+    // Stop and start the backend again on the same port.
+    restart: (): Promise<{ ok: boolean; error?: string }> => ipcRenderer.invoke('service:restart'),
+    // Problems main found with the backend: a crash it couldn't recover from
+    // (`stopped`), or a warning such as a missing arduino-cli.
+    onError: (
+      cb: (info: { message: string; error: string; stopped: boolean }) => void
+    ): (() => void) => {
+      const handler = (
+        _e: unknown,
+        info: { message: string; error: string; stopped: boolean }
+      ): void => cb(info)
+      ipcRenderer.on('service:error', handler)
+      return () => ipcRenderer.removeListener('service:error', handler)
+    }
   },
 
   // App settings (Studio AI). The renderer never sees the API key value —

@@ -119,6 +119,9 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
 - Light theme by default, with coloured chrome and tabs. Diagrams in docs follow
   the theme.
 - **About tinyStudio** in the header menu shows the version, licence and credits.
+- If tinyService stops while the desktop app is open, the app restarts it once.
+  If that fails, or it stops again within a minute, a notification says so and
+  offers **Restart**. A missing arduino-cli is reported the same way.
 - Links in project READMEs open in your browser instead of replacing the app.
 - The Windows installer has its own app identity and ships only the built app.
 - Your theme choice carries over from earlier versions.

@@ -174,11 +174,24 @@ interface GitHubAuthAPI {
   signInWithToken: (token: string) => Promise<GitHubAccountInfo>
 }
 
+export interface ServiceError {
+  message: string
+  error: string
+  /** The backend isn't running and won't restart on its own. */
+  stopped: boolean
+}
+
 interface ServiceAPI {
   /** Real ws:// URL of the spawned tinyService backend (port may differ from 3000). */
   getUrl: () => Promise<string>
   /** Synchronous variant for construction-time use. */
   getUrlSync: () => string
+  /** Whether the backend is running, and the last fatal error if it isn't. */
+  getStatus: () => Promise<{ running: boolean; error: string | null }>
+  /** Stop and start the backend again on the same port. */
+  restart: () => Promise<{ ok: boolean; error?: string }>
+  /** Backend problems found by the main process. */
+  onError: (cb: (info: ServiceError) => void) => () => void
 }
 
 export type AgentEvent =

@@ -375,11 +375,29 @@ export class WebSocketArduinoService implements ArduinoService {
   }
 
   /**
-   * Check arduino-cli availability
+   * Open the WebSocket again after the client gave up. The shared client stops
+   * after maxReconnectAttempts (30 s of outage here), so a backend that comes
+   * back later, like one restarted from the "tinyService stopped" prompt,
+   * needs a push. Debounced: connect() on a socket that is still CONNECTING
+   * would open a second one.
+   */
+  private lastReconnectAt = 0
+  public reconnect(): void {
+    if (!this.client || this.client.isConnected()) return
+    const now = Date.now()
+    if (now - this.lastReconnectAt < 2000) return
+    this.lastReconnectAt = now
+    this.client.connect()
+  }
+
+  /**
+   * Check arduino-cli availability. When the backend isn't connected this
+   * also kicks off a reconnect, so the status bar's Retry really retries.
    */
   async checkStatus(): Promise<AgentStatus> {
     try {
       if (!this.client || !this.client.isConnected()) {
+        this.reconnect()
         return {
           connected: false,
           lastCheck: Date.now(),

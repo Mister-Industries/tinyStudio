@@ -116,7 +116,8 @@ app.whenReady().then(async () => {
   try {
     await serviceManager.start()
   } catch (error) {
-    console.error('Failed to start TinyService during app initialization:', error)
+    // The window doesn't exist yet; the renderer asks for the status on mount.
+    serviceManager.reportStartFailure('tinyService failed to start', error)
   }
 
   // F12 toggles DevTools in development; Ctrl/Cmd+R is ignored in production.
@@ -129,6 +130,18 @@ app.whenReady().then(async () => {
   ipcMain.handle('service:get-url', () => serviceManager.getServiceUrl())
   ipcMain.on('service:get-url-sync', (event) => {
     event.returnValue = serviceManager.getServiceUrl()
+  })
+  ipcMain.handle('service:get-status', () => serviceManager.getStatus())
+  // The Restart button in BackendPrompt. Returns the failure as data so the
+  // renderer gets a clean message rather than an "Error invoking remote
+  // method" wrapper.
+  ipcMain.handle('service:restart', async () => {
+    try {
+      await serviceManager.restart()
+      return { ok: true }
+    } catch (error) {
+      return { ok: false, error: error instanceof Error ? error.message : String(error) }
+    }
   })
 
   // --- Studio AI agent + settings ---

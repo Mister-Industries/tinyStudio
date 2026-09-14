@@ -2,9 +2,9 @@
 /**
  * test-circuit.mjs — zero-extra-dependency test runner for the Circuit v2 core.
  *
- * Bundles every src/renderer/src/**\/__tests__/*.test.ts with esbuild (already
- * a transitive dependency via vite) into a temp dir, then runs them with
- * Node's built-in test runner (node:test).
+ * Bundles every src/**\/__tests__/*.test.ts with esbuild (already a
+ * transitive dependency via vite) into a temp dir, then runs them with Node's
+ * built-in test runner (node:test).
  *
  *   npm run test:circuit
  *
@@ -19,12 +19,13 @@ import { basename, dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const srcRoot = resolve(__dirname, '..', 'src', 'renderer', 'src')
+const srcRoot = resolve(__dirname, '..', 'src')
 
-// Every `__tests__/*.test.ts` under the renderer, not just the circuit's — so a
-// new suite (lib/__tests__, components/__tests__) is picked up by dropping the
-// file in, with no change here. `outbase` below keeps the directory structure
-// in the temp build, so two suites may share a basename.
+// Every `__tests__/*.test.ts` under src — renderer and main alike — so a new
+// suite (lib/__tests__, main/__tests__) is picked up by dropping the file in,
+// with no change here. Main-process tests must not import `electron`; keep the
+// logic under test in plain modules. `outbase` below keeps the directory
+// structure in the temp build, so two suites may share a basename.
 const files = readdirSync(srcRoot, { recursive: true, withFileTypes: true })
   .filter(
     (e) =>

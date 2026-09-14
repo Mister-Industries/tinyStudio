@@ -1,15 +1,18 @@
-// "Run tinyService" prompt for the browser build.
+// tinyService prompts. Renders nothing — it's a headless watcher.
 //
 // Compile / upload / serial all go through tinyService, a small local WebSocket
-// backend (see WebSocketArduinoService.ts). The desktop app launches it for you;
-// in the browser the user runs it themselves. When nothing is listening we drop
-// a persistent notification into the status-bar bell so it's easy to find and
-// stays until the user clears it. Never shown in the Electron build (which
-// auto-starts the backend). Renders nothing — it's a headless watcher.
+// backend (see WebSocketArduinoService.ts).
 //
-// On Windows the primary path is the one-click tray-agent installer published
-// from the tinyService repo (stable latest-release URL). Elsewhere — and as a
-// fallback for developers — we still show the npx command.
+// In the browser the user runs it themselves. When nothing is listening we drop
+// a persistent notification into the status-bar bell so it's easy to find and
+// stays until the user clears it. On Windows the primary path is the one-click
+// tray-agent installer published from the tinyService repo (stable
+// latest-release URL). Elsewhere — and as a fallback for developers — we still
+// show the npx command.
+//
+// On desktop the main process launches tinyService and restarts it once if it
+// dies (main/ServiceManager.ts). When that isn't enough, main sends the error
+// here and the prompt offers a Restart button.
 
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
@@ -23,13 +26,60 @@ const DOWNLOAD_URL =
 
 const isWindows = navigator.userAgent.includes('Windows')
 
+// Fixed toast ids, so a repeat error replaces the stale one instead of stacking.
+const STOPPED_TOAST = 'tinyservice-stopped'
+const RESTARTING_TOAST = 'tinyservice-restarting'
+
 export function BackendPrompt(): null {
   const dispatch = useAppDispatch()
   // Push at most once so flapping connections don't spam the bell.
   const pushed = useRef(false)
 
+  // Desktop: the backend died and main gave up, or never started.
   useEffect(() => {
-    if (isElectron()) return // desktop starts tinyService itself
+    if (!isElectron()) return
+    const api = window.api.service
+
+    const showStopped = (detail: string): void => {
+      const msg = `${detail} Compiling, uploading and the serial monitor won't work until it's running again.`
+      dispatch(addNotification({ tone: 'error', title: 'tinyService stopped', msg }))
+      toast.error('tinyService stopped', {
+        id: STOPPED_TOAST,
+        description: msg,
+        duration: Infinity,
+        action: { label: 'Restart', onClick: () => void restart() }
+      })
+    }
+
+    const restart = async (): Promise<void> => {
+      // A separate toast: updating the error toast in place would keep its
+      // description and Restart button (sonner merges options by id).
+      toast.dismiss(STOPPED_TOAST)
+      toast.loading('Restarting tinyService…', { id: RESTARTING_TOAST })
+      const result = await api.restart()
+      if (result.ok) {
+        toast.success('tinyService restarted', { id: RESTARTING_TOAST, duration: 4000 })
+        // The WebSocket client gives up after 30 s of outage; reconnect now.
+        void getArduinoService().checkStatus()
+      } else {
+        toast.dismiss(RESTARTING_TOAST)
+        showStopped(`Restarting failed: ${result.error ?? 'unknown error'}.`)
+      }
+    }
+
+    // The failure may have happened before this component mounted.
+    void api.getStatus().then((status) => {
+      if (!status.running && status.error) showStopped(status.error)
+    })
+    return api.onError(({ message, error, stopped }) => {
+      if (stopped) showStopped(error)
+      else toast.warning(message, { description: error })
+    })
+  }, [dispatch])
+
+  // Browser: the user runs tinyService themselves.
+  useEffect(() => {
+    if (isElectron()) return
     const service = getArduinoService()
 
     const announce = (): void => {
