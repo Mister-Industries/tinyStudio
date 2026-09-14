@@ -1,5 +1,7 @@
 import { isElectron } from '@renderer/lib/utils'
+import { keysOf, matches } from '@renderer/lib/shortcuts'
 import { openProjectDialog, selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
+import { showExamples } from '@renderer/redux/editorSlice'
 import { useTheme } from '@renderer/lib/ThemeProvider'
 import { ChevronRight, Maximize, Minimize, Minus, Moon, Sun, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -15,6 +17,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
 import { GitHubAccountButton } from './GitHubAccountButton'
 import { AboutDialog } from './AboutDialog'
+import { ShortcutsDialog } from './ShortcutsDialog'
 
 /**
  * Top bar (38px). Brand wordmark + breadcrumb on the left; theme toggle, GitHub
@@ -28,6 +31,7 @@ import { AboutDialog } from './AboutDialog'
 export function Header(): React.JSX.Element {
   const [isMaximized, setIsMaximized] = useState(false)
   const [aboutOpen, setAboutOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const workspace = useAppSelector((state) => state.file.workspace)
   const openFiles = useAppSelector(selectOpenFiles)
   const viewingFileId = useAppSelector((state) => state.file.viewingFileId)
@@ -35,8 +39,21 @@ export function Header(): React.JSX.Element {
   const { theme, setTheme } = useTheme()
   const isDark = theme === 'dark'
   const dispatch = useAppDispatch()
-  const { openWorkspace, refreshWorkspace, closeWorkspace, newFile, newFolder } =
-    useWorkspaceActions()
+  const { refreshWorkspace, closeWorkspace, newFile, newFolder } = useWorkspaceActions()
+
+  // Mod+/ opens the shortcuts dialog, except while typing: the code editor
+  // uses the same keys to toggle a comment.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (!matches(e, 'global.shortcuts')) return
+      const el = document.activeElement as HTMLElement | null
+      if (el && (/INPUT|TEXTAREA|SELECT/.test(el.tagName) || el.closest('.monaco-editor'))) return
+      e.preventDefault()
+      setShortcutsOpen(true)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   // Radix traps focus while the menu is open, which would swallow the file
   // tree's inline name-field autoFocus (New File/Folder). So run the action a
@@ -101,26 +118,35 @@ export function Header(): React.JSX.Element {
             <DropdownMenuItem
               onSelect={afterMenuClose(() => dispatch(openProjectDialog('create')))}
             >
-              New Project…
+              Create new…
             </DropdownMenuItem>
+            <DropdownMenuItem onSelect={afterMenuClose(() => dispatch(openProjectDialog('open')))}>
+              Open existing…
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={afterMenuClose(() => dispatch(showExamples()))}>
+              Try an example
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem disabled={!workspace} onSelect={afterMenuClose(newFile)}>
               New File
             </DropdownMenuItem>
             <DropdownMenuItem disabled={!workspace} onSelect={afterMenuClose(newFolder)}>
               New Folder
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={afterMenuClose(openWorkspace)}>
-              Open Folder…
-            </DropdownMenuItem>
             <DropdownMenuItem disabled={!workspace} onSelect={afterMenuClose(refreshWorkspace)}>
               Refresh Files
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem disabled={!workspace} onSelect={afterMenuClose(closeWorkspace)}>
-              Close Workspace
+              Close project
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={afterMenuClose(() => setShortcutsOpen(true))}>
+              Keyboard shortcuts
+              <span className="ml-auto pl-4 text-[11px] text-[var(--text-muted)]">
+                {keysOf('global.shortcuts')}
+              </span>
+            </DropdownMenuItem>
             <DropdownMenuItem onSelect={afterMenuClose(() => setAboutOpen(true))}>
               About tinyStudio
             </DropdownMenuItem>
@@ -207,6 +233,7 @@ export function Header(): React.JSX.Element {
         )}
       </div>
       <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
+      <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </div>
   )
 }

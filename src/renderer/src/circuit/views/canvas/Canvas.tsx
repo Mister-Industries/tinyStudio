@@ -13,6 +13,7 @@
 
 import { CircuitBoard, Crosshair, X, Zap } from 'lucide-react'
 import React from 'react'
+import { matches } from '../../../lib/shortcuts'
 import { buildClipboard, materializePaste, parseClipboard } from '../../core/clipboard'
 import * as cmd from '../../core/commands'
 import {
@@ -1096,61 +1097,61 @@ export function Canvas({
     const down = (e: KeyboardEvent): void => {
       if (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))
         return
-      // Space = straight-wire modifier (Shift is reserved for shift-select).
-      if (e.key === ' ') {
+      // Bindings live in lib/shortcuts (the Keyboard Shortcuts dialog reads
+      // the same list). Space = straight-wire modifier (Shift is reserved for
+      // shift-select).
+      if (matches(e, 'circuit.straightWire')) {
         setStraight(true)
         e.preventDefault()
         return
       }
-      if (e.key === 'Escape') {
+      if (matches(e, 'circuit.cancel')) {
         setArmed(null)
         setSel(emptySel())
         return
       }
       if (!editable) return
-      const mod = e.ctrlKey || e.metaKey
-      if (mod && (e.key === 'z' || e.key === 'Z')) {
+      if (matches(e, 'circuit.undo')) {
         e.preventDefault()
-        if (e.shiftKey) store.redo()
-        else store.undo()
+        store.undo()
         return
       }
-      if (mod && (e.key === 'y' || e.key === 'Y')) {
+      if (matches(e, 'circuit.redo') || matches(e, 'circuit.redoAlt')) {
         e.preventDefault()
         store.redo()
         return
       }
-      if (mod && (e.key === 'c' || e.key === 'C')) {
+      if (matches(e, 'circuit.copy')) {
         void copySelection()
         return
       }
-      if (mod && (e.key === 'x' || e.key === 'X')) {
+      if (matches(e, 'circuit.cut')) {
         void copySelection().then((ok) => {
           if (ok) deleteSelection()
         })
         return
       }
-      if (mod && (e.key === 'v' || e.key === 'V')) {
+      if (matches(e, 'circuit.paste')) {
         void navigator.clipboard.readText().then((text) => {
           const payload = parseClipboard(text)
           if (payload) pastePayload(payload)
         })
         return
       }
-      if (mod && (e.key === 'd' || e.key === 'D')) {
+      if (matches(e, 'circuit.duplicate')) {
         e.preventDefault()
         const payload = buildClipboard(doc, sel.parts, sel.wires)
         if (payload) pastePayload(payload)
         return
       }
-      if (e.key === 'r' || e.key === 'R') {
+      if (matches(e, 'circuit.rotate')) {
         if (sel.parts.size) {
           e.preventDefault()
           rotateSelection()
         }
         return
       }
-      if ((e.key === 'f' || e.key === 'F') && view === 'sch' && sel.parts.size) {
+      if (matches(e, 'circuit.flip') && view === 'sch' && sel.parts.size) {
         // horizontal mirror — schematic only (spec §6.3 / B13)
         e.preventDefault()
         const ids = [...sel.parts]
@@ -1170,13 +1171,14 @@ export function Canvas({
         if (cmds.length) store.dispatch(cmd.composite('Flip', cmds))
         return
       }
-      if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (matches(e, 'circuit.delete')) {
         deleteSelection()
         return
       }
-      if (e.key.startsWith('Arrow') && sel.parts.size) {
+      const big = matches(e, 'circuit.nudgeBig')
+      if ((big || matches(e, 'circuit.nudge')) && sel.parts.size) {
         e.preventDefault()
-        const step = (view === 'sch' ? GRID_SCH : GRID_BB) * (e.shiftKey ? 5 : 1)
+        const step = (view === 'sch' ? GRID_SCH : GRID_BB) * (big ? 5 : 1)
         const d = {
           ArrowLeft: [-step, 0],
           ArrowRight: [step, 0],

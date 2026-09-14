@@ -129,6 +129,11 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
 - Light theme by default, with coloured chrome and tabs. Diagrams in docs follow
   the theme.
 - **About tinyStudio** in the header menu shows the version, licence and credits.
+- **Keyboard shortcuts** in the header menu (or Ctrl+/) lists every shortcut
+  the app defines.
+- With no project open, the Files panel just says so; creating and opening
+  projects happens on the start screen and in the header menu, with the same
+  names in both: **Create new**, **Open existing**, **Try an example**.
 - If tinyService stops while the desktop app is open, the app restarts it once.
   If that fails, or it stops again within a minute, a notification says so and
   offers **Restart**. A missing arduino-cli is reported the same way.

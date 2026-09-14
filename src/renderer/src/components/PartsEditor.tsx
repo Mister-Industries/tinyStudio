@@ -30,6 +30,7 @@ import { FolderOpen, Plus, RotateCcw, Trash2, UploadCloud, X } from 'lucide-reac
 import React from 'react'
 import type { PartDef, PartSource, PartView, ViewKind } from '../lib/partsLibrary'
 import { GRID_BB } from '../circuit/core/model'
+import { keysOf, matches } from '../lib/shortcuts'
 import {
   artPrefix,
   movePinInArt,
@@ -374,19 +375,20 @@ export function PartsEditor({
     const onKey = (e: KeyboardEvent): void => {
       if (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))
         return
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      if (matches(e, 'parts.undo')) {
         e.preventDefault()
-        if (e.shiftKey) redo()
-        else undo()
+        undo()
         return
       }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+      if (matches(e, 'parts.redo') || matches(e, 'parts.redoAlt')) {
         e.preventDefault()
         redo()
         return
       }
       if (sel < 0) return
-      const step = e.shiftKey ? GRID_BB : artUnitPx()
+      const grid = matches(e, 'parts.nudgeGrid')
+      if (!grid && !matches(e, 'parts.nudge')) return
+      const step = grid ? GRID_BB : artUnitPx()
       const d: Record<string, [number, number]> = {
         ArrowLeft: [-step, 0],
         ArrowRight: [step, 0],
@@ -718,7 +720,8 @@ export function PartsEditor({
                   </div>
                 ) : (
                   <div className="text-[10px] leading-snug text-text-faint py-1">
-                    Arrow keys nudge the selected pin one art unit; Shift for 0.1 in. Ctrl+Z undoes.
+                    {keysOf('parts.nudge')} nudge the selected pin one art unit,{' '}
+                    {keysOf('parts.nudgeGrid')} 0.1 in. {keysOf('parts.undo')} undoes.
                   </div>
                 )}
               </div>

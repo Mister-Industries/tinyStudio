@@ -5,8 +5,8 @@
  */
 
 import { useWorkspaceActions } from '@renderer/hooks/useWorkspaceActions'
-import { openProjectDialog, useAppDispatch, useAppSelector } from '@renderer/redux'
-import { FilePlus2, Folder, FolderOpen, FolderPlus, FolderSync, FolderX, Plus } from 'lucide-react'
+import { useAppSelector } from '@renderer/redux'
+import { Folder, FolderOpen, FolderPlus, FolderSync, FolderX, Plus } from 'lucide-react'
 import React from 'react'
 import { Button } from '../ui/Button'
 import { ScrollArea } from '../ui/ScrollArea'
@@ -16,7 +16,6 @@ import { FileTreeItem } from './FileTreeItem'
 export function FileExplorerContent(): React.JSX.Element {
   const isLoading = false
   const workspace = useAppSelector((state) => state.file.workspace)
-  const dispatch = useAppDispatch()
   const {
     openWorkspace: handleSelectWorkspace,
     refreshWorkspace: handleRefreshWorkspace,
@@ -31,7 +30,7 @@ export function FileExplorerContent(): React.JSX.Element {
       <div className="group/dir relative flex justify-between items-center px-3 pt-2.5 pb-1.5">
         <span className="inline-flex items-center gap-1.5 min-w-0 font-sans text-[12.5px] font-bold tracking-[0.01em] text-[var(--text-body)]">
           <Folder size={14} className="shrink-0 text-[var(--text-faint)]" />
-          <span className="truncate">{workspace ? workspace.name : 'No workspace selected'}</span>
+          <span className="truncate">{workspace ? workspace.name : 'No project open'}</span>
         </span>
         {workspace && (
           <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex gap-px pl-2 bg-[var(--bg-raised)] opacity-0 transition-opacity group-hover/dir:opacity-100 focus-within:opacity-100">
@@ -112,21 +111,10 @@ export function FileExplorerContent(): React.JSX.Element {
       {/* Main Content Area */}
       <ScrollArea className="flex-1">
         {!workspace ? (
-          // No workspace — the start screen's ways in, compact and in the same order.
-          <div className="flex flex-col items-center justify-center py-10 px-4 gap-2">
-            <Button onClick={() => dispatch(openProjectDialog('create'))} className="w-40 gap-1.5">
-              <FilePlus2 size={15} /> Create Project!
-            </Button>
-            <Button variant="secondary" onClick={handleSelectWorkspace} className="w-40 gap-1.5">
-              <FolderOpen size={15} /> Open Folder
-            </Button>
-            <button
-              type="button"
-              onClick={() => dispatch(openProjectDialog('open'))}
-              className="mt-1 cursor-pointer text-xs font-medium text-[var(--brand)] hover:underline"
-            >
-              or open a GitHub repo
-            </button>
+          // No project: creating and opening live on the start screen and in
+          // the tinyStudio menu, so this panel only says so.
+          <div className="px-4 py-10 text-center text-xs text-[var(--text-muted)]">
+            No project open
           </div>
         ) : isLoading ? (
           // Loading state

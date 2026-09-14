@@ -35,6 +35,7 @@ import {
   ZoomOut
 } from 'lucide-react'
 import React from 'react'
+import { keysOf } from '../../lib/shortcuts'
 import {
   PART_MANIFEST,
   ensureParts,
@@ -802,7 +803,7 @@ export function CircuitViewV2({
                 className={`${tool} w-8 justify-center px-0 disabled:opacity-40`}
                 disabled={!store.canUndo()}
                 onClick={() => store.undo()}
-                title={store.undoLabel() ? `Undo ${store.undoLabel()} (Ctrl+Z)` : 'Undo (Ctrl+Z)'}
+                title={`${store.undoLabel() ? `Undo ${store.undoLabel()}` : 'Undo'} (${keysOf('circuit.undo')})`}
               >
                 <Undo2 size={15} />
               </button>
@@ -810,7 +811,7 @@ export function CircuitViewV2({
                 className={`${tool} w-8 justify-center px-0 disabled:opacity-40`}
                 disabled={!store.canRedo()}
                 onClick={() => store.redo()}
-                title="Redo (Ctrl+Y)"
+                title={`Redo (${keysOf('circuit.redo')})`}
               >
                 <Redo2 size={15} />
               </button>

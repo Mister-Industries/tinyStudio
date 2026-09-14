@@ -4,6 +4,7 @@ import { promptSaveToComputer } from '@renderer/commands/fileCommands'
 import { useIsReadOnlyProject } from '@renderer/hooks/useIsReadOnlyProject'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { notify as toast } from '@renderer/lib/notify'
+import { matches } from '@renderer/lib/shortcuts'
 import { isVirtualPath } from '@renderer/lib/virtualFileSystem'
 import { selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
 import {
@@ -49,19 +50,16 @@ export function CodeView(): React.JSX.Element {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if ((event.metaKey || event.ctrlKey) && event.key === 'w') {
+      if (matches(event, 'code.closeTab')) {
         event.preventDefault()
         if (viewingFileId) handleFileClose(viewingFileId)
       }
-      if (event.ctrlKey && event.key === 'Tab') {
+      const prev = matches(event, 'code.prevTab')
+      if (prev || matches(event, 'code.nextTab')) {
         event.preventDefault()
         if (openFiles.length > 1) {
           const i = openFiles.findIndex((f) => f.id === viewingFileId)
-          const next = event.shiftKey
-            ? i <= 0
-              ? openFiles.length - 1
-              : i - 1
-            : (i + 1) % openFiles.length
+          const next = prev ? (i <= 0 ? openFiles.length - 1 : i - 1) : (i + 1) % openFiles.length
           if (openFiles[next]) handleFileSelect(openFiles[next].id)
         }
       }
