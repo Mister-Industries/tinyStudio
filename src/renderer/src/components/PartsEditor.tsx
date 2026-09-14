@@ -19,6 +19,11 @@
  * Both views are editable via the toggle — each keeps its own art, size and pin
  * positions (pin NAMES are the cross-view join key, so keep them consistent).
  *
+ * The Schematic view has a second mode, **Symbol** (components/SymbolEditor):
+ * a body shape, a name and pins on the 0.1 in grid, rendered to a schematic
+ * SVG with `pin-*` shapes (circuit/parts/symbolDraft), so it saves and loads
+ * exactly like hand-drawn art. Saving overwrites the part's schematic.svg.
+ *
  * Arrow keys nudge the selected pin by one unit of the art's own coordinates
  * (Shift: 0.1 in). While the pins come from `pin-*` shapes, a nudge moves the
  * shape in the SVG itself, so the file stays the source of truth; only a drag
@@ -40,6 +45,13 @@ import {
   scanPins
 } from '../circuit/parts/svgArt'
 import { sanitizeSvg } from '../lib/sanitizeSvg'
+import {
+  draftFromPins,
+  draftFromView,
+  renderDraft,
+  type SymbolDraft
+} from '../circuit/parts/symbolDraft'
+import { SymbolCanvas, SymbolPanel } from './SymbolEditor'
 
 const slug = (s: string): string =>
   s
@@ -169,6 +181,10 @@ export function PartsEditor({
   )
   const [sel, setSel] = React.useState<number>(-1)
   const [busy, setBusy] = React.useState(false)
+  // Symbol mode: the draft is the truth; every change re-renders the
+  // schematic art from it. null until the mode is entered.
+  const [schMode, setSchMode] = React.useState<'art' | 'symbol'>('art')
+  const [draft, setDraft] = React.useState<SymbolDraft | null>(null)
   const [targetPack, setTargetPack] = React.useState<string>(
     initial?.source?.pack ??
       folderPacks?.find((p) => p.id === 'core')?.id ??
@@ -189,11 +205,12 @@ export function PartsEditor({
     sch: ViewBuf
     editView: ViewKind
     sel: number
+    draft: SymbolDraft | null
   }
   const history = React.useRef<{ past: Snap[]; future: Snap[] }>({ past: [], future: [] })
   const record = (): void => {
     const h = history.current
-    h.past.push({ bb, sch, editView, sel })
+    h.past.push({ bb, sch, editView, sel, draft })
     if (h.past.length > 100) h.past.shift()
     h.future = []
   }
@@ -202,20 +219,58 @@ export function PartsEditor({
     setSch(s.sch)
     setEditView(s.editView)
     setSel(s.sel)
+    setDraft(s.draft)
   }
   const undo = (): void => {
     const h = history.current
     const s = h.past.pop()
     if (!s) return
-    h.future.push({ bb, sch, editView, sel })
+    h.future.push({ bb, sch, editView, sel, draft })
     restore(s)
   }
   const redo = (): void => {
     const h = history.current
     const s = h.future.pop()
     if (!s) return
-    h.past.push({ bb, sch, editView, sel })
+    h.past.push({ bb, sch, editView, sel, draft })
     restore(s)
+  }
+
+  // ── Symbol mode ──────────────────────────────────────────────────────────
+  /** Turn the draft into the schematic view's art and pins. */
+  const applyDraft = (next: SymbolDraft): void => {
+    const r = renderDraft(next)
+    setDraft(next)
+    setSch((b) => ({
+      ...b,
+      raw: r.svg,
+      svg: previewOf(r.svg, 'schematic'),
+      w: r.w,
+      h: r.h,
+      pins: Object.entries(r.pins).map(([n, [x, y]]) => ({ name: n, x, y })),
+      fromSvg: true,
+      pinsEdited: false,
+      artChanged: true,
+      sizeEdited: true
+    }))
+  }
+  /** The generated-box layout over the part's pins (breadboard names first). */
+  const draftFromBox = (): SymbolDraft =>
+    draftFromPins(
+      (bb.pins.length ? bb.pins : sch.pins).map((p) => p.name),
+      name
+    )
+  const enterSymbolMode = (): void => {
+    setSchMode('symbol')
+    setSel(-1)
+    if (!draft) {
+      record()
+      applyDraft(draftFromBox())
+    }
+  }
+  const changeDraft = (next: SymbolDraft, commit = true): void => {
+    if (commit) record()
+    applyDraft(next)
   }
 
   // any hand change to pins pins them down in part.json from then on
@@ -226,6 +281,12 @@ export function PartsEditor({
     if (v === editView) return
     setEditView(v)
     setSel(-1)
+  }
+  // Editing the art file directly leaves Symbol mode: the two would fight
+  // over sch.raw.
+  const onUploadArt = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setSchMode('art')
+    onUpload(e)
   }
 
   // fit the part into the preview area (cap zoom so tiny parts stay visible)
@@ -385,7 +446,7 @@ export function PartsEditor({
         redo()
         return
       }
-      if (sel < 0) return
+      if (sel < 0 || (editView === 'schematic' && schMode === 'symbol')) return
       const grid = matches(e, 'parts.nudgeGrid')
       if (!grid && !matches(e, 'parts.nudge')) return
       const step = grid ? GRID_BB : artUnitPx()
@@ -402,7 +463,7 @@ export function PartsEditor({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sel, editView, bb, sch])
+  }, [sel, editView, bb, sch, draft, schMode])
 
   const toMap = (ps: Pin[]): Record<string, [number, number]> => {
     const m: Record<string, [number, number]> = {}
@@ -539,46 +600,56 @@ export function PartsEditor({
         <div className="flex-1 flex min-h-0">
           {/* preview surface */}
           <div className="flex-1 flex items-center justify-center bg-bg-sunken overflow-auto p-6">
-            <div
-              ref={surfaceRef}
-              className="relative cursor-crosshair"
-              style={{
-                width: w * scale,
-                height: h * scale,
-                outline: '1px dashed var(--border-interactive)',
-                backgroundImage: 'radial-gradient(var(--dot-color) 1.1px, transparent 1.1px)',
-                backgroundSize: `${10 * scale}px ${10 * scale}px`
-              }}
-              onClick={onSurfaceClick}
-            >
-              <div
-                className="absolute inset-0 [&>svg]:size-full pointer-events-none"
-                dangerouslySetInnerHTML={{ __html: sanitizeSvg(svg) }}
+            {editView === 'schematic' && schMode === 'symbol' && draft ? (
+              <SymbolCanvas
+                draft={draft}
+                scale={scale}
+                selected={sel}
+                onSelect={setSel}
+                onChange={changeDraft}
               />
-              {pins.map((pin, i) => (
+            ) : (
+              <div
+                ref={surfaceRef}
+                className="relative cursor-crosshair"
+                style={{
+                  width: w * scale,
+                  height: h * scale,
+                  outline: '1px dashed var(--border-interactive)',
+                  backgroundImage: 'radial-gradient(var(--dot-color) 1.1px, transparent 1.1px)',
+                  backgroundSize: `${10 * scale}px ${10 * scale}px`
+                }}
+                onClick={onSurfaceClick}
+              >
                 <div
-                  key={i}
-                  className="editor-pin absolute -translate-x-1/2 -translate-y-1/2"
-                  style={{ left: pin.x * scale, top: pin.y * scale, zIndex: 2 }}
-                  onPointerDown={(e) => onPinDown(e, i)}
-                  onClick={(e) => e.stopPropagation()}
-                >
+                  className="absolute inset-0 [&>svg]:size-full pointer-events-none"
+                  dangerouslySetInnerHTML={{ __html: sanitizeSvg(svg) }}
+                />
+                {pins.map((pin, i) => (
                   <div
-                    className="rounded-full border-2"
-                    style={{
-                      width: 12,
-                      height: 12,
-                      background: i === sel ? 'var(--brand)' : 'var(--text-muted)',
-                      borderColor: '#fff',
-                      cursor: 'grab'
-                    }}
-                  />
-                  <div className="absolute left-3 -top-1 text-[10px] text-brand whitespace-nowrap pointer-events-none">
-                    {pin.name}
+                    key={i}
+                    className="editor-pin absolute -translate-x-1/2 -translate-y-1/2"
+                    style={{ left: pin.x * scale, top: pin.y * scale, zIndex: 2 }}
+                    onPointerDown={(e) => onPinDown(e, i)}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div
+                      className="rounded-full border-2"
+                      style={{
+                        width: 12,
+                        height: 12,
+                        background: i === sel ? 'var(--brand)' : 'var(--text-muted)',
+                        borderColor: '#fff',
+                        cursor: 'grab'
+                      }}
+                    />
+                    <div className="absolute left-3 -top-1 text-[10px] text-brand whitespace-nowrap pointer-events-none">
+                      {pin.name}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* inspector */}
@@ -592,139 +663,186 @@ export function PartsEditor({
                   onChange={(e) => setName(e.target.value)}
                 />
               </label>
-              <div className="flex gap-3">
-                <label className="flex flex-col gap-1">
-                  <span className="text-[11px] text-text-muted">Width (px)</span>
-                  <input
-                    type="number"
-                    className={numField}
-                    value={w}
-                    onChange={(e) => resize(Math.max(1, parseFloat(e.target.value) || 1), h)}
-                  />
-                </label>
-                <label className="flex flex-col gap-1">
-                  <span className="text-[11px] text-text-muted">Height (px)</span>
-                  <input
-                    type="number"
-                    className={numField}
-                    value={h}
-                    onChange={(e) => resize(w, Math.max(1, parseFloat(e.target.value) || 1))}
-                  />
-                </label>
-              </div>
-
-              {/* where this view's art lives */}
-              <div className="rounded-lg border border-border-default bg-surface-card p-2 flex flex-col gap-1.5">
-                <div className="text-[11px] text-text-muted">
-                  {editView === 'breadboard' ? 'Breadboard' : 'Schematic'} art
+              {editView === 'schematic' && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] text-text-muted">Schematic</span>
+                  <div className="flex rounded-md overflow-hidden border border-border-default">
+                    {(
+                      [
+                        ['art', 'Art file'],
+                        ['symbol', 'Symbol']
+                      ] as ['art' | 'symbol', string][]
+                    ).map(([m, label]) => (
+                      <button
+                        key={m}
+                        className={`flex-1 h-7 text-xs font-medium ${
+                          schMode === m
+                            ? 'bg-brand/15 text-brand'
+                            : 'bg-surface-card text-text-muted hover:text-text-body'
+                        }`}
+                        onClick={() => (m === 'symbol' ? enterSymbolMode() : setSchMode('art'))}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="text-[10px] leading-snug text-text-faint">
+                    {schMode === 'symbol'
+                      ? 'A body, a name and pins on the 0.1 in grid. Saving writes it as schematic.svg.'
+                      : 'The schematic art as a file: upload an SVG and place pins on it.'}
+                  </div>
                 </div>
-                <div className="text-[11px] text-text-body break-all">
-                  {buf.artChanged
-                    ? 'uploaded — not saved yet'
-                    : artFile && initial?.source?.dir
-                      ? `tinyparts/${initial.source.dir}/${artFile}`
-                      : initial?.views[editView]
-                        ? 'inside the part definition'
-                        : 'placeholder box'}
-                </div>
-                {artPath && !buf.artChanged && window.api?.fs && (
-                  <button
-                    className="self-start text-[11px] text-brand hover:underline flex items-center gap-1"
-                    onClick={() => void window.api?.fs?.showInFolder(artPath)}
-                  >
-                    <FolderOpen size={11} /> Show in folder
-                  </button>
-                )}
-                <label className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-md border border-dashed border-border-interactive text-xs text-text-body hover:border-brand hover:text-text-strong cursor-pointer">
-                  <UploadCloud size={14} /> Upload SVG…
-                  <input
-                    type="file"
-                    accept=".svg,image/svg+xml"
-                    className="hidden"
-                    onChange={onUpload}
-                  />
-                </label>
-                <div className="text-[10px] leading-snug text-text-faint">
-                  {buf.fromSvg && !buf.pinsEdited
-                    ? 'Pins come from the shapes named “pin-<NAME>” in the SVG, so moving them in Illustrator moves the pins.'
-                    : buf.fromSvg
-                      ? 'You moved pins by hand: their positions will be fixed in part.json and stop following the art.'
-                      : 'Tip: name pad shapes “pin-GND”, “pin-D8”… in Illustrator and upload — pins place themselves.'}
-                </div>
-              </div>
+              )}
+              {editView === 'schematic' && schMode === 'symbol' && draft ? (
+                <SymbolPanel
+                  draft={draft}
+                  selected={sel}
+                  onSelect={setSel}
+                  onChange={changeDraft}
+                  onStartFromBox={() => changeDraft(draftFromBox())}
+                  onStartFromArt={
+                    initial?.views.schematic
+                      ? () => changeDraft(draftFromView(initial.views.schematic!, name))
+                      : undefined
+                  }
+                />
+              ) : (
+                <>
+                  <div className="flex gap-3">
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[11px] text-text-muted">Width (px)</span>
+                      <input
+                        type="number"
+                        className={numField}
+                        value={w}
+                        onChange={(e) => resize(Math.max(1, parseFloat(e.target.value) || 1), h)}
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[11px] text-text-muted">Height (px)</span>
+                      <input
+                        type="number"
+                        className={numField}
+                        value={h}
+                        onChange={(e) => resize(w, Math.max(1, parseFloat(e.target.value) || 1))}
+                      />
+                    </label>
+                  </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-text-muted">Pins ({pins.length})</span>
-                <button
-                  className="text-text-muted hover:text-brand"
-                  title="Add pin at centre"
-                  onClick={() => {
-                    record()
-                    setPins((ps) => [
-                      ...ps,
-                      {
-                        name: uniqueName(String(ps.length + 1)),
-                        x: Math.round(w / 2),
-                        y: Math.round(h / 2)
-                      }
-                    ])
-                    setSel(pins.length)
-                  }}
-                >
-                  <Plus size={15} />
-                </button>
-              </div>
+                  {/* where this view's art lives */}
+                  <div className="rounded-lg border border-border-default bg-surface-card p-2 flex flex-col gap-1.5">
+                    <div className="text-[11px] text-text-muted">
+                      {editView === 'breadboard' ? 'Breadboard' : 'Schematic'} art
+                    </div>
+                    <div className="text-[11px] text-text-body break-all">
+                      {buf.artChanged
+                        ? 'uploaded — not saved yet'
+                        : artFile && initial?.source?.dir
+                          ? `tinyparts/${initial.source.dir}/${artFile}`
+                          : initial?.views[editView]
+                            ? 'inside the part definition'
+                            : 'placeholder box'}
+                    </div>
+                    {artPath && !buf.artChanged && window.api?.fs && (
+                      <button
+                        className="self-start text-[11px] text-brand hover:underline flex items-center gap-1"
+                        onClick={() => void window.api?.fs?.showInFolder(artPath)}
+                      >
+                        <FolderOpen size={11} /> Show in folder
+                      </button>
+                    )}
+                    <label className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-md border border-dashed border-border-interactive text-xs text-text-body hover:border-brand hover:text-text-strong cursor-pointer">
+                      <UploadCloud size={14} /> Upload SVG…
+                      <input
+                        type="file"
+                        accept=".svg,image/svg+xml"
+                        className="hidden"
+                        onChange={onUploadArt}
+                      />
+                    </label>
+                    <div className="text-[10px] leading-snug text-text-faint">
+                      {buf.fromSvg && !buf.pinsEdited
+                        ? 'Pins come from the shapes named “pin-<NAME>” in the SVG, so moving them in Illustrator moves the pins.'
+                        : buf.fromSvg
+                          ? 'You moved pins by hand: their positions will be fixed in part.json and stop following the art.'
+                          : 'Tip: name pad shapes “pin-GND”, “pin-D8”… in Illustrator and upload — pins place themselves.'}
+                    </div>
+                  </div>
 
-              <div className="flex flex-col gap-1">
-                {pins.map((pin, i) => (
-                  <div
-                    key={i}
-                    className={`flex items-center gap-2 px-2 py-1 rounded border ${i === sel ? 'border-brand/50 bg-bg-sunken' : 'border-border-default'}`}
-                    onClick={() => setSel(i)}
-                  >
-                    <input
-                      className="flex-1 min-w-0 bg-transparent text-sm text-text-strong outline-none"
-                      value={pin.name}
-                      onFocus={record}
-                      onChange={(e) => {
-                        const v = e.target.value
-                        setPins((ps) => ps.map((p, idx) => (idx === i ? { ...p, name: v } : p)))
-                      }}
-                      onBlur={(e) => {
-                        const fixed = uniqueName(e.target.value || String(i + 1), i)
-                        if (fixed !== pin.name)
-                          setPins((ps) =>
-                            ps.map((p, idx) => (idx === i ? { ...p, name: fixed } : p))
-                          )
-                      }}
-                    />
-                    <span className="text-[10px] text-text-faint">
-                      {Math.round(pin.x * 100) / 100},{Math.round(pin.y * 100) / 100}
-                    </span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-text-muted">Pins ({pins.length})</span>
                     <button
-                      className="text-text-faint hover:text-status-error"
-                      onClick={(e) => {
-                        e.stopPropagation()
+                      className="text-text-muted hover:text-brand"
+                      title="Add pin at centre"
+                      onClick={() => {
                         record()
-                        setPins((ps) => ps.filter((_, idx) => idx !== i))
-                        setSel(-1)
+                        setPins((ps) => [
+                          ...ps,
+                          {
+                            name: uniqueName(String(ps.length + 1)),
+                            x: Math.round(w / 2),
+                            y: Math.round(h / 2)
+                          }
+                        ])
+                        setSel(pins.length)
                       }}
                     >
-                      <Trash2 size={13} />
+                      <Plus size={15} />
                     </button>
                   </div>
-                ))}
-                {pins.length === 0 ? (
-                  <div className="text-[11px] text-text-faint py-2">
-                    Click the preview to drop pins for the {editView} view.
+
+                  <div className="flex flex-col gap-1">
+                    {pins.map((pin, i) => (
+                      <div
+                        key={i}
+                        className={`flex items-center gap-2 px-2 py-1 rounded border ${i === sel ? 'border-brand/50 bg-bg-sunken' : 'border-border-default'}`}
+                        onClick={() => setSel(i)}
+                      >
+                        <input
+                          className="flex-1 min-w-0 bg-transparent text-sm text-text-strong outline-none"
+                          value={pin.name}
+                          onFocus={record}
+                          onChange={(e) => {
+                            const v = e.target.value
+                            setPins((ps) => ps.map((p, idx) => (idx === i ? { ...p, name: v } : p)))
+                          }}
+                          onBlur={(e) => {
+                            const fixed = uniqueName(e.target.value || String(i + 1), i)
+                            if (fixed !== pin.name)
+                              setPins((ps) =>
+                                ps.map((p, idx) => (idx === i ? { ...p, name: fixed } : p))
+                              )
+                          }}
+                        />
+                        <span className="text-[10px] text-text-faint">
+                          {Math.round(pin.x * 100) / 100},{Math.round(pin.y * 100) / 100}
+                        </span>
+                        <button
+                          className="text-text-faint hover:text-status-error"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            record()
+                            setPins((ps) => ps.filter((_, idx) => idx !== i))
+                            setSel(-1)
+                          }}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                    {pins.length === 0 ? (
+                      <div className="text-[11px] text-text-faint py-2">
+                        Click the preview to drop pins for the {editView} view.
+                      </div>
+                    ) : (
+                      <div className="text-[10px] leading-snug text-text-faint py-1">
+                        {keysOf('parts.nudge')} nudge the selected pin one art unit,{' '}
+                        {keysOf('parts.nudgeGrid')} 0.1 in. {keysOf('parts.undo')} undoes.
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-[10px] leading-snug text-text-faint py-1">
-                    {keysOf('parts.nudge')} nudge the selected pin one art unit,{' '}
-                    {keysOf('parts.nudgeGrid')} 0.1 in. {keysOf('parts.undo')} undoes.
-                  </div>
-                )}
-              </div>
+                </>
+              )}
             </div>
 
             <div className="mt-auto p-3 border-t border-border-default flex flex-col gap-2">
