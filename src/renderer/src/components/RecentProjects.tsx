@@ -62,7 +62,9 @@ export function RecentProjects({
         })
       } else {
         toast.info(`tinyStudio wasn't allowed into ${entry.name}`, {
-          description: 'Click it again and choose Allow when your browser asks.'
+          description: isElectron()
+            ? 'Choose the folder again so tinyStudio can open it.'
+            : 'Click it again and choose Allow when your browser asks.'
         })
       }
     } catch (e) {

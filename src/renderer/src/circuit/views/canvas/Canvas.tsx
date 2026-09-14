@@ -65,6 +65,7 @@ import {
   type Seat
 } from '../partsAdapter'
 import { emptySel, type Selection } from './selection'
+import { sanitizeSvg } from '../../../lib/sanitizeSvg'
 
 // wire look (identical to DiagramEditor / tinySchematic)
 const WIRE_W = 2.8
@@ -1651,7 +1652,7 @@ export function Canvas({
                 >
                   <div
                     className="size-full [&>svg]:size-full [&>svg]:block pointer-events-none select-none"
-                    dangerouslySetInnerHTML={{ __html: partArtFor(part, vis, view) }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeSvg(partArtFor(part, vis, view)) }}
                   />
                   {(editable || pickNets) &&
                     !isBreadboard(part.type) &&
@@ -1862,7 +1863,7 @@ export function Canvas({
                 >
                   <div
                     className="size-full [&>svg]:size-full [&>svg]:block pointer-events-none select-none"
-                    dangerouslySetInnerHTML={{ __html: v.svg }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeSvg(v.svg) }}
                   />
                   {editable && (
                     <div

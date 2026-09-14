@@ -25,6 +25,7 @@ import {
   type AgentWorkspace,
   type StudioMethod
 } from '../shared/agentCore'
+import { hasAccess } from './folderAccess'
 import { getApiKey } from './settings'
 
 export type { AgentSendArgs }
@@ -41,7 +42,8 @@ export class AgentService {
   private session = new AgentSession({
     getApiKey,
     createClient: (apiKey) => new Anthropic({ apiKey }),
-    openWorkspace: (root) => (root ? nodeWorkspace(root) : null),
+    // Only folders the user opened: the renderer names the root, main decides.
+    openWorkspace: (root) => (root && hasAccess(root) ? nodeWorkspace(root) : null),
     emit: (evt) => this.window?.webContents.send('agent:event', evt),
     requestPermission: (req) => {
       if (!this.window) return false

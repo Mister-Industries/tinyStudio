@@ -4,10 +4,11 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 import { defineConfig } from 'vite'
 import { tinypartsDev } from './vite-plugin-tinyparts'
+import { devCsp, p5Runtime } from './vite-plugins'
 
 export default defineConfig({
   // tinypartsDev: dev server only — serves ../tinyparts live (docs/parts-and-art.md)
-  plugins: [react(), tailwindcss(), tinypartsDev()],
+  plugins: [react(), tailwindcss(), tinypartsDev(), p5Runtime(), devCsp()],
   // Absolute base so deep SPA routes (e.g. /owner/repo/path) still resolve
   // /assets/... correctly. A relative './' base would resolve assets against
   // the deep path and 404 once the Netlify SPA redirect serves index.html there.

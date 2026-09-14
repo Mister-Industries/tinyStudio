@@ -717,6 +717,14 @@ export class OpenRecentFolderCommand {
   async execute(): Promise<'opened' | 'missing' | 'denied'> {
     if (fileSystem.isElectron()) {
       if (!(await fileSystem.pathExists(this.entry.location))) return 'missing'
+      // Folders opened before access was tracked have to be chosen once more.
+      if (!(await window.api.fs.hasAccess(this.entry.location))) {
+        if (!this.opts.prompt) return 'denied'
+        const picked = await window.api.fs.selectFolder(this.entry.location)
+        if (!picked) return 'denied'
+        await new OpenWorkspaceCommand(picked).execute()
+        return 'opened'
+      }
       await new OpenWorkspaceCommand(this.entry.location).execute()
       return 'opened'
     }

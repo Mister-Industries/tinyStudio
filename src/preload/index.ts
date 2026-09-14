@@ -22,7 +22,11 @@ interface FileStats {
 const api = {
   // File system operations
   fs: {
-    selectFolder: (): Promise<string | null> => ipcRenderer.invoke('select-folder'),
+    // Picking a folder grants tinyStudio access to it (main/folderAccess).
+    selectFolder: (defaultPath?: string): Promise<string | null> =>
+      ipcRenderer.invoke('select-folder', defaultPath),
+    hasAccess: (targetPath: string): Promise<boolean> =>
+      ipcRenderer.invoke('has-access', targetPath),
     readDirectory: (dirPath: string, recursive = false): Promise<FileSystemItem[]> =>
       ipcRenderer.invoke('read-directory', dirPath, recursive),
     readFile: (filePath: string): Promise<string> => ipcRenderer.invoke('read-file', filePath),
@@ -164,19 +168,10 @@ const api = {
   }
 }
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
+// The window is always context-isolated, so the bridge is the renderer's only way in.
+try {
+  contextBridge.exposeInMainWorld('electron', electronAPI)
+  contextBridge.exposeInMainWorld('api', api)
+} catch (error) {
+  console.error(error)
 }

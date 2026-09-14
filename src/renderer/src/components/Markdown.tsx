@@ -208,16 +208,27 @@ const components: Components = {
       {children}
     </blockquote>
   ),
-  a: ({ children, className, ...props }) => (
-    <a
-      {...props}
-      className={[className, 'text-cyan hover:text-cyan-bright underline']
-        .filter(Boolean)
-        .join(' ')}
-    >
-      {children}
-    </a>
-  ),
+  a: ({ children, className, href, ...props }) => {
+    // Web and mail links open outside the app (a new tab, or the system browser
+    // on desktop). Relative links point into a repo the preview can't follow,
+    // so they do nothing rather than navigate the app away.
+    const external = !!href && /^(https?:|mailto:)/i.test(href)
+    const inPage = !!href && href.startsWith('#')
+    return (
+      <a
+        {...props}
+        href={href}
+        target={external ? '_blank' : undefined}
+        rel={external ? 'noopener noreferrer' : undefined}
+        onClick={external || inPage ? undefined : (e) => e.preventDefault()}
+        className={[className, 'text-cyan hover:text-cyan-bright underline']
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {children}
+      </a>
+    )
+  },
   hr: ({ className, ...props }) => (
     <hr {...props} className={[className, 'border-navy-600 my-4'].filter(Boolean).join(' ')} />
   ),

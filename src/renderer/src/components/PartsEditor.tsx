@@ -24,6 +24,7 @@ import { FolderOpen, Plus, RotateCcw, Trash2, UploadCloud, X } from 'lucide-reac
 import React from 'react'
 import type { PartDef, PartSource, PartView, ViewKind } from '../lib/partsLibrary'
 import { artPrefix, namespaceSvg, prepareArt, readSvgRoot, scanPins } from '../circuit/parts/svgArt'
+import { sanitizeSvg } from '../lib/sanitizeSvg'
 
 const slug = (s: string): string =>
   s
@@ -449,7 +450,7 @@ export function PartsEditor({
             >
               <div
                 className="absolute inset-0 [&>svg]:size-full pointer-events-none"
-                dangerouslySetInnerHTML={{ __html: svg }}
+                dangerouslySetInnerHTML={{ __html: sanitizeSvg(svg) }}
               />
               {pins.map((pin, i) => (
                 <div

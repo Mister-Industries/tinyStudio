@@ -1,10 +1,9 @@
 /**
  * circuit/parts/svg — SVG utilities for part artwork.
  *
- * M1 ships the pieces the image exporter needs (B6 fix): id-namespacing so
- * two parts whose SVGs both define e.g. `id="g"` don't corrupt each other in
- * a composed export, plus small size/escape helpers. The full sanitizer and
- * the procedural breadboard generator land in M2 (spec §5).
+ * Id-namespacing so two parts whose SVGs both define e.g. `id="g"` don't
+ * corrupt each other in a composed export, plus small size/escape helpers.
+ * Sanitizing markup before it's inserted into the page is lib/sanitizeSvg.
  *
  * Pure string transforms — no DOM — so they run in tests, workers, exports.
  */

@@ -1,10 +1,10 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { app, BrowserWindow, dialog, ipcMain, Menu, screen, shell } from 'electron'
-import { constants, promises as fs, watch, type FSWatcher } from 'fs'
-import path, { join } from 'path'
+import { app, BrowserWindow, ipcMain, Menu, screen } from 'electron'
+import { join } from 'path'
+import { pathToFileURL } from 'url'
 import icon from '../../resources/icon.png?asset'
 import { AgentService, type AgentSendArgs } from './AgentService'
-import { ServiceManager } from './ServiceManager'
+import { openExternalSafely } from './externalLinks'
 import {
   cancelSignIn as ghCancelSignIn,
   getAccount as ghGetAccount,
@@ -14,16 +14,41 @@ import {
   signOut as ghSignOut,
   startDeviceFlow as ghStartDeviceFlow
 } from './githubAuth'
+import { registerFileIpc } from './ipc/files'
+import { registerPartsIpc } from './ipc/parts'
+import { registerWindowIpc } from './ipc/window'
+import { ServiceManager } from './ServiceManager'
 import { clearApiKey, getStatus, setApiKey } from './settings'
 
-// Initialize ServiceManager
 const serviceManager = new ServiceManager({
   port: 3000,
-  allowedOrigins: ['*']
+  // The desktop renderer, the dev server and the hosted web app. tinyService
+  // 1.1.0 doesn't check the WebSocket Origin header yet; this list takes
+  // effect once it does.
+  allowedOrigins: ['file://', 'http://localhost:5173', 'https://app.tinystudio.cc']
 })
 
 // Studio AI agent — one instance, bound to the main window.
 const agentService = new AgentService()
+
+/** The URL the renderer is served from, so navigation elsewhere can be refused. */
+const rendererUrl =
+  is.dev && process.env['ELECTRON_RENDERER_URL']
+    ? process.env['ELECTRON_RENDERER_URL']
+    : pathToFileURL(join(__dirname, '../renderer/index.html')).href
+
+function isAppUrl(url: string): boolean {
+  try {
+    const target = new URL(url)
+    const appUrl = new URL(rendererUrl)
+    if (target.protocol !== appUrl.protocol) return false
+    return target.protocol === 'file:'
+      ? target.pathname === appUrl.pathname
+      : target.host === appUrl.host
+  } catch {
+    return false
+  }
+}
 
 function createWindow(): void {
   // Size to fit the monitor: cap the window to the available work area so the
@@ -32,7 +57,6 @@ function createWindow(): void {
   const winW = Math.min(1280, screenW - 40)
   const winH = Math.min(800, screenH - 40)
 
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: winW,
     height: winH,
@@ -49,32 +73,26 @@ function createWindow(): void {
     }
   })
 
-  // Set the main window for ServiceManager error reporting
   serviceManager.setMainWindow(mainWindow)
-
-  // Bind the Studio AI agent to this window for streaming + permission prompts.
   agentService.setWindow(mainWindow)
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-  })
+  mainWindow.on('ready-to-show', () => mainWindow.show())
+  mainWindow.on('maximize', () => mainWindow.webContents.send('window:maximized'))
+  mainWindow.on('unmaximize', () => mainWindow.webContents.send('window:unmaximized'))
 
-  // Emit maximize/unmaximize events for renderer
-  mainWindow.on('maximize', () => {
-    mainWindow.webContents.send('window:maximized')
-  })
-
-  mainWindow.on('unmaximize', () => {
-    mainWindow.webContents.send('window:unmaximized')
-  })
-
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+  // Links open in the user's browser. The app window only ever shows the app:
+  // a plain link click in a README must not replace it with a website that has
+  // no way back (the window is frameless).
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    void openExternalSafely(url)
     return { action: 'deny' }
   })
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (isAppUrl(url)) return
+    event.preventDefault()
+    void openExternalSafely(url)
+  })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -82,11 +100,7 @@ function createWindow(): void {
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
   // Register standard edit/view accelerators (undo/redo/cut/copy/paste/select-all,
@@ -96,16 +110,13 @@ app.whenReady().then(async () => {
     Menu.buildFromTemplate([{ role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' }])
   )
 
-  // Start TinyService
   try {
     await serviceManager.start()
   } catch (error) {
     console.error('Failed to start TinyService during app initialization:', error)
   }
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+  // F12 toggles DevTools in development; Ctrl/Cmd+R is ignored in production.
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
@@ -153,226 +164,14 @@ app.whenReady().then(async () => {
   ipcMain.handle('github:sign-out', () => ghSignOut())
   ipcMain.handle('github:sign-in-token', (_, token: string) => ghSignInWithToken(token))
 
-  // Window control handlers
-  ipcMain.on('window:minimize', (event) => {
-    const window = BrowserWindow.fromWebContents(event.sender)
-    window?.minimize()
-  })
-
-  ipcMain.on('window:maximize', (event) => {
-    const window = BrowserWindow.fromWebContents(event.sender)
-    if (window?.isMaximized()) {
-      window.unmaximize()
-    } else {
-      window?.maximize()
-    }
-  })
-
-  ipcMain.on('window:close', (event) => {
-    const window = BrowserWindow.fromWebContents(event.sender)
-    window?.close()
-  })
-
-  // Open a local file with the OS default app (e.g. the exported index.html in
-  // the browser). Returns '' on success or an error string.
-  ipcMain.handle('open-path', async (_, targetPath: string) => {
-    return shell.openPath(targetPath)
-  })
-
-  // Open an external URL (e.g. the GitHub Pages site) in the default browser.
-  ipcMain.handle('open-external', async (_, url: string) => {
-    await shell.openExternal(url)
-  })
-
   // Unpackaged (npm run dev / npm start): unlocks parts-development features.
   ipcMain.on('app:is-dev', (event) => {
     event.returnValue = is.dev
   })
 
-  // Default location for downloaded example projects (first-run onboarding).
-  ipcMain.handle('app:get-examples-dir', () => {
-    return path.join(app.getPath('documents'), 'tinyStudio Examples')
-  })
-
-  // Save a generated file (e.g. the Visual web export) via a Save dialog.
-  ipcMain.handle('save-file-as', async (event, defaultName: string, content: string) => {
-    const window = BrowserWindow.fromWebContents(event.sender)
-    const result = await dialog.showSaveDialog(window!, {
-      defaultPath: defaultName,
-      filters: [
-        { name: 'HTML', extensions: ['html'] },
-        { name: 'All Files', extensions: ['*'] }
-      ]
-    })
-    if (result.canceled || !result.filePath) return null
-    await fs.writeFile(result.filePath, content, 'utf-8')
-    return result.filePath
-  })
-
-  // File system handlers
-  ipcMain.handle('select-folder', async () => {
-    const result = await dialog.showOpenDialog({
-      properties: ['openDirectory']
-    })
-    return result.canceled ? null : result.filePaths[0]
-  })
-
-  ipcMain.handle('read-directory', async (_, dirPath: string, recursive = false) => {
-    try {
-      const result: Array<{
-        name: string
-        path: string
-        isDirectory: boolean
-        size?: number
-        lastModified: number
-      }> = []
-
-      async function readDirRecursive(currentPath: string): Promise<void> {
-        const items = await fs.readdir(currentPath, { withFileTypes: true })
-
-        for (const item of items) {
-          const itemPath = join(currentPath, item.name)
-          const stats = await fs.stat(itemPath)
-
-          result.push({
-            name: item.name,
-            path: itemPath,
-            isDirectory: item.isDirectory(),
-            size: item.isFile() ? stats.size : undefined,
-            lastModified: stats.mtime.getTime()
-          })
-
-          if (recursive && item.isDirectory()) {
-            await readDirRecursive(itemPath)
-          }
-        }
-      }
-
-      await readDirRecursive(dirPath)
-
-      return result
-    } catch (error) {
-      throw new Error(`Failed to read directory: ${error}`)
-    }
-  })
-
-  ipcMain.handle('read-file', async (_, filePath: string) => {
-    try {
-      return await fs.readFile(filePath, 'utf-8')
-    } catch (error) {
-      throw new Error(`Failed to read file: ${error}`)
-    }
-  })
-
-  ipcMain.handle('write-file', async (_, filePath: string, content: string) => {
-    try {
-      await fs.mkdir(path.dirname(filePath), { recursive: true })
-      await fs.writeFile(filePath, content, 'utf-8')
-    } catch (error) {
-      throw new Error(`Failed to write file: ${error}`)
-    }
-  })
-
-  ipcMain.handle('create-file', async (_, filePath: string, content = '') => {
-    try {
-      await fs.mkdir(path.dirname(filePath), { recursive: true })
-      await fs.writeFile(filePath, content, 'utf-8')
-    } catch (error) {
-      throw new Error(`Failed to create file: ${error}`)
-    }
-  })
-
-  ipcMain.handle('rename-file', async (_, oldPath: string, newPath: string) => {
-    try {
-      await fs.rename(oldPath, newPath)
-    } catch (error) {
-      throw new Error(`Failed to rename file: ${error}`)
-    }
-  })
-
-  ipcMain.handle('create-folder', async (_, folderPath: string) => {
-    try {
-      await fs.mkdir(folderPath, { recursive: true })
-    } catch (error) {
-      throw new Error(`Failed to create folder: ${error}`)
-    }
-  })
-
-  ipcMain.handle('delete-file', async (_, targetPath: string) => {
-    try {
-      const stats = await fs.stat(targetPath)
-      if (stats.isDirectory()) {
-        await fs.rmdir(targetPath, { recursive: true })
-      } else {
-        await fs.unlink(targetPath)
-      }
-    } catch (error) {
-      throw new Error(`Failed to delete: ${error}`)
-    }
-  })
-
-  ipcMain.handle('path-exists', async (_, targetPath: string) => {
-    try {
-      await fs.access(targetPath, constants.F_OK)
-      return true
-    } catch {
-      return false
-    }
-  })
-
-  // Reveal a file or folder in Explorer / Finder (e.g. a part's art in tinyparts).
-  ipcMain.handle('show-item-in-folder', (_, targetPath: string) => {
-    shell.showItemInFolder(path.normalize(targetPath))
-  })
-
-  // --- Parts development: watch a local tinyparts checkout ---
-  // One recursive watcher per window. Changes are batched (editors like
-  // Illustrator save through temp files and renames) and sent as paths
-  // relative to the watched folder; the renderer decides what to reload.
-  const partWatchers = new Map<number, FSWatcher>()
-  ipcMain.handle('parts:watch', (event, dir: string) => {
-    const sender = event.sender
-    partWatchers.get(sender.id)?.close()
-    let pending = new Set<string>()
-    let timer: NodeJS.Timeout | null = null
-    const watcher = watch(dir, { recursive: true }, (_evt, file) => {
-      if (!file) return
-      const rel = file.toString().replace(/\\/g, '/')
-      if (rel === '.git' || rel.startsWith('.git/')) return
-      pending.add(rel)
-      if (timer) clearTimeout(timer)
-      timer = setTimeout(() => {
-        if (!sender.isDestroyed()) sender.send('parts:changed', { dir, paths: [...pending] })
-        pending = new Set()
-      }, 250)
-    })
-    watcher.on('error', () => partWatchers.delete(sender.id))
-    if (!partWatchers.has(sender.id))
-      sender.once('destroyed', () => {
-        partWatchers.get(sender.id)?.close()
-        partWatchers.delete(sender.id)
-      })
-    partWatchers.set(sender.id, watcher)
-  })
-  ipcMain.handle('parts:unwatch', (event) => {
-    partWatchers.get(event.sender.id)?.close()
-    partWatchers.delete(event.sender.id)
-  })
-
-  ipcMain.handle('get-file-stats', async (_, filePath: string) => {
-    try {
-      const stats = await fs.stat(filePath)
-      return {
-        isDirectory: stats.isDirectory(),
-        isFile: stats.isFile(),
-        size: stats.size,
-        lastModified: stats.mtime.getTime(),
-        created: stats.birthtime.getTime()
-      }
-    } catch (error) {
-      throw new Error(`Failed to get file stats: ${error}`)
-    }
-  })
+  registerWindowIpc()
+  registerFileIpc()
+  registerPartsIpc()
 
   createWindow()
 
@@ -383,9 +182,8 @@ app.whenReady().then(async () => {
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+// Quit when all windows are closed, except on macOS, where apps stay active
+// until the user quits with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
@@ -402,10 +200,8 @@ app.on('before-quit', async (event) => {
     }, 3000)
 
     try {
-      console.log('Stopping TinyService...')
       await serviceManager.stop()
       clearTimeout(cleanupTimeout)
-      console.log('TinyService stopped, exiting...')
       app.exit()
     } catch (error) {
       console.error('Error stopping TinyService during app quit:', error)

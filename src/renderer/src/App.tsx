@@ -144,14 +144,11 @@ export default function App(): React.JSX.Element {
       }
       return
     }
-    fileSystem
-      .pathExists(last)
-      .then((exists) => {
-        if (exists) {
-          void new OpenWorkspaceCommand(last).execute()
-        } else {
-          localStorage.removeItem('tinystudio.lastWorkspace')
-        }
+    Promise.all([fileSystem.pathExists(last), window.api.fs.hasAccess(last)])
+      .then(([exists, allowed]) => {
+        if (!exists) localStorage.removeItem('tinystudio.lastWorkspace')
+        // A folder from before access was tracked waits under Recent until it's chosen again.
+        else if (allowed) void new OpenWorkspaceCommand(last).execute()
       })
       .catch((e) => console.error('Failed to reopen last workspace:', e))
   }, [])

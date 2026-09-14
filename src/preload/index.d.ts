@@ -18,14 +18,16 @@ interface FileStats {
 }
 
 interface FileSystemAPI {
-  selectFolder: () => Promise<string | null>
+  /** Folder picker. The chosen folder joins the folders tinyStudio may read and write. */
+  selectFolder: (defaultPath?: string) => Promise<string | null>
+  /** Whether file access is allowed at this path (a chosen folder or the examples folder). */
+  hasAccess: (targetPath: string) => Promise<boolean>
   readDirectory: (dirPath: string, recursive?: boolean) => Promise<FileSystemItem[]>
   readFile: (filePath: string) => Promise<string>
   writeFile: (filePath: string, content: string) => Promise<void>
   createFile: (filePath: string, content?: string) => Promise<void>
   renameFile: (oldPath: string, newPath: string) => Promise<void>
   createFolder: (folderPath: string) => Promise<void>
-  deleteFolder: (folderPath: string) => Promise<void>
   deleteFile: (targetPath: string) => Promise<void>
   pathExists: (targetPath: string) => Promise<boolean>
   getFileStats: (filePath: string) => Promise<FileStats>

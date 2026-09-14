@@ -3,6 +3,7 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { tinypartsDev } from './vite-plugin-tinyparts'
+import { devCsp, p5Runtime } from './vite-plugins'
 
 /**
  * The GitHub OAuth client ID is baked in at build time. It is a PUBLIC value —
@@ -31,6 +32,6 @@ export default defineConfig({
     // module workers (sim engine lazy-imports ngspice-WASM inside a worker)
     worker: { format: 'es' },
     // tinypartsDev: dev server only — serves ../tinyparts live (docs/parts-and-art.md)
-    plugins: [react(), tailwindcss(), tinypartsDev()]
+    plugins: [react(), tailwindcss(), tinypartsDev(), p5Runtime(), devCsp()]
   }
 })

@@ -11,6 +11,7 @@ import type { ViewId } from '../../core/model'
 import { NET_LABEL_KINDS, netLabelView } from '../../parts/netLabels'
 import { schematicVisual } from '../../parts/symbols'
 import { WIRE_COLORS } from './wireColors'
+import { sanitizeSvg } from '../../../lib/sanitizeSvg'
 
 function iconFor(meta: PartMeta, view: ViewId): string | undefined {
   if (view === 'sch') {
@@ -34,7 +35,7 @@ function Thumb({ svg, size = 40 }: { svg?: string; size?: number }): React.JSX.E
     <div
       className="shrink-0 rounded-md p-1 grid place-items-center [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto"
       style={{ width: size, height: size, background: 'var(--warm-150)' }}
-      dangerouslySetInnerHTML={{ __html: svg }}
+      dangerouslySetInnerHTML={{ __html: sanitizeSvg(svg) }}
     />
   )
 }

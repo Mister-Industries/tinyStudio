@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>tinyStudio sketch</title>
+    <!--
+      Runs a project's visual.js. tinyStudio loads this page in an iframe with
+      sandbox="allow-scripts" and no same-origin, so the sketch cannot reach
+      the app, the project files or the user's accounts. The app talks to it
+      only through postMessage (see runner.js).
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap"
+    />
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: transparent;
+      }
+      #stage {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #stage canvas {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <!-- p5.min.js is served from node_modules/p5 by vite-plugins.ts -->
+    <script src="p5.min.js"></script>
+    <script src="runner.js"></script>
+  </body>
+</html>
