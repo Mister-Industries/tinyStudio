@@ -1,194 +1,99 @@
-# TinyService Integration Guide
+# tinyService integration
 
-This document describes the integration of @mister-industries/tinyservice into the tinyStudio Electron application.
+tinyService is the local backend that compiles, uploads and talks to boards. It is
+a WebSocket and HTTP server around `arduino-cli`, published on npm as
+[`@mister-industries/tinyservice`](https://www.npmjs.com/package/@mister-industries/tinyservice),
+with its client and protocol types in `@mister-industries/shared`. tinyStudio
+needs tinyService 1.1.0 or later.
 
-## Overview
+This guide covers how the desktop app runs it, how the renderer finds it, and how
+the browser build uses it.
 
-TinyService is a WebSocket service that wraps arduino-cli for compiling and uploading Arduino sketches. It has been integrated into the Electron main process with the following features:
+## Desktop: the main process runs it
 
-- **Automatic startup** when the app initializes
-- **Graceful shutdown** when the app quits
-- **Platform-specific binary management** for arduino-cli
-- **Development/Production mode handling** for different execution paths
+[`src/main/ServiceManager.ts`](src/main/ServiceManager.ts) owns the backend.
+[`src/main/index.ts`](src/main/index.ts) creates one `ServiceManager`, starts it
+when the app is ready and stops it before the app quits (forcing exit after three
+seconds if it hangs).
 
-## Files Modified/Created
+`start()` does this:
 
-### 1. [package.json](package.json#L29)
+1. **Picks a port.** It tries `TINYSERVICE_DEFAULT_PORT` (3000, from
+   [`src/shared/tinyservice.ts`](src/shared/tinyservice.ts)) and the next nine,
+   and takes the first one free on 127.0.0.1. Port 3000 is a common dev-server
+   default, so it can't be assumed.
+2. **Finds arduino-cli.**
+   - In development: `vendor/arduino-cli/<platform>/`, fetched by
+     [`scripts/fetch-arduino-cli.mjs`](scripts/fetch-arduino-cli.mjs), falling back
+     to `arduino-cli` on `PATH`.
+   - In a packaged app: `resources/arduino-cli/<platform>/`, copied there by
+     `extraResources` in [`electron-builder.yml`](electron-builder.yml).
+   - The folder names differ: `vendor/` uses `windows-x64` and `macos-arm64`, the
+     packaged app uses `win32-x64` and `darwin-arm64`.
+3. **Finds the language server** (optional). `arduino-language-server` and
+   `clangd` from `vendor/language-server/<platform>/` or
+   `resources/language-server/<platform>/`, fetched by
+   `npm run fetch:language-server`. Without them the editor still works, just
+   without completion and diagnostics.
+4. **Spawns tinyService as a child process.** It runs Electron's own binary in
+   Node mode (`ELECTRON_RUN_AS_NODE=1`) with a short launcher that imports the ESM
+   package and calls `new TinyService(options).start()`. A separate process is
+   used because Electron's main-process loader can't reliably import the ESM
+   package, and it keeps a backend crash out of the app. The child's working
+   directory is the app root, so it resolves the package from `node_modules`.
+   That is why `asar` is disabled in the packaged app.
+5. **Waits for `/health`.** It polls `http://localhost:<port>/health` up to ten
+   times, a second apart. If arduino-cli isn't available, or the service never
+   answers, it sends `service:error` to the renderer.
 
-Added dependency:
+tinyService's output is forwarded to the main-process console with a
+`[tinyService]` prefix.
 
-```json
-"@mister-industries/tinyservice": "^1.0.0"
-```
+## Renderer: finding the service
 
-### 2. Package registry
+[`WebSocketArduinoService`](src/renderer/src/services/arduino/WebSocketArduinoService.ts)
+connects to the first of these that exists:
 
-`@mister-industries/tinyservice` and `@mister-industries/shared` are published to **public npm**,
-so a plain `npm install` resolves them with no `.npmrc`, token, or registry configuration. (If you
-ever fork the backend into a private registry, that's where a scoped `.npmrc` would go.)
+1. `localStorage["tinyservice.url"]`, an explicit override
+2. On desktop, the URL main reports over `service:get-url-sync`, which carries the
+   port tinyService actually got
+3. `ws://localhost:3000`
 
-### 3. [electron-builder.yml](electron-builder.yml#L11-L35)
+The Content Security Policy in
+[`src/renderer/index.html`](src/renderer/index.html) allows `ws://` and `http://`
+to any port on `localhost` and `127.0.0.1`, so a backend on 3001 connects too.
 
-Configured bundling of platform-specific arduino-cli binaries as `extraResources`:
+## Browser build
 
-- **macOS Intel**: `node_modules/@mister-industries/tinyservice/binaries/macos-x64/arduino-cli` → `arduino-cli/darwin-x64/`
-- **macOS ARM**: `node_modules/@mister-industries/tinyservice/binaries/macos-arm64/arduino-cli` → `arduino-cli/darwin-arm64/`
-- **Linux x64**: `node_modules/@mister-industries/tinyservice/binaries/linux-x64/arduino-cli` → `arduino-cli/linux-x64/`
-- **Linux ARM64**: `node_modules/@mister-industries/tinyservice/binaries/linux-arm64/arduino-cli` → `arduino-cli/linux-arm64/`
-- **Windows**: `node_modules/@mister-industries/tinyservice/binaries/windows-x64/arduino-cli.exe` → `arduino-cli/win32-x64/`
+The browser can't start processes, so tinyService has to be running on the same
+computer. When the app can't reach it, it offers the tinyService installer from
+the [tinyService releases](https://github.com/Mister-Industries/tinyService/releases/latest).
+Anyone developing tinyService itself can run it from that repo instead.
 
-### 4. [src/main/ServiceManager.ts](src/main/ServiceManager.ts)
+Browser projects opened from GitHub live in memory (`mem://` paths) and can't be
+compiled until they're saved to a real folder, because arduino-cli reads from
+disk.
 
-New class that manages the TinyService lifecycle:
+## Security
 
-**Key Features:**
-
-- Dynamically imports TinyService to handle ESM modules in CommonJS context
-- Detects platform and architecture at runtime
-- Resolves correct arduino-cli binary path:
-  - **Development mode** (`!app.isPackaged`): Uses system `arduino-cli` from PATH
-  - **Production mode** (`app.isPackaged`): Uses bundled binary from `process.resourcesPath`
-- Provides `start()` and `stop()` methods with error handling
-- Configuration: port 3000, allowedOrigins: ['*']
-
-### 5. [src/main/index.ts](src/main/index.ts)
-
-Updated main process entry point:
-
-**Changes:**
-
-- Imports and instantiates `ServiceManager`
-- Starts TinyService in `app.whenReady()` callback with error handling
-- Stops TinyService gracefully in `app.on('before-quit')` event
-- Ensures clean shutdown by calling `app.exit()` after stopping the service
-
-## Architecture
-
-### Service Lifecycle
-
-```
-app.whenReady()
-  ↓
-serviceManager.start()
-  ├─ Detect platform/arch
-  ├─ Resolve arduino-cli path
-  ├─ Create TinyService instance
-  └─ Start WebSocket server on ws://localhost:3000
-  
-app.beforeQuit
-  ↓
-serviceManager.stop()
-  ├─ Close WebSocket connections
-  ├─ Stop HTTP server
-  └─ Exit process
-```
-
-### Module Resolution
-
-The main process is compiled to CommonJS (`require`), but TinyService is an ESM module. This is handled via dynamic import:
-
-```typescript
-async importTinyService() {
-  const module = await import('@mister-industries/tinyservice')
-  return module.TinyService
-}
-```
-
-This allows the CommonJS main process to import ESM modules at runtime.
-
-## Running the Application
-
-### Development Mode
-
-```bash
-npm run dev
-```
-
-The app will:
-
-1. Start the Electron app
-2. Initialize TinyService with system `arduino-cli`
-3. Listen on `ws://localhost:3000`
-
-### Production Build
-
-```bash
-npm run build:mac  # or build:linux, build:win
-```
-
-The app will:
-
-1. Bundle platform-specific arduino-cli binaries
-2. On launch, resolve the correct binary path from `process.resourcesPath`
-3. Initialize TinyService with bundled binary
-
-## Usage in Renderer Process
-
-Renderer processes can connect to TinyService using the WebSocket client from `@mister-industries/shared`:
-
-```typescript
-import { TinyServiceClient } from '@mister-industries/shared'
-
-const client = new TinyServiceClient('ws://localhost:3000')
-
-// Connect and use the service
-await client.connect()
-const result = await client.compile(sketchPath, boardFqbn)
-await client.disconnect()
-```
-
-## Environment Variables
-
-Optional environment variables that can be set to override defaults:
-
-- `PORT`: TinyService port (default: 3000)
-- `ARDUINO_CLI_PATH`: Path to arduino-cli binary (development only)
-- `NODE_ENV`: Set to 'development' for debug logging
-
-## Error Handling
-
-The integration includes comprehensive error handling:
-
-- **Startup errors**: Logged but don't prevent app from launching
-- **Shutdown errors**: Logged with fallback to force exit
-- **Runtime errors**: TinyService logs are visible in DevTools
-
-## Platform Support
-
-The integration supports:
-
-- ✅ macOS (Intel & ARM64)
-- ✅ Linux (x64 & ARM64)
-- ✅ Windows (x64)
+`ServiceManager` passes `allowedOrigins` (the packaged app, the dev server and
+`https://app.tinystudio.cc`), but tinyService 1.1.0 doesn't check it and listens on
+all network interfaces. Until a tinyService release binds to `127.0.0.1` and
+checks the `Origin` header, any web page open on the computer, and anything on the
+local network, can reach the backend.
 
 ## Troubleshooting
 
-### "arduino-cli not found" in development
+**"Arduino CLI is not available"**
+Run `npm run fetch:arduino-cli` (development), or check that
+`resources/arduino-cli/<platform>/` exists in the packaged app.
 
-Ensure arduino-cli is installed and available in your PATH:
+**The app can't reach the backend**
+Check the main-process console for `[ServiceManager]` and `[tinyService]` lines.
+On desktop, ports 3000 to 3009 all being taken stops it from starting. In the
+browser, make sure tinyService is running and, if it isn't on port 3000, set
+`localStorage["tinyservice.url"]`.
 
-```bash
-arduino-cli version
-```
-
-### Service fails to start
-
-1. Check port 3000 is not in use: `lsof -i :3000`
-2. Verify arduino-cli binary path in ServiceManager logs
-3. Ensure you have permission to execute the binary
-
-### WebSocket connection refused
-
-1. Verify TinyService started successfully (check console logs)
-2. Confirm connecting from correct origin (add to `allowedOrigins` if needed)
-3. Check if another service is using port 3000
-
-## Future Enhancements
-
-Potential improvements:
-
-- Make port configurable via config file or environment variable
-- Add IPC channel to communicate service status to renderer
-- Implement service health checks
-- Add automatic service restart on failure
-- Support for authenticated WebSocket connections
+**No completion or diagnostics in the editor**
+The language server isn't bundled by default. Run
+`npm run fetch:language-server` and restart.

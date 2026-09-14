@@ -1,0 +1,144 @@
+# Changelog
+
+What changed in each tinyStudio release. Dates are when the version was
+finished; versions follow [semantic versioning](https://semver.org).
+
+## 0.4.0 — unreleased
+
+0.3.0 was merged to `main` in July 2026 but never tagged or released, so 0.4.0
+is the first release since 0.2.0 and includes everything under 0.3.0 below.
+
+### Projects
+
+- A start screen with **Create new**, **Open existing**, **Try an example** and
+  your recent projects.
+- **Open existing** takes a local folder, a pasted GitHub repo or link, one of
+  your own repos, or a recent project.
+- The **New Project** dialog names the folder and sketch the way the Arduino IDE
+  does.
+- A project menu in the header.
+- In the browser, recent folders reopen with one permission prompt. Projects
+  that only live in the browser show a **Save to computer** banner, and Firefox
+  and Safari get scratch projects kept in browser storage.
+- The browser build can compile and upload a real local folder.
+
+### GitHub
+
+- Desktop sign-in uses GitHub's device flow and keeps the token in the system
+  keychain instead of browser storage. A personal access token is still accepted
+  under **Advanced**.
+- Sign-in asks only for access to public repositories.
+- **Make it mine** copies an example into a new public repo in your account,
+  images included, and keeps you editing there.
+- Link, Push, Pull and Publish from the GitHub tab. A project opened from a repo
+  subfolder stays pinned to that folder.
+- Whether you can push to a repo is checked with GitHub instead of guessed.
+
+### Parts
+
+- Parts now live in the [tinyparts](https://github.com/Mister-Industries/tinyparts)
+  repo as a folder per part: a `part.json` plus real SVG files you can edit in
+  Illustrator. Pins come from shapes named `pin-*`.
+- The app ships a snapshot of tinyparts and, on launch, downloads only the files
+  that changed on GitHub (checked at most every 15 minutes).
+- Parts are layered: your own edits on this computer, then a developer
+  checkout, then GitHub, then the built-in snapshot.
+- The parts editor shows both views and can save a part on this computer or
+  reset it to the default.
+- The Parts Packs panel is reorganised into Built in, Developer, This computer
+  and More packs. Installed packs stay linked to GitHub.
+- Fritzing art ships with its CC-BY-SA attribution.
+
+### Circuit view
+
+- A new circuit editor replaces the old one, saving to `circuit.json`. Projects
+  with a `diagram.json` convert on first open and keep the original as
+  `diagram.json.bak`.
+- **Breadboard:** zoom at the cursor, pan, fit, marquee select; draw, bend and
+  tap wires; rotate, flip, nudge, copy and paste parts; generated mini, half and
+  full breadboards that connect parts seated in their holes; bendable LED and
+  resistor legs; undo and redo up to 200 steps.
+- **Schematic:** the same circuit as a schematic, with a hand-drawn US/IEEE
+  symbol set, ground, power and net labels, reference designators above each
+  symbol and simulated values below, ratsnest lines, and an electrical rule
+  check.
+- **Simulation:** ngspice runs in the app (downloaded on first use, about
+  20 MB) with DC operating point, DC sweep, transient and AC analyses; charts
+  with cursors, zoom, log axes, dB and phase; CSV export; voltage and current
+  probes; node voltages drawn on the canvas. Pick what to plot by clicking the
+  schematic.
+- Import a Fritzing `.fzpz` by dropping it on the canvas.
+- SVG and PNG export of either view.
+- The **Edit** button is labelled, each view remembers its own zoom and
+  position, and pins stay easy to click when zoomed out.
+
+### Code, build and serial
+
+- Boards are detected as they're plugged in and unplugged, without polling.
+- A board options menu (PSRAM, partition scheme, CPU frequency) and
+  **Change board**.
+- Compiler errors show as markers in the editor, and a failed build keeps the
+  Output tab open.
+- Real upload progress, and ESP32 uploads report success correctly.
+- The Serial Monitor has the full baud list, a line-ending picker, timestamps,
+  and remembers settings per port. It reports a port as open only when it is.
+- Code completion, hover, signature help and live diagnostics from the Arduino
+  language server (desktop).
+- The backend picks a free port starting at 3000, and the app connects to
+  whichever one it got.
+- Requires tinyService 1.1.0.
+
+### Visual view
+
+- Sketches run in a sandbox, so a project's `visual.js` can't reach your files.
+- p5.js is bundled, so Visual works offline.
+- A `theme` object lets sketches follow light and dark mode. New projects start
+  with a serial plotter.
+- The exported web page has a theme toggle and a connection status.
+
+### Studio AI
+
+- Runs in the browser as well as the desktop app.
+- New tools: read a built-in guide, inspect the circuit, find parts, read serial
+  output. Guides cover the app, the tinyCore pinout, `visual.js`, serial and
+  `circuit.json`.
+- The conversation stays when you switch to another tab.
+
+### Examples
+
+- Examples come from the
+  [tinyStudio-examples](https://github.com/Mister-Industries/tinyStudio-examples)
+  repo, with tags, search and filters. Board tags use each board's colour.
+
+### App
+
+- Light theme by default, with coloured chrome and tabs. Diagrams in docs follow
+  the theme.
+- **About tinyStudio** in the header menu shows the version, licence and credits.
+- Links in project READMEs open in your browser instead of replacing the app.
+- The Windows installer has its own app identity and ships only the built app.
+- Your theme choice carries over from earlier versions.
+
+### Security
+
+- File access on desktop is limited to folders you've opened, plus downloaded
+  examples. Projects opened in an earlier version ask for their folder once.
+- Only web and email links open outside the app, and only documents and images
+  open in other programs.
+- Part art from packs and imports is sanitised before it's shown.
+- A strict Content Security Policy in the built app.
+
+### Known issues
+
+- tinyService 1.1.0 accepts connections from any website and listens on all
+  network interfaces. The fix needs a tinyService release.
+
+## 0.3.0 — not released
+
+Merged to `main` between 3 and 22 July 2026 and included in 0.4.0: the new
+circuit editor with breadboard, schematic and simulation; Arduino IDE parity for
+board detection, board options, serial and the language server; the light theme.
+
+## 0.2.0
+
+See the [GitHub release](https://github.com/Mister-Industries/tinyStudio/releases/tag/v0.2.0).

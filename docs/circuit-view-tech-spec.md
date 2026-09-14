@@ -9,7 +9,7 @@
 
 A brand-new Circuit View that runs alongside Code and Visual in tinyStudio: **a Fritzing-feeling breadboard editor and a CircuitLab-feeling schematic editor over one shared electrical model**, saved as a single local JSON file per project, simulated with real SPICE (ngspice compiled to WASM), able to import Fritzing parts (`.fzpz`) and Wokwi diagrams, able to export KiCad netlists and schematics, and fed by installable parts libraries hosted on GitHub — the way Arduino's Boards Manager loads board packages from index URLs. Effectively: **Fritzing's interaction model, refactored into TypeScript/Electron, with CircuitLab's simulation UX bolted on.**
 
-This spec is written so an agent can start building without further context. Companion background document: `docs/circuit-architecture-and-roadmap.md` (deep dives on Fritzing internals, current-code bugs B1–B23, and format research). Implementation progress log: `docs/circuit-editor-progress.md` (branch `circuit-editor`).
+This spec is written so an agent can start building without further context. Companion background document: `docs/archive/circuit-architecture-and-roadmap.md` (deep dives on Fritzing internals, current-code bugs B1–B23, and format research). Implementation progress log: `docs/archive/circuit-editor-progress.md` (branch `circuit-editor`).
 
 **Platform contract (hard requirements):** runs in **both** the Electron desktop build and the web build (`build:web`) — no Node-only APIs in the renderer module; sim is WASM-in-worker (browser-native); pack storage falls back to IndexedDB on web. It mounts in the **same window slot** the Circuit view occupies today (`EditorPanel → CircuitView`), alongside Code/Visual — one integrated IDE, not a separate window.
 
@@ -31,7 +31,7 @@ This spec is written so an agent can start building without further context. Com
 
 - PCB layout view (KiCad is the PCB tool; we export to it).
 - MCU/digital co-simulation (Wokwi-style AVR/ESP32 emulation) — architecture leaves a seam for tinyService later (§10.6).
-- Full Wokwi round-trip fidelity. Wokwi is an *import source* and *export target*, not the native format.
+- Full Wokwi round-trip fidelity. Wokwi is an _import source_ and _export target_, not the native format.
 - Autorouting. Manual wires with great ergonomics beat a bad autorouter.
 - Real-time animated current flow (Falstad-style). Possible later on top of the DC solver results.
 
@@ -41,14 +41,14 @@ This spec is written so an agent can start building without further context. Com
 
 ### Keep (port into the new module as pure libraries — they are already good)
 
-| Existing code | Fate |
-|---|---|
-| `lib/wireRouting.ts` | Keep ~as-is → `circuit/core/routing.ts`. Absolute bendpoints, orthogonal elbows, segment/vertex/endpoint drag math, simplify. Add `*`-aware journey decoding (bug B2). |
-| `lib/circuitNets.ts` | Keep DSU approach → `circuit/core/nets.ts`. Wire in `busesFor` (B8), add implicit-connection edges (breadboard seating, §7.3), net labels (§8.4), junction refs (B9 fix). |
-| `scripts/fritzing-import.mjs` | Extract the resolver (fzp parse, transform-chain math, unit scaling, anchor heuristics) into `circuit/import/fritzing/` shared by the CLI script **and** the in-app `.fzpz` importer. Extend: `buses`, `pinType`, `legId`, `<use>` resolution, id namespacing. |
-| `PartsEditor.tsx` | Keep the UX; rewire to save PartDef v2 into the project/user pack (persistence, B7). |
-| Design system (tokens, tactile buttons, dot grid, wire tube styling) | Keep. The new view must be visually indistinguishable from the rest of the IDE. |
-| `EditorPanel.tsx` Circuit tab plumbing, `useProjectFile` | Keep the mount point; swap `DiagramEditor` for `CircuitView2` behind a feature flag during development. |
+| Existing code                                                        | Fate                                                                                                                                                                                                                                                           |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/wireRouting.ts`                                                 | Keep ~as-is → `circuit/core/routing.ts`. Absolute bendpoints, orthogonal elbows, segment/vertex/endpoint drag math, simplify. Add `*`-aware journey decoding (bug B2).                                                                                         |
+| `lib/circuitNets.ts`                                                 | Keep DSU approach → `circuit/core/nets.ts`. Wire in `busesFor` (B8), add implicit-connection edges (breadboard seating, §7.3), net labels (§8.4), junction refs (B9 fix).                                                                                      |
+| `scripts/fritzing-import.mjs`                                        | Extract the resolver (fzp parse, transform-chain math, unit scaling, anchor heuristics) into `circuit/import/fritzing/` shared by the CLI script **and** the in-app `.fzpz` importer. Extend: `buses`, `pinType`, `legId`, `<use>` resolution, id namespacing. |
+| `PartsEditor.tsx`                                                    | Keep the UX; rewire to save PartDef v2 into the project/user pack (persistence, B7).                                                                                                                                                                           |
+| Design system (tokens, tactile buttons, dot grid, wire tube styling) | Keep. The new view must be visually indistinguishable from the rest of the IDE.                                                                                                                                                                                |
+| `EditorPanel.tsx` Circuit tab plumbing, `useProjectFile`             | Keep the mount point; swap `DiagramEditor` for `CircuitView2` behind a feature flag during development.                                                                                                                                                        |
 
 ### Discard / replace
 
@@ -75,7 +75,7 @@ circuit/
     refdes.ts                # R1/C2/U3 auto-assignment
   parts/
     schema.ts                # PartDef v2 + PackManifest types (§5)
-    registry.ts              # in-memory registry; resolution order: project → user packs → default pack → builtin
+    registry.ts              # planned; not built — the tinyparts layers replaced it (see §5.2)
     packs.ts                 # pack fetch/install/update/cache from GitHub index URLs (§5.4)
     svg.ts                   # SVG sanitize, id-namespacing, symbol generation (generic fallback symbols)
   views/
@@ -105,7 +105,7 @@ circuit/
 - **Document state** (the circuit itself) lives in `CircuitDocument` — a plain-TS class holding the parsed model, a command stack (undo/redo, command merging so a drag is one undo step), and a change-notification. React components use `useSyncExternalStore`.
 - **Ephemeral UI state** (camera, hover, selection, active tool, drawing-in-progress) stays in React state within the view — never serialized.
 - **App integration:** the document syncs to Redux `fileSlice` (dirty flag, save) via a debounced (250 ms) serializer, and listens for external content changes (user edits `circuit.json` in the Code tab) — last-writer-wins with a structural diff to avoid churn.
-- Redux is *not* used for per-frame editing (that's what killed the old editor — B11).
+- Redux is _not_ used for per-frame editing (that's what killed the old editor — B11).
 
 ### 3.3 Rendering
 
@@ -128,57 +128,75 @@ One file per project (same slot `diagram.json` occupies today). JSON, 2-space, s
   "version": 2,
   "meta": { "author": "…", "created": "…", "modified": "…" },
 
-  "packs": [                       // parts provenance — enables auto-install prompts
-    { "id": "tinystudio-core", "version": "1.4.0", "url": "https://raw.githubusercontent.com/Mister-Industries/tinyparts/main/index.json" }
+  "packs": [
+    // parts provenance — enables auto-install prompts
+    {
+      "id": "tinystudio-core",
+      "version": "1.4.0",
+      "url": "https://raw.githubusercontent.com/Mister-Industries/tinyparts/main/index.json"
+    }
   ],
 
   "parts": [
     {
-      "id": "R1",                  // == reference designator, unique, user-visible (§6.4)
-      "type": "resistor",          // PartDef type within resolved packs
+      "id": "R1", // == reference designator, unique, user-visible (§6.4)
+      "type": "resistor", // PartDef type within resolved packs
       "attrs": { "value": "220" }, // part-schema-declared properties (drive sim + BOM)
-      "bb":  { "x": 480, "y": 240, "rotate": 0, "flip": false, "legs": { "1": [ -14, 28 ] } },
-      "sch": { "x": 300, "y": 160, "rotate": 90, "flip": false }   // absent ⇒ unplaced (ratsnest)
+      "bb": { "x": 480, "y": 240, "rotate": 0, "flip": false, "legs": { "1": [-14, 28] } },
+      "sch": { "x": 300, "y": 160, "rotate": 90, "flip": false } // absent ⇒ unplaced (ratsnest)
     }
   ],
 
   "wires": [
     {
-      "id": "w7",                  // stable id (B4 fix) — 8-char nanoid
-      "from": "R1:2",              // "partId:pinName"
-      "to":   { "wire": "w3", "t": 0.42 },   // OR a junction: parametric point on another wire (B9 fix)
-      "view": "bb",                // each wire belongs to ONE view ("bb" | "sch")
-      "color": "#2fa46a",          // bb only; schematic wires are always ink
-      "route": ["h48", "v-19.2"],  // Wokwi-style journey, source-anchored; "d dx,dy" allowed in bb
-      "curve": true                // bb only: render as bezier jumper (route still authoritative for hit tests)
+      "id": "w7", // stable id (B4 fix) — 8-char nanoid
+      "from": "R1:2", // "partId:pinName"
+      "to": { "wire": "w3", "t": 0.42 }, // OR a junction: parametric point on another wire (B9 fix)
+      "view": "bb", // each wire belongs to ONE view ("bb" | "sch")
+      "color": "#2fa46a", // bb only; schematic wires are always ink
+      "route": ["h48", "v-19.2"], // Wokwi-style journey, source-anchored; "d dx,dy" allowed in bb
+      "curve": true // bb only: render as bezier jumper (route still authoritative for hit tests)
     }
   ],
 
-  "netLabels": [                   // schematic-only named nets (GND, 3V3, SDA…)
-    { "id": "nl1", "name": "GND", "kind": "ground", "sch": { "x": 340, "y": 260, "rotate": 0 }, "pin": "nl1:1" }
+  "netLabels": [
+    // schematic-only named nets (GND, 3V3, SDA…)
+    {
+      "id": "nl1",
+      "name": "GND",
+      "kind": "ground",
+      "sch": { "x": 340, "y": 260, "rotate": 0 },
+      "pin": "nl1:1"
+    }
   ],
 
   "sim": {
     "analyses": [
       { "id": "tran1", "kind": "tran", "step": "10us", "stop": "5ms", "enabled": true },
-      { "id": "dc1",   "kind": "op", "enabled": true },
-      { "id": "sweep1","kind": "dc", "source": "V1", "from": 0, "to": 5, "step": 0.05 },
-      { "id": "ac1",   "kind": "ac", "sweep": "dec", "points": 20, "fstart": "1", "fstop": "1meg" }
+      { "id": "dc1", "kind": "op", "enabled": true },
+      { "id": "sweep1", "kind": "dc", "source": "V1", "from": 0, "to": 5, "step": 0.05 },
+      { "id": "ac1", "kind": "ac", "sweep": "dec", "points": 20, "fstart": "1", "fstop": "1meg" }
     ],
     "probes": [
-      { "id": "p1", "kind": "voltage", "at": "net:GND->led_anode", "label": "V(out)", "color": "#42a5f5" },
+      {
+        "id": "p1",
+        "kind": "voltage",
+        "at": "net:GND->led_anode",
+        "label": "V(out)",
+        "color": "#42a5f5"
+      },
       { "id": "p2", "kind": "current", "at": "part:R1", "label": "I(R1)" }
     ]
   },
 
-  "camera": { "bb": { "x": 0, "y": 0, "zoom": 1 }, "sch": { "x": 0, "y": 0, "zoom": 1 } }   // convenience, non-semantic
+  "camera": { "bb": { "x": 0, "y": 0, "zoom": 1 }, "sch": { "x": 0, "y": 0, "zoom": 1 } } // convenience, non-semantic
 }
 ```
 
 Design decisions and invariants:
 
 - **Wires are per-view.** Breadboard wires and schematic wires are different physical objects (Fritzing models it the same way). The **net model is the shared truth**: a connection made in breadboard shows as ratsnest in schematic until the user draws the schematic wire, and vice versa. (This replaces v1's awkward `schematic.pos/routes` overlay where one connection was shared.)
-- **Implicit connections are not stored.** Breadboard seating (pin-in-hole) is *derived* from geometry on load/edit — storing it would let the file lie. Same for junction net membership.
+- **Implicit connections are not stored.** Breadboard seating (pin-in-hole) is _derived_ from geometry on load/edit — storing it would let the file lie. Same for junction net membership.
 - **Junction endpoints reference the host wire** (`{wire, t}`), never a bare coordinate — they survive rerouting and deletion is cascaded (delete host ⇒ junction wires re-anchor to nearest pin of the host's net, or get flagged dangling).
 - **Coordinates:** px @ 96 DPI. Grids: bb 2.54 mm = 9.6 px (holes), sch 4.8 px fine / 9.6 px major (CircuitLab uses a similar half-pitch feel). All pins land on-grid by part-schema contract.
 - **`id` is the refdes** (`R1`, `LED2`, `U1`) — user-visible, auto-assigned by family prefix, editable with uniqueness enforcement. This makes netlists, BOM, and KiCad export trivially consistent.
@@ -198,54 +216,71 @@ Design decisions and invariants:
   "schema": 2,
   "type": "resistor",
   "label": "Resistor",
-  "family": "Passive",              // palette grouping + swap group + refdes prefix table
-  "prefix": "R",                    // refdes prefix (falls back to family map)
+  "family": "Passive", // palette grouping + swap group + refdes prefix table
+  "prefix": "R", // refdes prefix (falls back to family map)
   "description": "…",
   "tags": ["basic"],
-  "properties": {                   // typed, Inspector-rendered, sim-visible
-    "value":     { "kind": "spice-number", "default": "1k", "unit": "Ω", "label": "Resistance" },
+  "properties": {
+    // typed, Inspector-rendered, sim-visible
+    "value": { "kind": "spice-number", "default": "1k", "unit": "Ω", "label": "Resistance" },
     "tolerance": { "kind": "enum", "options": ["1%", "5%"], "default": "5%" }
   },
 
-  "pins": [                         // single source of truth for pin identity/order
+  "pins": [
+    // single source of truth for pin identity/order
     { "name": "1", "type": "male", "erc": "passive" },
     { "name": "2", "type": "male", "erc": "passive" }
   ],
-  "buses": [],                      // e.g. breadboard: [["1a","1b","1c","1d","1e"], …]
+  "buses": [], // e.g. breadboard: [["1a","1b","1c","1d","1e"], …]
 
   "views": {
     "breadboard": {
-      "svg": "…", "w": 68.5, "h": 9.6,
+      "svg": "…",
+      "w": 68.5,
+      "h": 9.6,
       "pins": { "1": [0.9, 4.8], "2": [67.5, 4.8] },
-      "legs": { "1": true, "2": true }          // bendable rubber-band legs
+      "legs": { "1": true, "2": true } // bendable rubber-band legs
     },
     "schematic": {
-      "svg": "…", "w": 57.6, "h": 19.2,         // CircuitLab-style symbol art (§9.2)
+      "svg": "…",
+      "w": 57.6,
+      "h": 19.2, // CircuitLab-style symbol art (§9.2)
       "pins": { "1": [0, 9.6], "2": [57.6, 9.6] },
-      "labels": { "ref": [28.8, -4], "value": [28.8, 26] }   // default text anchor slots
+      "labels": { "ref": [28.8, -4], "value": [28.8, 26] } // default text anchor slots
     }
   },
 
-  "spice": {                        // §10.3 — omit ⇒ part is sim-transparent or sim-blocking per `ercRole`
+  "spice": {
+    // §10.3 — omit ⇒ part is sim-transparent or sim-blocking per `ercRole`
     "template": "R{REF} {1} {2} {value}",
-    "models": []                    // optional .model / .subckt cards to emit once
+    "models": [] // optional .model / .subckt cards to emit once
   },
-  "kicad":  { "symbol": "Device:R", "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal", "pinMap": { "1": "1", "2": "2" } },
-  "wokwi":  { "type": "wokwi-resistor", "attrs": { "value": "{value}" }, "pinMap": { "1": "1", "2": "2" } },
+  "kicad": {
+    "symbol": "Device:R",
+    "footprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+    "pinMap": { "1": "1", "2": "2" }
+  },
+  "wokwi": {
+    "type": "wokwi-resistor",
+    "attrs": { "value": "{value}" },
+    "pinMap": { "1": "1", "2": "2" }
+  },
   "source": { "origin": "fritzing", "fzp": "resistor.fzp", "moduleId": "…" }
 }
 ```
 
 Notes:
 
-- `pins[]` (ordered, typed) is new vs v1's per-view map — pin *names* stay the cross-view join key, but identity/ERC/type live view-independently.
+- `pins[]` (ordered, typed) is new vs v1's per-view map — pin _names_ stay the cross-view join key, but identity/ERC/type live view-independently.
 - `spice.template` placeholders: `{REF}`, `{pinName}` (replaced with node names), `{property}`. Multi-line templates allowed (e.g. op-amp emits `X{REF} … opamp_model` and `models` carries the `.subckt`).
 - The **breadboard part itself is a PartDef** generated procedurally (`breadboard-half`, `breadboard-full`, `breadboard-mini`): female pins named `a1…j63`, `power+/-` rails, `buses` for rows/rails. Generator lives in `parts/svg.ts` so sizes are parametric and SVG is crisp.
 - **Generated schematic symbols:** parts lacking a schematic view get an auto-generated IC-style box symbol (name on top, pins on sides by `pins[]` order) so schematic view and KiCad export never block on missing art.
 
 ### 5.2 Registry and resolution
 
-`registry.ts` resolves `type → PartDef` in order: **project parts** (`<project>/parts/*.json`) → **installed packs** (userData) → **default pack** (bundled) → **builtins** (tiny* boards, breadboards, net labels, sources/probes). First hit wins; the Inspector shows provenance. Lazy per-part loading stays (manifest eager, bodies on demand).
+> **As built:** the `registry.ts` below was never written. Parts moved to the [tinyparts](https://github.com/Mister-Industries/tinyparts) repo instead, and `src/renderer/src/lib/partsLibrary.ts` resolves each `type` across layers, highest first: **user** (edits saved on this computer) → **dev** (a local tinyparts checkout) → **remote** (files synced from GitHub) → **bundled** (the snapshot in `assets/tinyparts`). The circuit editor still reads the v1 `PartDef` shape through `circuit/views/partsAdapter.ts`. Project-local parts aren't supported. See `docs/parts-and-art.md`.
+
+`registry.ts` resolves `type → PartDef` in order: **project parts** (`<project>/parts/*.json`) → **installed packs** (userData) → **default pack** (bundled) → **builtins** (tiny\* boards, breadboards, net labels, sources/probes). First hit wins; the Inspector shows provenance. Lazy per-part loading stays (manifest eager, bodies on demand).
 
 ### 5.3 Pack format
 
@@ -257,9 +292,20 @@ A pack is a repo/folder: `pack.json` + `parts/*.json` (+ optional `README`, prev
   "schema": 1,
   "id": "tinystudio-core",
   "name": "tinyStudio Core Parts",
-  "version": "1.4.0",              // semver; app checks for updates
+  "version": "1.4.0", // semver; app checks for updates
   "homepage": "https://github.com/Mister-Industries/tinyparts",
-  "parts": [ { "type": "resistor", "label": "Resistor", "family": "Passive", "file": "parts/resistor.json", "icon": "<svg…>", "pins": 2, "views": ["breadboard","schematic"], "sim": true } ]
+  "parts": [
+    {
+      "type": "resistor",
+      "label": "Resistor",
+      "family": "Passive",
+      "file": "parts/resistor.json",
+      "icon": "<svg…>",
+      "pins": 2,
+      "views": ["breadboard", "schematic"],
+      "sim": true
+    }
+  ]
 }
 ```
 
@@ -290,7 +336,7 @@ Multi-select (click, shift-click, marquee), copy/paste/duplicate (offset + refde
 
 ### 6.3 Geometry
 
-Rotation 0/90/180/270 both views (45° increments allowed for bb wires' aesthetics, not parts, v2.0); horizontal/vertical flip in schematic (mirrored symbols are mandatory for readable schematics — B13). Snapping: parts snap so *pins* land on-grid (not the part origin — this is a subtle Fritzing behavior that makes everything line up).
+Rotation 0/90/180/270 both views (45° increments allowed for bb wires' aesthetics, not parts, v2.0); horizontal/vertical flip in schematic (mirrored symbols are mandatory for readable schematics — B13). Snapping: parts snap so _pins_ land on-grid (not the part origin — this is a subtle Fritzing behavior that makes everything line up).
 
 ### 6.4 Reference designators
 
@@ -341,7 +387,7 @@ CircuitLab's editor reads as: white/paper background, fine grid, **black ink sym
 
 ### 8.2 Ratsnest sync (the dual-view contract)
 
-- **Either view can lead.** A part exists once; `bb` and `sch` placements are independent and each optional. Design schematic-first, breadboard-first, or mixed — the other view shows the part in its **"unplaced" tray** on the canvas edge; clicking one attaches it to the cursor for placement (better than Fritzing's pile-at-origin). The tray exists in *both* views.
+- **Either view can lead.** A part exists once; `bb` and `sch` placements are independent and each optional. Design schematic-first, breadboard-first, or mixed — the other view shows the part in its **"unplaced" tray** on the canvas edge; clicking one attaches it to the cursor for placement (better than Fritzing's pile-at-origin). The tray exists in _both_ views.
 - Nets connected in breadboard but not yet drawn in schematic render as light dashed **ratsnest** lines between nearest unconnected pins of the net. Drawing a real wire over a ratsnest satisfies it. Symmetrically, schematic-made connections show as ratsnest in breadboard.
 - Status pill: `Nets: 9 · routed here: 6 / 9` per view.
 
@@ -351,7 +397,7 @@ Same gesture engine as breadboard with schematic constraints: orthogonal only, w
 
 ### 8.4 Net labels
 
-A net label is a 1-pin builtin part whose net merges with every other label of the same name (`kind: ground` is just the name `GND` with the ground glyph). This gives clean schematics *and* named nets for netlists/KiCad (`GND`, `3V3`, `SDA`) — same mechanism Fritzing's SymbolPaletteItem uses.
+A net label is a 1-pin builtin part whose net merges with every other label of the same name (`kind: ground` is just the name `GND` with the ground glyph). This gives clean schematics _and_ named nets for netlists/KiCad (`GND`, `3V3`, `SDA`) — same mechanism Fritzing's SymbolPaletteItem uses.
 
 ---
 
@@ -421,7 +467,7 @@ S-expression netlist (`(export (version "E") (components …) (nets …))`) with
 
 ### 12.2 `.kicad_sch`
 
-KiCad 8/9 s-expression schematic (dev-docs.kicad.org spec): embedded `lib_symbols` (either referenced standard symbols like `Device:R` from `kicad.symbol`, or our generated generic box symbols serialized as full symbol defs so the file is self-contained), symbol instances from `sch` placements (px → mm, snapped to 1.27 mm grid, rotation/mirror mapped), wires from routed segments, junctions, labels from netLabels, `.op`-style text notes skipped. Validation: file opens in KiCad ≥8 with zero ERC *format* errors on demo projects; electrical ERC issues are the user's circuit's business.
+KiCad 8/9 s-expression schematic (dev-docs.kicad.org spec): embedded `lib_symbols` (either referenced standard symbols like `Device:R` from `kicad.symbol`, or our generated generic box symbols serialized as full symbol defs so the file is self-contained), symbol instances from `sch` placements (px → mm, snapped to 1.27 mm grid, rotation/mirror mapped), wires from routed segments, junctions, labels from netLabels, `.op`-style text notes skipped. Validation: file opens in KiCad ≥8 with zero ERC _format_ errors on demo projects; electrical ERC issues are the user's circuit's business.
 
 ### 12.3 Wokwi export (lossy, for wokwi.com simulation)
 
@@ -449,21 +495,21 @@ SVG (vector, exact scene) and PNG @2×, per view, with the tinyStudio watermark.
 
 ## 15. Milestones
 
-| # | Deliverable (demoable) | Contents | Est. |
-|---|---|---|---|
-| **M0** | Core skeleton | `core/` model+store+commands+undo, ported routing/nets with fixes (B2, B4, B9, B10), file load/save/migration, feature-flag mount, unit test rig | 2 wk |
-| **M1** | Breadboard editor parity | Canvas/camera, palette (packs read-only from bundled default), place/move/rotate/wire/junction/inspector, multi-select+clipboard+nudge, SVG/PNG export — *matches old editor, plus undo* | 3 wk |
+| #      | Deliverable (demoable)           | Contents                                                                                                                                                                                                           | Est. |
+| ------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- |
+| **M0** | Core skeleton                    | `core/` model+store+commands+undo, ported routing/nets with fixes (B2, B4, B9, B10), file load/save/migration, feature-flag mount, unit test rig                                                                   | 2 wk |
+| **M1** | Breadboard editor parity         | Canvas/camera, palette (packs read-only from bundled default), place/move/rotate/wire/junction/inspector, multi-select+clipboard+nudge, SVG/PNG export — _matches old editor, plus undo_                           | 3 wk |
 | **M2** | Real breadboard + parts pipeline | Procedural breadboards, drop-to-connect+sticky+legs, hole tooltips; `.fzpz` drop-import; Part Editor v2 with persistence; pack manager UI + GitHub index install; default pack regenerated with buses/pinType/legs | 4 wk |
-| **M3** | Schematic view | View toggle, symbol rendering, unplaced tray + ratsnest sync, net labels/ground, flip/mirror, ERC panel, refdes system | 4 wk |
-| **M4** | Simulation | Sources/probes builtins, netlist gen, worker engine, Build/Simulate UI, DC annotations, transient/sweep/AC plots, error mapping. Flag default ON; old editor removed | 4 wk |
-| **M5** | Interop | KiCad netlist + `.kicad_sch` export, Wokwi import/export + lint CI, curated mapping overlay (top 100 parts), `.fzz` import (stretch) | 3 wk |
+| **M3** | Schematic view                   | View toggle, symbol rendering, unplaced tray + ratsnest sync, net labels/ground, flip/mirror, ERC panel, refdes system                                                                                             | 4 wk |
+| **M4** | Simulation                       | Sources/probes builtins, netlist gen, worker engine, Build/Simulate UI, DC annotations, transient/sweep/AC plots, error mapping. Flag default ON; old editor removed                                               | 4 wk |
+| **M5** | Interop                          | KiCad netlist + `.kicad_sch` export, Wokwi import/export + lint CI, curated mapping overlay (top 100 parts), `.fzz` import (stretch)                                                                               | 3 wk |
 
 Dependencies: M0→M1→M2; M3 needs M0/M1 (not M2); M4 needs M3 (probes/labels); M5's netlist exporter can start after M3. Two agents can parallelize M2 ∥ M3 after M1.
 
 ## 16. Decisions (open questions resolved 2026-07-02)
 
 1. **Filename:** `circuit.json`; old `diagram.json` migrated on open. ✅
-2. **Theme:** both views follow the tinyStudio design system / Design Guide tokens (no forced paper-white); a "paper" style is an *export* option only. ✅
+2. **Theme:** both views follow the tinyStudio design system / Design Guide tokens (no forced paper-white); a "paper" style is an _export_ option only. ✅
 3. **Symbol standard:** US/IEEE default, IEC later as a setting. ✅
 4. **Default pack hosting:** new `tinyparts` repo under Mister-Industries; CI runs the bulk importer and publishes `index.json`. ✅
 5. **Mapping overlay:** lives in the `tinyparts` repo, community-PR-able. ✅
@@ -475,7 +521,7 @@ Dependencies: M0→M1→M2; M3 needs M0/M1 (not M2); M4 needs M3 (probes/labels)
 
 - **ngspice-WASM robustness** (nonconvergence on user circuits): mitigate with `.options` defaults (gmin stepping, itl bumps), watchdog, and readable error mapping. CircuitLab hides SPICE-isms well; we should crib their error copy tone.
 - **Fritzing SVG variance** (transforms, `<use>`, fonts, CSS): the resolver already handles the worst; budget real time in M2 for the long tail; `_report.json` keeps it honest.
-- **Scope gravity on the schematic view**: CircuitLab look is a *skin* discipline — resist rebuilding their whole parameter-expression system in v2 (plain values + spice-number parsing only).
+- **Scope gravity on the schematic view**: CircuitLab look is a _skin_ discipline — resist rebuilding their whole parameter-expression system in v2 (plain values + spice-number parsing only).
 - **Dual-view confusion** (users expect wires to teleport between views): ratsnest + status pills + a first-run tour mitigate; this is Fritzing's model and it's learnable.
 
 ---
@@ -487,4 +533,4 @@ Dependencies: M0→M1→M2; M3 needs M0/M1 (not M2); M4 needs M3 (probes/labels)
 - eecircuit-engine (ngspice WASM): https://github.com/eelab-dev/EEcircuit-engine · demo https://eecircuit.com · alternative build https://github.com/tscircuit/ngspice
 - KiCad s-expression schematic spec: https://dev-docs.kicad.org/en/file-formats/sexpr-schematic/index.html
 - CircuitLab UX reference: https://www.circuitlab.com/docs/the-basics/ (Build/Simulate modes, DC/Sweep/Transient/Frequency)
-- Fritzing internals + current-code bug catalogue: `docs/circuit-architecture-and-roadmap.md` (this repo)
+- Fritzing internals + current-code bug catalogue: `docs/archive/circuit-architecture-and-roadmap.md` (this repo)
