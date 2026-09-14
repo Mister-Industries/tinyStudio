@@ -163,6 +163,7 @@ export function Canvas({
   defsTick,
   cam,
   setCam,
+  fitOnMount = true,
   handleRef,
   onDropPart,
   onDropNetLabel,
@@ -193,6 +194,8 @@ export function Canvas({
   defsTick: number
   cam: Cam
   setCam: React.Dispatch<React.SetStateAction<Cam>>
+  /** fit the scene on first render; false when a remembered camera is restored */
+  fitOnMount?: boolean
   handleRef: React.Ref<CanvasHandle>
   onDropPart: (type: string, at: Pt) => void
   onDropNetLabel: (kind: NetLabelKind, name: string, at: Pt) => void
@@ -223,6 +226,8 @@ export function Canvas({
   onRequestEdit: () => void
 }): React.JSX.Element {
   const scale = cam.scale
+  // Pin targets stay at least 12 screen px wide however far the view zooms out.
+  const pinHit = Math.max(16, 12 / scale)
   // schematic wires bend on the fine grid; parts still snap pins to major
   const wireGrid = view === 'sch' ? GRID_SCH : GRID_BB
   const snap = (v: number): number => Math.round(v / wireGrid) * wireGrid
@@ -388,7 +393,7 @@ export function Canvas({
     [fit, cam, scale]
   )
 
-  const didFit = React.useRef(false)
+  const didFit = React.useRef(!fitOnMount)
   React.useEffect(() => {
     if (didFit.current) return
     if (doc.parts.length === 0 || doc.parts.every((p) => !p[view] || visualFor(p.type, view))) {
@@ -1683,10 +1688,10 @@ export function Canvas({
                           title={isLeg ? `${pin} (drag to bend the leg)` : pin}
                           style={{
                             position: 'absolute',
-                            left: px - 8,
-                            top: py - 8,
-                            width: 16,
-                            height: 16,
+                            left: px - pinHit / 2,
+                            top: py - pinHit / 2,
+                            width: pinHit,
+                            height: pinHit,
                             zIndex: 3,
                             cursor: 'crosshair'
                           }}
@@ -1725,7 +1730,15 @@ export function Canvas({
                             onPinClick(e, part.id, pin)
                           }}
                         >
-                          <svg width="16" height="16">
+                          <svg
+                            width="16"
+                            height="16"
+                            style={{
+                              position: 'absolute',
+                              left: (pinHit - 16) / 2,
+                              top: (pinHit - 16) / 2
+                            }}
+                          >
                             {onHotNet && !on && (
                               <circle
                                 cx="8"
@@ -1871,10 +1884,10 @@ export function Canvas({
                       title={label.name}
                       style={{
                         position: 'absolute',
-                        left: px - 8,
-                        top: py - 8,
-                        width: 16,
-                        height: 16,
+                        left: px - pinHit / 2,
+                        top: py - pinHit / 2,
+                        width: pinHit,
+                        height: pinHit,
                         zIndex: 3,
                         cursor: 'crosshair'
                       }}
@@ -1885,7 +1898,15 @@ export function Canvas({
                       }
                       onClick={(e) => onPinClick(e, label.id, '1')}
                     >
-                      <svg width="16" height="16">
+                      <svg
+                        width="16"
+                        height="16"
+                        style={{
+                          position: 'absolute',
+                          left: (pinHit - 16) / 2,
+                          top: (pinHit - 16) / 2
+                        }}
+                      >
                         {showDot && (
                           <circle
                             cx="8"

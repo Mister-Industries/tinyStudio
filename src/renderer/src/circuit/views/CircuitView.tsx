@@ -145,6 +145,19 @@ export function CircuitViewV2({
   const [sel, setSel] = React.useState<Selection>(emptySel())
   const [wireColor, setWireColor] = React.useState(WIRE_COLORS[0])
   const [cam, setCam] = React.useState<Cam>({ scale: 1, tx: 40, ty: 40 })
+  // Breadboard and schematic each keep their own zoom and pan: switching back to
+  // a view restores where you left it instead of re-fitting it.
+  const camByView = React.useRef<Partial<Record<ViewId, Cam>>>({})
+  const latestCam = React.useRef(cam)
+  latestCam.current = cam
+  const camView = React.useRef(view)
+  React.useLayoutEffect(() => {
+    if (camView.current === view) return
+    camByView.current[camView.current] = latestCam.current
+    camView.current = view
+    const saved = camByView.current[view]
+    if (saved) setCam(saved)
+  }, [view])
   const [editorPart, setEditorPart] = React.useState<PartDef | null | undefined>(undefined)
   // packs in the dev tinyparts folder a Parts Editor save can target
   const [devPacks, setDevPacks] = React.useState<{ id: string; name: string }[]>()
@@ -1041,6 +1054,7 @@ export function CircuitViewV2({
           defsTick={defsTick}
           cam={cam}
           setCam={setCam}
+          fitOnMount={!camByView.current[view]}
           handleRef={canvasRef}
           onDropPart={(type, at) => void addPartAt(type, at)}
           onDropNetLabel={(kind, name, at) => addNetLabel(kind, name, at)}
