@@ -1,4 +1,4 @@
-import { OpenFileCommand, RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
+import { openFileItem, refreshWorkspace } from '@renderer/commands/fileCommands'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { selectOpenFiles, useAppSelector } from '@renderer/redux'
 import type { BaseFileItem, EditorFile } from '@renderer/redux/fileSlice'
@@ -54,13 +54,13 @@ export function useProjectFile(name: string, makeDefault?: () => string): Editor
         if (!item && makeDefault) {
           const path = `${workspace.path}/${name}`
           await fileSystem.writeFile(path, makeDefault())
-          await new RefreshWorkspaceCommand(workspace).execute()
+          await refreshWorkspace(workspace)
           item = { id: crypto.randomUUID(), parentId: 'root', name, path, type: 'file' }
         }
         // Load as a hidden background buffer: the full-window view edits/saves
         // it, but it stays out of the Code tab bar until the user clicks the
         // in-view code button (which reveals it).
-        if (item) await new OpenFileCommand(item, { hidden: true }).execute()
+        if (item) await openFileItem(item, { hidden: true })
       } finally {
         busy.current = false
       }

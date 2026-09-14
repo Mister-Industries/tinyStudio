@@ -9,7 +9,7 @@
  * for Code, makes sure a sketch is open to land on.
  */
 
-import { OpenFileCommand } from '@renderer/commands/fileCommands'
+import { openFileItem } from '@renderer/commands/fileCommands'
 import {
   BaseFileItem,
   selectEditorView,
@@ -53,7 +53,7 @@ export function ViewSegment(): React.JSX.Element {
         const item =
           findInTree(workspace.root, (i) => /\.ino$/i.test(i.name!)) ||
           findInTree(workspace.root, (i) => /\.(cpp|c|h|hpp)$/i.test(i.name!))
-        if (item) new OpenFileCommand(item).execute()
+        if (item) openFileItem(item)
       }
     }
     dispatch(setEditorView(view))

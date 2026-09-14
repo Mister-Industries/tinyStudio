@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { notify as toast } from './lib/notify'
 import { BackendPrompt } from './components/BackendPrompt'
-import {
-  LoadGitHubProjectCommand,
-  OpenRecentFolderCommand,
-  OpenWorkspaceCommand
-} from './commands/fileCommands'
+import { loadGitHubProject, openRecentFolder, openFolder } from './commands/fileCommands'
 import { listRecentProjects } from './lib/projectStore'
 import { STORAGE_KEYS } from './lib/storageKeys'
 import { parseProjectRoute } from './lib/projectRouting'
@@ -122,7 +118,7 @@ export default function App(): React.JSX.Element {
 
     const route = parseProjectRoute()
     if (route) {
-      new LoadGitHubProjectCommand(route.owner, route.repo, route.path).execute().catch((e) => {
+      loadGitHubProject(route.owner, route.repo, route.path).catch((e) => {
         console.error('Failed to load project from URL:', e)
         toast.error('Could not open that project', {
           description: e instanceof Error ? e.message : String(e)
@@ -139,9 +135,9 @@ export default function App(): React.JSX.Element {
       // it waits under Recent on the start screen.
       const entry = listRecentProjects().find((r) => r.kind === 'folder' && r.location === last)
       if (entry) {
-        new OpenRecentFolderCommand(entry, { prompt: false })
-          .execute()
-          .catch((e) => console.error('Failed to reopen last folder:', e))
+        openRecentFolder(entry, { prompt: false }).catch((e) =>
+          console.error('Failed to reopen last folder:', e)
+        )
       }
       return
     }
@@ -149,7 +145,7 @@ export default function App(): React.JSX.Element {
       .then(([exists, allowed]) => {
         if (!exists) localStorage.removeItem(STORAGE_KEYS.lastWorkspace)
         // A folder from before access was tracked waits under Recent until it's chosen again.
-        else if (allowed) void new OpenWorkspaceCommand(last).execute()
+        else if (allowed) void openFolder(last)
       })
       .catch((e) => console.error('Failed to reopen last workspace:', e))
   }, [])
@@ -159,9 +155,9 @@ export default function App(): React.JSX.Element {
     const onPop = (): void => {
       const route = parseProjectRoute()
       if (route) {
-        new LoadGitHubProjectCommand(route.owner, route.repo, route.path)
-          .execute()
-          .catch((e) => console.error('Failed to load project on navigation:', e))
+        loadGitHubProject(route.owner, route.repo, route.path).catch((e) =>
+          console.error('Failed to load project on navigation:', e)
+        )
       }
     }
     window.addEventListener('popstate', onPop)

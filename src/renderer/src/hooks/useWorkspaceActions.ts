@@ -4,11 +4,7 @@
  * project menu on the header bar.
  */
 
-import {
-  CloseWorkspaceCommand,
-  OpenWorkspaceCommand,
-  RefreshWorkspaceCommand
-} from '@renderer/commands/fileCommands'
+import { closeProject, openFolder, refreshWorkspace } from '@renderer/commands/fileCommands'
 import { notify as toast } from '@renderer/lib/notify'
 import {
   BaseFileItem,
@@ -31,20 +27,11 @@ export function useWorkspaceActions(): WorkspaceActions {
   const dispatch = useAppDispatch()
 
   const openWorkspace = (): void => {
-    new OpenWorkspaceCommand(undefined).execute().catch((e) => {
+    openFolder().catch((e) => {
       toast.error('Could not open folder', {
         description: e instanceof Error ? e.message : String(e)
       })
     })
-  }
-
-  const refreshWorkspace = (): void => {
-    if (!workspace) return
-    new RefreshWorkspaceCommand(workspace).execute()
-  }
-
-  const closeWorkspace = (): void => {
-    new CloseWorkspaceCommand().execute()
   }
 
   // The new item's name is typed inline in the file tree, so make sure the
@@ -77,5 +64,13 @@ export function useWorkspaceActions(): WorkspaceActions {
     )
   }
 
-  return { openWorkspace, refreshWorkspace, closeWorkspace, newFile, newFolder }
+  return {
+    openWorkspace,
+    refreshWorkspace: () => {
+      if (workspace) void refreshWorkspace(workspace)
+    },
+    closeWorkspace: closeProject,
+    newFile,
+    newFolder
+  }
 }

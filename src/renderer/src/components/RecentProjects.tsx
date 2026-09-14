@@ -1,7 +1,7 @@
 // RecentProjects — one-click reopen for folders and GitHub repos opened before.
 // Shown on the start screen and in the Open dialog; renders nothing when empty.
 
-import { OpenRecentFolderCommand } from '@renderer/commands/fileCommands'
+import { openRecentFolder } from '@renderer/commands/fileCommands'
 import { notify as toast } from '@renderer/lib/notify'
 import {
   forgetRecentProject,
@@ -52,7 +52,7 @@ export function RecentProjects({
         onOpened?.()
         return
       }
-      const result = await new OpenRecentFolderCommand(entry).execute()
+      const result = await openRecentFolder(entry)
       if (result === 'opened') {
         onOpened?.()
       } else if (result === 'missing') {

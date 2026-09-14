@@ -1,6 +1,6 @@
 // Visual view: the full-window p5 sketch, with sketch tabs, preview and publish.
 
-import { RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
+import { refreshWorkspace } from '@renderer/commands/fileCommands'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { enablePages, loadAccount, loadLink, pushFile, toRepoPath } from '@renderer/lib/github'
 import { notify as toast } from '@renderer/lib/notify'
@@ -58,7 +58,7 @@ export function VisualPane(): React.JSX.Element | null {
     const path = `${ws.path}/${fileName}`
     try {
       await fileSystem.writeFile(path, sketchTemplate(fileName.replace(/\.js$/i, '')))
-      await new RefreshWorkspaceCommand(ws).execute()
+      await refreshWorkspace(ws)
       setActiveSketch(fileName)
       setShowNew(false)
     } catch (e) {
@@ -95,12 +95,12 @@ export function VisualPane(): React.JSX.Element | null {
         // Keep index.html in the project too, as on desktop (best-effort).
         await fileSystem
           .writeFile(path, html)
-          .then(() => new RefreshWorkspaceCommand(ws).execute())
+          .then(() => refreshWorkspace(ws))
           .catch((e) => console.warn('Could not save index.html:', e))
         return
       }
       await window.api.fs.writeFile(path, html)
-      await new RefreshWorkspaceCommand(ws).execute()
+      await refreshWorkspace(ws)
       const err = await window.api.fs.openPath(path)
       if (err) toast.error('Could not open preview', { description: err })
       else toast.success('Preview opened in your browser', { description: path })
@@ -131,7 +131,7 @@ export function VisualPane(): React.JSX.Element | null {
     try {
       const html = buildHtml()
       await fileSystem.writeFile(`${ws.path}/index.html`, html)
-      await new RefreshWorkspaceCommand(ws).execute()
+      await refreshWorkspace(ws)
       await pushFile(
         link.remote,
         link.branch,

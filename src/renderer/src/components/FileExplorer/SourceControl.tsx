@@ -4,7 +4,7 @@
  * The push set is the working tree diffed against the last-synced baseline.
  */
 
-import { AdoptCopiedProjectCommand, RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
+import { adoptCopiedProject, refreshWorkspace } from '@renderer/commands/fileCommands'
 import { GitHubSignInButton } from '@renderer/components/GitHubSignIn'
 import { useGitHubAccount } from '@renderer/hooks/useGitHubAccount'
 import { useAppSelector } from '@renderer/redux'
@@ -96,7 +96,7 @@ export function SourceControl(): React.JSX.Element {
       const base = await pullWorkspace(workspace, newLink, account?.token, (msg) => setBusy(msg))
       newLink.base = base
       saveLink(workspace.path, newLink)
-      if (workspace) await new RefreshWorkspaceCommand(workspace).execute()
+      if (workspace) await refreshWorkspace(workspace)
       setRepoInput('')
       await refreshChanges()
       toast.success(`Linked ${meta.fullName}`)
@@ -149,7 +149,7 @@ export function SourceControl(): React.JSX.Element {
       const updated = { ...link, base }
       saveLink(workspace.path, updated)
       setLink(updated)
-      await new RefreshWorkspaceCommand(workspace).execute()
+      await refreshWorkspace(workspace)
       await refreshChanges()
       toast.success('Pulled latest')
     } catch (e) {
@@ -183,7 +183,7 @@ export function SourceControl(): React.JSX.Element {
         source: workspace.source,
         onProgress: (msg) => setBusy(msg)
       })
-      await new AdoptCopiedProjectCommand(workspace, linked, account.login).execute()
+      await adoptCopiedProject(workspace, linked, account.login)
       setLink(linked)
       setRepoInput('')
       await refreshChanges()

@@ -1,6 +1,6 @@
 // Circuit view: the full-window circuit.json editor (docs/circuit-view-tech-spec.md).
 
-import { RefreshWorkspaceCommand } from '@renderer/commands/fileCommands'
+import { refreshWorkspace } from '@renderer/commands/fileCommands'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { useAppDispatch, useAppSelector } from '@renderer/redux'
 import { setEditorView, setPanelOpen } from '@renderer/redux/editorSlice'
@@ -40,7 +40,7 @@ export function CircuitPane(): React.JSX.Element | null {
         const { doc } = parseCircuitFile(old)
         await fileSystem.writeFile(`${workspace.path}/circuit.json`, serializeDoc(doc))
         await fileSystem.writeFile(`${workspace.path}/diagram.json.bak`, old)
-        await new RefreshWorkspaceCommand(workspace).execute()
+        await refreshWorkspace(workspace)
       } catch (e) {
         console.error('circuit.json adoption failed:', e)
       } finally {

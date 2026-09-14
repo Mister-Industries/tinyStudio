@@ -5,7 +5,7 @@
 // computer is the clone step, and a repo you can push to stays linked, so Push
 // and Pull keep working from the folder afterwards.
 
-import { OpenWorkspaceCommand } from '@renderer/commands/fileCommands'
+import { openFolder } from '@renderer/commands/fileCommands'
 import { useGitHubAccount } from '@renderer/hooks/useGitHubAccount'
 import { ghRepos, parseRepoRef, type RepoRef, type RepoSummary } from '@renderer/lib/github'
 import { notify as toast } from '@renderer/lib/notify'
@@ -63,12 +63,12 @@ export function OpenProjectDialog({
 
   const close = (): void => onOpenChange(false)
 
-  const openFolder = async (): Promise<void> => {
+  const pickFolder = async (): Promise<void> => {
     // Close first: the system picker takes over anyway, and the dialog
     // shouldn't linger behind it.
     close()
     try {
-      await new OpenWorkspaceCommand(undefined).execute()
+      await openFolder()
     } catch (e) {
       toast.error('Could not open folder', {
         description: e instanceof Error ? e.message : String(e)
@@ -112,7 +112,7 @@ export function OpenProjectDialog({
         <div className="flex min-w-0 flex-col gap-5">
           <button
             type="button"
-            onClick={openFolder}
+            onClick={pickFolder}
             disabled={!folders || !!busy}
             className="tactile-bordered flex w-full cursor-pointer items-center gap-3 rounded-[var(--radius-md)] bg-card p-3 text-left disabled:cursor-not-allowed disabled:opacity-55"
           >

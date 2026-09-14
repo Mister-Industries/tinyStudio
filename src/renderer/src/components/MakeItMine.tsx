@@ -9,7 +9,7 @@
  * people mid-thought and make a permanent decision feel like a typo.
  */
 
-import { AdoptCopiedProjectCommand } from '@renderer/commands/fileCommands'
+import { adoptCopiedProject } from '@renderer/commands/fileCommands'
 import { useGitHubAccount } from '@renderer/hooks/useGitHubAccount'
 import { useIsBrowserOnlyProject } from '@renderer/hooks/useIsBrowserOnlyProject'
 import { useIsReadOnlyProject } from '@renderer/hooks/useIsReadOnlyProject'
@@ -106,7 +106,7 @@ export function MakeItMine(): React.JSX.Element | null {
       })
 
       setBusy('Switching to your copy…')
-      await new AdoptCopiedProjectCommand(workspace, link, account.login).execute()
+      await adoptCopiedProject(workspace, link, account.login)
 
       setOpen(false)
       if (failed.length > 0) {

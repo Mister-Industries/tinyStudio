@@ -4,11 +4,11 @@
 //   e.g. /Mister-Industries/tinyStudio-examples/blink
 //
 // There is no router dependency — the app parses window.location on startup (and
-// on back/forward) and loads the matching project via LoadGitHubProjectCommand.
+// on back/forward) and loads the matching project via loadGitHubProject.
 // The Netlify SPA redirect (netlify.toml) ensures the deep URL serves index.html
 // so this code can run.
 
-import { LoadGitHubProjectCommand } from '@renderer/commands/fileCommands'
+import { loadGitHubProject } from '@renderer/commands/fileCommands'
 
 export interface ProjectRoute {
   owner: string
@@ -57,5 +57,5 @@ export async function navigateToProject(
   if (url !== window.location.pathname) {
     window.history.pushState({ owner, repo, path }, '', url)
   }
-  await new LoadGitHubProjectCommand(owner, repo, path, branch).execute()
+  await loadGitHubProject(owner, repo, path, branch)
 }

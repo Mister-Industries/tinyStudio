@@ -7,7 +7,7 @@
  * with the usual banner explaining how to keep it.
  */
 
-import { OpenScratchProjectCommand, OpenWorkspaceCommand } from '@renderer/commands/fileCommands'
+import { openScratchProject, openFolder } from '@renderer/commands/fileCommands'
 import { notify as toast } from '@renderer/lib/notify'
 import { flattenSketchLayout, toSketchName } from '@renderer/lib/projectLayout'
 import {
@@ -69,7 +69,7 @@ export function CreateProjectDialog({
       const files = createDefaultProjectFiles(title.trim(), name)
 
       if (!local) {
-        await new OpenScratchProjectCommand(name, files).execute()
+        await openScratchProject(name, files)
         onOpenChange(false)
         return
       }
@@ -79,7 +79,7 @@ export function CreateProjectDialog({
       const target = await chooseProjectTarget(parent, name)
       const layout = flattenSketchLayout(files, target.name)
       const root = await writeProjectFolder(parent, target, layout.files)
-      await new OpenWorkspaceCommand(root).execute()
+      await openFolder(root)
       onOpenChange(false)
       if (target.name !== name) {
         toast.info(`A ${name} folder was already there`, {
