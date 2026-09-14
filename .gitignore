@@ -12,3 +12,9 @@ vendor/
 
 # Staging output of scripts/fritzing-import.mjs (explode it into tinyparts)
 tmp/
+
+# Temp files left by FUSE-mounted sandboxes
+.fuse_hidden*
+
+# TypeScript incremental build caches
+*.tsbuildinfo
