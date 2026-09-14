@@ -6,7 +6,7 @@
  * (store.serialize() → onChange → Redux buffer; disk save stays on Ctrl+S,
  * same as every other editor buffer).
  *
- * Mounted directly by EditorPanel's CircuitView in the Circuit tab — desktop
+ * Mounted by components/editor/CircuitPane in the Circuit tab — desktop
  * and web builds. This has been the only circuit editor since M4 (the legacy
  * DiagramEditor and its feature flag were removed).
  */
