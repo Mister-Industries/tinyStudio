@@ -84,6 +84,7 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
 
 ### Code, build and serial
 
+- Renaming an open file updates its tab's name as well as its path.
 - Boards are detected as they're plugged in and unplugged, without polling.
 - A board options menu (PSRAM, partition scheme, CPU frequency) and
   **Change board**.

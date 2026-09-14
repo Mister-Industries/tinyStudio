@@ -73,6 +73,39 @@ const inlineImports = {
   }
 }
 
+/**
+ * Main-process modules import `electron`. Tests never have one, so the import
+ * resolves to a stub whose `app.getPath` answers from environment variables the
+ * test sets (TINYSTUDIO_TEST_USERDATA, TINYSTUDIO_TEST_DOCUMENTS) and whose
+ * other members are inert.
+ */
+const electronStub = {
+  name: 'electron-stub',
+  setup(b) {
+    b.onResolve({ filter: /^electron$/ }, () => ({ path: 'electron', namespace: 'electron-stub' }))
+    b.onLoad({ filter: /.*/, namespace: 'electron-stub' }, () => ({
+      contents: `
+        export const app = {
+          getPath: (name) =>
+            name === 'userData'
+              ? process.env.TINYSTUDIO_TEST_USERDATA ?? '/tmp/tinystudio-test-userdata'
+              : process.env.TINYSTUDIO_TEST_DOCUMENTS ?? '/tmp/tinystudio-test-documents',
+          isPackaged: false,
+          getAppPath: () => process.cwd()
+        }
+        export const shell = { openExternal: async () => {}, openPath: async () => '', showItemInFolder: () => {} }
+        export const ipcMain = { handle: () => {}, on: () => {} }
+        export const dialog = {}
+        export class BrowserWindow { static fromWebContents() { return null } }
+        export const safeStorage = { isEncryptionAvailable: () => false }
+        export const contextBridge = { exposeInMainWorld: () => {} }
+        export const ipcRenderer = {}
+      `,
+      loader: 'js'
+    }))
+  }
+}
+
 const out = mkdtempSync(join(tmpdir(), 'circuit-tests-'))
 try {
   await build({
@@ -85,9 +118,11 @@ try {
     target: 'node20',
     sourcemap: 'inline',
     external: ['node:*'],
+    // The renderer's `@renderer/*` import alias (tsconfig.web.json paths).
+    alias: { '@renderer': join(srcRoot, 'renderer', 'src') },
     outExtension: { '.js': '.mjs' },
     logLevel: 'error',
-    plugins: [rawImports, inlineImports]
+    plugins: [rawImports, inlineImports, electronStub]
   })
   const compiled = readdirSync(out, { recursive: true, withFileTypes: true })
     .filter((e) => e.isFile() && e.name.endsWith('.mjs'))

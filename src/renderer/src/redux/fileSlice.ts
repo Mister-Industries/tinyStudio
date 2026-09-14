@@ -275,9 +275,11 @@ export const fileSlice = createAppSlice({
         const all = editorObjectAdapter.getSelectors().selectAll(state.openFiles)
         for (const f of all) {
           if (f.path !== from && !f.path.startsWith(from + '/')) continue
+          const path = f.path === from ? to : to + f.path.slice(from.length)
+          // The tab's label follows too, so a renamed file reads as renamed.
           state.openFiles = editorObjectAdapter.updateOne(state.openFiles, {
             id: f.id,
-            changes: { path: f.path === from ? to : to + f.path.slice(from.length) }
+            changes: { path, name: path.slice(path.lastIndexOf('/') + 1) }
           })
         }
       }

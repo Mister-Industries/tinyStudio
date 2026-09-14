@@ -18,7 +18,7 @@ interface FileSystemItem {
 }
 
 /** What "open with the default app" may open: documents and images, never programs. */
-const OPENABLE_EXTENSIONS = new Set([
+export const OPENABLE_EXTENSIONS = new Set([
   '.html',
   '.htm',
   '.svg',
@@ -32,6 +32,11 @@ const OPENABLE_EXTENSIONS = new Set([
   '.csv',
   '.json'
 ])
+
+/** True when `open-path` may hand this file to the OS: its extension is on the list above. */
+export function canOpenFile(filePath: string): boolean {
+  return OPENABLE_EXTENSIONS.has(path.extname(filePath).toLowerCase())
+}
 
 /** Run a file operation, prefixing failures so the renderer can tell what went wrong. */
 async function attempt<T>(what: string, run: () => Promise<T>): Promise<T> {
@@ -157,8 +162,8 @@ export function registerFileIpc(): void {
     const target = requireAccess(targetPath)
     const stats = await fs.stat(target).catch(() => null)
     if (!stats) return `${target} doesn't exist.`
-    const ext = path.extname(target).toLowerCase()
-    if (stats.isFile() && !OPENABLE_EXTENSIONS.has(ext)) {
+    if (stats.isFile() && !canOpenFile(target)) {
+      const ext = path.extname(target).toLowerCase()
       return `tinyStudio only opens documents and images, not ${ext || 'files without an extension'}.`
     }
     return shell.openPath(target)

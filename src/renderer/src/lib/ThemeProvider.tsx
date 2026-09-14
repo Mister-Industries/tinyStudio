@@ -23,7 +23,7 @@ const initialState: ThemeProviderState = {
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
 /** The saved theme, moving one saved under the pre-0.4 key to the current key. */
-function readSavedTheme(key: string): Theme | null {
+export function readSavedTheme(key: string): Theme | null {
   try {
     const saved = localStorage.getItem(key) ?? localStorage.getItem(LEGACY_THEME_KEY)
     if (saved !== 'dark' && saved !== 'light' && saved !== 'system') return null
