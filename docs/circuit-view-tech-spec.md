@@ -55,7 +55,7 @@ This spec is written so an agent can start building without further context. Com
 - `DiagramEditor.tsx` (2,000-line monolith: state, geometry, rendering, palette, inspector in one component) → replaced by the module in §3.
 - `CircuitEditor.tsx` (legacy static viewer) → delete.
 - Direct-to-file writes per pointermove → replaced by an in-memory document store with command-based undo, debounced serialization (§6).
-- `diagram.json` as the native format → superseded by `circuit.json` v2 (§4). A migration shim converts old files on open (they are near-Wokwi, so the Wokwi importer handles them).
+- `diagram.json` as the native format → superseded by `circuit.json` v2 (§4). A migration shim converts old files when the user clicks **Convert** in the Circuit view (they are near-Wokwi, so the Wokwi importer handles them).
 
 ---
 
@@ -201,7 +201,7 @@ Design decisions and invariants:
 - **Coordinates:** px @ 96 DPI. Grids: bb 2.54 mm = 9.6 px (holes), sch 4.8 px fine / 9.6 px major (CircuitLab uses a similar half-pitch feel). All pins land on-grid by part-schema contract.
 - **`id` is the refdes** (`R1`, `LED2`, `U1`) — user-visible, auto-assigned by family prefix, editable with uniqueness enforcement. This makes netlists, BOM, and KiCad export trivially consistent.
 - **Unknown keys are preserved** on round-trip (B3 fix): the serializer patches known sections and carries the rest.
-- **Migration:** v1 `diagram.json` (and raw Wokwi files) are detected by shape and converted on open via the Wokwi importer + v1 shim; the file is rewritten as `circuit.json` v2 next save (old file kept as `diagram.json.bak` once).
+- **Migration:** v1 `diagram.json` (and raw Wokwi files) are detected by shape and converted via the Wokwi importer + v1 shim when the user clicks **Convert** in the Circuit view; that writes `circuit.json` v2 and keeps the old file as `diagram.json.bak`.
 
 **Why JSON, not XML:** everything downstream (Wokwi import, packs, TS tooling, git diffs) is JSON-native; Fritzing's XML buys nothing but familiarity to Fritzing itself. Fritzing compatibility lives in importers, not in the native format.
 
@@ -482,7 +482,7 @@ SVG (vector, exact scene) and PNG @2×, per view, with the tinyStudio watermark.
 ## 13. tinyStudio integration
 
 - `EditorPanel.CircuitView` mounts `circuit/index.ts` behind a feature flag (`settings.circuitV2`, default off until M4) — old editor remains during development; the flag flips per-project once `circuit.json` exists.
-- File plumbing: `useProjectFile('circuit.json', defaultDoc)` (with `diagram.json` migration probe), Redux `updateFileContent` on the debounced serializer, Code-tab `</>` deep link kept.
+- File plumbing: `useProjectFile('circuit.json')` (the view offers **Create circuit** when the file is missing and **Convert** when only a `diagram.json` exists), Redux `updateFileContent` on the debounced serializer, Code-tab `</>` deep link kept.
 - AI assistant: expose a small imperative API (`getDocument()`, `applyOperations(ops[])`, `getNetlist()`) so Studio AI can read/modify circuits and reason over netlists — the current "Auto-wired by Studio AI" flow ports over.
 - Web build: everything works except pack install to disk (uses IndexedDB) — ngspice-WASM is browser-native, Electron not required for sim.
 
@@ -508,7 +508,7 @@ Dependencies: M0→M1→M2; M3 needs M0/M1 (not M2); M4 needs M3 (probes/labels)
 
 ## 16. Decisions (open questions resolved 2026-07-02)
 
-1. **Filename:** `circuit.json`; old `diagram.json` migrated on open. ✅
+1. **Filename:** `circuit.json`; old `diagram.json` converted on request. ✅
 2. **Theme:** both views follow the tinyStudio design system / Design Guide tokens (no forced paper-white); a "paper" style is an _export_ option only. ✅
 3. **Symbol standard:** US/IEEE default, IEC later as a setting. ✅
 4. **Default pack hosting:** new `tinyparts` repo under Mister-Industries; CI runs the bulk importer and publishes `index.json`. ✅

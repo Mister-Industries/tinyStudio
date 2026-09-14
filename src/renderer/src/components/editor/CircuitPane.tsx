@@ -1,65 +1,95 @@
 // Circuit view: the full-window circuit.json editor (docs/circuit-view-tech-spec.md).
 
-import { refreshWorkspace } from '@renderer/commands/fileCommands'
 import { fileSystem } from '@renderer/lib/fileSystem'
+import { notify as toast } from '@renderer/lib/notify'
 import { useAppDispatch, useAppSelector } from '@renderer/redux'
 import { setEditorView, setPanelOpen } from '@renderer/redux/editorSlice'
-import { revealFile, updateFileContent } from '@renderer/redux/fileSlice'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { revealFile, updateFileContent, type Workspace } from '@renderer/redux/fileSlice'
+import { CircuitBoard, FileClock } from 'lucide-react'
 import { emptyDoc, parseCircuitFile, serializeDoc } from '../../circuit'
 import { CircuitViewV2 } from '../../circuit/views/CircuitView'
 import { LoadingHint } from './LoadingHint'
-import { findInTree, useProjectFile } from './projectFiles'
+import { MissingFileView } from './MissingFileView'
+import { createProjectFile, findInTree, useProjectFile } from './projectFiles'
 
 /**
- * The native file is `circuit.json` (spec §4, §13). On first open of a project
- * that only has a v1 `diagram.json`, migrate it on disk: write `circuit.json`
- * (converted) and `diagram.json.bak` (verbatim copy).
+ * The native file is `circuit.json` (spec §4, §13). A project without one gets
+ * an offer to create it, and a project that only has a v1 `diagram.json` gets
+ * an offer to convert it. Neither happens until the user clicks: opening the
+ * view must not change the project folder.
  */
 export function CircuitPane(): React.JSX.Element | null {
   const workspace = useAppSelector((s) => s.file.workspace)
-  const [ready, setReady] = useState(false)
-  const adopting = useRef(false)
-
-  useEffect(() => {
-    setReady(false)
-    if (!workspace || adopting.current) return
-    if (findInTree(workspace.root, (i) => i.name === 'circuit.json')) {
-      setReady(true)
-      return
-    }
-    const diagram = findInTree(workspace.root, (i) => i.name === 'diagram.json')
-    if (!diagram) {
-      setReady(true) // fresh project — useProjectFile seeds an empty circuit.json
-      return
-    }
-    adopting.current = true
-    ;(async () => {
-      try {
-        const old = await fileSystem.readFile(diagram.path!)
-        const { doc } = parseCircuitFile(old)
-        await fileSystem.writeFile(`${workspace.path}/circuit.json`, serializeDoc(doc))
-        await fileSystem.writeFile(`${workspace.path}/diagram.json.bak`, old)
-        await refreshWorkspace(workspace)
-      } catch (e) {
-        console.error('circuit.json adoption failed:', e)
-      } finally {
-        adopting.current = false
-        setReady(true)
-      }
-    })()
-  }, [workspace])
 
   // EditorPanel shows the start screen until a project is open.
   if (!workspace) return null
-  if (!ready) return <LoadingHint label="Preparing circuit…" />
-  return <CircuitFileEditor />
+  if (findInTree(workspace.root, (i) => i.name === 'circuit.json')) return <CircuitFileEditor />
+
+  const diagram = findInTree(workspace.root, (i) => i.name === 'diagram.json')
+  if (diagram?.path) return <ConvertDiagramView workspace={workspace} diagramPath={diagram.path} />
+
+  return (
+    <MissingFileView
+      icon={<CircuitBoard size={36} />}
+      title="This project has no circuit yet"
+      description={
+        <p>
+          Creating one adds an empty <code>circuit.json</code> to the project folder.
+        </p>
+      }
+      action="Create circuit"
+      onAction={async () => {
+        try {
+          await createProjectFile(workspace, 'circuit.json', serializeDoc(emptyDoc()))
+        } catch (e) {
+          toast.error('Could not create circuit.json', {
+            description: e instanceof Error ? e.message : 'Unknown error'
+          })
+        }
+      }}
+    />
+  )
+}
+
+/** Old projects have a v1 `diagram.json`. Converting writes `circuit.json` and keeps the original. */
+function ConvertDiagramView({
+  workspace,
+  diagramPath
+}: {
+  workspace: Workspace
+  diagramPath: string
+}): React.JSX.Element {
+  const convert = async (): Promise<void> => {
+    try {
+      const old = await fileSystem.readFile(diagramPath)
+      const { doc } = parseCircuitFile(old)
+      await fileSystem.writeFile(`${workspace.path}/diagram.json.bak`, old)
+      await createProjectFile(workspace, 'circuit.json', serializeDoc(doc))
+    } catch (e) {
+      toast.error('Could not convert diagram.json', {
+        description: e instanceof Error ? e.message : 'Unknown error'
+      })
+    }
+  }
+  return (
+    <MissingFileView
+      icon={<FileClock size={36} />}
+      title="This circuit is in the old format"
+      description={
+        <p>
+          The project has a <code>diagram.json</code> from an earlier tinyStudio. Converting writes{' '}
+          <code>circuit.json</code> and keeps the original as <code>diagram.json.bak</code>.
+        </p>
+      }
+      action="Convert"
+      onAction={convert}
+    />
+  )
 }
 
 function CircuitFileEditor(): React.JSX.Element {
   const dispatch = useAppDispatch()
-  const makeDefault = useCallback(() => serializeDoc(emptyDoc()), [])
-  const file = useProjectFile('circuit.json', makeDefault)
+  const file = useProjectFile('circuit.json')
 
   if (!file) return <LoadingHint label="Loading circuit…" />
 

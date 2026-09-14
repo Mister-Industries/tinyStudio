@@ -192,8 +192,6 @@ Where to read more:
 
 - tinyService 1.1.0 accepts connections from any website and listens on every
   network interface, not only this computer. The fix needs a tinyService release.
-- Opening the Circuit or Visual view writes `circuit.json` or `visual.js` into the
-  project if it doesn't have one.
 - If tinyService stops while the app is open, the app doesn't restart it or say so.
 - Desktop projects opened in an earlier version ask you to choose their folder once.
 

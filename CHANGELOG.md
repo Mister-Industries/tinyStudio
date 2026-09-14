@@ -51,8 +51,10 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
 
 ### Circuit view
 
-- A new circuit editor replaces the old one, saving to `circuit.json`. Projects
-  with a `diagram.json` convert on first open and keep the original as
+- A new circuit editor replaces the old one, saving to `circuit.json`. Opening
+  the view doesn't write into a project that has no circuit: a **Create
+  circuit** button adds one, and projects with an old `diagram.json` get a
+  **Convert** button that writes `circuit.json` and keeps the original as
   `diagram.json.bak`.
 - **Breadboard:** zoom at the cursor, pan, fit, marquee select; draw, bend and
   tap wires; rotate, flip, nudge, copy and paste parts; generated mini, half and
@@ -90,6 +92,8 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
 
 ### Visual view
 
+- The Visual view no longer writes `visual.js` into a project that has none;
+  it offers to create one from the serial plotter template.
 - Sketches run in a sandbox, so a project's `visual.js` can't reach your files.
 - p5.js is bundled, so Visual works offline.
 - A `theme` object lets sketches follow light and dark mode. New projects start

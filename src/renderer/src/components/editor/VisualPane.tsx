@@ -9,13 +9,14 @@ import { buildVisualExportHtml } from '@renderer/lib/visualExport'
 import { useAppDispatch, useAppSelector } from '@renderer/redux'
 import { setEditorView } from '@renderer/redux/editorSlice'
 import { revealFile } from '@renderer/redux/fileSlice'
-import { CodeXml, ExternalLink, Loader2, Plus, UploadCloud } from 'lucide-react'
+import { CodeXml, ExternalLink, Loader2, Plus, Sparkles, UploadCloud } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { IconButton } from '../ui/IconButton'
 import { VisualPreview } from '../VisualPreview'
 import { LoadingHint } from './LoadingHint'
+import { MissingFileView } from './MissingFileView'
 import { NewSketchDialog } from './NewSketchDialog'
-import { collectFiles, findInTree, useProjectFile } from './projectFiles'
+import { collectFiles, createProjectFile, findInTree, useProjectFile } from './projectFiles'
 import { DEFAULT_VISUAL, sketchTemplate } from './sketchTemplates'
 
 export function VisualPane(): React.JSX.Element | null {
@@ -23,7 +24,7 @@ export function VisualPane(): React.JSX.Element | null {
   const dispatch = useAppDispatch()
 
   // Which .js sketch is shown in the Visual view. Defaults to visual.js, the
-  // sketch auto-created for every project; other .js files are selectable too.
+  // sketch the view offers to create; other .js files are selectable too.
   const [activeSketch, setActiveSketch] = useState('visual.js')
   const [showNew, setShowNew] = useState(false)
   // Serial is owned app-wide by SerialProvider and feeds the running sketch via
@@ -43,22 +44,20 @@ export function VisualPane(): React.JSX.Element | null {
     }
   }, [jsFiles, activeSketch])
 
-  // Only visual.js gets seeded from a default; other sketches must already exist.
-  const file = useProjectFile(
-    activeSketch,
-    activeSketch === 'visual.js' ? () => DEFAULT_VISUAL : undefined
-  )
+  const file = useProjectFile(activeSketch)
 
   // EditorPanel shows the start screen until a project is open.
   if (!workspace) return null
 
   const ws = workspace
 
-  const createSketch = async (fileName: string): Promise<void> => {
-    const path = `${ws.path}/${fileName}`
+  const createSketch = async (fileName: string, content?: string): Promise<void> => {
     try {
-      await fileSystem.writeFile(path, sketchTemplate(fileName.replace(/\.js$/i, '')))
-      await refreshWorkspace(ws)
+      await createProjectFile(
+        ws,
+        fileName,
+        content ?? sketchTemplate(fileName.replace(/\.js$/i, ''))
+      )
       setActiveSketch(fileName)
       setShowNew(false)
     } catch (e) {
@@ -223,6 +222,19 @@ export function VisualPane(): React.JSX.Element | null {
                 </IconButton>
               </>
             }
+          />
+        ) : jsFiles.length === 0 ? (
+          <MissingFileView
+            icon={<Sparkles size={36} />}
+            title="This project has no visual sketch yet"
+            description={
+              <p>
+                Creating one adds <code>visual.js</code> to the project folder: a p5.js serial
+                plotter that draws whatever the board prints.
+              </p>
+            }
+            action="Create visual.js"
+            onAction={() => createSketch('visual.js', DEFAULT_VISUAL)}
           />
         ) : (
           <LoadingHint label="Loading visual…" />

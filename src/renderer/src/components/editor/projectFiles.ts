@@ -1,7 +1,7 @@
 import { openFileItem, refreshWorkspace } from '@renderer/commands/fileCommands'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { selectOpenFiles, useAppSelector } from '@renderer/redux'
-import type { BaseFileItem, EditorFile } from '@renderer/redux/fileSlice'
+import type { BaseFileItem, EditorFile, Workspace } from '@renderer/redux/fileSlice'
 import { useEffect, useRef } from 'react'
 
 export function findInTree(
@@ -34,12 +34,27 @@ export function collectFiles(
 }
 
 /**
- * Ensure a project file (e.g. diagram.json / visual.js) is open as an editor
- * buffer, creating it from a default if it doesn't exist yet. Returns the open
- * file once ready. Used by the full-window Circuit/Visual views so their edits
- * live in the same buffer model as code (saved on Ctrl+S / build).
+ * Write a new file into the project root and refresh the tree so it shows up.
+ * The Circuit and Visual views call this from their "Create" buttons; nothing
+ * writes into a project without the user asking for it.
  */
-export function useProjectFile(name: string, makeDefault?: () => string): EditorFile | undefined {
+export async function createProjectFile(
+  workspace: Workspace,
+  name: string,
+  content: string
+): Promise<void> {
+  await fileSystem.writeFile(`${workspace.path}/${name}`, content)
+  await refreshWorkspace(workspace)
+}
+
+/**
+ * Keep a project file (circuit.json / visual.js) open as an editor buffer and
+ * return it once loaded. Used by the full-window Circuit/Visual views so their
+ * edits live in the same buffer model as code (saved on Ctrl+S / build).
+ * Returns undefined while loading and when the file doesn't exist; the views
+ * check for existence themselves and offer to create it.
+ */
+export function useProjectFile(name: string): EditorFile | undefined {
   const workspace = useAppSelector((s) => s.file.workspace)
   const openFiles = useAppSelector(selectOpenFiles)
   const file = openFiles.find((f) => f.name === name)
@@ -47,25 +62,16 @@ export function useProjectFile(name: string, makeDefault?: () => string): Editor
 
   useEffect(() => {
     if (file || !workspace || busy.current) return
+    const item = findInTree(workspace.root, (i) => i.name === name)
+    if (!item) return
     busy.current = true
-    ;(async () => {
-      try {
-        let item = findInTree(workspace.root, (i) => i.name === name)
-        if (!item && makeDefault) {
-          const path = `${workspace.path}/${name}`
-          await fileSystem.writeFile(path, makeDefault())
-          await refreshWorkspace(workspace)
-          item = { id: crypto.randomUUID(), parentId: 'root', name, path, type: 'file' }
-        }
-        // Load as a hidden background buffer: the full-window view edits/saves
-        // it, but it stays out of the Code tab bar until the user clicks the
-        // in-view code button (which reveals it).
-        if (item) await openFileItem(item, { hidden: true })
-      } finally {
-        busy.current = false
-      }
-    })()
-  }, [file, workspace, name, makeDefault])
+    // Load as a hidden background buffer: the full-window view edits/saves
+    // it, but it stays out of the Code tab bar until the user clicks the
+    // in-view code button (which reveals it).
+    openFileItem(item, { hidden: true }).finally(() => {
+      busy.current = false
+    })
+  }, [file, workspace, name])
 
   return file
 }
