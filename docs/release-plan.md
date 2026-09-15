@@ -385,7 +385,15 @@ In order.
 11. **End-to-end test [GAP-4].** An Electron smoke test (Playwright's Electron
     support): launch, open a project, compile against a mock tinyService. Run it
     in CI.
-12. **Label.** Switch "alpha" to "beta" in the status bar and README [UX-5].
+12. **Full git in project folders.** Commits land in the folder's `.git`, so
+    terminal git and VS Code see what tinyStudio pushed, and a repo can be
+    cloned from the browser. isomorphic-git runs over the File System Access
+    API, but GitHub's git server sends no CORS headers, so the browser needs a
+    small proxy function; the desktop app can run it directly. Today tinyStudio
+    reads `.git` to link a clone and pushes through the GitHub API
+    ([github-sync.md](github-sync.md)). The plan, starting with a spike:
+    [full-git.md](full-git.md).
+13. **Label.** Switch "alpha" to "beta" in the status bar and README [UX-5].
 
 ## After beta
 
