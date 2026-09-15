@@ -193,14 +193,24 @@ Leave links to `https://tinystudio.cc` alone: the Visual export credit and the l
 
 The change is on tinyService branch `release/1.2.0`, commits `c198db4` and `212d1bb`. Its default allowed origins already include `https://studio.tinycore.cc` and `https://app.tinystudio.cc`.
 
-- **Fix the port check first. It's needed now, not after npm.** On 2026-09-14 the owner installed a local build of the tray app (agent 1.1.0, service 1.2.0), which listens on `127.0.0.1:3000` only.
-  - `findFreePort` in `src/main/ServiceManager.ts` probes with `listen(port)`, which opens the port on all interfaces. On Windows that probe succeeds while another program holds `127.0.0.1` on the same port (tested 2026-09-14).
-  - So the desktop app picks 3000, and its own tinyService child fails with `EADDRINUSE`. Meanwhile the health check reaches the tray app and passes.
-  - Fix: count a port as free only when both `listen(port)` and `listen(port, '127.0.0.1')` succeed, and update the comment above the function. Cover it with a test next to `serviceRestart`'s.
-- Bump `@mister-industries/tinyservice` to `^1.2.0`.
-- In `src/main/index.ts`, set `allowedOrigins` to `['file://', 'http://localhost:*', 'https://studio.tinycore.cc', 'https://app.tinystudio.cc']`. Drop the comment saying 1.1.0 doesn't check the origin.
-- Remove the tinyService Known issue from `README.md` and `CHANGELOG.md`.
-- Deploy previews aren't in tinyService's default list, so compile and upload can't reach a local tinyService from a preview. Test those on `studio.tinycore.cc` or localhost.
+Already done on `v0.4-dev` (2026-09-14):
+
+- **Port check.** It opens the port on both `127.0.0.1` and all interfaces (`src/main/freePort.ts`).
+  - This matters because the owner's tray app runs 1.2.0 on `127.0.0.1:3000`.
+  - On Windows, a check on all interfaces alone passes while the tray holds that port.
+- **Allowed origins.** `allowedOrigins` in `src/main/index.ts` is `['file://', 'http://localhost:*', 'https://studio.tinycore.cc', 'https://app.tinystudio.cc']`.
+- **Known issue.** The tinyService Known issue is gone from `README.md` and `CHANGELOG.md`.
+- **Temporary dependency.** Until 1.2.0 is published, it is `file:local-packages/mister-industries-tinyservice-1.2.0.tgz`, packed from `release/1.2.0`.
+  - The lockfile resolves it from that file, so `npm install`, `npm ci` and Netlify work without the registry.
+  - To repack after tinyService changes, run `npm pack --pack-destination <tinyStudio>/local-packages` in `packages/service`, then run `npm install ./local-packages/<file>.tgz` here.
+
+Once 1.2.0 is on npm:
+
+1. Set `@mister-industries/tinyservice` back to `^1.2.0`.
+2. Delete `local-packages/`.
+3. Run `npm install`.
+
+Deploy previews aren't in tinyService's default list, so compile and upload can't reach a local tinyService from a preview. Test those on `studio.tinycore.cc` or localhost.
 
 ### Not yet
 
