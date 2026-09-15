@@ -1049,6 +1049,9 @@ export async function initAccount(): Promise<GitHubAccount | null> {
   return currentAccount
 }
 
+/** Fired on `window` whenever the account changes; every useGitHubAccount re-reads it. */
+export const GITHUB_ACCOUNT_EVENT = 'tinystudio:github-account'
+
 export function saveAccount(account: GitHubAccount | null): void {
   currentAccount = account
   // Desktop persistence is the main process's job — writing the token here too
@@ -1064,6 +1067,9 @@ export function saveAccount(account: GitHubAccount | null): void {
   // Permissions and repo visibility are token-dependent, so anything cached
   // under the previous auth state is now wrong.
   clearRepoCache()
+  // Announced here rather than by callers: browser sign-in finishes in App.tsx,
+  // outside every sign-in surface, and they would otherwise show the old account.
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(GITHUB_ACCOUNT_EVENT))
 }
 
 export function loadLink(workspacePath: string): RepoLink | null {
