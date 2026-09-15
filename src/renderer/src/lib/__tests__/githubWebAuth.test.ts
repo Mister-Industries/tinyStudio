@@ -12,6 +12,7 @@ import {
 } from '../../../../shared/githubApp'
 import {
   authorizeUrl,
+  exchangeFailureMessage,
   isCallbackUrl,
   pkceChallenge,
   randomToken,
@@ -45,19 +46,40 @@ test('random tokens are url-safe and unique', () => {
   assert.notEqual(a, b)
 })
 
-test('a dev server uses the hosted token exchange; a site uses its own', () => {
-  assert.equal(
-    tokenEndpoint('http://localhost:5174'),
-    'https://studio.tinycore.cc/.netlify/functions/github-token'
+test('the token exchange goes to the page’s own site, a dev server included', () => {
+  for (const origin of [
+    'http://localhost:5174',
+    'https://studio.tinycore.cc',
+    'https://deploy-preview-12.preview.tinystudio.cc'
+  ])
+    assert.equal(tokenEndpoint(origin), origin + '/.netlify/functions/github-token', origin)
+})
+
+test('a failed exchange names the host, and only localhost mentions the dev server', () => {
+  const local = 'http://localhost:5173/.netlify/functions/github-token'
+  const hosted = 'https://studio.tinycore.cc/.netlify/functions/github-token'
+
+  assert.match(
+    exchangeFailureMessage(local, 'http://localhost:5173'),
+    /^Couldn't reach localhost:5173 .*npm run dev:web/
+  )
+  assert.match(
+    exchangeFailureMessage(hosted, 'https://studio.tinycore.cc'),
+    /^Couldn't reach studio\.tinycore\.cc /
+  )
+  assert.doesNotMatch(exchangeFailureMessage(hosted, 'https://studio.tinycore.cc'), /npm/)
+
+  assert.match(exchangeFailureMessage(local, 'http://localhost:5173', 404), /npm run dev:web/)
+  assert.match(
+    exchangeFailureMessage(hosted, 'https://studio.tinycore.cc', 404),
+    /^studio\.tinycore\.cc has no GitHub sign-in function/
   )
   assert.equal(
-    tokenEndpoint('https://studio.tinycore.cc'),
-    'https://studio.tinycore.cc/.netlify/functions/github-token'
+    exchangeFailureMessage(hosted, 'https://studio.tinycore.cc', 502),
+    'GitHub sign-in failed (502).'
   )
-  assert.equal(
-    tokenEndpoint('https://deploy-preview-12.preview.tinystudio.cc'),
-    'https://deploy-preview-12.preview.tinystudio.cc/.netlify/functions/github-token'
-  )
+  // A relative override resolves against the page.
+  assert.match(exchangeFailureMessage('/token', 'http://localhost:5174'), /localhost:5174/)
 })
 
 test('the callback path is never read as a project', () => {

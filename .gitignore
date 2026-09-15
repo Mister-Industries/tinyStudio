@@ -7,6 +7,10 @@ out
 *.log*
 .npmrc
 
+# Local secrets, such as the dev server's GITHUB_CLIENT_SECRET (docs/github-auth.md)
+.env.local
+.env.*.local
+
 # arduino-cli binaries fetched by scripts/fetch-arduino-cli.mjs
 vendor/
 

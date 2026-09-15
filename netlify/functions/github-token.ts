@@ -36,7 +36,8 @@ function reply(status: number, body: unknown, origin: string | null): Response {
     headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
     headers.Vary = 'Origin'
   }
-  return new Response(JSON.stringify(body), { status, headers })
+  // A 204 may not carry a body: the Response constructor throws if it does.
+  return new Response(status === 204 ? null : JSON.stringify(body), { status, headers })
 }
 
 export default async (req: Request): Promise<Response> => {

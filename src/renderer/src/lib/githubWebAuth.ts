@@ -22,8 +22,7 @@ import { ghUser, saveAccount, type GitHubAccount } from './github'
 import { STORAGE_KEYS } from './storageKeys'
 
 const AUTHORIZE_URL = 'https://github.com/login/oauth/authorize'
-/** The hosted app's token exchange, for a dev server that has no function of its own. */
-const HOSTED_TOKEN_ENDPOINT = 'https://studio.tinycore.cc/.netlify/functions/github-token'
+const TOKEN_FUNCTION_PATH = '/.netlify/functions/github-token'
 
 // Build-time overrides, substituted by the vite configs' `define` (see
 // env.d.ts); absent under the test runner.
@@ -83,15 +82,39 @@ export function authorizeUrl(origin: string, state: string, challenge: string): 
   return u.toString()
 }
 
-/** Where the code is swapped for a token: this site's function, or the hosted app's from a dev server. */
+/**
+ * Where the code is swapped for a token: the page's own site. Netlify serves
+ * the function on a deploy, and `npm run dev:web` serves the same file
+ * (githubTokenDev in vite-plugins.ts). VITE_GITHUB_TOKEN_ENDPOINT overrides it.
+ */
 export function tokenEndpoint(origin = window.location.origin): string {
   const override = defined(
     typeof __GITHUB_TOKEN_ENDPOINT__ === 'string' ? __GITHUB_TOKEN_ENDPOINT__ : undefined
   )
-  if (override) return override
-  return /^http:\/\/localhost(:\d+)?$/.test(origin)
-    ? HOSTED_TOKEN_ENDPOINT
-    : origin + '/.netlify/functions/github-token'
+  return override || origin + TOKEN_FUNCTION_PATH
+}
+
+const isLocalhost = (host: string): boolean => /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host)
+
+/**
+ * What to show when the token exchange gets no usable answer: `status` is
+ * absent when nothing answered at all, which the browser itself reports only
+ * as "Failed to fetch".
+ */
+export function exchangeFailureMessage(endpoint: string, origin: string, status?: number): string {
+  const host = new URL(endpoint, origin).host
+  const local = isLocalhost(host)
+  if (status === undefined) {
+    return local
+      ? `Couldn't reach ${host} to finish signing in. Check that npm run dev:web is still running, then try again.`
+      : `Couldn't reach ${host} to finish signing in. Check your connection, then try again.`
+  }
+  if (status === 404) {
+    return local
+      ? `${host} has no GitHub sign-in function. Sign in from npm run dev:web, which serves it.`
+      : `${host} has no GitHub sign-in function, so sign-in can't finish there.`
+  }
+  return `GitHub sign-in failed (${status}).`
 }
 
 /**
@@ -152,19 +175,28 @@ export async function completeWebSignIn(): Promise<WebSignInResult> {
     return { error: 'The sign-in did not come back the way it left. Try again.', returnTo }
   }
 
+  const origin = window.location.origin
+  const endpoint = tokenEndpoint(origin)
+  let r: Response
   try {
-    const r = await fetch(tokenEndpoint(), {
+    r = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({
         code,
         code_verifier: pending.verifier,
-        redirect_uri: window.location.origin + GITHUB_CALLBACK_PATH
+        redirect_uri: origin + GITHUB_CALLBACK_PATH
       })
     })
+  } catch {
+    // Nothing answered: the host doesn't resolve, or its server is down.
+    return { error: exchangeFailureMessage(endpoint, origin), returnTo }
+  }
+
+  try {
     const j = (await r.json().catch(() => ({}))) as { access_token?: string; error?: string }
     if (!r.ok || !j.access_token) {
-      return { error: j.error || `GitHub sign-in failed (${r.status}).`, returnTo }
+      return { error: j.error || exchangeFailureMessage(endpoint, origin, r.status), returnTo }
     }
     const account = await ghUser(j.access_token)
     saveAccount(account)

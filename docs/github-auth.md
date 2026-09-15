@@ -92,11 +92,22 @@ collide.
    stored, and returns to the page the user started on, which may be a project
    deep link.
 
-A dev server at `http://localhost:5173` or `:5174` has no function of its own,
-so it calls the hosted app's (`https://studio.tinycore.cc/.netlify/functions/github-token`);
-`VITE_GITHUB_TOKEN_ENDPOINT` points it elsewhere, for instance at `netlify dev`.
-The token endpoint's host has to be in the page's Content Security Policy
-(`connect-src` in `src/renderer/index.html`).
+Every page exchanges the code on its own site. On `npm run dev:web`,
+`githubTokenDev` in [`vite-plugins.ts`](../vite-plugins.ts) serves
+`/.netlify/functions/github-token` by running the same function file, so
+sign-in works on `http://localhost:5173` and `:5174` without a deploy:
+
+1. Create `.env.local` in the repo root, which git ignores, with one line:
+   `GITHUB_CLIENT_SECRET=<the client secret>`. `GITHUB_CLIENT_SECRET` in the
+   environment works too.
+2. Sign in. The file is read on every exchange, so there's nothing to restart.
+
+Without a secret, the dev server answers with a message saying to add it. Other
+ports aren't in the function's allowed origins or the app's callback URLs.
+
+`VITE_GITHUB_TOKEN_ENDPOINT` points the exchange somewhere else, such as the
+hosted app's function once it's deployed. That host has to be in the page's
+Content Security Policy (`connect-src` in `src/renderer/index.html`).
 
 ## Sign-in surfaces
 
