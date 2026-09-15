@@ -50,6 +50,7 @@ import {
   WorkspaceSource
 } from '@renderer/redux/fileSlice'
 import { store } from '@renderer/redux/store'
+import { linkClonedFolder } from './cloneLink'
 
 const dispatch = store.dispatch
 
@@ -251,6 +252,10 @@ export async function openFolder(folder?: string, source?: WorkspaceSource): Pro
     root: buildNestedStructure(fileSystemItems),
     source
   })
+
+  // A git clone of a GitHub repo links itself (docs/github-sync.md). Not
+  // awaited: GitHub may take a moment, and the project is usable meanwhile.
+  if (!isVirtualPath(workspacePath)) void linkClonedFolder(workspacePath)
 }
 
 /**

@@ -1,26 +1,25 @@
 /**
  * SourceControl — GitHub panel for the file explorer. Sign in (see
  * GitHubSignIn), link the workspace to a repo, then Push / Pull / Publish.
- * The push set is the working tree diffed against the last-synced baseline.
+ * The push set is the working tree diffed against the last-synced baseline,
+ * shared with the push reminder through lib/repoSync.
  */
 
 import { adoptCopiedProject, refreshWorkspace } from '@renderer/commands/fileCommands'
 import { GitHubSignInButton } from '@renderer/components/GitHubSignIn'
 import { useGitHubAccount } from '@renderer/hooks/useGitHubAccount'
+import { useRepoSync } from '@renderer/hooks/useRepoSync'
 import { useAppSelector } from '@renderer/redux'
 import {
-  canPushTo,
-  changedPaths,
   collectWorkspaceFiles,
   copyProjectToNewRepo,
   ghRepoMeta,
-  loadLink,
   parseRepoRef,
-  pullWorkspace,
-  pushWorkspace,
   saveLink,
   type RepoLink
 } from '@renderer/lib/github'
+import { defaultPushMessage, pullWorkspace } from '@renderer/lib/githubSync'
+import { pullRepo, pushRepo, refreshRepoSync } from '@renderer/lib/repoSync'
 import {
   ArrowDownToLine,
   ArrowUpToLine,
@@ -39,39 +38,19 @@ export function SourceControl(): React.JSX.Element {
   const workspace = useAppSelector((state) => state.file.workspace)
   // Shared with the header sign-in, so connecting in either place updates both.
   const { account, signOut } = useGitHubAccount()
-  const [link, setLink] = React.useState<RepoLink | null>(null)
-  const [changed, setChanged] = React.useState<string[]>([])
+  // Whether the *token* can push is asked of GitHub rather than inferred from
+  // who we think the user is, so a collaborator gets write access with no extra
+  // wiring and everyone else gets a truthful read-only state.
+  const { link, changed, deleted, writable, busy: syncBusy } = useRepoSync()
   const [repoInput, setRepoInput] = React.useState('')
-  const [busy, setBusy] = React.useState<string | null>(null)
-  // null = not linked / unknown. Whether the *token* can push to the linked repo
-  // — asked of GitHub rather than inferred from who we think the user is, so a
-  // collaborator gets write access with no extra wiring and everyone else gets a
-  // truthful read-only state.
-  const [writable, setWritable] = React.useState<boolean | null>(null)
-
-  // Load this workspace's repo link + compute the change set.
-  const refreshChanges = React.useCallback(async () => {
-    if (!workspace) return
-    const l = loadLink(workspace.path)
-    setLink(l)
-    if (l) {
-      const current = await collectWorkspaceFiles(workspace)
-      setChanged(changedPaths(current, l.base))
-      const [owner, repo] = l.remote.split('/')
-      setWritable(await canPushTo(owner, repo, account?.token))
-    } else {
-      setChanged([])
-      setWritable(null)
-    }
-  }, [workspace, account?.token])
-
-  React.useEffect(() => {
-    refreshChanges()
-  }, [refreshChanges])
+  const [message, setMessage] = React.useState('')
+  const [localBusy, setLocalBusy] = React.useState<string | null>(null)
+  const busy = syncBusy ?? localBusy
+  const changeCount = changed.length + deleted.length
 
   const linkRepo = async (): Promise<void> => {
     if (!workspace || !repoInput.trim()) return
-    setBusy('link')
+    setLocalBusy('link')
     try {
       const ref = parseRepoRef(repoInput)
       if (!ref) throw new Error('Enter a repo as owner/name or a github.com URL')
@@ -93,75 +72,34 @@ export function SourceControl(): React.JSX.Element {
         base: {}
       }
       // Pull to populate the baseline + working tree from the remote.
-      const base = await pullWorkspace(workspace, newLink, account?.token, (msg) => setBusy(msg))
-      newLink.base = base
-      saveLink(workspace.path, newLink)
-      if (workspace) await refreshWorkspace(workspace)
+      const pulled = await pullWorkspace(workspace, newLink, account?.token, (msg) =>
+        setLocalBusy(msg)
+      )
+      saveLink(workspace.path, pulled.link)
+      await refreshWorkspace(workspace)
       setRepoInput('')
-      await refreshChanges()
+      await refreshRepoSync()
       toast.success(`Linked ${meta.fullName}`)
     } catch (e) {
       toast.error('Could not link repo', {
         description: e instanceof Error ? e.message : 'Unknown error'
       })
     } finally {
-      setBusy(null)
+      setLocalBusy(null)
     }
   }
 
   const push = async (): Promise<void> => {
-    if (!workspace || !link || !account) return
-    setBusy('Pushing…')
-    try {
-      const { pushed, base } = await pushWorkspace(
-        workspace,
-        link,
-        account.token,
-        'Update via tinyStudio',
-        (msg) => setBusy(msg)
-      )
-      const updated = { ...link, base }
-      setLink(updated)
-      setChanged([])
-      toast.success(pushed > 0 ? `Pushed ${pushed} file(s)` : 'Nothing to push')
-      // The push already landed on GitHub; only the local baseline can fail
-      // here, and reporting that as "Push failed" would send people looking in
-      // the wrong place.
-      try {
-        saveLink(workspace.path, updated)
-      } catch (e) {
-        toast.error('Pushed, but could not save the sync baseline', {
-          description: e instanceof Error ? e.message : 'Unknown error'
-        })
-      }
-    } catch (e) {
-      toast.error('Push failed', { description: e instanceof Error ? e.message : 'Unknown error' })
-    } finally {
-      setBusy(null)
-    }
+    if (await pushRepo(message)) setMessage('')
   }
 
   const pull = async (): Promise<void> => {
-    if (!workspace || !link) return
-    setBusy('Pulling…')
-    try {
-      const base = await pullWorkspace(workspace, link, account?.token, (msg) => setBusy(msg))
-      const updated = { ...link, base }
-      saveLink(workspace.path, updated)
-      setLink(updated)
-      await refreshWorkspace(workspace)
-      await refreshChanges()
-      toast.success('Pulled latest')
-    } catch (e) {
-      toast.error('Pull failed', { description: e instanceof Error ? e.message : 'Unknown error' })
-    } finally {
-      setBusy(null)
-    }
+    await pullRepo(refreshWorkspace)
   }
 
   const publish = async (): Promise<void> => {
     if (!workspace || !account || !repoInput.trim()) return
-    setBusy('Publishing…')
+    setLocalBusy('Publishing…')
     try {
       // Repos are created PUBLIC so GitHub Pages works on the free plan (Pages
       // on private repos needs a paid plan) and so the project can be shared.
@@ -181,12 +119,11 @@ export function SourceControl(): React.JSX.Element {
         description: `${workspace.name} — built with tinyStudio`,
         files: await collectWorkspaceFiles(workspace),
         source: workspace.source,
-        onProgress: (msg) => setBusy(msg)
+        onProgress: (msg) => setLocalBusy(msg)
       })
       await adoptCopiedProject(workspace, linked, account.login)
-      setLink(linked)
       setRepoInput('')
-      await refreshChanges()
+      await refreshRepoSync()
       if (failed.length > 0) {
         toast.warning(`Published ${linked.remote} — ${failed.length} file(s) failed`, {
           description: failed.slice(0, 4).join(', ') + (failed.length > 4 ? '…' : '')
@@ -199,7 +136,7 @@ export function SourceControl(): React.JSX.Element {
         description: e instanceof Error ? e.message : 'Unknown error'
       })
     } finally {
-      setBusy(null)
+      setLocalBusy(null)
     }
   }
 
@@ -292,24 +229,36 @@ export function SourceControl(): React.JSX.Element {
                 <span className="font-mono text-[var(--text-faint)]">{link.branch}</span>
               </div>
               <div className="px-4 py-1 text-[11px] font-semibold tracking-wider text-[var(--text-muted)]">
-                CHANGES ({changed.length})
+                CHANGES ({changeCount})
               </div>
               <ScrollArea className="flex-1">
                 <div className="px-4 pb-3 flex flex-col gap-0.5">
-                  {changed.length === 0 ? (
+                  {changeCount === 0 ? (
                     <div className="text-xs text-[var(--text-faint)] py-2">
                       Working tree matches the last sync.
                     </div>
                   ) : (
-                    changed.map((p) => (
-                      <div
-                        key={p}
-                        className="flex items-center gap-2 text-xs text-[var(--text-body)] py-0.5"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--status-warn)] shrink-0" />
-                        <span className="truncate font-mono">{p}</span>
-                      </div>
-                    ))
+                    <>
+                      {changed.map((p) => (
+                        <div
+                          key={p}
+                          className="flex items-center gap-2 text-xs text-[var(--text-body)] py-0.5"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--status-warn)] shrink-0" />
+                          <span className="truncate font-mono">{p}</span>
+                        </div>
+                      ))}
+                      {deleted.map((p) => (
+                        <div
+                          key={p}
+                          className="flex items-center gap-2 text-xs text-[var(--text-muted)] py-0.5"
+                          title="Deleted — Push removes it from GitHub"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--status-error)] shrink-0" />
+                          <span className="truncate font-mono line-through">{p}</span>
+                        </div>
+                      ))}
+                    </>
                   )}
                 </div>
               </ScrollArea>
@@ -318,6 +267,21 @@ export function SourceControl(): React.JSX.Element {
                   You don&apos;t have write access to{' '}
                   <span className="text-[var(--text-body)]">{link.remote}</span>. Your edits are
                   saved locally — publish a copy to keep them on GitHub.
+                </div>
+              )}
+              {writable !== false && changeCount > 0 && (
+                <div className="px-4 pt-2">
+                  <input
+                    id="source-control-commit-message"
+                    className={input}
+                    placeholder={defaultPushMessage(changed, deleted)}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !busy) void push()
+                    }}
+                    aria-label="Commit message"
+                  />
                 </div>
               )}
               <div className="px-4 py-2 flex gap-2">
@@ -333,7 +297,7 @@ export function SourceControl(): React.JSX.Element {
                   ) : (
                     <ArrowUpToLine size={14} />
                   )}
-                  Push{changed.length > 0 ? ` (${changed.length})` : ''}
+                  Push{changeCount > 0 ? ` (${changeCount})` : ''}
                 </Button>
                 <Button
                   onClick={pull}
@@ -352,7 +316,7 @@ export function SourceControl(): React.JSX.Element {
               </div>
             </>
           )}
-          {busy && busy.includes('·') && (
+          {busy && (busy.includes('·') || busy.includes('…')) && busy !== 'Publishing…' && (
             <div className="px-4 py-1.5 text-[11px] text-[var(--text-muted)] border-t border-[var(--border-default)] truncate">
               {busy}
             </div>

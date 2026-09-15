@@ -10,6 +10,17 @@ const isElectron = (): boolean => {
   return typeof window !== 'undefined' && window.electron != null
 }
 
+/**
+ * Fired on `window` after a write, create, rename or delete through this
+ * service, so views that summarise the project (the GitHub changes list, the
+ * push reminder) can refresh without every caller telling them.
+ */
+export const FILES_CHANGED_EVENT = 'tinystudio:files-changed'
+
+const announceChange = (): void => {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(FILES_CHANGED_EVENT))
+}
+
 export interface UnifiedFileSystemAPI {
   selectFolder(): Promise<string | null>
   readDirectory(dirPath?: string, recursive?: boolean): Promise<FileSystemItem[]>
@@ -105,9 +116,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     try {
       if (isVirtualPath(filePath)) {
         await virtualFileSystem.writeFile(filePath, content)
-        return
-      }
-      if (this.isElectron()) {
+      } else if (this.isElectron()) {
         await window.api.fs.writeFile(filePath, content)
       } else {
         await webFileSystem.writeFile(filePath, content)
@@ -117,6 +126,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     } catch (error) {
       throw new Error(`Failed to write file: ${(error as Error).message}`)
     }
+    announceChange()
   }
 
   // Create new file
@@ -124,9 +134,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     try {
       if (isVirtualPath(filePath)) {
         await virtualFileSystem.createFile(filePath, content)
-        return
-      }
-      if (this.isElectron()) {
+      } else if (this.isElectron()) {
         await window.api.fs.createFile(filePath, content)
       } else {
         await webFileSystem.createFile(filePath, content)
@@ -135,15 +143,14 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     } catch (error) {
       throw new Error(`Failed to create file: ${(error as Error).message}`)
     }
+    announceChange()
   }
 
   async renameFile(oldPath: string, newPath: string): Promise<void> {
     try {
       if (isVirtualPath(oldPath) || isVirtualPath(newPath)) {
         await virtualFileSystem.renameFile(oldPath, newPath)
-        return
-      }
-      if (this.isElectron()) {
+      } else if (this.isElectron()) {
         await window.api.fs.renameFile(oldPath, newPath)
       } else {
         await webFileSystem.renameFile(oldPath, newPath)
@@ -152,6 +159,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     } catch (error) {
       throw new Error(`Failed to rename file: ${(error as Error).message}`)
     }
+    announceChange()
   }
 
   // Create new folder
@@ -159,9 +167,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     try {
       if (isVirtualPath(folderPath)) {
         await virtualFileSystem.createFolder(folderPath)
-        return
-      }
-      if (this.isElectron()) {
+      } else if (this.isElectron()) {
         await window.api.fs.createFolder(folderPath)
       } else {
         await webFileSystem.createFolder(folderPath)
@@ -169,6 +175,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     } catch (error) {
       throw new Error(`Failed to create folder: ${(error as Error).message}`)
     }
+    announceChange()
   }
 
   // Delete file or directory
@@ -176,9 +183,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     try {
       if (isVirtualPath(targetPath)) {
         await virtualFileSystem.deleteFile(targetPath)
-        return
-      }
-      if (this.isElectron()) {
+      } else if (this.isElectron()) {
         await window.api.fs.deleteFile(targetPath)
       } else {
         await webFileSystem.deleteFile(targetPath)
@@ -187,6 +192,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     } catch (error) {
       throw new Error(`Failed to delete file/folder: ${(error as Error).message}`)
     }
+    announceChange()
   }
 
   // Check if path exists

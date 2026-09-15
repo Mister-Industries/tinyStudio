@@ -35,6 +35,13 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
   images included, and keeps you editing there.
 - Link, Push, Pull and Publish from the GitHub tab. A project opened from a repo
   subfolder stays pinned to that folder.
+- Push makes one commit with your message, deleted files included, and stops
+  instead of overwriting files someone changed on GitHub since your last sync.
+- Pull brings in GitHub's changes and keeps your edits to files GitHub also
+  changed, naming them.
+- A bar above the editor shows how many changes aren't pushed yet, with a Push
+  button.
+- Opening a folder that is a git clone of a GitHub repo links it automatically.
 - Whether you can push to a repo is checked with GitHub instead of guessed.
 
 ### Parts

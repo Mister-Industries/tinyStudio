@@ -91,10 +91,10 @@ const TEXT_BARE = [
 ]
 
 /** Per-file ceilings. Text is what the editor loads; binaries only ride along on copy. */
-const MAX_TEXT_BYTES = 1_000_000
+export const MAX_TEXT_BYTES = 1_000_000
 const MAX_BINARY_BYTES = 5_000_000
 /** Ceilings for one project fetch, so a mis-aimed deep link can't hang the tab. */
-const MAX_PROJECT_FILES = 300
+export const MAX_PROJECT_FILES = 300
 const MAX_PROJECT_BYTES = 25_000_000
 
 export interface GitHubAccount {
@@ -114,6 +114,16 @@ export interface RepoLink {
    */
   path: string
   base: Record<string, string> // workspace-relative path -> content at last sync
+  /**
+   * GitHub's blob id for each baseline file, which is how Push spots a file
+   * changed on GitHub since the last sync. Links saved before it existed lack
+   * it; Push hashes `base` instead.
+   */
+  baseSha?: Record<string, string>
+  /** the commit the baseline was taken at */
+  commit?: string
+  /** set when the link was read from the folder's own `.git`; `head` is the commit checked out then */
+  clone?: { head: string }
 }
 
 /** What the *authenticated viewer* may do with a repo. */
@@ -878,77 +888,7 @@ export function deletedPaths(
   return Object.keys(base).filter((p) => !(p in current))
 }
 
-/** Push the working-tree diff against the baseline; returns the count pushed. */
-export async function pushWorkspace(
-  workspace: Workspace,
-  link: RepoLink,
-  token: string,
-  message: string,
-  onProgress?: (msg: string) => void
-): Promise<{ pushed: number; base: Record<string, string> }> {
-  const [owner, repo] = link.remote.split('/')
-  const current = await collectWorkspaceFiles(workspace)
-  const paths = changedPaths(current, link.base)
-  let i = 0
-  for (const p of paths) {
-    i++
-    onProgress?.(`Pushing ${i}/${paths.length} · ${p}`)
-    await ghPutFile(
-      owner,
-      repo,
-      toRepoPath(link, p),
-      current[p],
-      link.branch,
-      token,
-      message || `Update ${p} via tinyStudio`
-    )
-  }
-  return { pushed: paths.length, base: current }
-}
-
-/**
- * Pull the repo folder this link points at down to disk, then return the new
- * baseline snapshot. Keys are workspace-relative on both sides — a repo path in
- * the baseline would make every file of a subfolder project read as changed.
- */
-export async function pullWorkspace(
-  workspace: Workspace,
-  link: RepoLink,
-  token: string | undefined,
-  onProgress?: (msg: string) => void
-): Promise<Record<string, string>> {
-  const [owner, repo] = link.remote.split('/')
-  onProgress?.('Reading tree…')
-  const blobs = await ghTree(owner, repo, link.branch, token)
-
-  const wanted: Array<{ rel: string; repoPath: string }> = []
-  for (const b of blobs) {
-    const r = toWorkspaceRel(link, b.path)
-    if (r === null) continue
-    if (!isTextPath(b.path) || b.size > MAX_TEXT_BYTES) continue
-    wanted.push({ rel: r, repoPath: b.path })
-  }
-  if (wanted.length > MAX_PROJECT_FILES) {
-    throw new Error(
-      `That folder has ${wanted.length} text files, over the ${MAX_PROJECT_FILES}-file limit for a single sync.`
-    )
-  }
-
-  const base: Record<string, string> = {}
-  let i = 0
-  for (const w of wanted) {
-    i++
-    onProgress?.(`Pulling ${i}/${wanted.length} · ${w.rel}`)
-    try {
-      const content = await ghFile(owner, repo, w.repoPath, link.branch, token)
-      base[w.rel] = content
-      await fileSystem.writeFile(`${workspace.path}/${w.rel}`, content)
-    } catch {
-      /* skip */
-    }
-  }
-  return base
-}
+// Push and Pull for a whole workspace are in lib/githubSync.ts.
 
 /**
  * Push a single file to the repo (used by Publish to drop index.html in).
@@ -1084,7 +1024,10 @@ export function loadLink(workspacePath: string): RepoLink | null {
       remote: parsed.remote,
       branch: parsed.branch,
       path: parsed.path ?? '',
-      base: parsed.base ?? {}
+      base: parsed.base ?? {},
+      baseSha: parsed.baseSha,
+      commit: parsed.commit,
+      clone: parsed.clone
     }
   } catch {
     return null

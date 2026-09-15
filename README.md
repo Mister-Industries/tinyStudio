@@ -188,6 +188,7 @@ Where to read more:
 | Code conventions                   | [docs/code-conventions.md](docs/code-conventions.md)                                                         |
 | Opening and saving files           | [docs/file-editing-flow.md](docs/file-editing-flow.md)                                                       |
 | GitHub sign-in                     | [docs/github-auth.md](docs/github-auth.md)                                                                   |
+| Push, Pull and linked repos        | [docs/github-sync.md](docs/github-sync.md)                                                                   |
 | What is planned for 0.4.0 and beta | [docs/release-plan.md](docs/release-plan.md), from [the September 2026 audit](docs/audit-2026-09.md)         |
 
 ## Known issues

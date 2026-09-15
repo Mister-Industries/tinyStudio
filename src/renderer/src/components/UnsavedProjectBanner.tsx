@@ -9,6 +9,7 @@
 
 import { saveProjectToComputer } from '@renderer/commands/fileCommands'
 import { useIsBrowserOnlyProject } from '@renderer/hooks/useIsBrowserOnlyProject'
+import { useRepoSync } from '@renderer/hooks/useRepoSync'
 import { useAppSelector } from '@renderer/redux'
 import { FolderDown, Globe, Loader2 } from 'lucide-react'
 import { Button } from './ui/Button'
@@ -17,8 +18,11 @@ export function UnsavedProjectBanner(): React.JSX.Element | null {
   const workspace = useAppSelector((state) => state.file.workspace)
   const saving = useAppSelector((state) => state.editor.savingToComputer)
   const browserOnly = useIsBrowserOnlyProject()
+  const { link, changed, deleted, writable } = useRepoSync()
+  // One notice at a time: unpushed changes to a repo you can push to come first.
+  const pushReminderShowing = !!link && writable === true && changed.length + deleted.length > 0
 
-  if (!workspace || !browserOnly) return null
+  if (!workspace || !browserOnly || pushReminderShowing) return null
 
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 text-[12px] border-b-[1.5px] border-[var(--border-default)] bg-[var(--brand-soft)]">

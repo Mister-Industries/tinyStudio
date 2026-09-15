@@ -13,6 +13,7 @@ import { CircuitPane } from './editor/CircuitPane'
 import { CodeView } from './editor/CodeView'
 import { VisualPane } from './editor/VisualPane'
 import { MakeItMine } from './MakeItMine'
+import { PushReminder } from './PushReminder'
 import { StartScreen } from './StartScreen'
 import { UnsavedProjectBanner } from './UnsavedProjectBanner'
 
@@ -35,9 +36,11 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
   return (
     <div className="flex flex-col bg-[var(--bg-raised)]" style={{ height: `${pixelSize}px` }}>
       {/* Project notices — above the view switch so they're visible from Code,
-          Circuit and Visual alike. At most one shows: "only in your browser"
-          first, then (once saved) the read-only example's "make it mine". */}
+          Circuit and Visual alike. At most one shows: unpushed changes to a
+          repo you can push to, else "only in your browser", else (once saved)
+          the read-only example's "make it mine". */}
       <UnsavedProjectBanner />
+      <PushReminder />
       <MakeItMine />
       {/* Until a project is open, the start screen stands in for every view —
           switching to Circuit or Visual has nothing to show without one. */}
