@@ -31,7 +31,7 @@ Every decision here was made by the owner on 2026-09-14. Only **Change now** is 
 | `tinycore.cc`                            | Home and store                | tinycore-cc        | Yes; sets the `.tinycore.cc` cookie |
 | `studio.tinycore.cc`                     | tinyStudio web app            | tinyStudio         | Yes                                 |
 | `docs.tinycore.cc`                       | tinyDocs                      | tinydocs-astro     | Yes, once sign-in is added          |
-| `tinystudio.cc`                          | tinyStudio landing page (new) | a new landing site | No                                  |
+| `tinystudio.cc`                          | tinyStudio landing page       | tinydocs-astro     | No                                  |
 | `deploy-preview-N.preview.tinystudio.cc` | tinyStudio deploy previews    | tinyStudio         | No                                  |
 
 These addresses forward to another site:
@@ -48,8 +48,9 @@ What's live today (checked 2026-09-14):
 - **DNS.** `tinycore.cc`, `tinystudio.cc`, `tinydocs.cc` and `mr.industries` all use Netlify DNS. New subdomains, HTTPS certificates and deploy subdomains are dashboard settings.
 - **tinyStudio.** `tinystudio.cc` and `app.tinystudio.cc` serve the same app, so project links like `/<owner>/<repo>` exist on both.
 - **tinyDocs.** `tinydocs.cc` and `docs.mr.industries` serve the same Astro site.
+  - The live site matches the `FacioErgoSum/tinydocs-cc` repo. The older `tinydocs-astro` repo is out of date.
   - `tinydocs.cc/get-started` returns 404; that page is at `/1_get-started/`.
-  - The site's header "Log in" button links to `https://dash.cloudflare.com/`, left over from its template.
+  - The header's "Sign In" button links to `https://tinycore.cc/store`.
 - **tinycore.cc.** No `tinycore.cc` subdomain exists yet; the store is at `tinycore.cc/store`.
 
 Rules:
@@ -70,7 +71,7 @@ The owner does these steps in Netlify, in this order:
 1. Add `studio.tinycore.cc` to the tinyStudio site as a domain alias. Both addresses work.
 2. Test the app on `studio.tinycore.cc`, including compile and upload through tinyService.
 3. Make `studio.tinycore.cc` the primary domain and add the forwarding rule for `app.tinystudio.cc`.
-4. Build the landing site, then move `tinystudio.cc` to it at a quiet time. Its new certificate can take a few minutes.
+4. At a quiet time, move `tinystudio.cc` from the tinyStudio site to the tinydocs site. That site serves the landing page (`/tinystudio/` in the tinydocs-cc repo) and already has the forwarding rules. The new certificate can take a few minutes.
 5. For docs:
    - Add `docs.tinycore.cc` to the tinydocs site and make it primary.
    - Forward `tinydocs.cc` and `docs.mr.industries`.
@@ -93,12 +94,28 @@ Forwarding rules in `netlify.toml`. Domain rules go above the site's other redir
   status = 301
   force = true
 
-# landing site: its own pages are served, every other path goes to the app
+# tinydocs site: tinystudio.cc shows the landing page at its root, loads the
+# page's own files, and forwards every other path to the app
 [[redirects]]
-  from = "/*"
+  from = "https://tinystudio.cc/"
+  to = "/tinystudio/"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://tinystudio.cc/_astro/*"
+  to = "/_astro/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://tinystudio.cc/*"
   to = "https://studio.tinycore.cc/:splat"
   status = 301
+  force = true
 ```
+
+The live rules, including `favicon.png` and the `/get-started` short URL, are in tinydocs-cc's `netlify.toml`.
 
 ## GitHub OAuth apps
 
@@ -217,6 +234,26 @@ Deploy previews aren't in tinyService's default list, so compile and upload can'
 tinyCore sign-in, the Share menu, courses, profiles and Canvas LTI are all later work, described below.
 
 ## Later: tinyCore sign-in on studio and docs
+
+### Docs: built
+
+On the tinydocs-cc branch `tinystudio-landing` (2026-09-14):
+
+- **Browser only.** The docs site stays static.
+  - `src/lib/supabase.ts` creates the browser client.
+  - `src/components/AccountButton.tsx`, in the header, shows Sign In (GitHub or Google) or the signed-in account.
+- **Cookie domain by host.** On `*.tinycore.cc` the session cookie goes on `.tinycore.cc`, so docs and tinycore.cc share one sign-in. On any other host, such as localhost or tinydocs.cc, it stays on that host.
+- **Callback.** `/auth/callback` is a static page.
+  - The browser client exchanges the `?code=` itself (PKCE).
+  - Then the page returns to where sign-in started, which was saved in `sessionStorage`. That keeps the redirect URL exactly the one on Supabase's allow list.
+- **Settings.**
+  - Netlify environment: `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY`, the same values tinycore-cc uses. Without them the header keeps its old link to the store.
+  - Supabase redirect URLs: `https://docs.tinycore.cc/auth/callback` and `http://localhost:4321/auth/callback`.
+- **To fix in tinycore-cc.** `src/lib/supabase/client.ts`, the browser client, sets no cookie domain. The server and middleware clients do.
+  - So when the browser refreshes the token or signs out on tinycore.cc, it writes or clears a host-only cookie, and signing out there may leave docs signed in.
+  - The fix: pass `cookieOptions: { domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN }` to `createBrowserClient`.
+
+### Studio, and what both follow
 
 - **Same Supabase project.** Use the one in tinycore-cc, with the same URL and public anon key.
   - Put the session cookie on `.tinycore.cc`, the way `tinycore-cc/src/lib/supabase/server.ts` does.

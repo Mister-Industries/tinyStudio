@@ -43,7 +43,9 @@ opens that project (proves the SPA redirect works).
 3. Make it the primary domain, and forward the old address with the rule in
    [accounts-and-domains.md](accounts-and-domains.md) (`app.tinystudio.cc/*` →
    `studio.tinycore.cc/:splat`). The apex `tinystudio.cc` becomes the landing
-   page, a separate site that forwards every non-landing path to the app.
+   page: it moves to the tinyDocs Netlify site, which serves the page at the
+   root and forwards every other path to the app (rules in tinydocs-cc's
+   `netlify.toml`).
 
 ## 4. Deep links to GitHub projects
 
