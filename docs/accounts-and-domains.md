@@ -206,26 +206,14 @@ Change `app.tinystudio.cc` to `studio.tinycore.cc` in:
 
 Leave links to `https://tinystudio.cc` alone: the Visual export credit and the link tests. That address becomes the landing page.
 
-### After tinyservice 1.2.0 is on npm
+### tinyService 1.2.0
 
-The change is on tinyService branch `release/1.2.0`, commits `c198db4` and `212d1bb`. Its default allowed origins already include `https://studio.tinycore.cc` and `https://app.tinystudio.cc`.
-
-Already done on `v0.4-dev` (2026-09-14):
+Published to npm on 2026-09-18 from tinyService commit `212d1bb` (branch `release/1.2.0`). Its default allowed origins include `https://studio.tinycore.cc` and `https://app.tinystudio.cc`. tinyStudio depends on `^1.2.0`.
 
 - **Port check.** It opens the port on both `127.0.0.1` and all interfaces (`src/main/freePort.ts`).
-  - This matters because the owner's tray app runs 1.2.0 on `127.0.0.1:3000`.
+  - This matters because the tray app runs 1.2.0 on `127.0.0.1:3000`.
   - On Windows, a check on all interfaces alone passes while the tray holds that port.
 - **Allowed origins.** `allowedOrigins` in `src/main/index.ts` is `['file://', 'http://localhost:*', 'https://studio.tinycore.cc', 'https://app.tinystudio.cc']`.
-- **Known issue.** The tinyService Known issue is gone from `README.md` and `CHANGELOG.md`.
-- **Temporary dependency.** Until 1.2.0 is published, it is `file:local-packages/mister-industries-tinyservice-1.2.0.tgz`, packed from `release/1.2.0`.
-  - The lockfile resolves it from that file, so `npm install`, `npm ci` and Netlify work without the registry.
-  - To repack after tinyService changes, run `npm pack --pack-destination <tinyStudio>/local-packages` in `packages/service`, then run `npm install ./local-packages/<file>.tgz` here.
-
-Once 1.2.0 is on npm:
-
-1. Set `@mister-industries/tinyservice` back to `^1.2.0`.
-2. Delete `local-packages/`.
-3. Run `npm install`.
 
 Deploy previews aren't in tinyService's default list, so compile and upload can't reach a local tinyService from a preview. Test those on `studio.tinycore.cc` or localhost.
 

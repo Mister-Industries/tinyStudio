@@ -107,7 +107,7 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
   language server (desktop).
 - The backend picks a free port starting at 3000, and the app connects to
   whichever one it got.
-- Requires tinyService 1.1.0.
+- Requires tinyService 1.2.0.
 
 ### Visual view
 
