@@ -1,6 +1,6 @@
 /* global p5 */
 /**
- * tinyStudio sketch runner — runs a visual.js p5 sketch inside a sandboxed
+ * tinyStudio sketch runner: runs a visual.js p5 sketch inside a sandboxed
  * iframe. The parent (components/VisualPreview) sends:
  *
  *   { type: 'run', code, theme, serial }   start (or restart) a sketch

@@ -1,5 +1,5 @@
 /**
- * circuit/core/commands — every document mutation as a Command.
+ * circuit/core/commands: every document mutation as a Command.
  *
  * Commands are PURE: `apply(doc)` returns a new doc (structural sharing, no
  * mutation), which makes undo trivial (the store keeps the previous doc) and
@@ -9,7 +9,7 @@
  *
  * Geometry-dependent updates (wire re-anchoring while a part moves) are
  * computed by the VIEW (it owns pin positions via the registry) and passed in
- * as data — core stays free of parts/geometry knowledge.
+ * as data; core stays free of parts/geometry knowledge.
  */
 
 import {
@@ -93,7 +93,7 @@ export function renamePart(oldId: string, next: string): Command {
   return {
     label: `Rename ${oldId} → ${next}`,
     apply: (doc) => {
-      if (doc.parts.some((p) => p.id === next)) return doc // uniqueness guard — no-op
+      if (doc.parts.some((p) => p.id === next)) return doc // uniqueness guard: no-op
       const fixEnd = (e: WireEnd): WireEnd => {
         if (typeof e !== 'string') return e
         const { part, pin } = splitPinRef(e)
@@ -407,7 +407,7 @@ export function cascadeWireRemoval(wires: CircuitWire[], gone: Set<string>): Cir
     seen.add(hostId)
     const host = byId.get(hostId)
     if (!host) return null
-    if (!gone.has(hostId)) return { wire: hostId, t: 0.5 } // host survives — shouldn't happen, keep rider
+    if (!gone.has(hostId)) return { wire: hostId, t: 0.5 } // host survives: shouldn't happen, keep rider
     if (typeof host.from === 'string') return host.from
     return resolveAnchor(host.from.wire, seen)
   }

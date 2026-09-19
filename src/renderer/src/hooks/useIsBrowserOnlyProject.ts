@@ -1,6 +1,6 @@
 /**
- * True when the open project exists only in the browser — an example, a GitHub
- * repo, or a scratch project — with no folder on the user's computer yet.
+ * True when the open project exists only in the browser (an example, a GitHub
+ * repo, or a scratch project) with no folder on the user's computer yet.
  *
  * Desktop never has these: it writes opened repos to disk straight away.
  */

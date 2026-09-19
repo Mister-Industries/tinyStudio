@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * render-circuit-preview.mjs — render a circuit document to a standalone SVG,
+ * render-circuit-preview.mjs: render a circuit document to a standalone SVG,
  * headlessly, without launching the app.
  *
  *   node scripts/render-circuit-preview.mjs [--view sch|bb] [--out file.svg] [doc.json]
@@ -8,7 +8,7 @@
  * Why: the schematic's look (symbol weights, fonts, symbol scale, label
  * placement) is the kind of thing you can only judge by looking at it, and
  * booting Electron for every tweak is slow. This bundles the real rendering
- * path — parts registry → partsAdapter geometry → views/exportImage — the same
+ * path: parts registry → partsAdapter geometry → views/exportImage, the same
  * one the in-app PNG/SVG export uses, so what comes out is what the app draws.
  *
  * With no document argument it renders a built-in sampler: one of every part in
@@ -38,7 +38,7 @@ const view = flag('view', 'sch')
 const out = resolve(flag('out', join(root, `circuit-preview-${view}.svg`)))
 const docPath = argv.find((a) => a.endsWith('.json'))
 
-/** Vite's `?raw` suffix — same shim the circuit test runner uses. */
+/** Vite's `?raw` suffix: same shim the circuit test runner uses. */
 const rawImports = {
   name: 'raw-imports',
   setup(b) {
@@ -80,7 +80,7 @@ if (DOC_PATH) {
   const types = PART_MANIFEST.map((m) => m.type).filter((t) => !t.startsWith('breadboard-'))
   await ensureParts(types)
   doc = emptyDoc()
-  // shelf packing on measured symbol sizes — a fixed cell grid buries the
+  // shelf packing on measured symbol sizes; a fixed cell grid buries the
   // big symbols (a 10-pin display is 20x a diode) under their neighbours
   const COLS = 6
   const GAP = GRID_BB * 6

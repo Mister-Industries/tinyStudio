@@ -1,4 +1,4 @@
-/** Tests for parts/breadboard — generator geometry, buses, net integration. */
+/** Tests for parts/breadboard: generator geometry, buses, net integration. */
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'

@@ -1,4 +1,4 @@
-/** Tests for core/erc — net-model rule checks. */
+/** Tests for core/erc: net-model rule checks. */
 import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
 import { runErc } from '../core/erc'

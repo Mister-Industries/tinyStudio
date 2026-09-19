@@ -27,7 +27,7 @@ export interface ExampleEntry {
    * Search/filter keywords, canonicalised to the vocabulary in
    * lib/exampleTags. Board tags ('tinycore', 'tinysniff', 'qwiic') colour the
    * card's chips to the real PCB; topic tags ('i2c', 'pwm') stay neutral.
-   * Optional — a manifest without tags still loads and still searches on
+   * Optional: a manifest without tags still loads and still searches on
    * title/description/board (see `searchHaystack`).
    *
    * Populated by scripts/gen-example-tags.mjs, which reads each project's
@@ -41,7 +41,7 @@ export interface ExampleEntry {
 // workflow (tools/gen-example-tags.mjs).
 //
 // Entries carry `owner`/`repo`/`path` per project, so one manifest can span
-// repos — the tinyHAT examples point straight at tinySniff / tinySpeak rather
+// repos; the tinyHAT examples point straight at tinySniff / tinySpeak rather
 // than being copied.
 //
 // Overridable (like tinyservice.url) for testing against a fork or branch via
@@ -60,11 +60,11 @@ export function resolveManifestUrl(): string | null {
 /**
  * Normalise one manifest entry. Tags are folded onto their canonical slugs so
  * an entry written as "I2C" / "Wire" / "i2c" all filter as one tag, and a
- * board named only in the free-text `board` field still gets a board chip —
+ * board named only in the free-text `board` field still gets a board chip,
  * which keeps older manifests (and hand-written entries) working.
  */
 function normalizeEntry(raw: ExampleEntry): ExampleEntry {
-  // Declared tags are trusted as-is, unknown slugs included — that is what
+  // Declared tags are trusted as-is, unknown slugs included; that is what
   // lets the manifest introduce vocabulary ahead of the app.
   const tags = canonicalizeTags(raw.tags)
   // Board-derived tags are the opposite: `board` is free text a human typed,
@@ -88,7 +88,7 @@ function knownTagsIn(board: string | undefined): string[] {
   if (!board) return []
   const fragments = board
     // Parentheses and brackets delimit a qualifier, not a separate board, but
-    // what's inside can still be a recognised alias — so split, don't strip.
+    // what's inside can still be a recognised alias, so split, don't strip.
     .split(/[+/,&()[\]]|\bwith\b|\band\b/i)
     .flatMap((part) => {
       const trimmed = part
@@ -159,7 +159,7 @@ export async function fetchExamplesManifest(): Promise<ExampleEntry[]> {
 
 /**
  * Where an example lands on disk. Namespaced by owner/repo because example
- * folder names are not unique across repos — two `blink/` examples from
+ * folder names are not unique across repos: two `blink/` examples from
  * different repos would install over each other.
  */
 function exampleFolderName(ex: ExampleEntry): string {
@@ -169,7 +169,7 @@ function exampleFolderName(ex: ExampleEntry): string {
 
 /**
  * Download every example in the manifest into the desktop app's default examples
- * folder (Documents/tinyStudio Examples). Desktop-only — the browser build
+ * folder (Documents/tinyStudio Examples). Desktop-only; the browser build
  * browses examples live via the Examples tab instead. Returns the target folder
  * and how many projects were written.
  */

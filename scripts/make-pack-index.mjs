@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * make-pack-index.mjs — wrap a scripts/fritzing-import.mjs output directory
+ * make-pack-index.mjs: wrap a scripts/fritzing-import.mjs output directory
  * into a tinyStudio parts pack (pack.json + parts/*.json) plus a repo-level
  * index.json, ready to publish as the raw contents of a GitHub repo. See
  * docs/tinyparts-pack-setup.md for the full walkthrough.
  *
  * fritzing-import.mjs already writes flat per-part JSON + its own index.json
- * manifest ({ parts: [{ type, file, ... }] }) — this script just re-shapes
+ * manifest ({ parts: [{ type, file, ... }] }); this script just re-shapes
  * that manifest into circuit/parts/packs.ts's pack.json format and copies
  * the part files alongside it, merging into (or creating) the repo's
  * top-level index.json so multiple packs can coexist.
@@ -54,7 +54,7 @@ if (args.help || !args.parts || !args.out || !args.id || !args.name || !args.ver
 
 const manifestPath = join(args.parts, 'index.json')
 if (!existsSync(manifestPath)) {
-  console.error(`No index.json in ${args.parts} — run scripts/fritzing-import.mjs first.`)
+  console.error(`No index.json in ${args.parts}. Run scripts/fritzing-import.mjs first.`)
   process.exit(1)
 }
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))

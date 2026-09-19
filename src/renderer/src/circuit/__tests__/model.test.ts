@@ -1,5 +1,5 @@
 /**
- * circuit/core/model tests — v2 parse/serialize round-trip, v1/Wokwi
+ * circuit/core/model tests: v2 parse/serialize round-trip, v1/Wokwi
  * migration, unknown-key preservation (B3), duplicate handling.
  */
 import { strict as assert } from 'node:assert'

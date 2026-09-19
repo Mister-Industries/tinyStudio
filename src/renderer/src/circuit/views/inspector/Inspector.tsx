@@ -1,5 +1,5 @@
 /**
- * circuit/views/inspector/Inspector — right-rail editing for the selection.
+ * circuit/views/inspector/Inspector: right-rail editing for the selection.
  * Part: refdes (rename with uniqueness check), label, location, rotation,
  * typed attrs. Wire: color, net info. Multi-select: summary + delete.
  * All edits dispatch Commands (undoable); moves/rotations reroute wires with
@@ -50,7 +50,7 @@ const rowLabel = 'text-[11px] text-text-muted'
  * The Properties panel: everything about whatever is selected.
  *
  * Lives inside the shell's tabbed right rail (Properties | Simulate), so it
- * renders as a plain column — the tab strip above it is the panel's header.
+ * renders as a plain column; the tab strip above it is the panel's header.
  */
 export function InspectorRail({
   doc,
@@ -113,7 +113,7 @@ export function InspectorRail({
         ) : (
           <div className="text-text-faint text-[11px] leading-relaxed">
             {editable
-              ? 'Select a component to edit its refdes, location, rotation, and properties — or a wire to recolor it. Shift-click or drag a marquee for multi-select.'
+              ? 'Select a component to edit its refdes, location, rotation, and properties, or a wire to recolor it. Shift-click or drag a marquee for multi-select.'
               : 'Switch on editing to change component properties. Select a component to inspect it.'}
           </div>
         )}
@@ -184,7 +184,7 @@ function PartInspector({
     if (!pv) return
     const next = (((deg % 360) + 360) % 360) as 0 | 90 | 180 | 270
     // Breadboards rotate as a rigid assembly (board + seated parts + wires
-    // between them) — same path as the canvas R / right-click gesture.
+    // between them): same path as the canvas R / right-click gesture.
     if (view === 'bb' && isBreadboard(part.type)) {
       const steps = ((next - (pv.rotate ?? 0)) / 90 + 4) % 4
       const c = rotateBoardAssemblyCmd(doc, part.id, implicitSeats(doc), steps)
@@ -249,7 +249,7 @@ function PartInspector({
           {def?.label ?? part.type}
         </span>
         <span className={rowLabel}>Category</span>
-        <span className="text-text-body truncate">{def?.family ?? '—'}</span>
+        <span className="text-text-body truncate">{def?.family ?? '-'}</span>
         <span className={rowLabel}>Wires</span>
         <span className="text-text-body">{wiresTouching}</span>
       </div>
@@ -346,7 +346,7 @@ function PartInspector({
         <span className={rowLabel}>Properties</span>
         {propRows.length === 0 && (
           <div className="text-[11px] text-text-faint">
-            No properties yet. Add one below — e.g. a resistor’s{' '}
+            No properties yet. Add one below, e.g. a resistor’s{' '}
             <span className="text-text-body">value</span>.
           </div>
         )}
@@ -600,7 +600,7 @@ function LabelInspector({
         </div>
       </label>
       <p className="text-[11px] text-text-faint leading-relaxed">
-        Labels sharing a name join the same net — a clean way to wire power and ground without long
+        Labels sharing a name join the same net: a clean way to wire power and ground without long
         wires.
       </p>
       <button

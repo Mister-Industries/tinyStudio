@@ -1,5 +1,5 @@
 /**
- * BoardControls — the serial-port picker for the toolbar.
+ * BoardControls: the serial-port picker for the toolbar.
  *
  * The port pill chooses which detected serial port to upload to. The board
  * TYPE (FQBN) is chosen in the Boards Manager modal (see BoardManager.tsx);

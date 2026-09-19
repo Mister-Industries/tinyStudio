@@ -1,5 +1,5 @@
 /**
- * github-token — the one server-side step of the web build's GitHub sign-in.
+ * github-token: the one server-side step of the web build's GitHub sign-in.
  *
  * The page finishes the OAuth authorization-code flow here because GitHub
  * requires the app's client secret to swap a code for a token, even with

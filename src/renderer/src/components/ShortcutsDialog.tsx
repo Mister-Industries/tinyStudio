@@ -1,5 +1,5 @@
 /**
- * ShortcutsDialog — every keyboard shortcut tinyStudio defines, from
+ * ShortcutsDialog: every keyboard shortcut tinyStudio defines, from
  * lib/shortcuts. Opened from the tinyStudio menu and with Mod+/.
  */
 
@@ -45,7 +45,7 @@ export function ShortcutsDialog({
                   >
                     <span className="min-w-0 text-[var(--text-body)]">
                       {s.label}
-                      {s.when && <span className="text-[var(--text-muted)]"> — {s.when}</span>}
+                      {s.when && <span className="text-[var(--text-muted)]"> ({s.when})</span>}
                     </span>
                     <kbd className="shrink-0 rounded-[var(--radius-sm)] border border-[var(--border-default)] bg-[var(--bg-sunken)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--text-strong)]">
                       {keysOf(s.id)}

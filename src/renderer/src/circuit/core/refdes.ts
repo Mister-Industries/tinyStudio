@@ -1,5 +1,5 @@
 /**
- * circuit/core/refdes — reference-designator assignment (R1, C2, LED3, U4…).
+ * circuit/core/refdes: reference-designator assignment (R1, C2, LED3, U4…).
  * Part ids ARE refdes in circuit.json v2 (§6.4 of the tech spec).
  */
 
@@ -63,7 +63,7 @@ function escapeRe(s: string): string {
  * Assign conventional reference designators to every part in the document.
  *
  * A circuit migrated from a v1 `diagram.json` keeps whatever ids that file
- * used — Fritzing/Wokwi slugs like `led`, `resistor`, `battery-aa_y90`. Those
+ * used: Fritzing/Wokwi slugs like `led`, `resistor`, `battery-aa_y90`. Those
  * ids ARE what the schematic prints beside each symbol, so a migrated sheet
  * reads like a directory listing instead of a schematic. Renumbering rewrites
  * them to R1, C2, D3, LED4, U5…
@@ -71,7 +71,7 @@ function escapeRe(s: string): string {
  * Order follows how a schematic is read: top to bottom, left to right, with
  * rows banded so parts that sit at roughly the same height number left to
  * right rather than by sub-pixel y. Parts already named correctly still get
- * renumbered — partial renumbering is what produces R1, R7, R12 gaps.
+ * renumbered; partial renumbering is what produces R1, R7, R12 gaps.
  *
  * Returns a mapping of old id → new id, excluding parts whose id doesn't
  * change; an empty result means there was nothing to do.
@@ -81,7 +81,7 @@ export function renumberAll(
   prefixOf: (type: string) => string,
   view: ViewId = 'sch'
 ): Record<string, string> {
-  const ROW_BAND = 48 // px — parts within this band count as the same row
+  const ROW_BAND = 48 // px, parts within this band count as the same row
   const ordered = [...doc.parts].sort((a, b) => {
     const pa = a[view] ?? a.bb ?? a.sch
     const pb = b[view] ?? b.bb ?? b.sch

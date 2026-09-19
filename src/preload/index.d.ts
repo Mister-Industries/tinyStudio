@@ -167,7 +167,7 @@ export interface DeviceFlowStart {
 }
 
 interface GitHubAuthAPI {
-  /** False when no OAuth client ID was built in — the UI falls back to a token. */
+  /** False when no OAuth client ID was built in; the UI falls back to a token. */
   isConfigured: () => Promise<boolean>
   getAccount: () => Promise<GitHubAccountInfo | null>
   startDeviceFlow: () => Promise<DeviceFlowStart>

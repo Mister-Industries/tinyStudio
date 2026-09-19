@@ -1,5 +1,5 @@
 /** The visual.js every project starts with: a serial plotter. */
-export const DEFAULT_VISUAL = `// visual.js — Serial Plotter
+export const DEFAULT_VISUAL = `// visual.js: Serial Plotter
 // Graphs the latest number printed over Serial (serialValue()) as a scrolling
 // line, auto-scaling to the data. Try Serial.println(analogRead(A5)) on the
 // board. Colours come from \`theme\`, so the plot follows light and dark mode.
@@ -37,7 +37,7 @@ function draw() {
   textFont(theme.mono);
   textStyle(NORMAL);
   textSize(40);
-  text(serialAvailable() ? serialValue().toFixed(2) : '—', pad, pad + 24);
+  text(serialAvailable() ? serialValue().toFixed(2) : '-', pad, pad + 24);
 
   // grid + range labels
   const top = 130;
@@ -70,7 +70,7 @@ function draw() {
 `
 
 /** Starter p5.js sketch dropped into newly created .js files. */
-export const sketchTemplate = (title: string): string => `// ${title} — p5.js sketch.
+export const sketchTemplate = (title: string): string => `// ${title}: p5.js sketch.
 // Switch to Code to edit this sketch; Visual to run it.
 
 let x = 240;

@@ -1,4 +1,4 @@
-// tinyService prompts. Renders nothing — it's a headless watcher.
+// tinyService prompts. Renders nothing; it's a headless watcher.
 //
 // Compile / upload / serial all go through tinyService, a small local WebSocket
 // backend (see WebSocketArduinoService.ts).
@@ -7,7 +7,7 @@
 // a persistent notification into the status-bar bell so it's easy to find and
 // stays until the user clears it. On Windows the primary path is the one-click
 // tray-agent installer published from the tinyService repo (stable
-// latest-release URL). Elsewhere — and as a fallback for developers — we still
+// latest-release URL). Elsewhere (and as a fallback for developers) we still
 // show the npx command.
 //
 // On desktop the main process launches tinyService and restarts it once if it
@@ -88,7 +88,7 @@ export function BackendPrompt(): null {
 
       if (isWindows) {
         const msg =
-          'Compiling, uploading, and the serial monitor run through tinyService, a small app that lives in your system tray. Install it once — the app reconnects automatically.'
+          'Compiling, uploading, and the serial monitor run through tinyService, a small app that lives in your system tray. Install it once and the app reconnects automatically.'
         dispatch(
           addNotification({
             tone: 'warn',
@@ -109,7 +109,7 @@ export function BackendPrompt(): null {
         })
       } else {
         const msg =
-          'Compiling, uploading, and the serial monitor run through a small local backend. Run this command in a terminal — the app reconnects automatically. Use Chrome or Edge to allow the local connection from a hosted page.'
+          'Compiling, uploading, and the serial monitor run through a small local backend. Run this command in a terminal and the app reconnects automatically. Use Chrome or Edge to allow the local connection from a hosted page.'
         dispatch(
           addNotification({
             tone: 'warn',

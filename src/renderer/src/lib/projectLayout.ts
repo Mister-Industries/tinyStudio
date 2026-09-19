@@ -1,4 +1,4 @@
-// Project folder layout — the rules for what a tinyStudio project looks like on
+// Project folder layout: the rules for what a tinyStudio project looks like on
 // disk, shared by "Save to computer" and "Create project".
 //
 // The Arduino IDE and arduino-cli only open a sketch whose .ino is named after
@@ -51,7 +51,7 @@ export function suggestProjectName(paths: string[], fallback: string): string {
 }
 
 export interface SketchLayout<T> {
-  /** folder name — and, when the sketch sits at the top, the .ino's basename */
+  /** folder name and, when the sketch sits at the top, the .ino's basename */
   name: string
   /** project-relative path -> content, in the new layout */
   files: Record<string, T>
@@ -62,8 +62,8 @@ export interface SketchLayout<T> {
 /**
  * Lay a project's files out as one flat sketch folder called `requestedName`.
  *
- * With `hoist` (the default), a sketch buried in a subfolder — the old
- * `Blink Example/led_blink/led_blink.ino` shape — is lifted to the top along
+ * With `hoist` (the default), a sketch buried in a subfolder (the old
+ * `Blink Example/led_blink/led_blink.ino` shape) is lifted to the top along
  * with everything beside it. A file that would land on top of an existing
  * top-level file keeps its original nested path instead: silently overwriting
  * someone's README is worse than a slightly untidy folder.

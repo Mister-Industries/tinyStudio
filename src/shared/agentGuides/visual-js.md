@@ -1,4 +1,4 @@
-# visual.js — sketches for the Visual view
+# visual.js: sketches for the Visual view
 
 A project's `visual.js` is a p5.js sketch that turns the board's serial output into something to look at: a gauge, a chart, a game, a mirror of an LED. The attached screenshots show:
 1. the Visual view with a sketch running;
@@ -38,7 +38,7 @@ The Visual view shows the canvas in a **square** frame, scaled to fit. The expor
 - For anything else (labels, several values, events) parse in `serialEvent(line)`.
 - The exact parsing rules and good line formats are in `read_guide("serial")`.
 
-## `theme` — use it for every colour and font
+## `theme`: use it for every colour and font
 
 `theme` is built in and always current. When the user switches the app between light and dark mode, the same fields change value on the next frame, with no restart. Never hard-code colours.
 
@@ -89,7 +89,7 @@ Older examples use navy backgrounds with pink/cyan. That's the retired look. Whe
 This is the sketch in the second screenshot. It pairs with an `.ino` that prints one reading per line (`Serial.println(analogRead(A5));`), plus `state:on` / `state:off` lines.
 
 ```js
-// visual.js — light sensor dashboard (tinyStudio reference style)
+// visual.js: light sensor dashboard (tinyStudio reference style)
 
 const MAX = 120;  // samples kept in the chart
 let history = [];
@@ -132,7 +132,7 @@ function draw() {
   textStyle(NORMAL);
   textAlign(LEFT, TOP);
   textSize(64);
-  text(serialAvailable() ? Math.round(shown) : '—', pad, pad + 28);
+  text(serialAvailable() ? Math.round(shown) : '-', pad, pad + 28);
   fill(theme.muted);
   textFont(theme.font);
   textSize(13);

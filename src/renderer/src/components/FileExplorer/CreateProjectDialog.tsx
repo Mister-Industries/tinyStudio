@@ -1,5 +1,5 @@
 /**
- * CreateProjectDialog — name a new project, pick where it lives, done.
+ * CreateProjectDialog: name a new project, pick where it lives, done.
  *
  * The project is one folder named after the sketch, with the .ino and README
  * inside (see lib/projectLayout), so it opens as-is in the Arduino IDE too.
@@ -75,7 +75,7 @@ export function CreateProjectDialog({
       }
 
       const parent = await pickParentFolder()
-      if (!parent) return // picker cancelled — leave the dialog up
+      if (!parent) return // picker cancelled; leave the dialog up
       const target = await chooseProjectTarget(parent, name)
       const layout = flattenSketchLayout(files, target.name)
       const root = await writeProjectFolder(parent, target, layout.files)

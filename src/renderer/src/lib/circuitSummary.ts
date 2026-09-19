@@ -1,5 +1,5 @@
 /**
- * circuitSummary — a circuit as plain text for Studio AI's inspect_circuit.
+ * circuitSummary: a circuit as plain text for Studio AI's inspect_circuit.
  *
  * Pure: the caller builds the net model (with breadboard seating and buses from
  * the parts registry, see lib/agentCircuit.ts) and says what each part type is.
@@ -53,7 +53,7 @@ export function summarizeCircuit(
       ...attrs,
       !pi && '(type not in the parts library)',
       pi?.breadboard && '(connections through its holes are included below)',
-      !part.bb && !part.sch && '(unplaced — in the tray)'
+      !part.bb && !part.sch && '(unplaced, in the tray)'
     ].filter(Boolean)
     out.push(
       `- ${part.id}: ${pi?.label ?? part.type} (${part.type})${extra.length ? ' ' + extra.join(' ') : ''}`
@@ -85,7 +85,7 @@ export function summarizeCircuit(
   out.push(...(netLines.length ? netLines : ['- none yet']))
   if (typeOf.size && [...typeOf.values()].includes(TINYCORE)) {
     out.push('', 'tinyCore pins in use:')
-    out.push(...(tinyCoreUse.length ? tinyCoreUse : ['- none — nothing is wired to the tinyCore']))
+    out.push(...(tinyCoreUse.length ? tinyCoreUse : ['- none: nothing is wired to the tinyCore']))
   }
 
   const loose = doc.parts.filter((p) => !connected.has(p.id) && !info(p.type)?.breadboard)

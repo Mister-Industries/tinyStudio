@@ -8,7 +8,7 @@ import { getTagMeta, tagChipStyle } from '@renderer/lib/exampleTags'
 import { Tag } from './ui/Tag'
 
 interface ExampleTagProps {
-  /** Canonical slug (or any alias — it is resolved here). */
+  /** Canonical slug (or any alias; it is resolved here). */
   slug: string
   selected?: boolean
   /** Result count shown after the label, for filter-bar chips. */
@@ -50,7 +50,7 @@ export function ExampleTag({
             }
           }
         : {})}
-      title={meta.kind === 'board' ? `${meta.label} — board or expansion` : meta.label}
+      title={meta.kind === 'board' ? `${meta.label}, board or expansion` : meta.label}
     >
       {meta.label}
       {count !== undefined && <span className="ts-tag__count">{count}</span>}

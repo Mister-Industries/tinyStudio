@@ -1,5 +1,5 @@
 /**
- * repoSync — one shared view of the open project's GitHub link: what changed
+ * repoSync: one shared view of the open project's GitHub link: what changed
  * since the last sync, whether this account can push, and Push and Pull.
  *
  * The GitHub tab and the push reminder both read it, so the project's files are

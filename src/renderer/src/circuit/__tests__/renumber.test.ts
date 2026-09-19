@@ -1,5 +1,5 @@
 /**
- * Tests for reference-designator renumbering — the fix for a migrated
+ * Tests for reference-designator renumbering: the fix for a migrated
  * diagram.json printing part-file slugs ("led", "battery-aa_y90") beside every
  * symbol instead of R1 / LED2 / BT3.
  */

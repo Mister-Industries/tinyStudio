@@ -1,14 +1,14 @@
 /**
- * agentCore — the platform-neutral "brain" behind the Studio AI tab.
+ * agentCore: the platform-neutral "brain" behind the Studio AI tab.
  *
  * Holds the conversation, runs the agentic tool loop against Claude, executes a
  * small set of workspace-scoped file tools, and gates every mutating tool
  * (write/edit/delete) behind a permission prompt. It knows nothing about where
- * it runs — the host supplies the API key, file access, and the channel back to
+ * it runs: the host supplies the API key, file access, and the channel back to
  * the UI:
  *
- *   - Desktop: src/main/AgentService.ts — Node fs, key in safeStorage, IPC.
- *   - Web:     src/renderer/src/lib/webAgent.ts — File System Access / mem://
+ *   - Desktop: src/main/AgentService.ts (Node fs, key in safeStorage, IPC).
+ *   - Web:     src/renderer/src/lib/webAgent.ts (File System Access / mem://)
  *              workspaces, key in localStorage, calls the API from the page.
  */
 
@@ -103,7 +103,7 @@ export interface AgentHost {
   getApiKey(): Promise<string | null>
   /** The model the user picked in the Studio AI settings (agentModels.ts). */
   getModel(): Promise<AgentModelId>
-  /** Build the API client — the web host opts into browser mode here. */
+  /** Build the API client; the web host opts into browser mode here. */
   createClient(apiKey: string): Anthropic
   /** The workspace a request targets, or null when none is open. */
   openWorkspace(root: string | null): AgentWorkspace | null
@@ -390,7 +390,7 @@ function buildSystem(args: AgentSendArgs, ws: AgentWorkspace | null): TextBlockP
   }
   if (!ws) {
     lines.push(
-      'No workspace is open, so file tools are unavailable — answer from knowledge and the guides.'
+      'No workspace is open, so file tools are unavailable; answer from knowledge and the guides.'
     )
   }
   return [
@@ -534,7 +534,7 @@ const TOOLS: Tool[] = [
   {
     name: 'read_serial',
     description:
-      'Read the most recent lines the board printed over serial — exactly what visual.js receives. Empty if no board is connected or nothing has been printed since the app opened.',
+      'Read the most recent lines the board printed over serial: exactly what visual.js receives. Empty if no board is connected or nothing has been printed since the app opened.',
     input_schema: {
       type: 'object',
       properties: {

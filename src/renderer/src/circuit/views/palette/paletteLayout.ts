@@ -1,5 +1,5 @@
 /**
- * circuit/views/palette/paletteLayout — which tab and section each part sits in,
+ * circuit/views/palette/paletteLayout: which tab and section each part sits in,
  * laid out the way Fritzing's parts bins are.
  *
  *   Core      the bundled tinyBoards and Core packs, and the parts generated in

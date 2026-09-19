@@ -35,7 +35,7 @@ const serviceManager = new ServiceManager({
   ]
 })
 
-// Studio AI agent — one instance, bound to the main window.
+// Studio AI agent: one instance, bound to the main window.
 const agentService = new AgentService()
 
 /** The URL the renderer is served from, so navigation elsewhere can be refused. */
@@ -114,7 +114,7 @@ app.whenReady().then(async () => {
 
   // Register standard edit/view accelerators (undo/redo/cut/copy/paste/select-all,
   // reload, devtools). The window is frameless so this menu stays hidden, but
-  // without it those shortcuts never bind — e.g. Ctrl+Z wouldn't work in inputs.
+  // without it those shortcuts never bind (e.g. Ctrl+Z wouldn't work in inputs).
   Menu.setApplicationMenu(
     Menu.buildFromTemplate([{ role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' }])
   )
@@ -175,7 +175,7 @@ app.whenReady().then(async () => {
 
   // --- GitHub sign-in (OAuth device flow) ---
   // These live in main because GitHub's OAuth endpoints send no CORS headers, so
-  // the renderer cannot call them — and because the token is then stored with
+  // the renderer cannot call them, and because the token is then stored with
   // safeStorage instead of sitting in renderer localStorage.
   ipcMain.handle('github:configured', () => ghIsConfigured())
   ipcMain.handle('github:account', () => ghGetAccount())

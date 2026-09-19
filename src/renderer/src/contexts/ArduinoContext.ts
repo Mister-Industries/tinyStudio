@@ -1,5 +1,5 @@
 /**
- * ArduinoContext — the app-wide Arduino state (boards, ports, compile/upload,
+ * ArduinoContext: the app-wide Arduino state (boards, ports, compile/upload,
  * serial plumbing) that ArduinoProvider runs once and shares.
  */
 

@@ -1,5 +1,5 @@
 /**
- * githubAuth — GitHub sign-in for the desktop app, via the OAuth **device flow**.
+ * githubAuth: GitHub sign-in for the desktop app, via the OAuth **device flow**.
  *
  * Why device flow: it is the only browser-less flow that needs no client secret
  * and no redirect URI, so nothing confidential ships inside the app. The user
@@ -7,7 +7,7 @@
  *
  * Why this lives in the MAIN process rather than the renderer:
  *   • GitHub's OAuth endpoints send no CORS headers, so a renderer `fetch` to
- *     them fails outright. This is not a workaround — it's the supported shape.
+ *     them fails outright. This is not a workaround; it's the supported shape.
  *   • The resulting token is written with safeStorage (OS keychain / DPAPI),
  *     the same way the Anthropic key is. A token in the renderer's localStorage
  *     would be readable by any process running as the user.
@@ -30,7 +30,7 @@ const TOKEN_URL = 'https://github.com/login/oauth/access_token'
 const API = 'https://api.github.com'
 
 /**
- * Public client id — safe to ship; it is not a secret. The tinyStudio app's id
+ * Public client id: safe to ship; it is not a secret. The tinyStudio app's id
  * is built in (shared/githubApp); override at build time with
  * VITE_GITHUB_CLIENT_ID, or at run time with GITHUB_CLIENT_ID for dev.
  */
@@ -77,7 +77,7 @@ function encrypt(token: string): Pick<StoredAuth, 'tokenEnc' | 'tokenEncrypted'>
     return { tokenEnc: safeStorage.encryptString(token).toString('base64'), tokenEncrypted: true }
   }
   // Platforms without an OS keychain. Base64 so it isn't in plain sight, but
-  // this is NOT encryption — same caveat as the Anthropic key.
+  // this is NOT encryption; same caveat as the Anthropic key.
   return { tokenEnc: Buffer.from(token, 'utf-8').toString('base64'), tokenEncrypted: false }
 }
 
@@ -169,7 +169,7 @@ export async function pollForToken(
 
   for (;;) {
     if (cancelled) throw new Error('Sign-in cancelled')
-    if (Date.now() > deadline) throw new Error('The code expired — start sign-in again.')
+    if (Date.now() > deadline) throw new Error('The code expired. Start sign-in again.')
     await sleep(interval)
     if (cancelled) throw new Error('Sign-in cancelled')
 
@@ -196,13 +196,13 @@ export async function pollForToken(
 
     switch (j.error) {
       case 'authorization_pending':
-        break // the user hasn't finished yet — keep waiting
+        break // the user hasn't finished yet; keep waiting
       case 'slow_down':
         // GitHub asks us to back off; its own +5s is the documented step.
         interval += 5000
         break
       case 'expired_token':
-        throw new Error('The code expired — start sign-in again.')
+        throw new Error('The code expired. Start sign-in again.')
       case 'access_denied':
         throw new Error('Sign-in was cancelled on GitHub.')
       default:

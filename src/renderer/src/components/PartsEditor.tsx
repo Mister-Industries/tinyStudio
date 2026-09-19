@@ -1,5 +1,5 @@
 /**
- * PartsEditor — a top-level modal for authoring or editing a part. Upload an SVG
+ * PartsEditor: a top-level modal for authoring or editing a part. Upload an SVG
  * (or start from a blank box), set its size, then click on the preview to drop
  * pins and drag them into place. Pins are saved in the same schema as every
  * other part (pixel coords @ 96 DPI), so a hand-made part wires up exactly like
@@ -8,15 +8,15 @@
  * Pins can also come straight from the art: any shape whose id is `pin-<NAME>`
  * becomes a pin (name the object "pin-GND" in Illustrator). Uploading such an
  * SVG fills the pin list, and as long as you don't drag them the part keeps
- * reading pins from its file — so later art edits move the pins too.
+ * reading pins from its file, so later art edits move the pins too.
  *
  * Where a save goes (docs/parts-and-art.md):
- *   - "Save on this computer" — a local copy that shadows the shipped part here
+ *   - "Save on this computer": a local copy that shadows the shipped part here
  *     only; "Reset to default" throws it away.
- *   - "Save to tinyparts" (npm run dev with a tinyparts folder set) — writes
+ *   - "Save to tinyparts" (npm run dev with a tinyparts folder set): writes
  *     part.json and the .svg files into the checkout; commit + push to share.
  *
- * Both views are editable via the toggle — each keeps its own art, size and pin
+ * Both views are editable via the toggle; each keeps its own art, size and pin
  * positions (pin NAMES are the cross-view join key, so keep them consistent).
  *
  * The Schematic view has a second mode, **Symbol** (components/SymbolEditor):
@@ -397,7 +397,7 @@ export function PartsEditor({
     return Math.min(w / vw, h / vh)
   }
 
-  /** Move the selected pin by (dx, dy) px — through the art when it owns the pins. */
+  /** Move the selected pin by (dx, dy) px, through the art when it owns the pins. */
   const nudge = (dx: number, dy: number): void => {
     const pin = pins[sel]
     if (!pin) return
@@ -557,7 +557,7 @@ export function PartsEditor({
             className="text-[11px] text-text-muted truncate"
             title={describeSource(initial, localEdit)}
           >
-            {initial ? `“${initial.label}” — ${describeSource(initial, localEdit)}` : 'new part'}
+            {initial ? `“${initial.label}” · ${describeSource(initial, localEdit)}` : 'new part'}
           </span>
           {localEdit && onReset && (
             <button
@@ -736,7 +736,7 @@ export function PartsEditor({
                     </div>
                     <div className="text-[11px] text-text-body break-all">
                       {buf.artChanged
-                        ? 'uploaded — not saved yet'
+                        ? 'uploaded, not saved yet'
                         : artFile && initial?.source?.dir
                           ? `tinyparts/${initial.source.dir}/${artFile}`
                           : initial?.views[editView]
@@ -765,7 +765,7 @@ export function PartsEditor({
                         ? 'Pins come from the shapes named “pin-<NAME>” in the SVG, so moving them in Illustrator moves the pins.'
                         : buf.fromSvg
                           ? 'You moved pins by hand: their positions will be fixed in part.json and stop following the art.'
-                          : 'Tip: name pad shapes “pin-GND”, “pin-D8”… in Illustrator and upload — pins place themselves.'}
+                          : 'Tip: name pad shapes “pin-GND”, “pin-D8”… in Illustrator and upload; pins place themselves.'}
                     </div>
                   </div>
 

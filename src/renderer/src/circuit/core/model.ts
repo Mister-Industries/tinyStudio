@@ -1,10 +1,10 @@
 /**
- * circuit/core/model — the Circuit View v2 document model.
+ * circuit/core/model: the Circuit View v2 document model.
  *
  * `circuit.json` v2 schema (docs/circuit-view-tech-spec.md §4), plus parsing,
  * validation, serialization and migration from v1 `diagram.json` / Wokwi files.
  *
- * ZERO React, ZERO Node — pure TypeScript usable in renderer, web build, workers
+ * ZERO React, ZERO Node: pure TypeScript usable in renderer, web build, workers
  * and unit tests alike.
  */
 
@@ -17,7 +17,7 @@ export interface Pt {
 
 export type ViewId = 'bb' | 'sch'
 
-/** 0.1 in at 96 DPI — breadboard hole pitch and the base grid. */
+/** 0.1 in at 96 DPI: breadboard hole pitch and the base grid. */
 export const GRID_BB = 9.6
 /** Schematic fine grid (half pitch). */
 export const GRID_SCH = 4.8
@@ -36,7 +36,7 @@ export interface Placement {
 }
 
 export interface CircuitPart {
-  /** Reference designator — unique, user-visible (R1, LED2, U1…). */
+  /** Reference designator: unique, user-visible (R1, LED2, U1…). */
   id: string
   /** PartDef type resolved through the parts registry. */
   type: string
@@ -58,7 +58,7 @@ export interface JunctionEnd {
 }
 
 export interface CircuitWire {
-  /** Stable id (nanoid-8) — selection/route identity survives reorders (fixes B4). */
+  /** Stable id (nanoid-8): selection/route identity survives reorders (fixes B4). */
   id: string
   from: WireEnd
   to: WireEnd
@@ -66,9 +66,9 @@ export interface CircuitWire {
   view: ViewId
   /** Wokwi-style journey, source-anchored: h<px>, v<px>, d<dx>,<dy> (bb only). */
   route?: string[]
-  /** bb only — schematic wires are always ink. */
+  /** bb only: schematic wires are always ink. */
   color?: string
-  /** bb only — render as a curved jumper (route stays authoritative for geometry). */
+  /** bb only: render as a curved jumper (route stays authoritative for geometry). */
   curve?: boolean
 }
 
@@ -91,7 +91,7 @@ export interface Analysis {
  * A placed measurement tag (spec §10.4). Unlike the `sim-probe-*` PARTS, a
  * probe is not in the circuit: it is a label pinned to a node, the thing you
  * get by clicking a wire with the Simulate panel's picker on. It says what an
- * analysis should report and where its tag sits, and nothing else — no pins,
+ * analysis should report and where its tag sits, and nothing else: no pins,
  * no SPICE card, no effect on the netlist.
  */
 export interface Probe {
@@ -101,7 +101,7 @@ export interface Probe {
    * What it measures, as a core/simOutputs reference: `v@<part>:<pin>` for the
    * node that pin sits on, `i@<part>` for the current through a source,
    * `d@<part>` for a differential probe part's own reading. Deliberately NOT a
-   * SPICE vector name — node names are assigned in net order and move whenever
+   * SPICE vector name; node names are assigned in net order and move whenever
    * a wire is added.
    */
   at: string
@@ -130,7 +130,7 @@ export interface CircuitDoc {
   camera?: Partial<Record<ViewId, { x: number; y: number; zoom: number }>>
   /**
    * Round-trip bag: every top-level key we don't model is preserved verbatim
-   * (fixes B3 — never destroy foreign data like Wokwi's serialMonitor).
+   * (fixes B3: never destroy foreign data like Wokwi's serialMonitor).
    */
   extra?: Record<string, unknown>
 }
@@ -154,7 +154,7 @@ export function isJunction(end: WireEnd): end is JunctionEnd {
  * A v1-migrated junction endpoint the editor hasn't geometrically resolved
  * yet: carries the original raw coordinate; `wire` is '' and `t` is -1 until
  * the first render (where pin geometry exists) rewrites it to a real
- * `{wire, t}` — see migrateV1 pass 2.
+ * `{wire, t}`; see migrateV1 pass 2.
  */
 export interface PendingJunctionEnd extends JunctionEnd {
   x: number
@@ -164,7 +164,7 @@ export function isPendingJunction(end: WireEnd): end is PendingJunctionEnd {
   return isJunction(end) && end.wire === '' && (end as PendingJunctionEnd).x !== undefined
 }
 
-/** Split a "partId:pinName" pin ref. Pin names may contain ':'? No — first colon splits. */
+/** Split a "partId:pinName" pin ref. Pin names may contain ':'? No; first colon splits. */
 export function splitPinRef(ref: string): { part: string; pin: string } {
   const i = ref.indexOf(':')
   return { part: ref.slice(0, i), pin: ref.slice(i + 1) }
@@ -203,7 +203,7 @@ export interface ParseResult {
 
 /**
  * Parse any supported circuit file text: v2 native, tinyStudio v1 diagram.json,
- * or a Wokwi diagram.json. Never throws on bad input — returns an empty doc
+ * or a Wokwi diagram.json. Never throws on bad input; returns an empty doc
  * with warnings instead (the editor must always mount).
  */
 export function parseCircuitFile(text: string): ParseResult {
@@ -229,7 +229,7 @@ export function parseCircuitFile(text: string): ParseResult {
     return { doc: migrateV1(raw, warnings), migrated: true, warnings }
   }
   if (Array.isArray(raw.parts) || Array.isArray(raw.wires)) {
-    // half-formed v2-ish content — salvage what we can
+    // half-formed v2-ish content: salvage what we can
     return {
       doc: normalizeV2({ format: 'tinystudio-circuit', version: 2, ...raw }, warnings),
       migrated: false,
@@ -259,7 +259,7 @@ function normalizeV2(raw: Record<string, unknown>, warnings: string[]): CircuitD
       continue
     }
     if (seenPart.has(part.id)) {
-      warnings.push(`Duplicate part id "${part.id}" — dropped duplicate.`)
+      warnings.push(`Duplicate part id "${part.id}"; dropped duplicate.`)
       continue
     }
     seenPart.add(part.id)
@@ -418,7 +418,7 @@ function migrateV1(raw: Record<string, unknown>, warnings: string[]): CircuitDoc
  * source-anchored list by keeping the source half; the target half becomes a
  * `@` marker consumed by routing.decodeJourney (which needs live endpoints to
  * finish the fold). To stay dependency-free here we keep the raw list and let
- * routing handle "*" — this function only trims garbage.
+ * routing handle "*"; this function only trims garbage.
  */
 export function normalizeJourney(route: unknown): string[] | undefined {
   if (!Array.isArray(route)) return undefined

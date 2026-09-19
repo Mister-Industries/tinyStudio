@@ -7,8 +7,8 @@ import { tinypartsDev } from './vite-plugin-tinyparts'
 import { devCsp, githubTokenDev, p5Runtime } from './vite-plugins'
 
 export default defineConfig({
-  // tinypartsDev: dev server only — serves ../tinyparts live (docs/parts-and-art.md).
-  // githubTokenDev: dev server only — runs the GitHub sign-in token exchange locally.
+  // tinypartsDev: dev server only; serves ../tinyparts live (docs/parts-and-art.md).
+  // githubTokenDev: dev server only; runs the GitHub sign-in token exchange locally.
   plugins: [react(), tailwindcss(), tinypartsDev(), p5Runtime(), devCsp(), githubTokenDev()],
   // GitHub sign-in overrides (lib/githubWebAuth); the app's own id is the default.
   define: {

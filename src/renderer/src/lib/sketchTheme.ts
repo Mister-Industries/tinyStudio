@@ -1,5 +1,5 @@
 /**
- * sketchTheme — the `theme` object p5 sketches (visual.js) draw with.
+ * sketchTheme: the `theme` object p5 sketches (visual.js) draw with.
  *
  * Sketches use theme.bg, theme.accent, … instead of hard-coded colours, so a
  * visual matches the app in light and dark mode and recolours live when the
@@ -7,7 +7,7 @@
  * standalone export (visualExport) both build it from this token map, so a
  * sketch looks the same in either place.
  *
- * Studio AI documents these fields in src/shared/agentGuides/visual-js.md —
+ * Studio AI documents these fields in src/shared/agentGuides/visual-js.md;
  * keep that list in sync when adding one.
  */
 

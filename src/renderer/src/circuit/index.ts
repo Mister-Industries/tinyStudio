@@ -1,8 +1,8 @@
 /**
- * circuit/ — public API of the Circuit View module.
+ * circuit/: public API of the Circuit View module.
  *
  * Everything outside this folder should import from here (or from
- * `circuit/views/CircuitView` for the React mount) — internals may reshuffle.
+ * `circuit/views/CircuitView` for the React mount); internals may reshuffle.
  *
  * As of M4 this is the only circuit editor (the legacy DiagramEditor and its
  * `tinystudio.circuitV2` feature flag were removed once v2 reached parity +

@@ -1,5 +1,5 @@
 /**
- * tinycorePins — the tinyCore (ESP32-S3) pin map, as data.
+ * tinycorePins: the tinyCore (ESP32-S3) pin map, as data.
  *
  * One table feeds both Studio AI's tinyCore guide and the circuit inspector, so
  * the pin numbers the agent quotes can't drift between the two. Sources: the
@@ -39,7 +39,7 @@ export const TINYCORE_PINS: TinyCorePin[] = [
   { label: 'A2', gpio: 16, code: 'A2', header: 'left', functions: ['ADC2_CH5'] },
   { label: 'A1', gpio: 17, code: 'A1', header: 'left', functions: ['ADC2_CH6'] },
   { label: 'A0', gpio: 18, code: 'A0', header: 'left', functions: ['ADC2_CH7'] },
-  // right header, top to bottom — the variant defines no D8…D13 constants
+  // right header, top to bottom; the variant defines no D8…D13 constants
   { label: 'D8', gpio: 8, code: '8', silk: '8', header: 'right', functions: ['ADC1_CH7'] },
   { label: 'D9', gpio: 9, code: '9', silk: '9', header: 'right', functions: ['ADC1_CH8'] },
   { label: 'D10', gpio: 10, code: '10', silk: '10', header: 'right', functions: ['ADC1_CH9'] },
@@ -110,8 +110,8 @@ export function tinyCorePinTable(): string {
     [
       p.header,
       p.silk && p.silk !== p.label ? `${p.label} (${p.silk})` : p.label,
-      p.gpio ?? '—',
-      p.code ? `\`${p.code}\`` : '—',
+      p.gpio ?? '-',
+      p.code ? `\`${p.code}\`` : '-',
       [...p.functions, p.note].filter(Boolean).join('; ')
     ].join(' | ')
   )

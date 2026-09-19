@@ -1,10 +1,10 @@
 /**
- * agentChat — the Studio AI conversation as the panel shows it.
+ * agentChat: the Studio AI conversation as the panel shows it.
  *
  * Kept outside the AIAssistant component so the timeline survives switching
  * tabs, and so what streams in while the panel is closed (a reply, a tool call,
- * a file the agent just edited) isn't dropped. The agent itself — conversation
- * history and tool loop — runs in the main process on desktop and in the page on
+ * a file the agent just edited) isn't dropped. The agent itself (conversation
+ * history and tool loop) runs in the main process on desktop and in the page on
  * the web (lib/webAgent); this module mirrors what it reports.
  */
 

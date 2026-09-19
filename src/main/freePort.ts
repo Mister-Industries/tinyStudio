@@ -1,5 +1,5 @@
 /**
- * freePort — find a TCP port tinyService can bind. Kept free of Electron so
+ * freePort: find a TCP port tinyService can bind. Kept free of Electron so
  * it can be unit-tested; ServiceManager supplies the preferred port.
  *
  * A port is probed twice, on 127.0.0.1 (where tinyService 1.2 binds) and on

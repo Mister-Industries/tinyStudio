@@ -1,5 +1,5 @@
 /**
- * circuit/core/routing — orthogonal wire routing + bendpoint model.
+ * circuit/core/routing: orthogonal wire routing + bendpoint model.
  *
  * Port of `lib/wireRouting.ts` (the tinySchematic/Fritzing-style engine) into
  * the v2 core, with one behavioral fix and one extension:
@@ -7,14 +7,14 @@
  *  FIX (B2): Wokwi's "*" journey instruction is honored. Instructions before
  *  "*" are anchored at the SOURCE pin; instructions after "*" are applied in
  *  REVERSE from the TARGET pin; the remaining gap is auto-completed with an
- *  orthogonal elbow — exactly the semantics documented at
+ *  orthogonal elbow, exactly the semantics documented at
  *  https://docs.wokwi.com/diagram-format#wire-placement-mini-language.
  *  On serialization we always emit source-anchored lists (valid Wokwi).
  *
  *  EXT: `d<dx>,<dy>` diagonal moves (tinyStudio straight-mode extension) are
  *  decoded/encoded as before; they never co-exist with "*".
  *
- * Pure TS. No document knowledge beyond Pt — endpoints are resolved by callers.
+ * Pure TS. No document knowledge beyond Pt; endpoints are resolved by callers.
  */
 
 import type { Pt } from './model'
@@ -70,7 +70,7 @@ function step(cur: Pt, instr: string): Pt | null {
 
 /**
  * Decode a journey (possibly containing "*") into the full waypoint list
- * between live `source` and `target` points — Wokwi semantics (B2 fix):
+ * between live `source` and `target` points, Wokwi semantics (B2 fix):
  *   pre-"*"  → walked forward from source
  *   post-"*" → walked in reverse from target
  *   gap      → auto-completed orthogonally

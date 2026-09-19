@@ -55,7 +55,7 @@ class WebFileSystemService {
   }
 
   /**
-   * Point the service at a folder it didn't pick itself — one tinyStudio just
+   * Point the service at a folder it didn't pick itself: one tinyStudio just
    * created for a saved project, or one reopened from the recent list. Cached
    * file handles belong to the previous root, so they go too.
    */
@@ -114,8 +114,8 @@ class WebFileSystemService {
     // Returned paths always start with the root folder's name ("blink/blink.ino").
     // Every other method strips that prefix back off (see normalizePath), and
     // it gives the workspace a real path to hang off: bare "blink.ino" paths
-    // left it with none, so anything built from `${workspace.path}/…` — new
-    // files, circuit.json, the repo link — pointed somewhere that didn't exist.
+    // left it with none, so anything built from `${workspace.path}/…` (new
+    // files, circuit.json, the repo link) pointed somewhere that didn't exist.
     const rootName = this.directoryHandle.name
     let targetHandle: FileSystemDirectoryHandle | null
     if (!dirPath || dirPath === rootName) {

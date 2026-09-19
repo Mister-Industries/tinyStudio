@@ -1,4 +1,4 @@
-# circuit.json — the Circuit view's file
+# circuit.json: the Circuit view's file
 
 The attached screenshot is the Circuit view: the parts rail on the left and the breadboard canvas, with a tinyCore, a resistor and an LED wired up. The Circuit view has two views of the same circuit, **breadboard** and **schematic**, plus a simulator.
 
@@ -49,7 +49,7 @@ The tinyCore part (`type: "tinycore"`) names its pins:
 
 `D13` in the circuit is `13` in code, and `A0` is GPIO 18. `inspect_circuit` does this translation for you, and the full table is in `read_guide("tinycore")`.
 
-## Editing by hand — rules
+## Editing by hand: rules
 
 - **Prefer small, safe edits**: change `attrs` values, rename or add a wire between pins of parts that are already placed, add or rename a net label.
 - **Adding parts**

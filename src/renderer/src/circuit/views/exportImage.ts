@@ -1,5 +1,5 @@
 /**
- * circuit/views/exportImage — compose a scene (breadboard OR schematic) into a
+ * circuit/views/exportImage: compose a scene (breadboard OR schematic) into a
  * standalone SVG and download it as .svg or rasterized .png @2×. Part SVG ids
  * are namespaced per instance (fixes B6). Schematic wires are single ink
  * strokes; net labels are rendered from their glyphs.
@@ -118,7 +118,7 @@ export function composeSceneSvg(doc: CircuitDoc, bg: string, view: ViewId = 'bb'
     const art = partArtFor(part, vis, view)
     const g = embed(art, part.id, pl.x, pl.y, vis.v.w, vis.v.h, pl.rotate, sch && pl.flip)
     const off = pl.labelOffset || [0, 0]
-    // schematic: refdes above the symbol, value below it — same layout the
+    // schematic: refdes above the symbol, value below it, same layout the
     // canvas draws, so an export matches the screen (parts/labels.ts)
     if (sch) {
       // same anchoring the canvas uses, so an export matches the screen
@@ -134,7 +134,7 @@ export function composeSceneSvg(doc: CircuitDoc, bg: string, view: ViewId = 'bb'
     const label = `<text x="${pl.x + off[0]}" y="${pl.y + vis.v.h + 13 + off[1]}" fill="#969ba3" font-family="${FONT}" font-size="11">${escapeXml(refdesOf(part))}</text>`
     return `${g}${label}`
   }
-  // boards paint first — under the wires and every other part
+  // boards paint first, under the wires and every other part
   const boardsSvg = doc.parts
     .filter((p) => isBreadboard(p.type))
     .map(partSvg)
@@ -169,7 +169,7 @@ export function composeSceneSvg(doc: CircuitDoc, bg: string, view: ViewId = 'bb'
 }
 
 /**
- * Inline every var(--token) with its computed value — builtin art and schematic
+ * Inline every var(--token) with its computed value; builtin art and schematic
  * ink use design-system variables that only resolve inside the app stylesheet.
  */
 function resolveCssVars(svg: string): string {
@@ -213,7 +213,7 @@ function baseName(view: ViewId): string {
  *
  * A `data:` URL rather than an object URL: the app CSP is
  * `img-src 'self' data: …` with no `blob:`, so an <img> pointed at an object
- * URL is blocked before it loads — onerror fires, the canvas is never painted,
+ * URL is blocked before it loads: onerror fires, the canvas is never painted,
  * and no file is written. `data:` is on the allowlist.
  */
 export function svgDataUrl(svg: string): string {
@@ -236,7 +236,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 /** A rendered export: the file to save plus a preview URL for the UI. */
 export interface ExportedImage {
   blob: Blob
-  /** data: URL of the composed scene — safe to drop straight into an <img>. */
+  /** data: URL of the composed scene; safe to drop straight into an <img>. */
   previewUrl: string
   name: string
   width: number

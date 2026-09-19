@@ -1,5 +1,5 @@
 /**
- * githubWebAuth — GitHub sign-in for the web build, via the OAuth
+ * githubWebAuth: GitHub sign-in for the web build, via the OAuth
  * authorization-code flow with PKCE.
  *
  * The page sends the user to github.com with a one-time state and a PKCE

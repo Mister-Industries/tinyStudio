@@ -1,19 +1,19 @@
 /**
- * circuit/parts/packs — installing parts packs from a pack index (the tinyparts
+ * circuit/parts/packs: installing parts packs from a pack index (the tinyparts
  * repo on GitHub by default, or any URL serving the same files).
  *
  * An installed pack is downloaded into the parts cache (parts/partsCache.ts)
- * and served as the REMOTE layer of the registry — not copied into the user's
- * own parts — so parts/tinypartsSync.ts can keep it current and a local edit
+ * and served as the REMOTE layer of the registry, not copied into the user's
+ * own parts, so parts/tinypartsSync.ts can keep it current and a local edit
  * still shadows it.
  *
  * Formats (docs/parts-and-art.md has the full picture):
  *   index.json  { schema: 1, packs: [{ id, name, version, url, bundled?, … }] }
  *   pack.json   { schema: 1, id, name, version, parts: [{ type, dir } | { type, file }] }
- *   parts/<type>/part.json + .svg files   (folder part — editable)
+ *   parts/<type>/part.json + .svg files   (folder part, editable)
  *   parts/<type>.json                      (single-file PartDef, SVG embedded)
  *
- * `file`/`dir`/`url` may be relative — resolved against the manifest/index's
+ * `file`/`dir`/`url` may be relative, resolved against the manifest/index's
  * own URL, so a pack can ship as a self-contained folder of relative paths.
  */
 
@@ -52,7 +52,7 @@ export interface PackIndexEntry {
   url: string
   group?: string
   icon?: string
-  /** ships inside the app — nothing to install */
+  /** ships inside the app; nothing to install */
   bundled?: boolean
   count?: number
 }
@@ -156,7 +156,7 @@ export async function registerCachedPack(id: string): Promise<string[]> {
   return errors
 }
 
-/** Register every cached pack — call once at startup, before user parts. */
+/** Register every cached pack; call once at startup, before user parts. */
 export async function initRemoteLayer(): Promise<void> {
   for (const rec of await listCachedPacks()) {
     try {
@@ -267,7 +267,7 @@ function writeLs(key: string, value: unknown): void {
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch {
-    /* quota / privacy mode — session-only */
+    /* quota / privacy mode: session-only */
   }
 }
 

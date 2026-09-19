@@ -1,5 +1,5 @@
 /**
- * circuit/parts/devFolder — live parts from a local tinyparts checkout, for
+ * circuit/parts/devFolder: live parts from a local tinyparts checkout, for
  * people editing the parts library itself. Development only.
  *
  * Two ways in, same behaviour:
@@ -13,7 +13,7 @@
  *   - the bundled and installed packs load from the checkout (the dev layer,
  *     above GitHub and the bundled snapshot);
  *   - saving an .svg in Illustrator (or any file there) reloads the affected
- *     pack within a moment — no restart, no `npm run parts:sync`;
+ *     pack within a moment, no restart, no `npm run parts:sync`;
  *   - the Parts editor gets "Save to tinyparts", which writes part.json and the
  *     .svg files into the checkout.
  *
@@ -57,7 +57,7 @@ export interface DevPackStatus {
   parts: number
   /** a part (or the pack) couldn't load at all */
   errors: string[]
-  /** loaded, but something's off — missing pins, unreadable icon… */
+  /** loaded, but something's off: missing pins, unreadable icon… */
   warnings: string[]
   /** part folders on disk that pack.json doesn't list (loaded anyway) */
   unlisted: string[]
@@ -145,7 +145,7 @@ function serverIO(root: string): FolderIO {
         try {
           onChange((JSON.parse(e.data) as { paths: string[] }).paths)
         } catch {
-          /* malformed event — ignore */
+          /* malformed event: ignore */
         }
       }
       return () => events.close()
@@ -172,7 +172,7 @@ async function detectServer(): Promise<string | null> {
 
 let isDev: boolean | undefined
 
-/** The desktop app running unpackaged — where a folder can be chosen by hand. */
+/** The desktop app running unpackaged, where a folder can be chosen by hand. */
 export function canChooseDevFolder(): boolean {
   if (isDev === undefined) {
     try {
@@ -205,7 +205,7 @@ function setLs(key: string, value: string | null): void {
     if (value === null) localStorage.removeItem(key)
     else localStorage.setItem(key, value)
   } catch {
-    /* private mode — this session only */
+    /* private mode: this session only */
   }
 }
 
@@ -291,7 +291,7 @@ async function loadDevPack(src: FolderIO, id: string): Promise<DevPackStatus | n
     loaded.providers.map(async (p) => {
       try {
         const def = p.def ?? (await p.load())
-        for (const w of def.source?.warnings ?? []) warnings.push(`${def.type} — ${w}`)
+        for (const w of def.source?.warnings ?? []) warnings.push(`${def.type}: ${w}`)
         providers.push({ meta: p.meta, load: async () => def, def })
       } catch (e) {
         errors.push(e instanceof Error ? e.message : String(e))
@@ -306,7 +306,7 @@ async function loadDevPack(src: FolderIO, id: string): Promise<DevPackStatus | n
   setLayerParts('dev', id, providers)
   for (const dir of unlisted)
     warnings.push(
-      `${dir} isn't listed in pack.json yet — run npm run parts:check -- --fix before pushing`
+      `${dir} isn't listed in pack.json yet; run npm run parts:check -- --fix before pushing`
     )
   return { id, name: pack.name, parts: providers.length, errors, warnings, unlisted }
 }
@@ -328,7 +328,7 @@ function stop(): void {
 
 /**
  * Start (or restart) live parts: a folder chosen in the desktop app wins,
- * otherwise whatever checkout the dev server offers. Safe to call anywhere —
+ * otherwise whatever checkout the dev server offers. Safe to call anywhere:
  * in a packaged app or a deployed web build it finds nothing and stays off.
  */
 export async function startDevParts(): Promise<void> {
@@ -435,7 +435,7 @@ export interface FolderSave {
   pack: string
   /** the edited definition (labels, sizes and pins; its svg strings are NOT written) */
   def: PartDef
-  /** the art to write per view, exactly as authored — omitted views keep their file */
+  /** the art to write per view, exactly as authored; omitted views keep their file */
   art: Partial<Record<ViewKind, string>>
   /** 'svg': pins come from the art's pin-* ids; 'fixed': write positions into part.json */
   pinMode: Partial<Record<ViewKind, 'svg' | 'fixed'>>
@@ -489,7 +489,7 @@ export async function savePartToFolder(s: FolderSave): Promise<string> {
     if (art !== undefined)
       await writeIfChanged(src, `${partDir}/${file}`, art.endsWith('\n') ? art : `${art}\n`)
     const keepSize = !!prev && !s.sizeEdited[kind]
-    // 'svg': keep reading positions from the art — as "every pin-* id" if the
+    // 'svg': keep reading positions from the art, as "every pin-* id" if the
     // part already worked that way, else as a name list; 'fixed': positions
     // go into part.json (an edit made by dragging pins in the editor)
     let pins: PartJsonView['pins']
@@ -525,7 +525,7 @@ export async function savePartToFolder(s: FolderSave): Promise<string> {
 
   await resetUserPart(type)
   // reload now rather than waiting for the watcher (a pack the app didn't
-  // load yet — a new part saved into it — starts being served here too)
+  // load yet, a new part saved into it, starts being served here too)
   const st = await loadDevPack(src, s.pack)
   if (st) {
     const known = status.packs.some((p) => p.id === s.pack)

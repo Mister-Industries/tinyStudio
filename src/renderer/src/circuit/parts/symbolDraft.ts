@@ -1,5 +1,5 @@
 /**
- * circuit/parts/symbolDraft — the parts editor's Symbol mode, as data.
+ * circuit/parts/symbolDraft: the parts editor's Symbol mode, as data.
  *
  * A draft is a body (rectangle, circle or right-pointing triangle, with a fill
  * choice), a name, and pins placed by side and grid slot. `renderDraft` turns

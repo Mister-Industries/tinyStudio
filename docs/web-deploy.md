@@ -5,14 +5,14 @@ bundle and hosted in the browser. This is the cloud-hosted IDE at
 `studio.tinycore.cc` (`app.tinystudio.cc` and `tinystudio.cc` forward to it;
 the domain plan is in [accounts-and-domains.md](accounts-and-domains.md)).
 Compile/upload/serial still run through **tinyService** on the user's own
-machine — the hosted page just connects to it over a local WebSocket.
+machine; the hosted page just connects to it over a local WebSocket.
 
 ## 1. What's in the repo
 
-- [`netlify.toml`](../netlify.toml) — build command (`npm run build:web`), publish
+- [`netlify.toml`](../netlify.toml): build command (`npm run build:web`), publish
   dir (`dist-web`), Node version, the functions folder, and the SPA fallback
   redirect that makes `/<owner>/<repo>/<path>` deep links work.
-- [`netlify/functions/github-token.ts`](../netlify/functions/github-token.ts) —
+- [`netlify/functions/github-token.ts`](../netlify/functions/github-token.ts):
   the one server-side step of GitHub sign-in in the browser. It needs
   `GITHUB_CLIENT_SECRET` in the site's environment variables
   ([github-auth.md](github-auth.md)).
@@ -53,7 +53,7 @@ Scheme: `studio.tinycore.cc/<owner>/<repo>/<optional/sub/path>`
 
 - `…/Mister-Industries/tinyStudio-examples/basics/blink-basic` opens that folder.
 - The folder is fetched from the repo's **default branch** via the GitHub API +
-  `raw.githubusercontent.com`, loaded into an in-memory workspace, and opened —
+  `raw.githubusercontent.com`, loaded into an in-memory workspace, and opened:
   no local folder pick, no clone.
 - Only public repos load anonymously. A signed-in GitHub token (the GitHub
   button in the app) just raises the rate limit. Anonymous GitHub API is
@@ -81,9 +81,9 @@ examples repo:
 
 Set these in the browser console / devtools `localStorage`:
 
-- `tinyservice.url` — point the app at a non-default backend
+- `tinyservice.url`: point the app at a non-default backend
   (default `ws://localhost:3000`).
-- `tinystudio.examples.url` — point the Examples tab at a different manifest
+- `tinystudio.examples.url`: point the Examples tab at a different manifest
   (e.g. a branch or fork) before it's merged to `main`.
 
 ## 7. Browser note (important)

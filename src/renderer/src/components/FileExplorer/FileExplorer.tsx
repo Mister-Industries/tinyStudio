@@ -16,7 +16,7 @@ export function FileExplorer(): React.JSX.Element {
   const [openTab, setOpenTab] = useState<FileExplorerTab>('file-explorer')
 
   // New file/folder can be started from the header menu while the GitHub tab is
-  // up — jump back to Files so the inline name field is visible.
+  // up; jump back to Files so the inline name field is visible.
   const isCreatingAtRoot = useAppSelector(
     (state) => state.file.workspace?.root.some((item) => !item.name) ?? false
   )
@@ -24,7 +24,7 @@ export function FileExplorer(): React.JSX.Element {
     if (isCreatingAtRoot) setOpenTab('file-explorer')
   }, [isCreatingAtRoot])
 
-  // Underline tab — the two tabs split the strip evenly and center their labels.
+  // Underline tab: the two tabs split the strip evenly and center their labels.
   const tab =
     "relative flex flex-1 items-center justify-center gap-[7px] py-[9px] text-xs font-semibold text-[var(--text-muted)] transition-colors hover:text-[var(--text-body)] cursor-pointer data-[active=true]:text-[var(--text-strong)] after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[1.5px] after:h-[2.5px] after:origin-bottom after:scale-x-0 after:rounded-t-[2px] after:bg-[var(--brand)] after:transition-transform after:content-[''] data-[active=true]:after:scale-x-100"
 

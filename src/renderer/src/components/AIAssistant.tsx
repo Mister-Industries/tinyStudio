@@ -1,5 +1,5 @@
 /**
- * AIAssistant — Studio AI agent panel.
+ * AIAssistant: Studio AI agent panel.
  *
  * Sends prompts, streams the reply, shows each tool call as it happens, and
  * surfaces an Allow/Deny dialog whenever the agent wants to write, edit, or
@@ -60,7 +60,7 @@ import { ScrollArea } from './ui/ScrollArea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/Select'
 
 const GREETING =
-  "I'm Studio AI ✦ — I can read and edit the files in your open workspace. Ask me to explain code, wire a circuit, fix a build error, or write a sketch. I'll ask before changing any file."
+  "I'm Studio AI ✦. I can read and edit the files in your open workspace. Ask me to explain code, wire a circuit, fix a build error, or write a sketch. I'll ask before changing any file."
 
 const TOOL_ICON: Record<string, React.ReactNode> = {
   list_dir: <Folder size={13} />,
@@ -181,7 +181,7 @@ export function AIAssistant(): React.JSX.Element {
           placeholder={
             workspace
               ? 'Ask Studio AI to edit your project…'
-              : 'Open a workspace to let AI edit files…'
+              : 'Open a project to let Studio AI edit files…'
           }
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -347,7 +347,7 @@ function SettingsDialog({
           <DialogTitle>Studio AI settings</DialogTitle>
           <DialogDescription>
             {isDesktop
-              ? 'Your Anthropic API key is stored encrypted on this device and is only used by the main process — it never leaves your machine except to call the Anthropic API.'
+              ? 'Your Anthropic API key is stored encrypted on this device and is only used by the main process; it never leaves your machine except to call the Anthropic API.'
               : "Your Anthropic API key is saved in this browser and is only sent to the Anthropic API. Anyone who can use this browser profile can read it, so remove it when you're done on a shared computer."}
           </DialogDescription>
         </DialogHeader>
@@ -360,7 +360,7 @@ function SettingsDialog({
             <SelectContent>
               {AGENT_MODELS.map((m) => (
                 <SelectItem key={m.id} value={m.id}>
-                  {m.label} — {m.note}
+                  {m.label} · {m.note}
                 </SelectItem>
               ))}
             </SelectContent>

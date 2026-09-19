@@ -1,4 +1,4 @@
-/** Tests for parts/svg — id namespacing (B6) and helpers. */
+/** Tests for parts/svg: id namespacing (B6) and helpers. */
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
@@ -19,7 +19,7 @@ test('namespaceSvgIds prefixes defined ids and their references', () => {
 test('namespaceSvgIds leaves external references and unknown ids alone', () => {
   const svg = '<svg><rect fill="url(#other)"/><use href="https://x/#frag"/><g id="mine"/></svg>'
   const out = namespaceSvgIds(svg, 'ns')
-  assert.ok(out.includes('url(#other)')) // not defined here — untouched
+  assert.ok(out.includes('url(#other)')) // not defined here, untouched
   assert.ok(out.includes('href="https://x/#frag"'))
   assert.ok(out.includes('id="ns-mine"'))
 })
@@ -82,6 +82,6 @@ test('namespaceSvgIds rewrites #id selectors inside style blocks', () => {
   const svg = '<svg><style>.a{fill:red}#body{fill:blue}#other{}</style><g id="body"/></svg>'
   const out = namespaceSvgIds(svg, 'pR1')
   assert.ok(out.includes('#pR1-body{fill:blue}'))
-  assert.ok(out.includes('#other{}')) // not defined as an id here — untouched
+  assert.ok(out.includes('#other{}')) // not defined as an id here, untouched
   assert.ok(out.includes('id="pR1-body"'))
 })

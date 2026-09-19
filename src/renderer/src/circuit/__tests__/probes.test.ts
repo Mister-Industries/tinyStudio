@@ -1,4 +1,4 @@
-/** core/probes — sim probe recognition + diff-probe subtraction + labeling. */
+/** core/probes: sim probe recognition + diff-probe subtraction + labeling. */
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
@@ -97,7 +97,7 @@ test('diffProbeVector subtracts real and imaginary parts when the run is complex
     part('R2', 'resistor', { resistance: '1k' }),
     part('VD1', 'sim-probe-vdiff')
   ]
-  // two disjoint nets, no GND — so neither resolves to node '0'
+  // two disjoint nets, no GND, so neither resolves to node '0'
   doc.wires = [wire('VD1:+', 'R1:Pin 1'), wire('VD1:-', 'R2:Pin 1')]
   const net = buildNets(doc)
   const gen = generateNetlist(doc, net)

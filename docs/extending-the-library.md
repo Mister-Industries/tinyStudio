@@ -73,7 +73,7 @@ my-example/
 ```
 
 The [Qwiic Joystick](https://github.com/Mister-Industries/tinyStudio-examples/tree/main/basics/qwiic-joystick)
-example is a complete reference — copy it and edit. The pieces:
+example is a complete reference; copy it and edit. The pieces:
 
 ### `my-example.ino`
 
@@ -106,12 +106,12 @@ The circuit. Same Wokwi-style format the Circuit editor reads and writes:
 }
 ```
 
-- **`parts[]`** — each placed part: `type` (a part id from the library), a unique
+- **`parts[]`**: each placed part: `type` (a part id from the library), a unique
   `id`, `left`/`top` in px, and optional `rotate` (degrees).
-- **`connections[]`** — each wire is `[ "fromId:pin", "toId:pin", "#color" ]`. Pin
+- **`connections[]`**: each wire is `[ "fromId:pin", "toId:pin", "#color" ]`. Pin
   names come from the part's `pins` (e.g. a resistor's are `Pin 0` / `Pin 1`, an
-  LED's are `anode` / `cathode`). You can append a 4th element — an array of
-  `"h<dx>"` / `"v<dy>"` segments — to pin the exact wire route, but it's optional;
+  LED's are `anode` / `cathode`). You can append a 4th element (an array of
+  `"h<dx>"` / `"v<dy>"` segments) to pin the exact wire route, but it's optional;
   omit it and tinyStudio auto-routes (see [blink-basic's diagram.json](https://github.com/Mister-Industries/tinyStudio-examples/blob/main/basics/blink-basic/diagram.json)
   for the explicit form).
 

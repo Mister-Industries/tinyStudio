@@ -1,9 +1,9 @@
 /**
- * Tests for "make it mine" — copying a read-only project into a repo the user owns.
+ * Tests for "make it mine": copying a read-only project into a repo the user owns.
  *
  * The failure this guards against is a *quiet* one. The working tree only holds
  * the files the editor needed to open, so a copy built from it alone silently
- * drops images, diagram.svg and anything else that was deferred — and the user
+ * drops images, diagram.svg and anything else that was deferred, and the user
  * doesn't find out until much later, looking at a repo that's missing pieces.
  * A copy must reproduce the whole source folder, not the part that happened to
  * be in memory.
@@ -133,7 +133,7 @@ test('binaries survive the round trip byte-for-byte', async () => {
   )
 })
 
-test('the working tree wins over the source — edits are what get copied', async () => {
+test('the working tree wins over the source: edits are what get copied', async () => {
   const puts = stubGitHub()
   await copyProjectToNewRepo({
     name: 'my-blink',
@@ -168,7 +168,7 @@ test('a fresh copy has nothing left to push', async () => {
   const files = { 'sketch.ino': 'void setup(){}', 'README.md': '# hi' }
   const { link } = await copyProjectToNewRepo({ name: 'my-blink', token: 't', files })
   // The baseline is the text working tree, which is exactly what the next diff
-  // reads back — so the change list starts empty instead of "everything".
+  // reads back, so the change list starts empty instead of "everything".
   assert.deepEqual(link.base, files)
 })
 

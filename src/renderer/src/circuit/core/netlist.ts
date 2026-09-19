@@ -1,21 +1,21 @@
 /**
- * circuit/core/netlist — SPICE netlist generation (M4, spec §10.2).
+ * circuit/core/netlist: SPICE netlist generation (M4, spec §10.2).
  *
  * Pure: takes the document + a prebuilt NetModel (so breadboard seating and
  * registry buses are included exactly as the editor sees them) and returns
- * netlist text + node naming + warnings. No React, no DOM, no engine — the
+ * netlist text + node naming + warnings. No React, no DOM, no engine; the
  * SimBackend consumes the text; tests golden-file it.
  *
  * Node naming: a net named GND (ground labels) is node `0`; other named nets
  * keep their (sanitized) label name; everything else is `n<k>` in stable net
- * order — diffable golden files.
+ * order: diffable golden files.
  *
  * Part mapping: built-in table keyed on family/type keywords (resistor, led,
  * battery, the sim-* sources…). Pins are matched by name (anode/cathode/+/-)
  * with positional fallback, since the Fritzing catalogue is inconsistent
  * ("Pin 0" vs "leg1" vs "0"). Parts without a mapping: breadboards are
  * transparent (their buses already merged nets), boards/MCUs are excluded
- * with an info (model their pins with sources — §10.2.5), other parts are
+ * with an info (model their pins with sources; §10.2.5), other parts are
  * excluded with a warning. The curated tinyparts overlay replaces this table
  * eventually; keep the shape compatible.
  */
@@ -26,7 +26,7 @@ import type { NetModel } from './nets'
 // ── SPICE value normalization ────────────────────────────────────────────────
 
 /** Normalize a human attr ("4.7kΩ", "10 µF", "1M") into a SPICE number.
- * Note SPICE reads `m` as milli — a trailing capital M (common for megohm)
+ * Note SPICE reads `m` as milli: a trailing capital M (common for megohm)
  * becomes `Meg`; lowercase m stays milli. */
 export function spiceNum(v: string | number | boolean | undefined, fallback: string): string {
   if (v === undefined || v === true || v === false) return fallback
@@ -50,7 +50,7 @@ function nodeToken(name: string): string {
  * Node name per net index (spec §10.2.2): a net named GND is `0`, other named
  * nets keep their sanitized label, everything else is `n<k>` in net order.
  *
- * Exported because the canvas needs the same names the netlist will use — a
+ * Exported because the canvas needs the same names the netlist will use; a
  * probe tag reading `n3` while SPICE calls that node `n4` is worse than no
  * label at all, so there is exactly one implementation and both callers use it.
  */
@@ -82,7 +82,7 @@ export interface NetlistOptions {
    * Per-part starting values (parts/naming PART_DEFAULT_ATTRS), consulted
    * before this table's generic keyword defaults. Without it a 2xAA pack that
    * the user never edited would simulate as the generic 5 V source while the
-   * schematic prints 3 V beside it — the sheet must never disagree with what
+   * schematic prints 3 V beside it; the sheet must never disagree with what
    * SPICE is given.
    */
   defaultAttrsOf?: (type: string) => Record<string, string> | undefined
@@ -97,13 +97,13 @@ export interface NetlistResult {
   /** part ids not simulated (unknown/board) */
   excluded: string[]
   /** SPICE element/device names emitted per part id (e.g. R1 → ['rr1']),
-   *  lowercased to match ngspice's own casing — feeds mapSimIssue. */
+   *  lowercased to match ngspice's own casing; feeds mapSimIssue. */
   elementOfPart: Record<string, string[]>
 }
 
 interface Ctx {
   part: CircuitPart
-  /** ordered pin names actually referenced by nets or the registry — here we
+  /** ordered pin names actually referenced by nets or the registry; here we
    * only know what the doc wired; order = wire discovery order. */
   nodeOf: (pin: string) => string
   pins: string[]
@@ -119,7 +119,7 @@ function pinLike(ctx: Ctx, res: RegExp[], positional: number, what: string): str
   }
   const p = ctx.pins[positional]
   if (p === undefined) {
-    ctx.warn(`${ctx.part.id}: no pin for ${what} — grounded`)
+    ctx.warn(`${ctx.part.id}: no pin for ${what}; grounded`)
     return '0'
   }
   return ctx.nodeOf(p)
@@ -306,14 +306,14 @@ const EMITTERS: {
   },
   {
     // current probe (spec §10.3): a 0V series source, so ngspice reports
-    // i(v<id>) through it without disturbing the circuit — an ideal ammeter.
+    // i(v<id>) through it without disturbing the circuit: an ideal ammeter.
     match: /^sim-probe-i\b/i,
     emit: (c) => {
       const [a, b] = two(c)
       return { lines: [`V${c.part.id} ${a} ${b} DC 0`] }
     }
   },
-  // voltage / diff. voltage probes need no element — every node's voltage is
+  // voltage / diff. voltage probes need no element; every node's voltage is
   // already reported by ngspice; core/probes.ts reads it back by node name
   // (and computes the diff-probe subtraction). Just don't warn about them.
   { match: /^sim-probe-vdiff\b/i, kind: 'transparent' },
@@ -381,14 +381,14 @@ export function generateNetlist(
     const entry = EMITTERS.find((e) => e.match.test(key))
     if (!entry) {
       excluded.push(part.id)
-      warnings.push(`${part.id} (${part.type}) has no simulation model — excluded`)
+      warnings.push(`${part.id} (${part.type}) has no simulation model; excluded`)
       continue
     }
     if (entry.kind === 'transparent') continue
     if (entry.kind === 'board') {
       excluded.push(part.id)
       warnings.push(
-        `${part.id} (${part.type}) is a board — not simulated; drive its pins with sources`
+        `${part.id} (${part.type}) is a board, not simulated; drive its pins with sources`
       )
       continue
     }
@@ -430,7 +430,7 @@ export function generateNetlist(
     }
   }
 
-  // analyses (spec §10.2.4) — default to .op
+  // analyses (spec §10.2.4); default to .op
   const analyses = (doc.sim?.analyses ?? []).filter((a) => a.enabled !== false)
   const resolved = analyses.map(analysisCard).filter(Boolean)
   const cards = resolved.length ? resolved : ['.op'] // never emit a card-less netlist
@@ -484,7 +484,7 @@ function escapeReg(s: string): string {
  * Map one raw ngspice error/warning line back to the parts and nets it names,
  * using the element/node names `generateNetlist` recorded for this run.
  * Case-insensitive, word-boundary matching (ngspice lowercases everything it
- * prints). Ground (`0`) is skipped — it appears in far too much numeric text
+ * prints). Ground (`0`) is skipped; it appears in far too much numeric text
  * to be a useful match.
  */
 export function mapSimIssue(text: string, gen: NetlistResult): SimIssueRef {

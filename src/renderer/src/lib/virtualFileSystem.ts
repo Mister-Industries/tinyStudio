@@ -2,8 +2,8 @@
 //
 // The web build normally uses the File System Access API (webFileSystem.ts),
 // which requires the user to *pick a real local folder*. That's wrong for
-// projects we load on the user's behalf — examples and `/<owner>/<repo>/<path>`
-// deep links — where there is no local folder to pick.
+// projects we load on the user's behalf: examples and `/<owner>/<repo>/<path>`
+// deep links, where there is no local folder to pick.
 //
 // This backend holds a project's files and folders in memory under a synthetic
 // `mem://` root, exposing the same surface UnifiedFileSystemService needs. Every
@@ -35,7 +35,7 @@ class VirtualFileSystemService {
   private parentOf(path: string): string | null {
     const norm = stripTrailingSlash(path)
     const slash = norm.lastIndexOf('/')
-    // `mem://owner` has its last slash inside the scheme — stop there.
+    // `mem://owner` has its last slash inside the scheme; stop there.
     if (slash <= VIRTUAL_PREFIX.length - 1) return null
     return norm.slice(0, slash)
   }
@@ -52,7 +52,7 @@ class VirtualFileSystemService {
   /**
    * Bulk-load a project's base content into memory. `rootPath` is the mem://
    * workspace root; `files` maps paths relative to that root to their text
-   * content. Intentionally does NOT touch webCache — the cache holds only the
+   * content. Intentionally does NOT touch webCache; the cache holds only the
    * user's in-editor edits (written via writeFile), so hydrateFromCache can
    * overlay them on top of this freshly-fetched base after a reload.
    */
@@ -205,7 +205,7 @@ class VirtualFileSystemService {
    * lost in the new project and keep shadowing the original example forever.
    *
    * Content is re-cached under the new root rather than renamed, because the
-   * seeded base was never in the cache — only edits were — and the copy is now
+   * seeded base was never in the cache (only edits were) and the copy is now
    * the user's own project, which should survive a reload in full.
    */
   async rerootTo(oldRoot: string, newRoot: string): Promise<void> {

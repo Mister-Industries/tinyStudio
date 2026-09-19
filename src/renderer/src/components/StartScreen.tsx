@@ -1,4 +1,4 @@
-// StartScreen — what the editor shows when no project is open.
+// StartScreen: what the editor shows when no project is open.
 //
 // Three ways in, each one big card: make something new, open something that
 // exists (a folder or a GitHub repo), or learn from an example. Recent projects
@@ -30,7 +30,7 @@ export function StartScreen(): React.JSX.Element {
     {
       key: 'create',
       title: 'Create new',
-      description: 'A blank sketch in a folder of its own',
+      description: 'A blank template sketch',
       icon: FilePlus2,
       className: 'tactile bg-primary text-white [--_edge:var(--brand-deep)]',
       iconClassName: 'bg-white/20 text-white',
@@ -40,7 +40,7 @@ export function StartScreen(): React.JSX.Element {
     {
       key: 'open',
       title: 'Open existing',
-      description: 'A folder on this computer or a GitHub repo',
+      description: 'A local folder or GitHub repo',
       icon: FolderOpen,
       className: 'tactile-bordered bg-card text-[var(--text-strong)]',
       iconClassName: 'bg-[var(--brand-soft)] text-[var(--brand)]',
@@ -50,7 +50,7 @@ export function StartScreen(): React.JSX.Element {
     {
       key: 'example',
       title: 'Try an example',
-      description: 'Blink, sensors, games and more — ready to run',
+      description: 'Blink, sensors, games and more',
       icon: Zap,
       className: 'tactile-bordered bg-card text-[var(--text-strong)]',
       // Same treatment as "Open existing": a pale tile with the icon in the

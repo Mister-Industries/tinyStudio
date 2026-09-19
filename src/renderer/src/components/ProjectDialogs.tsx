@@ -1,7 +1,7 @@
 // The project-level dialogs (Create / Open), mounted once at the app root and
 // driven by editorSlice.projectDialog, so the start screen and the Files panel
 // open the same ones. (Save to computer has no dialog: it goes straight to the
-// folder picker — see saveProjectToComputer.)
+// folder picker; see saveProjectToComputer.)
 
 import {
   closeProjectDialog,

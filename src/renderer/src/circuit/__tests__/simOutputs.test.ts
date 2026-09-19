@@ -77,7 +77,7 @@ test('available outputs list the measurable nets and source currents, not ground
   const labels = choices.map((c) => c.label)
 
   assert.ok(labels.includes('OUT'), `the named midpoint is offered (got ${labels.join(', ')})`)
-  assert.ok(!labels.includes('GND'), 'ground is 0 by definition — never an output')
+  assert.ok(!labels.includes('GND'), 'ground is 0 by definition, never an output')
   assert.ok(
     choices.some((c) => c.kind === 'i' && c.label === 'I(V1)'),
     'the voltage source can report its current'
@@ -96,7 +96,7 @@ test('an output reference survives a node renumber', () => {
   const before = vectorForOutput(ref!, net, gen)
   assert.equal(before, 'v(out)')
 
-  // add an unrelated branch — enough to shift the n<k> numbering around
+  // add an unrelated branch, enough to shift the n<k> numbering around
   doc.parts.push(part('R3', 'resistor', { resistance: '1k' }))
   doc.wires.push(wire('V1:+', 'R3:Pin 0'), wire('R3:Pin 1', 'V1:-'))
   net = buildNets(doc)

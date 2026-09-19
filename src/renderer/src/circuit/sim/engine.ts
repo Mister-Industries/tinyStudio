@@ -1,5 +1,5 @@
 /**
- * circuit/sim/engine — the worker-hosted SPICE backend (M4, spec §10.1).
+ * circuit/sim/engine: the worker-hosted SPICE backend (M4, spec §10.1).
  *
  * Wraps simWorker.ts with a typed request/response protocol and two separate
  * clocks:
@@ -8,7 +8,7 @@
  *     its own generous budget and its own observable phase, so a cold start
  *     reads as "loading the engine" rather than tripping an analysis watchdog
  *     and reporting a bogus timeout;
- *   - the ANALYSIS has the short watchdog — that one really does mean ngspice
+ *   - the ANALYSIS has the short watchdog; that one really does mean ngspice
  *     is spinning on a non-convergent circuit.
  *
  * Cancellation is terminate+respawn (ngspice has no reentrant abort). A worker
@@ -36,7 +36,7 @@ type WorkerReply =
   | { type: 'phase'; phase: 'loading' | 'ready' | 'running' }
   | { id: number | null; ok: boolean; result?: SimRun; error?: SimFailure }
 
-/** Engine load budget. Generous on purpose — a cold cache on a slow link can
+/** Engine load budget. Generous on purpose: a cold cache on a slow link can
  * legitimately take a minute, and killing it there only guarantees failure. */
 const LOAD_TIMEOUT_MS = 180_000
 /** How many times we'll respawn after an unexplained worker death before
@@ -93,7 +93,7 @@ export class SpiceWorkerBackend implements SimBackend {
         return
       }
       const reply = data as Exclude<WorkerReply, { type: 'phase' }>
-      // a null id is a worker-level crash report — fail everything in flight
+      // a null id is a worker-level crash report; fail everything in flight
       if (reply.id == null) {
         this.onWorkerLost(reply.error?.message ?? 'the simulation engine stopped unexpectedly')
         return
@@ -136,7 +136,7 @@ export class SpiceWorkerBackend implements SimBackend {
     this.respawns++
     const exhausted = this.respawns > MAX_RESPAWNS
     const text = exhausted
-      ? `${message} — it has failed to start ${this.respawns} times, so simulation is unavailable in this session`
+      ? `${message}; it has failed to start ${this.respawns} times, so simulation is unavailable in this session`
       : message
     this.setStatus({ phase: 'failed', message: text, error: text })
     this.failAll(new SimError({ message: text }))
@@ -154,13 +154,13 @@ export class SpiceWorkerBackend implements SimBackend {
           ? null
           : setTimeout(() => {
               this.pending.delete(id)
-              this.cancel() // engine may be stuck in WASM — replace it
+              this.cancel() // engine may be stuck in WASM; replace it
               reject(
                 new SimError({
                   message:
                     msg.op === 'warm'
                       ? `the simulation engine did not finish loading after ${Math.round(timeoutMs / 1000)}s`
-                      : `the analysis did not converge within ${Math.round(timeoutMs / 1000)}s — try a coarser step, a shorter run, or check for a floating node`
+                      : `the analysis did not converge within ${Math.round(timeoutMs / 1000)}s. Try a coarser step, a shorter run, or check for a floating node`
                 })
               )
             }, timeoutMs)
@@ -226,7 +226,7 @@ export class SpiceWorkerBackend implements SimBackend {
     this.loaded = false
     this.loadPromise = null
     if (this.state.phase !== 'failed')
-      this.setStatus({ phase: 'cold', message: 'engine stopped — it will reload on the next run' })
+      this.setStatus({ phase: 'cold', message: 'engine stopped; it will reload on the next run' })
   }
 
   dispose(): void {
@@ -245,7 +245,7 @@ export class SpiceWorkerBackend implements SimBackend {
 
 let shared: SimBackend | null = null
 
-/** App-wide backend instance (the engine is heavy — share it across tabs). */
+/** App-wide backend instance (the engine is heavy; share it across tabs). */
 export function getSimBackend(): SimBackend {
   if (!shared) shared = new SpiceWorkerBackend()
   return shared

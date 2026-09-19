@@ -2,7 +2,7 @@
 // again.
 //
 // Two jobs:
-//   1. Writing a project out to a new folder the user picks — "Save to
+//   1. Writing a project out to a new folder the user picks: "Save to
 //      computer" for a project that has only ever lived in the browser, and
 //      "Create project". What the folder looks like is projectLayout's call.
 //   2. Remembering recently opened projects so they reopen in one click. On
@@ -75,7 +75,7 @@ async function childState(
   try {
     dir = await parent.handle.getDirectoryHandle(name)
   } catch (e) {
-    // TypeMismatchError means a *file* has that name — just as unusable.
+    // TypeMismatchError means a *file* has that name, just as unusable.
     return (e as Error).name === 'NotFoundError' ? 'missing' : 'used'
   }
   return (await isEmptyHandle(dir)) ? 'empty' : 'used'
@@ -94,7 +94,7 @@ async function isEmptyParent(parent: ParentFolder): Promise<boolean> {
 
 /**
  * Settle on a folder name inside `parent` that won't clobber anything. An
- * existing, non-empty folder gets a numbered sibling (`blink_2`) — never an
+ * existing, non-empty folder gets a numbered sibling (`blink_2`), never an
  * overwrite. The caller must lay the files out under the returned name, since
  * the .ino has to match it.
  */
@@ -204,7 +204,7 @@ function writeRecents(list: RecentProject[]): void {
   try {
     localStorage.setItem(RECENTS_KEY, JSON.stringify(list))
   } catch {
-    /* storage unavailable — recents are a convenience */
+    /* storage unavailable; recents are a convenience */
   }
   window.dispatchEvent(new Event(RECENTS_EVENT))
 }
@@ -223,7 +223,7 @@ export function forgetRecentProject(id: string): void {
 
 /**
  * Record a local folder that was just opened. In the browser this stores the
- * current root handle, deduped by *identity* (`isSameEntry`) rather than name —
+ * current root handle, deduped by *identity* (`isSameEntry`) rather than name:
  * two different folders called "blink" are two projects.
  */
 export async function rememberFolder(workspacePath: string): Promise<void> {
@@ -289,7 +289,7 @@ interface PermissionedHandle {
 /**
  * Make sure we may read and write a stored folder handle. Access lapses when the
  * page reloads; `prompt` asks the user to grant it again, which the browser only
- * allows from a click — so launch-time restores pass false and simply skip.
+ * allows from a click, so launch-time restores pass false and simply skip.
  */
 export async function ensureFolderAccess(
   handle: FileSystemDirectoryHandle,

@@ -1,5 +1,5 @@
 /**
- * The guides Studio AI can pull with read_guide — ids and one-line summaries
+ * The guides Studio AI can pull with read_guide: ids and one-line summaries
  * only. Kept apart from the guide content (./index.ts) so the system prompt and
  * tool schema can list the topics without bundling the screenshots eagerly.
  */

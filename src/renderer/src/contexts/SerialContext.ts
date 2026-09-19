@@ -1,5 +1,5 @@
 /**
- * SerialContext — the one serial connection the whole app shares (opened and
+ * SerialContext: the one serial connection the whole app shares (opened and
  * owned by SerialProvider), and the shapes the Serial Monitor renders.
  */
 
@@ -8,7 +8,7 @@ import { createContext, useContext } from 'react'
 /** One rendered line of the Serial Monitor. */
 export interface SerialLine {
   text: string
-  /** Receive (or send) time, ms since epoch — rendered by the timestamps toggle. */
+  /** Receive (or send) time, ms since epoch; rendered by the timestamps toggle. */
   ts: number
   /** True for lines the user sent (rendered in the accent color). */
   tx?: boolean

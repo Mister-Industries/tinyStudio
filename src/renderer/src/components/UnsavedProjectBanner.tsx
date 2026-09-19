@@ -1,5 +1,5 @@
 /**
- * UnsavedProjectBanner — "this project only lives in your browser."
+ * UnsavedProjectBanner: "this project only lives in your browser."
  *
  * Examples and GitHub repos open straight into browser storage, which is great
  * for trying things and easy to lose track of. This keeps that fact visible
@@ -35,7 +35,7 @@ export function UnsavedProjectBanner(): React.JSX.Element | null {
         size="sm"
         className="h-6 shrink-0 px-2 text-[12px]"
         disabled={saving}
-        title="Pick a location — a folder named after this project is created there"
+        title="Pick a location; a folder named after this project is created there"
         onClick={() => void saveProjectToComputer()}
       >
         {saving ? <Loader2 size={13} className="animate-spin" /> : <FolderDown size={13} />}

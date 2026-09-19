@@ -1,5 +1,5 @@
 /**
- * circuit/parts/resistorBands — resistor color-code decoration.
+ * circuit/parts/resistorBands: resistor color-code decoration.
  *
  * The Fritzing resistor art carries clean band ids (`band_1_st`, `band_2_nd`,
  * `band_rd_multiplier`; `gold_band` is tolerance and stays gold). When a part
@@ -64,7 +64,7 @@ export function bandColorsFor(ohms: number): BandColors | null {
     exp += 1
   }
   if (sig < 10) {
-    // values < 10 Ω land here (e.g. 4.7 → sig 47, exp −1 — already handled);
+    // values < 10 Ω land here (e.g. 4.7 → sig 47, exp −1, already handled);
     // a degenerate rounding can still under-run, renormalize
     sig *= 10
     exp -= 1

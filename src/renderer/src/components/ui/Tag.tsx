@@ -2,7 +2,7 @@ import * as React from 'react'
 import { cn } from '@renderer/lib/utils'
 import { X } from 'lucide-react'
 
-/* tinyStudio — Tag / Chip
+/* tinyStudio: Tag / Chip
    For libraries, board capabilities, filters. Optional leading icon and a
    removable affordance. Square-ish radius (not pill). */
 

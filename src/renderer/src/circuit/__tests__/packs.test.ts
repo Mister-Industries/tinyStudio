@@ -1,4 +1,4 @@
-/** Tests for parts/packs — index/manifest fetch+validate, install into the
+/** Tests for parts/packs: index/manifest fetch+validate, install into the
  * parts cache (served as the registry's remote layer), settings. Network
  * (fetch) and localStorage are stubbed; the cache falls back to memory under
  * node, and the registry is the real one. */

@@ -1,10 +1,10 @@
 /**
- * circuit/parts/bundled — the tinyparts packs compiled into the app, so a fresh
+ * circuit/parts/bundled: the tinyparts packs compiled into the app, so a fresh
  * install works offline with the tinyBoards and Core parts already there.
  *
  * The files under assets/tinyparts/ are a COPY of the tinyparts repo, made by
  * `npm run parts:sync`; snapshot.gen.ts is the generated index of them. Don't
- * edit either by hand — edit tinyparts and re-sync (docs/parts-and-art.md).
+ * edit either by hand; edit tinyparts and re-sync (docs/parts-and-art.md).
  *
  * part.json files and palette icons are imported eagerly (the palette needs
  * them at startup); view art is a lazy import per file, loaded on first use.

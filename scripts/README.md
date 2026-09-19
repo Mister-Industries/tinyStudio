@@ -29,7 +29,7 @@ npx electron scripts/capture-agent-screens.mjs http://localhost:5173
 
 It drives the web build in an offscreen Electron window: the Code, Circuit and
 Visual views on example projects, plus the `visual-js.md` reference sketch
-rendered in the light and dark themes. Look at the images before committing —
+rendered in the light and dark themes. Look at the images before committing;
 the captions in `src/shared/agentGuides/index.ts` describe what's in each one.
 
 # Fritzing → tinyStudio parts importer
@@ -44,7 +44,7 @@ output into tinyparts folders.
 - The [`fritzing-parts`](https://github.com/fritzing/fritzing-parts) repo cloned
   locally. By default the script looks for it at `../fritzing-parts` (next to
   this repo). Use `--src` to point elsewhere.
-- Run from the tinyStudio repo root. No install step — it uses `@xmldom/xmldom`,
+- Run from the tinyStudio repo root. No install step: it uses `@xmldom/xmldom`,
   already a dependency.
 
 ## How it works
@@ -73,7 +73,7 @@ _report.json  per-part ok / partial / failed / skipped
 # See all options
 node scripts/fritzing-import.mjs --help
 
-# A handful first — exact filename match, no .fzp extension
+# A handful first: exact filename match, no .fzp extension
 node scripts/fritzing-import.mjs --only resistor,LED-generic-5mm --views breadboard,schematic
 
 # From a list file (one basename / moduleId per line)
@@ -91,9 +91,9 @@ npm run parts:check
 | `--src <dir>` | `../fritzing-parts` | Path to the cloned fritzing-parts repo |
 | `--out <dir>` | `tmp/fritzing-import` | Output directory |
 | `--views <list>` | `breadboard` | Views to extract: `breadboard`, `schematic` |
-| `--only <list>` | — | Comma list of `.fzp` basenames / moduleIds |
-| `--list <file>` | — | File with one basename / moduleId per line |
-| `--all` | — | Import every `.fzp` in `<src>/core` |
+| `--only <list>` | - | Comma list of `.fzp` basenames / moduleIds |
+| `--list <file>` | - | File with one basename / moduleId per line |
+| `--all` | - | Import every `.fzp` in `<src>/core` |
 | `--limit <n>` | ∞ | Stop after `n` parts (safety while testing) |
 | `--clean` | merge | Wipe the output dir first instead of merging |
 
@@ -101,7 +101,7 @@ Notes:
 - `--only` matches an **exact** filename first; if none matches it falls back to
   substring (so `--only resistor` gives just `resistor.fzp`).
 - Parts where a pin can't be resolved are marked `partial` in `_report.json`
-  (they still import — just check the flagged pins).
+  (they still import; just check the flagged pins).
 - Fritzing parts keep **fixed** pin positions in `part.json` (their SVG ids
   aren't `pin-*`). To make one follow its art, rename its pad shapes
   `pin-<name>` and switch `pins` to a list; see

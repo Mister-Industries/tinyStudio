@@ -1,5 +1,5 @@
 /**
- * serialBus — the lines the board prints over serial, shared by everything that
+ * serialBus: the lines the board prints over serial, shared by everything that
  * reads them: the Visual sketch runner (components/VisualPreview) and Studio AI's
  * read_serial tool (lib/studioBridge). SerialProvider pushes each line here.
  */

@@ -138,7 +138,7 @@ test('re-inking replaces hairlines, literal colours and fonts', () => {
 test('grid alignment removes the half-stroke offset Fritzing bakes in', () => {
   const [dx, dy] = gridAlignOffset({ a: [0.47, 4.13], b: [38.87, 4.13] })
   assert.ok(Math.abs(dx - -0.47) < 0.06, `dx=${dx}`)
-  // 4.13 is not near a grid line at all — it must not drag the drawing sideways
+  // 4.13 is not near a grid line at all; it must not drag the drawing sideways
   assert.ok(Math.abs(dy) < GRID_BB / 2)
 
   const v: PartView = {
@@ -156,7 +156,7 @@ test('grid alignment removes the half-stroke offset Fritzing bakes in', () => {
 
 test('the schematic palette can draw a symbol for every catalogue part', async () => {
   // The components rail asks the registry for each tile's symbol. Parts are
-  // lazily loaded, so this only works once their definitions are in — the
+  // lazily loaded, so this only works once their definitions are in; the
   // schematic rail used to fall back to the Fritzing breadboard photo.
   const types = PART_MANIFEST.map((m) => m.type)
   await ensureParts(types)

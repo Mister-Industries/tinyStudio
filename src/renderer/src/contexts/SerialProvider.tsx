@@ -1,5 +1,5 @@
 /**
- * SerialProvider — owns the ONE serial connection for the whole app.
+ * SerialProvider: owns the ONE serial connection for the whole app.
  *
  * Mounted once at the app root (not per-view), so switching Code / Circuit /
  * Visual or toggling the monitor panel does NOT close and reopen the port.
@@ -124,7 +124,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }): Rea
     }
   }, [onSerialData, onSerialStatus])
 
-  // Connection lifecycle — independent of which view is showing. Reopens only
+  // Connection lifecycle: independent of which view is showing. Reopens only
   // when the port/baud changes or after an upload finishes (isUploading flips),
   // and stays closed while the user has manually disconnected.
   useEffect(() => {
@@ -154,7 +154,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }): Rea
     eol,
     setEol,
     send: (data: string) => {
-      // Apply the chosen line ending ourselves and write raw — the backend
+      // Apply the chosen line ending ourselves and write raw; the backend
       // appends nothing (Arduino IDE's None / NL / CR / Both behavior).
       writeSerial(data + EOL_CHARS[eol], true)
       setLines((prev) => [...prev.slice(-1000), { text: `→ ${data}`, ts: Date.now(), tx: true }])

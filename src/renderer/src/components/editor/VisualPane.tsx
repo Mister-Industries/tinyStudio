@@ -80,14 +80,14 @@ export function VisualPane(): React.JSX.Element | null {
     try {
       const html = buildHtml()
       if (!isElectron()) {
-        // No shell to open a local file on the web — show the page from a blob
+        // No shell to open a local file on the web; show the page from a blob
         // URL instead. Open it before any await so the popup blocker allows it.
         const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }))
         const win = window.open(url, '_blank')
         setTimeout(() => URL.revokeObjectURL(url), 60_000)
         if (!win) {
           toast.error('Could not open preview', {
-            description: 'Your browser blocked the new tab — allow pop-ups for this site.'
+            description: 'Your browser blocked the new tab. Allow pop-ups for this site.'
           })
           return
         }
@@ -143,7 +143,7 @@ export function VisualPane(): React.JSX.Element | null {
       )
       const url = await enablePages(link.remote, link.branch, account.token)
       toast.success('Published to GitHub Pages', {
-        description: `${url} — the first build can take a minute.`
+        description: `${url} (the first build can take a minute)`
       })
       openExternal(url)
     } catch (e) {

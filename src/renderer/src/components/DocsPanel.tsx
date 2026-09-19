@@ -15,7 +15,7 @@ import { ReadmeContent } from './ReferenceContent'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs'
 
 // All three tabs share the shared TabsTrigger's brand-blue underline/active
-// state — the accent colors below live in the tab content instead (Examples'
+// state; the accent colors below live in the tab content instead (Examples'
 // buttons are yellow, Studio AI's bubbles and send button are purple).
 
 // The last Examples flash that has played. Module scope, so it outlives the

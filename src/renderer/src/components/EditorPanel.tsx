@@ -1,5 +1,5 @@
 /**
- * EditorPanel — the main work area. Shows the start screen until a project is
+ * EditorPanel: the main work area. Shows the start screen until a project is
  * open, then whichever view the header switch selects: Code, Circuit or Visual
  * (each in components/editor/).
  */
@@ -24,7 +24,7 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
   const hasWorkspace = useAppSelector((s) => s.file.workspace !== null)
   // Track viewport height so the panel re-measures on resize / fullscreen toggle
   // (otherwise the height is computed once from a stale window.innerHeight and
-  // the layout — and its buttons — break after going fullscreen).
+  // the layout, and its buttons, break after going fullscreen).
   const [winHeight, setWinHeight] = useState(window.innerHeight)
   useEffect(() => {
     const onResize = (): void => setWinHeight(window.innerHeight)
@@ -35,14 +35,14 @@ export function EditorPanel({ size }: { size: number }): React.JSX.Element {
 
   return (
     <div className="flex flex-col bg-[var(--bg-raised)]" style={{ height: `${pixelSize}px` }}>
-      {/* Project notices — above the view switch so they're visible from Code,
+      {/* Project notices, above the view switch so they're visible from Code,
           Circuit and Visual alike. At most one shows: unpushed changes to a
           repo you can push to, else "only in your browser", else (once saved)
           the read-only example's "make it mine". */}
       <UnsavedProjectBanner />
       <PushReminder />
       <MakeItMine />
-      {/* Until a project is open, the start screen stands in for every view —
+      {/* Until a project is open, the start screen stands in for every view;
           switching to Circuit or Visual has nothing to show without one. */}
       {!hasWorkspace ? (
         <StartScreen />

@@ -25,7 +25,7 @@ export type EditorSliceState = {
   projectDialog: ProjectDialog | null
   // Bumped whenever something sends the user to the Examples tab, so the panel
   // flashes to show where they went. A counter, not a flag, so every click
-  // flashes — including a second one while the tab is already showing.
+  // flashes, including a second one while the tab is already showing.
   examplesFlash: number
   // Workspace path whose save-to-computer folder picker was cancelled. Save
   // stops opening it for that project; the banner still offers it.

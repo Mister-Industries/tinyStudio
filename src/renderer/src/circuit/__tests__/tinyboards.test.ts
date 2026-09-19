@@ -1,8 +1,8 @@
 /**
  * Tests for the tinyBoard family as it ships: the bundled tinyparts `tinyboards`
  * pack, whose pins are read out of the real SVG files. These pin the family's
- * physical contract — the shared 25-pin stack connector at fixed positions,
- * tinyProto's hole lattice and power buses — so an art edit that nudges a pad
+ * physical contract: the shared 25-pin stack connector at fixed positions,
+ * tinyProto's hole lattice and power buses, so an art edit that nudges a pad
  * off the 0.1in grid fails here instead of in someone's circuit.
  */
 
@@ -133,7 +133,7 @@ test('tinyProto adds a 183-hole cross: 15 cols x 8 header rows + 9 cols x 15 row
   assert.equal(pins['O.15'], undefined)
 })
 
-test('proto holes share the header lattice — a hole lines up with its header pin', async () => {
+test('proto holes share the header lattice: a hole lines up with its header pin', async () => {
   const pins = (await bb('tinyproto')).pins
   assert.equal(pins['A.5']![1], pins['GND']![1])
   assert.equal(pins['O.12']![1], pins['A0']![1])
@@ -191,11 +191,11 @@ test('only the five ringed groups are bussed; every other hole is an island', as
   assert.notEqual(nets2.pinToNet.get('R1:1'), nets2.pinToNet.get('R2:1'))
 })
 
-test('moving a pad in the art moves the pin — nothing else to update', async () => {
+test('moving a pad in the art moves the pin, nothing else to update', async () => {
   const def = getPart('tinycore') ?? (await ensureParts(['tinycore']), getPart('tinycore')!)
   const src = def.source!
-  // shift pin-GND (tinyCore's pads are <circle>s) one pitch — 5.4 viewBox
-  // units, 7.2px — to the right
+  // shift pin-GND (tinyCore's pads are <circle>s) one pitch (5.4 viewBox
+  // units, 7.2px) to the right
   const edited = src.raw!.breadboard!.replace(
     /(<circle id="pin-GND"[^>]*?cx=")([\d.]+)/,
     (_m, head: string, x: string) => `${head}${(parseFloat(x) + 5.4).toFixed(2)}`

@@ -68,7 +68,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
   async readDirectory(dirPath = '', recursive = false): Promise<FileSystemItem[]> {
     try {
       // A mem:// path (or a virtual current workspace) is served in-memory,
-      // regardless of Electron vs web — examples/deep links use this.
+      // regardless of Electron vs web; examples/deep links use this.
       if (isVirtualPath(dirPath) || (!dirPath && isVirtualPath(this.currentWorkspace))) {
         return await virtualFileSystem.readDirectory(dirPath || this.currentWorkspace!, recursive)
       }
@@ -98,7 +98,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         return await webFileSystem.readFile(filePath)
       }
     } catch (error) {
-      // In the browser, fall back to the IndexedDB cache — handy when the File
+      // In the browser, fall back to the IndexedDB cache, handy when the File
       // System Access permission was lost on reload but we saved the file before.
       if (!this.isElectron()) {
         const cached = await webCache.get(filePath)

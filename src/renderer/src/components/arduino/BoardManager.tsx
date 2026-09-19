@@ -1,5 +1,5 @@
 /**
- * BoardManager — the toolbar board control. A dropdown lists the auto-detected
+ * BoardManager: the toolbar board control. A dropdown lists the auto-detected
  * boards (or "No boards detected") for quick selection; its "Select another
  * board…" option opens the Boards Manager modal, which lets you override the
  * active board type, search/install/uninstall platforms (cores) from the
@@ -337,7 +337,7 @@ export function BoardManager(): React.JSX.Element {
                 </div>
                 {boards.length === 0 ? (
                   <div className="text-xs text-[var(--text-faint)] py-2">
-                    No boards detected — plug a board in via USB and press Rescan.
+                    No boards detected. Plug a board in via USB and press Rescan.
                   </div>
                 ) : (
                   <div className="flex flex-col gap-1">
@@ -400,7 +400,7 @@ export function BoardManager(): React.JSX.Element {
                   </span>
                 </button>
 
-                {/* Common boards quick-pick — fixes a misidentified board in
+                {/* Common boards quick-pick: fixes a misidentified board in
                     one click (e.g. a CH340 board detected as an Uno). */}
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {Object.values(COMMON_BOARDS).map((c) => {
@@ -427,7 +427,7 @@ export function BoardManager(): React.JSX.Element {
                       <Search size={15} className="text-[var(--text-faint)]" />
                       <input
                         className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-[var(--text-strong)] placeholder:text-[var(--text-faint)]"
-                        placeholder="Filter boards — e.g. Uno, ESP32-S3…"
+                        placeholder="Filter boards, e.g. Uno, ESP32-S3…"
                         value={boardFilter}
                         onChange={(e) => setBoardFilter(e.target.value)}
                       />
@@ -467,13 +467,13 @@ export function BoardManager(): React.JSX.Element {
                       {filteredBoards.length === 0 && (
                         <div className="text-xs text-[var(--text-faint)] py-2">
                           {allBoards.length === 0
-                            ? 'No boards available — install a platform below.'
+                            ? 'No boards available. Install a platform below.'
                             : 'No boards match your filter.'}
                         </div>
                       )}
                       {filteredBoards.length > 60 && (
                         <div className="text-[11px] text-[var(--text-faint)] py-1">
-                          Showing 60 of {filteredBoards.length} — refine the filter to see more.
+                          Showing 60 of {filteredBoards.length}. Refine the filter to see more.
                         </div>
                       )}
                     </div>
@@ -491,7 +491,7 @@ export function BoardManager(): React.JSX.Element {
                     <Search size={15} className="text-[var(--text-faint)]" />
                     <input
                       className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-[var(--text-strong)] placeholder:text-[var(--text-faint)]"
-                      placeholder="Search platforms — e.g. esp32, rp2040, avr…"
+                      placeholder="Search platforms, e.g. esp32, rp2040, avr…"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && search()}

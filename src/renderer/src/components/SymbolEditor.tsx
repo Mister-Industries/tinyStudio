@@ -1,5 +1,5 @@
 /**
- * SymbolEditor — the parts editor's Symbol mode: a schematic symbol built from
+ * SymbolEditor: the parts editor's Symbol mode: a schematic symbol built from
  * a body shape, a name and pins on the 0.1 in grid, without freeform drawing.
  * The canvas shows the rendered symbol with a draggable handle on every pin
  * tip; the panel edits the name, shape, fill, body size and the pin list.
@@ -105,7 +105,7 @@ export function SymbolCanvas({
             className="absolute -translate-x-1/2 -translate-y-1/2"
             style={{ left: x * scale, top: y * scale, zIndex: 2 }}
             onPointerDown={(e) => onPinDown(e, i)}
-            title={`${pin.name} — drag to another side or slot`}
+            title={`${pin.name}: drag to another side or slot`}
           >
             <div
               className="rounded-full border-2"

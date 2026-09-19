@@ -6,7 +6,7 @@
 // Paths under /auth/ belong to sign-in (lib/githubWebAuth) and are never
 // read as a project.
 //
-// There is no router dependency — the app parses window.location on startup (and
+// There is no router dependency; the app parses window.location on startup (and
 // on back/forward) and loads the matching project via loadGitHubProject.
 // The Netlify SPA redirect (netlify.toml) ensures the deep URL serves index.html
 // so this code can run.

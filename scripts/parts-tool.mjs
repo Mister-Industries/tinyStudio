@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * parts-tool.mjs — maintenance commands for a tinyparts checkout.
+ * parts-tool.mjs: maintenance commands for a tinyparts checkout.
  * The author-facing guide is docs/parts-and-art.md.
  *
  *   npm run parts:check                       validate every pack (art, pins, listings)
@@ -61,7 +61,7 @@ const readJson = (p) => JSON.parse(readFileSync(p, 'utf8').trimStart())
 
 /**
  * JSON as a person would write it: arrays of plain values on one line, wrapped
- * at `width`. Same as formatJson in circuit/parts/folderPart.ts — keep in step.
+ * at `width`. Same as formatJson in circuit/parts/folderPart.ts; keep in step.
  */
 function formatJson(value, width = 100) {
   const text = JSON.stringify(value, null, 2)
@@ -297,7 +297,7 @@ function scaffold() {
     join(dir, 'breadboard.svg'),
     `<svg xmlns="http://www.w3.org/2000/svg" width="0.8in" height="0.4in" viewBox="0 0 57.6 28.8">
   <!-- Replace this with your art. Every shape whose id is "pin-<NAME>" is a pin:
-       rename these, add more, move them — the app reads positions from the file. -->
+       rename these, add more, move them; the app reads positions from the file. -->
   <rect x="0.5" y="0.5" width="56.6" height="20" rx="3" fill="#383a40" stroke="#4a4d54"/>
   <text x="28.8" y="13.5" font-family="sans-serif" font-size="7" fill="#ffffff" text-anchor="middle">${label}</text>
   <circle id="pin-1" cx="21.6" cy="25.2" r="2.4" fill="#c9a03c"/>
@@ -312,7 +312,7 @@ function scaffold() {
     if (index.packs.some((p) => p.id === pack.id)) upsertIndexEntry(pack)
   }
   console.log(
-    `new: packs/${packId}/parts/${type}/  (part.json + breadboard.svg) — added to pack.json`
+    `new: packs/${packId}/parts/${type}/  (part.json + breadboard.svg), added to pack.json`
   )
 }
 
@@ -456,15 +456,15 @@ async function check() {
           pack: id,
           dir: lib.joinPath(ref.dir)
         })
-        for (const w of def.source.warnings) warn(`${json.type} — ${w}`)
+        for (const w of def.source.warnings) warn(`${json.type}: ${w}`)
         const names = new Set(Object.keys((def.views.breadboard ?? def.views.schematic).pins))
         for (const bus of json.buses ?? [])
           for (const p of bus)
-            if (!names.has(p)) err(`${json.type} — bus references unknown pin "${p}"`)
+            if (!names.has(p)) err(`${json.type}: bus references unknown pin "${p}"`)
         if (def.views.breadboard && def.views.schematic) {
           const bb = Object.keys(def.views.breadboard.pins).sort().join()
           const sch = Object.keys(def.views.schematic.pins).sort().join()
-          if (bb !== sch) warn(`${json.type} — breadboard and schematic pin names differ`)
+          if (bb !== sch) warn(`${json.type}: breadboard and schematic pin names differ`)
         }
       } catch (e) {
         err(e.message)
@@ -472,7 +472,7 @@ async function check() {
     }
   }
   console.log(
-    `\n${checked} part(s) checked — ${errors} error(s), ${warnings} warning(s)${errors && !fix ? '\n(some listing problems can be repaired with --fix)' : ''}`
+    `\n${checked} part(s) checked: ${errors} error(s), ${warnings} warning(s)${errors && !fix ? '\n(some listing problems can be repaired with --fix)' : ''}`
   )
   process.exit(errors ? 1 : 0)
 }

@@ -1,9 +1,9 @@
 /**
- * settings — persistent app settings for the main process.
+ * settings: persistent app settings for the main process.
  *
  * Stores the Studio AI settings: the Anthropic API key and the model to use.
  * The key is encrypted at rest with Electron's safeStorage (OS keychain / DPAPI)
- * and written to userData. We never expose the key to the renderer — the renderer
+ * and written to userData. We never expose the key to the renderer; the renderer
  * only ever learns whether a key is configured, never its value.
  */
 

@@ -1,5 +1,5 @@
 /**
- * agentModels — the Claude models Studio AI can use, and the request options
+ * agentModels: the Claude models Studio AI can use, and the request options
  * each one accepts. Shared by the desktop main process, the web agent and the
  * settings UI so the list is defined once.
  */

@@ -1,4 +1,4 @@
-/** Tests for core/clipboard — copy payload rules + paste re-iding. */
+/** Tests for core/clipboard: copy payload rules + paste re-iding. */
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
@@ -45,7 +45,7 @@ test('buildClipboard keeps junction riders when the host and both parts are in',
 
 test('buildClipboard drops junction riders whose host wire is dropped (fixpoint)', () => {
   const doc = fixture()
-  // select all parts but explicitly only wire w3 — its host w1 is a candidate
+  // select all parts but explicitly only wire w3; its host w1 is a candidate
   // via both-pins-selected, so w3 survives; then remove R2 → w1 dies → w3 dies.
   const p1 = buildClipboard(doc, ['R1', 'R2', 'LED1'], ['w3'])!
   assert.ok(p1.wires.some((w) => w.id === 'w3'))

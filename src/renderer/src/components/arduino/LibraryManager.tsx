@@ -1,5 +1,5 @@
 /**
- * LibraryManager — search/install/uninstall Arduino libraries via tinyService.
+ * LibraryManager: search/install/uninstall Arduino libraries via tinyService.
  * Opened from the library button next to the port picker in the toolbar.
  */
 
@@ -119,7 +119,7 @@ export function LibraryManager(): React.JSX.Element {
                 <Search size={15} className="text-[var(--text-faint)]" />
                 <input
                   className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-[var(--text-strong)] placeholder:text-[var(--text-faint)]"
-                  placeholder="Search libraries — e.g. Adafruit NeoPixel, FastLED…"
+                  placeholder="Search libraries, e.g. Adafruit NeoPixel, FastLED…"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && search()}

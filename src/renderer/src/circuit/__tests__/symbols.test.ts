@@ -1,4 +1,4 @@
-/** Tests for parts/symbols — generated IC-box schematic symbols. */
+/** Tests for parts/symbols: generated IC-box schematic symbols. */
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'

@@ -1,9 +1,9 @@
 /**
- * circuit/sim/simWorker — ngspice-WASM in a module worker (M4).
+ * circuit/sim/simWorker: ngspice-WASM in a module worker (M4).
  *
  * The engine (eecircuit-engine ≈20 MB with embedded WASM) is imported lazily
  * so opening the Circuit tab costs nothing; Vite splits it into its own chunk.
- * One Simulation instance is reused across runs — cancellation is handled by
+ * One Simulation instance is reused across runs; cancellation is handled by
  * the owner terminating this worker entirely.
  *
  * Two operations:
@@ -123,7 +123,7 @@ self.onmessage = async (
     }
     post({ id, ok: true, result: convert(result) })
   } catch (err) {
-    // a failed run can leave ngspice in a bad state — drop the instance so the
+    // a failed run can leave ngspice in a bad state; drop the instance so the
     // next attempt boots a clean one instead of compounding the failure
     if (op === 'run') {
       sim = null

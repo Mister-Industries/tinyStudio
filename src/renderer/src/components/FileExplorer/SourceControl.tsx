@@ -1,5 +1,5 @@
 /**
- * SourceControl — GitHub panel for the file explorer. Sign in (see
+ * SourceControl: GitHub panel for the file explorer. Sign in (see
  * GitHubSignIn), link the workspace to a repo, then Push / Pull / Publish.
  * The push set is the working tree diffed against the last-synced baseline,
  * shared with the push reminder through lib/repoSync.
@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import React from 'react'
 import { notify as toast } from '@renderer/lib/notify'
+import { NoProjectMessage } from '../NoProjectMessage'
 import { Button } from '../ui/Button'
 import { ScrollArea } from '../ui/ScrollArea'
 
@@ -105,7 +106,7 @@ export function SourceControl(): React.JSX.Element {
       // on private repos needs a paid plan) and so the project can be shared.
       //
       // This goes through the same copy path as "Make it mine" so a project
-      // opened from an example publishes *complete* — including the files whose
+      // opened from an example publishes *complete*, including the files whose
       // bytes were never downloaded, which a plain push of the working tree
       // would leave behind.
       const {
@@ -116,7 +117,7 @@ export function SourceControl(): React.JSX.Element {
         name: repoInput.trim(),
         token: account.token,
         isPrivate: false,
-        description: `${workspace.name} — built with tinyStudio`,
+        description: `${workspace.name}, built with tinyStudio`,
         files: await collectWorkspaceFiles(workspace),
         source: workspace.source,
         onProgress: (msg) => setLocalBusy(msg)
@@ -125,7 +126,7 @@ export function SourceControl(): React.JSX.Element {
       setRepoInput('')
       await refreshRepoSync()
       if (failed.length > 0) {
-        toast.warning(`Published ${linked.remote} — ${failed.length} file(s) failed`, {
+        toast.warning(`Published ${linked.remote}; ${failed.length} file(s) failed`, {
           description: failed.slice(0, 4).join(', ') + (failed.length > 4 ? '…' : '')
         })
       } else {
@@ -146,9 +147,7 @@ export function SourceControl(): React.JSX.Element {
   return (
     <div className="h-full flex flex-col">
       {!workspace ? (
-        <div className="p-4 text-sm text-[var(--text-faint)] text-center">
-          Open a project to use source control.
-        </div>
+        <NoProjectMessage action="use source control" />
       ) : !account ? (
         <div className="p-4 flex flex-col gap-3">
           <div className="flex items-center gap-2 text-sm text-[var(--text-body)]">
@@ -252,7 +251,7 @@ export function SourceControl(): React.JSX.Element {
                         <div
                           key={p}
                           className="flex items-center gap-2 text-xs text-[var(--text-muted)] py-0.5"
-                          title="Deleted — Push removes it from GitHub"
+                          title="Deleted. Push removes it from GitHub"
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-[var(--status-error)] shrink-0" />
                           <span className="truncate font-mono line-through">{p}</span>
@@ -266,7 +265,7 @@ export function SourceControl(): React.JSX.Element {
                 <div className="px-4 py-2 text-[11px] text-[var(--text-muted)] border-t border-[var(--border-default)]">
                   You don&apos;t have write access to{' '}
                   <span className="text-[var(--text-body)]">{link.remote}</span>. Your edits are
-                  saved locally — publish a copy to keep them on GitHub.
+                  saved locally; publish a copy to keep them on GitHub.
                 </div>
               )}
               {writable !== false && changeCount > 0 && (

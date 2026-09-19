@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * fritzing-import.mjs — convert Fritzing parts (.fzp + SVGs) into tinyStudio's
+ * fritzing-import.mjs: convert Fritzing parts (.fzp + SVGs) into tinyStudio's
  * per-part JSON library (Wokwi-pixel compatible).
  *
  * What it does
  * ------------
  * For each Fritzing part it reads the .fzp (metadata + connector list) and the
- * referenced view SVG(s). Fritzing does NOT store pin coordinates in the .fzp —
+ * referenced view SVG(s). Fritzing does NOT store pin coordinates in the .fzp;
  * it only names an svgId / terminalId. We resolve the real X/Y *inside the SVG*,
  * accumulating ancestor transforms, then scale viewBox units into pixels at
  * 96 DPI (the Wokwi convention) so the output drops straight into diagram.json.
@@ -20,7 +20,7 @@
  *   <out>/index.json             lightweight manifest (palette + grouping)
  *   <out>/_report.json           per-part ok / partial / failed / skipped
  *
- * Usage — see `node scripts/fritzing-import.mjs --help`.
+ * Usage: see `node scripts/fritzing-import.mjs --help`.
  */
 
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, rmSync } from 'node:fs'
@@ -31,7 +31,7 @@ import { DOMParser } from '@xmldom/xmldom'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO = resolve(__dirname, '..')
 
-const PX_PER_MM = 96 / 25.4 // 3.7795 — 96 DPI
+const PX_PER_MM = 96 / 25.4 // 3.7795, 96 DPI
 
 // ── CLI ─────────────────────────────────────────────────────────────────────
 
@@ -63,7 +63,7 @@ function parseArgs(argv) {
 }
 
 const HELP = `
-fritzing-import — Fritzing parts → tinyStudio JSON library
+fritzing-import: Fritzing parts → tinyStudio JSON library
 
   node scripts/fritzing-import.mjs [options]
 
@@ -350,7 +350,7 @@ function extractView(fzp, view, srcRoot) {
   const rel = fzp.viewImage[tag]
   if (!rel) return { skip: 'no view image' }
 
-  // image path is like "breadboard/foo.svg" — resolve under svg/<section>/
+  // image path is like "breadboard/foo.svg"; resolve under svg/<section>/
   // Try core first, then user/contrib/obsolete sections.
   const candidates = ['core', 'user', 'contrib', 'obsolete'].map((sec) =>
     join(srcRoot, 'svg', sec, rel)
@@ -433,7 +433,7 @@ function extractView(fzp, view, srcRoot) {
     usedNames.add(n)
     pins[n] = [round(canvas.x), round(canvas.y)]
     // bendable rubber-band leg (LED/resistor class parts, breadboard view
-    // only — cv.legId is only ever set there): tag the pin so the editor
+    // only; cv.legId is only ever set there): tag the pin so the editor
     // knows it can be dragged independent of the part body (Placement.legs).
     if (cv.legId) legPins.push(n)
   }
@@ -614,7 +614,7 @@ function main() {
     const bb = def.views.breadboard?.svg || def.views.schematic?.svg || ''
     def.icon = extractIcon(fzp, srcRoot) || (bb.length < 4000 ? bb : null) || undefined
 
-    // write per-part file — flat directory (Vite dynamic-import variables only
+    // write per-part file: flat directory (Vite dynamic-import variables only
     // support a single path segment, so family lives in the manifest, not dirs)
     writeFileSync(join(outRoot, `${type}.json`), JSON.stringify(def, null, 2))
 
@@ -644,7 +644,7 @@ function main() {
 
   console.log('\n')
   console.log(`✓ ok       ${report.ok.length}`)
-  console.log(`~ partial  ${report.partial.length}  (some pins unresolved — see _report.json)`)
+  console.log(`~ partial  ${report.partial.length}  (some pins unresolved; see _report.json)`)
   console.log(`✗ failed   ${report.failed.length}`)
   console.log(`· skipped  ${report.skipped.length}`)
   console.log(`\nManifest : ${indexPath}  (${parts.length} parts total)`)

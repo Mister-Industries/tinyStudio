@@ -22,7 +22,7 @@ import { notify as toast, reportError } from '@renderer/lib/notify'
 /**
  * Flush all unsaved editor buffers to disk. Verify/Upload compile the sketch
  * folder straight off disk, so without this they'd build the last *saved*
- * version — meaning you'd flash stale code unless you remembered to save first.
+ * version, meaning you'd flash stale code unless you remembered to save first.
  */
 function useSaveAllBeforeBuild(): () => Promise<void> {
   const dispatch = useAppDispatch()

@@ -1,6 +1,6 @@
 // Examples browser. Pulls a manifest of ready-to-open projects from the public
 // examples repo and opens any of them straight into the editor (via the virtual
-// workspace) — no local folder pick, no clone. Each card maps to a
+// workspace): no local folder pick, no clone. Each card maps to a
 // /<owner>/<repo>/<path> deep link.
 //
 // Finding the right example is the job here, so the list is searchable and
@@ -12,7 +12,7 @@
 //     the Filters disclosure, so the default view stays calm.
 //
 // Filters AND together (each one narrows further) and every chip carries the
-// count it would yield, with zero-result chips dimmed — so you can't filter
+// count it would yield, with zero-result chips dimmed, so you can't filter
 // your way into an empty list by accident.
 
 import { BookOpen, Loader2, Search, SlidersHorizontal, X, Zap } from 'lucide-react'
@@ -133,7 +133,7 @@ export function ExamplesContent(): React.JSX.Element {
     [examples, selectedTags, query]
   )
 
-  // How many results each chip would yield if it were toggled on now — so a
+  // How many results each chip would yield if it were toggled on now, so a
   // chip that leads nowhere can be dimmed instead of producing an empty list.
   const tagCounts = useMemo(() => {
     const counts = new Map<string, number>()
@@ -194,7 +194,7 @@ export function ExamplesContent(): React.JSX.Element {
                 ref={searchRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search examples — try “i2c”, “blink”, “tinySniff”…"
+                placeholder="Search examples: try “i2c”, “blink”, “tinySniff”…"
                 aria-label="Search examples"
                 className="pl-9 pr-9"
               />

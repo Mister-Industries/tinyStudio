@@ -2,7 +2,7 @@ import { Toaster } from 'sonner'
 import { useTheme } from '../lib/ThemeProvider'
 
 /**
- * Toast host — without this, no toast.* feedback ever renders.
+ * Toast host; without this, no toast.* feedback ever renders.
  *
  * Reads the theme through the hook rather than a hardcoded value: sonner stamps
  * `data-sonner-theme` on the toaster and resolves its own palette from it, so a

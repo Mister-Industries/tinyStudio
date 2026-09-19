@@ -1,5 +1,5 @@
 /**
- * ViewSegment — the Code / Circuit / Visual switch in the toolbar.
+ * ViewSegment: the Code / Circuit / Visual switch in the toolbar.
  *
  * These are full-window views (like the desktop app), not per-tab modes:
  *   Code    → the normal tabbed editor IDE

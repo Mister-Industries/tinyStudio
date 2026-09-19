@@ -5,7 +5,7 @@
  * The failures worth catching are the quiet ones: the pin map drifting from the
  * tinycore part.json (the agent would quote pins the circuit editor doesn't
  * have), a guide or screenshot missing from the bundle (read_guide throws
- * mid-conversation), and breadboard holes cluttering — or dropping — connections.
+ * mid-conversation), and breadboard holes cluttering (or dropping) connections.
  */
 
 import assert from 'node:assert/strict'
@@ -92,7 +92,7 @@ test('summary annotates tinyCore pins with GPIO and code, and lists loose parts'
   assert.match(text, /LED1:anode ↔ R1:Pin 1/)
   assert.match(text, /U1:GND \[tinyCore ground\] ↔ LED1:cathode/)
   assert.match(text, /tinyCore pins in use:\n.*U1:D13 .* → R1:Pin 0/)
-  assert.match(text, /BAT1: AA Battery \(battery-aa\) \(unplaced — in the tray\)/)
+  assert.match(text, /BAT1: AA Battery \(battery-aa\) \(unplaced, in the tray\)/)
   assert.match(text, /Not connected to anything: BAT1/)
 })
 
@@ -105,7 +105,7 @@ test('summary hides breadboard holes but keeps the connections made through them
     ],
     [['U1:A5', 'BB1:a1']]
   )
-  // LED1's anode is seated in the same hole — a derived, unstored connection.
+  // LED1's anode is seated in the same hole: a derived, unstored connection.
   const nets = buildNets(d, { implicit: [['LED1:anode', 'BB1:a1']] })
   const text = summarizeCircuit(d, nets, info)
   assert.match(text, /U1:A5 \[tinyCore GPIO 7 · ADC1_CH6 · write A5 in code\] ↔ LED1:anode/)

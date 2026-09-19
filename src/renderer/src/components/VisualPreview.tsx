@@ -1,9 +1,9 @@
 /**
- * VisualPreview — runs a project's p5.js sketch (a .js file, conventionally
+ * VisualPreview: runs a project's p5.js sketch (a .js file, conventionally
  * visual.js) live inside its editor tab.
  *
- * A sketch is code from wherever the project came from — an example, someone's
- * GitHub repo — so it runs in a sandboxed iframe (public/sketch-runner) that
+ * A sketch is code from wherever the project came from (an example, someone's
+ * GitHub repo) so it runs in a sandboxed iframe (public/sketch-runner) that
  * can't reach the app, the project files or the user's accounts. This component
  * sends it the code, the `theme` object (lib/sketchTheme) and each serial line
  * (lib/serialBus), and shows the errors it reports.

@@ -1,7 +1,7 @@
 // Regenerates the tinyStudio app icons.
 //
 // The monogram letterforms are the real Plus Jakarta Sans (ExtraBold) glyph
-// outlines — the app's UI font — converted to vector paths so the icon has no
+// outlines (the app's UI font) converted to vector paths so the icon has no
 // runtime font dependency. The composed master is written to build/icon.svg,
 // then rasterized to the platform icons electron-builder consumes from build/.
 //

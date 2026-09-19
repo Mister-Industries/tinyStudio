@@ -1,10 +1,10 @@
 /**
- * sanitizeSvg — clean SVG markup before it goes into the page.
+ * sanitizeSvg: clean SVG markup before it goes into the page.
  *
  * Part art comes from the tinyparts repo, pack indexes anyone can host, and
  * dropped .fzpz files, and the page it's inserted into can read and write the
- * user's project. DOMPurify's SVG profile keeps drawing markup — shapes,
- * gradients, filters, <style> blocks, ids — and strips scripts, event handlers,
+ * user's project. DOMPurify's SVG profile keeps drawing markup (shapes,
+ * gradients, filters, <style> blocks, ids) and strips scripts, event handlers,
  * <foreignObject> and script URLs.
  *
  * Sanitizing happens where markup is inserted, not when a part loads, so the

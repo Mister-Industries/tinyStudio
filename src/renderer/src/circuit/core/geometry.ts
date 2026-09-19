@@ -1,5 +1,5 @@
 /**
- * circuit/core/geometry — snapping, rotation, and a spatial hash for pin
+ * circuit/core/geometry: snapping, rotation, and a spatial hash for pin
  * hit-testing / drop-to-connect. Pure math; no document knowledge.
  */
 
@@ -58,7 +58,7 @@ export function pinWorld(
 }
 
 /**
- * Snap a part's placement so its PINS land on-grid (not its origin) — the
+ * Snap a part's placement so its PINS land on-grid (not its origin); the
  * Fritzing behavior that keeps everything lined up. Uses the first pin as the
  * alignment reference.
  */

@@ -1,5 +1,5 @@
 /**
- * circuit/views/packs/PackManager — everything about where parts come from.
+ * circuit/views/packs/PackManager: everything about where parts come from.
  *
  *   Built in       the bundled tinyparts packs, which one is serving (as
  *                  shipped / updated from GitHub / your folder), and the
@@ -104,7 +104,7 @@ export function PackManager({
   onInstalled
 }: {
   onClose: () => void
-  /** parts changed — caller should re-resolve/refresh */
+  /** parts changed; caller should re-resolve/refresh */
   onInstalled: () => void
 }): React.JSX.Element {
   const sync = React.useSyncExternalStore(onSyncStatus, getSyncStatus)
@@ -262,7 +262,7 @@ export function PackManager({
                 ? `Checking ${sync.source}…`
                 : sync.state === 'error'
                   ? `Update check failed: ${sync.errors[0]}`
-                  : `Kept in step with github.com/${sync.source.replace('@', ' · ')} — checked ${ago(sync.checkedAt)}`
+                  : `Kept in step with github.com/${sync.source.replace('@', ' · ')}, checked ${ago(sync.checkedAt)}`
             }
             action={
               <button
@@ -328,7 +328,7 @@ export function PackManager({
               {!dev.folder && (
                 <div className={rowCls}>
                   <div className="text-[11px] text-text-faint flex-1">
-                    Off — parts come from the app and GitHub as usual.
+                    Off: parts come from the app and GitHub as usual.
                   </div>
                   {dev.serverRoot && (
                     <button

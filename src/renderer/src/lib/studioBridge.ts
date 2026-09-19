@@ -1,5 +1,5 @@
 /**
- * studioBridge — the renderer side of Studio AI's live-state tools
+ * studioBridge: the renderer side of Studio AI's live-state tools
  * (StudioBridge in shared/agentCore): circuit inspection, parts search, and
  * the serial buffer.
  *

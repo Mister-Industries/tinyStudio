@@ -1,5 +1,5 @@
 /**
- * githubSync — Push and Pull for a workspace linked to a GitHub repo.
+ * githubSync: Push and Pull for a workspace linked to a GitHub repo.
  *
  * Push makes one commit through GitHub's Git Data API: a tree built on the
  * branch's current tree, a commit on top of its head, then a fast-forward of the

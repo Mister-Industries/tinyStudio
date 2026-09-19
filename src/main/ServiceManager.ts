@@ -85,7 +85,7 @@ export class ServiceManager {
       port: this.config.port,
       arduinoCliPath,
       allowedOrigins: this.config.allowedOrigins,
-      // Language-server integration (optional — the service degrades to
+      // Language-server integration (optional; the service degrades to
       // "lsp-unavailable" when the binaries aren't present).
       lspServerPath: lsPaths?.lspServerPath,
       clangdPath: lsPaths?.clangdPath,
@@ -167,7 +167,7 @@ export class ServiceManager {
   /**
    * Resolve the arduino-language-server + clangd binaries fetched by
    * scripts/fetch-language-server.mjs into vendor/language-server/<platform>/
-   * (dev) or bundled resources (packaged). Returns null when missing — the
+   * (dev) or bundled resources (packaged). Returns null when missing; the
    * backend then reports the LSP as unavailable and the editor degrades to
    * syntax-highlighting only.
    */
@@ -205,7 +205,7 @@ export class ServiceManager {
   /**
    * Default arduino-cli.yaml location (the language server wants the config
    * file arduino-cli itself uses). Returns undefined when the file doesn't
-   * exist yet — arduino-cli works on defaults without one.
+   * exist yet; arduino-cli works on defaults without one.
    */
   private resolveArduinoCliConfigPath(): string | undefined {
     let candidate: string
@@ -292,9 +292,9 @@ export class ServiceManager {
    * an ESM package, and Electron's main-process ESM loader can't reliably import
    * ESM that's bundled with the app. Running it under Electron's own binary in
    * Node mode (ELECTRON_RUN_AS_NODE) uses the plain Node ESM loader, which loads
-   * it fine — and isolates the backend in its own process. `cwd` points at the
+   * it fine, and isolates the backend in its own process. `cwd` points at the
    * app root so the child resolves @mister-industries/tinyservice from
-   * node_modules (which is why asar must stay disabled — see electron-builder.yml).
+   * node_modules (which is why asar must stay disabled; see electron-builder.yml).
    */
   async start(): Promise<void> {
     if (this.isRunning) {
@@ -312,7 +312,7 @@ export class ServiceManager {
   private async spawnAndVerify(): Promise<void> {
     this.stopping = false
     try {
-      // Bind to a free port — 3000 may be taken by another dev server. Only on
+      // Bind to a free port: 3000 may be taken by another dev server. Only on
       // the first start: restarts keep the port (see portChosen).
       if (!this.portChosen) {
         this.config.port = await findFreePort(this.config.port)

@@ -1,5 +1,5 @@
 /**
- * circuit/parts/folderPart — the tinyparts on-disk format, and turning it into
+ * circuit/parts/folderPart: the tinyparts on-disk format, and turning it into
  * live PartDefs. See docs/parts-and-art.md for the author-facing guide.
  *
  * A pack is a folder in the tinyparts repo:
@@ -43,7 +43,7 @@ export interface PartJsonView {
   height?: number | string
   /**
    * - omitted: every `pin-<NAME>` element in the SVG is a pin, in file order
-   * - array of names: the pins this part must have, in this order — read from
+   * - array of names: the pins this part must have, in this order, read from
    *   the SVG, with a warning for any the art is missing
    * - object `{ name: [x, y] }`: fixed positions; the SVG ids are ignored
    */
@@ -104,7 +104,7 @@ const round2 = (n: number): number => Math.round(n * 100) / 100
 /**
  * JSON as a person would write it: two-space indent, but arrays of plain values
  * on one line (`"pins": ["GND", "3V3", …]`, `[0.96, 3.93]`), wrapped at `width`.
- * scripts/parts-tool.mjs has the same function — keep them in step.
+ * scripts/parts-tool.mjs has the same function; keep them in step.
  */
 export function formatJson(value: unknown, width = 100): string {
   const text = JSON.stringify(value, null, 2)
@@ -193,7 +193,7 @@ export function parsePartJson(text: string, where: string): PartJson {
     if (typeof view.svg !== 'string' || !view.svg)
       fail(where, `views.${k}.svg must name an .svg file`)
     if (view.svg.trimStart().startsWith('<'))
-      fail(where, `views.${k}.svg holds inline markup — folder parts reference a file`)
+      fail(where, `views.${k}.svg holds inline markup; folder parts reference a file`)
   }
   return p
 }
@@ -318,7 +318,7 @@ function buildView(
       pins = Object.fromEntries(scan.pins.map((p) => [p.name, p.at]))
     }
     if (!Object.keys(pins).length)
-      warnings.push(`${kind}: no pins — name each pad "pin-<NAME>" in ${v.svg}`)
+      warnings.push(`${kind}: no pins; name each pad "pin-<NAME>" in ${v.svg}`)
   }
 
   return {

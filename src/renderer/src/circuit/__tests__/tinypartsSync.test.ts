@@ -1,5 +1,5 @@
 /**
- * Tests for parts/tinypartsSync — the launch-time update check against the
+ * Tests for parts/tinypartsSync: the launch-time update check against the
  * tinyparts repo. GitHub is stubbed with a tree built from the real bundled
  * snapshot, so "nothing changed" really is byte-for-byte what ships.
  */

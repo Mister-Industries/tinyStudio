@@ -67,7 +67,7 @@ collide.
 - [`src/main/githubAuth.ts`](../src/main/githubAuth.ts) runs the flow and stores
   the token with Electron `safeStorage` (OS keychain / DPAPI), the same way the
   Anthropic API key is stored. It lives in **main**, not the renderer, because
-  GitHub's OAuth endpoints send no CORS headers — a renderer `fetch` to them
+  GitHub's OAuth endpoints send no CORS headers; a renderer `fetch` to them
   fails outright.
 - The renderer receives the token **in memory only** (`initAccount()` in
   `lib/github.ts`) and never writes it to `localStorage`.

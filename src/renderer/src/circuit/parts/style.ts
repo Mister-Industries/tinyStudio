@@ -1,9 +1,9 @@
 /**
- * circuit/parts/style — the schematic drawing tokens.
+ * circuit/parts/style: the schematic drawing tokens.
  *
- * Everything that draws schematic ink — generated symbols, the hand-authored
+ * Everything that draws schematic ink (generated symbols, the hand-authored
  * symbol library, net labels, sources, probes, annotations, the canvas overlay
- * and the image exporter — pulls its stroke widths, ink colour, fonts and
+ * and the image exporter) pulls its stroke widths, ink colour, fonts and
  * grid pitch from here. One source is what keeps symbols from looking like
  * they came from four different programs, which is what module-by-module
  * choices of stroke, font and grid produce.
@@ -18,21 +18,21 @@
 
 import { GRID_BB, GRID_SCH } from '../core/model'
 
-/** Major grid — pin pitch. Every pin tip lands on a multiple of this. */
+/** Major grid: pin pitch. Every pin tip lands on a multiple of this. */
 export const SCH_GRID = GRID_BB // 9.6
-/** Fine grid — the snap used for wire bends and annotation handles. */
+/** Fine grid: the snap used for wire bends and annotation handles. */
 export const SCH_FINE = GRID_SCH // 4.8
 
 /** Schematic ink (theme-aware; inlined on export). */
 export const INK = 'var(--text-strong)'
-/** Secondary ink — pin names, unit suffixes, anything supporting. */
+/** Secondary ink: pin names, unit suffixes, anything supporting. */
 export const INK_MUTED = 'var(--text-muted)'
 /** Selection / probe accent. */
 export const ACCENT = 'var(--brand)'
 /** Fill for symbol bodies that are closed shapes (IC boxes, meter circles). */
 export const BODY_FILL = 'none'
 
-/** Symbol body stroke — the single weight every symbol outline uses. */
+/** Symbol body stroke: the single weight every symbol outline uses. */
 export const STROKE = 2
 /** Pin lead stroke: same weight as the body, so a lead reads as one line. */
 export const PIN_STROKE = 2
@@ -41,7 +41,7 @@ export const WIRE_STROKE = 2
 /** Junction dot radius (a filled dot where 3+ wires meet). */
 export const JUNCTION_R = 3.2
 /** Standard pin lead length from the body edge to the connection point. */
-export const PIN_LEAD = SCH_GRID // 9.6 — one grid square
+export const PIN_LEAD = SCH_GRID // 9.6: one grid square
 
 /** Type stack. Sans for everything; the schematic is not a code listing. */
 export const FONT = 'var(--font-sans)'

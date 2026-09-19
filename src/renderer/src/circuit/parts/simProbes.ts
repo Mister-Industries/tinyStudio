@@ -1,15 +1,15 @@
 /**
- * circuit/parts/simProbes — builtin sim probes (M4 leftover, spec §10.3).
+ * circuit/parts/simProbes: builtin sim probes (M4 leftover, spec §10.3).
  *
  * Three placeable 1/2-pin builtins, CircuitLab-flag style, same art both
  * views (seatable on a breadboard like any part):
  *   - sim-probe-v      voltage probe   (1 pin: `+`)
  *   - sim-probe-vdiff  diff. voltage   (2 pins: `+`, `-`)
- *   - sim-probe-i      current probe   (2 pins: `in`, `out` — wired in
+ *   - sim-probe-i      current probe   (2 pins: `in`, `out`; wired in
  *                      series with the branch to measure)
  *
  * Voltage/diff probes need no SPICE element (ngspice already reports every
- * node's voltage under `.op`/`.tran`/`.ac`) — core/netlist.ts marks them
+ * node's voltage under `.op`/`.tran`/`.ac`); core/netlist.ts marks them
  * `transparent`. The current probe DOES need a real element: it emits a 0V
  * series voltage source so ngspice reports `i(v<id>)` through it (an ideal
  * ammeter). Diff-probe subtraction and probe labeling live in core/probes.ts.

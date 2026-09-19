@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { cn } from '@renderer/lib/utils'
 
-/* tinyStudio — IconButton
+/* tinyStudio: IconButton
    Square tactile control for icon-only actions (toolbars, IDE chrome).
    Requires an accessible `label`. Use `active` for toggled tools. */
 

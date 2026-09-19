@@ -81,7 +81,7 @@ export class ArduinoServiceFactory {
    * Check if current environment can reach an Arduino backend.
    *
    * Both desktop and web connect to a local tinyService over WebSocket, so both
-   * support Arduino operations — the difference is only whether the app launches
+   * support Arduino operations; the difference is only whether the app launches
    * tinyService for you (desktop) or you run it yourself (web).
    */
   static supportsArduinoCLI(): boolean {

@@ -1,4 +1,4 @@
-// RecentProjects — one-click reopen for folders and GitHub repos opened before.
+// RecentProjects: one-click reopen for folders and GitHub repos opened before.
 // Shown on the start screen and in the Open dialog; renders nothing when empty.
 
 import { openRecentFolder } from '@renderer/commands/fileCommands'

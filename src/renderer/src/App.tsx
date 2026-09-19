@@ -82,7 +82,7 @@ export default function App(): React.JSX.Element {
     return () => cancelAnimationFrame(id)
   }, [isDocsPanelOpen, isSerialMonitorOpen, isFileExplorerOpen, applyFilePanelWidth])
 
-  // The serial monitor / output dock only makes sense while coding a project —
+  // The serial monitor / output dock only makes sense while coding a project;
   // close it for the full-window Circuit or Visual views and when nothing is
   // open (the start screen gets the whole column), reopen on Code once a
   // project is.
@@ -109,7 +109,7 @@ export default function App(): React.JSX.Element {
   // takes precedence over reopening the last local workspace. Otherwise, reopen
   // the last workspace (if it still exists on disk).
   //
-  // Guard against running twice — StrictMode double-invokes effects in dev, and a
+  // Guard against running twice: StrictMode double-invokes effects in dev, and a
   // second open rebuilds the tree with new ids, which would open a duplicate
   // tab for the auto-opened sketch.
   const reopenedRef = useRef(false)

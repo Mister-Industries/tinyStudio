@@ -1,5 +1,5 @@
 /**
- * circuit/views/palette/Palette — the parts bin, laid out like Fritzing's: a
+ * circuit/views/palette/Palette: the parts bin, laid out like Fritzing's: a
  * rail of tabs (Search, Core, Mine, then one per installed pack) beside a grid
  * of part icons in sections. Which part goes where: ./paletteLayout.
  * Drag a tile onto the canvas, or double-click it to drop it at the centre.

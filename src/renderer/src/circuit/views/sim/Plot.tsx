@@ -1,5 +1,5 @@
 /**
- * circuit/views/sim/Plot — uPlot-backed waveform display (M4, spec §10.4).
+ * circuit/views/sim/Plot: uPlot-backed waveform display (M4, spec §10.4).
  *
  * One component for the three sweep shapes:
  *   - transient: x = time (linear)
@@ -9,7 +9,7 @@
  *
  * Traces are limited to the outputs the user picked (core/simOutputs) when
  * they picked any; currents get their own right-hand axis so amps and volts
- * don't share a scale. Long runs are decimated for drawing only — the CSV
+ * don't share a scale. Long runs are decimated for drawing only; the CSV
  * export and the underlying vectors keep every point.
  *
  * uPlot gives cursors, drag-zoom (double-click resets), and a legend with
@@ -82,7 +82,7 @@ function prepare(
   // rather than showing an empty chart
   const picked = pick ? all.filter((v) => pick(v.name)) : all
   let ys = (picked.length ? picked : all).slice(0, TRACES.length)
-  // AC plots magnitude/phase — currents don't belong on a dB axis
+  // AC plots magnitude/phase; currents don't belong on a dB axis
   if (mode === 'ac') ys = ys.filter((v) => isVoltage(v.name))
   if (!ys.length) return null
 

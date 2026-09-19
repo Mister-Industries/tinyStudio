@@ -1,5 +1,5 @@
 /**
- * circuit/parts/partsBoot — bring every parts layer up, in order, once per run.
+ * circuit/parts/partsBoot: bring every parts layer up, in order, once per run.
  *
  *   bundled  registered as soon as lib/partsLibrary loads (always there)
  *   remote   packs cached from GitHub on an earlier run      (parts/packs.ts)

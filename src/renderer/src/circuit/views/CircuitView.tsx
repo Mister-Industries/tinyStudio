@@ -1,12 +1,12 @@
 /**
- * circuit/views/CircuitView — the Circuit View v2 shell (M1: breadboard
+ * circuit/views/CircuitView: the Circuit View v2 shell (M1: breadboard
  * editor parity). Composes: components palette · interactive Canvas ·
  * Inspector rail · toolbar (edit toggle, grid, export, code) · zoom cluster ·
  * status pills. Owns the CircuitStore and the debounced save path
  * (store.serialize() → onChange → Redux buffer; disk save stays on Ctrl+S,
  * same as every other editor buffer).
  *
- * Mounted by components/editor/CircuitPane in the Circuit tab — desktop
+ * Mounted by components/editor/CircuitPane in the Circuit tab, in both desktop
  * and web builds. This has been the only circuit editor since M4 (the legacy
  * DiagramEditor and its feature flag were removed).
  */
@@ -14,11 +14,13 @@
 import {
   ChevronDown,
   CircleAlert,
+  CircuitBoard,
   CodeXml,
+  Cpu,
   Download,
   Eye,
   FileCode2,
-  Grid3x3,
+  Grip,
   ImageDown,
   Info,
   ListOrdered,
@@ -132,7 +134,7 @@ export function CircuitViewV2({
 }): React.JSX.Element {
   const [{ store, migrated, warnings }] = React.useState(() => {
     // procedural breadboards live in the legacy registry until the M2+ pack
-    // registry replaces it — register once, before first geometry pass
+    // registry replaces it; register once, before first geometry pass
     for (const s of BREADBOARDS) if (!getPart(s.type)) registerPart(generateBreadboard(s).def)
     for (const s of SIM_SOURCES) if (!getPart(s.type)) registerPart(generateSimSource(s))
     for (const s of SIM_PROBES) if (!getPart(s.type)) registerPart(generateSimProbe(s))
@@ -141,7 +143,15 @@ export function CircuitViewV2({
   const revision = React.useSyncExternalStore(store.subscribe, store.getRevision)
   const doc = store.getDoc()
 
-  const [editable, setEditable] = React.useState(false)
+  // A blank circuit opens ready to edit: there's nothing to look at, so view
+  // mode would only be one more click. Anything with parts opens view-only.
+  const [editable, setEditable] = React.useState(() => doc.parts.length === 0)
+  const startedEditing = React.useRef(editable)
+  React.useEffect(() => {
+    if (startedEditing.current) onEditChange?.(true)
+    // mount only: tell the host we opened in edit mode, as the Edit button does
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [view, setView] = React.useState<ViewId>('bb')
   const [grid, setGrid] = React.useState(true)
   const [sel, setSel] = React.useState<Selection>(emptySel())
@@ -202,7 +212,7 @@ export function CircuitViewV2({
   }, [revision, store, onChange])
 
   // bring the parts layers up (cached packs, saved parts, the dev folder), then
-  // lazy-load the defs this doc uses — saved parts must land first so custom
+  // lazy-load the defs this doc uses; saved parts must land first so custom
   // types resolve
   React.useEffect(() => {
     void initPartsLibrary().then(() => {
@@ -213,7 +223,7 @@ export function CircuitViewV2({
   }, [doc.parts])
 
   // a part's source changed (an update from GitHub, art saved in the tinyparts
-  // folder, a local edit reset): its old geometry is gone — reload what's used
+  // folder, a local edit reset): its old geometry is gone; reload what's used
   React.useEffect(
     () =>
       onPartsChanged((types) => {
@@ -238,7 +248,7 @@ export function CircuitViewV2({
       const issues = packs.flatMap((p) => [...p.errors, ...p.warnings])
       if (issues.length)
         toast.warning(
-          `Reloaded ${names} — ${issues.length} issue${issues.length === 1 ? '' : 's'}`,
+          `Reloaded ${names}, ${issues.length} issue${issues.length === 1 ? '' : 's'}`,
           {
             description: issues.slice(0, 3).join('\n')
           }
@@ -264,8 +274,8 @@ export function CircuitViewV2({
   }, [editorPart])
 
   // The components rail draws each tile from the part's SCHEMATIC symbol when
-  // the schematic is open, and symbols are generated from the part definition
-  // — which is lazily loaded. Without this the rail fell back to `meta.icon`,
+  // the schematic is open, and symbols are generated from the part definition,
+  // which is lazily loaded. Without this the rail fell back to `meta.icon`,
   // the Fritzing breadboard photo, so the schematic palette showed pictures of
   // components instead of symbols. Warm the whole catalogue once on entry.
   React.useEffect(() => {
@@ -305,7 +315,7 @@ export function CircuitViewV2({
     [doc, seats]
   )
 
-  // sim results go stale the moment the circuit changes — drop them
+  // sim results go stale the moment the circuit changes; drop them
   React.useEffect(() => {
     setSim((s) => (s.run || s.netlist ? { run: null, netlist: null } : s))
   }, [doc])
@@ -330,7 +340,7 @@ export function CircuitViewV2({
     })
     return out
   }, [sim, netModel, doc, view])
-  // per-net voltage lookup for the breadboard hole tooltip (M4 leftover) —
+  // per-net voltage lookup for the breadboard hole tooltip (M4 leftover):
   // same DC (.op) result as the canvas chips, keyed by net index instead of
   // pre-picking one representative pin, so every hole in the net can show it.
   const simVoltageForNet = React.useCallback(
@@ -374,7 +384,7 @@ export function CircuitViewV2({
   }
   // parts with no placement in the current view live in the tray.
   // Breadboards are excluded from the schematic entirely (spec §10.2: they
-  // are transparent — their row/rail buses still merge nets globally).
+  // are transparent; their row/rail buses still merge nets globally).
   const trayParts = React.useMemo(
     () =>
       doc.parts.filter((p) => !p[view] && (view === 'bb' ? p.sch : p.bb && !isBreadboard(p.type))),
@@ -392,7 +402,7 @@ export function CircuitViewV2({
 
   // A migrated diagram.json has breadboard placements only, so the schematic
   // opened completely empty with everything sitting in the tray. If a view has
-  // nothing placed at all but the document has parts for it, lay them out —
+  // nothing placed at all but the document has parts for it, lay them out:
   // one undoable step, and only ever on an empty sheet, so this can't shuffle
   // a layout the user has arranged.
   const autoPlacedViews = React.useRef<Set<ViewId>>(new Set())
@@ -443,7 +453,7 @@ export function CircuitViewV2({
       })
   }
 
-  // picking is a mode of the open Simulate panel — it can't outlive it
+  // picking is a mode of the open Simulate panel; it can't outlive it
   React.useEffect(() => {
     if (!showSim && picking) setPicking(false)
   }, [showSim, picking])
@@ -451,7 +461,7 @@ export function CircuitViewV2({
   // ── sim probes (CircuitLab-style measurement tags) ──────────────────────────
   // A picked output is a TAG on the sheet, not a highlight: it says what it
   // reads, it can be dragged, and it can be thrown away. doc.sim.probes is the
-  // single source of truth — the Outputs list in the panel is a view of it.
+  // single source of truth: the Outputs list in the panel is a view of it.
 
   const probes = React.useMemo(() => doc.sim?.probes ?? [], [doc.sim])
   const nodeNames = React.useMemo(() => nodeNamesForNets(netModel), [netModel])
@@ -502,7 +512,7 @@ export function CircuitViewV2({
     const out: ProbeTag[] = []
     for (const p of probes) {
       const anchor = anchorWorldOf(p.at)
-      if (!anchor) continue // unplaced in this view — nothing to hang the tag on
+      if (!anchor) continue // unplaced in this view; nothing to hang the tag on
       const [dx, dy] = p[view] ?? PROBE_DEFAULT_OFFSET
       out.push({
         id: p.id,
@@ -518,7 +528,7 @@ export function CircuitViewV2({
     return out
   }, [probes, view, anchorWorldOf, labelOfProbe, valueOfProbe])
 
-  /** Outputs the panel shows as picked — exactly what has a tag on the sheet. */
+  /** Outputs the panel shows as picked: exactly what has a tag on the sheet. */
   const pickedOutputs = React.useMemo<OutputRef[]>(() => probes.map((p) => p.at), [probes])
 
   /** Add a tag for an output (or remove the one that is already there). */
@@ -576,7 +586,7 @@ export function CircuitViewV2({
 
   /**
    * Placement for a part in the view the user is NOT looking at. Breadboards
-   * never enter the schematic (spec §10.2 — they're electrically transparent
+   * never enter the schematic (spec §10.2; they're electrically transparent
    * there), so they get no counterpart placement; everything else does, which
    * is what keeps the tray empty for parts the user just added.
    */
@@ -596,7 +606,7 @@ export function CircuitViewV2({
     )
     const attrs = simSourceDefaultAttrs(type) ?? simProbeDefaultAttrs(type) ?? defaultAttrsFor(type)
     // The part lands where the user dropped it in this view, and auto-places
-    // (collision-avoided) in the other one — add an LED on the breadboard and
+    // (collision-avoided) in the other one: add an LED on the breadboard and
     // its symbol is already sitting on the schematic.
     const other: ViewId = view === 'bb' ? 'sch' : 'bb'
     const placements: Partial<Record<ViewId, Placement>> = {
@@ -620,7 +630,7 @@ export function CircuitViewV2({
   }, [])
 
   /** True when the document still carries part-file slugs as reference designators
-   * (`led`, `battery-aa_y90`) — what a migrated v1 diagram.json leaves behind. */
+   * (`led`, `battery-aa_y90`): what a migrated v1 diagram.json leaves behind. */
   const needsRenumber = React.useMemo(() => doc.parts.some((p) => looksLikeSlug(p.id)), [doc.parts])
 
   /** Rewrite every part id to a conventional refdes (R1, C2, LED3…). */
@@ -673,7 +683,7 @@ export function CircuitViewV2({
         bumpDefs()
         await addPartAt(def.type, at)
         // saveUserPart registers it, which is where naming/categorisation is
-        // applied — report the display name, not the raw Fritzing title.
+        // applied; report the display name, not the raw Fritzing title.
         const shown = getPart(def.type) ?? def
         toast.success(`Imported ${shown.label}`, {
           description: warnings.length
@@ -709,7 +719,7 @@ export function CircuitViewV2({
 
   // ── image export ────────────────────────────────────────────────────────────
   // Render first, play the shutter/fly-to-corner animation against the real
-  // image, then hand the blob to the browser — so the download shows up right
+  // image, then hand the blob to the browser, so the download shows up right
   // where the animation lands.
   const savePng = React.useCallback(async (): Promise<void> => {
     if (exporting) return
@@ -717,7 +727,7 @@ export function CircuitViewV2({
     try {
       const shot = await renderPng(doc, view)
       if (!shot) {
-        toast.error('Nothing to export — this view is empty.')
+        toast.error('Nothing to export: this view is empty.')
         return
       }
       await playCaptureAnimation({
@@ -738,7 +748,7 @@ export function CircuitViewV2({
     try {
       const shot = exportSvg(doc, view)
       if (!shot) {
-        toast.error('Nothing to export — this view is empty.')
+        toast.error('Nothing to export: this view is empty.')
         return
       }
       setSavedFile({ name: shot.name, id: ++saveSeq.current })
@@ -763,6 +773,13 @@ export function CircuitViewV2({
     'tactile h-8 px-2.5 flex items-center gap-1.5 rounded-md text-white text-xs font-medium'
   const toolGreen = `${toolFilled} bg-[var(--green)] [--_edge:var(--green-deep)]`
   const toolBrand = `${toolFilled} bg-[var(--brand)] [--_edge:var(--brand-deep)]`
+  // The toolbar follows the stage's own width (a container query), so it also
+  // makes room when the palette or the right rail opens. Wide: icons and
+  // labels. Under 700px: icons only. Under 420px: the corner groups turn into
+  // columns so they never run into the Breadboard | Schematic switch.
+  const noLabel = '@max-[700px]:hidden'
+  const iconOnly = '@max-[700px]:w-8 @max-[700px]:justify-center @max-[700px]:px-0'
+  const stack = '@max-[420px]:flex-col'
 
   return (
     <div className="size-full relative flex bg-bg overflow-hidden pb-7">
@@ -779,11 +796,11 @@ export function CircuitViewV2({
         />
       )}
 
-      <div ref={stageRef} className="flex-1 relative min-w-0 overflow-hidden flex">
+      <div ref={stageRef} className="@container flex-1 relative min-w-0 overflow-hidden flex">
         {/* left toolbar: edit toggle + undo/redo */}
-        <div className="absolute top-3 left-3 z-10 flex gap-1.5">
+        <div className={`absolute top-3 left-3 z-10 flex gap-1.5 ${stack}`}>
           <button
-            className={`${tool} ${editable ? 'text-brand' : ''}`}
+            className={`${tool} ${iconOnly} ${editable ? 'text-brand' : ''}`}
             onClick={() => {
               const next = !editable
               setEditable(next)
@@ -792,9 +809,10 @@ export function CircuitViewV2({
             }}
             aria-pressed={editable}
             title={editable ? 'Stop editing (view only)' : 'Edit the circuit'}
+            aria-label={editable ? 'Done editing' : 'Edit'}
           >
             {editable ? <Eye size={15} /> : <Pencil size={15} />}
-            {editable ? 'Done' : 'Edit'}
+            <span className={noLabel}>{editable ? 'Done' : 'Edit'}</span>
           </button>
           {editable && (
             <>
@@ -821,7 +839,7 @@ export function CircuitViewV2({
             onClick={() => setGrid((g) => !g)}
             title="Toggle grid"
           >
-            <Grid3x3 size={15} />
+            <Grip size={15} />
           </button>
         </div>
 
@@ -829,20 +847,23 @@ export function CircuitViewV2({
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex rounded-md overflow-hidden tactile-bordered">
           {(
             [
-              ['bb', 'Breadboard'],
-              ['sch', 'Schematic']
-            ] as [ViewId, string][]
-          ).map(([v, label]) => (
+              ['bb', 'Breadboard', CircuitBoard],
+              ['sch', 'Schematic', Cpu]
+            ] as [ViewId, string, typeof Cpu][]
+          ).map(([v, label, Icon]) => (
             <button
               key={v}
-              className={`h-8 px-3 text-xs font-medium ${
+              title={label}
+              aria-label={label}
+              className={`h-8 px-3 flex items-center text-xs font-medium @max-[700px]:w-9 @max-[700px]:justify-center @max-[700px]:px-0 ${
                 view === v
                   ? 'bg-brand/15 text-brand'
                   : 'bg-surface-card text-text-muted hover:text-text-body'
               }`}
               onClick={() => switchView(v)}
             >
-              {label}
+              <Icon size={15} className="hidden @max-[700px]:block" />
+              <span className={noLabel}>{label}</span>
             </button>
           ))}
         </div>
@@ -864,7 +885,7 @@ export function CircuitViewV2({
               <button
                 key={part.id}
                 className="px-2 py-0.5 rounded-full bg-surface-card border border-dashed border-border-strong text-[11px] text-text-body hover:border-brand hover:text-brand"
-                title={`${part.type} — click to place it in this view`}
+                title={`${part.type}: click to place it in this view`}
                 onClick={() => placeFromTray(part.id)}
               >
                 {part.id}
@@ -874,31 +895,34 @@ export function CircuitViewV2({
         )}
 
         {/* right toolbar: simulate · export · code */}
-        <div className="absolute top-3 right-3.5 z-30 flex gap-1.5">
+        <div className={`absolute top-3 right-3.5 z-30 flex gap-1.5 ${stack}`}>
           <button
-            className={`${toolGreen} ${showSim ? 'ring-2 ring-[var(--green-deep)]' : ''}`}
+            className={`${toolGreen} ${iconOnly} ${showSim ? 'ring-2 ring-[var(--green-deep)]' : ''}`}
             onClick={toggleSimulate}
             title={
               showSim
                 ? 'Close the simulator'
-                : 'Simulate this circuit (experimental) — opens the schematic and the Simulate panel'
+                : 'Simulate this circuit (experimental): opens the schematic and the Simulate panel'
             }
           >
-            <Play size={14} /> Simulate
+            <Play size={14} />
+            <span className={noLabel}>Simulate</span>
           </button>
 
-          {/* one export control, two formats — the two icon buttons that used
+          {/* one export control, two formats; the two icon buttons that used
               to sit here read as unrelated actions */}
           <div className="relative">
             <button
               ref={exportBtnRef}
-              className={`${toolBrand} disabled:opacity-60`}
+              className={`${toolBrand} ${iconOnly} disabled:opacity-60`}
               disabled={exporting}
               onClick={() => setExportOpen((o) => !o)}
               title="Export this view as an image"
+              aria-label="Export"
             >
-              <Share size={14} /> Export
-              <ChevronDown size={13} className="-ml-0.5 opacity-80" />
+              <Share size={14} />
+              <span className={noLabel}>Export</span>
+              <ChevronDown size={13} className={`-ml-0.5 opacity-80 ${noLabel}`} />
             </button>
             {exportOpen && (
               <>
@@ -939,7 +963,7 @@ export function CircuitViewV2({
           )}
         </div>
 
-        {/* download chip — the animation lands here, then this confirms it */}
+        {/* download chip: the animation lands here, then this confirms it */}
         {savedFile && <DownloadChip key={savedFile.id} name={savedFile.name} />}
 
         {/* zoom cluster */}
@@ -995,7 +1019,7 @@ export function CircuitViewV2({
             {needsRenumber && (
               <button
                 className="px-2.5 py-1 rounded-full bg-surface-card border border-brand/40 text-brand flex items-center gap-1.5 hover:bg-brand/10"
-                title="Rename parts to conventional reference designators (R1, C2, D3…) — the ids an imported diagram.json left behind are part-file slugs"
+                title="Rename parts to conventional reference designators (R1, C2, D3…); the ids an imported diagram.json left behind are part-file slugs"
                 onClick={renumber}
               >
                 <ListOrdered size={12} /> renumber refdes
@@ -1069,7 +1093,7 @@ export function CircuitViewV2({
           onRequestEdit={enterEdit}
         />
 
-        {/* watermark — matches the header wordmark: thin 'tiny', bold 'Studio' */}
+        {/* watermark: matches the header wordmark: thin 'tiny', bold 'Studio' */}
         <div className="absolute bottom-16 right-5 z-0 pointer-events-none select-none max-w-full truncate text-[46px] leading-[1.15] pb-1 tracking-[-0.02em] text-text-faint/25">
           <span className="font-light">tiny</span>
           <span className="font-extrabold">Studio</span>
@@ -1077,7 +1101,7 @@ export function CircuitViewV2({
       </div>
 
       {/* Right rail. Properties is an editing tool and Simulate is a
-          schematic tool, so the rail only exists when one of them applies —
+          schematic tool, so the rail only exists when one of them applies;
           the breadboard in view-only mode has no sidebar at all. */}
       {railVisible && (
         <div
@@ -1190,7 +1214,7 @@ export function CircuitViewV2({
                     bumpDefs()
                     setEditorPart(undefined)
                     toast.success(`Saved ${def.label} to tinyparts`, {
-                      description: `${dir} — commit and push tinyparts to share it`,
+                      description: `${dir}: commit and push tinyparts to share it`,
                       // revealing a folder needs the desktop app
                       action: window.api?.fs
                         ? { label: 'Show', onClick: () => void window.api.fs.showInFolder(dir) }
@@ -1215,7 +1239,7 @@ export function CircuitViewV2({
 }
 
 /**
- * The little "saved" chip that pops in under the export button — the landing
+ * The little "saved" chip that pops in under the export button: the landing
  * pad the capture animation flies into, so the download has somewhere to be.
  */
 function DownloadChip({ name }: { name: string }): React.JSX.Element {

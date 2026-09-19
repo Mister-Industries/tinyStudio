@@ -1,5 +1,5 @@
 /**
- * githubApp — the tinyStudio GitHub OAuth app, shared by the desktop main
+ * githubApp: the tinyStudio GitHub OAuth app, shared by the desktop main
  * process (device flow), the web build (authorization-code flow with PKCE) and
  * the Netlify function that finishes the web flow.
  *
@@ -15,7 +15,7 @@ export const GITHUB_CLIENT_ID_DEFAULT = 'Ov23liGFj4cdnq63Empm'
 
 /**
  * `public_repo` covers reading and writing public repositories and creating new
- * ones — everything tinyStudio does. It deliberately cannot touch private
+ * ones: everything tinyStudio does. It deliberately cannot touch private
  * repos. Widen to `repo` only if private copies become a requirement.
  */
 export const GITHUB_SCOPE = 'public_repo'

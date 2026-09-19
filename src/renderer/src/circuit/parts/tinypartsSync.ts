@@ -1,7 +1,7 @@
 /**
- * circuit/parts/tinypartsSync — keeps the bundled and installed packs current
+ * circuit/parts/tinypartsSync: keeps the bundled and installed packs current
  * with the tinyparts repo on GitHub, so pushing a part edit to tinyparts
- * reaches every copy of the app on its next launch — no app release.
+ * reaches every copy of the app on its next launch, no app release.
  *
  * How it stays cheap:
  *  1. One GitHub API call asks for the branch's commit sha. Same as last time
@@ -16,7 +16,7 @@
  *
  * Failures (offline, rate limit) leave whatever is loaded untouched.
  * `localStorage["tinystudio.tinyparts.source"] = "owner/repo@branch"` points
- * the check at a fork or branch — handy for previewing a tinyparts PR.
+ * the check at a fork or branch, handy for previewing a tinyparts PR.
  */
 
 import { readBundled, SNAPSHOT } from './bundled'
@@ -112,7 +112,7 @@ async function get(url: string, accept?: string): Promise<Response> {
       headers: accept ? { Accept: accept } : undefined
     })
     if (res.status === 403 || res.status === 429)
-      throw new Error('GitHub rate limit reached — try again in a while')
+      throw new Error('GitHub rate limit reached; try again in a while')
     if (!res.ok) throw new Error(`${url} → HTTP ${res.status}`)
     return res
   } catch (e) {
@@ -289,7 +289,7 @@ export function syncTinyparts(opts: { force?: boolean } = {}): Promise<SyncStatu
       const ids = new Set([
         ...SNAPSHOT.packs.map((p) => p.id),
         ...fromRepo.map((c) => c.id),
-        // installed by an older build (copied into user parts) — adopt them
+        // installed by an older build (copied into user parts); adopt them
         ...Object.keys(getInstalledPacks()).filter(
           (id) => !isBundledPack(id) && !cached.some((c) => c.id === id)
         )
@@ -306,9 +306,9 @@ export function syncTinyparts(opts: { force?: boolean } = {}): Promise<SyncStatu
           try {
             const r = await syncPack(id, repo, ref, commit, tree)
             if (r.changed) updated.push(id)
-            errors.push(...r.errors.map((e) => `${id} — ${e}`))
+            errors.push(...r.errors.map((e) => `${id}: ${e}`))
           } catch (e) {
-            errors.push(`${id} — ${e instanceof Error ? e.message : String(e)}`)
+            errors.push(`${id}: ${e instanceof Error ? e.message : String(e)}`)
           }
         }
       }

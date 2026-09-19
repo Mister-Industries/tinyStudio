@@ -98,8 +98,8 @@ export function CodeView(): React.JSX.Element {
           // Browser projects can now live in a real folder too, so ask the
           // file where it went rather than which build this is.
           description: isVirtualPath(file.path)
-            ? 'Saved in this browser — use “Make it mine” to keep it on GitHub.'
-            : 'This is a copy of an example — use “Make it mine” to put it on GitHub.'
+            ? 'Saved in this browser; use “Make it mine” to keep it on GitHub.'
+            : 'This is a copy of an example; use “Make it mine” to put it on GitHub.'
         })
       }
     } catch (error) {

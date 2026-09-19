@@ -1,5 +1,5 @@
 /**
- * circuit/views/captureAnimation — the "screenshot" flourish that plays when
+ * circuit/views/captureAnimation: the "screenshot" flourish that plays when
  * the circuit view exports an image.
  *
  * Sequence: a shutter flash over the stage, the freshly-composed scene snaps
@@ -11,7 +11,7 @@
 const REDUCED = '(prefers-reduced-motion: reduce)'
 
 export interface CaptureAnimationOpts {
-  /** The element that was "photographed" — the animation is drawn over it. */
+  /** The element that was "photographed"; the animation is drawn over it. */
   stage: HTMLElement | null
   /** Where the download lands (the export button). Falls back to the corner. */
   target?: HTMLElement | null
@@ -26,7 +26,7 @@ function prefersReducedMotion(): boolean {
 }
 
 /**
- * Play the capture animation. Always resolves — a failure to animate must
+ * Play the capture animation. Always resolves; a failure to animate must
  * never stop the file from being saved.
  */
 export async function playCaptureAnimation(opts: CaptureAnimationOpts): Promise<void> {
@@ -101,11 +101,11 @@ export async function playCaptureAnimation(opts: CaptureAnimationOpts): Promise<
   const flight = `translate(${destCx - stageCx}px, ${destCy - stageCy}px)`
   const printAnim = print.animate(
     [
-      // 1 — the shutter is still white: nothing to see yet
+      // 1: the shutter is still white: nothing to see yet
       { transform: 'scale(1)', opacity: 0, offset: 0, easing: 'ease-out' },
-      // 2 — the print snaps in at full size, exactly over what was captured
+      // 2: the print snaps in at full size, exactly over what was captured
       { transform: 'scale(1)', opacity: 1, offset: 0.12, easing: 'cubic-bezier(0.3, 1.2, 0.5, 1)' },
-      // 3 — it shrinks a bit and holds: this is the beat that reads "screenshot"
+      // 3: it shrinks a bit and holds: this is the beat that reads "screenshot"
       { transform: 'scale(0.86)', opacity: 1, offset: 0.34, easing: 'linear' },
       {
         transform: 'scale(0.85)',
@@ -113,7 +113,7 @@ export async function playCaptureAnimation(opts: CaptureAnimationOpts): Promise<
         offset: 0.5,
         easing: 'cubic-bezier(0.55, 0, 0.3, 1)'
       },
-      // 4 — off to the corner the download lands in, landing before it fades
+      // 4: off to the corner the download lands in, landing before it fades
       {
         transform: `${flight} scale(${scale}) rotate(-5deg)`,
         opacity: 0.9,
@@ -162,6 +162,6 @@ async function safeFinish(a: Animation): Promise<void> {
   try {
     await a.finished
   } catch {
-    /* cancelled — nothing to do */
+    /* cancelled: nothing to do */
   }
 }

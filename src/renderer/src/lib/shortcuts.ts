@@ -1,5 +1,5 @@
 /**
- * shortcuts — every keyboard shortcut the app defines, in one list.
+ * shortcuts: every keyboard shortcut the app defines, in one list.
  *
  * Handlers ask `matches(event, id)` instead of comparing keys themselves, and
  * the Keyboard Shortcuts dialog (components/ShortcutsDialog) and tooltips

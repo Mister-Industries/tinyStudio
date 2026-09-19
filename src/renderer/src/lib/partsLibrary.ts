@@ -1,5 +1,5 @@
 /**
- * partsLibrary — the live registry of every part the Circuit view can place.
+ * partsLibrary: the live registry of every part the Circuit view can place.
  * Where the art lives and how to edit it: docs/parts-and-art.md.
  *
  * Parts arrive in LAYERS. When two layers offer the same `type`, the higher
@@ -19,7 +19,7 @@
  * (circuit/parts/naming) here, in one place.
  *
  * Schema: pin coordinates are pixels @ 96 DPI relative to the part's top-left
- * — the same space Wokwi uses — so a part drops straight into diagram.json. A
+ * (the same space Wokwi uses), so a part drops straight into diagram.json. A
  * part can carry a `breadboard` and/or `schematic` view; pin NAMES are stable
  * across views, which is what lets connections survive a view switch.
  */
@@ -37,7 +37,7 @@ export interface PartView {
   h: number
   pins: Record<string, [number, number]>
   /** pin names with a bendable rubber-band leg in this view (Fritzing
-   * legId — LED/resistor class parts). Breadboard view only in practice. */
+   * legId, LED/resistor class parts). Breadboard view only in practice. */
   legs?: string[]
 }
 
@@ -45,7 +45,7 @@ export type PartLayer = 'bundled' | 'remote' | 'dev' | 'user'
 
 export const LAYER_RANK: Record<PartLayer, number> = { bundled: 0, remote: 1, dev: 2, user: 3 }
 
-/** Where a loaded definition came from — what the Parts Editor needs to save it back. */
+/** Where a loaded definition came from: what the Parts Editor needs to save it back. */
 export interface PartSource {
   layer: PartLayer
   /** tinyparts pack id */
@@ -68,9 +68,9 @@ export interface PartSource {
 
 export interface PartDef {
   type: string
-  /** Display name (human-readable — see circuit/parts/naming). */
+  /** Display name (human-readable; see circuit/parts/naming). */
   label: string
-  /** Display category — the group this part sits in, in the components rail. */
+  /** Display category: the group this part sits in, in the components rail. */
   family?: string
   /**
    * Keyword string used for SPICE emitter + refdes matching, kept separate
@@ -105,7 +105,7 @@ export interface PartMeta {
   label: string
   /** Display category (see circuit/parts/naming). */
   family: string
-  /** Keyword string for sim/refdes matching — never the display category. */
+  /** Keyword string for sim/refdes matching; never the display category. */
   simFamily?: string
   prefix?: string
   familySlug?: string
@@ -342,7 +342,7 @@ export function partsByFamily(): { family: string; parts: PartMeta[] }[] {
   })).sort((a, b) => compareCategories(a.family, b.family))
 }
 
-/** Synchronous lookup — only returns parts already loaded. */
+/** Synchronous lookup: only returns parts already loaded. */
 export function getPart(type: string): PartDef | undefined {
   return cache[type]
 }

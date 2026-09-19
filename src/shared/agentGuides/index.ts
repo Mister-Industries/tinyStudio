@@ -1,5 +1,5 @@
 /**
- * agentGuides — the reference guides behind Studio AI's read_guide tool.
+ * agentGuides: the reference guides behind Studio AI's read_guide tool.
  *
  * Markdown and screenshots are bundled with the app (Vite `?raw` / `?inline`),
  * so they work the same on desktop and web and never depend on what's in the
@@ -59,7 +59,7 @@ const GUIDES: Record<GuideId, { markdown: string; images: [dataUrl: string, capt
         ],
         [
           visualReference,
-          'The reference sketch from this guide with live data — light theme on the left, dark theme on the right. This is the target look.'
+          'The reference sketch from this guide with live data: light theme on the left, dark theme on the right. This is the target look.'
         ]
       ]
     },

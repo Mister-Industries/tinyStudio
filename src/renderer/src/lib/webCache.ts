@@ -1,4 +1,4 @@
-// webCache — IndexedDB-backed durable cache for the browser build.
+// webCache: IndexedDB-backed durable cache for the browser build.
 //
 // The web build uses the File System Access API (see webFileSystem.ts) for real
 // folders, but those permissions/handles don't survive a page reload, and a user

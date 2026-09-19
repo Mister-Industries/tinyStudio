@@ -1,4 +1,4 @@
-// OpenProjectDialog — "Open existing": a folder on this computer, a GitHub repo
+// OpenProjectDialog is "Open existing": a folder on this computer, a GitHub repo
 // (pasted, or picked from your own), or something you had open recently.
 //
 // A GitHub repo opens in the browser first, like an example. Saving it to the
@@ -206,7 +206,7 @@ export function OpenProjectDialog({
 
           {!isElectron() && (
             <p className="px-1 text-[11px] leading-snug text-[var(--text-faint)]">
-              Repos open in your browser first. Save one to put it in a folder on your computer — if
+              Repos open in your browser first. Save one to put it in a folder on your computer. If
               you can push to it, it stays linked, so Push and Pull keep working.
             </p>
           )}

@@ -1,5 +1,5 @@
 /**
- * WebSocketArduinoService — the real Arduino implementation, shared by both the
+ * WebSocketArduinoService: the real Arduino implementation, shared by both the
  * desktop (Electron) and browser builds.
  *
  * tinyService is always a local WebSocket backend on ws://localhost:3000. The
@@ -9,7 +9,7 @@
  * and WebArduinoService simply extend this class.
  *
  * The service URL defaults to ws://localhost:3000 but can be overridden by
- * setting `localStorage["tinyservice.url"]` — handy when hosting the web build
+ * setting `localStorage["tinyservice.url"]`, handy when hosting the web build
  * and pointing it at a backend on a non-default port.
  */
 
@@ -169,7 +169,7 @@ export class WebSocketArduinoService implements ArduinoService {
     this.client.onError(() => {
       if (warned || this.client.isConnected()) return
       warned = true
-      console.warn(`tinyService isn't reachable at ${this.serviceUrl} — retrying.`)
+      console.warn(`tinyService isn't reachable at ${this.serviceUrl}; retrying.`)
     })
   }
 
@@ -298,7 +298,7 @@ export class WebSocketArduinoService implements ArduinoService {
           if (message.data.details) {
             errorMessage += '\n' + message.data.details
           }
-          // For these request/response actions an error is terminal — the
+          // For these request/response actions an error is terminal; the
           // handler sends it instead of `complete`. Resolve now (with any
           // streamed/compiler output) so the caller doesn't hang until timeout.
           cleanup()
@@ -323,7 +323,7 @@ export class WebSocketArduinoService implements ArduinoService {
               error: hasError ? errorMessage : undefined
             })
           } else if (Array.isArray((message.data as { libraries?: unknown[] }).libraries)) {
-            // Library search/list — serialize libraries to JSON lines
+            // Library search/list: serialize libraries to JSON lines
             const libs = (message.data as { libraries: unknown[] }).libraries
             safeResolve({
               success: !hasError,
@@ -332,7 +332,7 @@ export class WebSocketArduinoService implements ArduinoService {
             })
           } else if (
             // Boards Manager list/search responses carry one of these arrays
-            // (platforms, boards, urls) — serialize to JSON lines like libraries.
+            // (platforms, boards, urls): serialize to JSON lines like libraries.
             Array.isArray((message.data as { platforms?: unknown[] }).platforms) ||
             Array.isArray((message.data as { boards?: unknown[] }).boards) ||
             Array.isArray((message.data as { urls?: unknown[] }).urls)
@@ -349,7 +349,7 @@ export class WebSocketArduinoService implements ArduinoService {
               error: hasError ? errorMessage : undefined
             })
           } else if ((message.data as { details?: unknown }).details) {
-            // board-details response — serialize the details object.
+            // board-details response: serialize the details object.
             safeResolve({
               success: !hasError,
               output: JSON.stringify((message.data as { details: unknown }).details),
@@ -742,7 +742,7 @@ export class WebSocketArduinoService implements ArduinoService {
   async installCore(id: string, version?: string): Promise<ArduinoActionResult> {
     if (!this.client) throw new Error('Arduino client not initialized')
     const requestId = this.client.coreInstall(id, version)
-    // Cores (esp32 especially) are large — allow up to 10 minutes.
+    // Cores (esp32 especially) are large; allow up to 10 minutes.
     return this.waitForResponse('core-install', 600000, requestId)
   }
 
@@ -790,7 +790,7 @@ export class WebSocketArduinoService implements ArduinoService {
   // Guard against a dropped backend: serialClose() sends over the socket, which
   // throws "WebSocket is not connected" if the backend already went away. That
   // throw escaped React cleanup and blanked the whole app, so skip it when the
-  // socket is down — there's nothing to close anyway.
+  // socket is down; there's nothing to close anyway.
   closeSerial(): void {
     if (this.client?.isConnected()) this.client.serialClose()
   }
@@ -833,7 +833,7 @@ export class WebSocketArduinoService implements ArduinoService {
   /**
    * Subscribe to server-pushed board events. The backend watches
    * `arduino-cli board list --watch` and broadcasts the full board list on
-   * every plug/unplug — no client polling. Returns an unsubscribe function.
+   * every plug/unplug, no client polling. Returns an unsubscribe function.
    */
   onBoardEvents(cb: (boards: Board[]) => void): () => void {
     if (!this.client) return () => {}

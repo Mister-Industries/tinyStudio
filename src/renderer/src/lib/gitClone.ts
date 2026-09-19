@@ -1,5 +1,5 @@
 /**
- * gitClone — recognise a folder that is a git clone of a GitHub repo.
+ * gitClone: recognise a folder that is a git clone of a GitHub repo.
  *
  * Everything comes from the plain-text files git keeps in `.git`: the remote in
  * `config`, the checked-out branch in `HEAD`, and that branch's commit in

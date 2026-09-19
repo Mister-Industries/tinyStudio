@@ -1,14 +1,14 @@
 /**
- * circuit/core/probes — placeable sim probes, the pure/testable half (M4
+ * circuit/core/probes: placeable sim probes, the pure/testable half (M4
  * leftover, spec §10.3). Part art + registration live in parts/simProbes.ts
  * (renderer-facing); the emitted SPICE for the current probe lives in
  * core/netlist.ts. This module only needs to:
  *   - recognize probe part types (probesIn), and
  *   - compute a differential-voltage probe's subtraction vector from a
- *     completed run (diffProbeVector/diffProbeVectors) — voltage/diff probes
+ *     completed run (diffProbeVector/diffProbeVectors); voltage/diff probes
  *     emit no SPICE element, so there's nothing else to derive.
  *
- * Zero React, zero Node — same rule as the rest of core/.
+ * Zero React, zero Node: same rule as the rest of core/.
  */
 
 import type { CircuitDoc, CircuitPart } from './model'

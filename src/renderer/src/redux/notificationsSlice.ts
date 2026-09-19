@@ -30,7 +30,7 @@ const initialState: NotificationsSliceState = {
 
 // A persistent notification history backing the status-bar bell. Toasts are
 // transient (sonner), but every notification is also recorded here so the user
-// can review what happened — see lib/notify.ts, which writes to both.
+// can review what happened; see lib/notify.ts, which writes to both.
 export const notificationsSlice = createAppSlice({
   name: 'notifications',
   initialState,

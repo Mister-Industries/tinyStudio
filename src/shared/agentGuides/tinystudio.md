@@ -1,6 +1,6 @@
-# tinyStudio — the app
+# tinyStudio: the app
 
-tinyStudio is MR.INDUSTRIES' IDE for the tinyCore (ESP32-S3). It puts the three things a hardware project needs — code, wiring, and a live visual — in one window. It ships as a desktop app and as a web app (studio.tinycore.cc); both behave the same apart from how folders are opened.
+tinyStudio is MR.INDUSTRIES' IDE for the tinyCore (ESP32-S3). It puts the three things a hardware project needs (code, wiring, and a live visual) in one window. It ships as a desktop app and as a web app (studio.tinycore.cc); both behave the same apart from how folders are opened.
 
 The screenshot below is the Code view with an example project open.
 

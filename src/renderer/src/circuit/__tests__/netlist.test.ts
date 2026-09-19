@@ -1,4 +1,4 @@
-/** Golden tests for core/netlist — SPICE generation from the net model. */
+/** Golden tests for core/netlist: SPICE generation from the net model. */
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
@@ -20,7 +20,7 @@ const part = (id: string, type: string, attrs?: CircuitPart['attrs']): CircuitPa
   sch: { x: 0, y: 0 }
 })
 
-/** V1 5V across R1(10k) → R2(4.7kΩ) to ground — the RC-divider golden. */
+/** V1 5V across R1(10k) → R2(4.7kΩ) to ground: the RC-divider golden. */
 function divider(): CircuitDoc {
   const doc = emptyDoc()
   doc.parts = [
@@ -194,7 +194,7 @@ test('mapSimIssue finds the part behind an ngspice device-name mention', () => {
 test('mapSimIssue finds the net behind a node-name mention, skips ground', () => {
   const doc = divider()
   const res = generateNetlist(doc, buildNets(doc))
-  // R1/R2 share a node — find its synthetic name and confirm it round-trips
+  // R1/R2 share a node; find its synthetic name and confirm it round-trips
   const midIdx = res.nodeOfNet.findIndex((n) => n !== '0' && n.startsWith('n'))
   assert.ok(midIdx >= 0)
   const hit = mapSimIssue(`doAnalyses: node ${res.nodeOfNet[midIdx]} is floating`, res)

@@ -1,5 +1,5 @@
 /**
- * GitHubSignIn — the single sign-in surface, shared by the header profile
+ * GitHubSignIn: the single sign-in surface, shared by the header profile
  * control and the GitHub sidebar tab.
  *
  * On desktop the default path is the OAuth **device flow**: the user gets a
@@ -165,7 +165,7 @@ export function GitHubSignInButton({
                 Paste a Personal Access Token with{' '}
                 <span className="font-mono text-[var(--text-body)]">repo</span> scope.
                 {canUseDeviceFlow
-                  ? ' Only needed for enterprise setups — signing in with GitHub is simpler.'
+                  ? ' Only needed for enterprise setups; signing in with GitHub is simpler.'
                   : ''}
               </p>
               <Input

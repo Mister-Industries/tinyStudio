@@ -1,5 +1,5 @@
 /**
- * capture-agent-screens.mjs — refresh the screenshots bundled with Studio AI's
+ * capture-agent-screens.mjs: refresh the screenshots bundled with Studio AI's
  * guides (src/shared/agentGuides/screens/). Run after UI changes that would
  * make them misleading.
  *

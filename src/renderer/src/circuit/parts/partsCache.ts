@@ -1,11 +1,11 @@
 /**
- * circuit/parts/partsCache — packs downloaded from tinyparts, kept on this
+ * circuit/parts/partsCache: packs downloaded from tinyparts, kept on this
  * computer so they load offline and only changed files are ever re-fetched.
  *
  * Stored in IndexedDB (`tinystudio-parts-cache`), which in the desktop app sits
  * inside Electron's userData folder; the web build uses the browser's. Falls
  * back to memory where IndexedDB doesn't exist (tests, locked-down WebViews).
- * Nothing here is user-authored — clearing it just means a re-download.
+ * Nothing here is user-authored; clearing it just means a re-download.
  */
 
 export type PackOrigin =
@@ -167,7 +167,7 @@ export async function deleteCachedPack(id: string): Promise<void> {
   })
 }
 
-/** Git's blob id for some bytes — lets a download be compared with GitHub's tree. */
+/** Git's blob id for some bytes; lets a download be compared with GitHub's tree. */
 export async function gitBlobSha(bytes: Uint8Array): Promise<string> {
   const header = new TextEncoder().encode(`blob ${bytes.length}\0`)
   const buf = new Uint8Array(header.length + bytes.length)

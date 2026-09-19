@@ -1,5 +1,5 @@
 /**
- * GitHubAccountButton — the sign-in / profile control in the header (top-right).
+ * GitHubAccountButton: the sign-in / profile control in the header (top-right).
  * Signed out it defers to GitHubSignInButton (device flow, PAT behind
  * "Advanced"); signed in it shows the user's avatar + login with a menu to open
  * their GitHub profile or sign out.

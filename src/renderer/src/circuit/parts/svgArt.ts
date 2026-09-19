@@ -1,11 +1,11 @@
 /**
- * circuit/parts/svgArt — reading and preparing part artwork that lives as real,
+ * circuit/parts/svgArt: reading and preparing part artwork that lives as real,
  * hand-editable .svg files (tinyparts folder parts; see docs/parts-and-art.md).
  *
  * Three jobs, all DOM-free so they behave identically in the app, under
  * `node --test`, and in scripts/parts-tool.mjs:
  *
- *  1. PIN DISCOVERY. A pin is any element whose id is `pin-<NAME>` — name the
+ *  1. PIN DISCOVERY. A pin is any element whose id is `pin-<NAME>`; name the
  *     object "pin-GND" in Illustrator's Layers panel and it becomes pin GND.
  *     Its position is the centre of that shape (or group), through every
  *     ancestor transform, mapped from viewBox units into the part's pixel box.
@@ -56,7 +56,7 @@ const localName = (n: string): string =>
   (n.includes(':') ? n.slice(n.indexOf(':') + 1) : n).toLowerCase()
 
 // Markup that carries no elements: comments, processing instructions and a
-// DOCTYPE (with its internal subset — old Illustrator "Save As SVG" writes
+// DOCTYPE (with its internal subset; old Illustrator "Save As SVG" writes
 // `<!DOCTYPE svg [ <!ENTITY …> ]>`). CDATA is separate: the tokenizer skips it,
 // but prepareArt must keep it (it wraps <style> content).
 const PROLOG = String.raw`<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<!DOCTYPE(?:[^>\[]|\[[\s\S]*?\])*>`
@@ -140,7 +140,7 @@ const NUM = /[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/y
 /**
  * Every endpoint and control point of a path, absolute. The control-point hull
  * over-estimates a curve's true bbox, but symmetrically for the round and
- * rectangular pads pins sit on — so the centre is exact where it matters.
+ * rectangular pads pins sit on, so the centre is exact where it matters.
  */
 export function pathPoints(d: string): number[] {
   const pts: number[] = []
@@ -301,7 +301,7 @@ export function pinNameFromId(id: string): string | null {
   return m ? m[1] : null
 }
 
-/** Elements whose content never renders — pins can't live inside these. */
+/** Elements whose content never renders: pins can't live inside these. */
 const NON_RENDERED = new Set([
   'defs',
   'clippath',
@@ -333,7 +333,7 @@ const round2 = (n: number): number => Math.round(n * 100) / 100
 /**
  * Find every `pin-<NAME>` element and place it in a `w`×`h` px part box. The
  * art is fitted into the box the way the canvas renders it (uniform scale,
- * centred — SVG's default preserveAspectRatio), so pins land on the art even
+ * centred; SVG's default preserveAspectRatio), so pins land on the art even
  * when the box and the viewBox disagree on aspect.
  */
 export function scanPins(svg: string, w?: number | null, h?: number | null): PinScan {
@@ -579,7 +579,7 @@ const CSS_ID = /#(-?[_a-zA-Z][\w-]*)/g
 /**
  * Prefix every id that something references (gradients, clip paths, masks,
  * filters, <use> targets) and every class a <style> block defines. Ids nothing
- * references are left alone — pin ids, Fritzing `connectorNleg` legs and
+ * references are left alone: pin ids, Fritzing `connectorNleg` legs and
  * resistor `band_*` hooks are looked up by name elsewhere.
  */
 export function namespaceSvg(svg: string, prefix: string): string {

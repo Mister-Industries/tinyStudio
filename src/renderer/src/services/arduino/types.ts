@@ -38,7 +38,7 @@ export interface Board {
   connected: boolean
   /**
    * True when the board identity was guessed from USB VID/PID rather than
-   * matched by arduino-cli — the user should be able to override it via the
+   * matched by arduino-cli; the user should be able to override it via the
    * "choose board for this port" picker.
    */
   guess?: boolean
@@ -222,7 +222,7 @@ export interface BoardDetails {
 /**
  * Arduino service interface
  * Abstraction over the tinyService WebSocket backend. Implemented identically in
- * the desktop (Electron) and browser (web) builds — both connect to a local
+ * the desktop (Electron) and browser (web) builds: both connect to a local
  * tinyService on ws://localhost:3000.
  */
 export interface ArduinoService {
@@ -344,7 +344,7 @@ export interface ArduinoService {
 
   /**
    * Subscribe to streamed output lines of a request/response action
-   * ("upload", "compile", …) — e.g. to derive real upload progress from
+   * ("upload", "compile", …), e.g. to derive real upload progress from
    * esptool/avrdude output. Returns an unsubscribe function.
    */
   onActionOutput(action: string, cb: (output: string) => void): () => void

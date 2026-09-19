@@ -1,5 +1,5 @@
 /**
- * Tests for parts/svgArt + parts/folderPart — reading pins out of hand-edited
+ * Tests for parts/svgArt + parts/folderPart: reading pins out of hand-edited
  * SVG files, surviving what Illustrator does to them, keeping every part's
  * gradients and classes to itself, and turning a part folder into a PartDef.
  */
@@ -200,7 +200,7 @@ test('namespacing keeps two parts from painting each other, and only touches wha
   assert.match(a, /xlink:href="#p-tinycore-shape"/)
   assert.match(a, /class="p-tinycore-st0 other"/)
   assert.match(a, /fill:url\('#p-tinycore-SVGID_1_'\)/)
-  // looked up by name elsewhere — must survive untouched
+  // looked up by name elsewhere, so it must survive untouched
   assert.match(a, /id="pin-GND"/)
   assert.match(a, /id="connector0leg"/)
   assert.match(a, /id="band_1"/)
@@ -280,7 +280,7 @@ test('fixed pin positions in part.json win over the art', async () => {
 })
 
 test('an icon and a view that are separate files keep separate class namespaces', async () => {
-  // both Illustrator exports define .st0 — on one page, the icon's must not repaint the board
+  // both Illustrator exports define .st0; on one page, the icon's must not repaint the board
   const json: PartJson = {
     type: 'board',
     label: 'Board',

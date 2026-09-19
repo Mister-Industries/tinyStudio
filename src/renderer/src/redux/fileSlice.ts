@@ -213,7 +213,7 @@ export const fileSlice = createAppSlice({
 
       // Enforce a single tab per file. Dedup on path (not id) because tree item
       // ids are regenerated whenever the workspace is (re)loaded, so the same
-      // file can arrive under different ids — that's what produced duplicate tabs.
+      // file can arrive under different ids; that's what produced duplicate tabs.
       const alreadyOpen = editorObjectAdapter
         .getSelectors()
         .selectAll(state.openFiles)
@@ -235,7 +235,7 @@ export const fileSlice = createAppSlice({
             updatedAt: new Date().toISOString()
           })
         } else if (!file.hidden && alreadyOpen.hidden) {
-          // Existing background buffer opened explicitly — reveal it as a tab.
+          // Existing background buffer opened explicitly: reveal it as a tab.
           state.openFiles = editorObjectAdapter.updateOne(state.openFiles, {
             id: file.id,
             changes: { hidden: false }
@@ -253,7 +253,7 @@ export const fileSlice = createAppSlice({
         ...file,
         updatedAt: new Date().toISOString()
       })
-      // Focus the file as the viewing tab — unless it's a background buffer for
+      // Focus the file as the viewing tab, unless it's a background buffer for
       // a full-window view, which stays out of the Code tab bar until revealed.
       if (!file.hidden) {
         state.viewingFileId = file.id
@@ -264,7 +264,7 @@ export const fileSlice = createAppSlice({
      * Rewrite the path of every open buffer under `from` to sit under `to`.
      *
      * Open tabs hold their own copy of a file's path, and nothing else updates
-     * it — so after a rename or a move the tab still points at the old path and
+     * it, so after a rename or a move the tab still points at the old path and
      * the next save writes there, quietly recreating the file the user just
      * renamed away. Callers that move files on disk must dispatch this.
      */

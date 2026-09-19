@@ -11,7 +11,7 @@
  *     folder whether or not its bytes were pulled.
  *  2. **Subfolder projects flattening.** Examples open a folder *inside* a repo.
  *     With no path on the link, push wrote every file to the repo root and pull
- *     compared repo-relative keys against workspace-relative ones — so a freshly
+ *     compared repo-relative keys against workspace-relative ones, so a freshly
  *     linked project reported every file as changed.
  *  3. **Unknown types being guessed as text.** Decoding an unknown binary as
  *     UTF-8 corrupts it. Anything not known to be text is carried as base64,

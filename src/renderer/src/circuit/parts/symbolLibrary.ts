@@ -1,12 +1,12 @@
 /**
- * circuit/parts/symbolLibrary — the hand-authored schematic symbol set
+ * circuit/parts/symbolLibrary: the hand-authored schematic symbol set
  * (spec §8: "US/IEEE default, black ink, 2 px strokes, standard library").
  *
  * Fritzing ships a schematic SVG with every part, but those symbols were drawn
  * by many different authors: stroke weights vary from hairline to heavy, text
  * carries baked-in blues and oranges, and the same resistor can be twice the
  * size of the capacitor next to it. Dropping them on one sheet looks like a
- * ransom note. So the parts we ship draw from this library instead — one
+ * ransom note. So the parts we ship draw from this library instead: one
  * geometry vocabulary, one stroke weight, one type stack, every pin on the
  * 9.6 px major grid.
  *
@@ -16,7 +16,7 @@
  * a jog in the wire. Parts that need headroom (an LED's emission arrows, a
  * potentiometer's wiper) grow DOWNWARD to 3 grid and keep the pin row on a
  * grid line. Three-terminal actives are 4 grid square with the control pin on
- * the left and the two power pins top and bottom — the orientation schematics
+ * the left and the two power pins top and bottom, the orientation schematics
  * are normally read in.
  *
  * ── Pin binding ─────────────────────────────────────────────────────────────
@@ -39,11 +39,11 @@ const P = SCH_GRID // 9.6
 /** Two-terminal footprint: 6 grid long, pins on the centre line. */
 const W2 = 6 * P // 57.6
 const H2 = 2 * P // 19.2
-const CY = P // 9.6 — centre line of a plain two-terminal symbol
+const CY = P // 9.6: centre line of a plain two-terminal symbol
 /** Two-terminal footprint with headroom (LED arrows, pot wiper): pins one grid lower. */
 const H3 = 3 * P // 28.8
 const CY3 = 2 * P // 19.2
-/** Body span for a two-terminal symbol — 1.5 grid of lead at each end. */
+/** Body span for a two-terminal symbol: 1.5 grid of lead at each end. */
 const BX0 = 1.5 * P // 14.4
 const BX1 = W2 - BX0 // 43.2
 
@@ -152,7 +152,7 @@ const NEG = [/^-$/, /^neg/i, /^gnd$/i, /cathode/i]
 
 // ── the library ──────────────────────────────────────────────────────────────
 
-/** Resistor — IEEE zigzag. */
+/** Resistor: IEEE zigzag. */
 const resistor: SymbolDef = {
   w: W2,
   h: H2,
@@ -160,7 +160,7 @@ const resistor: SymbolDef = {
   body: leads(BX0, BX1) + zigzag(BX0, BX1, CY)
 }
 
-/** Non-polarised capacitor — two parallel plates. */
+/** Non-polarised capacitor: two parallel plates. */
 const capacitor: SymbolDef = (() => {
   const gap = 0.75 * P
   const x0 = W2 / 2 - gap / 2
@@ -174,7 +174,7 @@ const capacitor: SymbolDef = (() => {
   }
 })()
 
-/** Polarised capacitor — straight plate, curved plate, plus sign. */
+/** Polarised capacitor: straight plate, curved plate, plus sign. */
 const capacitorPolar: SymbolDef = (() => {
   const x0 = W2 / 2 - 0.4 * P
   const x1 = W2 / 2 + 0.4 * P
@@ -191,7 +191,7 @@ const capacitorPolar: SymbolDef = (() => {
   }
 })()
 
-/** Inductor — four half-circle humps. */
+/** Inductor: four half-circle humps. */
 const inductor: SymbolDef = (() => {
   const humps = 4
   const span = BX1 - BX0
@@ -201,7 +201,7 @@ const inductor: SymbolDef = (() => {
   return { w: W2, h: H2, slots: PLAIN2(), body: leads(BX0, BX1) + path(d) }
 })()
 
-/** Fuse — body with a conductor straight through it. */
+/** Fuse: body with a conductor straight through it. */
 const fuse: SymbolDef = (() => {
   const x0 = W2 / 2 - 1.2 * P
   const x1 = W2 / 2 + 1.2 * P
@@ -242,7 +242,7 @@ const diode: SymbolDef = {
   body: diodeBody(CY)
 }
 
-/** Zener — cathode bar with the characteristic bent ends. */
+/** Zener: cathode bar with the characteristic bent ends. */
 const zener: SymbolDef = (() => {
   const tipX = W2 / 2 + 0.5 * P
   const half = 0.62 * P
@@ -258,7 +258,7 @@ const zener: SymbolDef = (() => {
   }
 })()
 
-/** LED — diode with emission arrows. */
+/** LED: diode with emission arrows. */
 const led: SymbolDef = {
   w: W2,
   h: H3,
@@ -266,7 +266,7 @@ const led: SymbolDef = {
   body: diodeBody(CY3) + lightArrows(W2 / 2 - 0.4 * P, CY3 - 0.9 * P, false)
 }
 
-/** Photoresistor — zigzag with incident-light arrows. */
+/** Photoresistor: zigzag with incident-light arrows. */
 const photoresistor: SymbolDef = {
   w: W2,
   h: H3,
@@ -277,7 +277,7 @@ const photoresistor: SymbolDef = {
     lightArrows(W2 / 2 - 0.9 * P, CY3 - 1.1 * P, true)
 }
 
-/** Thermistor — zigzag crossed by the temperature-dependence stroke. */
+/** Thermistor: zigzag crossed by the temperature-dependence stroke. */
 const thermistor: SymbolDef = {
   w: W2,
   h: H2,
@@ -289,7 +289,7 @@ const thermistor: SymbolDef = {
     line(BX0 - 1.6, CY + 0.85 * P, BX0 + 3.4, CY + 0.85 * P, 1.4)
 }
 
-/** SPST switch — hinged blade between two contacts. */
+/** SPST switch: hinged blade between two contacts. */
 const switchSpst: SymbolDef = {
   w: W2,
   h: H2,
@@ -302,7 +302,7 @@ const switchSpst: SymbolDef = {
     line(2 * P, CY, 3.9 * P, CY - 0.72 * P)
 }
 
-/** Momentary pushbutton — plunger over a pair of contacts. */
+/** Momentary pushbutton: plunger over a pair of contacts. */
 const pushbutton: SymbolDef = {
   w: W2,
   h: H3,
@@ -317,7 +317,7 @@ const pushbutton: SymbolDef = {
     line(W2 / 2 - 0.5 * P, CY3 - 1.35 * P, W2 / 2 + 0.5 * P, CY3 - 1.35 * P)
 }
 
-/** Reed switch — blades sealed in a glass envelope. */
+/** Reed switch: blades sealed in a glass envelope. */
 const reedSwitch: SymbolDef = {
   w: W2,
   h: H2,
@@ -330,7 +330,7 @@ const reedSwitch: SymbolDef = {
     line(4.2 * P, CY, 3.1 * P, CY - 0.42 * P)
 }
 
-/** Potentiometer — resistor body with a wiper arrow onto it. */
+/** Potentiometer: resistor body with a wiper arrow onto it. */
 const potentiometer: SymbolDef = {
   w: W2,
   h: H3,
@@ -347,7 +347,7 @@ const potentiometer: SymbolDef = {
 }
 
 /**
- * Two-cell battery — alternating long (positive) and short (negative) plates.
+ * Two-cell battery: alternating long (positive) and short (negative) plates.
  * Uses the taller footprint so the polarity mark has room above the plates
  * instead of being clipped by the symbol's own bounding box.
  */
@@ -376,7 +376,7 @@ const battery: SymbolDef = (() => {
   }
 })()
 
-/** Buzzer / piezo sounder — half-disc on its flat side. */
+/** Buzzer / piezo sounder: half-disc on its flat side. */
 const buzzer: SymbolDef = (() => {
   const w = 4 * P
   const h = 3 * P
@@ -391,7 +391,7 @@ const buzzer: SymbolDef = (() => {
       { role: '-', pos: [x1, h], match: NEG }
     ],
     body:
-      // dome, then the flat face as its own stroke — a closed-path `Z` is at
+      // dome, then the flat face as its own stroke; a closed-path `Z` is at
       // the mercy of the renderer's join handling; an explicit line is not
       path(
         `M${x0} ${flatY} A ${round((x1 - x0) / 2)} ${round((x1 - x0) / 2)} 0 0 1 ${x1} ${flatY}`
@@ -402,7 +402,7 @@ const buzzer: SymbolDef = (() => {
   }
 })()
 
-/** Electret microphone — diaphragm chord across a capsule. */
+/** Electret microphone: diaphragm chord across a capsule. */
 const microphone: SymbolDef = {
   w: W2,
   h: H2,
@@ -485,7 +485,7 @@ const nmos: SymbolDef = (() => {
   }
 })()
 
-/** Relay — coil on the left, changeover contact on the right. */
+/** Relay: coil on the left, changeover contact on the right. */
 const relay: SymbolDef = (() => {
   const w = 6 * P
   const h = 6 * P
@@ -609,7 +609,7 @@ export function symbolIdForKeywords(haystack: string): string | undefined {
 /**
  * Bind a symbol's slots to a part's real pin names and render the PartView.
  *
- * Returns null when the part cannot wear this symbol — a different pin count
+ * Returns null when the part cannot wear this symbol: a different pin count
  * means we would silently drop or invent a terminal, and a symbol that hides
  * a pin is worse than an ugly one, so the caller falls back.
  */

@@ -2,7 +2,7 @@ import { shell } from 'electron'
 
 const SAFE_PROTOCOLS = new Set(['https:', 'http:', 'mailto:'])
 
-/** True for web and mail links — the only things tinyStudio hands to the OS to open. */
+/** True for web and mail links: the only things tinyStudio hands to the OS to open. */
 export function isSafeExternalUrl(url: unknown): boolean {
   try {
     return SAFE_PROTOCOLS.has(new URL(String(url)).protocol)

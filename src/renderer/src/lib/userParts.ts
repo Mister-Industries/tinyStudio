@@ -1,21 +1,21 @@
 /**
- * userParts — parts saved on THIS computer: the registry's top (user) layer.
+ * userParts: parts saved on THIS computer: the registry's top (user) layer.
  *
  *   - local edits: a Parts Editor save of a part that ships in a pack. It
  *     shadows the shipped part here only; "Reset to default" deletes it and
  *     the pack's version (including any later updates) shows again.
  *   - imports: parts made from scratch in the Parts Editor or dropped in as
- *     .fzpz — nothing else supplies them.
+ *     .fzpz; nothing else supplies them.
  *
  * Nothing here is ever uploaded. Stored in IndexedDB (in the desktop app that
  * lives in Electron's userData folder; the web build uses the browser's), with
  * localStorage as the fallback where IndexedDB is missing.
  *
  * Usage:
- *   - `initUserParts()` — idempotent; loads every saved part into the registry.
+ *   - `initUserParts()`: idempotent; loads every saved part into the registry.
  *     Call after the pack layers are registered (see parts/partsBoot.ts).
- *   - `saveUserPart(def)` — registers AND persists.
- *   - `resetUserPart(type)` — deletes the local copy; the shipped part returns.
+ *   - `saveUserPart(def)`: registers AND persists.
+ *   - `resetUserPart(type)`: deletes the local copy; the shipped part returns.
  */
 
 import { artPrefix, namespaceSvg } from '../circuit/parts/svgArt'
@@ -105,7 +105,7 @@ function lsWrite(defs: PartDef[]): void {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(defs))
   } catch {
-    /* quota / privacy mode — parts stay session-only */
+    /* quota / privacy mode: parts stay session-only */
   }
 }
 
@@ -113,7 +113,7 @@ function lsWrite(defs: PartDef[]): void {
 
 /** types persisted here (generated breadboards are registered but never stored) */
 const stored = new Map<string, 'edit' | 'import'>()
-/** saved by a build that didn't record why — resolved once packs have loaded */
+/** saved by a build that didn't record why; resolved once packs have loaded */
 const legacy = new Set<string>()
 
 /** Does any pack layer (bundled / remote / dev) ship this type? */
@@ -141,7 +141,7 @@ export function initUserParts(): Promise<number> {
         if (!def.origin) legacy.add(def.type)
         stored.set(def.type, def.origin ?? 'import')
         // saves from before per-file art prefixes gave the icon its views' prefix,
-        // so its <style> repainted the part on the canvas — re-prefix it on load
+        // so its <style> repainted the part on the canvas; re-prefix it on load
         const icon = def.icon && namespaceSvg(def.icon, artPrefix(def.type, 'icon'))
         registerPart({ ...def, icon, source: { ...def.source, layer: 'user' } })
         n++

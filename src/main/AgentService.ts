@@ -1,5 +1,5 @@
 /**
- * AgentService — the desktop host for the Studio AI agent.
+ * AgentService: the desktop host for the Studio AI agent.
  *
  * The agent itself (conversation, tool loop, tool definitions) lives in
  * src/shared/agentCore.ts so the web build can run it too. This file supplies
@@ -9,8 +9,8 @@
  *
  * Communication with the renderer:
  *   - main → renderer  'agent:event'              streamed text / tool activity / done / error
- *   - main → renderer  'agent:permission-request' { id, ... } — awaits a response
- *   - main → renderer  'agent:file-changed'       { path } — so open editors can refresh
+ *   - main → renderer  'agent:permission-request' { id, ... }, awaits a response
+ *   - main → renderer  'agent:file-changed'       { path }, so open editors can refresh
  *   - renderer → main  agent:send / agent:abort / agent:reset / agent:permission-response
  */
 

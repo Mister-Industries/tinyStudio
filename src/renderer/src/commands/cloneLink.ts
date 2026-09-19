@@ -1,5 +1,5 @@
 /**
- * cloneLink — link a folder that is a git clone of a GitHub repo from its own
+ * cloneLink: link a folder that is a git clone of a GitHub repo from its own
  * `.git` (lib/gitClone), so Push and Pull work on a clone without linking it by
  * hand in the GitHub tab.
  */

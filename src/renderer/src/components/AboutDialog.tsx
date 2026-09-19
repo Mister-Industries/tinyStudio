@@ -1,5 +1,5 @@
 /**
- * AboutDialog — version, licence and the third-party work tinyStudio ships with.
+ * AboutDialog: version, licence and the third-party work tinyStudio ships with.
  * Opened from the tinyStudio menu in the header.
  */
 
@@ -90,7 +90,7 @@ export function AboutDialog({
                   >
                     {c.name}
                   </button>
-                  {c.note && <span className="text-[var(--text-muted)]"> — {c.note}</span>}
+                  {c.note && <span className="text-[var(--text-muted)]"> · {c.note}</span>}
                 </span>
                 <span className="shrink-0 font-mono text-[11px] text-[var(--text-muted)]">
                   {c.licence}

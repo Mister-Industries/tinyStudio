@@ -3,29 +3,29 @@ import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@renderer/lib/utils'
 
-/* tinyStudio — Button
+/* tinyStudio: Button
    The signature "pixel-art" tactile control: a top inner highlight + a solid
    colored bottom edge + a soft ambient shadow. Filled variants lift on hover
    and press DOWN on click (see .tactile / .tactile-bordered in ds-components.css).
    All historical variant/size names are preserved so existing call sites keep
-   working — they're just remapped onto the new design language. */
+   working; they're just remapped onto the new design language. */
 
 const buttonVariants = cva(
   "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md)] font-semibold tracking-[-0.01em] select-none transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]",
   {
     variants: {
       variant: {
-        // filled — tactile depth, lifts/presses
+        // filled: tactile depth, lifts/presses
         default: 'tactile bg-primary text-white [--_edge:var(--brand-deep)]',
         destructive: 'tactile bg-[var(--red)] text-white [--_edge:var(--red-deep)]',
         success: 'tactile bg-[var(--green)] text-white [--_edge:var(--green-deep)]',
         warning:
           // Softened: full-strength gold shouted over everything around it.
           'tactile bg-[var(--yellow)]/70 text-[var(--yellow-contrast)] [--_edge:color-mix(in_oklab,var(--yellow-deep)_70%,transparent)]',
-        // bordered tactile — neutral actions
+        // bordered tactile: neutral actions
         secondary: 'tactile-bordered bg-card text-[var(--text-strong)]',
         outline: 'tactile-bordered bg-background text-[var(--text-strong)]',
-        // flat soft — quiet neutral
+        // flat soft: quiet neutral
         muted:
           'border-[1.5px] border-[var(--border-soft)] bg-[var(--bg-sunken)] text-[var(--text-body)] hover:border-[var(--border-interactive)]',
         // chromeless

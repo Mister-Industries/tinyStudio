@@ -1,4 +1,4 @@
-/** Tests for parts/resistorBands — value parsing, 4-band color code, SVG recolor. */
+/** Tests for parts/resistorBands: value parsing, 4-band color code, SVG recolor. */
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'

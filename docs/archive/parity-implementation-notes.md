@@ -1,11 +1,11 @@
-# Arduino IDE Parity — Implementation Notes (July 2026)
+# Arduino IDE Parity: Implementation Notes (July 2026)
 
 Companion to `arduino-ide-comparison.md`. This documents what was implemented
 from that report's §7 recommendations, across **tinyStudio** (branch
 `development`) and **tinyService** (branch `claude-development`, shared
 `1.2.0` / service `1.1.0`). Scope notes honored: the Visual view stands in
 for the Serial Plotter, the Library Manager UX was left as-is, and everything
-works in both the desktop and browser builds (LSP is desktop-only — the
+works in both the desktop and browser builds (LSP is desktop-only; the
 language server needs the sketch on disk).
 
 ## What changed
@@ -15,7 +15,7 @@ runs one long-lived `arduino-cli board list --watch --format jsonmini`
 process (`board-watch.service.ts`) and broadcasts a `board-events` push to
 every client on plug/unplug (~150 ms debounce). New clients get a snapshot on
 connect; `list-boards` is served instantly from the watcher's memory. The
-frontend subscribes (`useArduino.ts`) instead of polling — the 8 s
+frontend subscribes (`useArduino.ts`) instead of polling; the 8 s
 poll-until-first-board and the 5 s refresh cache are gone. Unplugging the
 selected board now clears the selection with a toast; a replacement port is
 adopted automatically.
@@ -43,14 +43,14 @@ backward compatible (id-less messages still work).
 **5. Board settings gear (rec 5, Bug 8).** New `BoardOptionsMenu` next to
 the port pill: FQBN config options (PSRAM, partition scheme, CPU freq, …) via
 the new `board-details` action, encoded into the FQBN like the Arduino IDE;
-plus "Change board…" — a searchable picker over installed board definitions
+plus "Change board…": a searchable picker over installed board definitions
 for wrong VID/PID guesses (guessed boards are labeled). The
 every-tinyCore-FQBN-collapses-to-one-variant behavior was removed; VID
 `303A` still defaults to tinyCore (tradeoff kept) but is flagged as a guess
 and overridable.
 
 **6. Monitor UX parity (rec 6).** Full baud list (300 → 2 000 000, incl.
-74880 for ESP boot messages), line-ending selector (None/NL/CR/Both — sends
+74880 for ESP boot messages), line-ending selector (None/NL/CR/Both: sends
 are raw now, the backend appends nothing), timestamps toggle, and per-port
 persistence of baud + line ending (localStorage).
 
@@ -68,13 +68,13 @@ bundle them via electron-builder.yml).
 from esptool/avrdude output (the fake 10%-per-200ms timer is gone); esptool
 success markers recognized in the timeout fallback; tinyService binds the
 first free port from 3000 (the renderer asks the main process for the real
-URL — web builds keep the `tinyservice.url` localStorage override); stale
+URL; web builds keep the `tinyservice.url` localStorage override); stale
 React closures in the compile/upload timeout-recovery paths fixed.
 
 ## Not done (deliberately)
 
 Programmer selection / Upload Using Programmer / Burn Bootloader (needs new
-service actions — small follow-up now that `board-details` returns
+service actions; small follow-up now that `board-details` returns
 programmers), Include Library / Add .ZIP, sketch archive/save-as, network
 (mDNS) upload, and Library Manager UX changes (kept per preference).
 
@@ -84,10 +84,10 @@ programmers), Include Library / Add .ZIP, sketch archive/save-as, network
    `@mister-industries/tinyservice@1.1.0` from the tinyService repo, then
    bump both deps in tinyStudio's package.json. (Until then, the freshly
    built dists were copied into `node_modules/@mister-industries/*/dist` for
-   local testing — `npm install` will overwrite them.)
+   local testing; `npm install` will overwrite them.)
 2. `npm run fetch:language-server -- current` for LSP in dev.
 3. Test on real hardware: plug/unplug detection, upload with the monitor
    open, monitor across baud changes, a failing sketch (inline errors), the
-   board options gear on a tinyCore, and — if binaries fetched — completion
+   board options gear on a tinyCore, and (if binaries fetched) completion
    and hover in the editor. The LSP client is new wiring and has not run
    against real hardware/binaries yet; treat it as experimental.

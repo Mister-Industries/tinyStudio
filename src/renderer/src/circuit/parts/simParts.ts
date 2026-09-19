@@ -1,5 +1,5 @@
 /**
- * circuit/parts/simParts — builtin simulation sources (M4, spec §10.3).
+ * circuit/parts/simParts: builtin simulation sources (M4, spec §10.3).
  *
  * Generated two-pin source symbols (DC voltage, sine, DC current) in the
  * classic circle style. Both views get the same art so a source is placeable
@@ -67,7 +67,7 @@ export function generateSimSource(spec: SimSourceSpec): PartDef {
     line(cx, 0, cx, cy - r) +
       line(cx, cy + r, cx, h) +
       circle(cx, cy, r) +
-      // polarity beside the positive lead — at the symbol's right edge it
+      // polarity beside the positive lead: at the symbol's right edge it
       // was clipped by the viewBox
       text(cx + 4, cy - r - 3, '+', { size: FONT_SYMBOL }) +
       spec.glyph(cx, cy, r),

@@ -1,5 +1,5 @@
 /**
- * fileCommands — what the app does when someone opens, saves, creates, renames
+ * fileCommands: what the app does when someone opens, saves, creates, renames
  * or deletes a project or file. Each action is a plain async function that
  * talks to the file system and the redux store; components call them directly.
  */
@@ -179,7 +179,7 @@ async function activateWorkspace(workspace: Workspace): Promise<void> {
   // old workspace's tabs/tree/README/diagram.
   dispatch(closeWorkspace())
   dispatch(openWorkspace(workspace))
-  // Opening a project (folder or example) means there's now something to read —
+  // Opening a project (folder or example) means there's now something to read;
   // switch the docs panel off the Examples tab and onto Docs.
   dispatch(setDocsTab('readme'))
 
@@ -208,7 +208,7 @@ async function activateWorkspace(workspace: Workspace): Promise<void> {
 /**
  * A local folder has no URL of its own. If the address bar still shows the
  * example or repo that was open before, a reload would bring *that* back instead
- * of this folder — so step off the project route.
+ * of this folder, so step off the project route.
  */
 function leaveProjectRoute(): void {
   if (fileSystem.isElectron() || typeof window === 'undefined') return
@@ -310,7 +310,7 @@ export async function loadGitHubProject(
   fileSystem.setCurrentWorkspace(root)
 
   // A repo this user can push to opens already linked, so Push works straight
-  // away — and the link travels with the project if it's saved to a folder.
+  // away, and the link travels with the project if it's saved to a folder.
   // The baseline is this fresh fetch, so edits cached from an earlier visit
   // show up as changes instead of being absorbed into it.
   if (source.canPush && !loadLink(root)) {
@@ -337,7 +337,7 @@ export async function loadGitHubProject(
 }
 
 /**
- * Start a brand-new project that lives only in the browser — the fallback for
+ * Start a brand-new project that lives only in the browser: the fallback for
  * browsers that can't write folders (Firefox, Safari). It behaves like an
  * opened example: edits persist in browser storage, and the banner explains
  * how to keep it.
@@ -363,7 +363,7 @@ export async function openScratchProject(
  * Reopen a folder from the recent list.
  *
  * In the browser that means re-granting access to its stored handle: a
- * permission prompt, which the browser only allows from a click — so a
+ * permission prompt, which the browser only allows from a click, so a
  * launch-time restore passes `prompt: false` and quietly does nothing if access
  * has lapsed. The desktop app has the same rule for folders it has no grant for.
  */
@@ -424,7 +424,7 @@ export function closeProject(): void {
  * Re-point an open workspace at the repo the user just copied it into.
  *
  * This is the fiddly half of "make it mine": four things have to move together
- * or the result is worse than not moving at all —
+ * or the result is worse than not moving at all:
  *   1. the in-memory project and its cached copies (web only; on desktop the
  *      folder already belongs to the user and stays where it is),
  *   2. the paths held by open editor tabs, which nothing else updates,
@@ -437,7 +437,7 @@ export async function adoptCopiedProject(
   newOwner: string
 ): Promise<void> {
   // The repo already exists on GitHub by the time we get here, so a failure to
-  // write the local baseline must not read as "the copy failed" — that sends
+  // write the local baseline must not read as "the copy failed"; that sends
   // people looking for a repo that is sitting there fine.
   const persistLink = (workspacePath: string): void => {
     try {
@@ -463,7 +463,7 @@ export async function adoptCopiedProject(
   }
 
   // Desktop: the workspace is already a real folder the user owns. Nothing
-  // moves — just record the link and that it is now writable.
+  // moves; just record the link and that it is now writable.
   if (!isVirtualPath(current.path)) {
     dispatch(openWorkspace({ ...current, source }))
     persistLink(current.path)
@@ -509,7 +509,7 @@ export async function adoptCopiedProject(
 
   // A refresh should land on the user's own project from here on. The URL is
   // built inline rather than imported from projectRouting, which imports this
-  // module — keeping that dependency one-way.
+  // module, keeping that dependency one-way.
   const url = `/${encodeURIComponent(newOwner)}/${encodeURIComponent(repoName)}`
   if (typeof window !== 'undefined' && window.location.pathname !== url) {
     window.history.pushState({ owner: newOwner, repo: repoName, path: '' }, '', url)
@@ -583,8 +583,8 @@ export interface SavedToComputer {
 }
 
 /**
- * Give a project that has only lived in the browser — an example, a GitHub
- * repo, a scratch project — a permanent home: a new folder named after the
+ * Give a project that has only lived in the browser (an example, a GitHub
+ * repo, a scratch project) a permanent home: a new folder named after the
  * project, inside whichever folder the user picks, laid out the way the Arduino
  * IDE expects (see projectLayout). The workspace then switches to that folder,
  * so every later Save writes to it.
@@ -627,7 +627,7 @@ async function moveProjectToFolder(): Promise<SavedToComputer | null> {
   // A repo-linked project keeps its paths, or pushes would stop lining up.
   const link = loadLink(oldRoot)
   const keepPaths = !!link || !!source?.canPush
-  // The folder is named after the project — no questions asked. Its main
+  // The folder is named after the project; no questions asked. Its main
   // sketch decides the name, since the Arduino IDE needs the two to match.
   const name = suggestProjectName(Object.keys(files), workspace.name)
   const target = await chooseProjectTarget(parent, name)
@@ -689,7 +689,7 @@ async function moveProjectToFolder(): Promise<SavedToComputer | null> {
 
 /**
  * Load a file into an editor buffer. `hidden` loads it as a background buffer
- * for a full-window view (Circuit/Visual) without surfacing it as a code tab —
+ * for a full-window view (Circuit/Visual) without surfacing it as a code tab;
  * see EditorFile.hidden.
  */
 export async function openFileItem(item: BaseFileItem, opts?: { hidden?: boolean }): Promise<void> {

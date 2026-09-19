@@ -1,5 +1,5 @@
 /* ============================================================================
-   tinyStudio — component layer
+   tinyStudio: component layer
    ----------------------------------------------------------------------------
    Tactile "pixel-art" primitives + additive display tokens, ported from the
    tinyStudio Design System. Everything here is token-driven (see base.css), so
@@ -7,7 +7,7 @@
    be composed with utilities on the app's Radix-based components.
    ============================================================================ */
 
-/* ── TACTILE depth helper — shared by Button (filled variants) ────────────────
+/* ── TACTILE depth helper: shared by Button (filled variants) ────────────────
    A filled control = inset top highlight + a solid colored bottom edge + a soft
    ambient shadow. Lifts on hover, presses DOWN on click. Variants set --_edge. */
 .tactile {
@@ -53,7 +53,7 @@
   font-family: var(--font-sans);
 }
 
-/* Bordered tactile (secondary / outline / icon) — adds a 1.5px inset ring that
+/* Bordered tactile (secondary / outline / icon): adds a 1.5px inset ring that
    the press collapses along with the bottom edge. */
 .tactile-bordered {
   --_edge: var(--border-default);
@@ -91,7 +91,7 @@
     0 2px 0 0 var(--_edge);
 }
 
-/* Outline tactile (icon-only neutral keys: Save, undo/redo…) — the same real
+/* Outline tactile (icon-only neutral keys: Save, undo/redo…): the same real
    1.5px border as the board/port pickers, in the darker interactive grey, over
    a 1.5px ledge. (A sub-pixel 0.5px ledge vanished at 100% scaling and left the
    key looking flat.) Lifts on hover, presses flat on click. */
@@ -121,7 +121,7 @@
   box-shadow: 0 1.5px 0 0 var(--border-interactive);
 }
 
-/* ── CHECKBOX — tactile, hard-edged ──────────────────────────────────────── */
+/* ── CHECKBOX: tactile, hard-edged ──────────────────────────────────────── */
 .ts-check {
   display: inline-flex;
   align-items: flex-start;
@@ -261,7 +261,7 @@
   gap: var(--space-5);
 }
 
-/* ── BADGE — compact status/label token (mono) ───────────────────────────── */
+/* ── BADGE: compact status/label token (mono) ───────────────────────────── */
 .ts-badge {
   display: inline-flex;
   align-items: center;
@@ -347,12 +347,12 @@
   border-color: var(--yellow);
 }
 
-/* ── TAG / CHIP — libraries, board capabilities, filters ─────────────────── */
+/* ── TAG / CHIP: libraries, board capabilities, filters ─────────────────── */
 .ts-tag {
   /* Three variables drive every chip. The defaults below are the neutral
      (topic) chip; a board chip re-points them at its solder-mask ramp via an
-     inline style from lib/exampleTags#tagChipStyle, and everything else —
-     hover, selected, the remove affordance — follows automatically. */
+     inline style from lib/exampleTags#tagChipStyle, and everything else (hover,
+     selected, the remove affordance) follows automatically. */
   --tag-soft: var(--bg-sunken);
   --tag-line: var(--border-soft);
   --tag-ink: var(--text-body);
@@ -372,7 +372,7 @@
   white-space: nowrap;
 }
 
-/* Board / expansion chip — colour-matched to the physical PCB. The mask
+/* Board / expansion chip: colour-matched to the physical PCB. The mask
    colour shows as a solid rail down the leading edge (a strong, consistent
    read even at a glance) with the tint carrying the fill behind it. */
 .ts-tag--board {
@@ -390,7 +390,7 @@
   border-color: color-mix(in srgb, var(--tag-line) 65%, transparent);
   background: color-mix(in srgb, var(--tag-soft) 70%, var(--surface-card));
 }
-/* Selected filter chip — the tag's own colour goes solid so an active board
+/* Selected filter chip: the tag's own colour goes solid so an active board
    filter is unmistakable, rather than every selection turning brand blue. */
 .ts-tag--selected,
 .ts-tag--clickable.ts-tag--selected:hover {
@@ -435,7 +435,7 @@
   color: var(--text-strong);
 }
 
-/* ── STATUS PILL — the IDE's board / connection indicator ────────────────── */
+/* ── STATUS PILL: the IDE's board / connection indicator ────────────────── */
 .ts-status {
   display: inline-flex;
   align-items: center;
@@ -535,7 +535,7 @@
   color: var(--text-strong);
 }
 
-/* ── STATUS BAR chrome — icon buttons, bell + history, panel menu ──────────
+/* ── STATUS BAR chrome: icon buttons, bell + history, panel menu ──────────
    The status bar is the raised surface: white in light, grey in dark. */
 .ts-statusbar {
   --sb-bg: var(--bg-raised);
@@ -883,7 +883,7 @@
   white-space: pre-wrap;
 }
 
-/* Action button — matches .notif__link. */
+/* Action button: matches .notif__link. */
 [data-sonner-toast].ts-toast [data-button] {
   flex: none;
   align-self: center;

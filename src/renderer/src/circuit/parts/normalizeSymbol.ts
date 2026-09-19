@@ -1,23 +1,23 @@
 /**
- * circuit/parts/normalizeSymbol — make an imported schematic symbol behave.
+ * circuit/parts/normalizeSymbol: make an imported schematic symbol behave.
  *
  * Parts we don't ship a hand-authored symbol for still have to sit on the same
  * sheet as the ones we do. Their art comes from whoever drew the Fritzing part,
  * and it arrives with three problems:
  *
  *  1. **Hairline strokes.** Fritzing schematic SVGs are authored in inch-based
- *     viewBox units — a typical `stroke-width="0.1524"` in a viewBox that maps
+ *     viewBox units: a typical `stroke-width="0.1524"` in a viewBox that maps
  *     ~3.8 units to the pixel renders as a 0.58 px line. Next to our 2 px
  *     symbols it disappears.
  *  2. **Baked-in colour and type.** Pin names in blue, part names in orange,
- *     `font-family="OCRA"` — none of it follows the app theme, and none of it
+ *     `font-family="OCRA"`; none of it follows the app theme, and none of it
  *     matches the rest of the sheet.
  *  3. **Half-a-stroke offsets.** Pin pitch is almost always already correct
  *     (0.1 in = our 9.6 px grid), but the whole drawing sits shifted by the
  *     stroke's half-width, so pins land at 0.47 rather than 0.
  *
  * So: restroke to the shared weight, repaint to theme ink, re-set the type
- * stack, and nudge the drawing onto the grid. Deliberately NOT rescaled —
+ * stack, and nudge the drawing onto the grid. Deliberately NOT rescaled:
  * the pitch is right, and scaling would take the pins off-grid to fix a
  * problem that isn't there.
  *
@@ -64,7 +64,7 @@ export function reinkSvg(svg: string, unitScale: number): string {
   out = out.replace(/stroke-width\s*=\s*"[^"]*"/gi, `stroke-width="${stroke}"`)
   out = out.replace(/stroke-width\s*:\s*[^;"']+/gi, `stroke-width:${stroke}`)
 
-  // stroke colour — leave "none"/"transparent" alone or shapes lose their fill-only look
+  // stroke colour: leave "none"/"transparent" alone or shapes lose their fill-only look
   out = out.replace(/stroke\s*=\s*"([^"]*)"/gi, (all, c) =>
     NO_PAINT.test(String(c).trim()) ? all : `stroke="${INK}"`
   )
@@ -89,7 +89,7 @@ export function reinkSvg(svg: string, unitScale: number): string {
 /**
  * Offset that brings a set of pins onto the major grid. Fritzing art is
  * uniformly shifted (usually by half a stroke), so one translation fixes every
- * pin at once — we take the average correction rather than snapping each pin
+ * pin at once; we take the average correction rather than snapping each pin
  * independently, which would slide pins off the art they belong to.
  */
 export function gridAlignOffset(pins: Record<string, [number, number]>): [number, number] {
@@ -97,7 +97,7 @@ export function gridAlignOffset(pins: Record<string, [number, number]>): [number
   if (!vals.length) return [0, 0]
   const correct = (n: number): number => {
     const d = Math.round(n / P) * P - n
-    // ignore pins that are nowhere near a grid line — they'd skew the average
+    // ignore pins that are nowhere near a grid line; they'd skew the average
     return Math.abs(d) <= P / 2 ? d : 0
   }
   const dx = vals.reduce((s, [x]) => s + correct(x), 0) / vals.length
@@ -111,7 +111,7 @@ export function gridAlignOffset(pins: Record<string, [number, number]>): [number
  */
 export function normalizeAuthoredSymbol(v: PartView): PartView {
   const vbw = viewBoxWidth(v.svg)
-  // viewBox units per pixel — 1 when the art is already authored in px
+  // viewBox units per pixel; 1 when the art is already authored in px
   const unitScale = vbw && v.w > 0 ? vbw / v.w : 1
 
   const [dx, dy] = gridAlignOffset(v.pins)

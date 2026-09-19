@@ -1,5 +1,5 @@
 /**
- * Workspace-level file actions — open/refresh/close the workspace and start a
+ * Workspace-level file actions: open/refresh/close the workspace and start a
  * new file or folder at its root. Shared by the Files panel header and the
  * project menu on the header bar.
  */

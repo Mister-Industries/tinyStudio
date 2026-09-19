@@ -1,4 +1,4 @@
-/** Tests for views/palette/paletteLayout — Fritzing-style tabs and sections. */
+/** Tests for views/palette/paletteLayout: Fritzing-style tabs and sections. */
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'

@@ -63,7 +63,7 @@ test('aliases fold onto one canonical slug', () => {
   assert.equal(getTagMeta('qwiic-joystick').slug, 'qwiic')
 })
 
-test('an unknown tag still resolves — as a neutral topic, never dropped', () => {
+test('an unknown tag still resolves, as a neutral topic, never dropped', () => {
   const meta = getTagMeta('Time Of Flight')
   assert.equal(meta.slug, 'time-of-flight')
   assert.equal(meta.kind, 'topic')
@@ -88,7 +88,7 @@ test('every board tag maps to a --board-* colour family', () => {
   }
 })
 
-test('topic tags stay neutral — colour is reserved for hardware', () => {
+test('topic tags stay neutral; colour is reserved for hardware', () => {
   for (const t of ALL_TAGS.filter((t) => t.kind === 'topic')) {
     assert.equal(tagChipStyle(t), undefined, `${t.slug} must not be coloured`)
   }
@@ -167,7 +167,7 @@ test('unrecognised board text is dropped rather than becoming a chip', () => {
   assert.deepEqual(derive('Some Unknown Board v2'), [])
 })
 
-test('declared tags still accept unknown vocabulary — only board text is filtered', () => {
+test('declared tags still accept unknown vocabulary; only board text is filtered', () => {
   const [ex] = normalizeManifest([entry({ tags: ['time-of-flight'], board: 'tinyCore / Arduino' })])
   assert.deepEqual(ex.tags, ['tinycore', 'time-of-flight'])
 })

@@ -1,5 +1,5 @@
 /**
- * circuit/parts/naming — human-readable part names and categories.
+ * circuit/parts/naming: human-readable part names and categories.
  *
  * Fritzing-imported parts arrive with whatever the .fzp author typed: labels
  * like "MOSFET-NCHANNEL", "FUSE" or "led", and families like
@@ -8,21 +8,21 @@
  * generator. This module is the single place that turns raw part metadata
  * into something a human wants to read:
  *
- *   - `PART_NAMING` — a curated table for parts we ship (exact names, the
+ *   - `PART_NAMING`: a curated table for parts we ship (exact names, the
  *     category they belong in, and the refdes prefix they deserve).
- *   - `humanizeLabel` / `humanizeCategory` — the fallback for anything we
+ *   - `humanizeLabel` / `humanizeCategory`: the fallback for anything we
  *     don't know: dropped .fzpz files, pack installs, user-authored parts.
  *
  * Naming is applied centrally in `lib/partsLibrary` (manifest metadata, lazy
- * part loads and `registerPart`), so every surface — palette, inspector,
- * tray, exports — shows the same name without each one re-deriving it.
+ * part loads and `registerPart`), so every surface (palette, inspector,
+ * tray, exports) shows the same name without each one re-deriving it.
  *
  * IMPORTANT: the SPICE netlist generator and the refdes assigner match on
  * keyword regexes over `"<type> <family>"`. Renaming a family could silently
  * change how a part simulates, so a curated entry can carry:
- *   - `sim`    — the keyword string handed to the netlist generator instead
+ *   - `sim`:     the keyword string handed to the netlist generator instead
  *                of the display category (keeps emitter matching stable), and
- *   - `prefix` — an explicit refdes prefix (R, C, D, Q…), which beats the
+ *   - `prefix`:  an explicit refdes prefix (R, C, D, Q…), which beats the
  *                keyword guess in core/refdes.
  *
  * Zero imports by design: this is pure string data, so `lib/partsLibrary` can
@@ -32,7 +32,7 @@
 export interface PartNaming {
   /** Display name shown in the palette, inspector and tray. */
   label: string
-  /** Display category — the collapsible group in the components rail. */
+  /** Display category: the collapsible group in the components rail. */
   category: string
   /** Keyword string for the SPICE emitter match (defaults to the category). */
   sim?: string
@@ -84,7 +84,7 @@ export function compareCategories(a: string, b: string): number {
  * Rules of thumb used here:
  *  - name the component, not the Fritzing file ("Pushbutton", not "pushbutton")
  *  - keep the distinguishing detail in parentheses (package, pitch, rating)
- *  - never bake a value into the name — values live in `attrs` and render as
+ *  - never bake a value into the name; values live in `attrs` and render as
  *    the schematic's value text (a resistor is "Resistor", not "220 Ω Resistor")
  */
 export const PART_NAMING: Record<string, PartNaming> = {
@@ -289,7 +289,7 @@ export const PART_NAMING: Record<string, PartNaming> = {
  * "a capacitor is 100 nF"), because it matches on keywords. A 2xAA pack is
  * 3 V, not the generic source's 5 V, and an electrolytic is microfarads, not
  * nanofarads. These land in the part's `attrs` on placement, so the value
- * printed on the schematic is the value that gets simulated — the sheet never
+ * printed on the schematic is the value that gets simulated; the sheet never
  * shows a number the netlist disagrees with.
  */
 export const PART_DEFAULT_ATTRS: Record<string, Record<string, string>> = {
@@ -437,7 +437,7 @@ function humanizeWord(word: string, isEdge: boolean): string {
   if (pkg) return `${pkg[1].toUpperCase()}-${pkg[2].toUpperCase()}`
   const unit = UNIT_RE.exec(word)
   if (unit) return `${unit[1]} ${UNIT_CASE[unit[2].toLowerCase()] ?? unit[2]}`
-  // already mixed-case and deliberate (tinyCore, LilyPad) — leave it alone
+  // already mixed-case and deliberate (tinyCore, LilyPad); leave it alone
   if (/[a-z][A-Z]/.test(word)) return word
   if (word === word.toUpperCase() && word.length > 3) return capitalize(lower)
   return capitalize(word)
@@ -456,7 +456,7 @@ export function humanizeLabel(raw: string): string {
   const cleaned = String(raw ?? '').replace(NOISE_RE, '')
   const words: string[] = []
   for (const token of cleaned.split(/[_\-.\s]+/).filter(Boolean)) {
-    // brand camelCase (tinyCore, tinyGlow) is deliberate — never split it
+    // brand camelCase (tinyCore, tinyGlow) is deliberate; never split it
     if (BRAND_CAMEL_RE.test(token)) words.push(token)
     else
       words.push(
@@ -517,7 +517,7 @@ export interface ResolvedNaming {
  * an authored label from the part file; then the humanized type slug.
  *
  * `rawLabel`/`rawFamily` are whatever the part file carried (Fritzing title
- * and family) — they stay the sim-matching keywords when there's no curated
+ * and family); they stay the sim-matching keywords when there's no curated
  * entry, so importing a part never changes how it simulates.
  */
 export function resolveNaming(type: string, rawLabel?: string, rawFamily?: string): ResolvedNaming {

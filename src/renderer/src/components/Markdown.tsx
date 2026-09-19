@@ -1,5 +1,5 @@
 /**
- * Markdown — shared GitHub-flavored markdown renderer.
+ * Markdown: shared GitHub-flavored markdown renderer.
  *
  * Used by both the Documentation tab and the Studio AI chat so they stylize
  * markdown the same way. Fenced ```mermaid blocks are rendered as diagrams
@@ -22,7 +22,7 @@ function ensureMermaid(dark: boolean): void {
   mermaid.initialize({
     startOnLoad: false,
     securityLevel: 'strict',
-    // Never let mermaid inject its "Syntax error" bomb graphic into the DOM —
+    // Never let mermaid inject its "Syntax error" bomb graphic into the DOM;
     // we render our own inline fallback instead.
     suppressErrorRendering: true,
     theme,

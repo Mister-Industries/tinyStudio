@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * test-circuit.mjs — zero-extra-dependency test runner for the Circuit v2 core.
+ * test-circuit.mjs: zero-extra-dependency test runner for the Circuit v2 core.
  *
  * Bundles every src/**\/__tests__/*.test.ts with esbuild (already a
  * transitive dependency via vite) into a temp dir, then runs them with Node's
@@ -8,7 +8,7 @@
  *
  *   npm run test:circuit
  *
- * Why not vitest? Nothing against it — adopt it whenever it lands in the repo;
+ * Why not vitest? Nothing against it. Adopt it whenever it lands in the repo;
  * these test files are plain node:test + assert and will port in minutes.
  */
 import { build } from 'esbuild'
@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const srcRoot = resolve(__dirname, '..', 'src')
 
-// Every `__tests__/*.test.ts` under src — renderer and main alike — so a new
+// Every `__tests__/*.test.ts` under src (renderer and main alike) so a new
 // suite (lib/__tests__, main/__tests__) is picked up by dropping the file in,
 // with no change here. Main-process tests must not import `electron`; keep the
 // logic under test in plain modules. `outbase` below keeps the directory

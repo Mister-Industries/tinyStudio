@@ -1,5 +1,5 @@
 /**
- * circuit/parts/netLabels — generated glyphs for schematic net labels (§8.4).
+ * circuit/parts/netLabels: generated glyphs for schematic net labels (§8.4).
  *
  * A net label is a 1-pin entity whose virtual pin is "<id>:1"; labels sharing a
  * name merge into one net (the mechanism in core/nets.ts). `ground` is just the

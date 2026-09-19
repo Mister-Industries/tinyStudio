@@ -139,7 +139,7 @@ export interface RepoMeta {
   private: boolean
   /**
    * GitHub omits `permissions` for anonymous requests, so every field defaults
-   * to false — which is the correct read-only answer for a signed-out user.
+   * to false, which is the correct read-only answer for a signed-out user.
    * This is what decides read-only vs writable in the UI: access is a property
    * of the repo + token, never of who we think the user is.
    */
@@ -194,7 +194,7 @@ const decodeSegments = (p: string): string => {
 
 /**
  * Read what someone pasted as "a repo": `owner/repo`, `owner/repo/some/folder`,
- * or a github.com URL — including `/tree/<branch>/<folder>` links copied from
+ * or a github.com URL, including `/tree/<branch>/<folder>` links copied from
  * the browser, and `/blob/…` links to a file, which open the folder holding it.
  * Null for anything that isn't recognisably a GitHub repo.
  */
@@ -232,7 +232,7 @@ export async function ghUser(token: string): Promise<GitHubAccount> {
   const r = await fetch(GH_API + '/user', { headers: ghHeaders(token) })
   if (!r.ok)
     throw new Error(
-      r.status === 401 ? "Invalid token — check it has 'repo' scope." : 'GitHub error ' + r.status
+      r.status === 401 ? "Invalid token. Check it has 'repo' scope." : 'GitHub error ' + r.status
     )
   const u = await r.json()
   return { login: u.login, name: u.name || u.login, avatarUrl: u.avatar_url, token }
@@ -279,7 +279,7 @@ export async function ghRepos(token: string): Promise<RepoSummary[]> {
 /**
  * Per-session memo for the two GitHub *API* calls behind fetchRepoFolder.
  * File contents come from raw.githubusercontent (not rate limited), but repo
- * metadata and the tree do count against the anonymous 60 req/hr/IP budget —
+ * metadata and the tree do count against the anonymous 60 req/hr/IP budget,
  * and the Examples manifest now holds ~70 projects across a handful of repos.
  * Without this, downloading the example set would spend ~140 API calls and get
  * throttled; with it, it costs two per repo.
@@ -296,7 +296,7 @@ const repoTreeCache = new Map<string, Promise<TreeBlob[]>>()
 /**
  * Cache keys carry whether the request was authenticated. Permissions and
  * visibility both depend on the token, so an anonymous lookup must never be
- * served back to a signed-in caller — that would report a repo the user can
+ * served back to a signed-in caller; that would report a repo the user can
  * push to as read-only for the rest of the session.
  */
 const authTag = (token?: string): string => (token ? 'auth' : 'anon')
@@ -336,7 +336,7 @@ async function ghRepoMeta(owner: string, repo: string, token?: string): Promise<
   if (!p) {
     p = ghRepoMetaUncached(owner, repo, token)
     repoMetaCache.set(key, p)
-    // a failed lookup shouldn't be cached — let the next call retry
+    // a failed lookup shouldn't be cached; let the next call retry
     p.catch(() => repoMetaCache.delete(key))
   }
   return p
@@ -345,7 +345,7 @@ async function ghRepoMeta(owner: string, repo: string, token?: string): Promise<
 /**
  * Can the signed-in user write to this repo? This is the single check that
  * separates "this is my example, push straight to it" from "this is read-only,
- * offer to make a copy" — and it works for collaborators without any extra
+ * offer to make a copy", and it works for collaborators without any extra
  * wiring, because GitHub answers it per-token.
  */
 export async function canPushTo(owner: string, repo: string, token?: string): Promise<boolean> {
@@ -439,7 +439,7 @@ async function ghFile(
   return (await ghBlobResponse(owner, repo, path, branch, token)).text()
 }
 
-/** Fetch a blob as base64 — the encoding the Contents API wants on the way back out. */
+/** Fetch a blob as base64, the encoding the Contents API wants on the way back out. */
 async function ghFileBase64(
   owner: string,
   repo: string,
@@ -459,7 +459,7 @@ async function ghFileBase64(
 }
 
 export interface RepoFileEntry {
-  /** path relative to the requested folder — how the workspace sees it */
+  /** path relative to the requested folder, how the workspace sees it */
   rel: string
   /** full path within the repo */
   repoPath: string
@@ -481,7 +481,7 @@ export interface RepoProject {
   path: string
   /** text files only: rel -> content. This is what the editor opens. */
   files: Record<string, string>
-  /** EVERY file in the folder, fetched or not — what a faithful copy must reproduce. */
+  /** EVERY file in the folder, fetched or not: what a faithful copy must reproduce. */
   manifest: RepoFileEntry[]
   /** the repo tree came back truncated; the manifest may be incomplete */
   truncated: boolean
@@ -510,7 +510,7 @@ async function pooled<T, R>(
  * Fetch one folder of a repo as an openable project.
  *
  * Text files are downloaded now (that's what the editor needs). Binaries are
- * *listed but not downloaded* — their bytes are only needed when the project is
+ * *listed but not downloaded*; their bytes are only needed when the project is
  * copied to a new repo, and pulling them at open time would cost load speed and
  * browser memory for files nobody is going to look at. `manifest` is the record
  * of what exists, so a later copy can fetch the rest and still be complete.
@@ -569,7 +569,7 @@ export async function fetchRepoProject(
     try {
       files[m.rel] = await ghFile(owner, repo, m.repoPath, resolvedBranch, token)
     } catch {
-      /* unreadable blob — leave it out of files; it stays in the manifest */
+      /* unreadable blob: leave it out of files; it stays in the manifest */
     }
     onProgress?.(`Loading ${++done}/${toFetch.length} · ${m.rel}`)
   })
@@ -627,7 +627,7 @@ function b64encode(str: string): string {
 
 /**
  * Percent-encode each path segment but keep the separators. Encoding the whole
- * path collapses '/' into %2F, which stops addressing a nested file — it only
+ * path collapses '/' into %2F, which stops addressing a nested file; it only
  * went unnoticed while every push landed on the repo root.
  */
 const encodePath = (path: string): string => path.split('/').map(encodeURIComponent).join('/')
@@ -728,7 +728,7 @@ export async function ghRepoNameAvailable(
   })
   if (r.status === 404) return true
   if (r.ok) return false
-  // Anything else (rate limit, network) is not a definitive "taken" — let the
+  // Anything else (rate limit, network) is not a definitive "taken"; let the
   // create call be the authority rather than blocking the user on a guess.
   return true
 }
@@ -756,7 +756,7 @@ export interface CopyResult {
  * Create a new repo owned by the signed-in user and copy a project into it.
  *
  * The push set is the working tree PLUS any file the source project listed but
- * never downloaded — images, diagram.svg, firmware blobs. Without that second
+ * never downloaded: images, diagram.svg, firmware blobs. Without that second
  * half the copy silently loses whatever the editor didn't happen to need, and
  * the user only finds out later.
  *
@@ -769,7 +769,7 @@ export async function copyProjectToNewRepo(opts: {
   token: string
   isPrivate?: boolean
   description?: string
-  /** current working tree, workspace-relative — includes the user's edits */
+  /** current working tree, workspace-relative, includes the user's edits */
   files: Record<string, string>
   /** where the project came from, for the files whose bytes were deferred */
   source?: WorkspaceSource
@@ -864,7 +864,7 @@ export async function collectWorkspaceFiles(workspace: Workspace): Promise<Recor
         try {
           out[rel(workspace, item.path)] = await fileSystem.readFile(item.path)
         } catch {
-          /* unreadable — skip */
+          /* unreadable: skip */
         }
       }
     }
@@ -907,7 +907,7 @@ export async function pushFile(
 
 /**
  * Enable GitHub Pages for the repo (served from the branch root) and return the
- * site URL. Safe to call repeatedly — a 409 means it's already enabled.
+ * site URL. Safe to call repeatedly: a 409 means it's already enabled.
  */
 export async function enablePages(remote: string, branch: string, token: string): Promise<string> {
   const [owner, repo] = remote.split('/')
@@ -994,14 +994,14 @@ export const GITHUB_ACCOUNT_EVENT = 'tinystudio:github-account'
 
 export function saveAccount(account: GitHubAccount | null): void {
   currentAccount = account
-  // Desktop persistence is the main process's job — writing the token here too
+  // Desktop persistence is the main process's job; writing the token here too
   // would put back the plaintext copy the keychain exists to avoid.
   if (!desktopAuth()) {
     try {
       if (account) localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account))
       else localStorage.removeItem(ACCOUNT_KEY)
     } catch {
-      /* storage unavailable — the in-memory account still works this session */
+      /* storage unavailable: the in-memory account still works this session */
     }
   }
   // Permissions and repo visibility are token-dependent, so anything cached
@@ -1035,7 +1035,7 @@ export function loadLink(workspacePath: string): RepoLink | null {
 }
 
 /**
- * Persist a workspace's repo link. Throws on quota — the baseline is a full
+ * Persist a workspace's repo link. Throws on quota: the baseline is a full
  * copy of every text file, so a large project can exceed the ~5 MB localStorage
  * budget. Failing loudly matters: a silently dropped baseline makes the next
  * push re-upload the entire project.
@@ -1051,7 +1051,7 @@ export function saveLink(workspacePath: string, link: RepoLink | null): void {
     const files = Object.keys(link.base).length
     throw new Error(
       `Could not save the sync baseline for this project (${files} files). ` +
-        'Browser storage is full — clear site data or use a smaller project. ' +
+        'Browser storage is full. Clear site data or use a smaller project. ' +
         `(${e instanceof Error ? e.message : 'quota exceeded'})`
     )
   }

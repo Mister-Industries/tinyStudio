@@ -1,10 +1,10 @@
 /**
- * vite-plugin-tinyparts — dev servers only: serve a tinyparts checkout live.
+ * vite-plugin-tinyparts: dev servers only: serve a tinyparts checkout live.
  *
  * With the tinyparts repo cloned next to this one (or TINYPARTS_DIR pointing at
  * it), `npm run dev` and `npm run dev:web` load the bundled and installed parts
  * packs straight from that folder, and push a change event the moment any file
- * in it is saved — Illustrator included — so the Circuit view reloads the art
+ * in it is saved (Illustrator included) so the Circuit view reloads the art
  * without a restart or `npm run parts:sync`. The app side is
  * src/renderer/src/circuit/parts/devFolder.ts. None of this exists in a build.
  *
@@ -14,7 +14,7 @@
  *   GET    /__tinyparts/file?path=      file text (404 if missing)
  *   GET    /__tinyparts/exists?path=    true | false
  *   GET    /__tinyparts/list?path=      [{ name, isDirectory }]
- *   PUT    /__tinyparts/file?path=      write (packs/…/*.json|*.svg only) — the Parts editor's "Save to tinyparts"
+ *   PUT    /__tinyparts/file?path=      write (packs/…/*.json|*.svg only): the Parts editor's "Save to tinyparts"
  *   DELETE /__tinyparts/file?path=      delete (packs/…/*.json only)
  */
 
@@ -51,7 +51,7 @@ export function tinypartsDev(): Plugin {
       const log = server.config.logger
       if (!existsSync(join(root, 'index.json'))) {
         log.info(
-          `  tinyparts: no checkout at ${root} — parts come from the bundled snapshot (set TINYPARTS_DIR to use one)`
+          `  tinyparts: no checkout at ${root}; parts come from the bundled snapshot (set TINYPARTS_DIR to use one)`
         )
         return
       }
@@ -77,7 +77,7 @@ export function tinypartsDev(): Plugin {
           }, 250)
         })
       } catch (e) {
-        log.warn(`  tinyparts: can't watch ${root} (${String(e)}) — reload the page to see changes`)
+        log.warn(`  tinyparts: can't watch ${root} (${String(e)}); reload the page to see changes`)
       }
       server.httpServer?.once('close', () => {
         watcher?.close()

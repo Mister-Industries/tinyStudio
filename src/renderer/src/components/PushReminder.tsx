@@ -1,5 +1,5 @@
 /**
- * PushReminder — "3 changes not pushed to owner/repo", for a project linked to
+ * PushReminder: "3 changes not pushed to owner/repo", for a project linked to
  * a repo this account can push to. Hidden while nothing has changed since the
  * last sync. Push commits with a default message; the GitHub tab takes a
  * custom one.

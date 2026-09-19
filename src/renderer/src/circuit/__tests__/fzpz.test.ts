@@ -122,7 +122,7 @@ test('unzip round-trips stored and deflated entries', async () => {
 test('unzip skips directory entries and rejects non-zip data', async () => {
   const zip = buildZip([{ name: 'a/', data: new Uint8Array(0), store: true }])
   assert.equal((await unzip(zip)).length, 0)
-  await assert.rejects(() => unzip(new TextEncoder().encode('not a zip at all — plain text')))
+  await assert.rejects(() => unzip(new TextEncoder().encode('not a zip at all; plain text')))
 })
 
 test('unzip survives a trailing comment after the EOCD', async () => {

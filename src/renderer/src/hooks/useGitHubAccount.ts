@@ -1,7 +1,7 @@
 /**
- * Shared GitHub account state, with a window event so every consumer — the
+ * Shared GitHub account state, with a window event so every consumer (the
  * header profile, the GitHub source-control tab, and the Visual "Publish"
- * button — stays in sync when you sign in or out.
+ * button) stays in sync when you sign in or out.
  *
  * Three ways in:
  *   • **Device flow** (desktop). No token to paste, no client secret in the
@@ -35,7 +35,7 @@ export interface DeviceCodePrompt {
 export interface UseGitHubAccount {
   account: GitHubAccount | null
   connecting: boolean
-  /** True on desktop with an OAuth client ID built in — i.e. no PAT needed. */
+  /** True on desktop with an OAuth client ID built in; i.e. no PAT needed. */
   canUseDeviceFlow: boolean
   /** True in the browser build: sign-in goes through github.com and comes back. */
   canUseWebFlow: boolean

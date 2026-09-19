@@ -1,10 +1,10 @@
 /**
- * folderAccess — which folders the renderer may read and write.
+ * folderAccess: which folders the renderer may read and write.
  *
  * The renderer shows project content from anywhere (README links, part art,
  * sketches), so it isn't trusted with the whole disk. It gets the folders the
- * user chose in a folder picker — remembered across launches in
- * userData/folder-access.json — plus the folder examples download into.
+ * user chose in a folder picker, remembered across launches in
+ * userData/folder-access.json, plus the folder examples download into.
  * Every file operation main performs for the renderer checks this first.
  */
 

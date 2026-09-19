@@ -1,5 +1,5 @@
 /**
- * exampleTags — the tag vocabulary for the Examples library.
+ * exampleTags: the tag vocabulary for the Examples library.
  *
  * One place defines what a tag *is*, what it's called, and what colour it
  * wears, so the Examples tab, the filter bar and the manifest generator
@@ -7,18 +7,18 @@
  *
  * Two kinds of tag, and the difference is the whole design:
  *
- *   'board' — a piece of hardware the example runs on or plugs into. These
+ *   'board':  a piece of hardware the example runs on or plugs into. These
  *             are colour-coded to the real solder-mask of the board, so the
  *             chip on the card matches the PCB on the bench: tinySniff is
  *             yellow because tinySniff *is* yellow. The colours come from
  *             the same masks partsLibrary.ts paints the Circuit view with.
  *
- *   'topic'  — what the example teaches (i2c, pwm, wifi…). Deliberately
+ *   'topic':  what the example teaches (i2c, pwm, wifi…). Deliberately
  *             neutral grey. Colour means "hardware" here; if topics were
  *             coloured too, the board colours would stop carrying meaning.
  *
  * Unknown tags are not an error. A tag that appears in the manifest but not
- * in this file still renders (as a neutral topic chip) and still filters —
+ * in this file still renders (as a neutral topic chip) and still filters,
  * so the examples repo can add vocabulary without shipping an app update.
  */
 
@@ -31,7 +31,7 @@ export type TagKind = 'board' | 'topic'
 export type TagFacet = 'board' | 'protocol' | 'peripheral' | 'concept'
 
 export interface TagMeta {
-  /** Canonical lowercase slug — what lives in the manifest and the filter state. */
+  /** Canonical lowercase slug: what lives in the manifest and the filter state. */
   slug: string
   /** Display text on the chip. */
   label: string
@@ -321,7 +321,7 @@ export function getTagMeta(raw: string): TagMeta {
   return { slug, label, kind: 'topic', facet: 'concept' }
 }
 
-/** Canonical slugs for a list of raw tags — de-duplicated, order preserved. */
+/** Canonical slugs for a list of raw tags, de-duplicated, order preserved. */
 export function canonicalizeTags(raw: readonly string[] | undefined): string[] {
   if (!raw) return []
   const out: string[] = []

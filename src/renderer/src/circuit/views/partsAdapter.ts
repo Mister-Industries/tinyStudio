@@ -1,5 +1,5 @@
 /**
- * circuit/views/partsAdapter — geometry glue between the v2 document and the
+ * circuit/views/partsAdapter: geometry glue between the v2 document and the
  * LEGACY partsLibrary (breadboard view only). Temporary by design: the M2
  * parts registry (`circuit/parts/registry.ts`) replaces every import of
  * `lib/partsLibrary` in here without touching the canvas.
@@ -88,7 +88,7 @@ export function firstPinLocal(type: string, view: ViewId = 'bb'): [number, numbe
   return Object.values(vis.v.pins)[0]
 }
 
-/** Snap a placement so its PINS land on the 9.6 px major grid (both views —
+/** Snap a placement so its PINS land on the 9.6 px major grid (both views:
  * spec §4 pin-on-grid contract; Fritzing behavior). */
 export function snapBB(type: string, placement: Placement, view: ViewId = 'bb'): Placement {
   const vis = visualFor(type, view)
@@ -239,7 +239,7 @@ export interface FrozenWire {
   id: string
   bends: Pt[]
   straight: boolean
-  /** Both endpoints sit on moved parts — bends translate with the move. */
+  /** Both endpoints sit on moved parts; bends translate with the move. */
   both: boolean
 }
 
@@ -320,7 +320,7 @@ export function bbBounds(
   return viewBounds(doc, 'bb')
 }
 
-// ── M2: breadboard seating (drop-to-connect, derived — never stored) ─────────
+// ── M2: breadboard seating (drop-to-connect, derived, never stored) ─────────
 
 import { SpatialHash } from '../core/geometry'
 import { breadboardBuses, isBreadboard } from '../parts/breadboard'
@@ -328,7 +328,7 @@ import { breadboardBuses, isBreadboard } from '../parts/breadboard'
 /** Seat radius: half a hole pitch (spec §7.3). */
 const SEAT_RADIUS = GRID_BB / 2
 
-/** buses resolver for buildNets — a part's own `buses` (tinyProto's power
+/** buses resolver for buildNets: a part's own `buses` (tinyProto's power
  * rails, from its part.json), else the generated breadboards'. */
 export function circuitBuses(type: string): string[][] | undefined {
   return getPart(type)?.buses ?? breadboardBuses(type)
@@ -343,7 +343,7 @@ export interface Seat {
 }
 
 /**
- * Derive implicit pin-in-hole connections: a part seats as a rigid body —
+ * Derive implicit pin-in-hole connections: a part seats as a rigid body;
  * ALL of its pins must land within SEAT_RADIUS of a breadboard hole at the
  * part's current placement/rotation, or NONE of them seat (Fritzing rule:
  * a component either fully plugs in or it's just resting on top). This
@@ -433,14 +433,14 @@ export interface RatsnestSegment {
 }
 
 /**
- * Dashed helper lines for nets that are electrically connected (globally —
+ * Dashed helper lines for nets that are electrically connected (globally:
  * either view, buses, seating) but not yet drawn in `view`: for each global
  * net, group its placed pins by this-view-only connectivity, then greedily
  * bridge groups between their nearest pins.
  */
 export function ratsnest(doc: CircuitDoc, view: ViewId, global: NetModel): RatsnestSegment[] {
   // this-view connectivity: only this view's wires (+ physical buses; bb also
-  // gets derived seating — a seated pin needs no wire)
+  // gets derived seating; a seated pin needs no wire)
   const viewDoc: CircuitDoc = { ...doc, wires: doc.wires.filter((w) => w.view === view) }
   const viewNets = buildNets(viewDoc, {
     busesFor: circuitBuses,
@@ -491,7 +491,7 @@ import type { ErcIssue } from '../core/erc'
 
 /**
  * Info-level floating-pin findings that need pin geometry (hence view-side).
- * Only parts that are PARTIALLY connected are reported — a fully-unwired part
+ * Only parts that are PARTIALLY connected are reported; a fully-unwired part
  * is just not placed yet and would only add noise.
  */
 export function ercFloatingPins(doc: CircuitDoc, net: NetModel, view: ViewId): ErcIssue[] {
@@ -569,7 +569,7 @@ export function occupiedBoxes(doc: CircuitDoc, view: ViewId, exclude?: Set<strin
 
 /**
  * Where a part should land when the editor places it for the user rather
- * than the user dropping it — the cross-view auto-placement anchor.
+ * than the user dropping it: the cross-view auto-placement anchor.
  *
  * Parts added in one view are placed in BOTH views (spec §10.2: the two views
  * share one electrical model, so a part that exists in the breadboard should

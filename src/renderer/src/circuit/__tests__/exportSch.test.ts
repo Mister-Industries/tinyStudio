@@ -1,4 +1,4 @@
-/** Tests for schematic image export — ink wires + net-label glyphs, valid XML shape. */
+/** Tests for schematic image export: ink wires + net-label glyphs, valid XML shape. */
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { emptyDoc, type CircuitDoc } from '../core/model'
@@ -29,7 +29,7 @@ test('composeSceneSvg (sch) renders ink wires + net labels with balanced svg tag
   ]
   const svg = composeSceneSvg(doc, '#ffffff', 'sch')
   assert.ok(svg, 'expected a scene svg')
-  // one shared weight for schematic ink (parts/style.ts) — a wire must draw
+  // one shared weight for schematic ink (parts/style.ts): a wire must draw
   // at the same width as the pin lead it lands on
   assert.ok(svg!.includes(`stroke-width="${WIRE_STROKE}"`), 'schematic ink wire present')
   assert.ok(svg!.includes('Studio'), 'watermark present')

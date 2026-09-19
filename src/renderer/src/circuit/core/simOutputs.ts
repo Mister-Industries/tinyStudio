@@ -1,10 +1,10 @@
 /**
- * circuit/core/simOutputs — which points of the circuit an analysis reports
+ * circuit/core/simOutputs: which points of the circuit an analysis reports
  * (spec §10.4, CircuitLab-style output selection).
  *
  * ngspice hands back every node in the circuit; a schematic of any size turns
  * that into an unreadable plot. CircuitLab's answer is to make the user name
- * the outputs — click a node, or pick it from a list — and plot only those.
+ * the outputs (click a node, or pick it from a list) and plot only those.
  * This module is the pure half of that: the stable references we persist, and
  * their resolution against a generated netlist.
  *
@@ -17,7 +17,7 @@
  *   "i@V1"       the current through V1 (a voltage source / current probe)
  *   "d@P2"       a differential probe's own reading
  *
- * ZERO React, ZERO DOM — same rule as the rest of core/.
+ * ZERO React, ZERO DOM: same rule as the rest of core/.
  */
 
 import { newId, type CircuitDoc, type Probe, type ViewId } from './model'
@@ -90,7 +90,7 @@ export function netIndexOfOutput(ref: OutputRef, net: NetModel): number | undefi
 
 /**
  * What a net is called on screen: its label if it has one, otherwise the same
- * `n<k>` token the netlist will hand ngspice — so the tag on the canvas, the
+ * `n<k>` token the netlist will hand ngspice, so the tag on the canvas, the
  * row in the Outputs list and the vector in the results all read alike.
  */
 export function netLabelFor(net: NetModel, index: number, nodeNames?: string[]): string {
@@ -104,7 +104,7 @@ export function netLabelFor(net: NetModel, index: number, nodeNames?: string[]):
 
 /**
  * Everything this circuit can report, ready for a checkbox list: one entry per
- * multi-pin net (ground excluded — it is 0 by definition), one per
+ * multi-pin net (ground excluded; it is 0 by definition), one per
  * current-measuring part, one per differential probe.
  */
 export function availableOutputs(
@@ -195,7 +195,7 @@ export function vectorForOutput(
 
 /**
  * Predicate for "does this result vector belong to the picked outputs?".
- * An empty pick means "everything" — same as before outputs existed, so a
+ * An empty pick means "everything": same as before outputs existed, so a
  * circuit the user hasn't curated still plots.
  */
 export function outputFilter(resolved: readonly ResolvedOutput[]): (vecName: string) => boolean {
@@ -218,7 +218,7 @@ export function outputLabelFor(
 
 // ── placed probes ────────────────────────────────────────────────────────────
 //
-// A picked output is not a highlight — it is a tag on the sheet. These helpers
+// A picked output is not a highlight; it is a tag on the sheet. These helpers
 // keep doc.sim.probes and the Outputs list describing the same set, so ticking
 // a box in the panel and clicking a wire on the canvas do the same thing.
 
@@ -237,7 +237,7 @@ export function probeFor(probes: readonly Probe[], ref: OutputRef): Probe | unde
   return probes.find((p) => p.at === ref)
 }
 
-/** The outputs the placed probes ask for — the panel's "picked" set. */
+/** The outputs the placed probes ask for: the panel's "picked" set. */
 export function outputRefsOf(probes: readonly Probe[]): OutputRef[] {
   return probes.map((p) => p.at)
 }
@@ -261,7 +261,7 @@ export function makeProbe(
   }
 }
 
-/** Which part a probe hangs off — the anchor for its leader line. */
+/** Which part a probe hangs off: the anchor for its leader line. */
 export function probeAnchor(
   ref: OutputRef
 ): { kind: OutputKind; part: string; pin?: string } | null {

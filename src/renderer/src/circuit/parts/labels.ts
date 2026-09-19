@@ -1,5 +1,5 @@
 /**
- * circuit/parts/labels — the text that rides beside a schematic symbol.
+ * circuit/parts/labels: the text that rides beside a schematic symbol.
  *
  * A schematic is only half symbols; the other half is "R1" and "220 Ω". The
  * spec (§8) puts the reference designator above the symbol and the value
@@ -9,7 +9,7 @@
  *
  * The value shown is the value that will actually be SIMULATED. It comes from
  * the same `simAttrsFor` table the netlist generator uses, including the same
- * defaults — so a resistor the user never edited reads "220 Ω" on the sheet
+ * defaults, so a resistor the user never edited reads "220 Ω" on the sheet
  * and emits 220 Ω into SPICE. A sheet that showed nothing until you typed a
  * value would quietly lie about what the simulator is doing.
  *
@@ -48,7 +48,7 @@ export function formatValue(raw: string, unit: string): string {
   if (!m) return `${String(raw).trim()} ${unit}`.trim()
   const n = m[1]
   const suffix = m[2] ? PREFIX[m[2].toLowerCase()] : ''
-  // an unrecognised suffix is probably already a unit ("5V") — don't double it
+  // an unrecognised suffix is probably already a unit ("5V"); don't double it
   if (m[2] && suffix === undefined) return `${n} ${unit}`
   return `${n} ${suffix ?? ''}${unit}`.replace(/\s+/g, ' ').trim()
 }
@@ -60,7 +60,7 @@ export function refdesOf(part: CircuitPart): string {
 
 /**
  * The value line drawn below the symbol, or '' when the part has no value
- * worth printing (a board, an LED, a bare diode). Sources print two terms —
+ * worth printing (a board, an LED, a bare diode). Sources print two terms:
  * a sine source is meaningless without both amplitude and frequency.
  */
 export function valueOf(part: CircuitPart, simFamily?: string): string {
@@ -95,7 +95,7 @@ export interface VisibleBox {
  * Where a rotated symbol actually sits. Rotation happens about the symbol's
  * centre, so a 90°-turned part keeps its placement origin but its ink moves:
  * a 57.6 x 19.2 resistor stood on end covers 19.2 x 57.6, offset up and right.
- * Labels anchor to THIS box, not the unrotated one — otherwise a vertical
+ * Labels anchor to THIS box, not the unrotated one; otherwise a vertical
  * part's value text lands on top of the wire running past it.
  */
 export function visibleBox(w: number, h: number, rotate?: number): VisibleBox {
@@ -124,7 +124,7 @@ export interface LabelLayout {
  * The deciding factor is which way the part's PINS run, not its rotation: a
  * source drawn tall (pins top and bottom) and a resistor turned on its end are
  * the same problem. Text under a vertical part lands on the wire leaving its
- * bottom pin, so vertical parts get their text stacked beside them — which is
+ * bottom pin, so vertical parts get their text stacked beside them, which is
  * also what every schematic tool does, and what a reader expects.
  */
 export function labelLayout(

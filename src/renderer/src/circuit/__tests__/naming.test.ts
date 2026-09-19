@@ -1,5 +1,5 @@
 /**
- * Tests for parts/naming — the human-readable label + category layer, and its
+ * Tests for parts/naming: the human-readable label + category layer, and its
  * contract with the two systems that used to read the raw Fritzing family:
  * SPICE emitter matching (netlist) and refdes assignment.
  */
@@ -25,7 +25,7 @@ test('curated parts get a real name, not the Fritzing slug', () => {
       .label,
     'N-Channel MOSFET'
   )
-  // a value never belongs in the name — it lives in attrs
+  // a value never belongs in the name; it lives in attrs
   assert.equal(resolveNaming('resistor', '220 Ω Resistor', 'Resistor').label, 'Resistor')
 })
 

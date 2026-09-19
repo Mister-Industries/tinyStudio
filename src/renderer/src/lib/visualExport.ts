@@ -2,7 +2,7 @@
  * Builds a self-contained HTML page from a project's visual.js p5 sketch.
  *
  * The export runs anywhere (open the file locally, or host it on GitHub Pages)
- * and keeps live USB serial via the Web Serial API — the same serialValue() /
+ * and keeps live USB serial via the Web Serial API, the same serialValue() /
  * serialEvent() shims the in-app Visual view provides, so the sketch is dropped
  * in unchanged, with the same `theme` object (lib/sketchTheme) read from this
  * page's own copy of the tokens. It's dressed in the tinyStudio design system (tokens copied
@@ -93,7 +93,7 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
     color: var(--text-body); font-family: var(--font-sans); -webkit-font-smoothing: antialiased;
   }
 
-  /* The card — the same raised panel + 1.5px border the app's panels use. */
+  /* The card: the same raised panel + 1.5px border the app's panels use. */
   .device {
     width: min(100%, 560px); background: var(--bg-raised);
     border: 1.5px solid var(--border-default); border-radius: 12px;
@@ -110,7 +110,7 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
   }
   .actions { display: flex; align-items: center; gap: 8px; }
 
-  /* Connection status — a dot + label, like the app's status bar. */
+  /* Connection status: a dot + label, like the app's status bar. */
   .status {
     display: inline-flex; align-items: center; gap: 7px;
     font-size: 12px; font-weight: 500; line-height: 1; white-space: nowrap; color: var(--text-muted);
@@ -124,7 +124,7 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
   }
   @keyframes pulse { 0% { transform: scale(1); opacity: .6; } 70%, 100% { transform: scale(2.6); opacity: 0; } }
 
-  /* Tactile keys — a top highlight over a solid bottom edge; lift on hover, press down on click. */
+  /* Tactile keys: a top highlight over a solid bottom edge; lift on hover, press down on click. */
   .btn {
     font: inherit; font-size: 14px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap;
     height: 30px; padding: 0 12px; display: inline-flex; align-items: center;
@@ -145,7 +145,7 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
     transform: translateY(2px);
     box-shadow: var(--highlight-top), 0 0 0 0 var(--brand-deep), 0 1px 3px rgba(20,19,16,.18);
   }
-  /* Theme toggle — a chromeless icon, like the one in the Studio's top bar. */
+  /* Theme toggle: a chromeless icon, like the one in the Studio's top bar. */
   .theme-toggle {
     width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
     border: 0; border-radius: 5px; background: transparent; color: var(--text-muted); cursor: pointer;
@@ -280,7 +280,7 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
         for (var i = 0; i < parts.length; i++) if (parts[i]) __pushSerial(parts[i]);
       }
     } catch (e) {}
-    // Picker cancelled, board unplugged, or stream ended — back to idle.
+    // Picker cancelled, board unplugged, or stream ended: back to idle.
     if (port) { try { await port.close(); } catch (e) {} }
     setStatus('idle', 'Not connected');
     connectBtn.hidden = false;

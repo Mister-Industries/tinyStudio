@@ -1,5 +1,5 @@
 /**
- * MakeItMine — the read-only-example affordance.
+ * MakeItMine: the read-only-example affordance.
  *
  * A project opened from someone else's repo is editable but not pushable. The
  * rule this component exists to enforce: **saving never blocks**. Edits go to
@@ -40,7 +40,7 @@ export function MakeItMine(): React.JSX.Element | null {
   const dispatch = useAppDispatch()
   const { account } = useGitHubAccount()
   const readOnly = useIsReadOnlyProject()
-  // A browser-only project gets the "save to computer" banner instead — one
+  // A browser-only project gets the "save to computer" banner instead; one
   // notice at a time. This offer returns once the project has a folder.
   const browserOnly = useIsBrowserOnlyProject()
 
@@ -50,7 +50,7 @@ export function MakeItMine(): React.JSX.Element | null {
   const [isPrivate, setIsPrivate] = React.useState(false)
   const [busy, setBusy] = React.useState<string | null>(null)
 
-  // A different project is a different offer — un-dismiss when the source changes.
+  // A different project is a different offer: un-dismiss when the source changes.
   const sourceKey = workspace?.source
     ? `${workspace.source.owner}/${workspace.source.repo}/${workspace.source.path}`
     : ''
@@ -66,7 +66,7 @@ export function MakeItMine(): React.JSX.Element | null {
     if (!account) {
       toast.info('Sign in to GitHub first', {
         description:
-          'Your edits are saved locally either way — signing in is only needed to make a repo.'
+          'Your edits are saved locally either way; signing in is only needed to make a repo.'
       })
       return
     }
@@ -99,7 +99,7 @@ export function MakeItMine(): React.JSX.Element | null {
         name,
         token: account.token,
         isPrivate,
-        description: `${workspace.name} — built with tinyStudio`,
+        description: `${workspace.name}, built with tinyStudio`,
         files,
         source: workspace.source,
         onProgress: (msg) => setBusy(msg)
@@ -136,7 +136,7 @@ export function MakeItMine(): React.JSX.Element | null {
           <span className="text-[var(--text-body)]">
             {workspace.source?.owner}/{workspace.source?.repo}
           </span>
-          . Changes save to this folder — make a copy to keep them on GitHub.
+          . Changes save to this folder; make a copy to keep them on GitHub.
         </span>
         <Button size="sm" className="h-6 shrink-0 px-2 text-[12px]" onClick={openDialog}>
           Make it mine

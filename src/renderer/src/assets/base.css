@@ -1,5 +1,5 @@
 /* ============================================================================
-   tinyStudio / MR.INDUSTRIES — application theme
+   tinyStudio / MR.INDUSTRIES: application theme
    ----------------------------------------------------------------------------
    tinyStudio design system: a clean digital workbench. Cold neutral greys
    (near-white in light, Discord-charcoal in dark) form a calm ground; four
@@ -37,45 +37,45 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* ── RAW INK RAMPS — the four PCB solder-mask colors ───────────────────────
+  /* ── RAW INK RAMPS: the four PCB solder-mask colors ───────────────────────
      *-soft = light tint surface · *-deep = press/border shade ·
      *-on = accessible text on the soft tint. (LIGHT values; dark brightens.) */
 
-  /* RED — error · disconnected · stop */
+  /* RED: error · disconnected · stop */
   --red-soft: #fbe4e1;
   --red: #e5544b;
   --red-deep: #b23a33;
   --red-on: #8c2a25;
 
-  /* GREEN — success · connected · run */
+  /* GREEN: success · connected · run */
   --green-soft: #daf1e5;
   --green: #2fa46a;
   --green-deep: #1e7a4d;
   --green-on: #155c3a;
 
-  /* BLUE — primary action · info · links (the brand) */
+  /* BLUE: primary action · info · links (the brand) */
   --blue-soft: #dceefd;
   --blue: #42a5f5;
   --blue-deep: #1e88e5;
   --blue-on: #0d5b9a;
 
-  /* YELLOW — warning · uploading · highlight (gold) */
+  /* YELLOW: warning · uploading · highlight (gold) */
   --yellow-soft: #fbf1c2;
   --yellow: #f3cb00;
   --yellow-deep: #c6a500;
   --yellow-on: #6b5800;
-  /* text on the solid --yellow swatch specifically (button fills, badges) —
+  /* text on the solid --yellow swatch specifically (button fills, badges):
      always dark since the gold stays bright in both themes, unlike --yellow-on
      which is tuned for the soft tinted surface and flips in dark mode */
   --yellow-contrast: #3d2f00;
 
-  /* PURPLE — Studio AI accent (chat bubbles, send button) */
+  /* PURPLE: Studio AI accent (chat bubbles, send button) */
   --purple-soft: #efe3fb;
   --purple: #9d5fd6;
   --purple-deep: #7c3fb0;
   --purple-on: #5a2a82;
 
-  /* ── COLD NEUTRAL RAMP — white → slate ───────────────────────────────────── */
+  /* ── COLD NEUTRAL RAMP: white → slate ───────────────────────────────────── */
   --warm-50: #fbfcfd;
   --warm-100: #f5f7f9;
   --warm-150: #edf0f3;
@@ -89,9 +89,9 @@
   --warm-900: #181a1e;
   --warm-950: #101113;
 
-  /* ── SEMANTIC ALIASES — LIGHT (default) ──────────────────────────────────── */
+  /* ── SEMANTIC ALIASES: LIGHT (default) ──────────────────────────────────── */
 
-  /* surfaces — near-white canvas, light-grey wells */
+  /* surfaces: near-white canvas, light-grey wells */
   --bg: #fafbfc;
   --bg-sunken: #edf0f3;
   --bg-raised: #ffffff;
@@ -118,7 +118,7 @@
   --brand-on: var(--blue-on);
   --brand-contrast: #ffffff;
 
-  /* top/bottom bar accent — deliberately independent of --brand so the
+  /* top/bottom bar accent: deliberately independent of --brand so the
      window chrome can be recolored without touching buttons/selection/focus */
   --bar-accent: var(--blue);
   --bar-accent-deep: var(--blue-deep);
@@ -170,7 +170,7 @@
   --control-md: 38px;
   --control-lg: 46px;
 
-  /* ── EFFECTS — radius, shadows, motion, dot-grid ─────────────────────────── */
+  /* ── EFFECTS: radius, shadows, motion, dot-grid ─────────────────────────── */
   --radius-xs: 3px;
   --radius-sm: 5px;
   --radius-md: 8px;
@@ -188,7 +188,7 @@
   --highlight-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.45);
   --highlight-top-strong: inset 0 1.5px 0 0 rgba(255, 255, 255, 0.6);
 
-  /* SOFT elevation — floating UI only */
+  /* SOFT elevation: floating UI only */
   --shadow-soft-sm: 0 2px 6px rgba(20, 19, 16, 0.1);
   --shadow-soft: 0 8px 24px rgba(20, 19, 16, 0.14);
   --shadow-soft-lg: 0 20px 48px rgba(20, 19, 16, 0.2);
@@ -206,7 +206,7 @@
   --dot-gap: 18px;
   --dots: radial-gradient(var(--dot-color) 1.1px, transparent 1.1px);
 
-  /* ── EDITOR SYNTAX — derived from the ink palette ────────────────────────── */
+  /* ── EDITOR SYNTAX: derived from the ink palette ────────────────────────── */
   --syn-bg: var(--bg-sunken);
   --syn-text: var(--text-body);
   --syn-comment: var(--text-faint);
@@ -218,7 +218,7 @@
   --syn-const: var(--red-deep);
   --syn-punc: var(--text-muted);
 
-  /* ── SHADCN SEMANTIC MAPPING — points the component system at design tokens.
+  /* ── SHADCN SEMANTIC MAPPING: points the component system at design tokens.
      These reference the semantic aliases above, so they flip with the theme
      automatically; no need to redefine them in the dark block. ──────────────── */
   --radius: var(--radius-md);
@@ -254,28 +254,28 @@
   --sidebar-primary-foreground: var(--brand-contrast);
   --sidebar-accent: var(--bg-sunken);
 
-  /* ── BOARD INKS — one ramp per tinyBoard, keyed to its real solder mask ────
+  /* ── BOARD INKS: one ramp per tinyBoard, keyed to its real solder mask ────
      These are the colours the Examples tab paints board tags with, so a tag
      matches the PCB in your hand. Base values are the same masks
      lib/partsLibrary paints the Circuit view with; *-soft is the chip fill and
      *-on is accessible text on that fill. (LIGHT values; dark brightens.) */
 
-  /* tinyCore — ESP32-S3, black mask */
+  /* tinyCore: ESP32-S3, black mask */
   --board-tinycore: #2c3a37;
   --board-tinycore-soft: #e6eae9;
   --board-tinycore-on: #1b2422;
 
-  /* tinyGlow — 3-channel LED driver, blue mask */
+  /* tinyGlow: 3-channel LED driver, blue mask */
   --board-tinyglow: #1d4bad;
   --board-tinyglow-soft: #e0e7fa;
   --board-tinyglow-on: #16357d;
 
-  /* tinyProto — prototyping / breakout, green mask */
+  /* tinyProto: prototyping / breakout, green mask */
   --board-tinyproto: #0a9950;
   --board-tinyproto-soft: #daf2e5;
   --board-tinyproto-on: #076e3a;
 
-  /* tinySniff — MEMS gas sensor array, yellow mask. Deepened from the literal
+  /* tinySniff: MEMS gas sensor array, yellow mask. Deepened from the literal
      mask (#efb812): a 3px rail of the true gold scores 1.6:1 against its own
      pale-yellow fill and effectively disappears. The fill still carries the
      yellow identity; the rail just has to be visible. */
@@ -283,17 +283,17 @@
   --board-tinysniff-soft: #fbf0cb;
   --board-tinysniff-on: #6f5405;
 
-  /* tinySpeak — microphone + speaker, red mask */
+  /* tinySpeak: microphone + speaker, red mask */
   --board-tinyspeak: #e8382c;
   --board-tinyspeak-soft: #fce1de;
   --board-tinyspeak-on: #a3221a;
 
-  /* tinyDisplay — round LCD module, teal mask */
+  /* tinyDisplay: round LCD module, teal mask */
   --board-tinydisplay: #0e7d6c;
   --board-tinydisplay-soft: #d7f0ec;
   --board-tinydisplay-on: #0a5a4e;
 
-  /* Qwiic — not a tinyBoard, but plug-in hardware, so it gets a ramp too */
+  /* Qwiic: not a tinyBoard, but plug-in hardware, so it gets a ramp too */
   --board-qwiic: #8a4fc4;
   --board-qwiic-soft: #efe4fb;
   --board-qwiic-on: #5a2a82;
@@ -303,13 +303,13 @@
   --sidebar-ring: var(--ring-ink);
 }
 
-/* ── DARK THEME — Discord-style cold charcoal ───────────────────────────────
+/* ── DARK THEME: Discord-style cold charcoal ───────────────────────────────
    Inks brighten so they sit on dark grey without vibrating. Neutrals are cold
    dark grey (never pure black). Everything referencing the semantic aliases
    (shadcn vars, legacy aliases) flips automatically. ────────────────────────── */
 .dark,
 :root[data-theme='dark'] {
-  /* brightened board inks — the mask hue survives, lightened enough to read
+  /* brightened board inks: the mask hue survives, lightened enough to read
      on charcoal. tinyCore's black mask becomes a light graphite here, since a
      black chip on a dark panel would vanish. */
   --board-tinycore: #9aa8a5;
@@ -371,14 +371,14 @@
   --bar-accent-deep: var(--blue-deep);
   --bar-accent-contrast: #06243b;
 
-  /* surfaces — Discord-ish cold grey ladder */
+  /* surfaces: Discord-ish cold grey ladder */
   --bg: #2b2d31;
   --bg-sunken: #1e1f22;
   --bg-raised: #313338;
   --surface-card: #383a40;
   --surface-overlay: #3e4046;
 
-  /* text — cool soft whites */
+  /* text: cool soft whites */
   --text-strong: #f2f3f5;
   --text-body: #dbdee1;
   --text-muted: #969ba3;
@@ -518,7 +518,7 @@
   }
 }
 
-/* ── mono eyebrow / label — the maker-signature microtype ────────────────────
+/* ── mono eyebrow / label: the maker-signature microtype ────────────────────
    e.g. SERIAL MONITOR, ▸ HARDWARE */
 .ts-eyebrow {
   font-family: var(--font-mono);

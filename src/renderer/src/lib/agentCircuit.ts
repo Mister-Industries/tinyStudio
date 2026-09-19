@@ -1,5 +1,5 @@
 /**
- * agentCircuit — the parts-registry half of Studio AI's inspect_circuit and
+ * agentCircuit: the parts-registry half of Studio AI's inspect_circuit and
  * find_parts tools (reached through lib/studioBridge.ts).
  *
  * Connections need the registry: parts seated in breadboard holes connect by
@@ -63,10 +63,10 @@ export async function findParts(query: string): Promise<string> {
     const pins = pinNames(m.type)
     const shown = pins.slice(0, MAX_PINS_LISTED).join(', ')
     const more = pins.length > MAX_PINS_LISTED ? ` … +${pins.length - MAX_PINS_LISTED} more` : ''
-    return `- ${m.type} — ${m.label} (${m.family})\n  pins: ${pins.length ? shown + more : 'unknown'}`
+    return `- ${m.type}: ${m.label} (${m.family})\n  pins: ${pins.length ? shown + more : 'unknown'}`
   })
   if (matches.length > hits.length) {
-    lines.push(`(${matches.length - hits.length} more matches — narrow the query to see them)`)
+    lines.push(`(${matches.length - hits.length} more matches; narrow the query to see them)`)
   }
   return lines.join('\n')
 }

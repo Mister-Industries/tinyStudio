@@ -1,5 +1,5 @@
 /**
- * circuit/parts/symbols — schematic symbol resolution (spec §5.1, §8).
+ * circuit/parts/symbols: schematic symbol resolution (spec §5.1, §8).
  *
  * A part's schematic art is resolved in this order:
  *   1. a hand-authored standard symbol from the symbol library (the IEEE-style
@@ -37,7 +37,7 @@ import {
   text
 } from './style'
 
-const P = SCH_GRID // 9.6 — schematic major grid
+const P = SCH_GRID // 9.6: schematic major grid
 
 const cache = new Map<string, PartView>()
 
@@ -49,7 +49,7 @@ function pinNamesOf(def: PartDef): string[] {
 
 /**
  * Schematic art for a part, resolved in preference order (see the module
- * header). Cached per type — resolution walks several fallbacks and every
+ * header). Cached per type: resolution walks several fallbacks and every
  * render of every instance asks for it.
  */
 export function schematicVisual(def: PartDef): PartView {
@@ -96,7 +96,7 @@ function resolveSchematic(def: PartDef): PartView {
     if (bound) return bound
   }
 
-  // 4. generated IC-style box — never blocks on missing artwork
+  // 4. generated IC-style box: never blocks on missing artwork
   return generateBoxSymbol(def)
 }
 
@@ -157,7 +157,7 @@ export function generateBoxSymbol(def: PartDef): PartView {
 /**
  * Rough advance width of a string at a font size. The renderer has no text
  * metrics (this runs in a worker and under node too), and 0.58 em is a good
- * average for the sans stack across mixed-case pin names — erring wide, since
+ * average for the sans stack across mixed-case pin names, erring wide, since
  * a slightly roomy box is invisible and a tight one collides.
  */
 function textWidth(s: string, size: number): number {

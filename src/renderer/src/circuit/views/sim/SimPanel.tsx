@@ -1,22 +1,22 @@
 /**
- * circuit/views/sim/SimPanel — the Simulate panel (spec §10.4).
+ * circuit/views/sim/SimPanel: the Simulate panel (spec §10.4).
  *
  * Lives in the shell's right rail (schematic view only). Analysis tabs
  * (DC op / DC sweep / Transient / AC), their parameters, the OUTPUTS the user
  * wants reported, and Run/Cancel. DC (.op) lists node voltages and source
- * currents — the shell mirrors them onto the canvas as annotations; sweeps
+ * currents; the shell mirrors them onto the canvas as annotations; sweeps
  * render in a uPlot chart with CSV export.
  *
  * Outputs work the way CircuitLab's do: nothing is plotted by name until you
- * say what you want. Picking one drops a PROBE TAG on the sheet — a real,
- * draggable, deletable label rather than a highlight — and doc.sim.probes is
+ * say what you want. Picking one drops a PROBE TAG on the sheet (a real,
+ * draggable, deletable label rather than a highlight) and doc.sim.probes is
  * the single source of truth this list reads. Probes store stable references,
  * not vector names; core/simOutputs says why.
  *
  * The engine's own lifecycle is surfaced separately from the analysis: a cold
  * start is "loading the engine", not a run that timed out. And an analysis
  * whose point count would exhaust memory is refused here, before it reaches
- * the worker — such a request would take the whole app down.
+ * the worker; such a request would take the whole app down.
  */
 
 import { Crosshair, Download, Loader2, Play, Square, X } from 'lucide-react'
@@ -57,7 +57,7 @@ export interface SimState {
   netlist: NetlistResult | null
 }
 
-/** Watchdog for the analysis itself — the engine load has its own, longer one. */
+/** Watchdog for the analysis itself; the engine load has its own, longer one. */
 function solveBudget(points: number): number {
   return Math.min(120_000, 20_000 + points * 20)
 }
@@ -90,7 +90,7 @@ export function SimPanel({
   picking?: boolean
   onPickingChange?: (on: boolean) => void
   /**
-   * Outputs currently picked — one per measurement tag placed on the sheet.
+   * Outputs currently picked: one per measurement tag placed on the sheet.
    * The shell owns them (they live in doc.sim.probes, which is what the canvas
    * draws), so this panel reads the list and asks for changes rather than
    * keeping a second copy that could disagree with the tags.
@@ -99,8 +99,8 @@ export function SimPanel({
   onToggleOutput: (ref: OutputRef) => void
   onClearOutputs: () => void
   /**
-   * 'drawer' — the original bottom panel across the canvas.
-   * 'rail'   — a column inside the shell's right rail, so running an analysis
+   * 'drawer':  the original bottom panel across the canvas.
+   * 'rail':    a column inside the shell's right rail, so running an analysis
    *            no longer covers the circuit you're analysing.
    */
   variant?: 'drawer' | 'rail'
@@ -161,7 +161,7 @@ export function SimPanel({
     if (runningRef.current) return // one in-flight run at a time (esp. for auto-rerun)
     if (tooMany) {
       setError({
-        message: `That analysis asks for about ${Math.round(points).toLocaleString()} points — more than the ${MAX_SIM_POINTS.toLocaleString()} this editor will hold in memory.`,
+        message: `That analysis asks for about ${Math.round(points).toLocaleString()} points, more than the ${MAX_SIM_POINTS.toLocaleString()} this editor will hold in memory.`,
         details: [
           analysis.kind === 'tran'
             ? 'Raise the step, or shorten the stop time.'
@@ -185,7 +185,7 @@ export function SimPanel({
     try {
       const raw = await getSimBackend().run(g.netlist, solveBudget(points))
       // fold in synthetic diff-probe vectors (voltage/current probes need no
-      // extra work — ngspice already reports every node and probe source)
+      // extra work; ngspice already reports every node and probe source)
       const diffs = diffProbeVectors(doc, netModel, g, raw)
       const r: SimRun = diffs.length ? { ...raw, vectors: [...raw.vectors, ...diffs] } : raw
       setResult(r)
@@ -211,7 +211,7 @@ export function SimPanel({
   }
 
   // auto-rerun: once enabled, every doc change re-runs the active analysis
-  // after a short debounce — same "Run" path, so results and canvas DC
+  // after a short debounce, same "Run" path, so results and canvas DC
   // annotations refresh without a manual click.
   const runRef = React.useRef(run)
   runRef.current = run
@@ -421,7 +421,7 @@ export function SimPanel({
             />
             <span
               className="text-text-faint"
-              title="AC needs a sine source — its amplitude sets the AC magnitude"
+              title="AC needs a sine source; its amplitude sets the AC magnitude"
             >
               Hz
             </span>
@@ -508,7 +508,7 @@ export function SimPanel({
             disabled={tooMany || engineFailed}
             title={
               tooMany
-                ? 'This analysis asks for too many points — adjust the step or range'
+                ? 'This analysis asks for too many points; adjust the step or range'
                 : engineFailed
                   ? engine.error
                   : 'Run the selected analysis'
@@ -526,7 +526,7 @@ export function SimPanel({
             <Loader2 size={13} className="animate-spin mt-px shrink-0" />
             <span>
               {loading
-                ? 'loading the SPICE engine — about 20 MB, once per session'
+                ? 'loading the SPICE engine (about 20 MB, once per session)'
                 : `solving${points > 1 ? ` ${Math.round(points).toLocaleString()} points` : ''}…`}
             </span>
           </div>
@@ -541,7 +541,7 @@ export function SimPanel({
 
         {!running && tooMany && (
           <div className="rounded-md border border-status-warning/40 bg-status-warning/5 p-2 text-status-warning">
-            About {Math.round(points).toLocaleString()} points — over the{' '}
+            About {Math.round(points).toLocaleString()} points, over the{' '}
             {MAX_SIM_POINTS.toLocaleString()} limit. Raise the step or shorten the range.
           </div>
         )}
@@ -619,7 +619,7 @@ export function SimPanel({
           <div className="text-text-faint">
             Pick the points you want to measure, then Run. A DC operating point annotates the
             schematic with node voltages; a transient plots them over time. Boards aren&apos;t
-            simulated — drive their pins with sources from the palette.
+            simulated; drive their pins with sources from the palette.
           </div>
         )}
       </div>
@@ -714,7 +714,7 @@ function OutputPicker({
         <div className="max-h-40 overflow-auto rounded border border-border-default bg-bg-sunken p-1 flex flex-col">
           {choices.length === 0 && (
             <span className="text-[10px] text-text-faint px-1 py-1">
-              Nothing to measure yet — wire up a couple of parts.
+              Nothing to measure yet. Wire up a couple of parts.
             </span>
           )}
           {choices.map((c) => (

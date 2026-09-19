@@ -1,11 +1,11 @@
 /**
- * circuit/parts/svg — SVG utilities for part artwork.
+ * circuit/parts/svg: SVG utilities for part artwork.
  *
  * Id-namespacing so two parts whose SVGs both define e.g. `id="g"` don't
  * corrupt each other in a composed export, plus small size/escape helpers.
  * Sanitizing markup before it's inserted into the page is lib/sanitizeSvg.
  *
- * Pure string transforms — no DOM — so they run in tests, workers, exports.
+ * Pure string transforms (no DOM) so they run in tests, workers, exports.
  */
 
 /**
@@ -55,11 +55,11 @@ export function stripSvgSize(svg: string): string {
 
 /**
  * Prepare a part's SVG for embedding as a NESTED <svg> element in a composed
- * scene: strip the XML prolog / doctype (illegal mid-document — they killed
+ * scene: strip the XML prolog / doctype (illegal mid-document; they killed
  * the whole exported file's parse), and remove any root-level x/y/width/height
  * attributes (Fritzing exports carry x="0px" y="0px", which collided with the
  * composer's placement attributes → duplicate-attribute XML errors). The
- * root's viewBox is kept — it's what makes the injected width/height scale.
+ * root's viewBox is kept; it's what makes the injected width/height scale.
  */
 export function prepareSvgForEmbed(svg: string): string {
   const s = svg

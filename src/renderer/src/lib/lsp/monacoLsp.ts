@@ -2,7 +2,7 @@
  * Minimal Arduino Language Server integration for Monaco.
  *
  * tinyService exposes the Arduino Language Server (clangd under the hood)
- * over a WebSocket bridge at /lsp — plain JSON-RPC, one payload per WS
+ * over a WebSocket bridge at /lsp: plain JSON-RPC, one payload per WS
  * message (the service handles stdio Content-Length framing). This module is
  * a deliberately small, dependency-free LSP client that wires the parts that
  * matter most into Monaco:
@@ -259,7 +259,7 @@ let lspUnavailable = false
 function markLspUnavailable(): void {
   if (!lspUnavailable) {
     lspUnavailable = true
-    console.info('[lsp] Arduino Language Server not available — code intelligence disabled')
+    console.info('[lsp] Arduino Language Server not available; code intelligence disabled')
   }
 }
 
@@ -340,7 +340,7 @@ function registerProviders(monaco: Monaco): void {
         return {
           suggestions: items.slice(0, 200).map((item) => ({
             label: item.label,
-            // LSP CompletionItemKind happens to align closely with Monaco's —
+            // LSP CompletionItemKind happens to align closely with Monaco's;
             // clamp to a safe fallback (Text) when out of range.
             kind: (item.kind && item.kind >= 1 && item.kind <= 25
               ? item.kind
@@ -486,7 +486,7 @@ export function attachLspToEditor(
       })
     }
 
-    // didChange — full-document sync, debounced.
+    // didChange: full-document sync, debounced.
     contentListener = model.onDidChangeContent(() => {
       if (changeDebounce) clearTimeout(changeDebounce)
       changeDebounce = setTimeout(() => {

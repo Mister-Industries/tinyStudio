@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { cn } from '@renderer/lib/utils'
 
-/* tinyStudio — Badge
+/* tinyStudio: Badge
    Compact status/label token (mono). Tones map to the four-ink semantic
    system. `soft` (default) = tinted bg; `solid` = filled ink; `outline`. */
 

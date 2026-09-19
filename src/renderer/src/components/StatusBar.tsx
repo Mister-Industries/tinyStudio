@@ -1,14 +1,11 @@
 import {
   Bell,
   ChevronDown,
-  Cpu,
   LayoutDashboard,
   ListX,
   PanelBottom,
   PanelLeft,
-  PanelRight,
-  Plug,
-  PlugZap
+  PanelRight
 } from 'lucide-react'
 import React from 'react'
 import { version as appVersion } from '../../../../package.json'
@@ -160,8 +157,36 @@ function NotificationBell(): React.JSX.Element {
   )
 }
 
+/**
+ * The one status light, in priority order: a build in progress, then whether
+ * tinyService is reachable, then whether a board is plugged in. Red means you
+ * can't flash right now; green means a board is there and ready.
+ */
+function boardStatus(a: {
+  isUploading: boolean
+  isCompiling: boolean
+  isAgentConnected: boolean
+  boardName: string | null
+}): { status: 'ok' | 'error' | 'warn'; label: string; title: string; pulse?: boolean } {
+  if (a.isUploading) return { status: 'warn', label: 'Uploading…', title: 'Uploading', pulse: true }
+  if (a.isCompiling) return { status: 'warn', label: 'Compiling…', title: 'Compiling', pulse: true }
+  if (!a.isAgentConnected)
+    return {
+      status: 'error',
+      label: 'tinyService not connected',
+      title: 'tinyService compiles, uploads and runs the serial monitor. Start it, then Retry.'
+    }
+  if (!a.boardName)
+    return {
+      status: 'error',
+      label: 'No board connected',
+      title: 'tinyService is running. Plug a board in over USB.'
+    }
+  return { status: 'ok', label: `${a.boardName} connected`, title: 'tinyService is running' }
+}
+
 export function StatusBar(): React.JSX.Element {
-  const { isAgentConnected, checkAgentStatus, selectedBoard, isCompiling, isUploading } =
+  const { isAgentConnected, checkAgentStatus, boards, selectedBoard, isCompiling, isUploading } =
     useArduinoContext()
   const { connected, disconnected, port, baud, reconnect } = useSerial()
 
@@ -170,14 +195,22 @@ export function StatusBar(): React.JSX.Element {
       await checkAgentStatus()
     } catch (error) {
       console.warn(
-        'tinyService status check failed; the status bar keeps showing Disconnected:',
+        'tinyService status check failed; the status bar keeps showing it as not connected:',
         error
       )
     }
   }
 
-  const busy = isUploading || isCompiling
-  const busyLabel = isUploading ? 'Uploading…' : isCompiling ? 'Compiling…' : 'Ready'
+  // A board counts as connected only while it's actually detected on a port;
+  // a board picked by hand with nothing plugged in doesn't turn the light green.
+  const pluggedIn = selectedBoard ? boards.find((b) => b.port === selectedBoard.port) : boards[0]
+  const board = pluggedIn ? (selectedBoard ?? pluggedIn) : null
+  const light = boardStatus({
+    isUploading,
+    isCompiling,
+    isAgentConnected,
+    boardName: board ? board.config.name : null
+  })
 
   // The bar is the same grey in both themes; its --sb-* palette lives on
   // .ts-statusbar in ds-components.css.
@@ -186,27 +219,15 @@ export function StatusBar(): React.JSX.Element {
   return (
     <footer className="ts-statusbar flex items-center justify-between shrink-0 h-[27px] px-3 text-[11.5px] font-sans bg-[var(--sb-bg)] text-[var(--sb-text)] border-t border-[var(--sb-border)]">
       <div className="flex items-center">
-        <StatusPill status={busy ? 'warn' : 'idle'} pulse={busy} bare>
-          {busyLabel}
+        <StatusPill status={light.status} pulse={light.pulse} bare title={light.title}>
+          {light.label}
         </StatusPill>
-        {selectedBoard && (
-          <>
-            <span className="text-[var(--sb-faint)] mx-2">·</span>
-            <span className="inline-flex items-center gap-1">
-              <Cpu size={12} />
-              {selectedBoard.config.name}
-            </span>
-          </>
+        {!isAgentConnected && (
+          <button className={`ml-2 ${link}`} onClick={handleRetry}>
+            Retry
+          </button>
         )}
-        <span className="text-[var(--sb-faint)] mx-2">·</span>
-        <span
-          className="inline-flex items-center gap-1"
-          style={!isAgentConnected ? { color: 'var(--status-error)' } : undefined}
-        >
-          {isAgentConnected ? <Plug size={12} /> : <PlugZap size={12} />}
-          {isAgentConnected ? 'Connected' : 'Disconnected'}
-        </span>
-        {isAgentConnected && port && (
+        {isAgentConnected && board && port && (
           <>
             <span className="text-[var(--sb-faint)] mx-2">·</span>
             <span className="inline-flex items-center gap-1.5">
@@ -222,11 +243,6 @@ export function StatusBar(): React.JSX.Element {
               )}
             </span>
           </>
-        )}
-        {!isAgentConnected && (
-          <button className={`ml-2 ${link}`} onClick={handleRetry}>
-            Retry
-          </button>
         )}
       </div>
       <div className="flex items-center">

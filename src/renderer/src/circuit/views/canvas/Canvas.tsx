@@ -1,17 +1,17 @@
 /**
- * circuit/views/canvas/Canvas — the interactive breadboard scene (M1).
+ * circuit/views/canvas/Canvas: the interactive breadboard scene (M1).
  *
  * Owns: camera (zoom/pan/fit), pointer routing, selection + marquee, wire
  * drawing/editing state machines, part drag with frozen-bend reroutes, and
  * rendering (parts, glossy-tube wires, junction dots, handles, preview).
  * The gesture set is a 1:1 port of DiagramEditor's editor behaviors, re-said
- * as Commands against the CircuitStore — same editor, now with undo.
+ * as Commands against the CircuitStore: same editor, now with undo.
  *
  * Document mutations ONLY go through store.dispatch(command). Ephemeral state
  * (camera, hover, armed wire, marquee, edit buffer) never touches the doc.
  */
 
-import { CircuitBoard, Crosshair, X, Zap } from 'lucide-react'
+import { Crosshair, X, Zap } from 'lucide-react'
 import React from 'react'
 import { matches } from '../../../lib/shortcuts'
 import { buildClipboard, materializePaste, parseClipboard } from '../../core/clipboard'
@@ -91,7 +91,7 @@ export interface Cam {
 
 /**
  * A placed measurement tag, already resolved to this view's world coordinates
- * by the shell (which owns pin geometry). `ax/ay` is the node it reads —
+ * by the shell (which owns pin geometry). `ax/ay` is the node it reads:
  * where the leader line starts; `x/y` is where the label sits, which is the
  * part the user drags.
  */
@@ -117,7 +117,7 @@ export interface CanvasHandle {
 type HandleKind = 'vertex' | 'edge' | 'endpoint'
 
 interface Armed {
-  from: string // "part:pin" — drawing always starts on a pin
+  from: string // "part:pin"; drawing always starts on a pin
   points: Pt[]
   straight: boolean
 }
@@ -209,7 +209,7 @@ export function Canvas({
   /**
    * Sim output picking (spec §10.4, CircuitLab-style): while on, a click on a
    * wire or a pin toggles that net as an analysis output instead of selecting
-   * it. Works in view-only mode too — picking what to measure is not editing.
+   * it. Works in view-only mode too: picking what to measure is not editing.
    */
   pickNets?: boolean
   /** a pick: the net that was hit, and where on the sheet it was clicked */
@@ -257,7 +257,7 @@ export function Canvas({
     offY: number
     orig: Map<string, Placement>
     frozen: FrozenWire[]
-    /** set once the pointer actually displaces — distinguishes board-hole clicks */
+    /** set once the pointer actually displaces; distinguishes board-hole clicks */
     moved: boolean
   } | null>(null)
   const handleDrag = React.useRef<{ kind: HandleKind } | null>(null)
@@ -530,11 +530,11 @@ export function Canvas({
     window.addEventListener('pointerup', up)
   }
 
-  // drag a bendable leg tip (LED/resistor class parts, breadboard view only —
+  // drag a bendable leg tip (LED/resistor class parts, breadboard view only;
   // M2 leftover, spec §6.2/§7.4). `base` is the pin's leg offset at grab time
   // ([0,0] if it was resting). Live-dispatches like onLabelDown (merged
   // commands per move) so wires re-anchor to the tip in real time without a
-  // separate dragOverrides path — nothing else needs to know this isn't a
+  // separate dragOverrides path; nothing else needs to know this isn't a
   // normal edit. A real (>=3px) drag suppresses the trailing click so it
   // doesn't also arm/complete a wire from this pin.
   const beginLegDrag = (
@@ -553,7 +553,7 @@ export function Canvas({
       const cur = doc.parts.find((p) => p.id === partId)?.[view]
       if (!cur) return
       // legOffset is added to the local pin coord BEFORE rotate/flip
-      // (core/geometry pinWorld) — invert that so dragging the tip on
+      // (core/geometry pinWorld); invert that so dragging the tip on
       // screen moves it the direction the user is actually dragging.
       const rad = (-(cur.rotate ?? 0) * Math.PI) / 180
       let ldx = dxs * Math.cos(rad) - dys * Math.sin(rad)
@@ -676,7 +676,7 @@ export function Canvas({
   }
 
   /** Output picking: resolve a click to its net and hand it to the shell,
-   * along with the point clicked — that is where the tag lands. */
+   * along with the point clicked; that is where the tag lands. */
   const pickNetOf = (key: string, from: 'pin' | 'wire', at: Pt): boolean => {
     if (!pickNets) return false
     const idx = from === 'pin' ? netModel.pinToNet.get(key) : netModel.wireToNet.get(key)
@@ -758,7 +758,7 @@ export function Canvas({
       const jp = clampOntoSegment(hit.p1, hit.p2, snap(wx), snap(wy))
       return { wire: hit.id, t: tAtPoint(host.points, jp) }
     }
-    return null // v2 has no free-point endpoints — caller reverts
+    return null // v2 has no free-point endpoints; caller reverts
   }
 
   const startHandleDrag = (
@@ -912,7 +912,7 @@ export function Canvas({
         window.removeEventListener('pointermove', move)
         window.removeEventListener('pointerup', up)
         setMarquee(null)
-        if (!rect) return // plain click — onCanvasClick handles deselect
+        if (!rect) return // plain click; onCanvasClick handles deselect
         const x0 = Math.min(rect.a.x, rect.b.x)
         const y0 = Math.min(rect.a.y, rect.b.y)
         const x1 = Math.max(rect.a.x, rect.b.x)
@@ -1152,7 +1152,7 @@ export function Canvas({
         return
       }
       if (matches(e, 'circuit.flip') && view === 'sch' && sel.parts.size) {
-        // horizontal mirror — schematic only (spec §6.3 / B13)
+        // horizontal mirror, schematic only (spec §6.3 / B13)
         e.preventDefault()
         const ids = [...sel.parts]
         const frozen = collectFrozen(doc, new Set(ids), view)
@@ -1289,7 +1289,7 @@ export function Canvas({
     window.addEventListener('pointerup', up)
   }
 
-  // Contextual hint only while actively wiring/editing — no idle 'scroll to
+  // Contextual hint only while actively wiring/editing; no idle 'scroll to
   // zoom' / 'view-only' bubbles cluttering the canvas.
   const hint: { icon: React.JSX.Element | null; text: string } | null = pickNets
     ? {
@@ -1316,7 +1316,7 @@ export function Canvas({
         style={{
           touchAction: 'none',
           cursor: armed || pickNets ? 'crosshair' : 'default',
-          // schematic reads as paper (lighter surface, finer dot grid — spec §8.1)
+          // schematic reads as paper (lighter surface, finer dot grid; spec §8.1)
           backgroundColor: view === 'sch' ? 'var(--bg)' : 'var(--bg-sunken)',
           backgroundImage: grid
             ? `radial-gradient(var(--dot-color) ${view === 'sch' ? 0.9 : 1.1}px, transparent ${view === 'sch' ? 0.9 : 1.1}px)`
@@ -1378,7 +1378,7 @@ export function Canvas({
               const onHotNet = highlightNet >= 0 && netModel.wireToNet.get(w.id) === highlightNet
               const core = view === 'sch' ? ink : w.color || '#2fa46a'
               const outline = view === 'sch' ? 'rgba(0,0,0,0.45)' : darken(w.color || '#2fa46a')
-              // schematic ink is a single thin stroke — no color outline, no glow.
+              // schematic ink is a single thin stroke, no color outline, no glow.
               const coreW = view === 'sch' ? WIRE_SCH_W : WIRE_W
               const d = roundedPath(pts, view === 'sch' ? WIRE_CORNER_SCH : WIRE_CORNER)
               return (
@@ -1570,7 +1570,7 @@ export function Canvas({
           {doc.parts.map((part) => {
             const pl = placementOf(part.id)
             if (!pl) return null
-            // breadboards are transparent on the schematic — their row/rail
+            // breadboards are transparent on the schematic; their row/rail
             // buses still merge nets globally, but they render as no part here.
             if (view === 'sch' && isBreadboard(part.type)) return null
             const vis = visualFor(part.type, view)
@@ -1588,7 +1588,7 @@ export function Canvas({
             const selected = sel.parts.has(part.id)
             const labelOff = pl.labelOffset || [0, 0]
             // labels live OUTSIDE the rotated container, anchored to the box
-            // the symbol visibly occupies (parts/labels.ts) — inside it they
+            // the symbol visibly occupies (parts/labels.ts); inside it they
             // would inherit the rotation and need a counter-transform that
             // slides them off the part
             const lay = labelLayout(vis.v.w, vis.v.h, vis.v.pins, pl.rotate)
@@ -1674,13 +1674,13 @@ export function Canvas({
                       const hovered = hoverPin?.id === part.id && hoverPin?.pin === pin
                       const netIdx = netModel.pinToNet.get(`${part.id}:${pin}`)
                       const onHotNet = highlightNet >= 0 && netIdx === highlightNet
-                      // a pin sharing a net with anything else is connected — its
+                      // a pin sharing a net with anything else is connected; its
                       // "open lead" dot disappears (still clickable to re-wire).
                       const connected =
                         netIdx !== undefined && (netModel.nets[netIdx]?.length ?? 0) >= 2
                       const on = armedHere || hovered
                       // a prototyping field (tinyProto) has too many holes to dot
-                      // them all at rest — show one on hover, like a breadboard.
+                      // them all at rest; show one on hover, like a breadboard.
                       const dense = Object.keys(vis.v.pins).length > 60
                       const showDot = on || onHotNet || (!connected && !dense)
                       return (
@@ -1698,7 +1698,7 @@ export function Canvas({
                             cursor: 'crosshair'
                           }}
                           onPointerDown={(e) => {
-                            // in pick mode the pin is only a click target — let
+                            // in pick mode the pin is only a click target; let
                             // the press through so panning still works there
                             if (pickNets && !editable) return
                             e.stopPropagation()
@@ -1766,7 +1766,7 @@ export function Canvas({
                     })}
                   {view === 'bb' && vis.v.legs && vis.v.legs.length > 0 && (
                     // bent-leg indicator: a simple ink line from the rest pin to
-                    // the dragged tip, overlaid on the (static) Fritzing art —
+                    // the dragged tip, overlaid on the (static) Fritzing art;
                     // real per-instance leg-path warping is future work.
                     <svg
                       className="absolute inset-0 pointer-events-none overflow-visible"
@@ -1794,7 +1794,7 @@ export function Canvas({
                   )}
                 </div>
                 {/* Schematic text: refdes above the symbol, value below it
-                  (spec §8). The breadboard keeps its single muted caption —
+                  (spec §8). The breadboard keeps its single muted caption;
                   a value on a physical part would be noise. */}
                 <div
                   className="absolute whitespace-nowrap select-none"
@@ -2008,7 +2008,7 @@ export function Canvas({
                 cursor: 'move',
                 touchAction: 'none'
               }}
-              title={`${t.label} — drag to move, drop on a wire to re-anchor`}
+              title={`${t.label}: drag to move, drop on a wire to re-anchor`}
               onPointerDown={(e) => onProbeDown(e, t)}
               onClick={(e) => e.stopPropagation()}
             >
@@ -2030,22 +2030,20 @@ export function Canvas({
               </button>
             </div>
           ))}
-
-          {doc.parts.length === 0 && (
-            <div
-              className="absolute flex flex-col items-center gap-2 text-text-faint text-sm text-center"
-              style={{ left: 200, top: 160, width: 320 }}
-            >
-              <CircuitBoard size={42} />
-              <div>
-                {editable
-                  ? 'Drag parts from the components rail — or double-click one to drop it here.'
-                  : 'Empty circuit — click Edit to start placing parts.'}
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Empty sheet: a note fixed to the middle of the window (not the
+          panned/zoomed world), gone once the first part is placed. */}
+      {doc.parts.length === 0 && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
+          <p className="max-w-[340px] text-center text-sm text-[var(--text-muted)]">
+            {editable
+              ? 'Drag parts from the components rail, or double-click one to drop it here.'
+              : 'Empty circuit. Click Edit to start placing parts.'}
+          </p>
+        </div>
+      )}
 
       {/* transient action hint (only while wiring/reshaping) */}
       {hint && (

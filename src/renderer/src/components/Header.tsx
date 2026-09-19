@@ -57,7 +57,7 @@ export function Header(): React.JSX.Element {
 
   // Radix traps focus while the menu is open, which would swallow the file
   // tree's inline name-field autoFocus (New File/Folder). So run the action a
-  // tick after select — once the menu has closed and released the trap — and
+  // tick after select (once the menu has closed and released the trap) and
   // skip the menu's usual return-focus-to-trigger, which would blur that field.
   const menuActionRan = useRef(false)
   const afterMenuClose = (action: () => void) => (): void => {

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { cn } from '@renderer/lib/utils'
 
-/* tinyStudio — StatusPill
+/* tinyStudio: StatusPill
    The IDE's board / connection state indicator: a live status dot (optionally
    pulsing) + label. Wrap the strong part of the label in <b> for emphasis. */
 

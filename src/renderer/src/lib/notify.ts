@@ -3,7 +3,7 @@ import { store } from '@renderer/redux/store'
 import { addNotification, type NotificationTone } from '@renderer/redux/notificationsSlice'
 
 /**
- * notify — the single entry point for user-facing notifications.
+ * notify: the single entry point for user-facing notifications.
  *
  * Each call shows a transient toast (sonner, bottom-right) AND records the
  * notification to the persistent history that backs the status-bar bell. It is

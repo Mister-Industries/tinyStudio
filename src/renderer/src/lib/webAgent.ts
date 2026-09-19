@@ -1,10 +1,10 @@
 /**
- * webAgent — Studio AI for the browser build.
+ * webAgent: Studio AI for the browser build.
  *
  * On desktop the agent runs in the Electron main process behind IPC
  * (window.api.agent). A browser has no main process, so here the same agent core
  * (src/shared/agentCore.ts) runs in the page and calls the Anthropic API
- * directly — the API allows this for browser clients that opt in. File tools go
+ * directly; the API allows this for browser clients that opt in. File tools go
  * through the unified fileSystem service, so they work on both a local folder
  * picked with the File System Access API and a mem:// project (examples, GitHub
  * deep links).

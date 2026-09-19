@@ -1,5 +1,5 @@
 /**
- * storageKeys — every localStorage key tinyStudio uses, in one list.
+ * storageKeys: every localStorage key tinyStudio uses, in one list.
  *
  * Keys start with `tinystudio.`, except `tinyservice.url`, a documented override
  * for the backend address. Keys holding per-port or per-project data are built by

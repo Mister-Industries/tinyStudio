@@ -369,7 +369,7 @@ In order.
    - 5 V through 220 Ω into the 5 mm LED gives 2.646 V forward and 10.7 mA,
      and the DC sweep plots all three signals. Plausible.
    - A tinyCore driving the same LED from D13 to GND reports every node at
-     0 V with the notice "U1 (tinycore) is a board — not simulated; drive
+     0 V with the notice "U1 (tinycore) is a board, not simulated; drive
      its pins with sources". The netlist has no ground node either, since
      the board's GND pin is not a ground label. This is almost certainly
      what "simulation doesn't seem to work" means: the circuits people draw

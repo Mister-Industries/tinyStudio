@@ -25,7 +25,7 @@ export function SerialMonitor(): React.JSX.Element {
   const { clearLogs, isCompiling, isUploading, lastCompileResult, lastUploadResult } =
     useArduinoContext()
 
-  // Auto-scroll (stick to bottom) per pane — toggled by the button in the header.
+  // Auto-scroll (stick to bottom) per pane, toggled by the button in the header.
   const [serialAuto, setSerialAuto] = useState(true)
   const [outputAuto, setOutputAuto] = useState(true)
   const auto = activeTab === 'serial' ? serialAuto : outputAuto
@@ -34,7 +34,7 @@ export function SerialMonitor(): React.JSX.Element {
 
   // Verify/Upload jump to the Output log so the build is visible. When the
   // operation finishes we snap back to the Serial Monitor ONLY if it
-  // succeeded — a failed build keeps the Output pane (and its compiler
+  // succeeded; a failed build keeps the Output pane (and its compiler
   // errors) in front instead of yanking it away after 400 ms. If the user
   // picked a tab themselves during the run, we respect that and don't
   // auto-switch at all.
@@ -61,7 +61,7 @@ export function SerialMonitor(): React.JSX.Element {
     setActiveTab(id)
   }
 
-  // Clear whichever pane is in front — the serial stream or the output log.
+  // Clear whichever pane is in front: the serial stream or the output log.
   const handleClear = (): void => {
     if (activeTab === 'serial') clear()
     else clearLogs()
@@ -283,7 +283,7 @@ export function OutputTab({ autoScroll = true }: { autoScroll?: boolean }): Reac
         : 'text-[var(--text-body)]'
 
   // Flatten each log entry into plain terminal lines: a header line, then its
-  // raw detail lines (no cards, no padding, no emoji) — just a console.
+  // raw detail lines (no cards, no padding, no emoji): just a console.
   return (
     <div className="size-full relative bg-[var(--bg-sunken)]">
       <div
@@ -292,7 +292,7 @@ export function OutputTab({ autoScroll = true }: { autoScroll?: boolean }): Reac
       >
         {logs.length === 0 ? (
           <span className="text-[var(--text-faint)]">
-            — no output yet · Verify or Upload to compile —
+            No output yet · Verify or Upload to compile
           </span>
         ) : (
           logs.map((log) => (
