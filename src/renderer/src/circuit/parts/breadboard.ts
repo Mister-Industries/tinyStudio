@@ -112,6 +112,8 @@ export function generateBreadboard(spec: BreadboardSpec): GeneratedBreadboard {
     label: spec.label,
     family: 'Breadboards',
     builtin: true,
+    bin: 'core',
+    section: 'Breadboard View',
     views: { breadboard: { svg: renderSvg(spec, L), w: L.w, h: L.h, pins } }
   }
   return { def, buses }

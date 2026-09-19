@@ -65,6 +65,8 @@ export interface PartJson {
   icon?: string
   /** groups of pins wired together inside the part (tinyProto's power rails) */
   buses?: string[][]
+  /** the part this one is a package variant of: it gets no palette tile of its own */
+  variantOf?: string
   views: Partial<Record<ViewKind, PartJsonView>>
   [extra: string]: unknown
 }
@@ -75,6 +77,8 @@ export interface PackPartRef {
   dir?: string
   /** legacy single-file part: a PartDef JSON inside the pack */
   file?: string
+  /** the palette section the part is listed under (Fritzing's bin sections: "Basic", "Input"…) */
+  section?: string
 }
 
 export interface PackJson {
@@ -87,6 +91,8 @@ export interface PackJson {
   icon?: string
   /** ships inside the app and loads without an install */
   bundled?: boolean
+  /** palette section order; parts are listed in `parts` order within each */
+  sections?: string[]
   parts: PackPartRef[]
   [extra: string]: unknown
 }
@@ -234,8 +240,14 @@ export function folderPartMeta(json: PartJson, iconSvg: string | undefined): Par
     views: VIEW_KINDS.filter((k) => json.views[k]),
     pins: declaredPinCount(json.views.breadboard ?? json.views.schematic),
     icon: iconSvg === undefined ? undefined : namespaceSvg(prepareArt(iconSvg), iconPrefix(json)),
-    builtin: json.builtin
+    builtin: json.builtin,
+    variantOf: typeof json.variantOf === 'string' ? json.variantOf : undefined
   }
+}
+
+/** Where a pack lists a part: its palette section, and its position in pack.json. */
+export function placeInPack(meta: PartMeta, ref: PackPartRef, position: number): PartMeta {
+  return { ...meta, section: ref.section, position }
 }
 
 /** Every file a part folder needs besides part.json (views + icon), folder-relative. */
@@ -436,7 +448,7 @@ export async function loadPack(
             absDir: opts.absRoot ? joinPath(opts.absRoot, dir) : undefined
           }
           providers.push({
-            meta: folderPartMeta(json, iconText),
+            meta: placeInPack(folderPartMeta(json, iconText), ref, refs.indexOf(ref)),
             load: () => buildFolderPart(json, read, origin)
           })
         } else if (ref.file) {
@@ -444,7 +456,11 @@ export async function loadPack(
           const json: unknown = JSON.parse(await read(where))
           if (!isPartDef(json)) throw new Error(`${where} is not a valid part definition`)
           const def: PartDef = { ...json, source: { layer, pack: pack.id, file: where } }
-          providers.push({ meta: legacyMeta(def), load: async () => def, def })
+          providers.push({
+            meta: placeInPack(legacyMeta(def), ref, refs.indexOf(ref)),
+            load: async () => def,
+            def
+          })
         }
       } catch (e) {
         errors.push(e instanceof Error ? e.message : String(e))
@@ -468,6 +484,10 @@ export function legacyMeta(def: PartDef): PartMeta {
     views: VIEW_KINDS.filter((k) => def.views[k]),
     pins: Object.keys(first?.pins ?? {}).length,
     icon: def.icon || first?.svg,
-    builtin: def.builtin
+    builtin: def.builtin,
+    bin: def.bin,
+    section: def.section,
+    variantOf: def.variantOf,
+    searchOnly: def.searchOnly
   }
 }

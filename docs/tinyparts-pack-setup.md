@@ -62,12 +62,25 @@ them, and they update from GitHub like any installed pack.
   "id": "core",
   "name": "Core",
   "version": "2.0.0",
+  "sections": ["Basic", "Input"],
   "parts": [
-    { "type": "resistor", "dir": "parts/resistor" },
-    { "type": "old-style-part", "file": "parts/old-style-part.json" }
+    { "type": "resistor", "dir": "parts/resistor", "section": "Basic" },
+    { "type": "old-style-part", "file": "parts/old-style-part.json", "section": "Input" }
   ]
 }
 ```
+
+**Palette layout.** The Circuit view's parts bin follows `pack.json`, the way
+Fritzing's follows its `.fzb` bin files:
+
+- **Order.** Parts appear in the order `parts` lists them.
+- **Sections.** A part's `section` is the heading it sits under, and `sections`
+  gives their order. A pack with no sections shows one grid.
+- **Tabs.** Packs in the `tinyStudio` group share the Core tab, packs in the
+  `SparkFun` group share a SparkFun tab (one section per pack), and any other
+  pack gets its own tab once installed, with its `icon` on the tab.
+
+The rules live in `circuit/views/palette/paletteLayout.ts`.
 
 **`part.json`**: see the reference in [parts-and-art.md](parts-and-art.md#partjson-reference).
 

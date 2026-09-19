@@ -11,7 +11,8 @@ locally and not pushed (`git log origin/v0.4-dev..HEAD`). Typecheck passes, lint
 has 0 errors, 277 tests pass, the web build succeeds.
 
 **Progress (2026-09-14).** Steps 1–6, 7a, 7c, 7d, 8, 9, 10, 11 and 12 are
-committed. Waiting on the owner: 7b (decisions on the parts worksheet).
+committed. 7b was settled on 2026-09-18 by laying the palette out like
+Fritzing's parts bins (below).
 tinyService 1.2.0 was published on 2026-09-18 and tinyStudio depends on
 `^1.2.0` from npm. Blocker 2 is
 settled (the art was right; two boards' pins were snapped back onto the grid in
@@ -186,7 +187,25 @@ opens (`circuit/views/sim/SimPanel.tsx` and its entry points). Fix crashes only.
 Try a resistor divider and an LED circuit, and write down what fails for beta
 step 5.
 
-**b. Curate the parts palette.**
+**b. Curate the parts palette.** Done 2026-09-18, not the way planned below: the
+owner chose to match Fritzing's parts bins instead of a worksheet.
+
+- **Tabs.** Search, Core (tinyBoards + Core), Mine (imported and new parts),
+  then one tab per installed pack, SparkFun packs sharing one.
+- **Layout.** `pack.json` gives the order and a Fritzing `section` per part
+  (`docs/tinyparts-pack-setup.md`). tinyparts commits 76148d7, e7d25ef and
+  d952101 write it for every pack from Fritzing's `.fzb` files.
+- **Hidden.** Simulation sources and probes are found by search only, and
+  package variants have no tile.
+- **Follow-up (after 0.4.0, no app release needed).** Fritzing's Core bin has
+  about 160 entries, and tinyparts has 39 of them. Import the ~95 missing real
+  parts (tantalum capacitor, potentiometers, switches, LCD, DC motor, 555,
+  generic ICs, headers…) into tinyparts `core` with `scripts/fritzing-import.mjs`,
+  listed in `pack.json` in Fritzing's order, then check their art and pins.
+  Some Arduino-pack parts are PCB-shape templates that mean nothing without a
+  PCB view; consider dropping them.
+
+The original plan, kept for reference:
 
 1. **Build a picker page** listing every part: the appendix below, plus the parts
    generated in code (breadboards, power, ground and net labels, sources and

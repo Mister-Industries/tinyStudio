@@ -17,7 +17,7 @@
  * own URL, so a pack can ship as a self-contained folder of relative paths.
  */
 
-import { setLayerParts } from '../../lib/partsLibrary'
+import { setLayerParts, setPackInfo } from '../../lib/partsLibrary'
 import { SNAPSHOT } from './bundled'
 import {
   formatJson,
@@ -150,7 +150,8 @@ export async function registerCachedPack(id: string): Promise<string[]> {
     if (text === undefined) throw new Error(`${path} is missing from the parts cache`)
     return text
   }
-  const { providers, errors } = await loadPack(`packs/${id}`, read, 'remote')
+  const { pack, providers, errors } = await loadPack(`packs/${id}`, read, 'remote')
+  setPackInfo(pack)
   setLayerParts('remote', id, providers)
   return errors
 }

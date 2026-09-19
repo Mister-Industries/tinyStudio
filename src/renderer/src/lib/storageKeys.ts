@@ -25,6 +25,7 @@ export const STORAGE_KEYS = {
   tinypartsLastCheck: 'tinystudio.tinyparts.checked',
   tinypartsDevFolder: 'tinystudio.tinyparts.devFolder',
   tinypartsLive: 'tinystudio.tinyparts.live',
+  paletteTab: 'tinystudio.circuit.paletteTab',
   serviceUrl: 'tinyservice.url'
 } as const
 

@@ -101,6 +101,8 @@ export function generateSimProbe(spec: ProbeSpec): PartDef {
     label: spec.label,
     family: 'Probe',
     builtin: true,
+    bin: 'core',
+    searchOnly: true,
     views: { breadboard: view, schematic: view }
   }
   cache.set(spec.type, def)

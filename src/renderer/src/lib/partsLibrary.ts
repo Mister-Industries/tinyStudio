@@ -27,7 +27,7 @@
 import { compareCategories, resolveNaming } from '../circuit/parts/naming'
 import { invalidateSymbol } from '../circuit/parts/symbols'
 import { bundledPacks } from '../circuit/parts/bundled'
-import { legacyMeta, type PartJson } from '../circuit/parts/folderPart'
+import { legacyMeta, type PackJson, type PartJson } from '../circuit/parts/folderPart'
 
 export type ViewKind = 'breadboard' | 'schematic'
 
@@ -90,6 +90,14 @@ export interface PartDef {
   source?: PartSource
   /** user-layer parts: a local edit of a shipped part, or an imported/new part */
   origin?: 'edit' | 'import'
+  /** the pack whose palette tab lists a part that isn't from a pack (generated breadboards…) */
+  bin?: string
+  /** its palette section within that tab */
+  section?: string
+  /** the part this one is a package variant of: it gets no palette tile of its own */
+  variantOf?: string
+  /** found by palette search but not shown in a tab (simulation sources and probes) */
+  searchOnly?: boolean
 }
 
 export interface PartMeta {
@@ -108,6 +116,30 @@ export interface PartMeta {
   builtin?: boolean
   /** the layer currently supplying this part */
   layer?: PartLayer
+  /**
+   * The pack whose palette tab lists this part (Fritzing calls these bins).
+   * Unset for the user's own imported and new parts, which list under Mine.
+   */
+  bin?: string
+  /** palette section within the tab ("Basic", "Input"…) */
+  section?: string
+  /** position in its pack's pack.json, which is palette order */
+  position?: number
+  /** the part this one is a package variant of: search finds it, the tabs don't show it */
+  variantOf?: string
+  /** found by palette search but not shown in a tab */
+  searchOnly?: boolean
+}
+
+/** What the palette needs to know about a pack to give it a tab. */
+export interface PackInfo {
+  id: string
+  name: string
+  /** index group: "tinyStudio" packs share the Core tab, "SparkFun" packs share one tab */
+  group?: string
+  /** tab icon: a data: URL, SVG markup or a short text code */
+  icon?: string
+  sections?: string[]
 }
 
 /** A layer's offer of one part: metadata now, the full definition on demand. */
@@ -171,6 +203,40 @@ let seq = 0
 /** Palette metadata for every available part (mutated in place as layers change). */
 export const PART_MANIFEST: PartMeta[] = []
 
+const packInfo = new Map<string, PackInfo>()
+
+/** Record a pack's name, group, icon and section order as its pack.json gives them. */
+export function setPackInfo(pack: PackJson): void {
+  packInfo.set(pack.id, {
+    id: pack.id,
+    name: pack.name || pack.id,
+    group: pack.group,
+    icon: pack.icon,
+    sections: pack.sections
+  })
+}
+
+export function getPackInfo(id: string): PackInfo | undefined {
+  return packInfo.get(id)
+}
+
+/**
+ * Palette placement for the winning slot. Pack layers place a part in their own
+ * pack; a user-layer edit keeps the place of the pack part it shadows.
+ */
+function placement(w: Slot, type: string): Pick<PartMeta, 'bin' | 'section' | 'position'> {
+  const own = w.provider.meta
+  if (w.layer !== 'user') return { bin: w.group, section: own.section, position: own.position }
+  const shipped = (slots.get(type) ?? [])
+    .filter((s) => s.layer !== 'user')
+    .sort((a, b) => LAYER_RANK[b.layer] - LAYER_RANK[a.layer] || b.seq - a.seq)[0]
+  return {
+    bin: own.bin ?? shipped?.group,
+    section: own.section ?? shipped?.provider.meta.section,
+    position: own.position ?? shipped?.provider.meta.position
+  }
+}
+
 function winner(type: string): Slot | undefined {
   let best: Slot | undefined
   for (const s of slots.get(type) ?? []) {
@@ -200,7 +266,11 @@ function refresh(types: Iterable<string>): void {
     } else {
       active.set(type, w)
       if (w.provider.def) cache[type] = applyNaming(w.provider.def)
-      const meta = applyNamingMeta({ ...w.provider.meta, layer: w.layer })
+      const meta = applyNamingMeta({
+        ...w.provider.meta,
+        ...placement(w, type),
+        layer: w.layer
+      })
       if (at >= 0) PART_MANIFEST[at] = meta
       else PART_MANIFEST.push(meta)
     }
@@ -331,5 +401,6 @@ export function viewFor(def: PartDef, view: ViewKind): PartView | undefined {
 
 for (const pack of bundledPacks()) {
   for (const e of pack.errors) console.error(`[parts] bundled ${pack.id}: ${e}`)
+  if (pack.json) setPackInfo(pack.json)
   setLayerParts('bundled', pack.id, pack.providers)
 }

@@ -21,6 +21,8 @@ import {
   legacyMeta,
   parsePackJson,
   parsePartJson,
+  placeInPack,
+  type PackJson,
   type ReadText
 } from './folderPart'
 
@@ -32,6 +34,8 @@ export interface BundledPack {
   version: string
   /** pack-relative path → git blob sha, as of the snapshot's commit */
   files: Record<string, string>
+  /** its pack.json, when that parsed */
+  json?: PackJson
   providers: PartProvider[]
   errors: string[]
 }
@@ -64,18 +68,24 @@ export function bundledPacks(): BundledPack[] {
     const providers: PartProvider[] = []
     let name = sp.id
     let version = ''
+    let packJson: PackJson | undefined
     try {
       const pack = parsePackJson(EAGER[`${packDir}/pack.json`] ?? '', `${packDir}/pack.json`)
+      packJson = pack
       name = pack.name
       version = pack.version
-      for (const ref of pack.parts) {
+      for (const [position, ref] of pack.parts.entries()) {
         try {
           if (ref.dir) {
             const dir = joinPath(packDir, ref.dir)
             const json = parsePartJson(EAGER[`${dir}/part.json`] ?? '', `${dir}/part.json`)
             const iconFile = iconFileOf(json)
             providers.push({
-              meta: folderPartMeta(json, iconFile ? EAGER[joinPath(dir, iconFile)] : undefined),
+              meta: placeInPack(
+                folderPartMeta(json, iconFile ? EAGER[joinPath(dir, iconFile)] : undefined),
+                ref,
+                position
+              ),
               load: () =>
                 buildFolderPart(json, readBundled, { layer: 'bundled', pack: pack.id, dir })
             })
@@ -87,7 +97,11 @@ export function bundledPacks(): BundledPack[] {
               ...json,
               source: { layer: 'bundled' as const, pack: pack.id, file: where }
             }
-            providers.push({ meta: legacyMeta(def), load: async () => def, def })
+            providers.push({
+              meta: placeInPack(legacyMeta(def), ref, position),
+              load: async () => def,
+              def
+            })
           }
         } catch (e) {
           errors.push(e instanceof Error ? e.message : String(e))
@@ -96,6 +110,6 @@ export function bundledPacks(): BundledPack[] {
     } catch (e) {
       errors.push(e instanceof Error ? e.message : String(e))
     }
-    return { id: sp.id, name, version, files: sp.files, providers, errors }
+    return { id: sp.id, name, version, files: sp.files, json: packJson, providers, errors }
   })
 }

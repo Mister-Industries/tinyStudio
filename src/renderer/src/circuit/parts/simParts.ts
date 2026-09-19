@@ -86,6 +86,8 @@ export function generateSimSource(spec: SimSourceSpec): PartDef {
     label: spec.label,
     family: 'Source',
     builtin: true,
+    bin: 'core',
+    searchOnly: true,
     views: { breadboard: view, schematic: view }
   }
   cache.set(spec.type, def)

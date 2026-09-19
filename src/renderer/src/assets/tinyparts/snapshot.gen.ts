@@ -94,13 +94,13 @@ export interface TinypartsSnapshot {
 
 export const SNAPSHOT: TinypartsSnapshot = {
   "repo": "Mister-Industries/tinyparts",
-  "commit": "0085e41a8cc546272c2bd78bc9f4bd8e9293f0f8",
+  "commit": "d952101940bbeddc7cecadb549f54a34198be38c",
   "dirty": false,
   "packs": [
     {
       "id": "tinyboards",
       "files": {
-        "pack.json": "4b9bac9f7c8d70e613ce00d1c87c4ff4281d1ec5",
+        "pack.json": "3f87e28bb0bad7aa72505c0dae9a66b1e91ae291",
         "parts/tinycore/breadboard.svg": "1779cf14d778fc1a9344ff7a79fd2c4ecc3c968f",
         "parts/tinycore/icon.svg": "334dfafa8d2954026c2448486a7aafeadac28e51",
         "parts/tinycore/part.json": "4168f74b75e81176d4d09a3bbc36cc0782e5322b",
@@ -124,7 +124,7 @@ export const SNAPSHOT: TinypartsSnapshot = {
     {
       "id": "core",
       "files": {
-        "pack.json": "95b171c8aecc30ad1f0979730addaf49c181294b",
+        "pack.json": "b06a82ce18ab4b3615873fbd04273c763916c997",
         "parts/7segment-100-cat/breadboard.svg": "549167978aff3849ac58e839a9cace3a5b1b5b9a",
         "parts/7segment-100-cat/icon.svg": "1e49653dea165e4387fc708c6f1f09584d42d4ff",
         "parts/7segment-100-cat/part.json": "e9b66edd52a8255306ac0b62d3514914adc51eef",

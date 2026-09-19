@@ -24,6 +24,7 @@
 import {
   layerGroups,
   setLayerParts,
+  setPackInfo,
   type PartDef,
   type PartProvider,
   type ViewKind
@@ -300,6 +301,7 @@ async function loadDevPack(src: FolderIO, id: string): Promise<DevPackStatus | n
   providers.sort((a, b) => (order.get(a.meta.type) ?? 0) - (order.get(b.meta.type) ?? 0))
   // a stale load (the source changed while this one ran) must not win
   if (io !== src) return null
+  setPackInfo(loaded.pack)
   setLayerParts('dev', id, providers)
   for (const dir of unlisted)
     warnings.push(

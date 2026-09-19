@@ -58,6 +58,13 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
 - The Parts Packs panel is reorganised into Built in, Developer, This computer
   and More packs. Installed packs stay linked to GitHub.
 - Fritzing art ships with its CC-BY-SA attribution.
+- The parts bin works like Fritzing's. A rail of tabs holds Search, Core, Mine,
+  and one tab for each installed pack; all the SparkFun packs share one tab.
+  Core opens with the tinyCore boards, then follows Fritzing's Core order
+  (Basic, Input, Output, Power, then the breadboards). Mine holds the parts you
+  import or make. Tiles are icons, with the name on hover.
+- Search finds any installed part, including package variants, which no longer
+  get a tile of their own. Simulation sources and probes are found by search.
 - New breadboard art for the tinyCore, tinyDisplay, tinyProto and tinySpeak.
 - In the parts editor, arrow keys nudge the selected pin by one unit of the
   art's own coordinates (Shift: 0.1 in). While pins come from `pin-*` shapes

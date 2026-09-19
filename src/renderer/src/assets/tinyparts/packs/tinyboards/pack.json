@@ -7,30 +7,37 @@
   "icon": "tB",
   "bundled": true,
   "description": "The MR.INDUSTRIES tinyBoard family: tinyCore and its stackable HATs.",
+  "sections": ["tinyCore Boards"],
   "parts": [
     {
       "type": "tinycore",
-      "dir": "parts/tinycore"
-    },
-    {
-      "type": "tinyglow",
-      "dir": "parts/tinyglow"
-    },
-    {
-      "type": "tinyproto",
-      "dir": "parts/tinyproto"
-    },
-    {
-      "type": "tinysniff",
-      "dir": "parts/tinysniff"
-    },
-    {
-      "type": "tinyspeak",
-      "dir": "parts/tinyspeak"
+      "dir": "parts/tinycore",
+      "section": "tinyCore Boards"
     },
     {
       "type": "tinydisplay",
-      "dir": "parts/tinydisplay"
+      "dir": "parts/tinydisplay",
+      "section": "tinyCore Boards"
+    },
+    {
+      "type": "tinyglow",
+      "dir": "parts/tinyglow",
+      "section": "tinyCore Boards"
+    },
+    {
+      "type": "tinyproto",
+      "dir": "parts/tinyproto",
+      "section": "tinyCore Boards"
+    },
+    {
+      "type": "tinysniff",
+      "dir": "parts/tinysniff",
+      "section": "tinyCore Boards"
+    },
+    {
+      "type": "tinyspeak",
+      "dir": "parts/tinyspeak",
+      "section": "tinyCore Boards"
     }
   ]
 }
