@@ -18,20 +18,31 @@ interface FileStats {
 }
 
 interface FileSystemAPI {
-  selectFolder: () => Promise<string | null>
+  /** Folder picker. The chosen folder joins the folders tinyStudio may read and write. */
+  selectFolder: (defaultPath?: string) => Promise<string | null>
+  /** Whether file access is allowed at this path (a chosen folder or the examples folder). */
+  hasAccess: (targetPath: string) => Promise<boolean>
   readDirectory: (dirPath: string, recursive?: boolean) => Promise<FileSystemItem[]>
   readFile: (filePath: string) => Promise<string>
   writeFile: (filePath: string, content: string) => Promise<void>
   createFile: (filePath: string, content?: string) => Promise<void>
   renameFile: (oldPath: string, newPath: string) => Promise<void>
   createFolder: (folderPath: string) => Promise<void>
-  deleteFolder: (folderPath: string) => Promise<void>
   deleteFile: (targetPath: string) => Promise<void>
   pathExists: (targetPath: string) => Promise<boolean>
   getFileStats: (filePath: string) => Promise<FileStats>
   saveFileAs: (defaultName: string, content: string) => Promise<string | null>
   openPath: (targetPath: string) => Promise<string>
   openExternal: (url: string) => Promise<void>
+  showInFolder: (targetPath: string) => Promise<void>
+}
+
+/** Parts development: watch a local tinyparts checkout (npm run dev). */
+interface PartsDevAPI {
+  watch: (dir: string) => Promise<void>
+  unwatch: () => Promise<void>
+  /** batched file changes, as paths relative to the watched folder */
+  onChanged: (cb: (info: { dir: string; paths: string[] }) => void) => () => void
 }
 
 // Arduino API types
@@ -126,10 +137,52 @@ interface SettingsAPI {
   getStatus: () => Promise<SettingsStatus>
   setApiKey: (key: string) => Promise<void>
   clearApiKey: () => Promise<void>
+  /** The Studio AI model id (shared/agentModels.ts), the default when none was chosen. */
+  getModel: () => Promise<string>
+  /** Rejects an id that isn't in the offered list. */
+  setModel: (model: string) => Promise<void>
 }
 
 interface AppAPI {
   getExamplesDir: () => Promise<string>
+  /** running unpackaged (npm run dev) */
+  isDev: () => boolean
+}
+
+/** A signed-in GitHub account. The token is held in memory by the renderer only. */
+export interface GitHubAccountInfo {
+  login: string
+  name: string
+  avatarUrl: string
+  token: string
+}
+
+export interface DeviceFlowStart {
+  deviceCode: string
+  /** the short code the user types on github.com */
+  userCode: string
+  verificationUri: string
+  expiresIn: number
+  interval: number
+}
+
+interface GitHubAuthAPI {
+  /** False when no OAuth client ID was built in; the UI falls back to a token. */
+  isConfigured: () => Promise<boolean>
+  getAccount: () => Promise<GitHubAccountInfo | null>
+  startDeviceFlow: () => Promise<DeviceFlowStart>
+  /** Resolves only once the user finishes authorising on github.com. */
+  poll: (deviceCode: string, interval: number, expiresIn: number) => Promise<GitHubAccountInfo>
+  cancelSignIn: () => Promise<void>
+  signOut: () => Promise<void>
+  signInWithToken: (token: string) => Promise<GitHubAccountInfo>
+}
+
+export interface ServiceError {
+  message: string
+  error: string
+  /** The backend isn't running and won't restart on its own. */
+  stopped: boolean
 }
 
 interface ServiceAPI {
@@ -137,6 +190,12 @@ interface ServiceAPI {
   getUrl: () => Promise<string>
   /** Synchronous variant for construction-time use. */
   getUrlSync: () => string
+  /** Whether the backend is running, and the last fatal error if it isn't. */
+  getStatus: () => Promise<{ running: boolean; error: string | null }>
+  /** Stop and start the backend again on the same port. */
+  restart: () => Promise<{ ok: boolean; error?: string }>
+  /** Backend problems found by the main process. */
+  onError: (cb: (info: ServiceError) => void) => () => void
 }
 
 export type AgentEvent =
@@ -157,7 +216,18 @@ export interface AgentPermissionRequest {
 interface AgentSendArgs {
   text: string
   workspaceRoot: string | null
-  context?: { board?: string; openFile?: string; lastError?: string }
+  context?: {
+    board?: string
+    openFile?: string
+    lastError?: string
+    view?: 'code' | 'circuit' | 'visual'
+  }
+}
+
+export interface AgentStudioRequest {
+  id: string
+  method: 'inspectCircuit' | 'findParts' | 'readSerial'
+  arg: string | number
 }
 
 interface AgentAPI {
@@ -168,6 +238,9 @@ interface AgentAPI {
   onEvent: (cb: (evt: AgentEvent) => void) => () => void
   onPermissionRequest: (cb: (req: AgentPermissionRequest) => void) => () => void
   onFileChanged: (cb: (info: { path: string }) => void) => () => void
+  /** Desktop only: the main-process agent asking the renderer for live app state. */
+  onStudioRequest?: (cb: (req: AgentStudioRequest) => void) => () => void
+  respondStudio?: (id: string, answer: { ok: boolean; value: string }) => Promise<void>
 }
 
 declare global {
@@ -177,9 +250,11 @@ declare global {
       fs: FileSystemAPI
       arduino: ArduinoAPI
       settings: SettingsAPI
+      github: GitHubAuthAPI
       agent: AgentAPI
       app: AppAPI
       service: ServiceAPI
+      parts: PartsDevAPI
     }
   }
 }

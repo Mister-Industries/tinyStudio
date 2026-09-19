@@ -1,5 +1,5 @@
 /**
- * circuit/core store + commands tests — undo/redo, drag merging, cascades,
+ * circuit/core store + commands tests: undo/redo, drag merging, cascades,
  * duplicate-wire guard (B5), rename rewrites (B4-adjacent), echo guard.
  */
 import { strict as assert } from 'node:assert'
@@ -90,7 +90,7 @@ test('deleteParts cascades wires and repairs junction riders', () => {
   s.dispatch(addPart({ id: 'C', type: 'x' }))
   s.dispatch(addWire({ id: 'host', from: 'A:1', to: 'B:1', view: 'bb' }))
   s.dispatch(addWire({ id: 'rider', from: 'C:1', to: { wire: 'host', t: 0.5 }, view: 'bb' }))
-  // deleting B removes host (touches B) — rider re-anchors to host.from = A:1
+  // deleting B removes host (touches B); rider re-anchors to host.from = A:1
   s.dispatch(deleteParts(['B']))
   const wires = s.getDoc().wires
   assert.equal(wires.length, 1)

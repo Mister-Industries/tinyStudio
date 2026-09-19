@@ -1,0 +1,17 @@
+{
+  "type": "switch-spst",
+  "label": "Slide Switch (SPST)",
+  "family": "Switch",
+  "description": "A hand-authored example part: a single-pole, single-throw slide switch. Copy this file as a starting point for your own parts.",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 60,
+      "height": 40,
+      "pins": {
+        "1": [12, 38],
+        "2": [48, 38]
+      }
+    }
+  }
+}

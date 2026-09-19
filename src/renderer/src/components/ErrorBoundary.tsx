@@ -1,8 +1,8 @@
 /**
- * ErrorBoundary — stops one component's crash from blanking the whole app.
+ * ErrorBoundary: stops one component's crash from blanking the whole app.
  *
  * React unmounts the entire tree when an error escapes render or an effect,
- * which previously left only the navy background ("blue screen"). This catches
+ * which would leave only the navy background ("blue screen"). This catches
  * that error and shows a recoverable fallback instead. Use it at the app root
  * and around any panel that can fail independently.
  */
@@ -48,12 +48,12 @@ export class ErrorBoundary extends React.Component<Props, State> {
     if (this.props.fallback) return this.props.fallback(error, this.reset)
 
     return (
-      <div className="size-full flex flex-col items-center justify-center gap-3 text-center text-fg-3 px-6 bg-navy-700">
-        <AlertTriangle size={36} className="text-pink opacity-80" />
-        <p className="text-sm text-fg-2">
+      <div className="size-full flex flex-col items-center justify-center gap-3 text-center text-[var(--text-muted)] px-6 bg-[var(--bg-raised)]">
+        <AlertTriangle size={36} className="text-[var(--brand)] opacity-80" />
+        <p className="text-sm text-[var(--text-body)]">
           {this.props.label ? `${this.props.label} hit an error.` : 'Something went wrong.'}
         </p>
-        <pre className="max-w-full max-h-32 overflow-auto rounded-md bg-navy-900 border border-navy-600 p-2 text-xs text-fg-3 whitespace-pre-wrap">
+        <pre className="max-w-full max-h-32 overflow-auto rounded-md bg-[var(--bg-raised)] border border-[var(--border-default)] p-2 text-xs text-[var(--text-muted)] whitespace-pre-wrap">
           {error.message}
         </pre>
         <Button size="sm" onClick={this.reset}>

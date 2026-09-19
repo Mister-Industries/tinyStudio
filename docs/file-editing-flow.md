@@ -16,7 +16,7 @@ The file editing system consists of three main components:
 - **Separation of Concerns**: File operations are handled at the `EditorPanel` level, while `MonacoEditor` is a pure controlled component
 - **Consistent State Management**: All file content changes flow through Redux state
 - **Correct File Association**: Save operations are always performed on the currently viewing file
-- **Extensible Architecture**: The same pattern can be used for `BlocklyEditor` and other future editors
+- **Extensible Architecture**: The same pattern can be used for other editors
 
 ## Sequence Diagrams
 
@@ -279,7 +279,7 @@ The system includes comprehensive error handling:
 
 - **Separation of Concerns**: `MonacoEditor` is now a pure controlled component
 - **Centralized File Operations**: All file I/O is handled at the `EditorPanel` level
-- **Extensible Design**: The same pattern can be applied to `BlocklyEditor` and future editors
+- **Extensible Design**: The same pattern can be applied to future editors
 - **Better State Management**: Clear data flow from UI events to Redux actions
 
 This architecture provides a robust, scalable file editing system that works consistently across different environments while maintaining good performance and user experience.

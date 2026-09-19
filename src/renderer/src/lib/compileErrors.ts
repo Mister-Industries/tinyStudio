@@ -1,6 +1,6 @@
 /**
  * Parse gcc/clang-style diagnostics out of arduino-cli compile output so they
- * can be shown inline in the editor (Monaco markers) and made clickable —
+ * can be shown inline in the editor (Monaco markers) and made clickable,
  * instead of living only as text in the Output pane.
  *
  * Typical shapes:

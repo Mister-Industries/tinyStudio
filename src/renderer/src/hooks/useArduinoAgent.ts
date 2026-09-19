@@ -93,7 +93,7 @@ export function useArduinoAgent(config: UseArduinoAgentConfig = {}): UseArduinoA
         setRetryCount((prev) => prev + 1)
       }
     } catch (error) {
-      console.error('Error checking Arduino agent status:', error)
+      console.warn('tinyService status check failed; shown as disconnected:', error)
       setStatus({
         connected: false,
         lastCheck: Date.now(),

@@ -3,11 +3,20 @@
 
 // Type declarations for File System Access API
 declare global {
+  interface DirectoryPickerOptions {
+    /** remembers the last folder per id, so the picker reopens where you left off */
+    id?: string
+    mode?: 'read' | 'readwrite'
+    startIn?: FileSystemHandle | 'desktop' | 'documents' | 'downloads'
+  }
   interface Window {
-    showDirectoryPicker(): Promise<FileSystemDirectoryHandle>
+    showDirectoryPicker(options?: DirectoryPickerOptions): Promise<FileSystemDirectoryHandle>
     showOpenFilePicker(): Promise<FileSystemFileHandle[]>
   }
 }
+
+/** Shared picker id: opening and saving projects both start in the same place. */
+export const PROJECTS_PICKER_ID = 'tinystudio-projects'
 
 export interface FileSystemItem {
   name: string
@@ -40,6 +49,21 @@ class WebFileSystemService {
     return this.directoryHandle?.name || null
   }
 
+  /** The folder every path is resolved against. */
+  getRoot(): FileSystemDirectoryHandle | null {
+    return this.directoryHandle
+  }
+
+  /**
+   * Point the service at a folder it didn't pick itself: one tinyStudio just
+   * created for a saved project, or one reopened from the recent list. Cached
+   * file handles belong to the previous root, so they go too.
+   */
+  setRoot(handle: FileSystemDirectoryHandle): void {
+    this.directoryHandle = handle
+    this.fileHandles.clear()
+  }
+
   // Select folder using File System Access API
   async selectFolder(): Promise<string | null> {
     try {
@@ -47,13 +71,13 @@ class WebFileSystemService {
         throw new Error('File System Access API not supported')
       }
 
-      this.directoryHandle = await window.showDirectoryPicker()
+      // readwrite up front, so the first save doesn't stop to ask again.
+      this.setRoot(await window.showDirectoryPicker({ id: PROJECTS_PICKER_ID, mode: 'readwrite' }))
       return this.directoryHandle?.name || null
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
         return null // User cancelled
       }
-      console.error('Error selecting folder:', error)
       throw error
     }
   }
@@ -80,32 +104,34 @@ class WebFileSystemService {
 
   // Read directory contents
   async readDirectory(dirPath = '', recursive = false): Promise<FileSystemItem[]> {
-    try {
-      if (!this.directoryHandle) {
-        throw new Error('No directory selected')
-      }
-
-      const items: FileSystemItem[] = []
-
-      // If dirPath is empty or matches the root directory name, use the root directory handle
-      let targetHandle: FileSystemDirectoryHandle | null
-      if (!dirPath || dirPath === this.directoryHandle.name) {
-        targetHandle = this.directoryHandle
-        dirPath = '' // Ensure we use empty string for root directory
-      } else {
-        targetHandle = await this.getDirectoryHandle(dirPath)
-      }
-
-      if (!targetHandle) {
-        throw new Error('Directory not found')
-      }
-
-      await this.readDirectoryRecursive(targetHandle, dirPath, items, recursive)
-      return items
-    } catch (error) {
-      console.error('Error reading directory:', error)
-      throw error
+    if (!this.directoryHandle) {
+      throw new Error('No directory selected')
     }
+
+    const items: FileSystemItem[] = []
+
+    // If dirPath is empty or matches the root directory name, use the root directory handle
+    // Returned paths always start with the root folder's name ("blink/blink.ino").
+    // Every other method strips that prefix back off (see normalizePath), and
+    // it gives the workspace a real path to hang off: bare "blink.ino" paths
+    // left it with none, so anything built from `${workspace.path}/…` (new
+    // files, circuit.json, the repo link) pointed somewhere that didn't exist.
+    const rootName = this.directoryHandle.name
+    let targetHandle: FileSystemDirectoryHandle | null
+    if (!dirPath || dirPath === rootName) {
+      targetHandle = this.directoryHandle
+      dirPath = rootName
+    } else {
+      targetHandle = await this.getDirectoryHandle(dirPath)
+      dirPath = `${rootName}/${this.normalizePath(dirPath)}`
+    }
+
+    if (!targetHandle) {
+      throw new Error('Directory not found')
+    }
+
+    await this.readDirectoryRecursive(targetHandle, dirPath, items, recursive)
+    return items
   }
 
   private async readDirectoryRecursive(
@@ -155,137 +181,107 @@ class WebFileSystemService {
 
   // Read file content
   async readFile(filePath: string): Promise<string> {
-    try {
-      const normalizedPath = this.normalizePath(filePath)
-      const fileHandle =
-        this.fileHandles.get(normalizedPath) ||
-        this.fileHandles.get(filePath) ||
-        (await this.getFileHandle(normalizedPath))
+    const normalizedPath = this.normalizePath(filePath)
+    const fileHandle =
+      this.fileHandles.get(normalizedPath) ||
+      this.fileHandles.get(filePath) ||
+      (await this.getFileHandle(normalizedPath))
 
-      if (!fileHandle) {
-        throw new Error('File not found')
-      }
-
-      const file = await fileHandle.getFile()
-      return await file.text()
-    } catch (error) {
-      console.error('Error reading file:', error)
-      throw error
+    if (!fileHandle) {
+      throw new Error('File not found')
     }
+
+    const file = await fileHandle.getFile()
+    return await file.text()
   }
 
   // Write file content
   async writeFile(filePath: string, content: string): Promise<void> {
-    try {
-      // Normalize the file path
-      const normalizedPath = this.normalizePath(filePath)
+    // Normalize the file path
+    const normalizedPath = this.normalizePath(filePath)
 
-      let fileHandle = this.fileHandles.get(normalizedPath) || this.fileHandles.get(filePath)
+    let fileHandle = this.fileHandles.get(normalizedPath) || this.fileHandles.get(filePath)
 
-      if (!fileHandle) {
-        // Create new file
-        const pathParts = normalizedPath.split('/')
-        const fileName = pathParts.pop()!
-        const dirPath = pathParts.join('/')
+    if (!fileHandle) {
+      // Create new file
+      const pathParts = normalizedPath.split('/')
+      const fileName = pathParts.pop()!
+      const dirPath = pathParts.join('/')
 
-        const dirHandle = await this.resolveDirectoryHandle(dirPath)
-        fileHandle = await dirHandle.getFileHandle(fileName, { create: true })
-        this.fileHandles.set(normalizedPath, fileHandle)
-        this.fileHandles.set(filePath, fileHandle) // Store both normalized and original paths
-      }
-
-      const writable = await fileHandle.createWritable()
-      await writable.write(content)
-      await writable.close()
-    } catch (error) {
-      console.error('Error writing file:', error)
-      throw error
+      const dirHandle = await this.resolveDirectoryHandle(dirPath)
+      fileHandle = await dirHandle.getFileHandle(fileName, { create: true })
+      this.fileHandles.set(normalizedPath, fileHandle)
+      this.fileHandles.set(filePath, fileHandle) // Store both normalized and original paths
     }
+
+    const writable = await fileHandle.createWritable()
+    await writable.write(content)
+    await writable.close()
   }
 
   // Create new file
   async createFile(filePath: string, content = ''): Promise<void> {
-    try {
-      const normalizedPath = this.normalizePath(filePath)
-      // Check if file already exists using both paths
-      if (this.fileHandles.has(normalizedPath) || this.fileHandles.has(filePath)) {
-        throw new Error('File already exists')
-      }
-
-      await this.writeFile(filePath, content)
-    } catch (error) {
-      console.error('Error creating file:', error)
-      throw error
+    const normalizedPath = this.normalizePath(filePath)
+    // Check if file already exists using both paths
+    if (this.fileHandles.has(normalizedPath) || this.fileHandles.has(filePath)) {
+      throw new Error('File already exists')
     }
+
+    await this.writeFile(filePath, content)
   }
 
   // Create new folder
   async createFolder(folderPath: string): Promise<void> {
-    try {
-      const normalizedPath = this.normalizePath(folderPath)
-      const pathParts = normalizedPath.split('/')
-      const folderName = pathParts.pop()!
-      const parentPath = pathParts.join('/')
+    const normalizedPath = this.normalizePath(folderPath)
+    const pathParts = normalizedPath.split('/')
+    const folderName = pathParts.pop()!
+    const parentPath = pathParts.join('/')
 
-      const parentHandle = await this.resolveDirectoryHandle(parentPath)
-      await parentHandle.getDirectoryHandle(folderName, { create: true })
-    } catch (error) {
-      console.error('Error creating folder:', error)
-      throw error
-    }
+    const parentHandle = await this.resolveDirectoryHandle(parentPath)
+    await parentHandle.getDirectoryHandle(folderName, { create: true })
   }
 
   async renameFile(oldPath: string, newPath: string): Promise<void> {
-    try {
-      const normalizedOldPath = this.normalizePath(oldPath)
+    const normalizedOldPath = this.normalizePath(oldPath)
 
-      // Get the old file handle
-      let fileHandle = this.fileHandles.get(normalizedOldPath) || this.fileHandles.get(oldPath)
-      if (!fileHandle) {
-        const handle = await this.getFileHandle(normalizedOldPath)
-        if (!handle) {
-          throw new Error('File not found')
-        }
-        fileHandle = handle
+    // Get the old file handle
+    let fileHandle = this.fileHandles.get(normalizedOldPath) || this.fileHandles.get(oldPath)
+    if (!fileHandle) {
+      const handle = await this.getFileHandle(normalizedOldPath)
+      if (!handle) {
+        throw new Error('File not found')
       }
-
-      // Read the content of the old file
-      const file = await fileHandle.getFile()
-      const content = await file.text()
-
-      // Create the new file with the content
-      await this.writeFile(newPath, content)
-
-      // Delete the old file
-      await this.deleteFile(oldPath)
-
-      // Update file handles - remove old entries
-      this.fileHandles.delete(normalizedOldPath)
-      this.fileHandles.delete(oldPath)
-    } catch (error) {
-      console.error('Error renaming file:', error)
-      throw error
+      fileHandle = handle
     }
+
+    // Read the content of the old file
+    const file = await fileHandle.getFile()
+    const content = await file.text()
+
+    // Create the new file with the content
+    await this.writeFile(newPath, content)
+
+    // Delete the old file
+    await this.deleteFile(oldPath)
+
+    // Update file handles - remove old entries
+    this.fileHandles.delete(normalizedOldPath)
+    this.fileHandles.delete(oldPath)
   }
 
   // Delete file or directory
   async deleteFile(targetPath: string): Promise<void> {
-    try {
-      const normalizedPath = this.normalizePath(targetPath)
-      const pathParts = normalizedPath.split('/')
-      const name = pathParts.pop()!
-      const parentPath = pathParts.join('/')
+    const normalizedPath = this.normalizePath(targetPath)
+    const pathParts = normalizedPath.split('/')
+    const name = pathParts.pop()!
+    const parentPath = pathParts.join('/')
 
-      const parentHandle = await this.resolveDirectoryHandle(parentPath)
-      await parentHandle.removeEntry(name, { recursive: true })
+    const parentHandle = await this.resolveDirectoryHandle(parentPath)
+    await parentHandle.removeEntry(name, { recursive: true })
 
-      // Delete from file handles using both paths
-      this.fileHandles.delete(normalizedPath)
-      this.fileHandles.delete(targetPath)
-    } catch (error) {
-      console.error('Error deleting file/folder:', error)
-      throw error
-    }
+    // Delete from file handles using both paths
+    this.fileHandles.delete(normalizedPath)
+    this.fileHandles.delete(targetPath)
   }
 
   // Check if path exists
@@ -325,35 +321,30 @@ class WebFileSystemService {
         }
       }
     } catch (error) {
-      console.error('Error in pathExists:', error)
+      console.warn('pathExists treated as false:', targetPath, error)
       return false
     }
   }
 
   // Get file stats
   async getFileStats(filePath: string): Promise<FileStats> {
-    try {
-      const normalizedPath = this.normalizePath(filePath)
-      const fileHandle =
-        this.fileHandles.get(normalizedPath) ||
-        this.fileHandles.get(filePath) ||
-        (await this.getFileHandle(normalizedPath))
+    const normalizedPath = this.normalizePath(filePath)
+    const fileHandle =
+      this.fileHandles.get(normalizedPath) ||
+      this.fileHandles.get(filePath) ||
+      (await this.getFileHandle(normalizedPath))
 
-      if (!fileHandle) {
-        throw new Error('File not found')
-      }
+    if (!fileHandle) {
+      throw new Error('File not found')
+    }
 
-      const file = await fileHandle.getFile()
-      return {
-        isDirectory: false,
-        isFile: true,
-        size: file.size,
-        lastModified: file.lastModified,
-        created: file.lastModified // Web API doesn't provide creation time
-      }
-    } catch (error) {
-      console.error('Error getting file stats:', error)
-      throw error
+    const file = await fileHandle.getFile()
+    return {
+      isDirectory: false,
+      isFile: true,
+      size: file.size,
+      lastModified: file.lastModified,
+      created: file.lastModified // Web API doesn't provide creation time
     }
   }
 
@@ -395,7 +386,7 @@ class WebFileSystemService {
       }
       return currentHandle
     } catch (error) {
-      console.error(`Error getting directory handle for path "${path}":`, error)
+      console.warn(`No directory handle for "${path}"; treated as missing:`, error)
       return null
     }
   }
@@ -423,7 +414,8 @@ class WebFileSystemService {
       }
       return currentHandle
     } catch (error) {
-      console.error(`Error resolving directory handle for path "${path}":`, error)
+      // The thrown message is what the user sees; the cause stays on the console.
+      console.warn(`Directory "${path}" could not be resolved:`, error)
       throw new Error(`Directory not found: ${path}`)
     }
   }

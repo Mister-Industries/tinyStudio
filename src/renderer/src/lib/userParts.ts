@@ -1,26 +1,30 @@
 /**
- * userParts — persistence for Parts-Editor-authored parts (B7).
+ * userParts: parts saved on THIS computer: the registry's top (user) layer.
  *
- * Custom parts used to live only in the in-memory registry (`registerPart`)
- * and vanished on reload. They now persist in IndexedDB, which works in both
- * the Electron renderer (stored under the app's userData) and the web build —
- * one implementation, no main-process IPC. localStorage is the fallback for
- * environments without IndexedDB (old WebViews, some test runners).
+ *   - local edits: a Parts Editor save of a part that ships in a pack. It
+ *     shadows the shipped part here only; "Reset to default" deletes it and
+ *     the pack's version (including any later updates) shows again.
+ *   - imports: parts made from scratch in the Parts Editor or dropped in as
+ *     .fzpz; nothing else supplies them.
+ *
+ * Nothing here is ever uploaded. Stored in IndexedDB (in the desktop app that
+ * lives in Electron's userData folder; the web build uses the browser's), with
+ * localStorage as the fallback where IndexedDB is missing.
  *
  * Usage:
- *   - `initUserParts()` — idempotent; loads every saved part into the live
- *     registry. Call before first geometry pass (CircuitView / DiagramEditor
- *     mount). Resolves with the number of parts restored.
- *   - `saveUserPart(def)` — registers AND persists (the Parts Editor save path).
- *   - `deleteUserPart(type)` — removes from storage (registry entries survive
- *     until reload; the doc may still reference the type).
+ *   - `initUserParts()`: idempotent; loads every saved part into the registry.
+ *     Call after the pack layers are registered (see parts/partsBoot.ts).
+ *   - `saveUserPart(def)`: registers AND persists.
+ *   - `resetUserPart(type)`: deletes the local copy; the shipped part returns.
  */
 
-import { registerPart, type PartDef } from './partsLibrary'
+import { artPrefix, namespaceSvg } from '../circuit/parts/svgArt'
+import { partLayers, registerPart, unregisterPart, type PartDef } from './partsLibrary'
+import { STORAGE_KEYS } from './storageKeys'
 
 const DB_NAME = 'tinystudio-user-parts'
 const STORE = 'parts'
-const LS_KEY = 'tinystudio.userParts'
+const LS_KEY = STORAGE_KEYS.userParts
 
 function idbAvailable(): boolean {
   try {
@@ -101,11 +105,19 @@ function lsWrite(defs: PartDef[]): void {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(defs))
   } catch {
-    /* quota / privacy mode — parts stay session-only */
+    /* quota / privacy mode: parts stay session-only */
   }
 }
 
 // ── public API ───────────────────────────────────────────────────────────────
+
+/** types persisted here (generated breadboards are registered but never stored) */
+const stored = new Map<string, 'edit' | 'import'>()
+/** saved by a build that didn't record why; resolved once packs have loaded */
+const legacy = new Set<string>()
+
+/** Does any pack layer (bundled / remote / dev) ship this type? */
+const shipped = (type: string): boolean => partLayers(type).some((l) => l.layer !== 'user')
 
 let initPromise: Promise<number> | null = null
 
@@ -123,17 +135,57 @@ export function initUserParts(): Promise<number> {
       } else {
         defs = lsRead()
       }
+      let n = 0
       for (const def of defs) {
-        if (def && typeof def.type === 'string' && def.views) registerPart(def)
+        if (!def || typeof def.type !== 'string' || !def.views) continue
+        if (!def.origin) legacy.add(def.type)
+        stored.set(def.type, def.origin ?? 'import')
+        // saves from before per-file art prefixes gave the icon its views' prefix,
+        // so its <style> repainted the part on the canvas; re-prefix it on load
+        const icon = def.icon && namespaceSvg(def.icon, artPrefix(def.type, 'icon'))
+        registerPart({ ...def, icon, source: { ...def.source, layer: 'user' } })
+        n++
       }
-      return defs.length
+      await adoptLegacyCopies()
+      return n
     })()
   }
   return initPromise
 }
 
-/** Register a part into the live registry and persist it. */
-export async function saveUserPart(def: PartDef): Promise<void> {
+/**
+ * Older builds installed packs by copying every part in here, where it could
+ * never update. Once a pack layer supplies the same type, drop that copy so the
+ * pack serves (and keeps serving updates). Safe to call repeatedly.
+ */
+export async function adoptLegacyCopies(): Promise<string[]> {
+  const dropped: string[] = []
+  for (const type of [...legacy]) {
+    if (!shipped(type)) continue
+    legacy.delete(type)
+    dropped.push(type)
+    await resetUserPart(type)
+  }
+  return dropped
+}
+
+/**
+ * Register a part into the live registry and persist it. A part that ships in
+ * a pack is saved as a local edit; anything else as an import.
+ */
+export async function saveUserPart(raw: PartDef): Promise<void> {
+  const origin = raw.origin ?? (shipped(raw.type) ? 'edit' : 'import')
+  const def: PartDef = {
+    ...raw,
+    origin,
+    // keep where it came from (the Parts Editor can save it back there), drop
+    // load-time diagnostics and machine-specific paths
+    source: raw.source
+      ? { ...raw.source, layer: 'user', warnings: undefined, absDir: undefined }
+      : { layer: 'user' }
+  }
+  stored.set(def.type, origin)
+  legacy.delete(def.type)
   registerPart(def)
   if (idbAvailable()) {
     try {
@@ -148,8 +200,9 @@ export async function saveUserPart(def: PartDef): Promise<void> {
   lsWrite(defs)
 }
 
-/** Remove a part from persistent storage. */
+/** Remove a part from persistent storage (the registry keeps it until reload). */
 export async function deleteUserPart(type: string): Promise<void> {
+  stored.delete(type)
   if (idbAvailable()) {
     try {
       await idbDelete(type)
@@ -159,4 +212,20 @@ export async function deleteUserPart(type: string): Promise<void> {
     }
   }
   lsWrite(lsRead().filter((d) => d.type !== type))
+}
+
+/** Throw away this computer's copy of a part; whatever ships takes over again. */
+export async function resetUserPart(type: string): Promise<void> {
+  await deleteUserPart(type)
+  unregisterPart(type, 'user')
+}
+
+/** Is `type` showing a local edit on top of a shipped part? */
+export function isLocalEdit(type: string): boolean {
+  return stored.has(type) && shipped(type)
+}
+
+/** Every type with a local edit shadowing a shipped part. */
+export function localEdits(): string[] {
+  return [...stored.keys()].filter((t) => shipped(t))
 }

@@ -1,9 +1,9 @@
 /**
- * circuit/parts/zip — minimal ZIP reader for `.fzpz` drop-import (M2).
+ * circuit/parts/zip: minimal ZIP reader for `.fzpz` drop-import (M2).
  *
  * No dependency: entries are located via the central directory and inflated
  * with the native `DecompressionStream('deflate-raw')` (Chromium, web, and
- * Node ≥18 — so this stays testable under `node --test`). Only what Fritzing
+ * Node ≥18, so this stays testable under `node --test`). Only what Fritzing
  * archives need: stored (method 0) and deflated (method 8) entries, no
  * encryption, no ZIP64 (a .fzpz is a handful of SVGs).
  */

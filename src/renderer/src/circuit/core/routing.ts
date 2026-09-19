@@ -1,5 +1,5 @@
 /**
- * circuit/core/routing — orthogonal wire routing + bendpoint model.
+ * circuit/core/routing: orthogonal wire routing + bendpoint model.
  *
  * Port of `lib/wireRouting.ts` (the tinySchematic/Fritzing-style engine) into
  * the v2 core, with one behavioral fix and one extension:
@@ -7,14 +7,14 @@
  *  FIX (B2): Wokwi's "*" journey instruction is honored. Instructions before
  *  "*" are anchored at the SOURCE pin; instructions after "*" are applied in
  *  REVERSE from the TARGET pin; the remaining gap is auto-completed with an
- *  orthogonal elbow — exactly the semantics documented at
+ *  orthogonal elbow, exactly the semantics documented at
  *  https://docs.wokwi.com/diagram-format#wire-placement-mini-language.
  *  On serialization we always emit source-anchored lists (valid Wokwi).
  *
  *  EXT: `d<dx>,<dy>` diagonal moves (tinyStudio straight-mode extension) are
  *  decoded/encoded as before; they never co-exist with "*".
  *
- * Pure TS. No document knowledge beyond Pt — endpoints are resolved by callers.
+ * Pure TS. No document knowledge beyond Pt; endpoints are resolved by callers.
  */
 
 import type { Pt } from './model'
@@ -70,11 +70,11 @@ function step(cur: Pt, instr: string): Pt | null {
 
 /**
  * Decode a journey (possibly containing "*") into the full waypoint list
- * between live `source` and `target` points — Wokwi semantics (B2 fix):
+ * between live `source` and `target` points, Wokwi semantics (B2 fix):
  *   pre-"*"  → walked forward from source
  *   post-"*" → walked in reverse from target
  *   gap      → auto-completed orthogonally
- * Journeys without "*" behave exactly like the old decoder.
+ * A journey without "*" is walked forward from source in full.
  */
 export function decodeJourney(source: Pt, target: Pt, instr?: string[]): Pt[] {
   const list = instr ?? []
@@ -108,7 +108,9 @@ export function decodeJourney(source: Pt, target: Pt, instr?: string[]): Pt[] {
 
   const a = fromSrc[fromSrc.length - 1]
   const b = fromTgt[0]
-  const mid: Pt[] = samePoint(a, b) ? [] : calculateOrthogonalPath(a.x, a.y, b.x, b.y, false).slice(1, -1)
+  const mid: Pt[] = samePoint(a, b)
+    ? []
+    : calculateOrthogonalPath(a.x, a.y, b.x, b.y, false).slice(1, -1)
   return simplifyWirePoints([...fromSrc, ...mid, ...fromTgt])
 }
 
@@ -235,7 +237,10 @@ export function vertexDrag(orig: Pt[], index: number, x: number, y: number): Pt[
   points[index].x = x
   points[index].y = y
   if (index > 0) {
-    if (Math.abs(points[index - 1].y - points[index].y) < Math.abs(points[index - 1].x - points[index].x)) {
+    if (
+      Math.abs(points[index - 1].y - points[index].y) <
+      Math.abs(points[index - 1].x - points[index].x)
+    ) {
       if (index - 1 > 0) points[index - 1].y = points[index].y
       else points[index].y = points[index - 1].y
     } else {
@@ -244,7 +249,10 @@ export function vertexDrag(orig: Pt[], index: number, x: number, y: number): Pt[
     }
   }
   if (index < points.length - 1) {
-    if (Math.abs(points[index + 1].y - points[index].y) < Math.abs(points[index + 1].x - points[index].x)) {
+    if (
+      Math.abs(points[index + 1].y - points[index].y) <
+      Math.abs(points[index + 1].x - points[index].x)
+    ) {
       if (index + 1 < points.length - 1) points[index + 1].y = points[index].y
       else points[index].y = points[index + 1].y
     } else {
@@ -276,7 +284,8 @@ export function clampOntoSegment(p1: Pt, p2: Pt, x: number, y: number): Pt {
 /** Total polyline length. */
 export function polylineLength(pts: Pt[]): number {
   let l = 0
-  for (let i = 1; i < pts.length; i++) l += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)
+  for (let i = 1; i < pts.length; i++)
+    l += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)
   return l
 }
 

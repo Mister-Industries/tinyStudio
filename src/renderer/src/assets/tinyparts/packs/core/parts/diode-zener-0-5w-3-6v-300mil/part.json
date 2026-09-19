@@ -1,0 +1,31 @@
+{
+  "type": "diode-zener-0-5w-3-6v-300mil",
+  "label": "Zener Diode",
+  "family": "Diode",
+  "description": "A standard zener diode",
+  "source": {
+    "fzp": "diode_zener_0_5w_3_6v_300mil.fzp",
+    "moduleId": "xc307sadf951b6bdd0d67c0d2ad67eabZenerDiodeModuleID"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 39.84,
+      "height": 9.6,
+      "pins": {
+        "cathode": [0.68, 4.79],
+        "anode": [39.16, 4.94]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 21.6,
+      "height": 9.36,
+      "pins": {
+        "cathode": [21.6, 4.94],
+        "anode": [0, 5.1]
+      }
+    }
+  }
+}

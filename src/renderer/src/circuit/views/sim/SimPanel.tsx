@@ -1,26 +1,53 @@
 /**
- * circuit/views/sim/SimPanel — the M4 Simulate panel (spec §10.4, first cut).
+ * circuit/views/sim/SimPanel: the Simulate panel (spec §10.4).
  *
- * Docked at the bottom of the circuit area: analysis tabs (DC op / DC sweep /
- * Transient / AC), parameters, Run/Cancel, results. DC (.op) lists node
- * voltages and source currents — and the shell mirrors them onto the canvas
- * as annotations; sweeps render in a uPlot chart (cursors, drag-zoom,
- * legend-toggle) with CSV export.
+ * Lives in the shell's right rail (schematic view only). Analysis tabs
+ * (DC op / DC sweep / Transient / AC), their parameters, the OUTPUTS the user
+ * wants reported, and Run/Cancel. DC (.op) lists node voltages and source
+ * currents; the shell mirrors them onto the canvas as annotations; sweeps
+ * render in a uPlot chart with CSV export.
  *
- * Analysis config persists in doc.sim via Commands (undoable, serialized).
+ * Outputs work the way CircuitLab's do: nothing is plotted by name until you
+ * say what you want. Picking one drops a PROBE TAG on the sheet (a real,
+ * draggable, deletable label rather than a highlight) and doc.sim.probes is
+ * the single source of truth this list reads. Probes store stable references,
+ * not vector names; core/simOutputs says why.
+ *
+ * The engine's own lifecycle is surfaced separately from the analysis: a cold
+ * start is "loading the engine", not a run that timed out. And an analysis
+ * whose point count would exhaust memory is refused here, before it reaches
+ * the worker; such a request would take the whole app down.
  */
 
-import { CircuitBoard, Download, Loader2, Play, Square, X } from 'lucide-react'
+import { Crosshair, Download, Loader2, Play, Square, X } from 'lucide-react'
 import React from 'react'
+import { Badge } from '../../../components/ui/Badge'
 import * as cmd from '../../core/commands'
 import type { Analysis, CircuitDoc } from '../../core/model'
 import { describeNet, type NetModel } from '../../core/nets'
-import { generateNetlist, mapSimIssues, type NetlistResult, type SimIssueRef } from '../../core/netlist'
+import { defaultAttrsFor } from '../../parts/naming'
+import {
+  estimatePoints,
+  generateNetlist,
+  mapSimIssues,
+  MAX_SIM_POINTS,
+  type NetlistResult,
+  type SimIssueRef
+} from '../../core/netlist'
+import {
+  availableOutputs,
+  outputFilter,
+  outputLabelFor,
+  resolveOutputs,
+  type OutputRef
+} from '../../core/simOutputs'
 import { diffProbeVectors, probeLabelFor } from '../../core/probes'
 import type { CircuitStore } from '../../core/store'
 import { getSimBackend, SimError } from '../../sim'
-import type { SimRun } from '../../sim'
-import { runToCsv, SimPlot, type PlotMode } from './Plot'
+import type { EngineStatus, SimRun } from '../../sim'
+import { fmtSI } from './format'
+import { SimPlot, type PlotMode } from './Plot'
+import { runToCsv } from './plotData'
 
 const field =
   'bg-bg-sunken border border-border-default rounded px-2 py-1 text-text-strong outline-none focus:border-brand w-20 text-xs'
@@ -30,6 +57,11 @@ export interface SimState {
   netlist: NetlistResult | null
 }
 
+/** Watchdog for the analysis itself; the engine load has its own, longer one. */
+function solveBudget(points: number): number {
+  return Math.min(120_000, 20_000 + points * 20)
+}
+
 export function SimPanel({
   doc,
   netModel,
@@ -37,7 +69,13 @@ export function SimPanel({
   familyOf,
   onClose,
   onResult,
-  onSelectIssue
+  onSelectIssue,
+  picking = false,
+  onPickingChange,
+  picked,
+  onToggleOutput,
+  onClearOutputs,
+  variant = 'drawer'
 }: {
   doc: CircuitDoc
   netModel: NetModel
@@ -48,6 +86,24 @@ export function SimPanel({
   onResult: (s: SimState) => void
   /** clicking a part/net chip on an error asks the shell to select it */
   onSelectIssue?: (refs: SimIssueRef) => void
+  /** "pick outputs by clicking the schematic" mode, owned by the shell */
+  picking?: boolean
+  onPickingChange?: (on: boolean) => void
+  /**
+   * Outputs currently picked: one per measurement tag placed on the sheet.
+   * The shell owns them (they live in doc.sim.probes, which is what the canvas
+   * draws), so this panel reads the list and asks for changes rather than
+   * keeping a second copy that could disagree with the tags.
+   */
+  picked: OutputRef[]
+  onToggleOutput: (ref: OutputRef) => void
+  onClearOutputs: () => void
+  /**
+   * 'drawer':  the original bottom panel across the canvas.
+   * 'rail':    a column inside the shell's right rail, so running an analysis
+   *            no longer covers the circuit you're analysing.
+   */
+  variant?: 'drawer' | 'rail'
 }): React.JSX.Element {
   const analysis: Analysis = doc.sim?.analyses?.[0] ?? { id: 'a1', kind: 'op' }
   const [running, setRunning] = React.useState(false)
@@ -55,7 +111,16 @@ export function SimPanel({
   const [gen, setGen] = React.useState<NetlistResult | null>(null)
   const [error, setError] = React.useState<{ message: string; details?: string[] } | null>(null)
   const [showNetlist, setShowNetlist] = React.useState(false)
+  const [showAllOutputs, setShowAllOutputs] = React.useState(false)
   const [autoRerun, setAutoRerun] = React.useState(false)
+  const [engine, setEngine] = React.useState<EngineStatus>(() => getSimBackend().status())
+
+  // engine lifecycle (loading / ready / failed) is independent of any one run
+  React.useEffect(() => {
+    const backend = getSimBackend()
+    setEngine(backend.status())
+    return backend.subscribe(setEngine)
+  }, [])
 
   const setAnalysis = (patch: Partial<Analysis>): void => {
     store.dispatch(cmd.setAnalyses([{ ...analysis, ...patch }]))
@@ -75,19 +140,52 @@ export function SimPanel({
     [doc.parts, familyOf]
   )
 
+  // ── outputs (what the user wants reported) ─────────────────────────────────
+
+  const choices = React.useMemo(
+    () => availableOutputs(doc, netModel, familyOf),
+    [doc, netModel, familyOf]
+  )
+  const resolved = React.useMemo(
+    () => resolveOutputs(picked, doc, netModel, gen, familyOf),
+    [picked, doc, netModel, gen, familyOf]
+  )
+  const pickFilter = React.useMemo(() => outputFilter(resolved), [resolved])
+  const pickLabel = React.useMemo(() => outputLabelFor(resolved), [resolved])
+
   const runningRef = React.useRef(false)
+  const points = estimatePoints(analysis)
+  const tooMany = points > MAX_SIM_POINTS
 
   const run = async (): Promise<void> => {
     if (runningRef.current) return // one in-flight run at a time (esp. for auto-rerun)
+    if (tooMany) {
+      setError({
+        message: `That analysis asks for about ${Math.round(points).toLocaleString()} points, more than the ${MAX_SIM_POINTS.toLocaleString()} this editor will hold in memory.`,
+        details: [
+          analysis.kind === 'tran'
+            ? 'Raise the step, or shorten the stop time.'
+            : analysis.kind === 'dc'
+              ? 'Raise the step, or narrow the from/to range.'
+              : 'Lower the points-per-decade, or narrow the frequency range.'
+        ]
+      })
+      return
+    }
     runningRef.current = true
     setRunning(true)
     setError(null)
-    const g = generateNetlist(doc, netModel, { familyOf, title: 'tinyStudio circuit' })
+    const g = generateNetlist(doc, netModel, {
+      familyOf,
+      // keeps SPICE and the printed schematic values in step (parts/naming)
+      defaultAttrsOf: defaultAttrsFor,
+      title: 'tinyStudio circuit'
+    })
     setGen(g)
     try {
-      const raw = await getSimBackend().run(g.netlist, 20000)
+      const raw = await getSimBackend().run(g.netlist, solveBudget(points))
       // fold in synthetic diff-probe vectors (voltage/current probes need no
-      // extra work — ngspice already reports every node and probe source)
+      // extra work; ngspice already reports every node and probe source)
       const diffs = diffProbeVectors(doc, netModel, g, raw)
       const r: SimRun = diffs.length ? { ...raw, vectors: [...raw.vectors, ...diffs] } : raw
       setResult(r)
@@ -112,10 +210,9 @@ export function SimPanel({
     setRunning(false)
   }
 
-  // auto-rerun (spec/M4 leftover): once enabled, every doc change re-runs the
-  // active analysis after a short debounce — same "Run" path, so results and
-  // canvas DC annotations refresh without a manual click. Skipped while a run
-  // is already in flight; the trailing edit still gets its own debounce timer.
+  // auto-rerun: once enabled, every doc change re-runs the active analysis
+  // after a short debounce, same "Run" path, so results and canvas DC
+  // annotations refresh without a manual click.
   const runRef = React.useRef(run)
   runRef.current = run
   const lastAutoDoc = React.useRef(doc)
@@ -128,18 +225,17 @@ export function SimPanel({
 
   const isOp = result != null && result.numPoints === 1
 
-  // probe labels (M4 leftover): a placed sim-probe-v/-vdiff/-i part's
-  // attrs.label, if any, stands in for the raw v(node)/vdiff(id)/i(v<id>)
-  // vector name in the table and plot legend.
+  // probe labels: a placed sim-probe part's attrs.label stands in for the raw
+  // v(node)/vdiff(id)/i(v<id>) vector name; a picked output's own label wins.
   const labelFor = React.useCallback(
     (vecName: string): string | undefined =>
-      gen ? probeLabelFor(vecName, doc, netModel, gen) : undefined,
-    [gen, doc, netModel]
+      pickLabel(vecName) ?? (gen ? probeLabelFor(vecName, doc, netModel, gen) : undefined),
+    [pickLabel, gen, doc, netModel]
   )
 
-  // error → part/net highlight mapping (M4 leftover): scan the engine's raw
-  // message lines for the device/node names this run's netlist used, so the
-  // offending elements can be selected on the canvas straight from the error.
+  // error → part/net highlight mapping: scan the engine's raw message lines for
+  // the device/node names this run's netlist used, so the offending elements
+  // can be selected on the canvas straight from the error.
   const issueRefs: SimIssueRef | null = React.useMemo(() => {
     if (!error || !gen) return null
     const lines = error.details?.length ? error.details : [error.message]
@@ -166,14 +262,34 @@ export function SimPanel({
     [gen, netModel]
   )
 
-  return (
-    <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-border-default bg-bg-raised flex flex-col max-h-[45%]">
-      {/* header row: analysis config + run */}
-      <div className="flex items-center gap-2 px-3 h-10 shrink-0 border-b border-border-default">
-        <CircuitBoard size={14} className="text-brand" />
-        <span className="text-xs font-semibold text-text-strong">Simulate</span>
+  const inRail = variant === 'rail'
+  const loading = engine.phase === 'loading'
+  const engineFailed = engine.phase === 'failed'
 
-        <div className="flex rounded-md overflow-hidden tactile-bordered ml-3">
+  return (
+    <div
+      className={
+        inRail
+          ? 'flex-1 min-h-0 flex flex-col'
+          : 'absolute bottom-0 left-0 right-0 z-20 border-t border-border-default bg-bg-raised flex flex-col max-h-[45%]'
+      }
+    >
+      {/* The simulator is shipped as-is in 0.4: say so wherever the panel opens. */}
+      <div className="flex items-center gap-2 px-3 py-1.5 shrink-0 border-b border-border-default text-[11px] text-text-muted">
+        <Badge tone="yellow">Experimental</Badge>
+        <span>Simulation is experimental and results may be wrong.</span>
+      </div>
+      {/* controls: analysis kind and its parameters */}
+      <div
+        className={
+          inRail
+            ? 'flex flex-wrap items-center gap-2 px-3 py-2 shrink-0 border-b border-border-default'
+            : 'flex items-center gap-2 px-3 h-10 shrink-0 border-b border-border-default'
+        }
+      >
+        <div
+          className={`flex rounded-md overflow-hidden tactile-bordered ${inRail ? 'w-full' : 'ml-3'}`}
+        >
           {(
             [
               ['op', 'DC'],
@@ -184,16 +300,14 @@ export function SimPanel({
           ).map(([kind, label]) => (
             <button
               key={kind}
-              className={`h-7 px-2.5 text-[11px] font-medium ${
+              className={`h-7 px-2.5 text-[11px] font-medium ${inRail ? 'flex-1' : ''} ${
                 analysis.kind === kind
                   ? 'bg-brand/15 text-brand'
                   : 'bg-surface-card text-text-muted hover:text-text-body'
               }`}
               onClick={() =>
                 setAnalysis(
-                  kind === 'dc'
-                    ? { kind, src: String(analysis.src ?? sources[0] ?? '') }
-                    : { kind }
+                  kind === 'dc' ? { kind, src: String(analysis.src ?? sources[0] ?? '') } : { kind }
                 )
               }
             >
@@ -203,7 +317,7 @@ export function SimPanel({
         </div>
 
         {analysis.kind === 'tran' && (
-          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-text-muted">
             <span>step</span>
             <input
               className={field}
@@ -218,7 +332,10 @@ export function SimPanel({
               key={`stop:${analysis.id}`}
               onBlur={(e) => setAnalysis({ stop: e.target.value })}
             />
-            <label className="flex items-center gap-1 cursor-pointer" title="Start from zero initial conditions instead of the DC operating point">
+            <label
+              className="flex items-center gap-1 cursor-pointer"
+              title="Start from zero initial conditions instead of the DC operating point"
+            >
               <input
                 type="checkbox"
                 checked={analysis.uic === true}
@@ -230,7 +347,7 @@ export function SimPanel({
         )}
 
         {analysis.kind === 'dc' && (
-          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-text-muted">
             <span>source</span>
             <select
               className={`${field} w-24`}
@@ -269,7 +386,7 @@ export function SimPanel({
         )}
 
         {analysis.kind === 'ac' && (
-          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-text-muted">
             <select
               className={`${field} w-16`}
               value={String(analysis.variation ?? 'dec')}
@@ -302,13 +419,42 @@ export function SimPanel({
               key={`fstop:${analysis.id}`}
               onBlur={(e) => setAnalysis({ fstop: e.target.value })}
             />
-            <span className="text-text-faint" title="AC needs a sine source — its amplitude sets the AC magnitude">
+            <span
+              className="text-text-faint"
+              title="AC needs a sine source; its amplitude sets the AC magnitude"
+            >
               Hz
             </span>
           </div>
         )}
 
-        <div className="flex-1" />
+        {!inRail && <div className="flex-1" />}
+        {!inRail && (
+          <button
+            className="w-7 h-7 flex items-center justify-center rounded text-text-faint hover:text-text-body"
+            onClick={onClose}
+            title="Close"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
+      {/* outputs: what gets reported. Empty = everything, like a bare .op. */}
+      <OutputPicker
+        choices={choices}
+        picked={picked}
+        netModel={netModel}
+        picking={picking}
+        onPickingChange={onPickingChange}
+        onToggle={onToggleOutput}
+        onClear={onClearOutputs}
+        expanded={showAllOutputs}
+        onExpand={setShowAllOutputs}
+      />
+
+      {/* run row */}
+      <div className="flex items-center gap-2 px-3 py-2 shrink-0 border-b border-border-default">
         <label
           className="flex items-center gap-1.5 text-[11px] text-text-muted cursor-pointer select-none"
           title="Automatically re-run the active analysis after each edit"
@@ -323,8 +469,14 @@ export function SimPanel({
               if (on) void run()
             }}
           />
-          auto-rerun
+          auto
         </label>
+        <button
+          className="text-[11px] text-text-faint hover:text-text-body"
+          onClick={() => setShowNetlist((s) => !s)}
+        >
+          {showNetlist ? 'hide netlist' : 'netlist'}
+        </button>
         {result && result.numPoints > 1 && (
           <button
             className="flex items-center gap-1 text-[11px] text-text-faint hover:text-text-body"
@@ -341,49 +493,63 @@ export function SimPanel({
             <Download size={11} /> CSV
           </button>
         )}
-        <button
-          className="text-[11px] text-text-faint hover:text-text-body"
-          onClick={() => setShowNetlist((s) => !s)}
-        >
-          {showNetlist ? 'hide netlist' : 'netlist'}
-        </button>
+        <div className="flex-1" />
         {running ? (
           <button
-            className="flex items-center gap-1.5 h-7 px-3 rounded-md bg-surface-card border border-border-default text-status-danger text-xs"
+            className="flex items-center justify-center gap-1.5 h-7 px-3 rounded-md bg-surface-card border border-border-default text-status-danger text-xs"
             onClick={cancel}
           >
             <Square size={11} /> Cancel
           </button>
         ) : (
           <button
-            className="flex items-center gap-1.5 h-7 px-3 rounded-md bg-brand text-white text-xs font-medium hover:bg-brand/90"
+            className="tactile flex items-center justify-center gap-1.5 h-7 px-3 rounded-md bg-[var(--green)] [--_edge:var(--green-deep)] text-white text-xs font-medium disabled:opacity-50"
             onClick={() => void run()}
+            disabled={tooMany || engineFailed}
+            title={
+              tooMany
+                ? 'This analysis asks for too many points; adjust the step or range'
+                : engineFailed
+                  ? engine.error
+                  : 'Run the selected analysis'
+            }
           >
             <Play size={11} /> Run
           </button>
         )}
-        <button
-          className="w-7 h-7 flex items-center justify-center rounded text-text-faint hover:text-text-body"
-          onClick={onClose}
-          title="Close"
-        >
-          <X size={14} />
-        </button>
       </div>
 
       {/* body: results / errors / netlist */}
       <div className="flex-1 min-h-0 overflow-auto p-3 text-xs flex flex-col gap-2">
         {running && (
-          <div className="flex items-center gap-2 text-text-muted">
-            <Loader2 size={13} className="animate-spin" /> running… first run loads the engine
-            (~a few MB)
+          <div className="flex items-start gap-2 text-text-muted">
+            <Loader2 size={13} className="animate-spin mt-px shrink-0" />
+            <span>
+              {loading
+                ? 'loading the SPICE engine (about 20 MB, once per session)'
+                : `solving${points > 1 ? ` ${Math.round(points).toLocaleString()} points` : ''}…`}
+            </span>
+          </div>
+        )}
+
+        {!running && engineFailed && (
+          <div className="rounded-md border border-status-danger/40 bg-status-danger/5 p-2 text-status-danger">
+            <div className="font-medium">The simulation engine could not start.</div>
+            <div className="mt-0.5 opacity-80">{engine.error}</div>
+          </div>
+        )}
+
+        {!running && tooMany && (
+          <div className="rounded-md border border-status-warning/40 bg-status-warning/5 p-2 text-status-warning">
+            About {Math.round(points).toLocaleString()} points, over the{' '}
+            {MAX_SIM_POINTS.toLocaleString()} limit. Raise the step or shorten the range.
           </div>
         )}
 
         {error && (
           <div className="rounded-md border border-status-danger/40 bg-status-danger/5 p-2 text-status-danger">
             <div className="font-medium">{error.message}</div>
-            {error.details && error.details.length > 1 && (
+            {error.details && error.details.length > 0 && (
               <pre className="mt-1 whitespace-pre-wrap text-[10px] opacity-80">
                 {error.details.slice(0, 8).join('\n')}
               </pre>
@@ -431,12 +597,15 @@ export function SimPanel({
           </div>
         )}
 
-        {isOp && result && <OpTable run={result} describe={describe} labelFor={labelFor} />}
+        {isOp && result && (
+          <OpTable run={result} describe={describe} labelFor={labelFor} pick={pickFilter} />
+        )}
         {result && result.numPoints > 1 && (
           <SimPlot
             run={result}
             mode={(analysis.kind === 'op' ? 'tran' : analysis.kind) as PlotMode}
             labelFor={labelFor}
+            pick={pickFilter}
           />
         )}
 
@@ -446,11 +615,11 @@ export function SimPanel({
           </pre>
         )}
 
-        {!running && !result && !error && (
+        {!running && !result && !error && !engineFailed && (
           <div className="text-text-faint">
-            Run a DC operating point to annotate the schematic with node voltages, or a transient
-            to plot waveforms. Boards aren&apos;t simulated — drive their pins with sources from
-            the palette.
+            Pick the points you want to measure, then Run. A DC operating point annotates the
+            schematic with node voltages; a transient plots them over time. Boards aren&apos;t
+            simulated; drive their pins with sources from the palette.
           </div>
         )}
       </div>
@@ -458,30 +627,135 @@ export function SimPanel({
   )
 }
 
-// ── DC table ─────────────────────────────────────────────────────────────────
+// ── outputs ──────────────────────────────────────────────────────────────────
 
-export function fmtSI(v: number, unit: string): string {
-  const a = Math.abs(v)
-  if (a >= 1e6) return `${(v / 1e6).toFixed(2)} M${unit}`
-  if (a >= 1e3) return `${(v / 1e3).toFixed(2)} k${unit}`
-  if (a >= 1) return `${v.toFixed(3)} ${unit}`
-  if (a >= 1e-3) return `${(v * 1e3).toFixed(2)} m${unit}`
-  if (a >= 1e-6) return `${(v * 1e6).toFixed(2)} µ${unit}`
-  if (a === 0) return `0 ${unit}`
-  return `${(v * 1e9).toFixed(2)} n${unit}`
+function OutputPicker({
+  choices,
+  picked,
+  netModel,
+  picking,
+  onPickingChange,
+  onToggle,
+  onClear,
+  expanded,
+  onExpand
+}: {
+  choices: ReturnType<typeof availableOutputs>
+  picked: OutputRef[]
+  netModel: NetModel
+  picking: boolean
+  onPickingChange?: (on: boolean) => void
+  onToggle: (ref: OutputRef) => void
+  onClear: () => void
+  expanded: boolean
+  onExpand: (v: boolean) => void
+}): React.JSX.Element {
+  const byRef = new Map(choices.map((c) => [c.ref, c]))
+  return (
+    <div className="shrink-0 border-b border-border-default px-3 py-2 flex flex-col gap-1.5">
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] font-semibold text-text-body">Outputs</span>
+        <span className="text-[10px] text-text-faint">
+          {picked.length ? `${picked.length} picked` : 'all nodes'}
+        </span>
+        <div className="flex-1" />
+        {picked.length > 0 && (
+          <button className="text-[10px] text-text-faint hover:text-text-body" onClick={onClear}>
+            clear
+          </button>
+        )}
+        <button
+          className={`flex items-center gap-1 h-6 px-1.5 rounded text-[10px] border ${
+            picking
+              ? 'border-brand text-brand bg-brand/10'
+              : 'border-border-default text-text-muted hover:text-text-body'
+          }`}
+          onClick={() => onPickingChange?.(!picking)}
+          title="Click nodes on the schematic to add them as outputs"
+        >
+          <Crosshair size={11} /> {picking ? 'picking…' : 'pick'}
+        </button>
+      </div>
+
+      {picking && (
+        <div className="text-[10px] text-brand">
+          Click a wire or a pin to drop a probe tag there. Drag a tag to move it, drop it on another
+          wire to re-anchor it, or use its × to remove it.
+        </div>
+      )}
+
+      {picked.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {picked.map((ref) => {
+            const c = byRef.get(ref)
+            return (
+              <button
+                key={ref}
+                className="group flex items-center gap-1 px-1.5 h-5 rounded-full bg-brand/12 border border-brand/40 text-[10px] text-brand"
+                title={c?.detail ?? 'no longer in the circuit'}
+                onClick={() => onToggle(ref)}
+              >
+                {c?.label ?? ref}
+                <X size={9} className="opacity-60 group-hover:opacity-100" />
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      <button
+        className="self-start text-[10px] text-text-faint hover:text-text-body"
+        onClick={() => onExpand(!expanded)}
+      >
+        {expanded ? 'hide' : `all signals (${choices.length})`}
+      </button>
+
+      {expanded && (
+        <div className="max-h-40 overflow-auto rounded border border-border-default bg-bg-sunken p-1 flex flex-col">
+          {choices.length === 0 && (
+            <span className="text-[10px] text-text-faint px-1 py-1">
+              Nothing to measure yet. Wire up a couple of parts.
+            </span>
+          )}
+          {choices.map((c) => (
+            <label
+              key={c.ref}
+              className="flex items-center gap-1.5 px-1 py-0.5 rounded hover:bg-bg text-[11px] cursor-pointer"
+              title={c.netIndex != null ? describeNet(netModel, c.netIndex) : c.detail}
+            >
+              <input
+                type="checkbox"
+                checked={picked.includes(c.ref)}
+                onChange={() => onToggle(c.ref)}
+              />
+              <span className="text-text-body truncate">{c.label}</span>
+              <span className="ml-auto text-[9px] text-text-faint uppercase">
+                {c.kind === 'i' ? 'A' : 'V'}
+              </span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
+
+// ── DC table ─────────────────────────────────────────────────────────────────
 
 function OpTable({
   run,
   describe,
-  labelFor
+  labelFor,
+  pick
 }: {
   run: SimRun
   describe: (vecName: string) => string | undefined
   labelFor?: (vecName: string) => string | undefined
+  pick?: (vecName: string) => boolean
 }): React.JSX.Element {
   const rows = run.vectors
     .filter((v) => v.values.length === 1)
+    .filter((v) => (pick ? pick(v.name) : true))
     .map((v) => {
       const isV = v.name.startsWith('v(') || v.name.startsWith('vdiff(')
       const unit = isV ? 'V' : 'A'

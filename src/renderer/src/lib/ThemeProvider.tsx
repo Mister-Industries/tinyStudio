@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from 'react'
+import { LEGACY_THEME_KEY, STORAGE_KEYS } from './storageKeys'
 
 type Theme = 'dark' | 'light' | 'system'
 
@@ -21,16 +22,27 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
+/** The saved theme, moving one saved under the pre-0.4 key to the current key. */
+export function readSavedTheme(key: string): Theme | null {
+  try {
+    const saved = localStorage.getItem(key) ?? localStorage.getItem(LEGACY_THEME_KEY)
+    if (saved !== 'dark' && saved !== 'light' && saved !== 'system') return null
+    localStorage.setItem(key, saved)
+    localStorage.removeItem(LEGACY_THEME_KEY)
+    return saved
+  } catch {
+    return null
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'vite-ui-theme',
+  storageKey = STORAGE_KEYS.theme,
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  )
+  const [theme, setTheme] = useState<Theme>(() => readSavedTheme(storageKey) ?? defaultTheme)
 
   useEffect(() => {
     const root = window.document.documentElement

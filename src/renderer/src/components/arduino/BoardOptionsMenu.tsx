@@ -1,5 +1,5 @@
 /**
- * BoardOptionsMenu — the gear next to the board/port pickers.
+ * BoardOptionsMenu: the gear next to the board/port pickers.
  *
  * The Arduino IDE's Tools-menu equivalents, in one dialog:
  *  - Board options: the selected board's FQBN config options (PSRAM,

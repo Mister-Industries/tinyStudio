@@ -2,7 +2,7 @@
 
 <img src="resources/icon.png" alt="tinyStudio"/>
 
-**Write and flash embedded code, design circuits, and deploy apps all in one place**
+**Write and flash embedded code, design circuits, and build visuals, all in one place**
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Built with Electron](https://img.shields.io/badge/Electron-2f3242?logo=electron&logoColor=9feaf9)](https://www.electronjs.org/)
@@ -13,43 +13,57 @@
 
 ---
 
-> ### ⚠️ WARNING - This is a ROUGH Alpha. Please read this first
+> ### ⚠️ Alpha
 >
-> Because ya'll are impatient, I have decided to release tinyStudio in **Alpha** (Although that's giving it a lot.). Right now it's a ***demonstration of the concept***, not a
-> finished product. It's buggy, incomplete, and quite rough around the edges. 
-> Almost everything you see here is **subject to change**. Some of it will probably (definitely) be ripped out and redone.
->
->You may notice there's a fair amount of agentic code in this repo. 
->
-> Treat it as a preview, not a tool you'd rely on yet. If you want to follow along or experiment,
-> hell yeah Batman. Just go in expecting stuff to break. See [Known bugs](#known-bugs) and
-> [Roadmap](#roadmap) for where things stand.
+> tinyStudio is in alpha. It works, but expect rough edges, and expect things to
+> change between versions. See [Known issues](#known-issues) and
+> [Roadmap](#roadmap) for where things stand, and [CHANGELOG.md](CHANGELOG.md)
+> for what changed.
 
-tinyStudio is an open-source IDE for makers. The idea was to be able to write an Arduino sketch, upload the code, see the wiring next to it, and watch a p5.js simulation react to your serial output, without jumping between apps. It can run as a local desktop app (Electron) and in the browser.
+tinyStudio is an open-source IDE for makers. Write an Arduino sketch, upload it,
+see the wiring next to it, and watch a p5.js sketch react to the board's serial
+output, without jumping between apps. It runs as a desktop app (Electron) and in
+the browser.
 
-It's built around the family of tinyBoards from
-[MR.INDUSTRIES](https://github.com/Mister-Industries), starting with the **tinyCore** (a development board based on ESP32‑S3).
-It also speaks plain Arduino, so most sketches and boards (an Arduino Uno, ESP32, etc) work too.
+It's built around the tinyBoards from
+[MR.INDUSTRIES](https://github.com/Mister-Industries), starting with the
+**tinyCore** (an ESP32‑S3 development board). It also speaks plain Arduino, so
+most sketches and boards (an Arduino Uno, an ESP32) work too.
 
-## What it does today
+## What it does
 
-Keep the alpha warning above in mind, all of these things work, but they're... early.
+- **Three views of one project.** Switch between Code, Circuit and Visual:
+  - **Code** is a Monaco editor for `.ino` sketches, with completion, hover and
+    live diagnostics from the Arduino language server on desktop.
+  - **Circuit** edits `circuit.json`: a breadboard view, a schematic view of the
+    same circuit, an electrical rule check, and SPICE simulation (ngspice) with
+    plots and probes.
+  - **Visual** runs a [p5.js](https://p5js.org/) sketch (`visual.js`) live off the
+    board's serial output, and exports it as a standalone web page or publishes
+    it to GitHub Pages.
+- **Build and flash.** Compile and upload with a bundled
+  [`arduino-cli`](https://arduino.github.io/arduino-cli/) through the tinyService
+  backend, with board options, upload progress and a Serial Monitor. As Arduino
+  tightens its licensing we plan to write our own service; until then, please
+  read arduino-cli's licence to make sure you're fine with its terms.
+- **Parts.** tinyBoards and Fritzing parts from the
+  [tinyparts](https://github.com/Mister-Industries/tinyparts) repo, each with
+  breadboard and schematic art. The app ships a snapshot and picks up changes on
+  launch. You can edit parts or add your own.
+- **GitHub.** Open any repo, copy an example into your own account with **Make it
+  mine**, and push, pull and publish from the app.
+- **Examples.** A searchable library from
+  [tinyStudio-examples](https://github.com/Mister-Industries/tinyStudio-examples).
+- **Studio AI (optional).** Bring your own Anthropic API key for an assistant that
+  can read your project, circuit and serial output, and edit files with your
+  permission.
 
-- **Three views, one project.** Switch between Code / Circuit / Visual for the same folder:
-  - **Code** is a Monaco-based editor for `.ino` sketches with some Arduino-aware tooling.
-  - **Circuit** is a drag-and-drop designer that reads and writes a
-    [Wokwi-compatible](https://docs.wokwi.com/diagram-format) `diagram.json`.
-  - **Visual** is a `visual.js` [p5.js](https://p5js.org/) sketch that runs live off your serial
-    output. You can export it to a standalone web page.
-- **Build and flash for real.** Compile and upload over a bundled
-  [`arduino-cli`](https://arduino.github.io/arduino-cli/) through the tinyService backend, with a
-  built-in serial monitor. As Arduino gets tighter with their licensing, we plan to write our own service, but this makes it work for now. Please read the CLI's license to ensure you are okay with the terms.
-- **A parts library.** Built-in tinyBoards plus parts imported from
-  [Fritzing](https://fritzing.org/), each with breadboard and schematic views. You can add your
-  own — see [Extending the library](#extending-the-library).
-- **Board and library managers.** Install board packages and Arduino libraries from the UI.
-- **Optional AI assistant.** Bring your own Anthropic API key for an in-app agent. Can read/write files with permission.
-- **Web and GitHub Pages Project Export.** The same renderer runs in Electron and as a static web build.
+## Download
+
+Installers for Windows, macOS (Apple Silicon and Intel) and Linux (AppImage and
+.deb) are on the [Releases](https://github.com/Mister-Industries/tinyStudio/releases)
+page. They aren't signed yet, so Windows and macOS warn the first time you open
+tinyStudio; the release notes say how to get past that.
 
 ## The tinyFamily
 
@@ -60,143 +74,159 @@ Keep the alpha warning above in mind, all of these things work, but they're... e
 | `tinyProto`   | Prototyping / Breakout board      |
 | `tinySpeak`   | Microphone and Speaker AI module  |
 | `tinySniff`   | MEMS Gas Sensor Array             |
+| `tinyDisplay` | Round LCD module                  |
 
-These ship as built-in parts in the Circuit view (see
-[`partsLibrary.ts`](src/renderer/src/lib/partsLibrary.ts)).
+These come from the `tinyboards` pack in
+[tinyparts](https://github.com/Mister-Industries/tinyparts) and show up in the
+Circuit view's parts palette.
 
 ## Getting started
 
 ### Prerequisites
 
-- **Node.js** 18+ and npm.
+- **Node.js 22** and npm.
 
-That's it. `npm install` pulls the backend packages (**`@mister-industries/tinyservice`** and
-**`@mister-industries/shared`**) from public npm — no token or registry config needed — and
-`arduino-cli` is fetched automatically the first time you run `npm run dev` (or `npm run build`)
-by [`scripts/fetch-arduino-cli.mjs`](scripts/fetch-arduino-cli.mjs). See
-[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) for what tinyService does and how it's wired in.
-
-### Install
-
-```bash
-npm install
-```
+`npm install` pulls the backend packages (`@mister-industries/tinyservice` and
+`@mister-industries/shared`) from public npm. `arduino-cli` is downloaded into
+`vendor/` the first time you run `npm run dev` or `npm run build`.
 
 ### Develop
 
 ```bash
-npm run dev       # Electron desktop app — starts the tinyService backend for you
-npm run dev:web   # browser-only renderer at http://localhost:5173
+npm install
+npm run dev       # desktop app; starts tinyService for you
+npm run dev:web   # browser build at http://localhost:5173
 ```
 
-> **How the backend works:** all compile/upload/serial goes through **tinyService**, a small
-> local WebSocket server (on `ws://localhost:3000`) that wraps `arduino-cli`. On the **desktop**
-> app it starts automatically. For the **browser** build, run tinyService yourself
-> (`npx @mister-industries/tinyservice`, or a standalone binary) and the page connects to it,
-> so you can host the web build on GitHub Pages/Netlify and users just run the backend locally.
-> Point the UI at a non-default backend by setting `localStorage["tinyservice.url"]`.
+Compile, upload and serial all go through **tinyService**, a local WebSocket
+server that wraps `arduino-cli`. The desktop app starts it on the first free port
+from 3000. The browser build needs it running on the same computer: install it
+from the
+[tinyService releases](https://github.com/Mister-Industries/tinyService/releases/latest)
+(the app offers the installer when it can't reach the backend). To use a
+different address, set `localStorage["tinyservice.url"]`. More in
+[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md).
+
+GitHub sign-in works out of the box on desktop (device flow) and in the browser
+(web flow); the app's OAuth client id is built in. How it works, and what the
+Netlify site needs for the browser flow: [docs/github-auth.md](docs/github-auth.md).
+
+### Check
+
+```bash
+npm run typecheck
+npm run lint
+npm test
+```
+
+CI runs these, plus the web build, on every push to `main` and each version branch.
 
 ### Build
 
 ```bash
 npm run build:win     # Windows installer
 npm run build:mac     # macOS app
-npm run build:linux   # Linux package
-npm run build:web     # static web bundle (dist-web/)
+npm run build:linux   # AppImage and deb
+npm run build:web     # static web bundle in dist-web/
 ```
 
-Windows packaging notes live in [docs/packaging-windows.md](docs/packaging-windows.md).
+Releases for all three systems are built on GitHub:
+[docs/releasing.md](docs/releasing.md). Windows packaging details:
+[docs/packaging-windows.md](docs/packaging-windows.md). Hosting
+the web build: [docs/web-deploy.md](docs/web-deploy.md).
 
 ## Example projects
 
-The [`demo/`](demo) folder holds ready-to-open projects. Clone the repo, and open one the folders in the editor,
-then pick your board and port and hit **Verify** / **Upload**.
+Ready-to-open projects live in
+[tinyStudio-examples](https://github.com/Mister-Industries/tinyStudio-examples) and
+show up in the app's **Examples** tab. Open one, pick your board and port, and hit
+**Verify** or **Upload**.
 
-| Project                                | What it shows                                            |
-| -------------------------------------- | -------------------------------------------------------- |
-| [Blink Example](demo/Blink%20Example)  | Blink an LED and mirror its state in the Visual view     |
-| [Fade Example](demo/Fade%20Example)    | PWM-fade an LED and chart the brightness curve live      |
-| [Joystick Example](demo/Joystick%20Example) | Read a Qwiic joystick and visualize the stick position |
+These come with a circuit and a live visual:
 
-Each project is a folder with the same structure:
+| Project                                                                                                              | What it shows                                                       |
+| -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| [Basic Blink Program](https://github.com/Mister-Industries/tinyStudio-examples/tree/main/basics/blink-basic)         | Blink an LED and mirror its state in the Visual view                |
+| [Smooth Breathing Effect](https://github.com/Mister-Industries/tinyStudio-examples/tree/main/basics/blink-breathing) | PWM-fade an LED and chart the brightness curve live                 |
+| [Qwiic Joystick](https://github.com/Mister-Industries/tinyStudio-examples/tree/main/basics/qwiic-joystick)           | Read a Qwiic joystick and play Asteroids or Pong in the Visual view |
+
+A project is a folder laid out the way the Arduino IDE expects:
 
 ```
-My Example/
-  my_sketch/
-    my_sketch.ino   ← the Arduino sketch (its own folder, per Arduino convention)
-  diagram.json      ← the circuit (Circuit view)
-  visual.js         ← the p5 sketch (Visual view)
-  README.md         ← how to run it
+my-example/
+  my-example.ino    ← the sketch; it shares the folder's name
+  circuit.json      ← the circuit (Circuit view)
+  visual.js         ← the p5.js sketch (Visual view)
+  README.md         ← shown in the Docs panel
 ```
+
+Older projects with a `diagram.json` get a **Convert** button in the Circuit
+view; it writes `circuit.json` and keeps the original as `diagram.json.bak`.
 
 ## Extending the library
 
-Creating your own **example projects** and **custom parts** is pretty straightforward. The full
-walkthrough has been documented in:
-
-📖 **[docs/extending-the-library.md](docs/extending-the-library.md)**
-
-> Just a heads up though, we are not opening up CONTRIBUTING just yet, since a lot will be SUBJECT TO CHANGE.
-
-TL;DR:
-
-- **A custom part** is a JSON file in
-  [`src/renderer/src/assets/parts/`](src/renderer/src/assets/parts) plus one entry in
-  [`index.json`](src/renderer/src/assets/parts/index.json). You can hand-author it or generate
-  it from a Fritzing part using
-  [`scripts/fritzing-import.mjs`](scripts/fritzing-import.mjs).
-- **An example project** is just a new folder under [`demo/`](demo) following the layout above.
+- **Parts and their art** live in
+  [tinyparts](https://github.com/Mister-Industries/tinyparts), one folder per part
+  with real `.svg` files you can edit in Illustrator:
+  [docs/parts-and-art.md](docs/parts-and-art.md).
+- **Example projects** are folders in tinyStudio-examples:
+  [docs/extending-the-library.md](docs/extending-the-library.md).
 
 ## Architecture
 
 ```
 src/
-  main/       Electron main process: app lifecycle, tinyService manager,
-              settings, the optional AI agent
-  preload/    typed IPC bridge between main and renderer
-  renderer/   the React UI (Code / Circuit / Visual), Redux store,
-              parts library, services, and the p5 visual runtime
-scripts/      arduino-cli fetcher + Fritzing parts importer
-demo/         bundled example projects
-docs/         contributor & packaging docs
+  main/       Electron main process: windows, file access, tinyService,
+              GitHub sign-in, the desktop side of Studio AI
+  preload/    the typed bridge between main and the renderer
+  renderer/   the React app: Code, Circuit and Visual views, Redux store,
+              parts, the Arduino service client
+  shared/     code both processes use (the Studio AI agent, constants)
+scripts/      arduino-cli and language-server fetchers, parts tools, tests
+docs/         design notes and guides
 ```
 
-The Electron main process starts **tinyService**, a WebSocket wrapper around `arduino-cli`, on
-launch; the renderer talks to it to compile, upload, and stream serial. See
-[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) for details.
+Where to read more:
 
-## Known bugs
+| Topic                              | Doc                                                                                                          |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| tinyService and the backend        | [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)                                                                 |
+| The circuit editor                 | [docs/circuit-view-tech-spec.md](docs/circuit-view-tech-spec.md)                                             |
+| Parts, packs and art               | [docs/parts-and-art.md](docs/parts-and-art.md), [docs/tinyparts-pack-setup.md](docs/tinyparts-pack-setup.md) |
+| Where state lives                  | [docs/state-management.md](docs/state-management.md)                                                         |
+| Code conventions                   | [docs/code-conventions.md](docs/code-conventions.md)                                                         |
+| Opening and saving files           | [docs/file-editing-flow.md](docs/file-editing-flow.md)                                                       |
+| GitHub sign-in                     | [docs/github-auth.md](docs/github-auth.md)                                                                   |
+| Push, Pull and linked repos        | [docs/github-sync.md](docs/github-sync.md)                                                                   |
+| What is planned for 0.4.0 and beta | [docs/release-plan.md](docs/release-plan.md), from [the September 2026 audit](docs/audit-2026-09.md)         |
 
-This is an alpha, so the list is short only because we haven't written everything down yet.
-Known issues right now:
+## Known issues
 
-- **Chat sessions don't persist between tabbing.** Switch away from the AI assistant and back,
-conversation is gone.
+- Desktop projects opened in an earlier version ask you to choose their folder once.
 
 ## Roadmap
 
-Nothing here is final, and priorities will shift. But this is roughly where we're headed.
+Nothing here is final.
 
 **Up next**
 
-- Circuit diagram overhaul and expansion (The wires suck right now, I'm aware)
+- Circuit export to KiCad and Wokwi
+- GitHub sign-in in the browser build without a pasted token
+- Signed installers and automatic updates
 - Tutorials for using tinyStudio
-- Built-in examples (and better examples in general)
-- Better Markdown support (in the README viewer and the agent)
-- General UI improvements
 
 **Further out**
 
 - CircuitPython support
-- KiCad Schematic export
 
 ## Contributions
 
-tinyStudio is in **early alpha** and is **not accepting external contributions** at this time.
-Pull requests are closed automatically and issues may be closed without review. This will open up
-as the project stabilizes, until then, feel free to **fork** and experiment.
+tinyStudio is in alpha and **not accepting external contributions** yet. Pull
+requests are closed automatically and issues may be closed without review. Feel
+free to **fork** and experiment.
 
 ## License
 
-tinyStudio is licensed under the **GNU General Public License v3.0 (or later)**. See
-[LICENSE](LICENSE).
+tinyStudio is licensed under the **GNU General Public License v3.0 (or later)**.
+See [LICENSE](LICENSE), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the
+work it includes.

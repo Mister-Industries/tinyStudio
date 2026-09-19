@@ -2,7 +2,7 @@ import * as React from 'react'
 import { cn } from '@renderer/lib/utils'
 import { X } from 'lucide-react'
 
-/* tinyStudio — Tag / Chip
+/* tinyStudio: Tag / Chip
    For libraries, board capabilities, filters. Optional leading icon and a
    removable affordance. Square-ish radius (not pill). */
 
@@ -24,7 +24,12 @@ export function Tag({
 }: TagProps): React.ReactElement {
   return (
     <span
-      className={cn('ts-tag', onClick && 'ts-tag--clickable', selected && 'ts-tag--selected', className)}
+      className={cn(
+        'ts-tag',
+        onClick && 'ts-tag--clickable',
+        selected && 'ts-tag--selected',
+        className
+      )}
       onClick={onClick}
       {...rest}
     >

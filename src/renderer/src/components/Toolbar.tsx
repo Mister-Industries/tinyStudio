@@ -1,3 +1,4 @@
+import { promptSaveToComputer } from '@renderer/commands/fileCommands'
 import { useArduinoContext } from '@renderer/contexts/ArduinoContext'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import {
@@ -6,6 +7,7 @@ import {
   useAppDispatch,
   useAppSelector
 } from '@renderer/redux'
+import { reportError } from '@renderer/lib/notify'
 import { RefreshCw, Save } from 'lucide-react'
 import React from 'react'
 import { UploadButton, VerifyButton } from './arduino/ArduinoButtons'
@@ -27,16 +29,16 @@ export function Toolbar(): React.JSX.Element {
     const file = openFiles.find((f) => f.id === viewingFileId)
     if (file && file.path) {
       try {
-        console.log(`Saving file: ${file.name} (${file.id}) to ${file.path}`)
         await fileSystem.writeFile(file.path, file.content)
         // Save with content to ensure state is properly synced
         dispatch(saveFileWithContent({ id: file.id, content: file.content }))
-        console.log(`Successfully saved: ${file.name}`)
+        // Browser-only project: ask where it should live for real.
+        promptSaveToComputer()
       } catch (error) {
-        console.error('Failed to save file:', error)
+        reportError(`Could not save ${file.name}`, error)
       }
-    } else {
-      console.error('Cannot save file: file path is undefined')
+    } else if (!promptSaveToComputer()) {
+      console.warn('Save: the open file has no path, nothing written', file?.name)
     }
   }
 

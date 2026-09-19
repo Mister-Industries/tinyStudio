@@ -1,20 +1,26 @@
 /**
- * VisualPreview — runs a project's p5.js sketch (a .js file, conventionally
- * visual.js) live inside its editor tab. Uses a `with(p)` shim so global-style
- * sketches work, and exposes a Processing-style serial API (serialValue(),
- * serialEvent(line), …) fed from the serial monitor via window.__tinySerial.
+ * VisualPreview: runs a project's p5.js sketch (a .js file, conventionally
+ * visual.js) live inside its editor tab.
+ *
+ * A sketch is code from wherever the project came from (an example, someone's
+ * GitHub repo) so it runs in a sandboxed iframe (public/sketch-runner) that
+ * can't reach the app, the project files or the user's accounts. This component
+ * sends it the code, the `theme` object (lib/sketchTheme) and each serial line
+ * (lib/serialBus), and shows the errors it reports.
  */
 
 import { AlertTriangle, Pause, Play, RotateCw } from 'lucide-react'
 import React from 'react'
+import { getSerialBuffer, onSerialLine } from '../lib/serialBus'
+import { sketchTheme } from '../lib/sketchTheme'
 import { Button } from './ui/Button'
 
-declare global {
-  interface Window {
-    p5?: any
-    __tinySerial?: { lines: string[]; values: number[]; last: string; value: number }
-  }
-}
+// The desktop app loads from a file, so the runner is a sibling file; the dev
+// server and the web app serve it from the site root (deep links included).
+const RUNNER_URL =
+  window.location.protocol === 'file:' ? './sketch-runner/index.html' : '/sketch-runner/index.html'
+
+type RunnerMessage = { type: 'ready' } | { type: 'error'; message: string }
 
 export function VisualPreview({
   code,
@@ -24,115 +30,68 @@ export function VisualPreview({
   name?: string
   actions?: React.ReactNode
 }): React.JSX.Element {
-  const holder = React.useRef<HTMLDivElement>(null)
-  const p5ref = React.useRef<any>(null)
+  const frame = React.useRef<HTMLIFrameElement>(null)
+  const [ready, setReady] = React.useState(false)
   const [running, setRunning] = React.useState(true)
   const [err, setErr] = React.useState<string | null>(null)
   const [runId, setRunId] = React.useState(0)
-  const [hasP5, setHasP5] = React.useState(!!window.p5)
 
-  // p5 is loaded from a CDN script tag; wait for it if not ready yet.
-  React.useEffect(() => {
-    if (window.p5) {
-      setHasP5(true)
-      return
-    }
-    const t = setInterval(() => {
-      if (window.p5) {
-        setHasP5(true)
-        clearInterval(t)
-      }
-    }, 200)
-    return () => clearInterval(t)
+  const post = React.useCallback((message: unknown): void => {
+    // The runner's origin is opaque (sandboxed), so there is no origin to target.
+    frame.current?.contentWindow?.postMessage(message, '*')
   }, [])
 
+  // Only this component's runner may talk to it.
   React.useEffect(() => {
+    const onMessage = (event: MessageEvent): void => {
+      if (event.source !== frame.current?.contentWindow) return
+      const message = event.data as RunnerMessage | undefined
+      if (message?.type === 'ready') setReady(true)
+      else if (message?.type === 'error') setErr(String(message.message))
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
+
+  // (Re)start when the runner is up, the code changes, or Restart is pressed.
+  React.useEffect(() => {
+    if (!ready) return
     setErr(null)
-    if (!window.p5 || !holder.current || !code) return
-    let inst: any = null
-    const serialPrelude = `
-      function __ts(){ return window.__tinySerial || {lines:[],values:[],last:'',value:0}; }
-      function serialRead(){ return __ts().last; }
-      function serialReadLine(){ return __ts().last; }
-      function serialAvailable(){ return __ts().lines.length > 0; }
-      function serialValue(){ return __ts().value; }
-      function serialValues(){ return __ts().values.slice(); }
-      function serialLines(){ return __ts().lines.slice(); }
-    `
-    try {
-      const factory = new Function(
-        'p',
-        `with(p){
-          ${serialPrelude}
-          ${code}
-          p.setup = (typeof setup==='function')?setup:p.setup;
-          p.draw = (typeof draw==='function')?draw:p.draw;
-          if(typeof mousePressed==='function') p.mousePressed=mousePressed;
-          if(typeof serialEvent==='function') p.serialEvent=serialEvent;
-        }`
-      )
-      inst = new window.p5((p: any) => {
-        try {
-          factory(p)
-        } catch (e) {
-          setErr(String(e))
-        }
-        const origSetup = p.setup
-        p.setup = function () {
-          try {
-            if (origSetup) origSetup.call(p)
-          } catch (e) {
-            setErr(String(e))
-          }
-          if (p.canvas) {
-            p.canvas.style.maxWidth = '100%'
-            p.canvas.style.maxHeight = '100%'
-          }
-        }
-        // Deliver serial lines to the sketch's serialEvent() deterministically:
-        // each frame, replay any lines that arrived since the last frame. This
-        // is reliable (no dependence on DOM-event timing) and stays in sync with
-        // the draw loop. `window.__tinySerial.lines` is the shared serial buffer.
-        let lastLen = window.__tinySerial ? window.__tinySerial.lines.length : 0
-        const origDraw = p.draw
-        p.draw = function () {
-          const buf = window.__tinySerial
-          if (buf && typeof p.serialEvent === 'function') {
-            // If the buffer was cleared/shrank, resync without replaying.
-            if (buf.lines.length < lastLen) lastLen = buf.lines.length
-            while (lastLen < buf.lines.length) {
-              try {
-                p.serialEvent(buf.lines[lastLen])
-              } catch {
-                /* ignore sketch errors */
-              }
-              lastLen++
-            }
-          }
-          if (origDraw) origDraw.call(p)
-        }
-      }, holder.current)
-      p5ref.current = inst
-      setRunning(true)
-    } catch (e) {
-      setErr(String(e))
+    if (!code) {
+      post({ type: 'stop' })
+      return
     }
+    setRunning(true)
+    post({ type: 'run', code, theme: { ...sketchTheme() }, serial: getSerialBuffer() })
+  }, [ready, code, runId, post])
+
+  // Serial lines and light/dark switches reach the running sketch.
+  React.useEffect(() => {
+    if (!ready) return
+    const offLine = onSerialLine((line) => post({ type: 'serial', line }))
+    // sketchTheme() refills its object on the same mutation, and its observer
+    // was registered first, so the copy sent here is already current.
+    const theme = sketchTheme()
+    const observer = new MutationObserver(() => post({ type: 'theme', theme: { ...theme } }))
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme']
+    })
     return () => {
-      if (inst) inst.remove()
+      offLine()
+      observer.disconnect()
     }
-  }, [code, runId, hasP5])
+  }, [ready, post])
 
   const toggle = (): void => {
-    if (!p5ref.current) return
-    if (running) p5ref.current.noLoop()
-    else p5ref.current.loop()
+    post({ type: running ? 'pause' : 'resume' })
     setRunning(!running)
   }
 
   return (
     <div className="size-full flex flex-col bg-[var(--bg)]">
       <div className="flex items-center gap-2 px-3.5 h-[44px] border-b-[1.5px] border-[var(--border-default)] bg-[var(--bg-raised)]">
-        <Button variant="default" size="sm" onClick={toggle} disabled={!code || !hasP5}>
+        <Button variant="default" size="sm" onClick={toggle} disabled={!code || !ready}>
           {running ? <Pause size={14} className="fill-current" /> : <Play size={14} />}
           {running ? 'Pause' : 'Run'}
         </Button>
@@ -140,13 +99,13 @@ export function VisualPreview({
           variant="secondary"
           size="sm"
           onClick={() => setRunId((n) => n + 1)}
-          disabled={!code || !hasP5}
+          disabled={!code || !ready}
         >
           <RotateCw size={13} /> Restart
         </Button>
-        {(err || !hasP5 || !running) && (
+        {(err || !ready || !running) && code && (
           <span className="text-[11px] font-mono text-[var(--text-muted)]">
-            {err ? 'error' : !hasP5 ? 'loading p5…' : 'paused'}
+            {err ? 'error' : !ready ? 'starting…' : 'paused'}
           </span>
         )}
         <div className="flex-1" />
@@ -156,22 +115,34 @@ export function VisualPreview({
         className="flex-1 min-h-0 flex items-center justify-center px-[22px] py-9 dot-grid"
         style={{ containerType: 'size' }}
       >
-        {code ? (
-          <div
-            ref={holder}
-            className="flex items-center justify-center aspect-square overflow-hidden rounded-[var(--radius-md)] border-[1.5px] border-[var(--border-default)] shadow-[var(--shadow-soft)] [&>canvas]:!w-full [&>canvas]:!h-full [&>canvas]:object-contain"
-            style={{ background: '#14161A', width: 'min(100cqw, 100cqh)' }}
-          >
-            {err && (
-              <div className="text-xs text-[var(--status-error)] font-mono max-w-md p-4">
-                <AlertTriangle size={14} className="inline -mt-0.5 mr-1.5" />
-                Sketch error:
-                <br />
-                {err}
-              </div>
-            )}
-          </div>
-        ) : (
+        {/* The runner stays mounted while the file is empty, so it's ready the
+            moment there is code to run. */}
+        <div
+          className="relative aspect-square overflow-hidden rounded-[var(--radius-md)] border-[1.5px] border-[var(--border-default)] shadow-[var(--shadow-soft)]"
+          style={{
+            background: 'var(--bg-raised)',
+            width: 'min(100cqw, 100cqh)',
+            display: code ? undefined : 'none'
+          }}
+        >
+          <iframe
+            ref={frame}
+            src={RUNNER_URL}
+            sandbox="allow-scripts"
+            referrerPolicy="no-referrer"
+            title="Visual sketch"
+            className="block size-full border-0"
+          />
+          {err && (
+            <div className="absolute inset-x-0 bottom-0 max-h-[50%] overflow-auto bg-[var(--bg-raised)] border-t-[1.5px] border-[var(--border-default)] text-xs text-[var(--status-error)] font-mono p-4">
+              <AlertTriangle size={14} className="inline -mt-0.5 mr-1.5" />
+              Sketch error:
+              <br />
+              {err}
+            </div>
+          )}
+        </div>
+        {!code && (
           <div className="text-center text-[var(--text-faint)]">
             <Play size={40} className="mx-auto" />
             <div className="mt-2.5 text-sm">

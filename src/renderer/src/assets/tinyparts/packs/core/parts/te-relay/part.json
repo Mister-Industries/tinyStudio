@@ -1,0 +1,35 @@
+{
+  "type": "te-relay",
+  "label": "RELAY",
+  "family": "TE General Purpose Relays",
+  "description": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">SPST relay</p></body></html>",
+  "source": {
+    "fzp": "TE_RELAY.fzp",
+    "moduleId": "TE_RELAY"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 77.57,
+      "height": 84.4,
+      "pins": {
+        "COIL1": [72.38, 83.98],
+        "COIL2": [72.38, 55.18],
+        "MAIN": [14.78, 83.98],
+        "NO": [5.18, 55.18]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 68.13,
+      "height": 58.53,
+      "pins": {
+        "COIL1": [0.67, 10.07],
+        "COIL2": [0.67, 48.47],
+        "MAIN": [67.4, 29.27],
+        "NO": [67.4, 48.47]
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "type": "piezo-sensor",
+  "label": "Piezo Speaker",
+  "family": "Piezo",
+  "description": "Piezo",
+  "source": {
+    "fzp": "piezo sensor.fzp",
+    "moduleId": "8abf6496b5d466c7a1893c17a296a676"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 104.64,
+      "height": 90.21,
+      "pins": {
+        "pin1": [46.2, 88.55],
+        "pin2": [55.78, 88.55]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 25.92,
+      "height": 20.51,
+      "pins": {
+        "pin1": [9.37, 20.17],
+        "pin2": [16.55, 20.17]
+      }
+    }
+  }
+}

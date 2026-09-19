@@ -1,0 +1,32 @@
+{
+  "type": "sparkfun-discretesemi-mosfet-nchannel-pth",
+  "label": "MOSFET-NCHANNEL",
+  "family": "sparkfun Mosfet (N Channel)",
+  "description": "Generic NMOS footprint",
+  "source": {
+    "fzp": "sparkfun-discretesemi-mosfet-nchannel-pth.fzp",
+    "moduleId": "SparkFun-DiscreteSemi-MOSFET-NCHANNEL-PTH"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 22.04,
+      "height": 32.1,
+      "pins": {
+        "D": [1.44, 31.33],
+        "G": [20.6, 31.33],
+        "S": [11.01, 31.33]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 42.51,
+      "height": 39.33,
+      "pins": {
+        "D": [29.27, 0.47],
+        "G": [0.47, 19.67],
+        "S": [29.27, 38.87]
+      }
+    }
+  }
+}

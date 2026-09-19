@@ -4,13 +4,13 @@
  */
 
 import {
-  CreateFileCommand,
-  CreateFolderCommand,
-  DeleteFileCommand,
-  OpenFileCommand,
-  RefreshWorkspaceCommand,
-  RenameFileCommand,
-  SetFolderOpenCommand
+  createFile,
+  createFolder,
+  deleteItem,
+  openFileItem,
+  refreshWorkspace,
+  renameItem,
+  setFolderExpanded
 } from '@renderer/commands/fileCommands'
 import {
   BaseFileItem,
@@ -66,13 +66,13 @@ function getFileIcon(fileName: string | null, isSelected = false): React.ReactNo
 
   switch (iconType) {
     case 'image':
-      return <Image size={14} className={isSelected ? 'text-current' : 'text-[var(--text-muted)]'} />
+      return (
+        <Image size={14} className={isSelected ? 'text-current' : 'text-[var(--text-muted)]'} />
+      )
     case 'code':
       return <Code size={14} className={isSelected ? 'text-current' : 'text-[var(--brand)]'} />
     case 'file':
-      return (
-        <File size={14} className={isSelected ? 'text-current' : 'text-[var(--text-faint)]'} />
-      )
+      return <File size={14} className={isSelected ? 'text-current' : 'text-[var(--text-faint)]'} />
     default:
       return null
   }
@@ -179,7 +179,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
 
   const handleOpenFile = (): void => {
     if (item.type === 'folder') {
-      new SetFolderOpenCommand(item, !isExpanded).execute()
+      setFolderExpanded(item, !isExpanded)
       return
     }
 
@@ -189,7 +189,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
     if (isOpen) {
       dispatch(revealFile(item.id))
     } else {
-      new OpenFileCommand(item).execute()
+      openFileItem(item)
     }
     dispatch(setEditorView('code'))
   }
@@ -207,15 +207,11 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   const handleCreateFileOrDirectory = async (): Promise<void> => {
     if (item.type === 'file') {
       // Logic to create a new file
-      const command = new CreateFileCommand(item, namingValue)
-      await command.execute()
-      const refreshCommand = new RefreshWorkspaceCommand(workspace!)
-      await refreshCommand.execute()
+      await createFile(item, namingValue)
+      await refreshWorkspace(workspace!)
     } else if (item.type === 'folder') {
-      const command = new CreateFolderCommand(item, namingValue)
-      await command.execute()
-      const refreshCommand = new RefreshWorkspaceCommand(workspace!)
-      await refreshCommand.execute()
+      await createFolder(item, namingValue)
+      await refreshWorkspace(workspace!)
     }
   }
 
@@ -231,8 +227,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
     if (item.type !== 'folder') {
       return
     }
-    const command = new SetFolderOpenCommand(item, true)
-    await command.execute()
+    setFolderExpanded(item, true)
     dispatch(
       startCreateItem({
         id: crypto.randomUUID(),
@@ -251,8 +246,7 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
     if (item.type !== 'folder') {
       return
     }
-    const command = new SetFolderOpenCommand(item, true)
-    await command.execute()
+    setFolderExpanded(item, true)
     dispatch(
       startCreateItem({
         id: crypto.randomUUID(),
@@ -276,10 +270,8 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
   }
 
   const handleRenameItem = async (): Promise<void> => {
-    const command = new RenameFileCommand(item, namingValue)
-    await command.execute()
-    const refreshCommand = new RefreshWorkspaceCommand(workspace!)
-    await refreshCommand.execute()
+    await renameItem(item, namingValue)
+    await refreshWorkspace(workspace!)
     setIsRenaming(false)
     setCursorPosition(0)
   }
@@ -290,10 +282,8 @@ export function FileTreeItem({ item, level = 1 }: FileTreeItemProps): React.JSX.
 
   const confirmDeleteItem = async (): Promise<void> => {
     // Logic to delete the item
-    const command = new DeleteFileCommand(item)
-    await command.execute()
-    const refreshCommand = new RefreshWorkspaceCommand(workspace!)
-    await refreshCommand.execute()
+    await deleteItem(item)
+    await refreshWorkspace(workspace!)
     setShowDeleteAlert(false)
   }
 

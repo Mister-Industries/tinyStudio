@@ -55,7 +55,7 @@ export class ArduinoServiceFactory {
   /**
    * Create new Arduino service instance (for testing or manual creation)
    */
-  static createService(_config?: ArduinoServiceConfig): ArduinoService {
+  static createService(): ArduinoService {
     const environment = this.detectEnvironment()
 
     if (environment === 'electron') {
@@ -81,7 +81,7 @@ export class ArduinoServiceFactory {
    * Check if current environment can reach an Arduino backend.
    *
    * Both desktop and web connect to a local tinyService over WebSocket, so both
-   * support Arduino operations — the difference is only whether the app launches
+   * support Arduino operations; the difference is only whether the app launches
    * tinyService for you (desktop) or you run it yourself (web).
    */
   static supportsArduinoCLI(): boolean {
@@ -116,7 +116,6 @@ export class ArduinoServiceFactory {
       'cleanup' in this.instance &&
       typeof this.instance.cleanup === 'function'
     ) {
-      console.log('Cleaning up Arduino service instance...')
       this.instance.cleanup()
     }
     this.instance = null

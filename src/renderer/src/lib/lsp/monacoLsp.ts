@@ -2,7 +2,7 @@
  * Minimal Arduino Language Server integration for Monaco.
  *
  * tinyService exposes the Arduino Language Server (clangd under the hood)
- * over a WebSocket bridge at /lsp — plain JSON-RPC, one payload per WS
+ * over a WebSocket bridge at /lsp: plain JSON-RPC, one payload per WS
  * message (the service handles stdio Content-Length framing). This module is
  * a deliberately small, dependency-free LSP client that wires the parts that
  * matter most into Monaco:
@@ -23,9 +23,58 @@
  */
 
 import type { Monaco } from '@monaco-editor/react'
+import type { languages as MonacoLanguages } from 'monaco-editor'
 import { getArduinoService } from '@renderer/services/arduino/ArduinoServiceFactory'
 
 type MonacoEditorType = ReturnType<typeof import('monaco-editor').editor.create>
+
+// ── LSP message shapes (only the fields this client reads) ─────────────────
+
+interface JsonRpcMessage {
+  id?: number | string
+  method?: string
+  params?: unknown
+  result?: unknown
+  error?: { message?: string }
+}
+
+/** LSP documentation: a plain string, MarkupContent, or a list of either. */
+type LspMarkup = string | { value?: string } | LspMarkup[] | null | undefined
+
+interface LspPosition {
+  line?: number
+  character?: number
+}
+
+interface LspDiagnostic {
+  severity?: number
+  message: string
+  range?: { start?: LspPosition; end?: LspPosition }
+}
+
+interface LspCompletionItem {
+  label: string
+  kind?: number
+  insertText?: string
+  textEdit?: { newText?: string }
+  detail?: string
+  documentation?: string | { value?: string }
+  sortText?: string
+  filterText?: string
+}
+
+interface LspSignatureHelp {
+  signatures?: {
+    label: string
+    documentation?: string | { value?: string }
+    parameters?: {
+      label: string | [number, number]
+      documentation?: string | { value?: string }
+    }[]
+  }[]
+  activeSignature?: number
+  activeParameter?: number
+}
 
 // ── tiny JSON-RPC over WebSocket ───────────────────────────────────────────
 
@@ -38,7 +87,7 @@ class LspConnection {
   private ws: WebSocket | null = null
   private nextId = 1
   private pending = new Map<number, PendingRequest>()
-  private notificationHandlers = new Map<string, (params: any) => void>()
+  private notificationHandlers = new Map<string, (params: unknown) => void>()
   private initialized: Promise<boolean> | null = null
   /** Documents currently open on the server: uri → version. */
   readonly openDocs = new Map<string, number>()
@@ -151,20 +200,20 @@ class LspConnection {
     this.ws.send(JSON.stringify({ jsonrpc: '2.0', method, params }))
   }
 
-  onNotification(method: string, handler: (params: any) => void): void {
+  onNotification(method: string, handler: (params: unknown) => void): void {
     this.notificationHandlers.set(method, handler)
   }
 
   private onMessage(ev: MessageEvent): void {
-    let msg: any
+    let msg: JsonRpcMessage
     try {
-      msg = JSON.parse(typeof ev.data === 'string' ? ev.data : '')
+      msg = JSON.parse(typeof ev.data === 'string' ? ev.data : '') as JsonRpcMessage
     } catch {
       return
     }
     if (msg.id !== undefined && (msg.result !== undefined || msg.error !== undefined)) {
-      const pending = this.pending.get(msg.id)
-      if (pending) {
+      const pending = typeof msg.id === 'number' ? this.pending.get(msg.id) : undefined
+      if (pending && typeof msg.id === 'number') {
         this.pending.delete(msg.id)
         if (msg.error) pending.reject(new Error(msg.error.message || 'LSP error'))
         else pending.resolve(msg.result)
@@ -210,7 +259,7 @@ let lspUnavailable = false
 function markLspUnavailable(): void {
   if (!lspUnavailable) {
     lspUnavailable = true
-    console.info('[lsp] Arduino Language Server not available — code intelligence disabled')
+    console.info('[lsp] Arduino Language Server not available; code intelligence disabled')
   }
 }
 
@@ -245,12 +294,17 @@ function toMarkerSeverity(monaco: Monaco, lspSeverity?: number): number {
   }
 }
 
-function hoverContentsToString(contents: any): string {
+function hoverContentsToString(contents: LspMarkup): string {
   if (!contents) return ''
   if (typeof contents === 'string') return contents
   if (Array.isArray(contents)) return contents.map(hoverContentsToString).join('\n\n')
   if (typeof contents.value === 'string') return contents.value
   return ''
+}
+
+/** The text of a documentation field that may be plain or markup. */
+function docText(doc: string | { value?: string } | undefined): string | undefined {
+  return typeof doc === 'string' ? doc : doc?.value
 }
 
 function registerProviders(monaco: Monaco): void {
@@ -271,11 +325,11 @@ function registerProviders(monaco: Monaco): void {
       const conn = connFor(model)
       if (!conn) return { suggestions: [] }
       try {
-        const result: any = await conn.request('textDocument/completion', {
+        const result = (await conn.request('textDocument/completion', {
           textDocument: { uri: model.uri.toString() },
           position: toLspPosition(position)
-        })
-        const items: any[] = Array.isArray(result) ? result : (result?.items ?? [])
+        })) as LspCompletionItem[] | { items?: LspCompletionItem[] } | null
+        const items = Array.isArray(result) ? result : (result?.items ?? [])
         const word = model.getWordUntilPosition(position)
         const range = {
           startLineNumber: position.lineNumber,
@@ -286,15 +340,14 @@ function registerProviders(monaco: Monaco): void {
         return {
           suggestions: items.slice(0, 200).map((item) => ({
             label: item.label,
-            // LSP CompletionItemKind happens to align closely with Monaco's —
+            // LSP CompletionItemKind happens to align closely with Monaco's;
             // clamp to a safe fallback (Text) when out of range.
-            kind:
-              item.kind && item.kind >= 1 && item.kind <= 25
-                ? item.kind
-                : monaco.languages.CompletionItemKind.Text,
+            kind: (item.kind && item.kind >= 1 && item.kind <= 25
+              ? item.kind
+              : monaco.languages.CompletionItemKind.Text) as MonacoLanguages.CompletionItemKind,
             insertText: item.insertText || item.textEdit?.newText || item.label,
             detail: item.detail,
-            documentation: item.documentation?.value ?? item.documentation,
+            documentation: docText(item.documentation),
             sortText: item.sortText,
             filterText: item.filterText,
             range
@@ -311,10 +364,10 @@ function registerProviders(monaco: Monaco): void {
       const conn = connFor(model)
       if (!conn) return null
       try {
-        const result: any = await conn.request('textDocument/hover', {
+        const result = (await conn.request('textDocument/hover', {
           textDocument: { uri: model.uri.toString() },
           position: toLspPosition(position)
-        })
+        })) as { contents?: LspMarkup } | null
         const text = hoverContentsToString(result?.contents)
         if (!text) return null
         return { contents: [{ value: text }] }
@@ -330,19 +383,19 @@ function registerProviders(monaco: Monaco): void {
       const conn = connFor(model)
       if (!conn) return null
       try {
-        const result: any = await conn.request('textDocument/signatureHelp', {
+        const result = (await conn.request('textDocument/signatureHelp', {
           textDocument: { uri: model.uri.toString() },
           position: toLspPosition(position)
-        })
+        })) as LspSignatureHelp | null
         if (!result?.signatures?.length) return null
         return {
           value: {
-            signatures: result.signatures.map((s: any) => ({
+            signatures: result.signatures.map((s) => ({
               label: s.label,
-              documentation: s.documentation?.value ?? s.documentation,
-              parameters: (s.parameters ?? []).map((p: any) => ({
+              documentation: docText(s.documentation),
+              parameters: (s.parameters ?? []).map((p) => ({
                 label: p.label,
-                documentation: p.documentation?.value ?? p.documentation
+                documentation: docText(p.documentation)
               }))
             })),
             activeSignature: result.activeSignature ?? 0,
@@ -402,10 +455,11 @@ export function attachLspToEditor(
   void connection.ensureInitialized().then((ok) => {
     if (!ok || disposed) return
 
-    connection.onNotification('textDocument/publishDiagnostics', (params: any) => {
+    connection.onNotification('textDocument/publishDiagnostics', (raw) => {
       try {
-        const targetUri: string = params?.uri ?? ''
-        const markers = (params?.diagnostics ?? []).map((d: any) => ({
+        const params = raw as { uri?: string; diagnostics?: LspDiagnostic[] } | undefined
+        const targetUri = params?.uri ?? ''
+        const markers = (params?.diagnostics ?? []).map((d) => ({
           severity: toMarkerSeverity(monaco, d.severity),
           message: d.message,
           startLineNumber: (d.range?.start?.line ?? 0) + 1,
@@ -432,7 +486,7 @@ export function attachLspToEditor(
       })
     }
 
-    // didChange — full-document sync, debounced.
+    // didChange: full-document sync, debounced.
     contentListener = model.onDidChangeContent(() => {
       if (changeDebounce) clearTimeout(changeDebounce)
       changeDebounce = setTimeout(() => {

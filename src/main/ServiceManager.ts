@@ -1,9 +1,10 @@
 import { spawn, type ChildProcess } from 'child_process'
 import { app, BrowserWindow } from 'electron'
 import { existsSync } from 'fs'
-import net from 'net'
 import os from 'os'
 import path from 'path'
+import { findFreePort } from './freePort'
+import { decideAfterExit } from './serviceRestart'
 
 interface ServiceConfig {
   port: number
@@ -26,8 +27,19 @@ export class ServiceManager {
   private config: ServiceConfig
   private isRunning = false
   private mainWindow: BrowserWindow | null = null
+  // start() in progress, so a second caller waits for it instead of spawning twice.
+  private starting: Promise<void> | null = null
+  // stop() asked the child to exit, so its exit isn't a crash.
+  private stopping = false
+  // When the last automatic restart happened (serviceRestart.ts).
+  private lastRestartAt: number | null = null
+  // The port is chosen once. The renderer builds its WebSocket URL at startup
+  // and never re-reads it, so every restart must reuse the same port.
+  private portChosen = false
+  // Why the service isn't running, for a renderer that mounts after the fact.
+  private lastError: string | null = null
 
-  constructor(config: ServiceConfig = { port: 3000, allowedOrigins: ['*'] }) {
+  constructor(config: ServiceConfig) {
     this.config = config
   }
 
@@ -39,18 +51,27 @@ export class ServiceManager {
   }
 
   /**
-   * Send error to renderer process
+   * Send an error to the renderer (BackendPrompt listens). `stopped` means the
+   * service isn't running and won't come back on its own; the renderer then
+   * offers a Restart button.
    */
-  private sendErrorToRenderer(message: string, error: unknown): void {
+  private sendErrorToRenderer(message: string, error: unknown, opts?: { stopped: boolean }): void {
     const errorMessage = error instanceof Error ? error.message : String(error)
     console.error(`[ServiceManager] ${message}:`, errorMessage)
-    
+    if (opts?.stopped) this.lastError = errorMessage
+
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
       this.mainWindow.webContents.send('service:error', {
         message,
-        error: errorMessage
+        error: errorMessage,
+        stopped: opts?.stopped ?? false
       })
     }
+  }
+
+  /** Report a start failure to the renderer; the caller decides the wording. */
+  reportStartFailure(message: string, error: unknown): void {
+    this.sendErrorToRenderer(message, error, { stopped: true })
   }
 
   /**
@@ -64,7 +85,7 @@ export class ServiceManager {
       port: this.config.port,
       arduinoCliPath,
       allowedOrigins: this.config.allowedOrigins,
-      // Language-server integration (optional — the service degrades to
+      // Language-server integration (optional; the service degrades to
       // "lsp-unavailable" when the binaries aren't present).
       lspServerPath: lsPaths?.lspServerPath,
       clangdPath: lsPaths?.clangdPath,
@@ -146,7 +167,7 @@ export class ServiceManager {
   /**
    * Resolve the arduino-language-server + clangd binaries fetched by
    * scripts/fetch-language-server.mjs into vendor/language-server/<platform>/
-   * (dev) or bundled resources (packaged). Returns null when missing — the
+   * (dev) or bundled resources (packaged). Returns null when missing; the
    * backend then reports the LSP as unavailable and the editor degrades to
    * syntax-highlighting only.
    */
@@ -184,7 +205,7 @@ export class ServiceManager {
   /**
    * Default arduino-cli.yaml location (the language server wants the config
    * file arduino-cli itself uses). Returns undefined when the file doesn't
-   * exist yet — arduino-cli works on defaults without one.
+   * exist yet; arduino-cli works on defaults without one.
    */
   private resolveArduinoCliConfigPath(): string | undefined {
     let candidate: string
@@ -203,39 +224,19 @@ export class ServiceManager {
   }
 
   /**
-   * Find a free TCP port, starting at the preferred one. Port 3000 is a very
-   * popular dev-server default, so never assume it's ours — a foreign process
-   * on 3000 previously made the backend fail to bind and the app report
-   * "agent offline" with no explanation.
+   * ws:// URL of the running service (port may differ from the default 3000).
+   * 127.0.0.1 rather than localhost: tinyService 1.2 binds IPv4 loopback only,
+   * and a client that resolves localhost to ::1 first would be refused.
    */
-  private async findFreePort(preferred: number, attempts = 10): Promise<number> {
-    for (let port = preferred; port < preferred + attempts; port++) {
-      const free = await new Promise<boolean>((resolve) => {
-        const probe = net
-          .createServer()
-          .once('error', () => resolve(false))
-          .once('listening', () => {
-            probe.close(() => resolve(true))
-          })
-        probe.listen(port, '127.0.0.1')
-      })
-      if (free) return port
-    }
-    throw new Error(
-      `No free port found in ${preferred}-${preferred + attempts - 1} for TinyService`
-    )
-  }
-
-  /** ws:// URL of the running service (port may differ from the default 3000). */
   getServiceUrl(): string {
-    return `ws://localhost:${this.config.port}`
+    return `ws://127.0.0.1:${this.config.port}`
   }
 
   /**
    * Check service health via HTTP endpoint
    */
   private async checkServiceHealth(): Promise<HealthCheckResponse> {
-    const response = await fetch(`http://localhost:${this.config.port}/health`)
+    const response = await fetch(`http://127.0.0.1:${this.config.port}/health`)
     if (!response.ok) {
       throw new Error(`Health check failed with status ${response.status}`)
     }
@@ -250,7 +251,7 @@ export class ServiceManager {
       try {
         console.log(`[ServiceManager] Health check attempt ${attempt}/${maxRetries}`)
         const health = await this.checkServiceHealth()
-        
+
         if (health.status !== 'ok') {
           throw new Error(`Service health check returned status: ${health.status}`)
         }
@@ -262,19 +263,24 @@ export class ServiceManager {
         if (!health.arduinoCli.available) {
           const warningMessage = 'Arduino CLI is not available on the service'
           console.warn(`[ServiceManager] WARNING: ${warningMessage}`)
-          this.sendErrorToRenderer(warningMessage, new Error('Arduino CLI not found at configured path'))
+          this.sendErrorToRenderer(
+            warningMessage,
+            new Error('Arduino CLI not found at configured path')
+          )
         }
 
         return
       } catch (error) {
         console.warn(`[ServiceManager] Health check attempt ${attempt} failed:`, error)
-        
+
         if (attempt === maxRetries) {
-          throw new Error(`Service health check failed after ${maxRetries} attempts: ${error instanceof Error ? error.message : String(error)}`)
+          throw new Error(
+            `Service health check failed after ${maxRetries} attempts: ${error instanceof Error ? error.message : String(error)}`
+          )
         }
-        
+
         // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, retryDelayMs))
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
       }
     }
   }
@@ -286,19 +292,32 @@ export class ServiceManager {
    * an ESM package, and Electron's main-process ESM loader can't reliably import
    * ESM that's bundled with the app. Running it under Electron's own binary in
    * Node mode (ELECTRON_RUN_AS_NODE) uses the plain Node ESM loader, which loads
-   * it fine — and isolates the backend in its own process. `cwd` points at the
+   * it fine, and isolates the backend in its own process. `cwd` points at the
    * app root so the child resolves @mister-industries/tinyservice from
-   * node_modules (which is why asar must stay disabled — see electron-builder.yml).
+   * node_modules (which is why asar must stay disabled; see electron-builder.yml).
    */
   async start(): Promise<void> {
     if (this.isRunning) {
       console.log('[ServiceManager] TinyService is already running')
       return
     }
+    if (!this.starting) {
+      this.starting = this.spawnAndVerify().finally(() => {
+        this.starting = null
+      })
+    }
+    return this.starting
+  }
 
+  private async spawnAndVerify(): Promise<void> {
+    this.stopping = false
     try {
-      // Bind to a free port — 3000 may be taken by another dev server.
-      this.config.port = await this.findFreePort(this.config.port)
+      // Bind to a free port: 3000 may be taken by another dev server. Only on
+      // the first start: restarts keep the port (see portChosen).
+      if (!this.portChosen) {
+        this.config.port = await findFreePort(this.config.port)
+        this.portChosen = true
+      }
 
       const arduinoCliPath = this.resolveArduinoCliPath()
       // out/main → app root (two levels up); node_modules lives here in dev and
@@ -309,31 +328,34 @@ export class ServiceManager {
       console.log(`[ServiceManager] Arduino CLI path: ${arduinoCliPath}`)
       console.log(`[ServiceManager] Service cwd: ${cwd}`)
 
-      this.child = spawn(process.execPath, ['-e', this.buildLauncherCode(arduinoCliPath)], {
+      const child = spawn(process.execPath, ['-e', this.buildLauncherCode(arduinoCliPath)], {
         cwd,
         env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
         windowsHide: true,
         stdio: ['ignore', 'pipe', 'pipe']
       })
+      this.child = child
 
-      this.child.stdout?.on('data', (d: Buffer) => console.log(`[tinyService] ${d.toString().trim()}`))
-      this.child.stderr?.on('data', (d: Buffer) =>
-        console.error(`[tinyService] ${d.toString().trim()}`)
-      )
-      this.child.on('error', (err) => this.sendErrorToRenderer('TinyService process error', err))
-      this.child.on('exit', (code) => {
-        if (code) console.warn(`[ServiceManager] TinyService process exited with code ${code}`)
+      child.stdout?.on('data', (d: Buffer) => console.log(`[tinyService] ${d.toString().trim()}`))
+      child.stderr?.on('data', (d: Buffer) => console.error(`[tinyService] ${d.toString().trim()}`))
+      // A spawn failure also fails the health check below, which reports it.
+      child.on('error', (err) => console.error('[ServiceManager] TinyService process error:', err))
+      child.on('exit', (code, signal) => {
+        // A child we've already replaced must not touch the current state.
+        if (this.child !== child) return
         this.isRunning = false
         this.child = null
+        void this.handleExit(code, signal)
       })
 
-      // Give the spawned process time to boot, then confirm it's serving.
-      await this.verifyServiceHealth(10, 1000)
+      // Give the spawned process time to boot, then confirm it's serving. A
+      // cold start on a busy or slow machine can take well over ten seconds.
+      await this.verifyServiceHealth(30, 1000)
 
       this.isRunning = true
-      console.log(`[ServiceManager] TinyService started on ws://localhost:${this.config.port}`)
+      this.lastError = null
+      console.log(`[ServiceManager] TinyService started on ${this.getServiceUrl()}`)
     } catch (error) {
-      this.sendErrorToRenderer('Failed to start TinyService', error)
       if (this.child) {
         this.child.kill()
         this.child = null
@@ -343,25 +365,82 @@ export class ServiceManager {
   }
 
   /**
+   * The child exited without stop() asking. Restart it once on the same port
+   * so the renderer's URL stays valid. If the restart fails, or the service
+   * dies again within a minute, tell the renderer instead (it shows the error
+   * with a Restart button).
+   */
+  private async handleExit(code: number | null, signal: NodeJS.Signals | null): Promise<void> {
+    const reason = signal ? `was killed by ${signal}` : `exited with code ${code}`
+    const decision = decideAfterExit({
+      stopping: this.stopping,
+      lastRestartAt: this.lastRestartAt,
+      now: Date.now()
+    })
+    if (decision === 'ignore') return
+    console.warn(`[ServiceManager] TinyService ${reason}`)
+    if (decision === 'give-up') {
+      this.sendErrorToRenderer(
+        'tinyService stopped',
+        new Error(`It ${reason} less than a minute after being restarted.`),
+        { stopped: true }
+      )
+      return
+    }
+    this.lastRestartAt = Date.now()
+    console.log('[ServiceManager] Restarting TinyService')
+    try {
+      await this.start()
+      console.log('[ServiceManager] TinyService restarted')
+    } catch (error) {
+      this.sendErrorToRenderer(
+        'tinyService stopped',
+        new Error(
+          `It ${reason} and couldn't be restarted: ${error instanceof Error ? error.message : String(error)}`
+        ),
+        { stopped: true }
+      )
+    }
+  }
+
+  /** Restart on request from the renderer. Resets the automatic-restart budget. */
+  async restart(): Promise<void> {
+    await this.stop()
+    this.lastRestartAt = null
+    await this.start()
+  }
+
+  /** For a renderer that mounts after the service already failed. */
+  getStatus(): { running: boolean; error: string | null } {
+    return { running: this.isRunning, error: this.lastError }
+  }
+
+  /**
    * Stop the TinyService child process.
    */
   async stop(): Promise<void> {
-    if (!this.child) {
+    const child = this.child
+    if (!child) {
       console.log('[ServiceManager] TinyService is not running')
       this.isRunning = false
       return
     }
 
-    try {
-      console.log('[ServiceManager] Stopping TinyService...')
-      this.child.kill()
-      this.child = null
-      this.isRunning = false
-      console.log('[ServiceManager] TinyService stopped')
-    } catch (error) {
-      this.sendErrorToRenderer('Failed to stop TinyService', error)
-      throw error
-    }
+    console.log('[ServiceManager] Stopping TinyService...')
+    // Mark the exit as ours before it happens, then wait for it (briefly) so
+    // a restart doesn't race the old child's exit handler.
+    this.stopping = true
+    await new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, 2000)
+      child.once('exit', () => {
+        clearTimeout(timer)
+        resolve()
+      })
+      child.kill()
+    })
+    if (this.child === child) this.child = null
+    this.isRunning = false
+    console.log('[ServiceManager] TinyService stopped')
   }
 
   /**

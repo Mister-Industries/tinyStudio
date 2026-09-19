@@ -1,0 +1,31 @@
+{
+  "type": "diode-1n4001-300mil",
+  "label": "Rectifier Diode",
+  "family": "Diode",
+  "description": "A standard rectifier diode",
+  "source": {
+    "fzp": "diode_1N4001_300mil.fzp",
+    "moduleId": "3254CBFC44diode"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 39.84,
+      "height": 9.6,
+      "pins": {
+        "cathode": [0.68, 4.79],
+        "anode": [39.16, 4.94]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 8.38,
+      "height": 22.02,
+      "pins": {
+        "cathode": [4.19, 21.88],
+        "anode": [4.19, 0.28]
+      }
+    }
+  }
+}

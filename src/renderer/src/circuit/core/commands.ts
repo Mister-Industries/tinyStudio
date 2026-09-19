@@ -1,5 +1,5 @@
 /**
- * circuit/core/commands — every document mutation as a Command.
+ * circuit/core/commands: every document mutation as a Command.
  *
  * Commands are PURE: `apply(doc)` returns a new doc (structural sharing, no
  * mutation), which makes undo trivial (the store keeps the previous doc) and
@@ -9,7 +9,7 @@
  *
  * Geometry-dependent updates (wire re-anchoring while a part moves) are
  * computed by the VIEW (it owns pin positions via the registry) and passed in
- * as data — core stays free of parts/geometry knowledge.
+ * as data; core stays free of parts/geometry knowledge.
  */
 
 import {
@@ -93,7 +93,7 @@ export function renamePart(oldId: string, next: string): Command {
   return {
     label: `Rename ${oldId} → ${next}`,
     apply: (doc) => {
-      if (doc.parts.some((p) => p.id === next)) return doc // uniqueness guard — no-op
+      if (doc.parts.some((p) => p.id === next)) return doc // uniqueness guard: no-op
       const fixEnd = (e: WireEnd): WireEnd => {
         if (typeof e !== 'string') return e
         const { part, pin } = splitPinRef(e)
@@ -103,6 +103,45 @@ export function renamePart(oldId: string, next: string): Command {
         ...doc,
         parts: doc.parts.map((p) => (p.id === oldId ? { ...p, id: next } : p)),
         wires: doc.wires.map((w) => ({ ...w, from: fixEnd(w.from), to: fixEnd(w.to) }))
+      }
+    }
+  }
+}
+
+/**
+ * Rename many parts at once.
+ *
+ * Renaming one at a time would collide the moment a new name is already in
+ * use by a part further down the list (renumbering `led`→`LED1` while another
+ * part is called `LED1`), and `renamePart`'s uniqueness guard would silently
+ * no-op. This applies the whole mapping in a single pass instead, rewriting
+ * every wire endpoint and net-label-adjacent reference with it.
+ */
+export function renumberParts(mapping: Record<string, string>): Command {
+  const count = Object.keys(mapping).length
+  return {
+    label: count === 1 ? 'Rename part' : `Renumber ${count} parts`,
+    apply: (doc) => {
+      if (!count) return doc
+      const fixEnd = (e: WireEnd): WireEnd => {
+        if (typeof e !== 'string') return e
+        const { part, pin } = splitPinRef(e)
+        const next = mapping[part]
+        return next ? `${next}:${pin}` : e
+      }
+      return {
+        ...doc,
+        parts: doc.parts.map((p) => (mapping[p.id] ? { ...p, id: mapping[p.id] } : p)),
+        wires: doc.wires.map((w) => ({ ...w, from: fixEnd(w.from), to: fixEnd(w.to) })),
+        sim: doc.sim?.probes
+          ? {
+              ...doc.sim,
+              probes: doc.sim.probes.map((pr) => {
+                const { part, pin } = splitPinRef(pr.at)
+                return mapping[part] ? { ...pr, at: `${mapping[part]}:${pin}` } : pr
+              })
+            }
+          : doc.sim
       }
     }
   }
@@ -273,6 +312,62 @@ export function setProbes(probes: Probe[]): Command {
   }
 }
 
+/** Drop a measurement tag on a node (the Simulate panel's picker). */
+export function addProbe(probe: Probe): Command {
+  return {
+    label: `Probe ${probe.label ?? probe.at}`,
+    apply: (doc) => ({
+      ...doc,
+      sim: { ...(doc.sim ?? {}), probes: [...(doc.sim?.probes ?? []), probe] }
+    })
+  }
+}
+
+export function removeProbe(id: string): Command {
+  return {
+    label: 'Remove probe',
+    apply: (doc) => ({
+      ...doc,
+      sim: { ...(doc.sim ?? {}), probes: (doc.sim?.probes ?? []).filter((p) => p.id !== id) }
+    })
+  }
+}
+
+/** Reposition a probe's tag in one view. Merges so a drag is one undo step. */
+export function moveProbe(id: string, view: ViewId, offset: [number, number]): Command {
+  return {
+    label: 'Move probe',
+    mergeKey: `probe:${view}:${id}`,
+    apply: (doc) => ({
+      ...doc,
+      sim: {
+        ...(doc.sim ?? {}),
+        probes: (doc.sim?.probes ?? []).map((p) => (p.id === id ? { ...p, [view]: offset } : p))
+      }
+    })
+  }
+}
+
+/** Re-anchor a probe to a different node (drag its tag onto another wire/pin). */
+export function reanchorProbe(
+  id: string,
+  at: string,
+  offset: [number, number],
+  view: ViewId
+): Command {
+  return {
+    label: 'Move probe',
+    mergeKey: `probe:${view}:${id}`,
+    apply: (doc) => ({
+      ...doc,
+      sim: {
+        ...(doc.sim ?? {}),
+        probes: (doc.sim?.probes ?? []).map((p) => (p.id === id ? { ...p, at, [view]: offset } : p))
+      }
+    })
+  }
+}
+
 // ── batch ────────────────────────────────────────────────────────────────────
 
 /** Compose several commands into one undo step (cross-view cascades, paste…).
@@ -312,7 +407,7 @@ export function cascadeWireRemoval(wires: CircuitWire[], gone: Set<string>): Cir
     seen.add(hostId)
     const host = byId.get(hostId)
     if (!host) return null
-    if (!gone.has(hostId)) return { wire: hostId, t: 0.5 } // host survives — shouldn't happen, keep rider
+    if (!gone.has(hostId)) return { wire: hostId, t: 0.5 } // host survives: shouldn't happen, keep rider
     if (typeof host.from === 'string') return host.from
     return resolveAnchor(host.from.wire, seen)
   }

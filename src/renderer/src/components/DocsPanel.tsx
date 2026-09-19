@@ -1,5 +1,6 @@
 import {
   selectDocsTab,
+  selectExamplesFlash,
   setDocsTab,
   setPanelOpen,
   useAppDispatch,
@@ -7,14 +8,32 @@ import {
 } from '@renderer/redux'
 import type { DocsTab } from '@renderer/redux/editorSlice'
 import { BookOpen, Sparkles, X, Zap } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { AIAssistant } from './AIAssistant'
 import { ExamplesContent } from './ExamplesContent'
 import { ReadmeContent } from './ReferenceContent'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs'
 
 // All three tabs share the shared TabsTrigger's brand-blue underline/active
-// state — the accent colors below live in the tab content instead (Examples'
+// state; the accent colors below live in the tab content instead (Examples'
 // buttons are yellow, Studio AI's bubbles and send button are purple).
+
+// The last Examples flash that has played. Module scope, so it outlives the
+// panel: reopening the panel later must not replay an old flash, while a panel
+// mounted *by* the flash (it was closed) still plays it.
+let flashPlayed = 0
+
+/** A key for the flash overlay while one should play, else null. */
+function useExamplesFlash(): [number | null, () => void] {
+  const flash = useAppSelector(selectExamplesFlash)
+  const [key, setKey] = useState<number | null>(() => (flash > flashPlayed ? flash : null))
+  useEffect(() => {
+    if (flash <= flashPlayed) return
+    flashPlayed = flash
+    setKey(flash)
+  }, [flash])
+  return [key, () => setKey(null)]
+}
 
 export function DocsPanel(): React.JSX.Element {
   const dispatch = useAppDispatch()
@@ -22,13 +41,14 @@ export function DocsPanel(): React.JSX.Element {
   // activateWorkspace() flips it to 'readme' whenever a folder or example
   // is opened. The user can still switch freely afterward.
   const activeTab = useAppSelector(selectDocsTab)
+  const [flashKey, endFlash] = useExamplesFlash()
 
   const handleCloseDocsPanel = (): void => {
     dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
   }
 
   return (
-    <div className="size-full flex flex-col bg-[var(--bg-raised)] border-l border-[var(--border-default)]">
+    <div className="relative size-full flex flex-col bg-[var(--bg-raised)] border-l border-[var(--border-default)]">
       <Tabs
         value={activeTab}
         onValueChange={(v) => dispatch(setDocsTab(v as DocsTab))}
@@ -67,6 +87,9 @@ export function DocsPanel(): React.JSX.Element {
           <AIAssistant />
         </TabsContent>
       </Tabs>
+      {flashKey !== null && (
+        <span key={flashKey} aria-hidden className="ts-attention-flash" onAnimationEnd={endFlash} />
+      )}
     </div>
   )
 }

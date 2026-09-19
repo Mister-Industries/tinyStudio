@@ -1,5 +1,5 @@
 /**
- * circuit/core/clipboard — copy/paste/duplicate as pure document logic.
+ * circuit/core/clipboard: copy/paste/duplicate as pure document logic.
  *
  * The clipboard payload is JSON (spec §6.2): a self-contained fragment of
  * parts + wires. It travels on the system clipboard as text (a custom MIME
@@ -13,7 +13,15 @@
  *    wires get fresh ids, endpoints are rewritten, placements are offset.
  */
 
-import { newId, splitPinRef, isJunction, type CircuitDoc, type CircuitPart, type CircuitWire, type WireEnd } from './model'
+import {
+  newId,
+  splitPinRef,
+  isJunction,
+  type CircuitDoc,
+  type CircuitPart,
+  type CircuitWire,
+  type WireEnd
+} from './model'
 
 export const CLIPBOARD_FORMAT = 'tinystudio-circuit-clipboard'
 
@@ -35,7 +43,7 @@ export function buildClipboard(
   const parts = doc.parts.filter((p) => pset.has(p.id))
 
   // candidates: explicitly selected wires + wires whose pin ends all sit on
-  // selected parts (junction ends are provisionally in — the fixpoint below
+  // selected parts (junction ends are provisionally in; the fixpoint below
   // keeps them only if their host wire survives)
   const pinIn = (e: WireEnd): boolean => typeof e === 'string' && pset.has(splitPinRef(e).part)
   const endIn = (e: WireEnd): boolean => isJunction(e) || pinIn(e)
@@ -96,7 +104,7 @@ export interface MaterializedPaste {
 
 /**
  * Re-id a payload against a target document and offset its placements.
- * Pure — the caller wraps the result in addPart/addWire commands.
+ * Pure: the caller wraps the result in addPart/addWire commands.
  */
 export function materializePaste(
   doc: CircuitDoc,

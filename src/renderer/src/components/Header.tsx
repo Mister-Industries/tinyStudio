@@ -1,30 +1,69 @@
 import { isElectron } from '@renderer/lib/utils'
-import { selectOpenFiles, useAppSelector } from '@renderer/redux'
+import { keysOf, matches } from '@renderer/lib/shortcuts'
+import { openProjectDialog, selectOpenFiles, useAppDispatch, useAppSelector } from '@renderer/redux'
+import { showExamples } from '@renderer/redux/editorSlice'
 import { useTheme } from '@renderer/lib/ThemeProvider'
 import { ChevronRight, Maximize, Minimize, Minus, Moon, Sun, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useWorkspaceActions } from '@renderer/hooks/useWorkspaceActions'
 import { Button } from './ui/Button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from './ui/DropdownMenu'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/Tooltip'
 import { GitHubAccountButton } from './GitHubAccountButton'
+import { AboutDialog } from './AboutDialog'
+import { ShortcutsDialog } from './ShortcutsDialog'
 
 /**
  * Top bar (38px). Brand wordmark + breadcrumb on the left; theme toggle, GitHub
  * account, and (on Electron) window controls on the right.
  *
  * Theme-aware per the design system: in LIGHT mode the bar is the green bar
- * accent color with a white wordmark; in DARK mode it's the raised grey
- * surface with the wordmark's "Studio" in that same accent green. Inset
- * controls flip with it. Uses --bar-accent (not --brand), so buttons and
+ * accent color; in DARK mode it's the raised grey surface. The wordmark is
+ * white in both. Inset controls flip with the bar. Uses --bar-accent (not --brand), so buttons and
  * selection elsewhere stay on the blue brand color.
  */
 export function Header(): React.JSX.Element {
   const [isMaximized, setIsMaximized] = useState(false)
+  const [aboutOpen, setAboutOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const workspace = useAppSelector((state) => state.file.workspace)
   const openFiles = useAppSelector(selectOpenFiles)
   const viewingFileId = useAppSelector((state) => state.file.viewingFileId)
   const viewingFile = openFiles.find((f) => f.id === viewingFileId)
   const { theme, setTheme } = useTheme()
   const isDark = theme === 'dark'
+  const dispatch = useAppDispatch()
+  const { refreshWorkspace, closeWorkspace, newFile, newFolder } = useWorkspaceActions()
+
+  // Mod+/ opens the shortcuts dialog, except while typing: the code editor
+  // uses the same keys to toggle a comment.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (!matches(e, 'global.shortcuts')) return
+      const el = document.activeElement as HTMLElement | null
+      if (el && (/INPUT|TEXTAREA|SELECT/.test(el.tagName) || el.closest('.monaco-editor'))) return
+      e.preventDefault()
+      setShortcutsOpen(true)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  // Radix traps focus while the menu is open, which would swallow the file
+  // tree's inline name-field autoFocus (New File/Folder). So run the action a
+  // tick after select (once the menu has closed and released the trap) and
+  // skip the menu's usual return-focus-to-trigger, which would blur that field.
+  const menuActionRan = useRef(false)
+  const afterMenuClose = (action: () => void) => (): void => {
+    menuActionRan.current = true
+    setTimeout(action, 0)
+  }
 
   useEffect(() => {
     if (!isElectron()) return
@@ -55,12 +94,70 @@ export function Header(): React.JSX.Element {
       style={isElectron() ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : {}}
     >
       <div className="flex items-center gap-2 pl-3 min-w-0">
-        <h1 className="text-[15px] font-extrabold tracking-[-0.02em] select-none text-white dark:text-[var(--bar-accent)]">
-          <span className="font-medium text-white/70 dark:text-[var(--text-muted)]">tiny</span>Studio
-        </h1>
+        {/* Wordmark doubles as a "File"-style menu for workspace actions. */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="-ml-1.5 cursor-pointer rounded-[var(--radius-sm)] px-1.5 py-0.5 text-[15px] font-extrabold tracking-[-0.02em] select-none text-white outline-none transition-colors hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/60 data-[state=open]:bg-white/15 dark:hover:bg-[var(--bg-sunken)] dark:data-[state=open]:bg-[var(--bg-sunken)]"
+              style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+            >
+              <span className="font-medium text-white/70">tiny</span>Studio
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            className="min-w-[11rem]"
+            onCloseAutoFocus={(e) => {
+              // Dismissed without choosing an item → let focus return to the trigger.
+              if (!menuActionRan.current) return
+              menuActionRan.current = false
+              e.preventDefault()
+            }}
+          >
+            <DropdownMenuItem
+              onSelect={afterMenuClose(() => dispatch(openProjectDialog('create')))}
+            >
+              Create new…
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={afterMenuClose(() => dispatch(openProjectDialog('open')))}>
+              Open existing…
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={afterMenuClose(() => dispatch(showExamples()))}>
+              Try an example
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem disabled={!workspace} onSelect={afterMenuClose(newFile)}>
+              New File
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={!workspace} onSelect={afterMenuClose(newFolder)}>
+              New Folder
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={!workspace} onSelect={afterMenuClose(refreshWorkspace)}>
+              Refresh Files
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem disabled={!workspace} onSelect={afterMenuClose(closeWorkspace)}>
+              Close project
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={afterMenuClose(() => setShortcutsOpen(true))}>
+              Keyboard shortcuts
+              <span className="ml-auto pl-4 text-[11px] text-[var(--text-muted)]">
+                {keysOf('global.shortcuts')}
+              </span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={afterMenuClose(() => setAboutOpen(true))}>
+              About tinyStudio
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {workspace && (
           <div className="flex items-center gap-2 min-w-0">
-            <ChevronRight size={13} className="text-white/55 dark:text-[var(--text-faint)] shrink-0" />
+            <ChevronRight
+              size={13}
+              className="text-white/55 dark:text-[var(--text-faint)] shrink-0"
+            />
             <span className="text-[13px] text-white/[0.78] dark:text-[var(--text-muted)] truncate">
               {workspace.name}
             </span>
@@ -75,9 +172,17 @@ export function Header(): React.JSX.Element {
           </div>
         )}
         {!workspace && (
-          <span className="text-[13px] text-white/70 dark:text-[var(--text-muted)] pl-1">
+          // target=_blank: a new tab on web; on desktop the main process's
+          // setWindowOpenHandler hands it to the system browser.
+          <a
+            href="https://www.mr.industries"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[13px] text-white/70 hover:text-white hover:underline underline-offset-2 dark:text-[var(--text-muted)] dark:hover:text-[var(--text-strong)] pl-1"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          >
             by MR.INDUSTRIES
-          </span>
+          </a>
         )}
       </div>
       <div
@@ -127,6 +232,8 @@ export function Header(): React.JSX.Element {
           </div>
         )}
       </div>
+      <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
+      <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </div>
   )
 }

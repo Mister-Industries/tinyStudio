@@ -1,0 +1,31 @@
+{
+  "type": "led-generic-3mm",
+  "label": "Red LED - 3mm",
+  "family": "LED",
+  "description": "A generic red LED (~1.8V)",
+  "source": {
+    "fzp": "LED-generic-3mm.fzp",
+    "moduleId": "3mmColorLEDModuleID"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 15.46,
+      "height": 29.21,
+      "pins": {
+        "cathode": [4.53, 25.78],
+        "anode": [11.73, 25.78]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 13.68,
+      "height": 22.03,
+      "pins": {
+        "cathode": [9.9, 21.82],
+        "anode": [9.9, 0.22]
+      }
+    }
+  }
+}

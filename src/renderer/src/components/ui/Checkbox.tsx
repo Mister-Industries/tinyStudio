@@ -2,7 +2,7 @@ import * as React from 'react'
 import { cn } from '@renderer/lib/utils'
 import { Check } from 'lucide-react'
 
-/* tinyStudio — Checkbox (tactile, hard-edged) */
+/* tinyStudio: Checkbox (tactile, hard-edged) */
 
 type CheckboxProps = Omit<React.ComponentProps<'input'>, 'type'> & {
   label?: React.ReactNode

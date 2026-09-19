@@ -1,79 +1,81 @@
-appId: com.electron.app
+appId: cc.tinystudio.app
 productName: tinyStudio
 directories:
   buildResources: build
+# Ship the built app and its manifest. electron-builder adds the production
+# dependencies from node_modules on its own; nothing else in the repo (docs,
+# scripts, sources, fetched binaries) belongs in the install.
 files:
-  - '!**/.vscode/*'
-  - '!src/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-# asar is disabled because the main process loads tinyService via a dynamic ESM
-# import(). Electron's require() shim can read inside app.asar, but its ESM loader
-# cannot — so an ESM dependency must live on the real filesystem to be importable.
-# Keeping the app unpacked is the simplest reliable fix (same files, just not
-# archived). Revisit post-alpha if we move tinyService to a spawned sidecar.
+  - out/**/*
+  - package.json
+# asar is disabled: tinyService runs as a child Node process that imports
+# @mister-industries/tinyservice (an ESM package) from node_modules, which Node's
+# ESM loader can't do from inside an asar archive.
 asar: false
-extraResources:
-  # arduino-cli binaries are fetched into vendor/ by scripts/fetch-arduino-cli.mjs
-  # (run automatically via the "prebuild" npm hook).
-  - from: vendor/arduino-cli/macos-x64/arduino-cli
-    to: arduino-cli/darwin-x64/arduino-cli
-    filter:
-      - '**/*'
-  - from: vendor/arduino-cli/macos-arm64/arduino-cli
-    to: arduino-cli/darwin-arm64/arduino-cli
-    filter:
-      - '**/*'
-  - from: vendor/arduino-cli/linux-x64/arduino-cli
-    to: arduino-cli/linux-x64/arduino-cli
-    filter:
-      - '**/*'
-  - from: vendor/arduino-cli/linux-arm64/arduino-cli
-    to: arduino-cli/linux-arm64/arduino-cli
-    filter:
-      - '**/*'
-  - from: vendor/arduino-cli/windows-x64/arduino-cli.exe
-    to: arduino-cli/win32-x64/arduino-cli.exe
-    filter:
-      - '**/*'
-  # arduino-language-server + clangd (optional; fetched by
-  # scripts/fetch-language-server.mjs). Powers editor code intelligence via
-  # tinyService's /lsp bridge; the app degrades gracefully when absent.
-  - from: vendor/language-server
-    to: language-server
-    filter:
-      - '**/*'
+# Each installer ships the arduino-cli (and, when fetched, the language server)
+# for its own platform only: scripts/fetch-arduino-cli.mjs and
+# scripts/fetch-language-server.mjs put them in vendor/<tool>/<platform>/, and
+# the app looks under resources/ (src/main/ServiceManager.ts). The language
+# server is optional; without it the editor has no code intelligence.
 win:
   executableName: tinystudio
+  target:
+    - target: nsis
+      arch: [x64]
+  extraResources:
+    - from: vendor/arduino-cli/windows-x64/arduino-cli.exe
+      to: arduino-cli/win32-x64/arduino-cli.exe
+    - from: vendor/language-server/windows-x64
+      to: language-server/windows-x64
+      filter: ['**/*']
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  # Ad-hoc signed ("-"), not notarized: Apple Silicon won't run an unsigned app
+  # at all, and a Developer ID certificate and notarization are a beta task
+  # (docs/release-plan.md, GAP-3). The hardened runtime is only needed for
+  # notarization, and ad-hoc signing with it on needs extra entitlements.
+  identity: '-'
+  hardenedRuntime: false
   entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
+  # both architectures' binaries: one build step makes the arm64 and x64 apps
+  extraResources:
+    - from: vendor/arduino-cli/macos-arm64/arduino-cli
+      to: arduino-cli/darwin-arm64/arduino-cli
+    - from: vendor/arduino-cli/macos-x64/arduino-cli
+      to: arduino-cli/darwin-x64/arduino-cli
+    - from: vendor/language-server/macos-arm64
+      to: language-server/macos-arm64
+      filter: ['**/*']
+    - from: vendor/language-server/macos-x64
+      to: language-server/macos-x64
+      filter: ['**/*']
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
 linux:
   target:
-    - AppImage
-    - snap
-    - deb
-  maintainer: electronjs.org
-  category: Utility
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
+  maintainer: MR.INDUSTRIES
+  category: Development
+  extraResources:
+    - from: vendor/arduino-cli/linux-x64/arduino-cli
+      to: arduino-cli/linux-x64/arduino-cli
+    - from: vendor/language-server/linux-x64
+      to: language-server/linux-x64
+      filter: ['**/*']
 appImage:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
+deb:
+  artifactName: ${name}_${version}_${arch}.${ext}
 npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates
-electronDownload:
-  mirror: https://npmmirror.com/mirrors/electron/

@@ -42,7 +42,9 @@ test('composite commands with a mergeKey collapse into one undo step', () => {
 test('different mergeKeys do not merge', () => {
   const store = new CircuitStore(fixture())
   store.dispatch(cmd.composite('Move', [cmd.placePart('R1', 'bb', { x: 9.6, y: 0 })], 'movebb:R1'))
-  store.dispatch(cmd.composite('Move', [cmd.placePart('R2', 'bb', { x: 105.6, y: 0 })], 'movebb:R2'))
+  store.dispatch(
+    cmd.composite('Move', [cmd.placePart('R2', 'bb', { x: 105.6, y: 0 })], 'movebb:R2')
+  )
   store.undo()
   assert.equal(store.getDoc().parts[1].bb!.x, 96)
   assert.equal(store.getDoc().parts[0].bb!.x, 9.6)

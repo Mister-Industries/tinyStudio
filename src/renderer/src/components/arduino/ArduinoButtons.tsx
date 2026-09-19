@@ -17,12 +17,12 @@ import { AlertCircle, Check, Loader2, Upload } from 'lucide-react'
 import React from 'react'
 // Route build/upload feedback through notify so it also lands in the status-bar
 // notification bell (not just a transient toast).
-import { notify as toast } from '@renderer/lib/notify'
+import { notify as toast, reportError } from '@renderer/lib/notify'
 
 /**
  * Flush all unsaved editor buffers to disk. Verify/Upload compile the sketch
  * folder straight off disk, so without this they'd build the last *saved*
- * version — meaning you'd flash stale code unless you remembered to save first.
+ * version, meaning you'd flash stale code unless you remembered to save first.
  */
 function useSaveAllBeforeBuild(): () => Promise<void> {
   const dispatch = useAppDispatch()
@@ -121,23 +121,15 @@ export function VerifyButton({
     try {
       await saveAll() // compile the current code, not the last saved version
       await compileSketch(sketchDir || workspace.path, selectedBoard.config)
-      toast.success('Compile complete', { description: `${selectedBoard.config.name} sketch verified.` })
-    } catch (error) {
-      console.error('Compilation error:', error)
-      toast.error('Compilation failed', {
-        description: error instanceof Error ? error.message : 'Unknown error'
+      toast.success('Compile complete', {
+        description: `${selectedBoard.config.name} sketch verified.`
       })
+    } catch (error) {
+      reportError('Compilation failed', error)
     }
   }
 
   const isDisabled = isCompiling || !selectedBoard || !isAgentConnected || !workspace
-  // console.log('VerifyButton isDisabled conditions:', {
-  //   isCompiling,
-  //   selectedBoard: !selectedBoard,
-  //   isAgentConnected: !isAgentConnected,
-  //   openFilesLength: openFiles.length === 0,
-  //   isDisabled
-  // })
 
   return (
     <Tooltip>
@@ -232,10 +224,7 @@ export function UploadButton({
       }
       toast.success('Upload complete', { description: 'Your sketch is running on the board.' })
     } catch (error) {
-      console.error('Upload error:', error)
-      toast.error('Upload failed', {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      reportError('Upload failed', error)
     }
   }
 

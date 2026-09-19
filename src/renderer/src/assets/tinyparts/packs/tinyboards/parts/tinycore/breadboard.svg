@@ -1,0 +1,2111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" viewBox="0 0 136.8 136.8">
+  <!-- Generator: Adobe Illustrator 29.3.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 151)  -->
+  <defs>
+    <style>
+      .st0, .st1, .st2, .st3, .st4, .st5, .st6, .st7 {
+        fill: none;
+      }
+
+      .st0, .st7 {
+        stroke: #f4f6f8;
+        stroke-width: 1.3px;
+      }
+
+      .st8, .st9, .st10, .st11, .st12, .st13, .st14, .st15, .st16, .st17, .st18, .st19, .st20, .st21, .st22, .st23, .st24, .st25, .st26 {
+        isolation: isolate;
+      }
+
+      .st8, .st27, .st12, .st13, .st18, .st23, .st26 {
+        fill: #fff;
+      }
+
+      .st8, .st13, .st24 {
+        font-family: CourierNewPS-BoldMT, 'Courier New';
+        font-weight: 700;
+      }
+
+      .st8, .st24 {
+        font-size: 5px;
+      }
+
+      .st28 {
+        fill: #80795b;
+      }
+
+      .st1 {
+        stroke-miterlimit: 10;
+      }
+
+      .st1, .st14 {
+        stroke: #000;
+      }
+
+      .st9, .st10, .st11, .st19 {
+        opacity: .4;
+      }
+
+      .st9, .st29, .st30, .st31 {
+        fill: #e6e6e6;
+      }
+
+      .st32 {
+        fill: #010101;
+      }
+
+      .st33 {
+        fill: #d1c690;
+      }
+
+      .st34 {
+        fill: #2a2c31;
+      }
+
+      .st35 {
+        fill: #d3d8de;
+        stroke: #93989f;
+        stroke-width: .3px;
+      }
+
+      .st2 {
+        stroke: #9a916c;
+        stroke-width: 1.2px;
+      }
+
+      .st36 {
+        fill: #141414;
+      }
+
+      .st10, .st37 {
+        fill: #c2b990;
+      }
+
+      .st38 {
+        fill: #5e5b43;
+      }
+
+      .st3, .st5, .st6 {
+        stroke: #fff;
+      }
+
+      .st3, .st6 {
+        stroke-width: .6px;
+      }
+
+      .st39, .st19 {
+        fill: #ad9e73;
+      }
+
+      .st40 {
+        fill: #534741;
+      }
+
+      .st11, .st41 {
+        fill: gray;
+      }
+
+      .st12, .st15 {
+        opacity: .6;
+      }
+
+      .st42 {
+        fill: #22b573;
+        fill-opacity: .7;
+      }
+
+      .st43 {
+        fill: #b8af82;
+      }
+
+      .st13 {
+        font-size: 6.7px;
+      }
+
+      .st14 {
+        fill: #182424;
+        stroke-width: 1.1px;
+      }
+
+      .st44, .st22, .st23 {
+        opacity: .2;
+      }
+
+      .st45 {
+        fill: #303030;
+      }
+
+      .st46, .st25 {
+        fill: #f2f2f2;
+      }
+
+      .st47 {
+        fill: #f1f3e6;
+      }
+
+      .st48 {
+        fill: #404040;
+      }
+
+      .st15, .st49 {
+        fill: #1a1a1a;
+      }
+
+      .st50 {
+        fill: #1f1f1f;
+      }
+
+      .st51 {
+        fill: #363636;
+      }
+
+      .st17, .st26 {
+        opacity: .1;
+      }
+
+      .st52 {
+        fill: #373737;
+      }
+
+      .st53 {
+        fill: #1f2020;
+      }
+
+      .st54 {
+        fill: #666;
+      }
+
+      .st55 {
+        fill: #8c8663;
+      }
+
+      .st18, .st21, .st25 {
+        opacity: .5;
+      }
+
+      .st5 {
+        stroke-width: .7px;
+      }
+
+      .st56 {
+        fill: #4a4d54;
+      }
+
+      .st20 {
+        opacity: 0;
+      }
+
+      .st29 {
+        stroke-width: 1.3px;
+      }
+
+      .st29, .st6, .st30, .st7 {
+        stroke-linecap: round;
+      }
+
+      .st29, .st30 {
+        stroke: #e6e6e6;
+        stroke-linejoin: round;
+      }
+
+      .st21 {
+        fill: #a0916b;
+      }
+
+      .st57 {
+        fill: #474747;
+      }
+
+      .st30 {
+        stroke-width: 1px;
+      }
+
+      .st58 {
+        fill: #595959;
+      }
+
+      .st59 {
+        fill: #9a916c;
+      }
+
+      .st60 {
+        fill: #ccc;
+      }
+
+      .st61 {
+        fill: #b3b3b3;
+      }
+
+      .st62 {
+        fill: #2a2a29;
+      }
+
+      .st63 {
+        fill: #dcdcdc;
+      }
+
+      .st64 {
+        fill: #8d8c8c;
+      }
+
+      .st65 {
+        fill: #cfcfcf;
+        stroke: #6f747d;
+        stroke-width: .4px;
+      }
+
+      .st66 {
+        fill: #b7b7b7;
+      }
+
+      .st67 {
+        fill: #3d3d3d;
+      }
+
+      .st68 {
+        fill: #9d956c;
+      }
+
+      .st69 {
+        fill: #ded5c6;
+      }
+
+      .st70 {
+        fill: #c8c9cb;
+      }
+
+      .st24 {
+        fill: #f4f6f8;
+      }
+
+      .st71 {
+        fill: #30302f;
+      }
+
+      .st72 {
+        fill: #cfc0a2;
+      }
+    </style>
+  </defs>
+  <g id="breadboard">
+    <polygon class="st14" points="40.3 .6 96.5 .6 136.2 40.3 136.2 96.5 96.5 136.2 40.3 136.2 .6 96.5 .6 40.3 40.3 .6"/>
+    <g>
+      <rect class="st65" x="93.3" y="8.7" width="9" height="12.3" rx=".8" ry=".8"/>
+      <circle class="st34" cx="97.8" cy="14.9" r="2.8"/>
+      <ellipse class="st56" cx="97.8" cy="14.6" rx="2.2" ry="2"/>
+    </g>
+    <g class="st16">
+      <text class="st24" transform="translate(31.7 28.1)"><tspan x="0" y="0">BOOT</tspan></text>
+    </g>
+    <polyline class="st23" points="19.4 64.4 19.4 63.5 21.6 63.5 21.6 64.4"/>
+    <rect class="st23" x="114.9" y="63.5" width="2.3" height=".9"/>
+    <rect class="st23" x="98.9" y="29" width="2.3" height=".9"/>
+    <g>
+      <path class="st0" d="M93.9,88.2"/>
+      <path class="st7" d="M95.5,80"/>
+      <path class="st7" d="M86.6,91.4"/>
+      <path class="st7" d="M86.6,89.8"/>
+      <path class="st7" d="M95.5,82.5"/>
+      <path class="st7" d="M93.9,82.5"/>
+      <path class="st7" d="M95.5,84.9"/>
+      <path class="st7" d="M93.9,84.9"/>
+      <path class="st7" d="M95.5,87.4"/>
+      <path class="st7" d="M93.9,87.4"/>
+    </g>
+    <circle class="st70" cx="96.7" cy="93.1" r="1.8"/>
+  </g>
+  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
+  <g id="layer1">
+    <g id="g1938">
+      <g id="usb-c-16p">
+        <g id="g1935">
+          <g id="g31886">
+            <g id="g1931">
+              <g id="g276">
+                <rect id="rect2057" class="st29" x="112.2" y="90.8" width="1.6" height="5.1" transform="translate(-32.9 107.3) rotate(-45)"/>
+                <rect id="rect2040" class="st29" x="96.1" y="107" width="1.6" height="5.1" transform="translate(-49.1 100.6) rotate(-45)"/>
+                <rect id="rect2059" class="st30" x="121.9" y="101.7" width="1.6" height="2.6" transform="translate(-36.9 116.9) rotate(-45)"/>
+                <rect id="rect2040-5" class="st30" x="105.8" y="117.7" width="1.6" height="2.6" transform="translate(-52.9 110.2) rotate(-45)"/>
+                <rect id="rect2" class="st49" x="98.4" y="97.2" width="22.8" height="18" transform="translate(-43 108.7) rotate(-45)"/>
+                <g id="g230-8">
+                  <path id="path228" class="st60" d="M99.6,112.1l10.8,10.8.3.3.3-.3,15.6-15.6.3-.3-.3-.3-10.8-10.8h0l-4.2-4-.2.2-2.2,2.2,2.3,2.3-1.2,1.2-2.1,2.1-1.3-1.3,2.1-2.1-1-1-2.1,2.1-.3.3-4,4-.3.3-2.1,2.1,1,1,2.1-2.1,1.3,1.3-2.1,2.1-1.2,1.2-2.3-2.3-2.3,2.3-.2.2c5.1,5.1,1,1,4,4.2h0Z"/>
+                </g>
+                <rect id="rect31869" class="st9" x="117.6" y="89.5" width="1.8" height="21.3" transform="translate(-36.1 113.1) rotate(-45)"/>
+                <rect id="rect31871" class="st11" x="102.9" y="104.4" width="1.8" height="21.3" transform="translate(-50.9 107.1) rotate(-45)"/>
+                <path id="path1917" class="st31" d="M106.9,98.8l-1-1,2.1-2.1,1,1-2.1,2.1Z"/>
+                <path id="path1919" class="st31" d="M102.3,103.3l-2.1,2.1-1-1,2.1-2.1,1,1Z"/>
+              </g>
+              <path id="path1917-1" class="st41" d="M104.9,110.1l-.7-.7,2.1-2.1.7.7-2.1,2.1Z"/>
+              <path id="path1917-1-0" class="st31" d="M104.9,110.1l-.7-.7.5-.5.7.7-.5.5Z"/>
+              <path id="path1917-1-0-3" class="st31" d="M106.5,108.5l-.7-.7.5-.5.7.7-.5.5Z"/>
+              <path id="path2010" class="st41" d="M111.6,103.4l-.7-.7,2.1-2.1.7.7-2.1,2.1Z"/>
+              <path id="path2012" class="st31" d="M111.6,103.4l-.7-.7.5-.5.7.7-.5.5Z"/>
+              <path id="path2014" class="st31" d="M113.1,101.9l-.7-.7.5-.5.7.7-.5.5Z"/>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
+  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
+  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
+  <g id="layer11">
+    <g id="_x30_402-cap">
+      <g id="g985">
+        <g id="_x30_402-cap1">
+          <g id="g988">
+            <g id="g990">
+              <g id="g992">
+                <rect id="rect994" class="st40" x="93.7" y="60.9" width="2.6" height="5.7"/>
+                <rect id="rect996" class="st22" x="96.3" y="60.9" height="5.7"/>
+                <rect id="rect998" class="st23" x="93.7" y="60.9" height="5.7"/>
+              </g>
+              <g id="g1000">
+                <path id="path1002" class="st63" d="M93.7,61.7h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path1004" class="st63" d="M93.8,65.7h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect1006" class="st22" x="96.3" y="65.7" height=".9"/>
+                <rect id="rect1008" class="st18" x="93.7" y="65.7" height=".9"/>
+                <path id="path1010" class="st33" d="M96.3,60.9v.9"/>
+                <rect id="rect1012" class="st22" x="96.3" y="60.9" height=".9"/>
+                <rect id="rect1014" class="st18" x="93.7" y="60.9" height=".9"/>
+                <line id="line1016" class="st4" x1="96.3" y1="66" x2="96.3" y2="66"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect1018" class="st17" points="93.8 60.8 96.3 60.8 96.3 60.8 93.8 60.8"/>
+        <polygon id="rect1020" class="st23" points="93.9 66.4 96.4 66.4 96.4 66.4 93.9 66.4"/>
+      </g>
+    </g>
+  </g>
+  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
+  <rect class="st65" x="33.1" y="8.7" width="9" height="12.3" rx=".8" ry=".8"/>
+  <circle class="st34" cx="37.6" cy="14.9" r="2.8"/>
+  <ellipse class="st56" cx="37.6" cy="14.6" rx="2.2" ry="2"/>
+  <g class="st16">
+    <text class="st24" transform="translate(93.9 28.1)"><tspan x="0" y="0">RST</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(122.5 44.8)"><tspan x="0" y="0">8</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(122.2 51.7)"><tspan x="0" y="0">9</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(120.3 59.3)"><tspan x="0" y="0">10</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(120.3 66.4)"><tspan x="0" y="0">11</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(120.6 73.8)"><tspan x="0" y="0">12</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(120.3 80.9)"><tspan x="0" y="0">13</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st13" transform="translate(118 82.1) rotate(-90)"><tspan x="0" y="0">DIGITAL</tspan></text>
+  </g>
+  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
+  <g id="layer12">
+    <g id="g2769">
+      <g id="g1375">
+        <g id="g1373">
+          <g id="g24874">
+            <g id="g24872">
+              <line id="line24860" class="st6" x1="124.2" y1="28" x2="118.2" y2="22"/>
+              <line id="line24862" class="st6" x1="122" y1="36.1" x2="118.7" y2="39.4"/>
+              <line id="line24864" class="st6" x1="108.2" y1="29" x2="106.7" y2="27.5"/>
+              <line id="line24866" class="st6" x1="106.7" y1="27.5" x2="110" y2="24.2"/>
+              <line id="line24868" class="st6" x1="118.7" y1="39.4" x2="117.2" y2="37.9"/>
+              <circle id="circle24870" class="st3" cx="116.4" cy="39.7" r=".3"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g id="g1442">
+        <g id="g1440">
+          <g id="jst04_1mm_ra">
+            <g id="g1437">
+              <g id="g1435">
+                <g id="g1897">
+                  <g id="g31840">
+                    <g id="g14124">
+                      <g id="g14026">
+                        <g id="g14263">
+                          <g id="g1397">
+                            <g id="g1395">
+                              <g id="g1869">
+                                <path id="rect19-0" class="st63" d="M114.9,32.9l.4.4c0,0,0,.3,0,.4l-2.8,2.8h-.4l-.4-.4c0,0,0-.3,0-.4l2.8-2.8h.4Z"/>
+                              </g>
+                            </g>
+                          </g>
+                          <g id="g1403">
+                            <g id="g1401">
+                              <g id="g1872">
+                                <path id="rect19-8" class="st63" d="M112.7,30.7l.4.4c0,.1,0,.3,0,.4l-2.8,2.8h-.4l-.4-.4c0,0,0-.3,0-.4l2.8-2.8s.3,0,.4,0Z"/>
+                              </g>
+                            </g>
+                          </g>
+                          <g id="g1409">
+                            <g id="g1407">
+                              <g id="g1875">
+                                <path id="rect19" class="st63" d="M110.5,28.5l.4.4c0,.1,0,.3,0,.4l-2.8,2.8h-.4l-.4-.4c0-.1,0-.3,0-.4l2.8-2.8h.4Z"/>
+                              </g>
+                            </g>
+                          </g>
+                          <g id="g1415">
+                            <g id="g1413">
+                              <g id="g1878">
+                                <path id="rect19-3" class="st63" d="M117.2,35.1l.4.4c0,0,0,.3,0,.4l-2.8,2.8h-.4l-.4-.4c0,0,0-.3,0-.4l2.8-2.8h.4Z"/>
+                              </g>
+                            </g>
+                          </g>
+                          <path id="polygon5" d="M127,30.1l-11.1-11.1-1.1-1.1-1.1,1.1-7.8,7.8,13.3,13.3,7.8-7.8,1.1-1.1s-1.1-1.1-1.1-1.1Z"/>
+                          <rect id="rect7" class="st54" x="104.7" y="22" width="12.7" height="2" transform="translate(16.2 85.3) rotate(-45)"/>
+                          <rect id="rect9" class="st54" x="116.7" y="34" width="12.6" height="2" transform="translate(11.3 97.2) rotate(-45)"/>
+                          <g id="g13829">
+                            <rect id="rect31825" class="st15" x="112.3" y="25.3" width="2.2" height="14.9" transform="translate(10.1 89.8) rotate(-45)"/>
+                            <rect id="rect15-5" class="st49" x="117.9" y="37" width="3.9" height="2.1" transform="translate(8.2 95.9) rotate(-45)"/>
+                            <rect id="rect15-5-3" class="st49" x="106" y="25.2" width="3.9" height="2" transform="translate(13.1 84) rotate(-45)"/>
+                          </g>
+                          <rect id="rect31830" x="106.3" y="25.7" width="2.2" height="2" transform="translate(12.6 83.8) rotate(-45)"/>
+                          <path id="rect13507" class="st54" d="M110.2,29.2h0v.2l-.6.6h-.2v-.2l.6-.6h.2Z"/>
+                          <path id="rect13507-7" class="st54" d="M112.4,31.4h0v.2l-.6.6h-.2v-.2l.6-.6h.2Z"/>
+                          <path id="rect13507-6" class="st54" d="M113.9,34.4h0s0,0,0-.1l.6-.6s0,0,.1,0h0s0,0,0,.1l-.6.6s0,0-.1,0Z"/>
+                          <path id="rect13507-3" class="st54" d="M116.1,36.6h0s0-.1,0-.1l.6-.6s.1,0,.1,0h0s0,.1,0,.1l-.6.6s-.1,0-.1,0Z"/>
+                          <rect id="rect13824-6" x="118.2" y="37.7" width="2.2" height="2" transform="translate(7.6 95.7) rotate(-45)"/>
+                        </g>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g id="layer13">
+    <g id="g27691">
+      <g id="g13751">
+        <g id="g13731">
+          <g id="g248741">
+            <g id="g248721">
+              <line id="line248601" class="st6" x1="18.3" y1="21.9" x2="12.3" y2="27.9"/>
+              <line id="line248621" class="st6" x1="26.4" y1="24.1" x2="29.7" y2="27.4"/>
+              <line id="line248641" class="st6" x1="19.3" y1="37.9" x2="17.8" y2="39.4"/>
+              <line id="line248661" class="st6" x1="17.8" y1="39.4" x2="14.5" y2="36.1"/>
+              <line id="line248681" class="st6" x1="29.7" y1="27.4" x2="28.2" y2="28.9"/>
+              <circle id="circle248701" class="st3" cx="30" cy="29.7" r=".3"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g id="g14421">
+        <g id="g14401">
+          <g id="jst04_1mm_ra1">
+            <g id="g14371">
+              <g id="g14351">
+                <g id="g18971">
+                  <g id="g318401">
+                    <g id="g141241">
+                      <g id="g140261">
+                        <g id="g142631">
+                          <g id="g13971">
+                            <g id="g13951">
+                              <g id="g18691">
+                                <path id="rect19-01" class="st63" d="M23.2,31.1l.4-.4c.1-.1.3-.1.4,0l2.8,2.8v.4l-.4.4c-.1,0-.3,0-.4,0l-2.8-2.8v-.4Z"/>
+                              </g>
+                            </g>
+                          </g>
+                          <g id="g14031">
+                            <g id="g14011">
+                              <g id="g18721">
+                                <path id="rect19-81" class="st63" d="M21,33.3l.4-.4c.1,0,.3,0,.4,0l2.8,2.8v.4l-.4.4c-.1,0-.3,0-.4,0l-2.8-2.8v-.4Z"/>
+                              </g>
+                            </g>
+                          </g>
+                          <g id="g14091">
+                            <g id="g14071">
+                              <g id="g18751">
+                                <path id="rect191" class="st63" d="M18.8,35.5l.4-.4c.1,0,.3,0,.4,0l2.8,2.8v.4l-.4.4c-.1,0-.3,0-.4,0l-2.8-2.8v-.4Z"/>
+                              </g>
+                            </g>
+                          </g>
+                          <g id="g14151">
+                            <g id="g14131">
+                              <g id="g18781">
+                                <path id="rect19-31" class="st63" d="M25.4,28.9l.4-.4c.1-.1.3-.1.4,0l2.8,2.8v.4l-.4.4c-.1,0-.3,0-.4,0l-2.8-2.8v-.4Z"/>
+                              </g>
+                            </g>
+                          </g>
+                          <path id="polygon51" d="M20.4,19l-11.1,11.1-1.1,1.1,1.1,1.1,7.8,7.8,13.3-13.3-7.8-7.8-1.1-1.1s-1.1,1.1-1.1,1.1Z"/>
+                          <rect id="rect71" class="st54" x="12.3" y="28.6" width="2" height="12.7" transform="translate(-20.8 19.7) rotate(-45)"/>
+                          <rect id="rect91" class="st54" x="24.3" y="16.8" width="2" height="12.6" transform="translate(-8.9 24.6) rotate(-45)"/>
+                          <g id="g138291">
+                            <rect id="rect318251" class="st15" x="15.5" y="31.6" width="14.9" height="2.2" transform="translate(-16.4 25.8) rotate(-45)"/>
+                            <rect id="rect15-51" class="st49" x="27.3" y="24.3" width="2.1" height="3.9" transform="translate(-10.2 27.8) rotate(-45)"/>
+                            <rect id="rect15-5-31" class="st49" x="15.5" y="36.1" width="2" height="3.9" transform="translate(-22.1 22.8) rotate(-45)"/>
+                          </g>
+                          <rect id="rect318301" x="16" y="37.5" width="2" height="2.2" transform="translate(-22.3 23.4) rotate(-45)"/>
+                          <path id="rect135071" class="st54" d="M19.5,35.8h.2l.6.6v.2h-.2l-.6-.6v-.2Z"/>
+                          <path id="rect13507-71" class="st54" d="M21.7,33.7h.2l.6.6v.2h-.2l-.6-.6v-.2Z"/>
+                          <path id="rect13507-61" class="st54" d="M24.7,32.3h0s0,0-.1,0l-.6-.6s0,0,0-.1h0s0,0,.1,0l.6.6s0,0,0,.1Z"/>
+                          <path id="rect13507-31" class="st54" d="M26.9,30h0s0,0-.1,0l-.6-.6s0,0,0-.1h0s0,0,.1,0l.6.6s0,0,0,.1Z"/>
+                          <rect id="rect13824-61" x="28" y="25.7" width="2" height="2.2" transform="translate(-10.5 28.4) rotate(-45)"/>
+                        </g>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="st16">
+    <text class="st13" transform="translate(55.9 110.3)"><tspan x="0" y="0">SERIAL</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st13" transform="translate(17.1 56) rotate(90)"><tspan x="0" y="0">ANALOG</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(10.4 44.3)"><tspan x="0" y="0">GND</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(9.9 50.8)"><tspan x="0" y="0">3V3</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(10.2 58.5)"><tspan x="0" y="0">A5</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(10.2 65.7)"><tspan x="0" y="0">A4</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(10.4 73)"><tspan x="0" y="0">A3</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(10.2 80.2)"><tspan x="0" y="0">A2</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(117.1 88.2)"><tspan x="0" y="0">3V3</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(117.1 94.3)"><tspan x="0" y="0">GND</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(10.1 87.4)"><tspan x="0" y="0">A1</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(10.1 93.4)"><tspan x="0" y="0">A0</tspan></text>
+  </g>
+  <sodipodi:namedview id="namedview7001" bordercolor="#666666" borderopacity="1" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" gridtolerance="10" guidetolerance="10" objecttolerance="10" pagecolor="#ffffff" showgrid="false"/>
+  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
+  <g id="layer14">
+    <g id="g726">
+      <g id="g728">
+        <g id="g730">
+          <g id="g732">
+            <g id="g734">
+              <polygon id="polygon736" class="st66" points="35.3 99.6 33.8 98.2 28.5 103.5 30 104.9 35.3 99.6"/>
+            </g>
+            <g id="g738">
+              <polygon id="polygon740" class="st66" points="30.1 94.4 28.7 93 23.4 98.3 24.8 99.7 30.1 94.4"/>
+            </g>
+          </g>
+          <rect id="rect742" class="st39" x="14.5" y="95.2" width="15.2" height="22.4" transform="translate(-68.7 46.8) rotate(-45)"/>
+          <g id="g744">
+            <polygon id="polygon746" class="st37" points="28.6 106.7 29.8 107.9 32.1 105.6 22.7 96.3 20.5 98.5 21.8 99.8 21 100.5 27.9 107.4 28.6 106.7"/>
+          </g>
+          <rect id="rect748" class="st47" x="14.4" y="104.3" width="2.8" height="16.8" transform="translate(-75 44.2) rotate(-45)"/>
+          <polygon id="polygon750" class="st21" points="27.9 107.4 21 100.5 21.8 99.8 20.5 98.5 18.5 100.5 19.8 101.8 26.6 108.6 27.8 109.8 29.8 107.9 28.6 106.7 27.9 107.4"/>
+          <rect id="rect752" class="st26" x="17.7" y="101.6" width="5.1" height="13.2" transform="translate(-70.6 46) rotate(-45)"/>
+          <rect id="rect754" class="st26" x="16.3" y="103" width="5.1" height="13.2" transform="translate(-72 45.4) rotate(-45)"/>
+          <g id="g756">
+            <g id="g758">
+              <path id="path760" class="st47" d="M35.4,108.9l2-2-2-2-2,2,2,2Z"/>
+            </g>
+          </g>
+          <g id="g762">
+            <g id="g764">
+              <path id="path766" class="st47" d="M21.5,95.1l2-2-2-2-2,2,2,2Z"/>
+            </g>
+          </g>
+          <g id="g768">
+            <g id="g770">
+              <polygon id="polygon772" class="st47" points="24.7 119.6 35.4 108.9 32.1 105.6 23.5 114.2 21.5 112.2 30.1 103.6 24.7 98.2 16.2 106.8 14.2 104.8 22.7 96.3 19.6 93.1 8.9 103.8 24.7 119.6"/>
+            </g>
+          </g>
+          <rect id="rect774" class="st10" x="20.5" y="92.5" width=".3" height="2.8" transform="translate(-60.4 42.1) rotate(-45)"/>
+          <rect id="rect776" class="st10" x="34.4" y="106.5" width=".3" height="2.8" transform="translate(-66.2 56) rotate(-45)"/>
+          <rect id="rect778" class="st19" x="18" y="114.9" width="2.8" height="2.8" transform="translate(-76.5 47.8) rotate(-45)"/>
+          <rect id="rect780" class="st19" x="10.6" y="107.6" width="2.8" height="2.8" transform="translate(-73.5 40.4) rotate(-45)"/>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(40.2 123.2) rotate(-90)"><tspan x="0" y="0">SCK</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(47.3 123.2) rotate(-90)"><tspan x="0" y="0">MO</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(54.6 123) rotate(-90)"><tspan x="0" y="0">MI</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(61.8 123.2) rotate(-90)"><tspan x="0" y="0">RX</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(69 123.3) rotate(-90)"><tspan x="0" y="0">TX</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(75.9 123.3) rotate(-90)"><tspan x="0" y="0">SDA</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(83.9 123.3) rotate(-90)"><tspan x="0" y="0">SCL</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(91.1 123.4) rotate(-90)"><tspan x="0" y="0">PWR</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st8" transform="translate(98 123.4) rotate(-90)"><tspan x="0" y="0">GND</tspan></text>
+  </g>
+  <g id="layer15">
+    <g id="_x30_402-cap2">
+      <g id="g9851">
+        <g id="_x30_402-cap3">
+          <g id="g9881">
+            <g id="g9901">
+              <g id="g9921">
+                <rect id="rect9941" class="st72" x="65.1" y="62.7" width="2.6" height="5.7"/>
+                <rect id="rect9961" class="st22" x="67.7" y="62.7" height="5.7"/>
+                <rect id="rect9981" class="st23" x="65.1" y="62.7" height="5.7"/>
+              </g>
+              <g id="g10001">
+                <path id="path10021" class="st63" d="M65.1,63.5h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path10041" class="st63" d="M65.2,67.5h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect10061" class="st22" x="67.7" y="67.5" height=".9"/>
+                <rect id="rect10081" class="st18" x="65.1" y="67.5" height=".9"/>
+                <path id="path10101" class="st33" d="M67.7,62.7v.9"/>
+                <rect id="rect10121" class="st22" x="67.7" y="62.7" height=".9"/>
+                <rect id="rect10141" class="st18" x="65.1" y="62.7" height=".9"/>
+                <line id="line10161" class="st4" x1="67.7" y1="67.8" x2="67.7" y2="67.8"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect10181" class="st17" points="65.2 62.6 67.7 62.6 67.7 62.6 65.2 62.6"/>
+        <polygon id="rect10201" class="st23" points="65.2 68.2 67.7 68.2 67.7 68.2 65.2 68.2"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer16">
+    <g id="_x30_402-cap4">
+      <g id="g9852">
+        <g id="_x30_402-cap5">
+          <g id="g9882">
+            <g id="g9902">
+              <g id="g9922">
+                <rect id="rect9942" class="st72" x="49.8" y="63.2" width="2.6" height="5.7"/>
+                <rect id="rect9962" class="st22" x="52.4" y="63.2" height="5.7"/>
+                <rect id="rect9982" class="st23" x="49.8" y="63.2" height="5.7"/>
+              </g>
+              <g id="g10002">
+                <path id="path10022" class="st63" d="M49.8,64h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path10042" class="st63" d="M49.9,68h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect10062" class="st22" x="52.4" y="68" height=".9"/>
+                <rect id="rect10082" class="st18" x="49.8" y="68" height=".9"/>
+                <path id="path10102" class="st33" d="M52.4,63.2v.9"/>
+                <rect id="rect10122" class="st22" x="52.4" y="63.2" height=".9"/>
+                <rect id="rect10142" class="st18" x="49.8" y="63.2" height=".9"/>
+                <line id="line10162" class="st4" x1="52.4" y1="68.3" x2="52.4" y2="68.3"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect10182" class="st17" points="49.9 63.2 52.4 63.2 52.4 63.2 49.9 63.2"/>
+        <polygon id="rect10202" class="st23" points="49.9 68.7 52.4 68.7 52.4 68.7 49.9 68.7"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer17">
+    <g id="_x30_402-cap6">
+      <g id="g9853">
+        <g id="_x30_402-cap7">
+          <g id="g9883">
+            <g id="g9903">
+              <g id="g9923">
+                <rect id="rect9943" class="st72" x="80.5" y="60.9" width="2.6" height="5.7"/>
+                <rect id="rect9963" class="st22" x="83.1" y="60.9" height="5.7"/>
+                <rect id="rect9983" class="st23" x="80.5" y="60.9" height="5.7"/>
+              </g>
+              <g id="g10003">
+                <path id="path10023" class="st63" d="M80.5,61.7h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path10043" class="st63" d="M80.6,65.7h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect10063" class="st22" x="83.1" y="65.7" height=".9"/>
+                <rect id="rect10083" class="st18" x="80.5" y="65.7" height=".9"/>
+                <path id="path10103" class="st33" d="M83.1,60.9v.9"/>
+                <rect id="rect10123" class="st22" x="83.1" y="60.9" height=".9"/>
+                <rect id="rect10143" class="st18" x="80.5" y="60.9" height=".9"/>
+                <line id="line10163" class="st4" x1="83.1" y1="66" x2="83.1" y2="66"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect10183" class="st17" points="80.6 60.8 83.1 60.8 83.1 60.8 80.6 60.8"/>
+        <polygon id="rect10203" class="st23" points="80.6 66.4 83.1 66.4 83.1 66.4 80.6 66.4"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer18">
+    <g id="_x30_402-cap8">
+      <g id="g9854">
+        <g id="_x30_402-cap9">
+          <g id="g9884">
+            <g id="g9904">
+              <g id="g9924">
+                <rect id="rect9944" class="st72" x="92.9" y="37.3" width="2.6" height="5.7"/>
+                <rect id="rect9964" class="st22" x="95.5" y="37.3" height="5.7"/>
+                <rect id="rect9984" class="st23" x="92.9" y="37.3" height="5.7"/>
+              </g>
+              <g id="g10004">
+                <path id="path10024" class="st63" d="M92.9,38.1h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path10044" class="st63" d="M93,42.1h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect10064" class="st22" x="95.5" y="42.1" height=".9"/>
+                <rect id="rect10084" class="st18" x="92.9" y="42.1" height=".9"/>
+                <path id="path10104" class="st33" d="M95.5,37.3v.9"/>
+                <rect id="rect10124" class="st22" x="95.5" y="37.3" height=".9"/>
+                <rect id="rect10144" class="st18" x="92.9" y="37.3" height=".9"/>
+                <line id="line10164" class="st4" x1="95.5" y1="42.4" x2="95.5" y2="42.4"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect10184" class="st17" points="93 37.3 95.5 37.3 95.5 37.3 93 37.3"/>
+        <polygon id="rect10204" class="st23" points="93 42.8 95.5 42.8 95.5 42.8 93 42.8"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer19">
+    <g id="_x30_402-cap10">
+      <g id="g9855">
+        <g id="_x30_402-cap11">
+          <g id="g9885">
+            <g id="g9905">
+              <g id="g9925">
+                <rect id="rect9945" class="st72" x="97.4" y="37.4" width="2.6" height="5.7"/>
+                <rect id="rect9965" class="st22" x="100" y="37.4" height="5.7"/>
+                <rect id="rect9985" class="st23" x="97.4" y="37.4" height="5.7"/>
+              </g>
+              <g id="g10005">
+                <path id="path10025" class="st63" d="M97.4,38.2h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path10045" class="st63" d="M97.5,42.2h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect10065" class="st22" x="100" y="42.2" height=".9"/>
+                <rect id="rect10085" class="st18" x="97.4" y="42.2" height=".9"/>
+                <path id="path10105" class="st33" d="M100,37.4v.9"/>
+                <rect id="rect10125" class="st22" x="100" y="37.4" height=".9"/>
+                <rect id="rect10145" class="st18" x="97.4" y="37.4" height=".9"/>
+                <line id="line10165" class="st4" x1="100" y1="42.5" x2="100" y2="42.5"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect10185" class="st17" points="97.4 37.3 99.9 37.3 99.9 37.3 97.4 37.3"/>
+        <polygon id="rect10205" class="st23" points="97.5 42.9 100 42.9 100 42.9 97.5 42.9"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer110">
+    <g id="_x30_402-cap12">
+      <g id="g9856">
+        <g id="_x30_402-cap13">
+          <g id="g9886">
+            <g id="g9906">
+              <g id="g9926">
+                <rect id="rect9946" class="st72" x="102" y="37.4" width="2.6" height="5.7"/>
+                <rect id="rect9966" class="st22" x="104.6" y="37.4" height="5.7"/>
+                <rect id="rect9986" class="st23" x="102" y="37.4" height="5.7"/>
+              </g>
+              <g id="g10006">
+                <path id="path10026" class="st63" d="M102,38.2h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path10046" class="st63" d="M102.1,42.2h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect10066" class="st22" x="104.6" y="42.2" height=".9"/>
+                <rect id="rect10086" class="st18" x="102" y="42.2" height=".9"/>
+                <path id="path10106" class="st33" d="M104.6,37.4v.9"/>
+                <rect id="rect10126" class="st22" x="104.6" y="37.4" height=".9"/>
+                <rect id="rect10146" class="st18" x="102" y="37.4" height=".9"/>
+                <line id="line10166" class="st4" x1="104.6" y1="42.5" x2="104.6" y2="42.5"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect10186" class="st17" points="102.1 37.3 104.6 37.3 104.6 37.3 102.1 37.3"/>
+        <polygon id="rect10206" class="st23" points="102.1 42.9 104.6 42.9 104.6 42.9 102.1 42.9"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer111">
+    <g id="_x30_402-cap14">
+      <g id="g9857">
+        <g id="_x30_402-cap15">
+          <g id="g9887">
+            <g id="g9907">
+              <g id="g9927">
+                <rect id="rect9947" class="st72" x="25.4" y="61.4" width="5.7" height="2.6"/>
+                <rect id="rect9967" class="st22" x="28.2" y="58.6" height="5.7"/>
+                <rect id="rect9987" class="st23" x="28.2" y="61.2" height="5.7"/>
+              </g>
+              <g id="g10007">
+                <path id="path10027" class="st63" d="M26.2,64h0c.1-.2.2-.8.2-1s0-1.4-.1-1.6h-.9v2.6h.8Z"/>
+                <path id="path10047" class="st63" d="M30.2,63.9h.9v-2.5h-.9c-.1.2-.1,1.4-.1,1.6-.1.2,0,.7.1.9Z"/>
+                <rect id="rect10067" class="st22" x="30.6" y="61" height=".9"/>
+                <rect id="rect10087" class="st18" x="30.6" y="63.6" height=".9"/>
+                <path id="path10107" class="st33" d="M25.4,61.4h.9"/>
+                <rect id="rect10127" class="st22" x="25.8" y="61" height=".9"/>
+                <rect id="rect10147" class="st18" x="25.8" y="63.6" height=".9"/>
+                <line id="line10167" class="st4" x1="30.5" y1="61.4" x2="30.5" y2="61.4"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect10187" class="st17" points="25.3 63.9 25.3 61.4 25.3 61.4 25.3 63.9"/>
+        <polygon id="rect10207" class="st23" points="30.9 63.9 30.9 61.4 30.9 61.4 30.9 63.9"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer112">
+    <g id="_x30_402-cap16">
+      <g id="g9858">
+        <g id="_x30_402-cap17">
+          <g id="g9888">
+            <g id="g9908">
+              <g id="g9928">
+                <rect id="rect9948" class="st72" x="93.9" y="29.2" width="2.6" height="5.7"/>
+                <rect id="rect9968" class="st22" x="96.5" y="29.2" height="5.7"/>
+                <rect id="rect9988" class="st23" x="93.9" y="29.2" height="5.7"/>
+              </g>
+              <g id="g10008">
+                <path id="path10028" class="st63" d="M93.9,30h0c.2.1.8.2,1,.2s1.4,0,1.6-.1v-.9h-2.6v.8Z"/>
+                <path id="path10048" class="st63" d="M94,34h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect10068" class="st22" x="96.5" y="34" height=".9"/>
+                <rect id="rect10088" class="st18" x="93.9" y="34" height=".9"/>
+                <path id="path10108" class="st33" d="M96.5,29.2v.9"/>
+                <rect id="rect10128" class="st22" x="96.5" y="29.2" height=".9"/>
+                <rect id="rect10148" class="st18" x="93.9" y="29.2" height=".9"/>
+                <line id="line10168" class="st4" x1="96.5" y1="34.3" x2="96.5" y2="34.3"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect10188" class="st17" points="94 29.2 96.5 29.2 96.5 29.2 94 29.2"/>
+        <polygon id="rect10208" class="st23" points="94 34.7 96.5 34.7 96.5 34.7 94 34.7"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer113">
+    <g id="_x30_402-cap18">
+      <g id="g9859">
+        <g id="_x30_402-cap19">
+          <g id="g9889">
+            <g id="g9909">
+              <g id="g9929">
+                <rect id="rect9949" class="st72" x="73.5" y="96.3" width="2.6" height="5.7"/>
+                <rect id="rect9969" class="st22" x="76.1" y="96.3" height="5.7"/>
+                <rect id="rect9989" class="st23" x="73.5" y="96.3" height="5.7"/>
+              </g>
+              <g id="g10009">
+                <path id="path10029" class="st63" d="M73.5,97.1h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path10049" class="st63" d="M73.6,101.1h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect10069" class="st22" x="76.1" y="101.1" height=".9"/>
+                <rect id="rect10089" class="st18" x="73.5" y="101.1" height=".9"/>
+                <path id="path10109" class="st33" d="M76.1,96.3v.9"/>
+                <rect id="rect10129" class="st22" x="76.1" y="96.3" height=".9"/>
+                <rect id="rect10149" class="st18" x="73.5" y="96.3" height=".9"/>
+                <line id="line10169" class="st4" x1="76.1" y1="101.4" x2="76.1" y2="101.4"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect10189" class="st17" points="73.6 96.3 76.1 96.3 76.1 96.3 73.6 96.3"/>
+        <polygon id="rect10209" class="st23" points="73.6 101.8 76.1 101.8 76.1 101.8 73.6 101.8"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer114">
+    <g id="_x30_402-cap20">
+      <g id="g98510">
+        <g id="_x30_402-cap21">
+          <g id="g98810">
+            <g id="g99010">
+              <g id="g99210">
+                <rect id="rect99410" class="st72" x="77.8" y="96.3" width="2.6" height="5.7"/>
+                <rect id="rect99610" class="st22" x="80.4" y="96.3" height="5.7"/>
+                <rect id="rect99810" class="st23" x="77.8" y="96.3" height="5.7"/>
+              </g>
+              <g id="g100010">
+                <path id="path100210" class="st63" d="M77.8,97.1h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100410" class="st63" d="M77.9,101.1h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100610" class="st22" x="80.4" y="101.1" height=".9"/>
+                <rect id="rect100810" class="st18" x="77.8" y="101.1" height=".9"/>
+                <path id="path101010" class="st33" d="M80.4,96.3v.9"/>
+                <rect id="rect101210" class="st22" x="80.4" y="96.3" height=".9"/>
+                <rect id="rect101410" class="st18" x="77.8" y="96.3" height=".9"/>
+                <line id="line101610" class="st4" x1="80.4" y1="101.4" x2="80.4" y2="101.4"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101810" class="st17" points="77.9 96.3 80.4 96.3 80.4 96.3 77.9 96.3"/>
+        <polygon id="rect102010" class="st23" points="77.9 101.9 80.4 101.9 80.4 101.9 77.9 101.9"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer115">
+    <g id="_x30_402-cap22">
+      <g id="g98511">
+        <g id="_x30_402-cap23">
+          <g id="g98811">
+            <g id="g99011">
+              <g id="g99211">
+                <rect id="rect99411" class="st72" x="82.6" y="96.4" width="2.6" height="5.7"/>
+                <rect id="rect99611" class="st22" x="85.2" y="96.4" height="5.7"/>
+                <rect id="rect99811" class="st23" x="82.6" y="96.4" height="5.7"/>
+              </g>
+              <g id="g100011">
+                <path id="path100211" class="st63" d="M82.6,97.2h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100411" class="st63" d="M82.7,101.2h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100611" class="st22" x="85.2" y="101.2" height=".9"/>
+                <rect id="rect100811" class="st18" x="82.6" y="101.2" height=".9"/>
+                <path id="path101011" class="st33" d="M85.2,96.4v.9"/>
+                <rect id="rect101211" class="st22" x="85.2" y="96.4" height=".9"/>
+                <rect id="rect101411" class="st18" x="82.6" y="96.4" height=".9"/>
+                <line id="line101611" class="st4" x1="85.2" y1="101.5" x2="85.2" y2="101.5"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101811" class="st17" points="82.7 96.3 85.2 96.3 85.2 96.3 82.7 96.3"/>
+        <polygon id="rect102011" class="st23" points="82.7 101.9 85.2 101.9 85.2 101.9 82.7 101.9"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer116">
+    <g id="_x30_402-cap24">
+      <g id="g98512">
+        <g id="_x30_402-cap25">
+          <g id="g98812">
+            <g id="g99012">
+              <g id="g99212">
+                <rect id="rect99412" class="st72" x="36.5" y="87" width="2.6" height="5.7"/>
+                <rect id="rect99612" class="st22" x="39.1" y="87" height="5.7"/>
+                <rect id="rect99812" class="st23" x="36.5" y="87" height="5.7"/>
+              </g>
+              <g id="g100012">
+                <path id="path100212" class="st63" d="M36.5,87.8h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100412" class="st63" d="M36.6,91.8h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100612" class="st22" x="39.1" y="91.8" height=".9"/>
+                <rect id="rect100812" class="st18" x="36.5" y="91.8" height=".9"/>
+                <path id="path101012" class="st33" d="M39.1,87v.9"/>
+                <rect id="rect101212" class="st22" x="39.1" y="87" height=".9"/>
+                <rect id="rect101412" class="st18" x="36.5" y="87" height=".9"/>
+                <line id="line101612" class="st4" x1="39.1" y1="92.1" x2="39.1" y2="92.1"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101812" class="st17" points="36.6 86.9 39.1 86.9 39.1 86.9 36.6 86.9"/>
+        <polygon id="rect102012" class="st23" points="36.6 92.5 39.1 92.5 39.1 92.5 36.6 92.5"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer117">
+    <g id="_x30_402-cap26">
+      <g id="g98513">
+        <g id="_x30_402-cap27">
+          <g id="g98813">
+            <g id="g99013">
+              <g id="g99213">
+                <rect id="rect99413" class="st72" x="73.2" y="90.8" width="5.7" height="2.6"/>
+                <rect id="rect99613" class="st22" x="76.1" y="87.9" height="5.7"/>
+                <rect id="rect99813" class="st23" x="76.1" y="90.5" height="5.7"/>
+              </g>
+              <g id="g100013">
+                <path id="path100213" class="st63" d="M74.1,93.4h0c0-.2.2-.8.2-1s0-1.4,0-1.6h-.9v2.6h.8Z"/>
+                <path id="path100413" class="st63" d="M78.1,93.3h.9v-2.5h-.9c0,.2,0,1.4,0,1.6,0,.2,0,.7,0,.9Z"/>
+                <rect id="rect100613" class="st22" x="78.5" y="90.3" height=".9"/>
+                <rect id="rect100813" class="st18" x="78.5" y="92.9" height=".9"/>
+                <path id="path101013" class="st33" d="M73.3,90.8h.9"/>
+                <rect id="rect101213" class="st22" x="73.7" y="90.3" height=".9"/>
+                <rect id="rect101413" class="st18" x="73.7" y="92.9" height=".9"/>
+                <line id="line101613" class="st4" x1="78.4" y1="90.8" x2="78.4" y2="90.8"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101813" class="st17" points="73.2 93.3 73.2 90.8 73.2 90.8 73.2 93.3"/>
+        <polygon id="rect102013" class="st23" points="78.8 93.2 78.8 90.7 78.8 90.7 78.8 93.2"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer118">
+    <g id="_x30_402-cap28">
+      <g id="g98514">
+        <g id="_x30_402-cap29">
+          <g id="g98814">
+            <g id="g99014">
+              <g id="g99214">
+                <rect id="rect99414" class="st40" x="84.9" y="61" width="2.6" height="5.7"/>
+                <rect id="rect99614" class="st22" x="87.5" y="61" height="5.7"/>
+                <rect id="rect99814" class="st23" x="84.9" y="61" height="5.7"/>
+              </g>
+              <g id="g100014">
+                <path id="path100214" class="st63" d="M84.9,61.8h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100414" class="st63" d="M85,65.8h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100614" class="st22" x="87.5" y="65.8" height=".9"/>
+                <rect id="rect100814" class="st18" x="84.9" y="65.8" height=".9"/>
+                <path id="path101014" class="st33" d="M87.5,61v.9"/>
+                <rect id="rect101214" class="st22" x="87.5" y="61" height=".9"/>
+                <rect id="rect101414" class="st18" x="84.9" y="61" height=".9"/>
+                <line id="line101614" class="st4" x1="87.5" y1="66.1" x2="87.5" y2="66.1"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101814" class="st17" points="84.9 60.9 87.4 60.9 87.4 60.9 84.9 60.9"/>
+        <polygon id="rect102014" class="st23" points="85 66.5 87.5 66.5 87.5 66.5 85 66.5"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer119">
+    <g id="_x30_402-cap30">
+      <g id="g98515">
+        <g id="_x30_402-cap31">
+          <g id="g98815">
+            <g id="g99015">
+              <g id="g99215">
+                <rect id="rect99415" class="st40" x="75.8" y="61" width="2.6" height="5.7"/>
+                <rect id="rect99615" class="st22" x="78.4" y="61" height="5.7"/>
+                <rect id="rect99815" class="st23" x="75.8" y="61" height="5.7"/>
+              </g>
+              <g id="g100015">
+                <path id="path100215" class="st63" d="M75.8,61.8h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100415" class="st63" d="M75.9,65.8h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100615" class="st22" x="78.4" y="65.8" height=".9"/>
+                <rect id="rect100815" class="st18" x="75.8" y="65.8" height=".9"/>
+                <path id="path101015" class="st33" d="M78.4,61v.9"/>
+                <rect id="rect101215" class="st22" x="78.4" y="61" height=".9"/>
+                <rect id="rect101415" class="st18" x="75.8" y="61" height=".9"/>
+                <line id="line101615" class="st4" x1="78.4" y1="66.1" x2="78.4" y2="66.1"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101815" class="st17" points="75.9 60.9 78.4 60.9 78.4 60.9 75.9 60.9"/>
+        <polygon id="rect102015" class="st23" points="75.9 66.5 78.4 66.5 78.4 66.5 75.9 66.5"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer120">
+    <g id="_x30_402-cap32">
+      <g id="g98516">
+        <g id="_x30_402-cap33">
+          <g id="g98816">
+            <g id="g99016">
+              <g id="g99216">
+                <rect id="rect99416" class="st40" x="98.2" y="29.3" width="2.6" height="5.7"/>
+                <rect id="rect99616" class="st22" x="100.8" y="29.3" height="5.7"/>
+                <rect id="rect99816" class="st23" x="98.2" y="29.3" height="5.7"/>
+              </g>
+              <g id="g100016">
+                <path id="path100216" class="st63" d="M98.2,30.1h0c.2.1.8.2,1,.2s1.4,0,1.6-.1v-.9h-2.6v.8Z"/>
+                <path id="path100416" class="st63" d="M98.3,34.1h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100616" class="st22" x="100.8" y="34.1" height=".9"/>
+                <rect id="rect100816" class="st18" x="98.2" y="34.1" height=".9"/>
+                <path id="path101016" class="st33" d="M100.8,29.3v.9"/>
+                <rect id="rect101216" class="st22" x="100.8" y="29.3" height=".9"/>
+                <rect id="rect101416" class="st18" x="98.2" y="29.3" height=".9"/>
+                <line id="line101616" class="st4" x1="100.8" y1="34.4" x2="100.8" y2="34.4"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101816" class="st17" points="98.3 29.2 100.8 29.2 100.8 29.2 98.3 29.2"/>
+        <polygon id="rect102016" class="st23" points="98.3 34.8 100.8 34.8 100.8 34.8 98.3 34.8"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer121">
+    <g id="_x30_402-cap34">
+      <g id="g98517">
+        <g id="_x30_402-cap35">
+          <g id="g98817">
+            <g id="g99017">
+              <g id="g99217">
+                <rect id="rect99417" class="st40" x="33" y="29.2" width="2.6" height="5.7"/>
+                <rect id="rect99617" class="st22" x="35.6" y="29.2" height="5.7"/>
+                <rect id="rect99817" class="st23" x="33" y="29.2" height="5.7"/>
+              </g>
+              <g id="g100017">
+                <path id="path100217" class="st63" d="M33,30h0c.2.1.8.2,1,.2s1.4,0,1.6-.1v-.9h-2.6v.8Z"/>
+                <path id="path100417" class="st63" d="M33.1,34h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100617" class="st22" x="35.6" y="34" height=".9"/>
+                <rect id="rect100817" class="st18" x="33" y="34" height=".9"/>
+                <path id="path101017" class="st33" d="M35.6,29.2v.9"/>
+                <rect id="rect101217" class="st22" x="35.6" y="29.2" height=".9"/>
+                <rect id="rect101417" class="st18" x="33" y="29.2" height=".9"/>
+                <line id="line101617" class="st4" x1="35.6" y1="34.3" x2="35.6" y2="34.3"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101817" class="st17" points="33.1 29.1 35.6 29.1 35.6 29.1 33.1 29.1"/>
+        <polygon id="rect102017" class="st23" points="33.1 34.7 35.6 34.7 35.6 34.7 33.1 34.7"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer122">
+    <g id="_x30_402-cap36">
+      <g id="g98518">
+        <g id="_x30_402-cap37">
+          <g id="g98818">
+            <g id="g99018">
+              <g id="g99218">
+                <rect id="rect99418" class="st40" x="37.5" y="29.2" width="2.6" height="5.7"/>
+                <rect id="rect99618" class="st22" x="40.1" y="29.2" height="5.7"/>
+                <rect id="rect99818" class="st23" x="37.5" y="29.2" height="5.7"/>
+              </g>
+              <g id="g100018">
+                <path id="path100218" class="st63" d="M37.5,30h0c.2.1.8.2,1,.2s1.4,0,1.6-.1v-.9h-2.6v.8Z"/>
+                <path id="path100418" class="st63" d="M37.6,34h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100618" class="st22" x="40.1" y="34" height=".9"/>
+                <rect id="rect100818" class="st18" x="37.5" y="34" height=".9"/>
+                <path id="path101018" class="st33" d="M40.1,29.2v.9"/>
+                <rect id="rect101218" class="st22" x="40.1" y="29.2" height=".9"/>
+                <rect id="rect101418" class="st18" x="37.5" y="29.2" height=".9"/>
+                <line id="line101618" class="st4" x1="40.1" y1="34.3" x2="40.1" y2="34.3"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101818" class="st17" points="37.6 29.1 40.1 29.1 40.1 29.1 37.6 29.1"/>
+        <polygon id="rect102018" class="st23" points="37.7 34.7 40.2 34.7 40.2 34.7 37.7 34.7"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer123">
+    <g id="_x30_402-cap38">
+      <g id="g98519">
+        <g id="_x30_402-cap39">
+          <g id="g98819">
+            <g id="g99019">
+              <g id="g99219">
+                <rect id="rect99419" class="st40" x="36" y="40.8" width="2.6" height="5.7"/>
+                <rect id="rect99619" class="st22" x="38.6" y="40.8" height="5.7"/>
+                <rect id="rect99819" class="st23" x="36" y="40.8" height="5.7"/>
+              </g>
+              <g id="g100019">
+                <path id="path100219" class="st63" d="M36,41.6h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100419" class="st63" d="M36.1,45.6h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100619" class="st22" x="38.6" y="45.6" height=".9"/>
+                <rect id="rect100819" class="st18" x="36" y="45.6" height=".9"/>
+                <path id="path101019" class="st33" d="M38.6,40.8v.9"/>
+                <rect id="rect101219" class="st22" x="38.6" y="40.8" height=".9"/>
+                <rect id="rect101419" class="st18" x="36" y="40.8" height=".9"/>
+                <line id="line101619" class="st4" x1="38.6" y1="45.9" x2="38.6" y2="45.9"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101819" class="st17" points="36 40.8 38.5 40.8 38.5 40.8 36 40.8"/>
+        <polygon id="rect102019" class="st23" points="36.1 46.3 38.6 46.3 38.6 46.3 36.1 46.3"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer124">
+    <g id="_x30_402-cap40">
+      <g id="g98520">
+        <g id="_x30_402-cap41">
+          <g id="g98820">
+            <g id="g99020">
+              <g id="g99220">
+                <rect id="rect99420" class="st40" x="31.4" y="40.8" width="2.6" height="5.7"/>
+                <rect id="rect99620" class="st22" x="34" y="40.8" height="5.7"/>
+                <rect id="rect99820" class="st23" x="31.4" y="40.8" height="5.7"/>
+              </g>
+              <g id="g100020">
+                <path id="path100220" class="st63" d="M31.4,41.6h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100420" class="st63" d="M31.5,45.6h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100620" class="st22" x="34" y="45.6" height=".9"/>
+                <rect id="rect100820" class="st18" x="31.4" y="45.6" height=".9"/>
+                <path id="path101020" class="st33" d="M34,40.8v.9"/>
+                <rect id="rect101220" class="st22" x="34" y="40.8" height=".9"/>
+                <rect id="rect101420" class="st18" x="31.4" y="40.8" height=".9"/>
+                <line id="line101620" class="st4" x1="34" y1="45.9" x2="34" y2="45.9"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101820" class="st17" points="31.4 40.8 33.9 40.8 33.9 40.8 31.4 40.8"/>
+        <polygon id="rect102020" class="st23" points="31.5 46.3 34 46.3 34 46.3 31.5 46.3"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer125">
+    <g id="_x30_402-cap42">
+      <g id="g98521">
+        <g id="_x30_402-cap43">
+          <g id="g98821">
+            <g id="g99021">
+              <g id="g99221">
+                <rect id="rect99421" class="st40" x="26.9" y="43.1" width="2.6" height="5.7"/>
+                <rect id="rect99621" class="st22" x="29.5" y="43.1" height="5.7"/>
+                <rect id="rect99821" class="st23" x="26.9" y="43.1" height="5.7"/>
+              </g>
+              <g id="g100021">
+                <path id="path100221" class="st63" d="M26.9,43.9h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100421" class="st63" d="M27,47.9h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100621" class="st22" x="29.5" y="47.9" height=".9"/>
+                <rect id="rect100821" class="st18" x="26.9" y="47.9" height=".9"/>
+                <path id="path101021" class="st33" d="M29.5,43.1v.9"/>
+                <rect id="rect101221" class="st22" x="29.5" y="43.1" height=".9"/>
+                <rect id="rect101421" class="st18" x="26.9" y="43.1" height=".9"/>
+                <line id="line101621" class="st4" x1="29.5" y1="48.2" x2="29.5" y2="48.2"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101821" class="st17" points="27 43 29.5 43 29.5 43 27 43"/>
+        <polygon id="rect102021" class="st23" points="27 48.6 29.5 48.6 29.5 48.6 27 48.6"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer126">
+    <g id="_x30_402-cap44">
+      <g id="g98522">
+        <g id="_x30_402-cap45">
+          <g id="g98822">
+            <g id="g99022">
+              <g id="g99222">
+                <rect id="rect99422" class="st40" x="49.9" y="76.4" width="2.6" height="5.7"/>
+                <rect id="rect99622" class="st22" x="52.5" y="76.4" height="5.7"/>
+                <rect id="rect99822" class="st23" x="49.9" y="76.4" height="5.7"/>
+              </g>
+              <g id="g100022">
+                <path id="path100222" class="st63" d="M49.9,77.2h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100422" class="st63" d="M50,81.2h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100622" class="st22" x="52.5" y="81.2" height=".9"/>
+                <rect id="rect100822" class="st18" x="49.9" y="81.2" height=".9"/>
+                <path id="path101022" class="st33" d="M52.5,76.4v.9"/>
+                <rect id="rect101222" class="st22" x="52.5" y="76.4" height=".9"/>
+                <rect id="rect101422" class="st18" x="49.9" y="76.4" height=".9"/>
+                <line id="line101622" class="st4" x1="52.5" y1="81.5" x2="52.5" y2="81.5"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101822" class="st17" points="50 76.3 52.5 76.3 52.5 76.3 50 76.3"/>
+        <polygon id="rect102022" class="st23" points="50 81.9 52.5 81.9 52.5 81.9 50 81.9"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer127">
+    <g id="_x30_402-cap46">
+      <g id="g98523">
+        <g id="_x30_402-cap47">
+          <g id="g98823">
+            <g id="g99023">
+              <g id="g99223">
+                <rect id="rect99423" class="st40" x="45.5" y="76.4" width="2.6" height="5.7"/>
+                <rect id="rect99623" class="st22" x="48.1" y="76.4" height="5.7"/>
+                <rect id="rect99823" class="st23" x="45.5" y="76.4" height="5.7"/>
+              </g>
+              <g id="g100023">
+                <path id="path100223" class="st63" d="M45.5,77.2h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100423" class="st63" d="M45.6,81.2h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100623" class="st22" x="48.1" y="81.2" height=".9"/>
+                <rect id="rect100823" class="st18" x="45.5" y="81.2" height=".9"/>
+                <path id="path101023" class="st33" d="M48.1,76.4v.9"/>
+                <rect id="rect101223" class="st22" x="48.1" y="76.4" height=".9"/>
+                <rect id="rect101423" class="st18" x="45.5" y="76.4" height=".9"/>
+                <line id="line101623" class="st4" x1="48.1" y1="81.5" x2="48.1" y2="81.5"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101823" class="st17" points="45.6 76.3 48.1 76.3 48.1 76.3 45.6 76.3"/>
+        <polygon id="rect102023" class="st23" points="45.6 81.9 48.1 81.9 48.1 81.9 45.6 81.9"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer128">
+    <g id="_x30_402-cap48">
+      <g id="g98524">
+        <g id="_x30_402-cap49">
+          <g id="g98824">
+            <g id="g99024">
+              <g id="g99224">
+                <rect id="rect99424" class="st40" x="72.9" y="82.5" width="2.6" height="5.7"/>
+                <rect id="rect99624" class="st22" x="75.5" y="82.5" height="5.7"/>
+                <rect id="rect99824" class="st23" x="72.9" y="82.5" height="5.7"/>
+              </g>
+              <g id="g100024">
+                <path id="path100224" class="st63" d="M72.9,83.3h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100424" class="st63" d="M73,87.3h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100624" class="st22" x="75.5" y="87.3" height=".9"/>
+                <rect id="rect100824" class="st18" x="72.9" y="87.3" height=".9"/>
+                <path id="path101024" class="st33" d="M75.5,82.5v.9"/>
+                <rect id="rect101224" class="st22" x="75.5" y="82.5" height=".9"/>
+                <rect id="rect101424" class="st18" x="72.9" y="82.5" height=".9"/>
+                <line id="line101624" class="st4" x1="75.5" y1="87.6" x2="75.5" y2="87.6"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101824" class="st17" points="72.9 82.5 75.4 82.5 75.4 82.5 72.9 82.5"/>
+        <polygon id="rect102024" class="st23" points="73 88 75.5 88 75.5 88 73 88"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer129">
+    <g id="_x30_402-cap50">
+      <g id="g98525">
+        <g id="_x30_402-cap51">
+          <g id="g98825">
+            <g id="g99025">
+              <g id="g99225">
+                <rect id="rect99425" class="st40" x="55" y="96.4" width="2.6" height="5.7"/>
+                <rect id="rect99625" class="st22" x="57.6" y="96.4" height="5.7"/>
+                <rect id="rect99825" class="st23" x="55" y="96.4" height="5.7"/>
+              </g>
+              <g id="g100025">
+                <path id="path100225" class="st63" d="M55,97.2h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100425" class="st63" d="M55.1,101.2h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100625" class="st22" x="57.6" y="101.2" height=".9"/>
+                <rect id="rect100825" class="st18" x="55" y="101.2" height=".9"/>
+                <path id="path101025" class="st33" d="M57.6,96.4v.9"/>
+                <rect id="rect101225" class="st22" x="57.6" y="96.4" height=".9"/>
+                <rect id="rect101425" class="st18" x="55" y="96.4" height=".9"/>
+                <line id="line101625" class="st4" x1="57.6" y1="101.5" x2="57.6" y2="101.5"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101825" class="st17" points="55.1 96.3 57.6 96.3 57.6 96.3 55.1 96.3"/>
+        <polygon id="rect102025" class="st23" points="55.1 101.9 57.6 101.9 57.6 101.9 55.1 101.9"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer130">
+    <g id="_x30_402-cap52">
+      <g id="g98526">
+        <g id="_x30_402-cap53">
+          <g id="g98826">
+            <g id="g99026">
+              <g id="g99226">
+                <rect id="rect99426" class="st40" x="91.1" y="99.2" width="2.6" height="5.7"/>
+                <rect id="rect99626" class="st22" x="93.7" y="99.2" height="5.7"/>
+                <rect id="rect99826" class="st23" x="91.1" y="99.2" height="5.7"/>
+              </g>
+              <g id="g100026">
+                <path id="path100226" class="st63" d="M91.1,100h0c.2,0,.8.2,1,.2s1.4,0,1.6,0v-.9h-2.6v.8Z"/>
+                <path id="path100426" class="st63" d="M91.2,104h0v.9h2.5v-.9c-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9,0Z"/>
+                <rect id="rect100626" class="st22" x="93.7" y="104" height=".9"/>
+                <rect id="rect100826" class="st18" x="91.1" y="104" height=".9"/>
+                <path id="path101026" class="st33" d="M93.7,99.2v.9"/>
+                <rect id="rect101226" class="st22" x="93.7" y="99.2" height=".9"/>
+                <rect id="rect101426" class="st18" x="91.1" y="99.2" height=".9"/>
+                <line id="line101626" class="st4" x1="93.7" y1="104.3" x2="93.7" y2="104.3"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101826" class="st17" points="91.1 99.2 93.6 99.2 93.6 99.2 91.1 99.2"/>
+        <polygon id="rect102026" class="st23" points="91.2 104.7 93.7 104.7 93.7 104.7 91.2 104.7"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer131">
+    <g id="_x30_402-cap54">
+      <g id="g98527">
+        <g id="_x30_402-cap55">
+          <g id="g98827">
+            <g id="g99027">
+              <g id="g99227">
+                <rect id="rect99427" class="st40" x="62.9" y="77.3" width="5.7" height="2.6"/>
+                <rect id="rect99627" class="st22" x="65.7" y="77" height="5.7"/>
+                <rect id="rect99827" class="st23" x="65.7" y="74.4" height="5.7"/>
+              </g>
+              <g id="g100027">
+                <path id="path100227" class="st63" d="M67.7,77.3h0c0,.2-.2.8-.2,1s0,1.4,0,1.6h.9v-2.6h-.8Z"/>
+                <path id="path100427" class="st63" d="M63.7,77.4h-.9v2.5h.9c0-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9Z"/>
+                <rect id="rect100627" class="st22" x="63.3" y="79.4" height=".9"/>
+                <rect id="rect100827" class="st18" x="63.3" y="76.8" height=".9"/>
+                <path id="path101027" class="st33" d="M68.5,79.9h-.9"/>
+                <rect id="rect101227" class="st22" x="68.1" y="79.4" height=".9"/>
+                <rect id="rect101427" class="st18" x="68.1" y="76.8" height=".9"/>
+                <line id="line101627" class="st4" x1="63.4" y1="79.9" x2="63.4" y2="79.9"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101827" class="st17" points="68.6 77.3 68.6 79.8 68.6 79.8 68.6 77.3"/>
+        <polygon id="rect102027" class="st23" points="63 77.3 63 79.8 63 79.8 63 77.3"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer132">
+    <g id="_x30_402-cap56">
+      <g id="g98528">
+        <g id="_x30_402-cap57">
+          <g id="g98828">
+            <g id="g99028">
+              <g id="g99228">
+                <rect id="rect99428" class="st40" x="45.6" y="87" width="5.7" height="2.6"/>
+                <rect id="rect99628" class="st22" x="48.5" y="86.7" height="5.7"/>
+                <rect id="rect99828" class="st23" x="48.5" y="84.1" height="5.7"/>
+              </g>
+              <g id="g100028">
+                <path id="path100228" class="st63" d="M50.5,86.9h0c0,.2-.2.8-.2,1s0,1.4,0,1.6h.9v-2.6h-.8Z"/>
+                <path id="path100428" class="st63" d="M46.5,87h-.9v2.5h.9c0-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9Z"/>
+                <rect id="rect100628" class="st22" x="46.1" y="89.1" height=".9"/>
+                <rect id="rect100828" class="st18" x="46.1" y="86.5" height=".9"/>
+                <path id="path101028" class="st33" d="M51.3,89.5h-.9"/>
+                <rect id="rect101228" class="st22" x="50.9" y="89.1" height=".9"/>
+                <rect id="rect101428" class="st18" x="50.9" y="86.5" height=".9"/>
+                <line id="line101628" class="st4" x1="46.2" y1="89.5" x2="46.2" y2="89.5"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101828" class="st17" points="51.4 87 51.4 89.5 51.4 89.5 51.4 87"/>
+        <polygon id="rect102028" class="st23" points="45.8 87 45.8 89.5 45.8 89.5 45.8 87"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer133">
+    <g id="_x30_402-cap58">
+      <g id="g98529">
+        <g id="_x30_402-cap59">
+          <g id="g98829">
+            <g id="g99029">
+              <g id="g99229">
+                <rect id="rect99429" class="st40" x="103.6" y="87" width="5.7" height="2.6"/>
+                <rect id="rect99629" class="st22" x="106.4" y="86.7" height="5.7"/>
+                <rect id="rect99829" class="st23" x="106.4" y="84.1" height="5.7"/>
+              </g>
+              <g id="g100029">
+                <path id="path100229" class="st63" d="M108.4,87h0c0,.2-.2.8-.2,1s0,1.4,0,1.6h.9v-2.6h-.8Z"/>
+                <path id="path100429" class="st63" d="M104.4,87.1h-.9v2.5h.9c0-.2,0-1.4,0-1.6,0-.2,0-.7,0-.9Z"/>
+                <rect id="rect100629" class="st22" x="104" y="89.1" height=".9"/>
+                <rect id="rect100829" class="st18" x="104" y="86.5" height=".9"/>
+                <path id="path101029" class="st33" d="M109.2,89.6h-.9"/>
+                <rect id="rect101229" class="st22" x="108.8" y="89.1" height=".9"/>
+                <rect id="rect101429" class="st18" x="108.8" y="86.5" height=".9"/>
+                <line id="line101629" class="st4" x1="104.1" y1="89.6" x2="104.1" y2="89.6"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <polygon id="rect101829" class="st17" points="109.3 87.1 109.3 89.6 109.3 89.6 109.3 87.1"/>
+        <polygon id="rect102029" class="st23" points="103.7 87.1 103.7 89.6 103.7 89.6 103.7 87.1"/>
+      </g>
+    </g>
+  </g>
+  <g id="layer134">
+    <g id="g1178">
+      <g id="g1180">
+        <g id="g1182">
+          <g id="g1184">
+            <rect id="rect1186" class="st63" x="90.4" y="60.8" width="1.4" height="6.4"/>
+            <line id="line1188" class="st4" x1="91.7" y1="67.2" x2="91.7" y2="60.8"/>
+          </g>
+          <g id="g1190">
+            <rect id="rect1192" class="st46" x="89.3" y="61.7" width="2.5" height="4.5"/>
+            <path id="path1194" class="st42" d="M91.7,62.4s-.5.2-.4,0c0-.2,0-.5,0-.7h.4v.7Z"/>
+            <g id="g1196">
+              <g id="g1198">
+                <rect id="rect1200" class="st27" x="90" y="63.6" width="1" height=".9"/>
+                <rect id="rect1202" class="st61" x="90.9" y="63.6" height=".9"/>
+              </g>
+              <g id="g1204">
+                <polygon id="polygon1206" class="st33" points="90.7 61.7 90.8 62.7 91.3 62.7 91.4 61.7 90.7 61.7"/>
+                <g id="g1208">
+                  <path id="path1210" class="st33" d="M91.1,62.4h0c0,.3,0,.5-.2.6,0,.2,0,.4,0,.6h0v-.7c0,0,0-.3.2-.6h0Z"/>
+                </g>
+                <polygon id="polygon1212" class="st33" points="90.4 66.3 90.3 65.3 89.8 65.3 89.7 66.3 90.4 66.3"/>
+                <g id="g1214">
+                  <path id="path1216" class="st33" d="M90.6,64h0c-.3,0-.4,1-.4,1.5h0c0-.2,0-1.5.5-1.6h0Z"/>
+                </g>
+                <path id="path1218" class="st33" d="M90.6,63.6s0,.4.3.4v-.4h-.3Z"/>
+                <path id="path1220" class="st33" d="M90.3,64s.3-.2.3,0v.2s-.3-.2-.3-.2Z"/>
+                <path id="path1222" class="st68" d="M91,63.6v-.6c0,0,0-.3.2-.6h0c0,.3,0,.4-.2.6,0,.2,0,.4,0,.6h0Z"/>
+                <polygon id="polygon1224" class="st68" points="90.4 66.3 90.3 65.3 90.4 65.3 90.5 66.3 90.4 66.3"/>
+                <path id="path1226" class="st68" d="M90.6,64.1c-.3,0-.4.9-.4,1.5h0c0-.5,0-1.4.4-1.5h0Z"/>
+                <path id="path1228" class="st68" d="M91,63.9v-.4h0v.4h0Z"/>
+                <path id="path1230" class="st68" d="M90.7,64.2v-.2h0v.2h0Z"/>
+              </g>
+            </g>
+            <rect id="rect1232" class="st18" x="89.3" y="62.3" height="3.5"/>
+            <g id="g1234" class="st44">
+              <path id="path1236" class="st27" d="M90,64.5h0v-.3h0v.3h0Z"/>
+              <path id="path1238" class="st27" d="M89.7,62.5h0v1.4h0v-1.4h0Z"/>
+              <path id="path1240" class="st27" d="M91.2,62.3v.2h0v-.2h0Z"/>
+              <path id="path1242" class="st27" d="M89.6,65.7v-1h0v1h0Z"/>
+            </g>
+            <g id="g1244">
+              <path id="path1246" class="st25" d="M89.3,66.2h2.5v-4.5h-2.5v4.5Z"/>
+              <path id="path1248" class="st12" d="M89.9,66.2h-.6v-4.1q0-.2,0,0v3.6c0,.5,0,.5.2.5h.3q.2,0,0,0h.1Z"/>
+              <path id="path1250" class="st20" d="M91.5,61.8h0v4.1q0,.2,0,0v-4.2h0Z"/>
+            </g>
+          </g>
+          <g id="g1252">
+            <path id="path1254" class="st33" d="M91.7,67.2v-.8h-.5c0,0-.2,0-.3-.2h-1.7v1h2.5"/>
+            <rect id="rect1256" class="st18" x="89.3" y="66.2" height="1"/>
+          </g>
+          <g id="g1258">
+            <path id="path1260" class="st33" d="M91.7,60.7h-2.5v1h2.1c0,0,0-.2.3-.2h0v-.8"/>
+            <rect id="rect1262" class="st18" x="89.3" y="60.7" height="1"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g id="layer135">
+    <g id="g11781">
+      <g id="g11801">
+        <g id="g11821">
+          <g id="g11841">
+            <rect id="rect11861" class="st63" x="72.7" y="60.6" width="1.4" height="6.4"/>
+            <line id="line11881" class="st4" x1="74.1" y1="67" x2="74.1" y2="60.6"/>
+          </g>
+          <g id="g11901">
+            <rect id="rect11921" class="st46" x="71.6" y="61.6" width="2.5" height="4.5"/>
+            <path id="path11941" class="st42" d="M74.1,62.3s-.5.2-.4,0c0-.2,0-.5,0-.7h.4v.7Z"/>
+            <g id="g11961">
+              <g id="g11981">
+                <rect id="rect12001" class="st27" x="72.3" y="63.4" width="1" height=".9"/>
+                <rect id="rect12021" class="st61" x="73.2" y="63.4" height=".9"/>
+              </g>
+              <g id="g12041">
+                <polygon id="polygon12061" class="st33" points="73 61.6 73.1 62.5 73.6 62.5 73.8 61.6 73 61.6"/>
+                <g id="g12081">
+                  <path id="path12101" class="st33" d="M73.4,62.2h0c0,.3,0,.5-.2.6,0,.2,0,.4,0,.6h0v-.7c0,0,0-.3.2-.6h0Z"/>
+                </g>
+                <polygon id="polygon12121" class="st33" points="72.7 66.1 72.6 65.1 72.1 65.1 72 66.1 72.7 66.1"/>
+                <g id="g12141">
+                  <path id="path12161" class="st33" d="M72.9,63.9h0c-.3,0-.4,1-.4,1.5h0c0-.2,0-1.5.5-1.6h0Z"/>
+                </g>
+                <path id="path12181" class="st33" d="M72.9,63.4s0,.4.3.4v-.4h-.3Z"/>
+                <path id="path12201" class="st33" d="M72.6,63.8s.3-.2.3,0v.2l-.3-.2Z"/>
+                <path id="path12221" class="st68" d="M73.3,63.5v-.6c0,0,0-.3.2-.6h0c0,.3,0,.4-.2.6,0,.2,0,.4,0,.6h0Z"/>
+                <polygon id="polygon12241" class="st68" points="72.7 66.1 72.6 65.1 72.7 65.1 72.8 66.1 72.7 66.1"/>
+                <path id="path12261" class="st68" d="M72.9,63.9c-.3,0-.4.9-.4,1.5h0c0-.5,0-1.4.4-1.5h0Z"/>
+                <path id="path12281" class="st68" d="M73.3,63.8v-.4h0v.4h0Z"/>
+                <path id="path12301" class="st68" d="M73,64v-.2h0v.2h0Z"/>
+              </g>
+            </g>
+            <rect id="rect12321" class="st18" x="71.6" y="62.1" height="3.5"/>
+            <g id="g12341" class="st44">
+              <path id="path12361" class="st27" d="M72.3,64.4h0v-.3h0v.3h0Z"/>
+              <path id="path12381" class="st27" d="M72,62.4h0v1.4h0v-1.4h0Z"/>
+              <path id="path12401" class="st27" d="M73.5,62.1v.2h0v-.2h0Z"/>
+              <path id="path12421" class="st27" d="M71.9,65.6v-1h0v1h0Z"/>
+            </g>
+            <g id="g12441">
+              <path id="path12461" class="st25" d="M71.6,66.1h2.5v-4.5h-2.5v4.5Z"/>
+              <path id="path12481" class="st12" d="M72.3,66h-.6v-4.1q0-.2,0,0v3.6c0,.5,0,.5.2.5h.3q.2,0,0,0h.1Z"/>
+              <path id="path12501" class="st20" d="M73.9,61.6h0v4.1q0,.2,0,0v-4.2h0Z"/>
+            </g>
+          </g>
+          <g id="g12521">
+            <path id="path12541" class="st33" d="M74.1,67v-.8h-.5c0,0-.2,0-.3-.2h-1.7v1h2.5"/>
+            <rect id="rect12561" class="st18" x="71.6" y="66.1" height="1"/>
+          </g>
+          <g id="g12581">
+            <path id="path12601" class="st33" d="M74.1,60.6h-2.5v1h2.1c0,0,0-.2.3-.2h0v-.8"/>
+            <rect id="rect12621" class="st18" x="71.6" y="60.6" height="1"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g id="layer136">
+    <g id="g11782">
+      <g id="g11802">
+        <g id="g11822">
+          <g id="g11842">
+            <rect id="rect11862" class="st63" x="55.3" y="76" width="1.4" height="6.4"/>
+            <line id="line11882" class="st4" x1="56.7" y1="82.4" x2="56.7" y2="76"/>
+          </g>
+          <g id="g11902">
+            <rect id="rect11922" class="st46" x="54.2" y="76.9" width="2.5" height="4.5"/>
+            <path id="path11942" class="st42" d="M56.7,77.7s-.5.2-.4,0c0-.2,0-.5,0-.7h.4v.7Z"/>
+            <g id="g11962">
+              <g id="g11982">
+                <rect id="rect12002" class="st27" x="54.9" y="78.8" width="1" height=".9"/>
+                <rect id="rect12022" class="st61" x="55.8" y="78.8" height=".9"/>
+              </g>
+              <g id="g12042">
+                <polygon id="polygon12062" class="st33" points="55.6 76.9 55.7 77.9 56.3 77.9 56.4 76.9 55.6 76.9"/>
+                <g id="g12082">
+                  <path id="path12102" class="st33" d="M56.1,77.6h0c0,.3,0,.5-.2.6,0,.2,0,.4,0,.6h0v-.7c0,0,0-.3.2-.6h0Z"/>
+                </g>
+                <polygon id="polygon12122" class="st33" points="55.4 81.5 55.3 80.5 54.7 80.5 54.6 81.5 55.4 81.5"/>
+                <g id="g12142">
+                  <path id="path12162" class="st33" d="M55.5,79.2h0c-.3,0-.4,1-.4,1.5h0c0-.2,0-1.5.5-1.6h0Z"/>
+                </g>
+                <path id="path12182" class="st33" d="M55.6,78.8s0,.4.3.4v-.4h-.3Z"/>
+                <path id="path12202" class="st33" d="M55.2,79.2s.3-.2.3,0v.2l-.3-.2Z"/>
+                <path id="path12222" class="st68" d="M55.9,78.8v-.6c0,0,0-.3.2-.6h0c0,.3,0,.4-.2.6,0,.2,0,.4,0,.6h0Z"/>
+                <polygon id="polygon12242" class="st68" points="55.4 81.5 55.3 80.5 55.3 80.5 55.4 81.5 55.4 81.5"/>
+                <path id="path12262" class="st68" d="M55.6,79.3c-.3,0-.4.9-.4,1.5h0c0-.5,0-1.4.4-1.5h0Z"/>
+                <path id="path12282" class="st68" d="M55.9,79.2v-.4h0v.4h0Z"/>
+                <path id="path12302" class="st68" d="M55.6,79.4v-.2h0v.2h0Z"/>
+              </g>
+            </g>
+            <rect id="rect12322" class="st18" x="54.2" y="77.5" height="3.5"/>
+            <g id="g12342" class="st44">
+              <path id="path12362" class="st27" d="M55,79.7h0v-.3h0v.3h0Z"/>
+              <path id="path12382" class="st27" d="M54.6,77.8h0v1.4h0v-1.4h0Z"/>
+              <path id="path12402" class="st27" d="M56.1,77.5v.2h0v-.2h0Z"/>
+              <path id="path12422" class="st27" d="M54.6,80.9v-1h0v1h0Z"/>
+            </g>
+            <g id="g12442">
+              <path id="path12462" class="st25" d="M54.2,81.5h2.5v-4.5h-2.5v4.5Z"/>
+              <path id="path12482" class="st12" d="M54.9,81.4h-.6v-4.1q0-.2,0,0v3.6c0,.5,0,.5.2.5h.3q.2,0,0,0h0Z"/>
+              <path id="path12502" class="st20" d="M56.5,77h0v4.1q0,.2,0,0v-4.2h0Z"/>
+            </g>
+          </g>
+          <g id="g12522">
+            <path id="path12542" class="st33" d="M56.7,82.4v-.8h-.5c0,0-.2,0-.3-.2h-1.7v1h2.5"/>
+            <rect id="rect12562" class="st18" x="54.2" y="81.5" height="1"/>
+          </g>
+          <g id="g12582">
+            <path id="path12602" class="st33" d="M56.7,75.9h-2.5v1h2.1c0,0,0-.2.3-.2h0v-.8"/>
+            <rect id="rect12622" class="st18" x="54.2" y="75.9" height="1"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <circle id="pin-GND" class="st35" cx="5.40" cy="43.20" r="2.6"/>
+  <circle class="st36" cx="5.5" cy="43" r="1.3"/>
+  <circle id="pin-3V3" class="st35" cx="5.40" cy="50.40" r="2.6"/>
+  <circle class="st36" cx="5.5" cy="50.2" r="1.3"/>
+  <circle id="pin-A5" class="st35" cx="5.40" cy="57.60" r="2.6"/>
+  <circle class="st36" cx="5.5" cy="57.4" r="1.3"/>
+  <circle id="pin-A4" class="st35" cx="5.40" cy="64.80" r="2.6"/>
+  <circle class="st36" cx="5.5" cy="64.6" r="1.3"/>
+  <circle id="pin-A3" class="st35" cx="5.40" cy="72.00" r="2.6"/>
+  <circle class="st36" cx="5.5" cy="71.8" r="1.3"/>
+  <circle id="pin-A2" class="st35" cx="5.40" cy="79.20" r="2.6"/>
+  <circle class="st36" cx="5.5" cy="79" r="1.3"/>
+  <circle id="pin-A1" class="st35" cx="5.40" cy="86.40" r="2.6"/>
+  <circle class="st36" cx="5.5" cy="86.2" r="1.3"/>
+  <circle id="pin-A0" class="st35" cx="5.40" cy="93.60" r="2.6"/>
+  <circle class="st36" cx="5.5" cy="93.4" r="1.3"/>
+  <circle id="pin-D8" class="st35" cx="131.40" cy="43.20" r="2.6"/>
+  <circle class="st36" cx="131.5" cy="43" r="1.3"/>
+  <circle id="pin-D9" class="st35" cx="131.40" cy="50.40" r="2.6"/>
+  <circle class="st36" cx="131.5" cy="50.2" r="1.3"/>
+  <circle id="pin-D10" class="st35" cx="131.40" cy="57.60" r="2.6"/>
+  <circle class="st36" cx="131.5" cy="57.4" r="1.3"/>
+  <circle id="pin-D11" class="st35" cx="131.40" cy="64.80" r="2.6"/>
+  <circle class="st36" cx="131.5" cy="64.6" r="1.3"/>
+  <circle id="pin-D12" class="st35" cx="131.40" cy="72.00" r="2.6"/>
+  <circle class="st36" cx="131.5" cy="71.8" r="1.3"/>
+  <circle id="pin-D13" class="st35" cx="131.40" cy="79.20" r="2.6"/>
+  <circle class="st36" cx="131.5" cy="79" r="1.3"/>
+  <circle id="pin-3V3.2" class="st35" cx="131.40" cy="86.40" r="2.6"/>
+  <circle class="st36" cx="131.5" cy="86.2" r="1.3"/>
+  <circle id="pin-GND.2" class="st35" cx="131.40" cy="93.60" r="2.6"/>
+  <circle class="st36" cx="131.5" cy="93.4" r="1.3"/>
+  <circle id="pin-SCK" class="st35" cx="39.60" cy="127.80" r="2.6"/>
+  <circle class="st36" cx="39.7" cy="127.6" r="1.3"/>
+  <circle id="pin-MO" class="st35" cx="46.80" cy="127.80" r="2.6"/>
+  <circle class="st36" cx="46.9" cy="127.6" r="1.3"/>
+  <circle id="pin-MI" class="st35" cx="54.00" cy="127.80" r="2.6"/>
+  <circle class="st36" cx="54.1" cy="127.6" r="1.3"/>
+  <circle id="pin-RX" class="st35" cx="61.20" cy="127.80" r="2.6"/>
+  <circle class="st36" cx="61.3" cy="127.6" r="1.3"/>
+  <circle id="pin-TX" class="st35" cx="68.40" cy="127.80" r="2.6"/>
+  <circle class="st36" cx="68.5" cy="127.6" r="1.3"/>
+  <circle id="pin-SDA" class="st35" cx="75.60" cy="127.80" r="2.6"/>
+  <circle class="st36" cx="75.7" cy="127.6" r="1.3"/>
+  <circle id="pin-SCL" class="st35" cx="82.80" cy="127.80" r="2.6"/>
+  <circle class="st36" cx="82.9" cy="127.6" r="1.3"/>
+  <circle id="pin-PWR" class="st35" cx="90.00" cy="127.80" r="2.6"/>
+  <circle class="st36" cx="90.1" cy="127.6" r="1.3"/>
+  <circle id="pin-GND.3" class="st35" cx="97.20" cy="127.80" r="2.6"/>
+  <circle class="st36" cx="97.3" cy="127.6" r="1.3"/>
+  <rect class="st5" x="127.8" y="40" width="8.5" height="57" rx=".7" ry=".7"/>
+  <g id="layer137">
+    <g id="g11783">
+      <g id="g11803">
+        <g id="g11823">
+          <g id="g11843">
+            <rect id="rect11863" class="st63" x="42.1" y="76" width="1.4" height="6.4"/>
+            <line id="line11883" class="st4" x1="43.5" y1="82.4" x2="43.5" y2="76"/>
+          </g>
+          <g id="g11903">
+            <rect id="rect11923" class="st46" x="41" y="77" width="2.5" height="4.5"/>
+            <path id="path11943" class="st42" d="M43.5,77.7s-.5.2-.4,0c0-.2,0-.5,0-.7h.4v.7Z"/>
+            <g id="g11963">
+              <g id="g11983">
+                <rect id="rect12003" class="st27" x="41.7" y="78.8" width="1" height=".9"/>
+                <rect id="rect12023" class="st61" x="42.7" y="78.8" height=".9"/>
+              </g>
+              <g id="g12043">
+                <polygon id="polygon12063" class="st33" points="42.4 76.9 42.5 77.9 43.1 77.9 43.2 76.9 42.4 76.9"/>
+                <g id="g12083">
+                  <path id="path12103" class="st33" d="M42.9,77.6h0c0,.3,0,.5-.2.6,0,.2,0,.4,0,.6h0v-.7c0,0,0-.3.2-.6h0Z"/>
+                </g>
+                <polygon id="polygon12123" class="st33" points="42.2 81.5 42.1 80.5 41.5 80.5 41.4 81.5 42.2 81.5"/>
+                <g id="g12143">
+                  <path id="path12163" class="st33" d="M42.3,79.2h0c-.3,0-.4,1-.4,1.5h0c0-.2,0-1.5.5-1.6h0Z"/>
+                </g>
+                <path id="path12183" class="st33" d="M42.4,78.8s0,.4.3.4v-.4h-.3Z"/>
+                <path id="path12203" class="st33" d="M42,79.2s.3-.2.3,0v.2l-.3-.2Z"/>
+                <path id="path12223" class="st68" d="M42.7,78.9v-.6c0,0,0-.3.2-.6h0c0,.3,0,.4-.2.6,0,.2,0,.4,0,.6h0Z"/>
+                <polygon id="polygon12243" class="st68" points="42.2 81.5 42.1 80.5 42.1 80.5 42.2 81.5 42.2 81.5"/>
+                <path id="path12263" class="st68" d="M42.4,79.3c-.3,0-.4.9-.4,1.5h0c0-.5,0-1.4.4-1.5h0Z"/>
+                <path id="path12283" class="st68" d="M42.7,79.2v-.4h0v.4h0Z"/>
+                <path id="path12303" class="st68" d="M42.4,79.4v-.2h0v.2h0Z"/>
+              </g>
+            </g>
+            <rect id="rect12323" class="st18" x="41" y="77.5" height="3.5"/>
+            <g id="g12343" class="st44">
+              <path id="path12363" class="st27" d="M41.8,79.7h0v-.3h0v.3h0Z"/>
+              <path id="path12383" class="st27" d="M41.4,77.8h0v1.4h0v-1.4h0Z"/>
+              <path id="path12403" class="st27" d="M42.9,77.5v.2h0v-.2h0Z"/>
+              <path id="path12423" class="st27" d="M41.4,80.9v-1h0v1h0Z"/>
+            </g>
+            <g id="g12443">
+              <path id="path12463" class="st25" d="M41,81.5h2.5v-4.5h-2.5v4.5Z"/>
+              <path id="path12483" class="st12" d="M41.7,81.4h-.6v-4.1q0-.2,0,0v3.6c0,.5,0,.5.2.5h.3q.2,0,0,0h0Z"/>
+              <path id="path12503" class="st20" d="M43.3,77h0v4.1q0,.2,0,0v-4.2h0Z"/>
+            </g>
+          </g>
+          <g id="g12523">
+            <path id="path12543" class="st33" d="M43.5,82.4v-.8h-.5c0,0-.2,0-.3-.2h-1.7v1h2.5"/>
+            <rect id="rect12563" class="st18" x="41" y="81.5" height="1"/>
+          </g>
+          <g id="g12583">
+            <path id="path12603" class="st33" d="M43.5,75.9h-2.5v1h2.1c0,0,0-.2.3-.2h0v-.8"/>
+            <rect id="rect12623" class="st18" x="41" y="75.9" height="1"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(35.3 73.1)"><tspan x="0" y="0">PWR</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(66.9 73.1)"><tspan x="0" y="0">BOOT</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(51.1 73.1)"><tspan x="0" y="0">CRG</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(86.2 73.1)"><tspan x="0" y="0">SIG</tspan></text>
+  </g>
+  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
+  <rect class="st5" x=".6" y="39.7" width="8.5" height="57" rx=".7" ry=".7"/>
+  <g>
+    <g id="layer138">
+      <g id="_x31_x06">
+        <g id="g87281">
+          <g id="g87283">
+            <rect id="rect87285" class="st48" x="128.4" y="39.4" width="7.2" height="57"/>
+            <rect id="rect87287" x="130.6" y="41.6" width="2.8" height="2.8"/>
+            <polygon id="polygon87289" class="st62" points="133.4 44.4 134.4 45.4 134.4 40.6 133.4 41.6 133.4 44.4"/>
+            <polygon id="polygon87291" class="st57" points="130.6 44.4 129.6 45.4 134.4 45.4 133.4 44.4 130.6 44.4"/>
+            <polygon id="polygon87293" class="st58" points="130.6 41.6 129.6 40.6 129.6 45.4 130.6 44.4 130.6 41.6"/>
+            <polygon id="polygon87295" class="st52" points="133.4 41.6 134.4 40.6 129.6 40.6 130.6 41.6 133.4 41.6"/>
+            <rect id="rect87297" x="130.6" y="48.8" width="2.8" height="2.8"/>
+            <polygon id="polygon87299" class="st62" points="133.4 51.6 134.4 52.6 134.4 47.8 133.4 48.8 133.4 51.6"/>
+            <polygon id="polygon87301" class="st57" points="130.6 51.6 129.6 52.6 134.4 52.6 133.4 51.6 130.6 51.6"/>
+            <polygon id="polygon87303" class="st58" points="130.6 48.8 129.6 47.8 129.6 52.6 130.6 51.6 130.6 48.8"/>
+            <polygon id="polygon87305" class="st52" points="133.4 48.8 134.4 47.8 129.6 47.8 130.6 48.8 133.4 48.8"/>
+            <rect id="rect87307" x="130.6" y="56" width="2.8" height="2.8"/>
+            <polygon id="polygon87309" class="st62" points="133.4 58.7 134.4 59.7 134.4 54.9 133.4 56 133.4 58.7"/>
+            <polygon id="polygon87311" class="st57" points="130.6 58.7 129.6 59.7 134.4 59.7 133.4 58.7 130.6 58.7"/>
+            <polygon id="polygon87313" class="st58" points="130.6 56 129.6 54.9 129.6 59.7 130.6 58.7 130.6 56"/>
+            <polygon id="polygon87315" class="st52" points="133.4 56 134.4 54.9 129.6 54.9 130.6 56 133.4 56"/>
+            <rect id="rect87317" x="130.6" y="63.1" width="2.8" height="2.8"/>
+            <polygon id="polygon87319" class="st62" points="133.4 65.9 134.4 66.9 134.4 62.1 133.4 63.1 133.4 65.9"/>
+            <polygon id="polygon87321" class="st57" points="130.6 65.9 129.6 66.9 134.4 66.9 133.4 65.9 130.6 65.9"/>
+            <polygon id="polygon87323" class="st58" points="130.6 63.1 129.6 62.1 129.6 66.9 130.6 65.9 130.6 63.1"/>
+            <polygon id="polygon87325" class="st52" points="133.4 63.1 134.4 62.1 129.6 62.1 130.6 63.1 133.4 63.1"/>
+            <rect id="rect87327" x="130.6" y="70.3" width="2.8" height="2.8"/>
+            <polygon id="polygon87329" class="st62" points="133.4 73 134.4 74 134.4 69.2 133.4 70.3 133.4 73"/>
+            <polygon id="polygon87331" class="st57" points="130.6 73 129.6 74 134.4 74 133.4 73 130.6 73"/>
+            <polygon id="polygon87333" class="st58" points="130.6 70.3 129.6 69.2 129.6 74 130.6 73 130.6 70.3"/>
+            <polygon id="polygon87335" class="st52" points="133.4 70.3 134.4 69.2 129.6 69.2 130.6 70.3 133.4 70.3"/>
+            <rect id="rect87337" x="130.6" y="77.4" width="2.8" height="2.8"/>
+            <polygon id="polygon87339" class="st62" points="133.4 80.2 134.4 81.2 134.4 76.4 133.4 77.4 133.4 80.2"/>
+            <polygon id="polygon87341" class="st57" points="130.6 80.2 129.6 81.2 134.4 81.2 133.4 80.2 130.6 80.2"/>
+            <polygon id="polygon87343" class="st58" points="130.6 77.4 129.6 76.4 129.6 81.2 130.6 80.2 130.6 77.4"/>
+            <polygon id="polygon87345" class="st52" points="133.4 77.4 134.4 76.4 129.6 76.4 130.6 77.4 133.4 77.4"/>
+          </g>
+        </g>
+      </g>
+    </g>
+    <rect id="rect872971" x="130.6" y="84.4" width="2.8" height="2.8"/>
+    <polygon id="polygon872991" class="st62" points="133.4 87.1 134.4 88.1 134.4 83.3 133.4 84.4 133.4 87.1"/>
+    <polygon id="polygon873011" class="st57" points="130.6 87.1 129.6 88.1 134.4 88.1 133.4 87.1 130.6 87.1"/>
+    <polygon id="polygon873031" class="st58" points="130.6 84.4 129.6 83.3 129.6 88.1 130.6 87.1 130.6 84.4"/>
+    <polygon id="polygon873051" class="st52" points="133.4 84.4 134.4 83.3 129.6 83.3 130.6 84.4 133.4 84.4"/>
+    <rect id="rect873071" x="130.6" y="91.5" width="2.8" height="2.8"/>
+    <polygon id="polygon873091" class="st62" points="133.4 94.3 134.4 95.3 134.4 90.5 133.4 91.5 133.4 94.3"/>
+    <polygon id="polygon873111" class="st57" points="130.6 94.3 129.6 95.3 134.4 95.3 133.4 94.3 130.6 94.3"/>
+    <polygon id="polygon873131" class="st58" points="130.6 91.5 129.6 90.5 129.6 95.3 130.6 94.3 130.6 91.5"/>
+    <polygon id="polygon873151" class="st52" points="133.4 91.5 134.4 90.5 129.6 90.5 130.6 91.5 133.4 91.5"/>
+  </g>
+  <g>
+    <g id="layer139">
+      <g id="_x31_x061">
+        <g id="g872811">
+          <g id="g872831">
+            <rect id="rect872851" class="st48" x="1.2" y="39.7" width="7.2" height="57"/>
+            <rect id="rect872871" x="3.4" y="41.9" width="2.8" height="2.8"/>
+            <polygon id="polygon872891" class="st62" points="6.2 44.7 7.2 45.7 7.2 40.9 6.2 41.9 6.2 44.7"/>
+            <polygon id="polygon872911" class="st57" points="3.4 44.7 2.4 45.7 7.2 45.7 6.2 44.7 3.4 44.7"/>
+            <polygon id="polygon872931" class="st58" points="3.4 41.9 2.4 40.9 2.4 45.7 3.4 44.7 3.4 41.9"/>
+            <polygon id="polygon872951" class="st52" points="6.2 41.9 7.2 40.9 2.4 40.9 3.4 41.9 6.2 41.9"/>
+            <rect id="rect872972" x="3.4" y="49.1" width="2.8" height="2.8"/>
+            <polygon id="polygon872992" class="st62" points="6.2 51.8 7.2 52.8 7.2 48 6.2 49.1 6.2 51.8"/>
+            <polygon id="polygon873012" class="st57" points="3.4 51.8 2.4 52.8 7.2 52.8 6.2 51.8 3.4 51.8"/>
+            <polygon id="polygon873032" class="st58" points="3.4 49.1 2.4 48 2.4 52.8 3.4 51.8 3.4 49.1"/>
+            <polygon id="polygon873052" class="st52" points="6.2 49.1 7.2 48 2.4 48 3.4 49.1 6.2 49.1"/>
+            <rect id="rect873072" x="3.4" y="56.2" width="2.8" height="2.8"/>
+            <polygon id="polygon873092" class="st62" points="6.2 59 7.2 60 7.2 55.2 6.2 56.2 6.2 59"/>
+            <polygon id="polygon873112" class="st57" points="3.4 59 2.4 60 7.2 60 6.2 59 3.4 59"/>
+            <polygon id="polygon873132" class="st58" points="3.4 56.2 2.4 55.2 2.4 60 3.4 59 3.4 56.2"/>
+            <polygon id="polygon873152" class="st52" points="6.2 56.2 7.2 55.2 2.4 55.2 3.4 56.2 6.2 56.2"/>
+            <rect id="rect873171" x="3.4" y="63.4" width="2.8" height="2.8"/>
+            <polygon id="polygon873191" class="st62" points="6.2 66.1 7.2 67.1 7.2 62.3 6.2 63.4 6.2 66.1"/>
+            <polygon id="polygon873211" class="st57" points="3.4 66.1 2.4 67.1 7.2 67.1 6.2 66.1 3.4 66.1"/>
+            <polygon id="polygon873231" class="st58" points="3.4 63.4 2.4 62.3 2.4 67.1 3.4 66.1 3.4 63.4"/>
+            <polygon id="polygon873251" class="st52" points="6.2 63.4 7.2 62.3 2.4 62.3 3.4 63.4 6.2 63.4"/>
+            <rect id="rect873271" x="3.4" y="70.5" width="2.8" height="2.8"/>
+            <polygon id="polygon873291" class="st62" points="6.2 73.3 7.2 74.3 7.2 69.5 6.2 70.5 6.2 73.3"/>
+            <polygon id="polygon873311" class="st57" points="3.4 73.3 2.4 74.3 7.2 74.3 6.2 73.3 3.4 73.3"/>
+            <polygon id="polygon873331" class="st58" points="3.4 70.5 2.4 69.5 2.4 74.3 3.4 73.3 3.4 70.5"/>
+            <polygon id="polygon873351" class="st52" points="6.2 70.5 7.2 69.5 2.4 69.5 3.4 70.5 6.2 70.5"/>
+            <rect id="rect873371" x="3.4" y="77.7" width="2.8" height="2.8"/>
+            <polygon id="polygon873391" class="st62" points="6.2 80.4 7.2 81.5 7.2 76.7 6.2 77.7 6.2 80.4"/>
+            <polygon id="polygon873411" class="st57" points="3.4 80.4 2.4 81.5 7.2 81.5 6.2 80.4 3.4 80.4"/>
+            <polygon id="polygon873431" class="st58" points="3.4 77.7 2.4 76.7 2.4 81.5 3.4 80.4 3.4 77.7"/>
+            <polygon id="polygon873451" class="st52" points="6.2 77.7 7.2 76.7 2.4 76.7 3.4 77.7 6.2 77.7"/>
+          </g>
+        </g>
+      </g>
+    </g>
+    <rect id="rect872973" x="3.4" y="84.6" width="2.8" height="2.8"/>
+    <polygon id="polygon872993" class="st62" points="6.2 87.4 7.2 88.4 7.2 83.6 6.2 84.6 6.2 87.4"/>
+    <polygon id="polygon873013" class="st57" points="3.4 87.4 2.4 88.4 7.2 88.4 6.2 87.4 3.4 87.4"/>
+    <polygon id="polygon873033" class="st58" points="3.4 84.6 2.4 83.6 2.4 88.4 3.4 87.4 3.4 84.6"/>
+    <polygon id="polygon873053" class="st52" points="6.2 84.6 7.2 83.6 2.4 83.6 3.4 84.6 6.2 84.6"/>
+    <rect id="rect873073" x="3.4" y="91.8" width="2.8" height="2.8"/>
+    <polygon id="polygon873093" class="st62" points="6.2 94.5 7.2 95.5 7.2 90.7 6.2 91.8 6.2 94.5"/>
+    <polygon id="polygon873113" class="st57" points="3.4 94.5 2.4 95.5 7.2 95.5 6.2 94.5 3.4 94.5"/>
+    <polygon id="polygon873133" class="st58" points="3.4 91.8 2.4 90.7 2.4 95.5 3.4 94.5 3.4 91.8"/>
+    <polygon id="polygon873153" class="st52" points="6.2 91.8 7.2 90.7 2.4 90.7 3.4 91.8 6.2 91.8"/>
+  </g>
+  <rect class="st5" x="92.2" y="7.2" width="11.2" height="16.2" rx=".7" ry=".7"/>
+  <rect class="st5" x="32" y="7.2" width="11.2" height="16.2" rx=".7" ry=".7"/>
+  <g id="HATCH">
+    <path class="st27" d="M85.8,83.7h.6v2.1h-.5v-2M86.4,83h0v.2h0s0,0-.2,0h-.2v-.2h0v-.2h.4v.2c0,0,0,0,0,0Z"/>
+  </g>
+  <g id="HATCH1">
+    <path class="st27" d="M88.7,84.5v1.2h-.5v-1.3c0,0,0-.2-.2-.3h-.5v1.4h-.4v-2.1h.8c.4,0,.7,0,.8.4v.7Z"/>
+  </g>
+  <g id="HATCH2">
+    <path class="st27" d="M91.1,83.7l-1.3,3h-.6c0,0,.4-1,.4-1l-.4-.9-.5-1.2h.6l.5,1.3h0l.6-1.3h.7Z"/>
+  </g>
+  <g id="HATCH3">
+    <path class="st27" d="M91.3,87h-7.8v-7.8h7.8v7.8M93.6,81.1c0,0,.3,0,.3-.3v-.8c0,0,0-.3-.3-.3h-.9v-.6c0-.7-.6-1.4-1.4-1.4h-.6v-1c0,0,0-.3-.3-.3h-.8c0,0-.3,0-.3.3v1h-1.3v-1c0,0,0-.3-.3-.3h-.8c0,0-.3,0-.3.3v1h-1.3v-1c0,0,0-.3-.3-.3h-.8c0,0-.3,0-.3.3v1h-.6c-.7,0-1.4.6-1.4,1.4v.6h-.9c0,0-.3,0-.3.3v.8c0,0,0,.3.3.3h.9v1.3h-.9c0,0-.3,0-.3.3v.8c0,0,0,.3.3.3h.9v1.3h-.9c0,0-.3,0-.3.3v.8c0,0,0,.3.3.3h.9v.6c0,.7.6,1.4,1.4,1.4h.6v1c0,0,0,.3.3.3h.8c0,0,.3,0,.3-.3v-1h1.3v1c0,0,0,.3.3.3h.8c0,0,.3,0,.3-.3v-1h1.3v1c0,0,0,.3.3.3h.8c0,0,.3,0,.3-.3v-1h.6c.7,0,1.4-.6,1.4-1.4v-.6h.9c0,0,.3,0,.3-.3v-.8c0,0,0-.3-.3-.3h-.9v-1.3h.9c0,0,.3,0,.3-.3v-.8c0,0,0-.3-.3-.3h-.9v-1.3h.9Z"/>
+  </g>
+  <circle class="st60" cx="28.2" cy="76.9" r="6"/>
+  <g id="HATCH4">
+    <path class="st27" d="M85.3,85.7h-.5c0,0-.3,0-.4,0h0v-1.2h-.3v-.5h.3v-1h.5v1h.5v.4h-.4v.9h.2l.2.5h0Z"/>
+  </g>
+  <circle class="st27" cx="28.3" cy="77" r="5.3"/>
+  <circle class="st60" cx="105.8" cy="76.8" r="6"/>
+  <circle class="st27" cx="105.9" cy="76.9" r="5.3"/>
+  <g class="st16">
+    <text class="st24" transform="translate(95.6 88.9)"><tspan x="0" y="0">5V</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(32.7 92.5)"><tspan x="0" y="0">+</tspan></text>
+  </g>
+  <g class="st16">
+    <text class="st24" transform="translate(37.2 97.2)"><tspan x="0" y="0">-</tspan></text>
+  </g>
+  <line id="top" class="st4" x1="63" y1="62.3" x2="63" y2="69.1"/>
+  <rect id="bottom" class="st32" x="54.6" y="62.3" width=".3" height="6.8"/>
+  <line id="left" class="st4" x1="54.6" y1="62.3" x2="63" y2="62.3"/>
+  <polygon id="left1" class="st53" points="54.6 69.1 54.9 68.8 62.6 68.8 63 69.1 54.6 69.1"/>
+  <rect id="middle" class="st71" x="54.6" y="62.4" width="8.2" height="6.6"/>
+  <g>
+    <rect class="st66" x="59.5" y="95.6" width="3.5" height="1.6"/>
+    <rect class="st66" x="59.4" y="98.4" width="3.5" height="1.6"/>
+    <rect class="st66" x="59.4" y="101.2" width="3.5" height="1.6"/>
+    <rect class="st66" x="67" y="101.2" width="3.5" height="1.6"/>
+    <rect class="st66" x="67.1" y="95.6" width="3.5" height="1.6"/>
+    <rect class="st45" x="62.8" y="94.7" width="4.2" height="8.9"/>
+    <polygon class="st50" points="67.1 94.7 67.1 103.6 66.3 102.9 66.3 95.4 67.1 94.7"/>
+    <polygon class="st50" points="62.9 94.7 62.9 103.6 63.6 102.9 63.6 95.4 62.9 94.7"/>
+    <polygon points="67.1 94.7 62.9 94.7 63.6 95.4 66.3 95.4 67.1 94.7"/>
+    <polygon class="st67" points="67.1 103.6 62.9 103.6 63.6 102.9 66.3 102.9 67.1 103.6"/>
+    <circle class="st27" cx="65.1" cy="96.9" r=".7"/>
+  </g>
+  <rect class="st66" x="41.3" y="91.3" width="3.5" height="1.6"/>
+  <rect class="st66" x="41.3" y="94.1" width="3.5" height="1.6"/>
+  <rect class="st66" x="41.3" y="96.9" width="3.5" height="1.6"/>
+  <rect class="st66" x="48.9" y="96.9" width="3.5" height="1.6"/>
+  <rect class="st66" x="48.9" y="91.3" width="3.5" height="1.6"/>
+  <rect class="st45" x="44.7" y="90.4" width="4.2" height="8.9"/>
+  <polygon class="st50" points="48.9 90.4 48.9 99.3 48.2 98.6 48.2 91.2 48.9 90.4"/>
+  <polygon class="st50" points="44.7 90.4 44.7 99.3 45.4 98.6 45.4 91.2 44.7 90.4"/>
+  <line class="st4" x1="45.4" y1="91.2" x2="48.2" y2="91.2"/>
+  <line class="st4" x1="45.4" y1="98.6" x2="48.2" y2="98.6"/>
+  <circle class="st27" cx="46.9" cy="92.7" r=".7"/>
+  <rect class="st66" x="33" y="57.7" width="3.5" height="1.6"/>
+  <rect class="st66" x="32.9" y="54.9" width="3.5" height="1.6"/>
+  <rect class="st66" x="33" y="52.2" width="3.5" height="1.6"/>
+  <rect class="st66" x="25.4" y="52.1" width="3.5" height="1.6"/>
+  <rect class="st66" x="25.3" y="57.7" width="3.5" height="1.6"/>
+  <rect class="st45" x="28.8" y="51.2" width="4.2" height="8.9"/>
+  <polygon class="st50" points="28.8 60.2 28.8 51.2 29.6 52 29.6 59.4 28.8 60.2"/>
+  <polygon class="st50" points="33 60.2 33 51.2 32.3 52 32.3 59.4 33 60.2"/>
+  <line class="st4" x1="32.3" y1="59.4" x2="29.6" y2="59.4"/>
+  <line class="st4" x1="32.3" y1="52" x2="29.6" y2="52"/>
+  <circle class="st27" cx="30.8" cy="57.9" r=".7"/>
+  <rect class="st66" x="58.4" y="84.1" width="1.6" height="3.5"/>
+  <rect class="st66" x="55.5" y="88.6" width="1.6" height="3.5"/>
+  <rect class="st66" x="61.1" y="88.6" width="1.6" height="3.5"/>
+  <rect class="st45" x="54.7" y="86" width="8.9" height="4.2"/>
+  <polygon class="st50" points="63.6 90.2 54.7 90.2 55.4 89.4 62.8 89.4 63.6 90.2"/>
+  <polygon class="st50" points="63.6 85.9 54.7 85.9 55.4 86.7 62.8 86.7 63.6 85.9"/>
+  <line class="st4" x1="62.8" y1="86.7" x2="62.8" y2="89.4"/>
+  <line class="st4" x1="55.4" y1="86.7" x2="55.4" y2="89.4"/>
+  <circle class="st27" cx="61.4" cy="88.2" r=".7"/>
+  <circle id="connector27pin" class="st2" cx="82.7" cy="127.8" r="2.1"/>
+  <circle id="connector28pin" class="st2" cx="75.5" cy="127.8" r="2.1"/>
+  <circle id="connector29pin" class="st2" cx="68.3" cy="127.8" r="2.1"/>
+  <circle id="connector30pin" class="st2" cx="61.1" cy="127.8" r="2.1"/>
+  <circle id="connector31pin" class="st2" cx="53.9" cy="127.8" r="2.1"/>
+  <circle id="connector32pin" class="st2" cx="46.7" cy="127.8" r="2.1"/>
+  <circle id="connector45pin" class="st2" cx="97.1" cy="127.8" r="2.1"/>
+  <circle id="connector48pin" class="st2" cx="89.9" cy="127.8" r="2.1"/>
+  <circle id="connector45pin1" class="st2" cx="39.7" cy="127.8" r="2.1"/>
+  <g id="breadboard1">
+    <polygon id="polygon52" class="st48" points="37.4 124.2 35.9 125.8 35.9 129.8 37.4 131.4 41.5 131.4 43.1 129.8 43.1 125.8 41.5 124.2 37.4 124.2"/>
+    <rect id="connector0pin" class="st4" x="38.1" y="126.4" width="2.8" height="2.8"/>
+    <rect id="connector0terminal" class="st4" x="38.4" y="126.7" width="2.2" height="2.3"/>
+    <rect id="rect92" class="st64" x="38.3" y="126.7" width="2.3" height="2.3"/>
+    <rect id="rect11" class="st55" x="38.9" y="127.2" width="1.2" height="1.2"/>
+    <polygon id="polygon13" class="st43" points="38.3 126.7 38.9 127.2 40 127.2 40.6 126.7 38.3 126.7"/>
+    <polygon id="polygon15" class="st28" points="40 128.4 40 127.2 40.6 126.7 40.6 128.9 40 128.4"/>
+    <polygon id="polygon17" class="st38" points="38.9 128.4 40 128.4 40.6 128.9 38.3 128.9 38.9 128.4"/>
+    <polygon id="polygon19" class="st59" points="38.3 126.7 38.9 127.2 38.9 128.4 38.3 128.9 38.3 126.7"/>
+    <polygon id="polygon21" class="st48" points="44.6 124.2 43.1 125.8 43.1 129.8 44.6 131.4 48.7 131.4 50.3 129.8 50.3 125.8 48.7 124.2 44.6 124.2"/>
+    <rect id="connector1pin" class="st4" x="45.3" y="126.4" width="2.8" height="2.8"/>
+    <rect id="connector1terminal" class="st4" x="45.6" y="126.7" width="2.2" height="2.3"/>
+    <rect id="rect25" class="st64" x="45.5" y="126.7" width="2.3" height="2.3"/>
+    <rect id="rect27" class="st55" x="46.1" y="127.2" width="1.2" height="1.2"/>
+    <polygon id="polygon29" class="st43" points="45.5 126.7 46.1 127.2 47.2 127.2 47.8 126.7 45.5 126.7"/>
+    <polygon id="polygon31" class="st28" points="47.2 128.4 47.2 127.2 47.8 126.7 47.8 128.9 47.2 128.4"/>
+    <polygon id="polygon33" class="st38" points="46.1 128.4 47.2 128.4 47.8 128.9 45.5 128.9 46.1 128.4"/>
+    <polygon id="polygon35" class="st59" points="45.5 126.7 46.1 127.2 46.1 128.4 45.5 128.9 45.5 126.7"/>
+    <polygon id="polygon37" class="st48" points="51.8 124.2 50.3 125.8 50.3 129.8 51.8 131.4 55.9 131.4 57.5 129.8 57.5 125.8 55.9 124.2 51.8 124.2"/>
+    <rect id="connector2pin" class="st4" x="52.5" y="126.4" width="2.8" height="2.8"/>
+    <rect id="connector2terminal" class="st4" x="52.8" y="126.7" width="2.2" height="2.3"/>
+    <rect id="rect41" class="st64" x="52.7" y="126.7" width="2.3" height="2.3"/>
+    <rect id="rect43" class="st55" x="53.3" y="127.2" width="1.2" height="1.2"/>
+    <polygon id="polygon45" class="st43" points="52.7 126.7 53.3 127.2 54.4 127.2 55 126.7 52.7 126.7"/>
+    <polygon id="polygon47" class="st28" points="54.4 128.4 54.4 127.2 55 126.7 55 128.9 54.4 128.4"/>
+    <polygon id="polygon49" class="st38" points="53.3 128.4 54.4 128.4 55 128.9 52.7 128.9 53.3 128.4"/>
+    <polygon id="polygon511" data-name="polygon51" class="st59" points="52.7 126.7 53.3 127.2 53.3 128.4 52.7 128.9 52.7 126.7"/>
+  </g>
+  <g id="breadboard2">
+    <polygon id="polygon53" class="st48" points="59 124.2 57.5 125.8 57.5 129.8 59 131.4 63.1 131.4 64.7 129.8 64.7 125.8 63.1 124.2 59 124.2"/>
+    <rect id="connector0pin1" class="st4" x="59.7" y="126.4" width="2.8" height="2.8"/>
+    <rect id="connector0terminal1" class="st4" x="60" y="126.7" width="2.2" height="2.3"/>
+    <rect id="rect93" class="st64" x="59.9" y="126.7" width="2.3" height="2.3"/>
+    <rect id="rect111" class="st55" x="60.5" y="127.2" width="1.2" height="1.2"/>
+    <polygon id="polygon131" class="st43" points="59.9 126.7 60.5 127.2 61.6 127.2 62.2 126.7 59.9 126.7"/>
+    <polygon id="polygon151" class="st28" points="61.6 128.4 61.6 127.2 62.2 126.7 62.2 128.9 61.6 128.4"/>
+    <polygon id="polygon171" class="st38" points="60.5 128.4 61.6 128.4 62.2 128.9 59.9 128.9 60.5 128.4"/>
+    <polygon id="polygon191" class="st59" points="59.9 126.7 60.5 127.2 60.5 128.4 59.9 128.9 59.9 126.7"/>
+    <polygon id="polygon211" class="st48" points="66.2 124.2 64.7 125.8 64.7 129.8 66.2 131.4 70.3 131.4 71.9 129.8 71.9 125.8 70.3 124.2 66.2 124.2"/>
+    <rect id="connector1pin1" class="st4" x="66.9" y="126.4" width="2.8" height="2.8"/>
+    <rect id="connector1terminal1" class="st4" x="67.2" y="126.7" width="2.2" height="2.3"/>
+    <rect id="rect251" class="st64" x="67.1" y="126.7" width="2.3" height="2.3"/>
+    <rect id="rect271" class="st55" x="67.7" y="127.2" width="1.2" height="1.2"/>
+    <polygon id="polygon291" class="st43" points="67.1 126.7 67.7 127.2 68.8 127.2 69.4 126.7 67.1 126.7"/>
+    <polygon id="polygon311" class="st28" points="68.8 128.4 68.8 127.2 69.4 126.7 69.4 128.9 68.8 128.4"/>
+    <polygon id="polygon331" class="st38" points="67.7 128.4 68.8 128.4 69.4 128.9 67.1 128.9 67.7 128.4"/>
+    <polygon id="polygon351" class="st59" points="67.1 126.7 67.7 127.2 67.7 128.4 67.1 128.9 67.1 126.7"/>
+    <polygon id="polygon371" class="st48" points="73.4 124.2 71.9 125.8 71.9 129.8 73.4 131.4 77.5 131.4 79.1 129.8 79.1 125.8 77.5 124.2 73.4 124.2"/>
+    <rect id="connector2pin1" class="st4" x="74.1" y="126.4" width="2.8" height="2.8"/>
+    <rect id="connector2terminal1" class="st4" x="74.4" y="126.7" width="2.2" height="2.3"/>
+    <rect id="rect411" class="st64" x="74.3" y="126.7" width="2.3" height="2.3"/>
+    <rect id="rect431" class="st55" x="74.9" y="127.2" width="1.2" height="1.2"/>
+    <polygon id="polygon451" class="st43" points="74.3 126.7 74.9 127.2 76 127.2 76.6 126.7 74.3 126.7"/>
+    <polygon id="polygon471" class="st28" points="76 128.4 76 127.2 76.6 126.7 76.6 128.9 76 128.4"/>
+    <polygon id="polygon491" class="st38" points="74.9 128.4 76 128.4 76.6 128.9 74.3 128.9 74.9 128.4"/>
+    <polygon id="polygon511" class="st59" points="74.3 126.7 74.9 127.2 74.9 128.4 74.3 128.9 74.3 126.7"/>
+  </g>
+  <g id="breadboard3">
+    <polygon id="polygon54" class="st48" points="80.6 124.2 79.1 125.8 79.1 129.8 80.6 131.4 84.7 131.4 86.3 129.8 86.3 125.8 84.7 124.2 80.6 124.2"/>
+    <rect id="connector0pin2" class="st4" x="81.3" y="126.4" width="2.8" height="2.8"/>
+    <rect id="connector0terminal2" class="st4" x="81.6" y="126.7" width="2.2" height="2.3"/>
+    <rect id="rect94" class="st64" x="81.5" y="126.7" width="2.3" height="2.3"/>
+    <rect id="rect112" class="st55" x="82.1" y="127.2" width="1.2" height="1.2"/>
+    <polygon id="polygon132" class="st43" points="81.5 126.7 82.1 127.2 83.2 127.2 83.8 126.7 81.5 126.7"/>
+    <polygon id="polygon152" class="st28" points="83.2 128.4 83.2 127.2 83.8 126.7 83.8 128.9 83.2 128.4"/>
+    <polygon id="polygon172" class="st38" points="82.1 128.4 83.2 128.4 83.8 128.9 81.5 128.9 82.1 128.4"/>
+    <polygon id="polygon192" class="st59" points="81.5 126.7 82.1 127.2 82.1 128.4 81.5 128.9 81.5 126.7"/>
+    <polygon id="polygon212" class="st48" points="87.8 124.2 86.3 125.8 86.3 129.8 87.8 131.4 91.9 131.4 93.5 129.8 93.5 125.8 91.9 124.2 87.8 124.2"/>
+    <rect id="connector1pin2" class="st4" x="88.5" y="126.4" width="2.8" height="2.8"/>
+    <rect id="connector1terminal2" class="st4" x="88.8" y="126.7" width="2.2" height="2.3"/>
+    <rect id="rect252" class="st64" x="88.7" y="126.7" width="2.3" height="2.3"/>
+    <rect id="rect272" class="st55" x="89.3" y="127.2" width="1.2" height="1.2"/>
+    <polygon id="polygon292" class="st43" points="88.7 126.7 89.3 127.2 90.4 127.2 91 126.7 88.7 126.7"/>
+    <polygon id="polygon312" class="st28" points="90.4 128.4 90.4 127.2 91 126.7 91 128.9 90.4 128.4"/>
+    <polygon id="polygon332" class="st38" points="89.3 128.4 90.4 128.4 91 128.9 88.7 128.9 89.3 128.4"/>
+    <polygon id="polygon352" class="st59" points="88.7 126.7 89.3 127.2 89.3 128.4 88.7 128.9 88.7 126.7"/>
+    <polygon id="polygon372" class="st48" points="95 124.2 93.5 125.8 93.5 129.8 95 131.4 99.1 131.4 100.7 129.8 100.7 125.8 99.1 124.2 95 124.2"/>
+    <rect id="connector2pin2" class="st4" x="95.7" y="126.4" width="2.8" height="2.8"/>
+    <rect id="connector2terminal2" class="st4" x="96" y="126.7" width="2.2" height="2.3"/>
+    <rect id="rect412" class="st64" x="95.9" y="126.7" width="2.3" height="2.3"/>
+    <rect id="rect432" class="st55" x="96.5" y="127.2" width="1.2" height="1.2"/>
+    <polygon id="polygon452" class="st43" points="95.9 126.7 96.5 127.2 97.6 127.2 98.2 126.7 95.9 126.7"/>
+    <polygon id="polygon472" class="st28" points="97.6 128.4 97.6 127.2 98.2 126.7 98.2 128.9 97.6 128.4"/>
+    <polygon id="polygon492" class="st38" points="96.5 128.4 97.6 128.4 98.2 128.9 95.9 128.9 96.5 128.4"/>
+    <polygon id="polygon512" class="st59" points="95.9 126.7 96.5 127.2 96.5 128.4 95.9 128.9 95.9 126.7"/>
+  </g>
+  <rect class="st51" x="45.6" y="-.4" width="45.4" height="58.1"/>
+  <rect class="st69" x="46.5" y="13" width="43.5" height="43.5"/>
+  <line class="st1" x1="48.1" y1="11.7" x2="48.1" y2="1.3"/>
+  <line class="st1" x1="63.3" y1="1.3" x2="47.5" y2="1.3"/>
+  <line class="st1" x1="55.4" y1="11.7" x2="55.4" y2="1.3"/>
+  <line class="st1" x1="62.8" y1="7.3" x2="62.8" y2="1.3"/>
+  <line class="st1" x1="69.6" y1="7" x2="62.3" y2="7"/>
+  <line class="st1" x1="69.1" y1="7.3" x2="69.1" y2="1.3"/>
+  <line class="st1" x1="76" y1="1.3" x2="68.6" y2="1.3"/>
+  <line class="st1" x1="75.5" y1="7" x2="75.5" y2="1"/>
+  <line class="st1" x1="82.3" y1="6.6" x2="75" y2="6.6"/>
+  <line class="st1" x1="81.9" y1="7" x2="81.9" y2="1"/>
+  <line class="st1" x1="88.9" y1="1" x2="81.4" y2="1"/>
+  <line class="st1" x1="88.3" y1="11.4" x2="88.3" y2="1"/>
+</svg>

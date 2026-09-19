@@ -50,14 +50,14 @@ function FileTabTrigger({ className, file, onFileClose, ...props }: FileTabTrigg
     <TabsPrimitive.Trigger
       data-slot="file-tab-trigger"
       className={cn(
-        "relative text-[13px] justify-start px-3.5 h-full text-[var(--text-muted)] data-[state=active]:bg-[var(--surface-card)] data-[state=active]:text-[var(--text-strong)] data-[state=active]:shadow-[inset_0_2.5px_0_0_var(--brand)] hover:text-[var(--text-body)] transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap border-r-[1.5px] border-[var(--border-soft)]",
+        'relative text-[13px] justify-start px-3.5 h-full text-[var(--text-muted)] data-[state=active]:bg-[var(--surface-card)] data-[state=active]:text-[var(--text-strong)] data-[state=active]:shadow-[inset_0_2.5px_0_0_var(--brand)] hover:text-[var(--text-body)] transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap border-r-[1.5px] border-[var(--border-soft)]',
         className
       )}
       {...props}
     >
       <span>{file.name}</span>
       {file.modified && (
-        <span className="w-2 h-2 bg-signal-warning rounded-full" title="Unsaved changes" />
+        <span className="w-2 h-2 bg-[var(--status-warn)] rounded-full" title="Unsaved changes" />
       )}
       <div
         className="size-4 p-0 rounded hover:bg-muted-foreground/20 flex items-center justify-center cursor-pointer"

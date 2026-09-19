@@ -1,0 +1,32 @@
+{
+  "type": "ir-receiver-v14",
+  "label": "IR Receiver Breakout",
+  "family": "IR",
+  "description": "<p>\n\n\n\t<span style=\"font-weight: bold;\">Description:</span> This is a very small infrared receiver based on the TSOP85 receiver from Vishay. This receiver has all the filtering and 38kHz demodulation built into the unit. Simply point a IR remote at the receiver, hit a button, and you&#39;ll see a stream of 1s and 0s out of the data pin.<br />\n\n\n\t<br />\n\n\n\t<span style=\"font-weight: bold;\">Documents:</span></p>\n\n\n<ul>\n\n\n\t<li>\n\n\n\t\t<a classname=\"\" href=\"http://www.sparkfun.com/datasheets/Sensors/Infrared/tsop853.pdf\" name=\"\" target=\"_blank\">Datasheet</a></li>\n\n\n\t<li>\n\n\n\t\t<a href=\"http://www.sparkfun.com/datasheets/Sensors/Infrared/IR-Receiver-Schematic.pdf\" target=\"_blank\">Schematic</a></li>\n\n\n\t<li>\n\n\n\t\t<a href=\"http://en.wikipedia.org/wiki/Consumer_IR\" target=\"_blank\">Consumer IR Information</a></li>\n\n\n</ul>",
+  "source": {
+    "fzp": "IR_Receiver_v14.fzp",
+    "moduleId": "IR_Receiver_v14"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 52.8,
+      "height": 38.4,
+      "pins": {
+        "GND": [43.2, 28.8],
+        "OUT": [43.2, 19.2],
+        "VCC": [43.2, 9.6]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 76.8,
+      "height": 86.4,
+      "pins": {
+        "GND": [28.8, 86.4],
+        "OUT": [76.8, 38.4],
+        "VCC": [28.8, 0]
+      }
+    }
+  }
+}

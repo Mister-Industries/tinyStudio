@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue
 } from './ui/Select'
+import { STORAGE_KEYS } from '@renderer/lib/storageKeys'
 
 export function SerialMonitor(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'serial' | 'output'>('serial')
@@ -24,7 +25,7 @@ export function SerialMonitor(): React.JSX.Element {
   const { clearLogs, isCompiling, isUploading, lastCompileResult, lastUploadResult } =
     useArduinoContext()
 
-  // Auto-scroll (stick to bottom) per pane — toggled by the button in the header.
+  // Auto-scroll (stick to bottom) per pane, toggled by the button in the header.
   const [serialAuto, setSerialAuto] = useState(true)
   const [outputAuto, setOutputAuto] = useState(true)
   const auto = activeTab === 'serial' ? serialAuto : outputAuto
@@ -33,7 +34,7 @@ export function SerialMonitor(): React.JSX.Element {
 
   // Verify/Upload jump to the Output log so the build is visible. When the
   // operation finishes we snap back to the Serial Monitor ONLY if it
-  // succeeded — a failed build keeps the Output pane (and its compiler
+  // succeeded; a failed build keeps the Output pane (and its compiler
   // errors) in front instead of yanking it away after 400 ms. If the user
   // picked a tab themselves during the run, we respect that and don't
   // auto-switch at all.
@@ -46,8 +47,7 @@ export function SerialMonitor(): React.JSX.Element {
       return
     }
     if (userPinnedTab.current) return
-    const failed =
-      lastCompileResult?.success === false || lastUploadResult?.success === false
+    const failed = lastCompileResult?.success === false || lastUploadResult?.success === false
     if (failed) return // leave the errors visible
     // Short delay rides over the brief gap between the compile and upload
     // phases of an Upload so we don't flash back to Serial mid-operation.
@@ -61,13 +61,17 @@ export function SerialMonitor(): React.JSX.Element {
     setActiveTab(id)
   }
 
-  // Clear whichever pane is in front — the serial stream or the output log.
+  // Clear whichever pane is in front: the serial stream or the output log.
   const handleClear = (): void => {
     if (activeTab === 'serial') clear()
     else clearLogs()
   }
 
-  const tab = (id: 'serial' | 'output', label: string, Icon: typeof Terminal): React.JSX.Element => (
+  const tab = (
+    id: 'serial' | 'output',
+    label: string,
+    Icon: typeof Terminal
+  ): React.JSX.Element => (
     <button
       data-active={activeTab === id}
       onClick={() => selectTab(id)}
@@ -131,20 +135,33 @@ function formatTs(ts: number): string {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`
 }
 
-export function SerialMonitorTab({ autoScroll = true }: { autoScroll?: boolean }): React.JSX.Element {
+export function SerialMonitorTab({
+  autoScroll = true
+}: {
+  autoScroll?: boolean
+}): React.JSX.Element {
   const { isAgentConnected } = useArduinoContext()
   // The connection itself is owned by SerialProvider (app-level) so it persists
   // across view switches; this tab just displays it and sends lines. The live
   // connection status (COM @ baud) now lives in the bottom StatusBar.
-  const { lines, connected, lastError, port, baud, setBaud, eol, setEol, send: sendLine } =
-    useSerial()
+  const {
+    lines,
+    connected,
+    lastError,
+    port,
+    baud,
+    setBaud,
+    eol,
+    setEol,
+    send: sendLine
+  } = useSerial()
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Timestamps toggle (persisted app-wide, like autoscroll in the Arduino IDE).
   const [showTs, setShowTs] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('tinystudio.monitor.timestamps') === '1'
+      return localStorage.getItem(STORAGE_KEYS.monitorTimestamps) === '1'
     } catch {
       return false
     }
@@ -152,7 +169,7 @@ export function SerialMonitorTab({ autoScroll = true }: { autoScroll?: boolean }
   const toggleTs = (): void => {
     setShowTs((v) => {
       try {
-        localStorage.setItem('tinystudio.monitor.timestamps', v ? '0' : '1')
+        localStorage.setItem(STORAGE_KEYS.monitorTimestamps, v ? '0' : '1')
       } catch {
         /* storage unavailable */
       }
@@ -266,7 +283,7 @@ export function OutputTab({ autoScroll = true }: { autoScroll?: boolean }): Reac
         : 'text-[var(--text-body)]'
 
   // Flatten each log entry into plain terminal lines: a header line, then its
-  // raw detail lines (no cards, no padding, no emoji) — just a console.
+  // raw detail lines (no cards, no padding, no emoji): just a console.
   return (
     <div className="size-full relative bg-[var(--bg-sunken)]">
       <div
@@ -275,7 +292,7 @@ export function OutputTab({ autoScroll = true }: { autoScroll?: boolean }): Reac
       >
         {logs.length === 0 ? (
           <span className="text-[var(--text-faint)]">
-            — no output yet · Verify or Upload to compile —
+            No output yet · Verify or Upload to compile
           </span>
         ) : (
           logs.map((log) => (
@@ -299,7 +316,7 @@ interface FrequencySelectProps {
 }
 
 // Match the Arduino IDE's full baud list (plus 74880, which ESP chips use for
-// boot messages). The old 5-entry list couldn't even show ESP32 boot output.
+// boot messages).
 const BAUD_RATES = [
   '300',
   '1200',

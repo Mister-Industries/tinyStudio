@@ -1,199 +1,159 @@
 /**
- * CreateProjectDialog Component
- * Modal dialog for creating new Arduino projects with validation
+ * CreateProjectDialog: name a new project, pick where it lives, done.
+ *
+ * The project is one folder named after the sketch, with the .ino and README
+ * inside (see lib/projectLayout), so it opens as-is in the Arduino IDE too.
+ * Browsers that can't write folders get the same project kept in the browser,
+ * with the usual banner explaining how to keep it.
  */
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Zap } from 'lucide-react'
-import React, { useCallback, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { fileSystem } from '../../lib/fileSystem'
+import { openScratchProject, openFolder } from '@renderer/commands/fileCommands'
+import { notify as toast } from '@renderer/lib/notify'
+import { flattenSketchLayout, toSketchName } from '@renderer/lib/projectLayout'
+import {
+  canSaveToComputer,
+  chooseProjectTarget,
+  pickParentFolder,
+  writeProjectFolder
+} from '@renderer/lib/projectStore'
+import { FilePlus2, FolderOpen, Loader2 } from 'lucide-react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { ProjectFolderPreview } from '../ProjectFolderPreview'
 import { Button } from '../ui/Button'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from '../ui/Dialog'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/Form'
 import { Input } from '../ui/Input'
-import { CreateProjectFormData, createProjectSchema } from './schemas'
+import { createProjectSchema } from './schemas'
 import { createDefaultProjectFiles, getRandomProjectPlaceholder } from './utils'
 
-// Create project dialog props
 export interface CreateProjectDialogProps {
-  openWorkspace: (workspacePath: string) => Promise<void>
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 export function CreateProjectDialog({
-  openWorkspace
+  open,
+  onOpenChange
 }: CreateProjectDialogProps): React.JSX.Element {
-  const [isOpen, setIsOpen] = useState(false)
-  const [dialogOpenCount, setDialogOpenCount] = useState(0)
+  const [title, setTitle] = useState('')
+  const [placeholder, setPlaceholder] = useState(getRandomProjectPlaceholder)
+  const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const local = canSaveToComputer()
 
-  // Initialize form with validation
-  const form = useForm<CreateProjectFormData>({
-    resolver: zodResolver(createProjectSchema),
-    defaultValues: {
-      projectTitle: '',
-      projectLocation: ''
-    }
-  })
+  // Fresh form (and a fresh placeholder) every time the dialog opens.
+  useEffect(() => {
+    if (!open) return
+    setTitle('')
+    setError(null)
+    setPlaceholder(getRandomProjectPlaceholder())
+  }, [open])
 
-  /**
-   * Track when dialog opens to regenerate placeholder
-   */
-  const handleOpenChange = useCallback((open: boolean) => {
-    setIsOpen(open)
-    if (open) {
-      setDialogOpenCount((prev) => prev + 1)
-    }
-  }, [])
+  const parsed = createProjectSchema.safeParse({ projectTitle: title })
+  const validation = title.trim() && !parsed.success ? parsed.error.issues[0]?.message : null
+  const sketch = toSketchName(title || placeholder)
+  const previewFiles = useMemo(() => [`${sketch}.ino`, 'README.md'], [sketch])
 
-  /**
-   * Handle folder selection for project location
-   */
-  const handleSelectLocation = useCallback(async () => {
+  const create = async (): Promise<void> => {
+    if (!parsed.success || busy) return
+    setBusy(true)
+    setError(null)
     try {
-      // Use the fileSystem API to select a directory
-      const selectedPath = await fileSystem.selectFolder()
-      if (selectedPath) {
-        form.setValue('projectLocation', selectedPath)
+      const name = toSketchName(title)
+      const files = createDefaultProjectFiles(title.trim(), name)
+
+      if (!local) {
+        await openScratchProject(name, files)
+        onOpenChange(false)
+        return
       }
-    } catch (error) {
-      console.error('Failed to select directory:', error)
-    }
-  }, [form])
 
-  /**
-   * Handle form submission and project creation
-   */
-  const handleSubmit = useCallback(
-    async (data: CreateProjectFormData) => {
-      try {
-        console.log('Creating project with data:', data)
-
-        // Create the project directory path
-        const projectPath = fileSystem.joinPath(data.projectLocation, data.projectTitle)
-
-        // Check if directory already exists
-        const exists = await fileSystem.pathExists(projectPath)
-        if (exists) {
-          form.setError('projectTitle', {
-            type: 'manual',
-            message: 'A tinyStudio project with this name already exists in the selected location'
-          })
-          return
-        }
-
-        // Create the project directory
-        await fileSystem.createFolder(projectPath)
-
-        // Create basic Arduino project structure
-        const defaultFiles = createDefaultProjectFiles(data.projectTitle)
-
-        // Create default files
-        for (const file of defaultFiles) {
-          const filePath = fileSystem.joinPath(projectPath, file.path)
-          await fileSystem.createFile(filePath, file.content)
-        }
-
-        // Close the dialog and reset form
-        handleOpenChange(false)
-        form.reset()
-
-        // Automatically open the created project in the file explorer
-        await openWorkspace(projectPath)
-      } catch (error) {
-        console.error('Failed to create project:', error)
-        form.setError('root', {
-          type: 'manual',
-          message: 'Failed to create project. Please try again.'
+      const parent = await pickParentFolder()
+      if (!parent) return // picker cancelled; leave the dialog up
+      const target = await chooseProjectTarget(parent, name)
+      const layout = flattenSketchLayout(files, target.name)
+      const root = await writeProjectFolder(parent, target, layout.files)
+      await openFolder(root)
+      onOpenChange(false)
+      if (target.name !== name) {
+        toast.info(`A ${name} folder was already there`, {
+          description: `Created ${target.name} instead, so nothing was overwritten.`
         })
       }
-    },
-    [form, openWorkspace, handleOpenChange]
-  )
-
-  /**
-   * Generate random placeholder that changes when dialog opens
-   */
-  const randomPlaceholder = useMemo(() => {
-    return getRandomProjectPlaceholder()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dialogOpenCount])
+    } catch (e) {
+      // Shown inline in the dialog; the console copy keeps the stack for a bug report.
+      console.warn('Create project failed:', e)
+      setError(e instanceof Error ? e.message : 'Failed to create project. Please try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button className="w-40">
-          Create Project <Zap />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={open} onOpenChange={(o) => !busy && onOpenChange(o)}>
+      <DialogContent className="sm:max-w-[440px]">
         <DialogHeader>
-          <DialogTitle>Build Cool Shit</DialogTitle>
+          <DialogTitle>New Project</DialogTitle>
           <DialogDescription>
-            Just give this project a title and a location and we can handle the rest.
+            {local ? 'Name your project, then choose where to save it.' : 'Name your project.'}
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            {/* Project Title Field */}
-            <FormField
-              control={form.control}
-              name="projectTitle"
-              render={({ field }) => (
-                <>
-                  <FormLabel htmlFor="project-title">Project Title</FormLabel>
-                  <FormControl>
-                    <Input id="project-title" placeholder={randomPlaceholder} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </>
-              )}
-            />
-            {/* Project Location Field */}
-            <FormField
-              control={form.control}
-              name="projectLocation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel htmlFor="project-location">Project Location</FormLabel>
-                  <FormControl>
-                    <div className="flex gap-2">
-                      <Input
-                        id="project-location"
-                        placeholder="Select a location..."
-                        readOnly
-                        {...field}
-                      />
-                      <Button type="button" variant="outline" onClick={handleSelectLocation}>
-                        Browse
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Root Error Display */}
-            {form.formState.errors.root && (
-              <div className="text-destructive text-sm">{form.formState.errors.root.message}</div>
-            )}
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Creating...' : 'Create Project'}
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            void create()
+          }}
+          className="flex min-w-0 flex-col gap-3"
+        >
+          <label
+            htmlFor="project-title"
+            className="text-sm font-semibold text-[var(--text-strong)]"
+          >
+            Project name
+          </label>
+          <Input
+            id="project-title"
+            autoFocus
+            placeholder={placeholder}
+            value={title}
+            disabled={busy}
+            aria-invalid={!!validation}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          {validation ? (
+            <p className="text-xs text-[var(--red-on)]">{validation}</p>
+          ) : (
+            <ProjectFolderPreview name={sketch} files={previewFiles} />
+          )}
+          {error && <p className="text-xs text-[var(--red-on)]">{error}</p>}
+          {!local && (
+            <p className="text-[11px] leading-snug text-[var(--text-muted)]">
+              This browser can&apos;t write folders on your computer, so the project stays in the
+              browser for now. Open tinyStudio in Chrome or Edge, or use the desktop app, to save it
+              as a folder.
+            </p>
+          )}
+          <DialogFooter className="pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={busy}
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={busy || !parsed.success}>
+              {busy ? <Loader2 className="animate-spin" /> : local ? <FolderOpen /> : <FilePlus2 />}
+              {local ? 'Choose location & create' : 'Create project'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )

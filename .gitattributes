@@ -1,0 +1,21 @@
+# Text files use LF everywhere; Windows checkouts included.
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.icns binary
+*.cur binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.mp3 binary
+*.ogg binary
+*.wav binary
+*.wasm binary
+*.exe binary
+*.zip binary
+*.fzpz binary

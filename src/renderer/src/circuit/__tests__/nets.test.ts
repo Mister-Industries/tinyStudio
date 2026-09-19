@@ -1,5 +1,5 @@
 /**
- * circuit/core/nets tests — DSU nets across views, buses, junction identity
+ * circuit/core/nets tests: DSU nets across views, buses, junction identity
  * (B9), net labels, dangling detection.
  */
 import { strict as assert } from 'node:assert'

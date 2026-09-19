@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 136.8 136.8">
+  <!-- Generator: Adobe Illustrator 29.3.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 151)  -->
+  <defs>
+    <style>
+      .st0 {
+        font-size: 2.8px;
+        letter-spacing: .2em;
+      }
+
+      .st0, .st1, .st2, .st3, .st4 {
+        isolation: isolate;
+      }
+
+      .st0, .st2, .st3, .st4 {
+        fill: #f4f6f8;
+        font-family: CourierNewPS-BoldMT, 'Courier New';
+        font-weight: 700;
+      }
+
+      .st5 {
+        fill: #c9ced4;
+        stroke-width: .2px;
+      }
+
+      .st5, .st6 {
+        stroke: #8d939b;
+      }
+
+      .st7 {
+        stroke-linecap: round;
+        stroke-width: 1.3px;
+      }
+
+      .st7, .st1, .st8 {
+        fill: none;
+      }
+
+      .st7, .st8 {
+        stroke: #f4f6f8;
+      }
+
+      .st9 {
+        fill: #141414;
+      }
+
+      .st10 {
+        fill: #fff;
+      }
+
+      .st1 {
+        opacity: .3;
+        stroke: #03361c;
+        stroke-width: 1.1px;
+      }
+
+      .st2 {
+        font-size: 2.6px;
+      }
+
+      .st3 {
+        font-size: 3px;
+      }
+
+      .st6 {
+        fill: #cbd0d6;
+        stroke-width: .3px;
+      }
+
+      .st4 {
+        font-size: 8.6px;
+        letter-spacing: 0em;
+      }
+
+      .st11 {
+        fill: #0a4a26;
+      }
+
+      .st8 {
+        stroke-width: .6px;
+      }
+
+      .st12 {
+        fill: url(#linear-gradient);
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="-74.3" y1="347.5" x2="-73.6" y2="346.5" gradientTransform="translate(10185 47532.2) scale(136.8 -136.8)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0a9950"/>
+      <stop offset="1" stop-color="#046f39"/>
+    </linearGradient>
+  </defs>
+  <g id="breadboard">
+    <polygon class="st12" points="40.1 0 96.7 0 136.8 40.1 136.8 96.7 96.7 136.8 40.1 136.8 0 96.7 0 40.1 40.1 0"/>
+    <polygon class="st1" points="40.3 .6 96.5 .6 136.2 40.3 136.2 96.5 96.5 136.2 40.3 136.2 .6 96.5 .6 40.3 40.3 .6"/>
+    <circle id="pin-A.5" class="st5" cx="18" cy="43.2" r="2.5"/>
+    <circle class="st11" cx="18" cy="43.2" r="1.3"/>
+    <circle id="pin-A.6" class="st5" cx="18" cy="50.4" r="2.5"/>
+    <circle class="st11" cx="18" cy="50.4" r="1.3"/>
+    <circle id="pin-A.7" class="st5" cx="18" cy="57.6" r="2.5"/>
+    <circle class="st11" cx="18" cy="57.6" r="1.3"/>
+    <circle id="pin-A.8" class="st5" cx="18" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="18" cy="64.8" r="1.3"/>
+    <circle id="pin-A.9" class="st5" cx="18" cy="72" r="2.6"/>
+    <circle class="st11" cx="18" cy="72" r="1.3"/>
+    <circle id="pin-A.10" class="st5" cx="18" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="18" cy="79.2" r="1.3"/>
+    <circle id="pin-A.11" class="st5" cx="18" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="18" cy="86.4" r="1.3"/>
+    <circle id="pin-A.12" class="st5" cx="18" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="18" cy="93.6" r="1.3"/>
+    <circle id="pin-B.5" class="st5" cx="25.2" cy="43.2" r="2.5"/>
+    <circle class="st11" cx="25.2" cy="43.2" r="1.3"/>
+    <circle id="pin-B.6" class="st5" cx="25.2" cy="50.4" r="2.5"/>
+    <circle class="st11" cx="25.2" cy="50.4" r="1.3"/>
+    <circle id="pin-B.7" class="st5" cx="25.2" cy="57.6" r="2.5"/>
+    <circle class="st11" cx="25.2" cy="57.6" r="1.3"/>
+    <circle id="pin-B.8" class="st5" cx="25.2" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="25.2" cy="64.8" r="1.3"/>
+    <circle id="pin-B.9" class="st5" cx="25.2" cy="72" r="2.6"/>
+    <circle class="st11" cx="25.2" cy="72" r="1.3"/>
+    <circle id="pin-B.10" class="st5" cx="25.2" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="25.2" cy="79.2" r="1.3"/>
+    <circle id="pin-B.11" class="st5" cx="25.2" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="25.2" cy="86.4" r="1.3"/>
+    <circle id="pin-B.12" class="st5" cx="25.2" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="25.2" cy="93.6" r="1.3"/>
+    <circle id="pin-C.5" class="st5" cx="32.4" cy="43.2" r="2.5"/>
+    <circle class="st11" cx="32.4" cy="43.2" r="1.3"/>
+    <circle id="pin-C.6" class="st5" cx="32.4" cy="50.4" r="2.5"/>
+    <circle class="st11" cx="32.4" cy="50.4" r="1.3"/>
+    <circle id="pin-C.7" class="st5" cx="32.4" cy="57.6" r="2.5"/>
+    <circle class="st11" cx="32.4" cy="57.6" r="1.3"/>
+    <circle id="pin-C.8" class="st5" cx="32.4" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="32.4" cy="64.8" r="1.3"/>
+    <circle id="pin-C.9" class="st5" cx="32.4" cy="72" r="2.6"/>
+    <circle class="st11" cx="32.4" cy="72" r="1.3"/>
+    <circle id="pin-C.10" class="st5" cx="32.4" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="32.4" cy="79.2" r="1.3"/>
+    <circle id="pin-C.11" class="st5" cx="32.4" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="32.4" cy="86.4" r="1.3"/>
+    <circle id="pin-C.12" class="st5" cx="32.4" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="32.4" cy="93.6" r="1.3"/>
+    <circle id="pin-D.1" class="st5" cx="39.6" cy="14.4" r="2.5"/>
+    <circle class="st11" cx="39.6" cy="14.4" r="1.3"/>
+    <circle id="pin-D.2" class="st5" cx="39.6" cy="21.6" r="2.5"/>
+    <circle class="st11" cx="39.6" cy="21.6" r="1.3"/>
+    <circle id="pin-D.3" class="st5" cx="39.6" cy="28.8" r="2.5"/>
+    <circle class="st11" cx="39.6" cy="28.8" r="1.3"/>
+    <circle id="pin-D.4" class="st5" cx="39.6" cy="36" r="2.5"/>
+    <circle class="st11" cx="39.6" cy="36" r="1.3"/>
+    <circle id="pin-D.5" class="st5" cx="39.6" cy="43.2" r="2.5"/>
+    <circle class="st11" cx="39.6" cy="43.2" r="1.3"/>
+    <circle id="pin-D.6" class="st5" cx="39.6" cy="50.4" r="2.5"/>
+    <circle class="st11" cx="39.6" cy="50.4" r="1.3"/>
+    <circle id="pin-D.7" class="st5" cx="39.6" cy="57.6" r="2.5"/>
+    <circle class="st11" cx="39.6" cy="57.6" r="1.3"/>
+    <circle id="pin-D.8" class="st5" cx="39.6" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="39.6" cy="64.8" r="1.3"/>
+    <circle id="pin-D.9" class="st5" cx="39.6" cy="72" r="2.6"/>
+    <circle class="st11" cx="39.6" cy="72" r="1.3"/>
+    <circle id="pin-D.10" class="st5" cx="39.6" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="39.6" cy="79.2" r="1.3"/>
+    <circle id="pin-D.11" class="st5" cx="39.6" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="39.6" cy="86.4" r="1.3"/>
+    <circle id="pin-D.12" class="st5" cx="39.6" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="39.6" cy="93.6" r="1.3"/>
+    <circle id="pin-D.13" class="st5" cx="39.6" cy="100.8" r="2.6"/>
+    <circle class="st11" cx="39.6" cy="100.8" r="1.3"/>
+    <circle id="pin-D.14" class="st5" cx="39.6" cy="108" r="2.6"/>
+    <circle class="st11" cx="39.6" cy="108" r="1.3"/>
+    <circle id="pin-D.15" class="st5" cx="39.6" cy="115.2" r="2.6"/>
+    <circle class="st11" cx="39.6" cy="115.2" r="1.3"/>
+    <circle id="pin-E.1" class="st5" cx="46.8" cy="14.4" r="2.5"/>
+    <circle class="st11" cx="46.8" cy="14.4" r="1.3"/>
+    <circle id="pin-E.2" class="st5" cx="46.8" cy="21.6" r="2.5"/>
+    <circle class="st11" cx="46.8" cy="21.6" r="1.3"/>
+    <circle id="pin-E.3" class="st5" cx="46.8" cy="28.8" r="2.5"/>
+    <circle class="st11" cx="46.8" cy="28.8" r="1.3"/>
+    <circle id="pin-E.4" class="st5" cx="46.8" cy="36" r="2.5"/>
+    <circle class="st11" cx="46.8" cy="36" r="1.3"/>
+    <circle id="pin-E.5" class="st5" cx="46.8" cy="43.2" r="2.5"/>
+    <circle class="st11" cx="46.8" cy="43.2" r="1.3"/>
+    <circle id="pin-E.6" class="st5" cx="46.8" cy="50.4" r="2.5"/>
+    <circle class="st11" cx="46.8" cy="50.4" r="1.3"/>
+    <circle id="pin-E.7" class="st5" cx="46.8" cy="57.6" r="2.5"/>
+    <circle class="st11" cx="46.8" cy="57.6" r="1.3"/>
+    <circle id="pin-E.8" class="st5" cx="46.8" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="46.8" cy="64.8" r="1.3"/>
+    <circle id="pin-E.9" class="st5" cx="46.8" cy="72" r="2.6"/>
+    <circle class="st11" cx="46.8" cy="72" r="1.3"/>
+    <circle id="pin-E.10" class="st5" cx="46.8" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="46.8" cy="79.2" r="1.3"/>
+    <circle id="pin-E.11" class="st5" cx="46.8" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="46.8" cy="86.4" r="1.3"/>
+    <circle id="pin-E.12" class="st5" cx="46.8" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="46.8" cy="93.6" r="1.3"/>
+    <circle id="pin-E.13" class="st5" cx="46.8" cy="100.8" r="2.6"/>
+    <circle class="st11" cx="46.8" cy="100.8" r="1.3"/>
+    <circle id="pin-E.14" class="st5" cx="46.8" cy="108" r="2.6"/>
+    <circle class="st11" cx="46.8" cy="108" r="1.3"/>
+    <circle id="pin-E.15" class="st5" cx="46.8" cy="115.2" r="2.6"/>
+    <circle class="st11" cx="46.8" cy="115.2" r="1.3"/>
+    <circle id="pin-F.1" class="st5" cx="54" cy="14.4" r="2.5"/>
+    <circle class="st11" cx="54" cy="14.4" r="1.3"/>
+    <circle id="pin-F.2" class="st5" cx="54" cy="21.6" r="2.5"/>
+    <circle class="st11" cx="54" cy="21.6" r="1.3"/>
+    <circle id="pin-F.3" class="st5" cx="54" cy="28.8" r="2.5"/>
+    <circle class="st11" cx="54" cy="28.8" r="1.3"/>
+    <circle id="pin-F.4" class="st5" cx="54" cy="36" r="2.5"/>
+    <circle class="st11" cx="54" cy="36" r="1.3"/>
+    <circle id="pin-F.5" class="st5" cx="54" cy="43.2" r="2.5"/>
+    <circle class="st11" cx="54" cy="43.2" r="1.3"/>
+    <circle id="pin-F.6" class="st5" cx="54" cy="50.4" r="2.5"/>
+    <circle class="st11" cx="54" cy="50.4" r="1.3"/>
+    <circle id="pin-F.7" class="st5" cx="54" cy="57.6" r="2.5"/>
+    <circle class="st11" cx="54" cy="57.6" r="1.3"/>
+    <circle id="pin-F.8" class="st5" cx="54" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="54" cy="64.8" r="1.3"/>
+    <circle id="pin-F.9" class="st5" cx="54" cy="72" r="2.6"/>
+    <circle class="st11" cx="54" cy="72" r="1.3"/>
+    <circle id="pin-F.10" class="st5" cx="54" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="54" cy="79.2" r="1.3"/>
+    <circle id="pin-F.11" class="st5" cx="54" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="54" cy="86.4" r="1.3"/>
+    <circle id="pin-F.12" class="st5" cx="54" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="54" cy="93.6" r="1.3"/>
+    <circle id="pin-F.13" class="st5" cx="54" cy="100.8" r="2.6"/>
+    <circle class="st11" cx="54" cy="100.8" r="1.3"/>
+    <circle id="pin-F.14" class="st5" cx="54" cy="108" r="2.6"/>
+    <circle class="st11" cx="54" cy="108" r="1.3"/>
+    <circle id="pin-F.15" class="st5" cx="54" cy="115.2" r="2.6"/>
+    <circle class="st11" cx="54" cy="115.2" r="1.3"/>
+    <circle id="pin-G.1" class="st5" cx="61.2" cy="14.4" r="2.5"/>
+    <circle class="st11" cx="61.2" cy="14.4" r="1.3"/>
+    <circle id="pin-G.2" class="st5" cx="61.2" cy="21.6" r="2.5"/>
+    <circle class="st11" cx="61.2" cy="21.6" r="1.3"/>
+    <circle id="pin-G.3" class="st5" cx="61.2" cy="28.8" r="2.5"/>
+    <circle class="st11" cx="61.2" cy="28.8" r="1.3"/>
+    <circle id="pin-G.4" class="st5" cx="61.2" cy="36" r="2.5"/>
+    <circle class="st11" cx="61.2" cy="36" r="1.3"/>
+    <circle id="pin-G.5" class="st5" cx="61.2" cy="43.2" r="2.5"/>
+    <circle class="st11" cx="61.2" cy="43.2" r="1.3"/>
+    <circle id="pin-G.6" class="st5" cx="61.2" cy="50.4" r="2.5"/>
+    <circle class="st11" cx="61.2" cy="50.4" r="1.3"/>
+    <circle id="pin-G.7" class="st5" cx="61.2" cy="57.6" r="2.5"/>
+    <circle class="st11" cx="61.2" cy="57.6" r="1.3"/>
+    <circle id="pin-G.8" class="st5" cx="61.2" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="61.2" cy="64.8" r="1.3"/>
+    <circle id="pin-G.9" class="st5" cx="61.2" cy="72" r="2.6"/>
+    <circle class="st11" cx="61.2" cy="72" r="1.3"/>
+    <circle id="pin-G.10" class="st5" cx="61.2" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="61.2" cy="79.2" r="1.3"/>
+    <circle id="pin-G.11" class="st5" cx="61.2" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="61.2" cy="86.4" r="1.3"/>
+    <circle id="pin-G.12" class="st5" cx="61.2" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="61.2" cy="93.6" r="1.3"/>
+    <circle id="pin-G.13" class="st5" cx="61.2" cy="100.8" r="2.6"/>
+    <circle class="st11" cx="61.2" cy="100.8" r="1.3"/>
+    <circle id="pin-G.14" class="st5" cx="61.2" cy="108" r="2.6"/>
+    <circle class="st11" cx="61.2" cy="108" r="1.3"/>
+    <circle id="pin-G.15" class="st5" cx="61.2" cy="115.2" r="2.6"/>
+    <circle class="st11" cx="61.2" cy="115.2" r="1.3"/>
+    <circle id="pin-H.1" class="st5" cx="68.4" cy="14.4" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="14.4" r="1.3"/>
+    <circle id="pin-H.2" class="st5" cx="68.4" cy="21.6" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="21.6" r="1.3"/>
+    <circle id="pin-H.3" class="st5" cx="68.4" cy="28.8" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="28.8" r="1.3"/>
+    <circle id="pin-H.4" class="st5" cx="68.4" cy="36" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="36" r="1.3"/>
+    <circle id="pin-H.5" class="st5" cx="68.4" cy="43.2" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="43.2" r="1.3"/>
+    <circle id="pin-H.6" class="st5" cx="68.4" cy="50.4" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="50.4" r="1.3"/>
+    <circle id="pin-H.7" class="st5" cx="68.4" cy="57.6" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="57.6" r="1.3"/>
+    <circle id="pin-H.8" class="st5" cx="68.4" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="64.8" r="1.3"/>
+    <circle id="pin-H.9" class="st5" cx="68.4" cy="72" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="72" r="1.3"/>
+    <circle id="pin-H.10" class="st5" cx="68.4" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="79.2" r="1.3"/>
+    <circle id="pin-H.11" class="st5" cx="68.4" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="86.4" r="1.3"/>
+    <circle id="pin-H.12" class="st5" cx="68.4" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="93.6" r="1.3"/>
+    <circle id="pin-H.13" class="st5" cx="68.4" cy="100.8" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="100.8" r="1.3"/>
+    <circle id="pin-H.14" class="st5" cx="68.4" cy="108" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="108" r="1.3"/>
+    <circle id="pin-H.15" class="st5" cx="68.4" cy="115.2" r="2.6"/>
+    <circle class="st11" cx="68.4" cy="115.2" r="1.3"/>
+    <circle id="pin-I.1" class="st5" cx="75.6" cy="14.4" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="14.4" r="1.3"/>
+    <circle id="pin-I.2" class="st5" cx="75.6" cy="21.6" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="21.6" r="1.3"/>
+    <circle id="pin-I.3" class="st5" cx="75.6" cy="28.8" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="28.8" r="1.3"/>
+    <circle id="pin-I.4" class="st5" cx="75.6" cy="36" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="36" r="1.3"/>
+    <circle id="pin-I.5" class="st5" cx="75.6" cy="43.2" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="43.2" r="1.3"/>
+    <circle id="pin-I.6" class="st5" cx="75.6" cy="50.4" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="50.4" r="1.3"/>
+    <circle id="pin-I.7" class="st5" cx="75.6" cy="57.6" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="57.6" r="1.3"/>
+    <circle id="pin-I.8" class="st5" cx="75.6" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="64.8" r="1.3"/>
+    <circle id="pin-I.9" class="st5" cx="75.6" cy="72" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="72" r="1.3"/>
+    <circle id="pin-I.10" class="st5" cx="75.6" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="79.2" r="1.3"/>
+    <circle id="pin-I.11" class="st5" cx="75.6" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="86.4" r="1.3"/>
+    <circle id="pin-I.12" class="st5" cx="75.6" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="93.6" r="1.3"/>
+    <circle id="pin-I.13" class="st5" cx="75.6" cy="100.8" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="100.8" r="1.3"/>
+    <circle id="pin-I.14" class="st5" cx="75.6" cy="108" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="108" r="1.3"/>
+    <circle id="pin-I.15" class="st5" cx="75.6" cy="115.2" r="2.6"/>
+    <circle class="st11" cx="75.6" cy="115.2" r="1.3"/>
+    <circle id="pin-J.1" class="st5" cx="82.8" cy="14.4" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="14.4" r="1.3"/>
+    <circle id="pin-J.2" class="st5" cx="82.8" cy="21.6" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="21.6" r="1.3"/>
+    <circle id="pin-J.3" class="st5" cx="82.8" cy="28.8" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="28.8" r="1.3"/>
+    <circle id="pin-J.4" class="st5" cx="82.8" cy="36" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="36" r="1.3"/>
+    <circle id="pin-J.5" class="st5" cx="82.8" cy="43.2" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="43.2" r="1.3"/>
+    <circle id="pin-J.6" class="st5" cx="82.8" cy="50.4" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="50.4" r="1.3"/>
+    <circle id="pin-J.7" class="st5" cx="82.8" cy="57.6" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="57.6" r="1.3"/>
+    <circle id="pin-J.8" class="st5" cx="82.8" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="64.8" r="1.3"/>
+    <circle id="pin-J.9" class="st5" cx="82.8" cy="72" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="72" r="1.3"/>
+    <circle id="pin-J.10" class="st5" cx="82.8" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="79.2" r="1.3"/>
+    <circle id="pin-J.11" class="st5" cx="82.8" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="86.4" r="1.3"/>
+    <circle id="pin-J.12" class="st5" cx="82.8" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="93.6" r="1.3"/>
+    <circle id="pin-J.13" class="st5" cx="82.8" cy="100.8" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="100.8" r="1.3"/>
+    <circle id="pin-J.14" class="st5" cx="82.8" cy="108" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="108" r="1.3"/>
+    <circle id="pin-J.15" class="st5" cx="82.8" cy="115.2" r="2.6"/>
+    <circle class="st11" cx="82.8" cy="115.2" r="1.3"/>
+    <circle id="pin-K.1" class="st5" cx="90" cy="14.4" r="2.6"/>
+    <circle class="st11" cx="90" cy="14.4" r="1.3"/>
+    <circle id="pin-K.2" class="st5" cx="90" cy="21.6" r="2.6"/>
+    <circle class="st11" cx="90" cy="21.6" r="1.3"/>
+    <circle id="pin-K.3" class="st5" cx="90" cy="28.8" r="2.6"/>
+    <circle class="st11" cx="90" cy="28.8" r="1.3"/>
+    <circle id="pin-K.4" class="st5" cx="90" cy="36" r="2.6"/>
+    <circle class="st11" cx="90" cy="36" r="1.3"/>
+    <circle id="pin-K.5" class="st5" cx="90" cy="43.2" r="2.6"/>
+    <circle class="st11" cx="90" cy="43.2" r="1.3"/>
+    <circle id="pin-K.6" class="st5" cx="90" cy="50.4" r="2.6"/>
+    <circle class="st11" cx="90" cy="50.4" r="1.3"/>
+    <circle id="pin-K.7" class="st5" cx="90" cy="57.6" r="2.6"/>
+    <circle class="st11" cx="90" cy="57.6" r="1.3"/>
+    <circle id="pin-K.8" class="st5" cx="90" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="90" cy="64.8" r="1.3"/>
+    <circle id="pin-K.9" class="st5" cx="90" cy="72" r="2.6"/>
+    <circle class="st11" cx="90" cy="72" r="1.3"/>
+    <circle id="pin-K.10" class="st5" cx="90" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="90" cy="79.2" r="1.3"/>
+    <circle id="pin-K.11" class="st5" cx="90" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="90" cy="86.4" r="1.3"/>
+    <circle id="pin-K.12" class="st5" cx="90" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="90" cy="93.6" r="1.3"/>
+    <circle id="pin-K.13" class="st5" cx="90" cy="100.8" r="2.6"/>
+    <circle class="st11" cx="90" cy="100.8" r="1.3"/>
+    <circle id="pin-K.14" class="st5" cx="90" cy="108" r="2.6"/>
+    <circle class="st11" cx="90" cy="108" r="1.3"/>
+    <circle id="pin-K.15" class="st5" cx="90" cy="115.2" r="2.6"/>
+    <circle class="st11" cx="90" cy="115.2" r="1.3"/>
+    <circle id="pin-L.1" class="st5" cx="97.2" cy="14.4" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="14.4" r="1.3"/>
+    <circle id="pin-L.2" class="st5" cx="97.2" cy="21.6" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="21.6" r="1.3"/>
+    <circle id="pin-L.3" class="st5" cx="97.2" cy="28.8" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="28.8" r="1.3"/>
+    <circle id="pin-L.4" class="st5" cx="97.2" cy="36" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="36" r="1.3"/>
+    <circle id="pin-L.5" class="st5" cx="97.2" cy="43.2" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="43.2" r="1.3"/>
+    <circle id="pin-L.6" class="st5" cx="97.2" cy="50.4" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="50.4" r="1.3"/>
+    <circle id="pin-L.7" class="st5" cx="97.2" cy="57.6" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="57.6" r="1.3"/>
+    <circle id="pin-L.8" class="st5" cx="97.2" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="64.8" r="1.3"/>
+    <circle id="pin-L.9" class="st5" cx="97.2" cy="72" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="72" r="1.3"/>
+    <circle id="pin-L.10" class="st5" cx="97.2" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="79.2" r="1.3"/>
+    <circle id="pin-L.11" class="st5" cx="97.2" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="86.4" r="1.3"/>
+    <circle id="pin-L.12" class="st5" cx="97.2" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="93.6" r="1.3"/>
+    <circle id="pin-L.13" class="st5" cx="97.2" cy="100.8" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="100.8" r="1.3"/>
+    <circle id="pin-L.14" class="st5" cx="97.2" cy="108" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="108" r="1.3"/>
+    <circle id="pin-L.15" class="st5" cx="97.2" cy="115.2" r="2.6"/>
+    <circle class="st11" cx="97.2" cy="115.2" r="1.3"/>
+    <circle id="pin-M.5" class="st5" cx="104.4" cy="43.2" r="2.6"/>
+    <circle class="st11" cx="104.4" cy="43.2" r="1.3"/>
+    <circle id="pin-M.6" class="st5" cx="104.4" cy="50.4" r="2.6"/>
+    <circle class="st11" cx="104.4" cy="50.4" r="1.3"/>
+    <circle id="pin-M.7" class="st5" cx="104.4" cy="57.6" r="2.6"/>
+    <circle class="st11" cx="104.4" cy="57.6" r="1.3"/>
+    <circle id="pin-M.8" class="st5" cx="104.4" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="104.4" cy="64.8" r="1.3"/>
+    <circle id="pin-M.9" class="st5" cx="104.4" cy="72" r="2.6"/>
+    <circle class="st11" cx="104.4" cy="72" r="1.3"/>
+    <circle id="pin-M.10" class="st5" cx="104.4" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="104.4" cy="79.2" r="1.3"/>
+    <circle id="pin-M.11" class="st5" cx="104.4" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="104.4" cy="86.4" r="1.3"/>
+    <circle id="pin-M.12" class="st5" cx="104.4" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="104.4" cy="93.6" r="1.3"/>
+    <circle id="pin-N.5" class="st5" cx="111.6" cy="43.2" r="2.6"/>
+    <circle class="st11" cx="111.6" cy="43.2" r="1.3"/>
+    <circle id="pin-N.6" class="st5" cx="111.6" cy="50.4" r="2.6"/>
+    <circle class="st11" cx="111.6" cy="50.4" r="1.3"/>
+    <circle id="pin-N.7" class="st5" cx="111.6" cy="57.6" r="2.6"/>
+    <circle class="st11" cx="111.6" cy="57.6" r="1.3"/>
+    <circle id="pin-N.8" class="st5" cx="111.6" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="111.6" cy="64.8" r="1.3"/>
+    <circle id="pin-N.9" class="st5" cx="111.6" cy="72" r="2.6"/>
+    <circle class="st11" cx="111.6" cy="72" r="1.3"/>
+    <circle id="pin-N.10" class="st5" cx="111.6" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="111.6" cy="79.2" r="1.3"/>
+    <circle id="pin-N.11" class="st5" cx="111.6" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="111.6" cy="86.4" r="1.3"/>
+    <circle id="pin-N.12" class="st5" cx="111.6" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="111.6" cy="93.6" r="1.3"/>
+    <circle id="pin-O.5" class="st5" cx="118.8" cy="43.2" r="2.6"/>
+    <circle class="st11" cx="118.8" cy="43.2" r="1.3"/>
+    <circle id="pin-O.6" class="st5" cx="118.8" cy="50.4" r="2.6"/>
+    <circle class="st11" cx="118.8" cy="50.4" r="1.3"/>
+    <circle id="pin-O.7" class="st5" cx="118.8" cy="57.6" r="2.6"/>
+    <circle class="st11" cx="118.8" cy="57.6" r="1.3"/>
+    <circle id="pin-O.8" class="st5" cx="118.8" cy="64.8" r="2.6"/>
+    <circle class="st11" cx="118.8" cy="64.8" r="1.3"/>
+    <circle id="pin-O.9" class="st5" cx="118.8" cy="72" r="2.6"/>
+    <circle class="st11" cx="118.8" cy="72" r="1.3"/>
+    <circle id="pin-O.10" class="st5" cx="118.8" cy="79.2" r="2.6"/>
+    <circle class="st11" cx="118.8" cy="79.2" r="1.3"/>
+    <circle id="pin-O.11" class="st5" cx="118.8" cy="86.4" r="2.6"/>
+    <circle class="st11" cx="118.8" cy="86.4" r="1.3"/>
+    <circle id="pin-O.12" class="st5" cx="118.8" cy="93.6" r="2.6"/>
+    <circle class="st11" cx="118.8" cy="93.6" r="1.3"/>
+    <rect class="st8" x="14.4" y="39.6" width="21.6" height="7.2" rx="3.6" ry="3.6"/>
+    <rect class="st8" x="36" y="18" width="7.2" height="21.6" rx="3.6" ry="3.6"/>
+    <line class="st8" x1="34.8" y1="40.8" x2="37" y2="38.5"/>
+    <rect class="st8" x="14.4" y="46.8" width="21.6" height="7.2" rx="3.6" ry="3.6"/>
+    <path class="st8" d="M104.4,82.8h14.4c2,0,3.6,1.6,3.6,3.6h0c0,2-1.6,3.6-3.6,3.6h-14.4c-2,0-3.6-1.6-3.6-3.6h0c0-2,1.6-3.6,3.6-3.6Z"/>
+    <path class="st8" d="M104.4,90h14.4c2,0,3.6,1.6,3.6,3.6h0c0,2-1.6,3.6-3.6,3.6h-14.4c-2,0-3.6-1.6-3.6-3.6h0c0-2,1.6-3.6,3.6-3.6Z"/>
+    <path class="st8" d="M97.2,97.2h0c2,0,3.6,1.6,3.6,3.6v14.4c0,2-1.6,3.6-3.6,3.6h0c-2,0-3.6-1.6-3.6-3.6v-14.4c0-2,1.6-3.6,3.6-3.6Z"/>
+    <line class="st8" x1="101.7" y1="95.9" x2="99.6" y2="98.1"/>
+    <path class="st8" d="M90,97.2h0c2,0,3.6,1.6,3.6,3.6v14.4c0,2-1.6,3.6-3.6,3.6h0c-2,0-3.6-1.6-3.6-3.6v-14.4c0-2,1.6-3.6,3.6-3.6Z"/>
+    <line class="st8" x1="11.8" y1="43.2" x2="14.4" y2="43.2"/>
+    <circle class="st8" cx="118.8" cy="43.2" r="3.6"/>
+    <line class="st8" x1="124.6" y1="43.2" x2="122.4" y2="43.2"/>
+    <line class="st8" x1="11.8" y1="50.4" x2="14.4" y2="50.4"/>
+    <circle class="st8" cx="118.8" cy="50.4" r="3.6"/>
+    <line class="st8" x1="124.6" y1="50.4" x2="122.4" y2="50.4"/>
+    <circle class="st8" cx="18" cy="57.6" r="3.6"/>
+    <line class="st8" x1="11.8" y1="57.6" x2="14.4" y2="57.6"/>
+    <circle class="st8" cx="118.8" cy="57.6" r="3.6"/>
+    <line class="st8" x1="124.6" y1="57.6" x2="122.4" y2="57.6"/>
+    <circle class="st8" cx="18" cy="64.8" r="3.6"/>
+    <line class="st8" x1="11.8" y1="64.8" x2="14.4" y2="64.8"/>
+    <circle class="st8" cx="118.8" cy="64.8" r="3.6"/>
+    <line class="st8" x1="124.6" y1="64.8" x2="122.4" y2="64.8"/>
+    <circle class="st8" cx="18" cy="72" r="3.6"/>
+    <line class="st8" x1="11.8" y1="72" x2="14.4" y2="72"/>
+    <circle class="st8" cx="118.8" cy="72" r="3.6"/>
+    <line class="st8" x1="124.6" y1="72" x2="122.4" y2="72"/>
+    <circle class="st8" cx="18" cy="79.2" r="3.6"/>
+    <line class="st8" x1="11.8" y1="79.2" x2="14.4" y2="79.2"/>
+    <circle class="st8" cx="118.8" cy="79.2" r="3.6"/>
+    <line class="st8" x1="124.6" y1="79.2" x2="122.4" y2="79.2"/>
+    <circle class="st8" cx="18" cy="86.4" r="3.6"/>
+    <line class="st8" x1="11.8" y1="86.4" x2="14.4" y2="86.4"/>
+    <line class="st8" x1="124.6" y1="86.4" x2="122.4" y2="86.4"/>
+    <circle class="st8" cx="18" cy="93.6" r="3.6"/>
+    <line class="st8" x1="11.8" y1="93.6" x2="14.4" y2="93.6"/>
+    <line class="st8" x1="124.6" y1="93.6" x2="122.4" y2="93.6"/>
+    <circle class="st8" cx="39.6" cy="115.2" r="3.6"/>
+    <line class="st8" x1="39.6" y1="121.4" x2="39.6" y2="118.8"/>
+    <circle class="st8" cx="46.8" cy="115.2" r="3.6"/>
+    <line class="st8" x1="46.8" y1="121.4" x2="46.8" y2="118.8"/>
+    <circle class="st8" cx="54" cy="115.2" r="3.6"/>
+    <line class="st8" x1="54" y1="121.4" x2="54" y2="118.8"/>
+    <circle class="st8" cx="61.2" cy="115.2" r="3.6"/>
+    <line class="st8" x1="61.2" y1="121.4" x2="61.2" y2="118.8"/>
+    <circle class="st8" cx="68.4" cy="115.2" r="3.6"/>
+    <line class="st8" x1="68.4" y1="121.4" x2="68.4" y2="118.8"/>
+    <circle class="st8" cx="75.6" cy="115.2" r="3.6"/>
+    <line class="st8" x1="75.6" y1="121.4" x2="75.6" y2="118.8"/>
+    <circle class="st8" cx="82.8" cy="115.2" r="3.6"/>
+    <line class="st8" x1="82.8" y1="121.4" x2="82.8" y2="118.8"/>
+    <line class="st8" x1="90" y1="121.4" x2="90" y2="118.8"/>
+    <line class="st8" x1="97.2" y1="121.4" x2="97.2" y2="118.8"/>
+    <rect class="st8" x="1.7" y="39.6" width="7.4" height="57.7" rx=".9" ry=".9"/>
+    <rect class="st8" x="127.7" y="39.5" width="7.4" height="57.7" rx=".9" ry=".9"/>
+    <rect class="st8" x="35.9" y="124.1" width="64.9" height="7.4" rx=".9" ry=".9"/>
+    <circle id="pin-GND" class="st6" cx="5.4" cy="43.2" r="2.6"/>
+    <circle class="st9" cx="5.4" cy="43.2" r="1.3"/>
+    <circle id="pin-3V3" class="st6" cx="5.4" cy="50.4" r="2.6"/>
+    <circle class="st9" cx="5.4" cy="50.4" r="1.3"/>
+    <circle id="pin-A5" class="st6" cx="5.4" cy="57.6" r="2.6"/>
+    <circle class="st9" cx="5.4" cy="57.6" r="1.3"/>
+    <circle id="pin-A4" class="st6" cx="5.4" cy="64.8" r="2.6"/>
+    <circle class="st9" cx="5.4" cy="64.8" r="1.3"/>
+    <circle id="pin-A3" class="st6" cx="5.4" cy="72" r="2.6"/>
+    <circle class="st9" cx="5.4" cy="72" r="1.3"/>
+    <circle id="pin-A2" class="st6" cx="5.4" cy="79.2" r="2.6"/>
+    <circle class="st9" cx="5.4" cy="79.2" r="1.3"/>
+    <circle id="pin-A1" class="st6" cx="5.4" cy="86.4" r="2.6"/>
+    <circle class="st9" cx="5.4" cy="86.4" r="1.3"/>
+    <circle id="pin-A0" class="st6" cx="5.4" cy="93.6" r="2.6"/>
+    <circle class="st9" cx="5.4" cy="93.6" r="1.3"/>
+    <circle id="pin-D8" class="st6" cx="131.4" cy="43.2" r="2.6"/>
+    <circle class="st9" cx="131.4" cy="43.2" r="1.3"/>
+    <circle id="pin-D9" class="st6" cx="131.4" cy="50.4" r="2.6"/>
+    <circle class="st9" cx="131.4" cy="50.4" r="1.3"/>
+    <circle id="pin-D10" class="st6" cx="131.4" cy="57.6" r="2.6"/>
+    <circle class="st9" cx="131.4" cy="57.6" r="1.3"/>
+    <circle id="pin-D11" class="st6" cx="131.4" cy="64.8" r="2.6"/>
+    <circle class="st9" cx="131.4" cy="64.8" r="1.3"/>
+    <circle id="pin-D12" class="st6" cx="131.4" cy="72" r="2.6"/>
+    <circle class="st9" cx="131.4" cy="72" r="1.3"/>
+    <circle id="pin-D13" class="st6" cx="131.4" cy="79.2" r="2.6"/>
+    <circle class="st9" cx="131.4" cy="79.2" r="1.3"/>
+    <circle id="pin-3V3.2" class="st6" cx="131.4" cy="86.4" r="2.6"/>
+    <circle class="st9" cx="131.4" cy="86.4" r="1.3"/>
+    <circle id="pin-GND.2" class="st6" cx="131.4" cy="93.6" r="2.6"/>
+    <circle class="st9" cx="131.4" cy="93.6" r="1.3"/>
+    <circle id="pin-SCK" class="st6" cx="39.6" cy="127.8" r="2.6"/>
+    <circle class="st9" cx="39.6" cy="127.8" r="1.3"/>
+    <circle id="pin-MO" class="st6" cx="46.8" cy="127.8" r="2.6"/>
+    <circle class="st9" cx="46.8" cy="127.8" r="1.3"/>
+    <circle id="pin-MI" class="st6" cx="54" cy="127.8" r="2.6"/>
+    <circle class="st9" cx="54" cy="127.8" r="1.3"/>
+    <circle id="pin-RX" class="st6" cx="61.2" cy="127.8" r="2.6"/>
+    <circle class="st9" cx="61.2" cy="127.8" r="1.3"/>
+    <circle id="pin-TX" class="st6" cx="68.4" cy="127.8" r="2.6"/>
+    <circle class="st9" cx="68.4" cy="127.8" r="1.3"/>
+    <circle id="pin-SDA" class="st6" cx="75.6" cy="127.8" r="2.6"/>
+    <circle class="st9" cx="75.6" cy="127.8" r="1.3"/>
+    <circle id="pin-SCL" class="st6" cx="82.8" cy="127.8" r="2.6"/>
+    <circle class="st9" cx="82.8" cy="127.8" r="1.3"/>
+    <circle id="pin-PWR" class="st6" cx="90" cy="127.8" r="2.6"/>
+    <circle class="st9" cx="90" cy="127.8" r="1.3"/>
+    <circle id="pin-GND.3" class="st6" cx="97.2" cy="127.8" r="2.6"/>
+    <circle class="st9" cx="97.2" cy="127.8" r="1.3"/>
+    <text class="st3" transform="translate(9.5 41.2) rotate(90)"><tspan x="0" y="0">GND</tspan></text>
+    <text class="st3" transform="translate(9.5 47.9) rotate(90)"><tspan x="0" y="0">3V3</tspan></text>
+    <text class="st3" transform="translate(9.5 56) rotate(90)"><tspan x="0" y="0">A5</tspan></text>
+    <text class="st3" transform="translate(9.5 63.2) rotate(90)"><tspan x="0" y="0">A4</tspan></text>
+    <text class="st3" transform="translate(9.5 70.4) rotate(90)"><tspan x="0" y="0">A3</tspan></text>
+    <text class="st3" transform="translate(9.5 77.6) rotate(90)"><tspan x="0" y="0">A2</tspan></text>
+    <text class="st3" transform="translate(9.5 84.8) rotate(90)"><tspan x="0" y="0">A1</tspan></text>
+    <text class="st3" transform="translate(9.5 92) rotate(90)"><tspan x="0" y="0">A0</tspan></text>
+    <text class="st3" transform="translate(127 44.2) rotate(-90)"><tspan x="0" y="0">8</tspan></text>
+    <text class="st3" transform="translate(127 51.4) rotate(-90)"><tspan x="0" y="0">9</tspan></text>
+    <text class="st3" transform="translate(127 59.5) rotate(-90)"><tspan x="0" y="0">10</tspan></text>
+    <text class="st3" transform="translate(127 66.7) rotate(-90)"><tspan x="0" y="0">11</tspan></text>
+    <text class="st3" transform="translate(127 73.9) rotate(-90)"><tspan x="0" y="0">12</tspan></text>
+    <text class="st3" transform="translate(127 81.1) rotate(-90)"><tspan x="0" y="0">13</tspan></text>
+    <text class="st3" transform="translate(127 89.3) rotate(-90)"><tspan x="0" y="0">3V3</tspan></text>
+    <text class="st3" transform="translate(127 97) rotate(-90)"><tspan x="0" y="0">GND</tspan></text>
+    <text class="st2" transform="translate(37.1 123.4)"><tspan x="0" y="0">SCK</tspan></text>
+    <text class="st2" transform="translate(44.9 123.4)"><tspan x="0" y="0">MO</tspan></text>
+    <text class="st2" transform="translate(52.6 123.4)"><tspan x="0" y="0">MI</tspan></text>
+    <text class="st2" transform="translate(59.6 123.4)"><tspan x="0" y="0">RX</tspan></text>
+    <text class="st2" transform="translate(66.9 123.4)"><tspan x="0" y="0">TX</tspan></text>
+    <text class="st2" transform="translate(73 123.4)"><tspan x="0" y="0">SDA</tspan></text>
+    <text class="st2" transform="translate(80.5 123.4)"><tspan x="0" y="0">SCL</tspan></text>
+    <text class="st2" transform="translate(87.2 123.4)"><tspan x="0" y="0">PWR</tspan></text>
+    <text class="st2" transform="translate(94.4 123.4)"><tspan x="0" y="0">GND</tspan></text>
+    <text class="st4" transform="translate(42.3 8.9)"><tspan x="0" y="0">tinyProto</tspan></text>
+    <text class="st0" transform="translate(102.3 121.8) rotate(-45)"><tspan x="0" y="0">BOARD DESIGN BY:</tspan></text>
+    <text class="st0" transform="translate(106.5 122.7) rotate(-45)"><tspan x="0" y="0">GEOFF McINTYRE</tspan></text>
+    <path class="st7" d="M30.9,101.8"/>
+  </g>
+  <g id="HATCH">
+    <path class="st10" d="M23.5,107.3h.6v2.1h0s0,0,0,0h-.5s0,0,0,0v-2M24.1,106.6h0c0,0,0,.2,0,.2h0c0,0-.1.1-.2.1h0c0,0-.2,0-.2,0h0s0,0,0-.1c0,0,0,0,0-.1h0c0,0,0-.2,0-.2h0s0,0,0,0c0,0,.1,0,.2,0h0c0,0,.2,0,.2,0h0c0,0,.1.2.1.2Z"/>
+  </g>
+  <g id="HATCH1" data-name="HATCH">
+    <path class="st10" d="M26.5,108.2v1.2h0c0,0-.5,0-.5,0h0v-1.3c0-.1,0-.2-.2-.3,0,0-.1,0-.2,0h0c-.2,0-.3,0-.3,0h0c0,0,0,.1,0,.2v1.2h0c0,0-.4,0-.4,0h0v-2.1h0c0,0,.4,0,.4,0h0c0,0,.1,0,.2,0,0,0,.1,0,.2,0h0c.4,0,.7.1.8.4,0,.1,0,.3,0,.4Z"/>
+  </g>
+  <g id="HATCH2" data-name="HATCH">
+    <path class="st10" d="M28.8,107.3l-1.3,3h-.6c0,0,0-.1,0-.1l.4-.9-.4-.9-.5-1.2h.6s0,0,0,0l.5,1.3s0,0,0,0l.6-1.3h.6Z"/>
+  </g>
+  <g id="HATCH3" data-name="HATCH">
+    <path class="st10" d="M29.1,110.6h-7.8v-7.8h7.8v7.8M31.3,104.8c.1,0,.3-.1.3-.3v-.8c0-.1-.1-.3-.3-.3h-.9v-.6c0-.7-.6-1.4-1.4-1.4h-.6v-1c0-.1-.1-.3-.3-.3h-.8c-.1,0-.3.1-.3.3v1h-1.3v-1c0-.1-.1-.3-.3-.3h-.8c-.1,0-.3.1-.3.3v1h-1.3v-1c0-.1-.1-.3-.3-.3h-.8c-.1,0-.3.1-.3.3v1h-.6c-.7,0-1.4.6-1.4,1.4v.6h-.9c-.1,0-.3.1-.3.3v.8c0,.1.1.3.3.3h.9v1.3h-.9c-.1,0-.3.1-.3.3v.8c0,.1.1.3.3.3h.9v1.3h-.9c-.1,0-.3.1-.3.3v.8c0,.1.1.3.3.3h.9v.6c0,.7.6,1.4,1.4,1.4h.6v1c0,.1.1.3.3.3h.8c.1,0,.3-.1.3-.3v-1h1.3v1c0,.1.1.3.3.3h.8c.1,0,.3-.1.3-.3v-1h1.3v1c0,.1.1.3.3.3h.8c.1,0,.3-.1.3-.3v-1h.6c.7,0,1.4-.6,1.4-1.4v-.6h.9c.1,0,.3-.1.3-.3v-.8c0-.1-.1-.3-.3-.3h-.9v-1.3h.9c.1,0,.3-.1.3-.3v-.8c0-.1-.1-.3-.3-.3h-.9v-1.3h.9Z"/>
+  </g>
+  <g id="HATCH4" data-name="HATCH">
+    <path class="st10" d="M23.1,109.3h0s0,0-.2,0c0,0-.2,0-.3,0h0c-.1,0-.3,0-.4-.1,0,0,0,0,0,0h0s0,0,0,0c0,0,0,0,0,0,0,0,0-.2,0-.3v-.9h-.3s0,0,0,0v-.5s0,0,0,0h.3v-1h.5s0,0,0,0v1h.5s0,0,0,0v.4h0s0,0,0,0h-.4v.9c0,0,0,0,0,0,0,0,0,0,0,0s0,0,.2,0h0s.2.5.2.5Z"/>
+  </g>
+</svg>

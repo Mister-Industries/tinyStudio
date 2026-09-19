@@ -1,27 +1,22 @@
 /**
- * circuit/core/nets — the equipotential net model (the spine of Circuit v2).
+ * circuit/core/nets: the equipotential net model (the spine of Circuit v2).
  *
  * A net is a connected component of the electrical graph over five edge types:
- *   1. wires        — every wire ties its two endpoints together (BOTH views:
+ *   1. wires:         every wire ties its two endpoints together (BOTH views:
  *                     the net model is shared; wires are per-view)
- *   2. junctions    — a {wire,t} endpoint joins the HOST WIRE's net directly
+ *   2. junctions:     a {wire,t} endpoint joins the HOST WIRE's net directly
  *                     (fixes B9: identity-based, no coordinate proximity)
- *   3. buses        — pins internally common inside a part (breadboard rows,
+ *   3. buses:         pins internally common inside a part (breadboard rows,
  *                     multi-GND boards), supplied by the parts registry
- *   4. net labels   — schematic labels with the same name share a net (GND…)
- *   5. implicit     — derived connections supplied by callers (breadboard
+ *   4. net labels:    schematic labels with the same name share a net (GND…)
+ *   5. implicit:      derived connections supplied by callers (breadboard
  *                     pin-in-hole seating, M2), as pin-ref pairs
  *
  * Successor to lib/circuitNets.ts. Keys are canonical strings (B10 fix: one
- * canonicalization for everyone — no more refKey/refStr divergence).
+ * canonicalization for everyone; no more refKey/refStr divergence).
  */
 
-import {
-  isJunction,
-  splitPinRef,
-  type CircuitDoc,
-  type WireEnd
-} from './model'
+import { isJunction, splitPinRef, type CircuitDoc, type WireEnd } from './model'
 
 /** Canonical endpoint key: pins are "part:pin", junctions collapse to the host wire. */
 export function endKey(end: WireEnd): string {
@@ -58,7 +53,7 @@ class DSU {
 }
 
 export interface NetModel {
-  /** Pins per net (only "part:pin" members — the electrically meaningful view). */
+  /** Pins per net (only "part:pin" members; the electrically meaningful view). */
   nets: string[][]
   /** Net name (from labels) per net index, if any. */
   netNames: (string | undefined)[]
@@ -80,7 +75,7 @@ export function buildNets(doc: CircuitDoc, opts: BuildNetsOptions = {}): NetMode
   const dsu = new DSU()
   const allPins = new Set<string>()
 
-  // 1+2. wires and junction endpoints — a wire's body key unions with both of
+  // 1+2. wires and junction endpoints: a wire's body key unions with both of
   // its endpoints, so a rider on the wire is in the same component.
   for (const w of doc.wires) {
     const wk = wireKey(w.id)
@@ -101,7 +96,7 @@ export function buildNets(doc: CircuitDoc, opts: BuildNetsOptions = {}): NetMode
         const b = `${part.id}:${group[i]}`
         dsu.union(a, b)
         // NOTE: bus pins are only *listed* in nets when something connects to
-        // them (allPins gate) — a bare breadboard is 0 meaningful nets.
+        // them (allPins gate): a bare breadboard is 0 meaningful nets.
       }
     }
   }

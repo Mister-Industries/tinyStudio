@@ -1,0 +1,31 @@
+{
+  "type": "thermistor-300mil",
+  "label": "Temperature Sensor (Thermistor)",
+  "family": "temperature sensor",
+  "description": "A 10k NTC Thermistor (Temperature Sensor)",
+  "source": {
+    "fzp": "thermistor_300mil.fzp",
+    "moduleId": "2012BCEC1FBThermistorModuleID"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 22.08,
+      "height": 22.08,
+      "pins": {
+        "pin 0": [1.44, 12.72],
+        "pin 1": [20.64, 12.72]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 17,
+      "height": 43.2,
+      "pins": {
+        "pin 0": [10.31, 42.86],
+        "pin 1": [10.31, 0.34]
+      }
+    }
+  }
+}

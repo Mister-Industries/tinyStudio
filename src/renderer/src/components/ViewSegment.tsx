@@ -1,5 +1,5 @@
 /**
- * ViewSegment — the Code / Circuit / Visual switch in the toolbar.
+ * ViewSegment: the Code / Circuit / Visual switch in the toolbar.
  *
  * These are full-window views (like the desktop app), not per-tab modes:
  *   Code    → the normal tabbed editor IDE
@@ -9,7 +9,7 @@
  * for Code, makes sure a sketch is open to land on.
  */
 
-import { OpenFileCommand } from '@renderer/commands/fileCommands'
+import { openFileItem } from '@renderer/commands/fileCommands'
 import {
   BaseFileItem,
   selectEditorView,
@@ -23,7 +23,10 @@ import {
 import { CircuitBoard, Code2, Play } from 'lucide-react'
 import React from 'react'
 
-function findInTree(items: BaseFileItem[], match: (i: BaseFileItem) => boolean): BaseFileItem | null {
+function findInTree(
+  items: BaseFileItem[],
+  match: (i: BaseFileItem) => boolean
+): BaseFileItem | null {
   for (const item of items) {
     if (item.type === 'file' && item.name && match(item)) return item
     if (item.children) {
@@ -50,7 +53,7 @@ export function ViewSegment(): React.JSX.Element {
         const item =
           findInTree(workspace.root, (i) => /\.ino$/i.test(i.name!)) ||
           findInTree(workspace.root, (i) => /\.(cpp|c|h|hpp)$/i.test(i.name!))
-        if (item) new OpenFileCommand(item).execute()
+        if (item) openFileItem(item)
       }
     }
     dispatch(setEditorView(view))

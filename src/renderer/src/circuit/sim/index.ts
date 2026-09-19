@@ -1,6 +1,8 @@
 export {
   SimError,
   voltageOf,
+  type EnginePhase,
+  type EngineStatus,
   type SimBackend,
   type SimFailure,
   type SimRun,

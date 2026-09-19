@@ -1,4 +1,4 @@
-/** Tests for parts/symbols — generated IC-box schematic symbols. */
+/** Tests for parts/symbols: generated IC-box schematic symbols. */
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
@@ -45,7 +45,10 @@ test('schematicVisual prefers authored art and caches generated symbols', () => 
   const authored: PartDef = {
     ...def,
     type: 'authored',
-    views: { ...def.views, schematic: { svg: '<svg>real</svg>', w: 10, h: 10, pins: { VCC: [0, 0] } } }
+    views: {
+      ...def.views,
+      schematic: { svg: '<svg>real</svg>', w: 10, h: 10, pins: { VCC: [0, 0] } }
+    }
   }
   assert.equal(schematicVisual(authored).svg, '<svg>real</svg>')
   const a = schematicVisual(def)

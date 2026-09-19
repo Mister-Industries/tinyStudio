@@ -16,11 +16,19 @@
 // .tar.gz. On Windows we call System32\tar.exe explicitly so we don't
 // accidentally pick up Git Bash's GNU tar (which can't read .zip and mis-parses
 // drive-letter paths). On Linux, GNU tar can't read .zip, so building the
-// Windows artifact there would need `unzip` — but Windows installers are built
+// Windows artifact there would need `unzip`, but Windows installers are built
 // on Windows, where this works out of the box.
 
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, copyFileSync, chmodSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+  copyFileSync,
+  chmodSync
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -62,7 +70,8 @@ async function download(url, dest) {
 
 async function fetchOne(platform) {
   const target = TARGETS[platform]
-  if (!target) throw new Error(`Unknown platform "${platform}". Valid: ${Object.keys(TARGETS).join(', ')}`)
+  if (!target)
+    throw new Error(`Unknown platform "${platform}". Valid: ${Object.keys(TARGETS).join(', ')}`)
 
   const outDir = join(vendorRoot, platform)
   const outBin = join(outDir, target.bin)
@@ -111,7 +120,7 @@ function hostPlatform() {
 }
 
 async function main() {
-  // `current` (or `--current`) resolves to just this machine's platform — handy
+  // `current` (or `--current`) resolves to just this machine's platform, handy
   // for development, where you only need to run the app locally. With no args we
   // fetch every platform (what packaging needs; see electron-builder.yml).
   const requested = process.argv

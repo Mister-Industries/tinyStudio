@@ -1,4 +1,4 @@
-/** Tests for parts/netLabels — glyph geometry, single pin, grid snapping. */
+/** Tests for parts/netLabels: glyph geometry, single pin, grid snapping. */
 import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
 import { GRID_BB, type NetLabel } from '../core/model'

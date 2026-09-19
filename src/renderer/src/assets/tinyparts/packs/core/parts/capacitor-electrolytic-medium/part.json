@@ -1,0 +1,31 @@
+{
+  "type": "capacitor-electrolytic-medium",
+  "label": "Electrolytic Capacitor",
+  "family": "Capacitor [unidirectional]",
+  "description": "electrolytic capacitor",
+  "source": {
+    "fzp": "capacitor_electrolytic_medium.fzp",
+    "moduleId": "MediumElectrolyticCapacitorModuleID"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 30.24,
+      "height": 57.5,
+      "pins": {
+        "-": [10.36, 50.3],
+        "+": [19.96, 50.3]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 20.16,
+      "height": 29.73,
+      "pins": {
+        "-": [10.08, 29.27],
+        "+": [10.08, 0.47]
+      }
+    }
+  }
+}

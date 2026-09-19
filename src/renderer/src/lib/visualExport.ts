@@ -2,12 +2,53 @@
  * Builds a self-contained HTML page from a project's visual.js p5 sketch.
  *
  * The export runs anywhere (open the file locally, or host it on GitHub Pages)
- * and keeps live USB serial via the Web Serial API — the same serialValue() /
+ * and keeps live USB serial via the Web Serial API, the same serialValue() /
  * serialEvent() shims the in-app Visual view provides, so the sketch is dropped
- * in unchanged. It's framed like a little hosted device/minigame: a fixed square
- * screen with a titled header and a "Made with tinyStudio" credit linking to
- * tinycore.cc, so projects look professional and the tool gets attribution.
+ * in unchanged, with the same `theme` object (lib/sketchTheme) read from this
+ * page's own copy of the tokens. It's dressed in the tinyStudio design system (tokens copied
+ * from assets/base.css): a card on the notebook dot-grid with a titled bar
+ * holding a light/dark toggle and a tactile Connect key, a square screen the
+ * sketch is letterboxed into, and a footer with the connection status and a
+ * "Made with tinyStudio" credit linking to tinystudio.cc. It follows the viewer's
+ * OS theme until they pick one.
  */
+
+import { sketchThemeScript } from './sketchTheme'
+
+// Semantic tokens from assets/base.css, trimmed to what the page uses. Keep in
+// sync with the app when the palette changes.
+const LIGHT_TOKENS = `
+    color-scheme: light;
+    --bg:#fafbfc; --bg-sunken:#edf0f3; --bg-raised:#ffffff; --surface-card:#ffffff;
+    --text-strong:#181a1e; --text-body:#24272c; --text-muted:#79818c; --text-faint:#a3abb5;
+    --border-soft:#e3e7ec; --border-default:#cfd5dc; --border-interactive:#a3abb5;
+    --brand:#42a5f5; --brand-deep:#1e88e5; --brand-soft:#dceefd;
+    --blue:#42a5f5; --green:#2fa46a; --yellow:#f3cb00; --red:#e5544b; --purple:#9d5fd6; --idle:#a3abb5;
+    --highlight-top: inset 0 1px 0 0 rgba(255,255,255,.45);
+    --shadow-soft-sm: 0 2px 6px rgba(20,19,16,.1);
+    --shadow-soft: 0 8px 24px rgba(20,19,16,.14);
+    --dot-color: rgba(24,26,30,.09);`
+
+const DARK_TOKENS = `
+    color-scheme: dark;
+    --bg:#2b2d31; --bg-sunken:#1e1f22; --bg-raised:#313338; --surface-card:#383a40;
+    --text-strong:#f2f3f5; --text-body:#dbdee1; --text-muted:#969ba3; --text-faint:#6b7077;
+    --border-soft:#26282c; --border-default:#26282b; --border-interactive:#4a4d54;
+    --brand:#42a5f5; --brand-deep:#2a8fdb; --brand-soft:#16314a;
+    --blue:#42a5f5; --green:#46c586; --yellow:#f5d426; --red:#f26d63; --purple:#b47ee8; --idle:#6b7077;
+    --highlight-top: inset 0 1px 0 0 rgba(255,255,255,.12);
+    --shadow-soft-sm: 0 2px 6px rgba(0,0,0,.4);
+    --shadow-soft: 0 8px 24px rgba(0,0,0,.5);
+    --dot-color: rgba(242,243,245,.07);`
+
+// lucide icons (moon, sun), inlined so the page has no icon dependency.
+const svg = (body: string, cls = ''): string =>
+  `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`
+const MOON = svg('<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>', 'i-moon')
+const SUN = svg(
+  '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  'i-sun'
+)
 
 export function buildVisualExportHtml(projectName: string, sketchCode: string): string {
   const title = (projectName || 'tinyStudio sketch').replace(/[<>&]/g, '')
@@ -20,67 +61,172 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${title} · tinyStudio</title>
+<script>
+  // Resolve the theme before first paint: the viewer's saved choice, else the OS.
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('tinystudio.theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
 <style>
-  :root {
-    --navy-1000:#05081a; --navy-900:#070b22; --navy-800:#0a0f2d; --navy-700:#11173a;
-    --navy-600:#1a1f4d; --navy-500:#262c5e; --navy-400:#353c78;
-    --cyan:#00f0ff; --pink:#ff3f8c; --fg-1:#fff; --fg-2:rgba(235,238,255,.72); --fg-3:rgba(214,220,255,.46);
-    --grad: linear-gradient(45deg, var(--cyan), var(--pink));
+  :root {${LIGHT_TOKENS}
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'Fira Code', ui-monospace, 'SF Mono', Menlo, monospace;
+    --ease-snap: cubic-bezier(.2,.8,.2,1);
+  }
+  :root[data-theme="dark"] {${DARK_TOKENS}
   }
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
+  [hidden] { display: none !important; }
   body {
-    margin: 0; display: flex; align-items: center; justify-content: center; padding: 24px;
-    background: radial-gradient(1100px 560px at 50% -8%, #16204d 0%, var(--navy-800) 55%, var(--navy-900) 100%);
-    color: var(--fg-1); font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    -webkit-font-smoothing: antialiased;
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding-block: 24px; padding-inline: 16px;
+    background-color: var(--bg);
+    background-image: radial-gradient(var(--dot-color) 1.1px, transparent 1.1px);
+    background-size: 18px 18px; background-position: -1px -1px;
+    color: var(--text-body); font-family: var(--font-sans); -webkit-font-smoothing: antialiased;
   }
-  .cabinet {
-    width: min(92vw, 540px); background: linear-gradient(180deg, var(--navy-700), var(--navy-800));
-    border: 1px solid var(--navy-400); border-radius: 20px; padding: 16px;
-    box-shadow: 0 24px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.04);
-    display: flex; flex-direction: column; gap: 14px;
+
+  /* The card: the same raised panel + 1.5px border the app's panels use. */
+  .device {
+    width: min(100%, 560px); background: var(--bg-raised);
+    border: 1.5px solid var(--border-default); border-radius: 12px;
+    box-shadow: var(--shadow-soft); overflow: hidden;
   }
-  .bar { display: flex; align-items: center; gap: 12px; padding: 2px 4px; }
-  .title { flex: 1; min-width: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.01em;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .connect { font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
-    display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--navy-400);
-    background: var(--navy-600); color: var(--fg-1); border-radius: 999px; padding: 7px 14px; transition: .15s; }
-  .connect:hover:not(:disabled) { background: var(--navy-500); }
-  .connect:disabled { cursor: default; border-color: rgba(61,220,151,.4); color: #bff7df; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4a5296; flex: none; }
-  .dot.on { background: #3ddc97; box-shadow: 0 0 9px #3ddc97; }
-  /* The "screen": a fixed square the sketch is letterboxed into. */
-  .screen { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 14px;
-    background: var(--navy-1000); border: 1px solid var(--navy-600);
-    box-shadow: inset 0 0 0 1px rgba(0,240,255,.06), inset 0 18px 60px rgba(0,0,0,.5); overflow: hidden; }
-  .screen::before { content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none;
-    box-shadow: inset 0 1px 0 rgba(0,240,255,.14); }
+  .bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px;
+    padding: 12px 14px; border-bottom: 1.5px solid var(--border-default);
+  }
+  .heading { flex: 1 1 180px; min-width: 0; }
+  .title {
+    margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.02em; color: var(--text-strong);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .actions { display: flex; align-items: center; gap: 8px; }
+
+  /* Connection status: a dot + label, like the app's status bar. */
+  .status {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 500; line-height: 1; white-space: nowrap; color: var(--text-muted);
+  }
+  .dot { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--idle); flex: none; }
+  .status[data-state="ok"] .dot { background: var(--green); }
+  .status[data-state="warn"] .dot { background: var(--yellow); }
+  .status[data-state="ok"] .dot::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%; background: inherit;
+    animation: pulse 1.6s cubic-bezier(.16,1,.3,1) infinite;
+  }
+  @keyframes pulse { 0% { transform: scale(1); opacity: .6; } 70%, 100% { transform: scale(2.6); opacity: 0; } }
+
+  /* Tactile keys: a top highlight over a solid bottom edge; lift on hover, press down on click. */
+  .btn {
+    font: inherit; font-size: 14px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap;
+    height: 30px; padding: 0 12px; display: inline-flex; align-items: center;
+    border: 0; border-radius: 5px; cursor: pointer;
+    transition: transform 110ms var(--ease-snap), box-shadow 110ms var(--ease-snap), filter 110ms var(--ease-snap);
+  }
+  .btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn-primary {
+    background: var(--brand); color: #fff;
+    box-shadow: var(--highlight-top), 0 2px 0 0 var(--brand-deep), 0 4px 10px rgba(20,19,16,.16);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px); filter: brightness(1.04);
+    box-shadow: var(--highlight-top), 0 3px 0 0 var(--brand-deep), 0 7px 16px rgba(20,19,16,.2);
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: var(--highlight-top), 0 0 0 0 var(--brand-deep), 0 1px 3px rgba(20,19,16,.18);
+  }
+  /* Theme toggle: a chromeless icon, like the one in the Studio's top bar. */
+  .theme-toggle {
+    width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+    border: 0; border-radius: 5px; background: transparent; color: var(--text-muted); cursor: pointer;
+    transition: color 110ms var(--ease-snap), background-color 110ms var(--ease-snap);
+  }
+  .theme-toggle:hover { color: var(--text-strong); background: var(--bg-sunken); }
+  .theme-toggle:active { transform: translateY(1px); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .theme-toggle svg { width: 16px; height: 16px; }
+  .i-sun { display: none; }
+  :root[data-theme="dark"] .i-sun { display: block; }
+  :root[data-theme="dark"] .i-moon { display: none; }
+
+  /* The screen: a fixed square the sketch is letterboxed into, as in the Visual view. */
+  .stage-wrap { padding: 16px; background: var(--bg-sunken); }
+  .screen {
+    position: relative; width: 100%; max-width: 100%; aspect-ratio: 1 / 1; overflow: hidden;
+    background: var(--bg-raised); border: 1.5px solid var(--border-default); border-radius: 8px;
+    box-shadow: var(--shadow-soft-sm);
+  }
   #stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-  #stage canvas { max-width: 100%; max-height: 100%; width: auto !important; height: auto !important; border-radius: 8px; }
-  .credit { text-align: center; font-size: 12px; color: var(--fg-3); padding-top: 2px; }
-  .credit a { font-weight: 700; text-decoration: none; background: var(--grad);
-    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  .credit a:hover { text-decoration: underline; -webkit-text-fill-color: var(--cyan); }
-  .spark { color: var(--cyan); }
+  #stage canvas { width: 100% !important; height: 100% !important; object-fit: contain; }
+
+  .foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px;
+    padding: 10px 14px; border-top: 1.5px solid var(--border-default);
+  }
+  .credit { font-size: 12px; color: var(--text-muted); text-decoration: none; border-radius: 5px; }
+  .credit:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .wordmark { font-size: 13px; font-weight: 800; letter-spacing: -0.02em; color: var(--text-strong); transition: color 110ms; }
+  .wordmark span { font-weight: 500; color: var(--text-muted); }
+  .credit:hover .wordmark { color: var(--brand); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn, .theme-toggle, .wordmark { transition: none; }
+    .status .dot::after { animation: none; }
+  }
 </style>
 </head>
 <body>
-  <main class="cabinet">
-    <div class="bar">
-      <div class="title">${title}</div>
-      <button class="connect" id="connect"><span class="dot" id="dot"></span><span id="label">Connect</span></button>
-    </div>
-    <div class="screen"><div id="stage"></div></div>
-    <div class="credit">Made with <span class="spark">✦</span> <a href="https://tinycore.cc" target="_blank" rel="noreferrer">tinyStudio</a></div>
+  <main class="device">
+    <header class="bar">
+      <div class="heading">
+        <h1 class="title">${title}</h1>
+      </div>
+      <div class="actions">
+        <button class="theme-toggle" id="theme" type="button" aria-label="Switch theme" title="Switch theme">${MOON}${SUN}</button>
+        <button class="btn btn-primary" id="connect" type="button">Connect</button>
+      </div>
+    </header>
+    <div class="stage-wrap"><div class="screen"><div id="stage"></div></div></div>
+    <footer class="foot">
+      <span class="status" id="status" data-state="idle" role="status"><span class="dot"></span><span id="status-text">Not connected</span></span>
+      <a class="credit" href="https://tinystudio.cc" target="_blank" rel="noreferrer">Made with <span class="wordmark"><span>tiny</span>Studio</span></a>
+    </footer>
   </main>
 
   <script>
+  // ---- light / dark toggle (follows the OS until the viewer picks one) ----
+  var rootEl = document.documentElement;
+  var themeBtn = document.getElementById('theme');
+  function isDark() { return rootEl.getAttribute('data-theme') === 'dark'; }
+  function labelTheme() {
+    var label = isDark() ? 'Light mode' : 'Dark mode';
+    themeBtn.setAttribute('aria-label', label); themeBtn.title = label;
+  }
+  themeBtn.onclick = function () {
+    var next = isDark() ? 'light' : 'dark';
+    rootEl.setAttribute('data-theme', next);
+    try { localStorage.setItem('tinystudio.theme', next); } catch (e) {}
+    labelTheme();
+  };
+  try {
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+      var saved = null;
+      try { saved = localStorage.getItem('tinystudio.theme'); } catch (err) {}
+      if (!saved) { rootEl.setAttribute('data-theme', e.matches ? 'dark' : 'light'); labelTheme(); }
+    });
+  } catch (e) {}
+  labelTheme();
+
   // ---- serial bus + Processing-style shims (match the tinyStudio Visual view) ----
   window.__tinySerial = { lines: [], values: [], last: '', value: 0 };
   function __pushSerial(line) {
@@ -99,25 +245,30 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
   function serialValues() { return window.__tinySerial.values.slice(); }
   function serialLines() { return window.__tinySerial.lines.slice(); }
 
+  // ---- theme: design tokens for the sketch, kept current across the light/dark toggle ----
+  ${sketchThemeScript()}
+
   // ---- Web Serial connection (works on https / GitHub Pages and local file) ----
-  var dotEl = document.getElementById('dot');
-  var labelEl = document.getElementById('label');
+  var statusEl = document.getElementById('status');
+  var statusText = document.getElementById('status-text');
   var connectBtn = document.getElementById('connect');
-  function setStatus(text, on) { labelEl.textContent = text; dotEl.className = 'dot' + (on ? ' on' : ''); }
+  function setStatus(state, text) { statusEl.setAttribute('data-state', state); statusText.textContent = text; }
 
   if (!('serial' in navigator)) {
-    setStatus('Use Chrome/Edge', false);
+    setStatus('warn', 'Use Chrome or Edge');
     connectBtn.disabled = true;
+    connectBtn.title = 'Live serial needs Web Serial (Chrome or Edge)';
   }
 
   connectBtn.onclick = async function () {
+    var port = null;
     try {
-      var port = await navigator.serial.requestPort();
+      port = await navigator.serial.requestPort();
       await port.open({ baudRate: 9600 });
-      setStatus('Connected', true);
-      connectBtn.disabled = true;
+      setStatus('ok', 'Connected');
+      connectBtn.hidden = true;
       var decoder = new TextDecoderStream();
-      port.readable.pipeTo(decoder.writable);
+      port.readable.pipeTo(decoder.writable).catch(function () {});
       var reader = decoder.readable.getReader();
       var buf = '';
       while (true) {
@@ -128,10 +279,11 @@ export function buildVisualExportHtml(projectName: string, sketchCode: string): 
         buf = parts.pop();
         for (var i = 0; i < parts.length; i++) if (parts[i]) __pushSerial(parts[i]);
       }
-    } catch (e) {
-      setStatus('Connect', false);
-      connectBtn.disabled = false;
-    }
+    } catch (e) {}
+    // Picker cancelled, board unplugged, or stream ended: back to idle.
+    if (port) { try { await port.close(); } catch (e) {} }
+    setStatus('idle', 'Not connected');
+    connectBtn.hidden = false;
   };
 
   // ---- the user's sketch (p5 global mode) ----

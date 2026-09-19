@@ -1,0 +1,33 @@
+{
+  "type": "transistor-signal-pnp-to92-ebc",
+  "label": "PNP-Transistor",
+  "family": "Bipolar Transistor",
+  "description": "A standard PNP signal transistor",
+  "source": {
+    "fzp": "transistor_signal_PNP_TO92_EBC.fzp",
+    "moduleId": "2244EBEC21e"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 22.04,
+      "height": 32.1,
+      "pins": {
+        "E": [1.44, 31.33],
+        "B": [11.01, 31.33],
+        "C": [20.6, 31.33]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 20.13,
+      "height": 39.33,
+      "pins": {
+        "E": [19.67, 0.47],
+        "B": [0.47, 19.67],
+        "C": [19.67, 38.87]
+      }
+    }
+  }
+}

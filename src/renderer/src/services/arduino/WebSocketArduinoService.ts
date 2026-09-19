@@ -1,5 +1,5 @@
 /**
- * WebSocketArduinoService — the real Arduino implementation, shared by both the
+ * WebSocketArduinoService: the real Arduino implementation, shared by both the
  * desktop (Electron) and browser builds.
  *
  * tinyService is always a local WebSocket backend on ws://localhost:3000. The
@@ -9,7 +9,7 @@
  * and WebArduinoService simply extend this class.
  *
  * The service URL defaults to ws://localhost:3000 but can be overridden by
- * setting `localStorage["tinyservice.url"]` — handy when hosting the web build
+ * setting `localStorage["tinyservice.url"]`, handy when hosting the web build
  * and pointing it at a backend on a non-default port.
  */
 
@@ -33,30 +33,55 @@ import {
   PlatformEntry,
   UploadResult
 } from './types'
+import { fileSystem } from '@renderer/lib/fileSystem'
+import { isTextPath } from '@renderer/lib/github'
+import { STORAGE_KEYS } from '@renderer/lib/storageKeys'
+import { isElectron } from '@renderer/lib/utils'
+import { TINYSERVICE_DEFAULT_PORT } from '../../../../shared/tinyservice'
 import { isVirtualPath, virtualFileSystem } from '@renderer/lib/virtualFileSystem'
 
-const DEFAULT_SERVICE_URL = 'ws://localhost:3000'
+const DEFAULT_SERVICE_URL = `ws://localhost:${TINYSERVICE_DEFAULT_PORT}`
 
 /**
- * Gather a `mem://` sketch's files into a flat `{ relativePath: content }` map
- * plus a sketch folder name. The browser can't hand tinyService a real disk
- * path (the File System Access API hides absolute paths, and examples live only
- * in memory), so the web build ships the sketch's contents instead and the
- * service materializes them to a temp dir to compile/upload. Desktop never
- * calls this — it passes a real path straight through.
+ * Whether a sketch has to travel to tinyService as file contents rather than a
+ * path. Everything the browser build compiles does: an in-memory project has no
+ * disk path at all, and a real folder opened through the File System Access API
+ * only exposes its *name*, which means nothing to the service. Desktop always
+ * has a real path and passes it straight through.
  */
-async function collectVirtualSketch(
+function mustShipFiles(sketchDir: string | undefined): sketchDir is string {
+  return !!sketchDir && (isVirtualPath(sketchDir) || !isElectron())
+}
+
+const IGNORED_SKETCH_DIRS = ['.git', 'node_modules']
+
+/**
+ * Gather a browser sketch's files into a flat `{ relativePath: content }` map
+ * plus a sketch folder name, for the service to materialize in a temp dir and
+ * compile/upload. Works for both in-memory (`mem://`) projects and local
+ * folders the user opened or saved to.
+ */
+async function collectBrowserSketch(
   sketchDir: string
 ): Promise<{ files: Record<string, string>; sketchName: string }> {
   const root = sketchDir.endsWith('/') ? sketchDir.slice(0, -1) : sketchDir
-  const items = await virtualFileSystem.readDirectory(root, true)
+  const virtual = isVirtualPath(root)
+  const items = virtual
+    ? await virtualFileSystem.readDirectory(root, true)
+    : await fileSystem.readDirectory(root, true)
   const files: Record<string, string> = {}
   for (const item of items) {
     if (item.isDirectory) continue
-    const rel = item.path.startsWith(root + '/')
-      ? item.path.slice(root.length + 1)
-      : item.name
-    files[rel] = await virtualFileSystem.readFile(item.path)
+    const rel = item.path.startsWith(root + '/') ? item.path.slice(root.length + 1) : item.name
+    if (!virtual) {
+      // A real folder can hold anything. Skip VCS/tooling noise, and binaries,
+      // which would arrive garbled after a round trip through text.
+      if (rel.split('/').some((seg) => IGNORED_SKETCH_DIRS.includes(seg))) continue
+      if (!isTextPath(rel)) continue
+    }
+    files[rel] = virtual
+      ? await virtualFileSystem.readFile(item.path)
+      : await fileSystem.readFile(item.path)
   }
   if (Object.keys(files).length === 0) {
     throw new Error(`No files found in ${root} to compile`)
@@ -72,7 +97,7 @@ async function collectVirtualSketch(
 function resolveServiceUrl(): string {
   try {
     if (typeof localStorage !== 'undefined') {
-      const override = localStorage.getItem('tinyservice.url')
+      const override = localStorage.getItem(STORAGE_KEYS.serviceUrl)
       if (override) return override
     }
   } catch {
@@ -90,8 +115,8 @@ function resolveServiceUrl(): string {
 /**
  * Convert a backend BoardInfo into the renderer's Board shape. The FQBN is
  * passed through untouched: collapsing every tinyCore variant to one FQBN
- * (the old behavior) forced all tinyCore boards to compile for the S3
- * no-PSRAM variant and made other variants unselectable.
+ * would force all tinyCore boards to compile for the S3 no-PSRAM variant and
+ * make other variants unselectable.
  */
 function toBoard(info: SharedBoardInfo): Board {
   return {
@@ -128,15 +153,23 @@ export class WebSocketArduinoService implements ArduinoService {
       autoReconnect: true,
       reconnectInterval: 3000,
       maxReconnectAttempts: 10,
-      debug: true
+      debug: false
     })
 
-    // Connect to the service
     this.client.connect()
 
-    // Set up global error handler
-    this.client.onError((error) => {
-      console.error('Arduino service error:', error)
+    // A failed attempt is normal while tinyService starts (and on the web, until
+    // the user runs it), and the client retries on its own. Say so once per
+    // outage rather than logging an error for every attempt, and never while a
+    // connection is up.
+    let warned = false
+    this.client.onConnect(() => {
+      warned = false
+    })
+    this.client.onError(() => {
+      if (warned || this.client.isConnected()) return
+      warned = true
+      console.warn(`tinyService isn't reachable at ${this.serviceUrl}; retrying.`)
     })
   }
 
@@ -145,7 +178,6 @@ export class WebSocketArduinoService implements ArduinoService {
    */
   public cleanup(): void {
     if (this.client) {
-      console.log('Disconnecting Arduino service client...')
       this.client.disconnect()
     }
   }
@@ -226,7 +258,6 @@ export class WebSocketArduinoService implements ArduinoService {
 
         // Check if the operation might have succeeded based on output
         if (action === 'compile' && output.includes('Sketch uses')) {
-          console.log(`[${action}] Detected successful compilation from output, resolving...`)
           safeResolve({
             success: !hasError,
             output: output,
@@ -240,7 +271,6 @@ export class WebSocketArduinoService implements ArduinoService {
             output.includes('Hash of data verified') ||
             output.includes('Hard resetting'))
         ) {
-          console.log(`[${action}] Detected successful upload from output, resolving...`)
           safeResolve({
             success: !hasError,
             output: output,
@@ -260,8 +290,6 @@ export class WebSocketArduinoService implements ArduinoService {
           return
         }
 
-        console.log(`[${action}] Received message:`, message.type, message.data) // Debug log
-
         if (message.type === 'output') {
           output += message.data.output + '\n'
         } else if (message.type === 'error') {
@@ -270,7 +298,7 @@ export class WebSocketArduinoService implements ArduinoService {
           if (message.data.details) {
             errorMessage += '\n' + message.data.details
           }
-          // For these request/response actions an error is terminal — the
+          // For these request/response actions an error is terminal; the
           // handler sends it instead of `complete`. Resolve now (with any
           // streamed/compiler output) so the caller doesn't hang until timeout.
           cleanup()
@@ -280,7 +308,6 @@ export class WebSocketArduinoService implements ArduinoService {
             error: errorMessage
           })
         } else if (message.type === 'complete') {
-          console.log(`[${action}] Operation completed:`, message.data) // Debug log
           cleanup()
 
           // Handle list-boards response differently
@@ -296,7 +323,7 @@ export class WebSocketArduinoService implements ArduinoService {
               error: hasError ? errorMessage : undefined
             })
           } else if (Array.isArray((message.data as { libraries?: unknown[] }).libraries)) {
-            // Library search/list — serialize libraries to JSON lines
+            // Library search/list: serialize libraries to JSON lines
             const libs = (message.data as { libraries: unknown[] }).libraries
             safeResolve({
               success: !hasError,
@@ -305,7 +332,7 @@ export class WebSocketArduinoService implements ArduinoService {
             })
           } else if (
             // Boards Manager list/search responses carry one of these arrays
-            // (platforms, boards, urls) — serialize to JSON lines like libraries.
+            // (platforms, boards, urls): serialize to JSON lines like libraries.
             Array.isArray((message.data as { platforms?: unknown[] }).platforms) ||
             Array.isArray((message.data as { boards?: unknown[] }).boards) ||
             Array.isArray((message.data as { urls?: unknown[] }).urls)
@@ -322,7 +349,7 @@ export class WebSocketArduinoService implements ArduinoService {
               error: hasError ? errorMessage : undefined
             })
           } else if ((message.data as { details?: unknown }).details) {
-            // board-details response — serialize the details object.
+            // board-details response: serialize the details object.
             safeResolve({
               success: !hasError,
               output: JSON.stringify((message.data as { details: unknown }).details),
@@ -341,18 +368,36 @@ export class WebSocketArduinoService implements ArduinoService {
       })
 
       errorUnsubscribe = this.client.onError((error) => {
-        console.error(`[${action}] WebSocket error:`, error)
+        console.warn(`[${action}] WebSocket error (the request is rejected with it):`, error)
         safeReject(error instanceof Error ? error : new Error(String(error)))
       })
     })
   }
 
   /**
-   * Check arduino-cli availability
+   * Open the WebSocket again after the client gave up. The shared client stops
+   * after maxReconnectAttempts (30 s of outage here), so a backend that comes
+   * back later, like one restarted from the "tinyService stopped" prompt,
+   * needs a push. Debounced: connect() on a socket that is still CONNECTING
+   * would open a second one.
+   */
+  private lastReconnectAt = 0
+  public reconnect(): void {
+    if (!this.client || this.client.isConnected()) return
+    const now = Date.now()
+    if (now - this.lastReconnectAt < 2000) return
+    this.lastReconnectAt = now
+    this.client.connect()
+  }
+
+  /**
+   * Check arduino-cli availability. When the backend isn't connected this
+   * also kicks off a reconnect, so the status bar's Retry really retries.
    */
   async checkStatus(): Promise<AgentStatus> {
     try {
       if (!this.client || !this.client.isConnected()) {
+        this.reconnect()
         return {
           connected: false,
           lastCheck: Date.now(),
@@ -403,7 +448,10 @@ export class WebSocketArduinoService implements ArduinoService {
           }
         }
       } catch (parseError) {
-        console.error('Error parsing board list:', parseError)
+        console.warn(
+          'Board list from tinyService could not be parsed; keeping the last one:',
+          parseError
+        )
       }
 
       // Cache the successful result
@@ -411,7 +459,6 @@ export class WebSocketArduinoService implements ArduinoService {
 
       return boards
     } catch (error) {
-      console.error('Error listing boards:', error)
       throw new Error(
         `Failed to list boards: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
@@ -450,7 +497,6 @@ export class WebSocketArduinoService implements ArduinoService {
 
       throw new Error(`Board not found on port ${port}`)
     } catch (error) {
-      console.error('Error getting board info:', error)
       throw new Error(
         `Failed to get board info: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
@@ -471,14 +517,11 @@ export class WebSocketArduinoService implements ArduinoService {
       // the real path straight through.
       let files: Record<string, string> | undefined
       let sketchName: string | undefined
-      if (isVirtualPath(workspacePath)) {
-        ;({ files, sketchName } = await collectVirtualSketch(workspacePath))
+      if (mustShipFiles(workspacePath)) {
+        ;({ files, sketchName } = await collectBrowserSketch(workspacePath))
       }
 
       // Compile the sketch
-      console.log(
-        `Starting compile operation for workspace: ${workspacePath}, FQBN: ${boardConfig.fqbn}`
-      )
       const requestId = this.client.compile(workspacePath, boardConfig.fqbn, files, sketchName)
 
       // Wait for response with longer timeout for compilation
@@ -490,7 +533,6 @@ export class WebSocketArduinoService implements ArduinoService {
         errors: result.error ? [{ message: result.error, severity: 'fatal' as const }] : undefined
       }
     } catch (error) {
-      console.error('Error compiling sketch:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       return {
         success: false,
@@ -519,14 +561,11 @@ export class WebSocketArduinoService implements ArduinoService {
       // present). Desktop passes the real path and relies on its prior compile.
       let files: Record<string, string> | undefined
       let sketchName: string | undefined
-      if (isVirtualPath(workspacePathOrBinary)) {
-        ;({ files, sketchName } = await collectVirtualSketch(workspacePathOrBinary!))
+      if (mustShipFiles(workspacePathOrBinary)) {
+        ;({ files, sketchName } = await collectBrowserSketch(workspacePathOrBinary))
       }
 
       // Upload the sketch
-      console.log(
-        `Starting upload operation to port: ${port}, FQBN: ${boardConfig.fqbn}, workspace: ${workspacePathOrBinary}`
-      )
       const requestId = this.client.upload(
         workspacePathOrBinary || '',
         boardConfig.fqbn,
@@ -544,7 +583,6 @@ export class WebSocketArduinoService implements ArduinoService {
         error: result.error
       }
     } catch (error) {
-      console.error('Error uploading sketch:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       return {
         success: false,
@@ -566,14 +604,12 @@ export class WebSocketArduinoService implements ArduinoService {
       // Browser: the service compiles the shipped files into a temp dir as part
       // of the upload, so a separate compile pass here would just build in a
       // throwaway dir and double the (slow) compile. Send one upload instead.
-      if (isVirtualPath(workspacePath)) {
+      if (mustShipFiles(workspacePath)) {
         const uploadResult = await this.uploadSketch(port, boardConfig, workspacePath)
         return {
           compile: {
             success: uploadResult.success,
-            output: uploadResult.success
-              ? 'Compiled and uploaded'
-              : uploadResult.output || '',
+            output: uploadResult.success ? 'Compiled and uploaded' : uploadResult.output || '',
             errors: uploadResult.success
               ? undefined
               : [{ message: uploadResult.error || 'Compilation failed', severity: 'fatal' }]
@@ -706,7 +742,7 @@ export class WebSocketArduinoService implements ArduinoService {
   async installCore(id: string, version?: string): Promise<ArduinoActionResult> {
     if (!this.client) throw new Error('Arduino client not initialized')
     const requestId = this.client.coreInstall(id, version)
-    // Cores (esp32 especially) are large — allow up to 10 minutes.
+    // Cores (esp32 especially) are large; allow up to 10 minutes.
     return this.waitForResponse('core-install', 600000, requestId)
   }
 
@@ -754,7 +790,7 @@ export class WebSocketArduinoService implements ArduinoService {
   // Guard against a dropped backend: serialClose() sends over the socket, which
   // throws "WebSocket is not connected" if the backend already went away. That
   // throw escaped React cleanup and blanked the whole app, so skip it when the
-  // socket is down — there's nothing to close anyway.
+  // socket is down; there's nothing to close anyway.
   closeSerial(): void {
     if (this.client?.isConnected()) this.client.serialClose()
   }
@@ -797,7 +833,7 @@ export class WebSocketArduinoService implements ArduinoService {
   /**
    * Subscribe to server-pushed board events. The backend watches
    * `arduino-cli board list --watch` and broadcasts the full board list on
-   * every plug/unplug — no client polling. Returns an unsubscribe function.
+   * every plug/unplug, no client polling. Returns an unsubscribe function.
    */
   onBoardEvents(cb: (boards: Board[]) => void): () => void {
     if (!this.client) return () => {}

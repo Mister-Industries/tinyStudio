@@ -7,11 +7,18 @@ out
 *.log*
 .npmrc
 
-# Generated web exports in the bundled demo project
-demo/**/index.html
+# Local secrets, such as the dev server's GITHUB_CLIENT_SECRET (docs/github-auth.md)
+.env.local
+.env.*.local
 
 # arduino-cli binaries fetched by scripts/fetch-arduino-cli.mjs
 vendor/
 
-# Per-run diagnostic report written by scripts/fritzing-import.mjs
-src/renderer/src/assets/parts/_report.json
+# Staging output of scripts/fritzing-import.mjs (explode it into tinyparts)
+tmp/
+
+# Temp files left by FUSE-mounted sandboxes
+.fuse_hidden*
+
+# TypeScript incremental build caches
+*.tsbuildinfo

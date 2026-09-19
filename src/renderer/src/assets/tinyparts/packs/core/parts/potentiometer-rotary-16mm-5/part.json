@@ -1,0 +1,33 @@
+{
+  "type": "potentiometer-rotary-16mm-5",
+  "label": "Rotary Potentiometer (Large)",
+  "family": "Potentiometer",
+  "description": "A rotary adjustable resistor (potentiometer).",
+  "source": {
+    "fzp": "potentiometer_rotary_16mm_5.fzp",
+    "moduleId": "potentiometer_rotary_16mm_5_PotentiometerModuleID"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 56.64,
+      "height": 113.38,
+      "pins": {
+        "leg1": [9.15, 107.64],
+        "wiper": [28.32, 107.64],
+        "leg2": [47.49, 107.64]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 24.02,
+      "height": 39.38,
+      "pins": {
+        "leg1": [4.35, 38.88],
+        "wiper": [23.54, 19.68],
+        "leg2": [4.35, 0.48]
+      }
+    }
+  }
+}

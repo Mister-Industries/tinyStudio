@@ -1,7 +1,7 @@
 // Regenerates the tinyStudio app icons.
 //
 // The monogram letterforms are the real Plus Jakarta Sans (ExtraBold) glyph
-// outlines — the app's UI font — converted to vector paths so the icon has no
+// outlines (the app's UI font) converted to vector paths so the icon has no
 // runtime font dependency. The composed master is written to build/icon.svg,
 // then rasterized to the platform icons electron-builder consumes from build/.
 //
@@ -12,7 +12,7 @@
 // (download once from github.com/google/fonts ofl/plusjakartasans).
 
 import { createRequire } from 'node:module'
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { writeFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const req = createRequire(import.meta.url)
@@ -26,7 +26,8 @@ try {
   process.exit(1)
 }
 
-const FONT = process.env.JAKARTA_TTF || 'C:/Users/Geoff McIntyre/AppData/Local/Temp/icongen/jakarta.ttf'
+const FONT =
+  process.env.JAKARTA_TTF || 'C:/Users/Geoff McIntyre/AppData/Local/Temp/icongen/jakarta.ttf'
 const buildDir = resolve(process.cwd(), 'build')
 
 // --- letterforms: real Plus Jakarta Sans ExtraBold glyph outlines ---------
@@ -35,7 +36,6 @@ if (!existsSync(FONT)) {
   process.exit(1)
 }
 const font = fontkit.openSync(FONT).getVariation({ wght: 800 })
-const upm = font.unitsPerEm
 
 function glyph(ch) {
   const run = font.layout(ch)
@@ -102,7 +102,10 @@ writeFileSync(resolve(buildDir, 'icon.svg'), svg + '\n')
 // --- rasterize -------------------------------------------------------------
 const png1024 = await sharp(Buffer.from(svg)).resize(1024, 1024).png().toBuffer()
 writeFileSync(resolve(buildDir, 'icon.png'), png1024)
-writeFileSync(resolve(buildDir, 'icon.ico'), png2icons.createICO(png1024, png2icons.BICUBIC, 0, false))
+writeFileSync(
+  resolve(buildDir, 'icon.ico'),
+  png2icons.createICO(png1024, png2icons.BICUBIC, 0, false)
+)
 writeFileSync(resolve(buildDir, 'icon.icns'), png2icons.createICNS(png1024, png2icons.BICUBIC, 0))
 
 console.log('wrote build/icon.svg, icon.png, icon.ico, icon.icns')

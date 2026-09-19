@@ -10,6 +10,17 @@ const isElectron = (): boolean => {
   return typeof window !== 'undefined' && window.electron != null
 }
 
+/**
+ * Fired on `window` after a write, create, rename or delete through this
+ * service, so views that summarise the project (the GitHub changes list, the
+ * push reminder) can refresh without every caller telling them.
+ */
+export const FILES_CHANGED_EVENT = 'tinystudio:files-changed'
+
+const announceChange = (): void => {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(FILES_CHANGED_EVENT))
+}
+
 export interface UnifiedFileSystemAPI {
   selectFolder(): Promise<string | null>
   readDirectory(dirPath?: string, recursive?: boolean): Promise<FileSystemItem[]>
@@ -49,7 +60,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         return result
       }
     } catch (error) {
-      console.error('Error selecting folder:', error)
       throw new Error(`Failed to select folder: ${(error as Error).message}`)
     }
   }
@@ -58,7 +68,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
   async readDirectory(dirPath = '', recursive = false): Promise<FileSystemItem[]> {
     try {
       // A mem:// path (or a virtual current workspace) is served in-memory,
-      // regardless of Electron vs web — examples/deep links use this.
+      // regardless of Electron vs web; examples/deep links use this.
       if (isVirtualPath(dirPath) || (!dirPath && isVirtualPath(this.currentWorkspace))) {
         return await virtualFileSystem.readDirectory(dirPath || this.currentWorkspace!, recursive)
       }
@@ -72,7 +82,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         return await webFileSystem.readDirectory(dirPath, recursive)
       }
     } catch (error) {
-      console.error('Error reading directory:', error)
       throw new Error(`Failed to read directory: ${(error as Error).message}`)
     }
   }
@@ -89,7 +98,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         return await webFileSystem.readFile(filePath)
       }
     } catch (error) {
-      // In the browser, fall back to the IndexedDB cache — handy when the File
+      // In the browser, fall back to the IndexedDB cache, handy when the File
       // System Access permission was lost on reload but we saved the file before.
       if (!this.isElectron()) {
         const cached = await webCache.get(filePath)
@@ -98,7 +107,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
           return cached
         }
       }
-      console.error('Error reading file:', error)
       throw new Error(`Failed to read file: ${(error as Error).message}`)
     }
   }
@@ -108,9 +116,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     try {
       if (isVirtualPath(filePath)) {
         await virtualFileSystem.writeFile(filePath, content)
-        return
-      }
-      if (this.isElectron()) {
+      } else if (this.isElectron()) {
         await window.api.fs.writeFile(filePath, content)
       } else {
         await webFileSystem.writeFile(filePath, content)
@@ -118,9 +124,9 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         void webCache.put(filePath, content)
       }
     } catch (error) {
-      console.error('Error writing file:', error)
       throw new Error(`Failed to write file: ${(error as Error).message}`)
     }
+    announceChange()
   }
 
   // Create new file
@@ -128,36 +134,32 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     try {
       if (isVirtualPath(filePath)) {
         await virtualFileSystem.createFile(filePath, content)
-        return
-      }
-      if (this.isElectron()) {
+      } else if (this.isElectron()) {
         await window.api.fs.createFile(filePath, content)
       } else {
         await webFileSystem.createFile(filePath, content)
         void webCache.put(filePath, content)
       }
     } catch (error) {
-      console.error('Error creating file:', error)
       throw new Error(`Failed to create file: ${(error as Error).message}`)
     }
+    announceChange()
   }
 
   async renameFile(oldPath: string, newPath: string): Promise<void> {
     try {
       if (isVirtualPath(oldPath) || isVirtualPath(newPath)) {
         await virtualFileSystem.renameFile(oldPath, newPath)
-        return
-      }
-      if (this.isElectron()) {
+      } else if (this.isElectron()) {
         await window.api.fs.renameFile(oldPath, newPath)
       } else {
         await webFileSystem.renameFile(oldPath, newPath)
         void webCache.rename(oldPath, newPath)
       }
     } catch (error) {
-      console.error('Error renaming file:', error)
       throw new Error(`Failed to rename file: ${(error as Error).message}`)
     }
+    announceChange()
   }
 
   // Create new folder
@@ -165,17 +167,15 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     try {
       if (isVirtualPath(folderPath)) {
         await virtualFileSystem.createFolder(folderPath)
-        return
-      }
-      if (this.isElectron()) {
+      } else if (this.isElectron()) {
         await window.api.fs.createFolder(folderPath)
       } else {
         await webFileSystem.createFolder(folderPath)
       }
     } catch (error) {
-      console.error('Error creating folder:', error)
       throw new Error(`Failed to create folder: ${(error as Error).message}`)
     }
+    announceChange()
   }
 
   // Delete file or directory
@@ -183,18 +183,16 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
     try {
       if (isVirtualPath(targetPath)) {
         await virtualFileSystem.deleteFile(targetPath)
-        return
-      }
-      if (this.isElectron()) {
+      } else if (this.isElectron()) {
         await window.api.fs.deleteFile(targetPath)
       } else {
         await webFileSystem.deleteFile(targetPath)
         void webCache.remove(targetPath)
       }
     } catch (error) {
-      console.error('Error deleting file/folder:', error)
       throw new Error(`Failed to delete file/folder: ${(error as Error).message}`)
     }
+    announceChange()
   }
 
   // Check if path exists
@@ -209,7 +207,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         return await webFileSystem.pathExists(targetPath)
       }
     } catch (error) {
-      console.error('Error checking path existence:', error)
+      console.warn('pathExists treated as false:', targetPath, error)
       return false
     }
   }
@@ -226,7 +224,6 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
         return await webFileSystem.getFileStats(filePath)
       }
     } catch (error) {
-      console.error('Error getting file stats:', error)
       throw new Error(`Failed to get file stats: ${(error as Error).message}`)
     }
   }
@@ -389,7 +386,7 @@ class UnifiedFileSystemService implements UnifiedFileSystemAPI {
 
       return null
     } catch (error) {
-      console.error('Error finding/reading README:', error)
+      console.warn('README lookup failed; treated as no README:', error)
       return null
     }
   }

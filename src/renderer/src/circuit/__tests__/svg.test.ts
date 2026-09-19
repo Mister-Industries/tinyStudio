@@ -1,4 +1,4 @@
-/** Tests for parts/svg — id namespacing (B6) and helpers. */
+/** Tests for parts/svg: id namespacing (B6) and helpers. */
 
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
@@ -19,7 +19,7 @@ test('namespaceSvgIds prefixes defined ids and their references', () => {
 test('namespaceSvgIds leaves external references and unknown ids alone', () => {
   const svg = '<svg><rect fill="url(#other)"/><use href="https://x/#frag"/><g id="mine"/></svg>'
   const out = namespaceSvgIds(svg, 'ns')
-  assert.ok(out.includes('url(#other)')) // not defined here — untouched
+  assert.ok(out.includes('url(#other)')) // not defined here, untouched
   assert.ok(out.includes('href="https://x/#frag"'))
   assert.ok(out.includes('id="ns-mine"'))
 })
@@ -38,14 +38,19 @@ test('svgNs sanitizes weird part ids', () => {
 })
 
 test('stripSvgSize removes root width/height only', () => {
-  const out = stripSvgSize('<svg width="10" height="20" viewBox="0 0 10 20"><rect width="5"/></svg>')
+  const out = stripSvgSize(
+    '<svg width="10" height="20" viewBox="0 0 10 20"><rect width="5"/></svg>'
+  )
   assert.ok(!/^<svg[^>]*width="10"/.test(out))
   assert.ok(out.includes('<rect width="5"/>'))
   assert.ok(out.includes('viewBox="0 0 10 20"'))
 })
 
 test('escapeXml escapes the five specials', () => {
-  assert.equal(escapeXml(`<a href="x">R&D's</a>`), '&lt;a href=&quot;x&quot;&gt;R&amp;D&apos;s&lt;/a&gt;')
+  assert.equal(
+    escapeXml(`<a href="x">R&D's</a>`),
+    '&lt;a href=&quot;x&quot;&gt;R&amp;D&apos;s&lt;/a&gt;'
+  )
 })
 
 test('prepareSvgForEmbed strips prolog/doctype and root x/y/width/height (Fritzing exports)', () => {
@@ -67,7 +72,9 @@ test('prepareSvgForEmbed strips prolog/doctype and root x/y/width/height (Fritzi
 })
 
 test('prepareSvgForEmbed keeps inner-element geometry attributes', () => {
-  const out = prepareSvgForEmbed('<svg width="10" viewBox="0 0 10 10"><rect x="1" y="2" width="3" height="4"/></svg>')
+  const out = prepareSvgForEmbed(
+    '<svg width="10" viewBox="0 0 10 10"><rect x="1" y="2" width="3" height="4"/></svg>'
+  )
   assert.ok(out.includes('<rect x="1" y="2" width="3" height="4"/>'))
 })
 
@@ -75,6 +82,6 @@ test('namespaceSvgIds rewrites #id selectors inside style blocks', () => {
   const svg = '<svg><style>.a{fill:red}#body{fill:blue}#other{}</style><g id="body"/></svg>'
   const out = namespaceSvgIds(svg, 'pR1')
   assert.ok(out.includes('#pR1-body{fill:blue}'))
-  assert.ok(out.includes('#other{}')) // not defined as an id here — untouched
+  assert.ok(out.includes('#other{}')) // not defined as an id here, untouched
   assert.ok(out.includes('id="pR1-body"'))
 })

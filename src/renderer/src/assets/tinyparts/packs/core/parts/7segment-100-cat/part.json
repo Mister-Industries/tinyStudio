@@ -1,0 +1,47 @@
+{
+  "type": "7segment-100-cat",
+  "label": "7 Segment Display",
+  "family": "Character Display",
+  "description": "7 Segment Display with common cathode.",
+  "source": {
+    "fzp": "7segment_100_cat.fzp",
+    "moduleId": "7segment100cat"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 256,
+      "height": 347,
+      "pins": {
+        "Segment E": [98.76, 324.73],
+        "Segment D": [113.16, 324.73],
+        "common cathode": [127.56, 324.73],
+        "Segment C": [141.96, 324.73],
+        "Segment DP": [156.36, 324.73],
+        "Segment B": [156.36, 21.43],
+        "Segment A": [141.96, 21.43],
+        "common cathode.2": [127.56, 21.43],
+        "Segment F": [113.16, 21.43],
+        "Segment G": [98.76, 21.43]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 221.13,
+      "height": 115.26,
+      "pins": {
+        "Segment E": [125.92, 114.74],
+        "Segment D": [97.05, 114.77],
+        "common cathode": [111.57, 0.49],
+        "Segment C": [68.35, 114.77],
+        "Segment DP": [212.32, 114.77],
+        "Segment B": [39.6, 114.77],
+        "Segment A": [10.68, 114.77],
+        "common cathode.2": [111.57, 0.49],
+        "Segment F": [154.79, 114.77],
+        "Segment G": [183.57, 114.77]
+      }
+    }
+  }
+}

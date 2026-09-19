@@ -1,0 +1,29 @@
+{
+  "type": "sparkfun-passives-fuse-x20mm",
+  "label": "FUSE",
+  "family": "sparkfun Fuse",
+  "source": {
+    "fzp": "sparkfun-passives-fuse-x20mm.fzp",
+    "moduleId": "SparkFun-Passives-FUSE-X20MM"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 66.77,
+      "height": 20.59,
+      "pins": {
+        "1": [5.04, 10.29],
+        "2": [45.17, 10.29]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 77.73,
+      "height": 20.16,
+      "pins": {
+        "1": [0.47, 10.08],
+        "2": [77.27, 10.08]
+      }
+    }
+  }
+}

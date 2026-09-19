@@ -1,0 +1,31 @@
+{
+  "type": "led-generic-5mm",
+  "label": "Red LED - 5mm",
+  "family": "LED",
+  "description": "A generic red LED (~1.8V)",
+  "source": {
+    "fzp": "LED-generic-5mm.fzp",
+    "moduleId": "5mmColorLEDModuleID"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 20.61,
+      "height": 38.94,
+      "pins": {
+        "cathode": [6.04, 34.37],
+        "anode": [15.64, 34.37]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 13.68,
+      "height": 22.03,
+      "pins": {
+        "cathode": [9.9, 21.82],
+        "anode": [9.9, 0.22]
+      }
+    }
+  }
+}

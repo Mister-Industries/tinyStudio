@@ -3,13 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <title>tinyStudio</title>
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!--
+      Content Security Policy. Script runs only from the app's own files; sketches
+      run in the sandboxed sketch-runner frame, never here. The dev server adds
+      inline script for Vite's React Refresh preamble (vite-plugins.ts devCsp).
+      connect-src allows any localhost port because tinyService moves off 3000
+      when that port is taken.
+    -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; connect-src 'self' ws://localhost:3000 http://localhost:3000 https://api.github.com https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://avatars.githubusercontent.com"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; connect-src 'self' ws://localhost:* http://localhost:* ws://127.0.0.1:* http://127.0.0.1:* https://api.github.com https://raw.githubusercontent.com https://api.anthropic.com https://studio.tinycore.cc; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; frame-src 'self'; object-src 'none'; base-uri 'self'"
     />
-    <!-- p5.js powers the in-tab Visual preview (visual.js sketches) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
   </head>
 
   <body>

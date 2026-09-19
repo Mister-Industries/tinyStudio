@@ -89,9 +89,7 @@ export interface UseArduinoReturn {
     name: string,
     version?: string
   ) => Promise<{ success: boolean; output: string; error?: string }>
-  uninstallLibrary: (
-    name: string
-  ) => Promise<{ success: boolean; output: string; error?: string }>
+  uninstallLibrary: (name: string) => Promise<{ success: boolean; output: string; error?: string }>
 
   // Boards manager
   searchCores: (query: string) => Promise<PlatformEntry[]>
@@ -369,7 +367,7 @@ export function useArduino(): UseArduinoReturn {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
         // Check if this was a timeout error after a successful operation.
-        // (Read through the ref — the state value in this closure is stale.)
+        // (Read through the ref; the state value in this closure is stale.)
         const prevCompile = lastCompileResultRef.current
         const isTimeout = errorMessage.includes('timed out')
         const isAfterSuccess = isTimeout && (prevCompile?.success ?? false)
@@ -480,7 +478,7 @@ export function useArduino(): UseArduinoReturn {
           }
         })
 
-        // Release the serial port before flashing — esptool needs exclusive
+        // Release the serial port before flashing: esptool needs exclusive
         // access to the COM port, and the monitor may still be holding it, so
         // close it and give the OS a moment to free the handle (otherwise the
         // upload fails with "uploading error: exit status 2").
@@ -545,7 +543,7 @@ export function useArduino(): UseArduinoReturn {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
         // Check if this was a timeout error after a successful operation.
-        // (Read through the ref — the state value in this closure is stale.)
+        // (Read through the ref; the state value in this closure is stale.)
         const prevUpload = lastUploadResultRef.current
         const isTimeout = errorMessage.includes('timed out')
         const isAfterSuccess = isTimeout && (prevUpload?.success ?? false)
@@ -630,8 +628,8 @@ export function useArduino(): UseArduinoReturn {
   /**
    * Event-driven board detection: the backend watches
    * `arduino-cli board list --watch` and pushes the full board list on every
-   * plug/unplug. This replaces the old 8-second poll (which stopped polling
-   * once a board was found, so unplugs went unnoticed until manual refresh).
+   * plug/unplug. Event-driven rather than polled, so an unplug shows up at
+   * once instead of at the next manual refresh.
    * The selection is reconciled on every event: kept if the same port is
    * still present, cleared (with a heads-up) if its board was unplugged.
    */
@@ -655,7 +653,7 @@ export function useArduino(): UseArduinoReturn {
           return null
         }
         toast.info('Board changed', {
-          description: `${currentBoard.port} is gone — switched to ${boardsList[0].config.name} (${boardsList[0].port}).`
+          description: `${currentBoard.port} is gone; switched to ${boardsList[0].config.name} (${boardsList[0].port}).`
         })
         return boardsList[0]
       })

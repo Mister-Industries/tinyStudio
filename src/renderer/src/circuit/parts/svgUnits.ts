@@ -1,5 +1,5 @@
 /**
- * circuit/parts/svgUnits — pure SVG unit + transform math for the .fzpz
+ * circuit/parts/svgUnits: pure SVG unit + transform math for the .fzpz
  * importer. Mirrors scripts/fritzing-import.mjs (the offline bulk importer);
  * keep the two in sync. No DOM here so it runs under `node --test`.
  */
@@ -38,7 +38,7 @@ export function toPx(value: string | null | undefined): number | null {
 
 export const IDENT: Mat = [1, 0, 0, 1, 0, 0]
 
-/** m · n — point map is x' = a·x + c·y + e ; y' = b·x + d·y + f */
+/** m · n: point map is x' = a·x + c·y + e ; y' = b·x + d·y + f */
 export function matMul(m: Mat, n: Mat): Mat {
   return [
     m[0] * n[0] + m[2] * n[1],

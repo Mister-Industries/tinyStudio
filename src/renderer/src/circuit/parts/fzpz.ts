@@ -1,15 +1,15 @@
 /**
- * circuit/parts/fzpz — in-app `.fzpz` drop-import (M2, spec §7).
+ * circuit/parts/fzpz: in-app `.fzpz` drop-import (M2, spec §7).
  *
  * A .fzpz is a ZIP of one `part.<name>.fzp` (XML metadata + connector list)
  * plus its view SVGs stored flat as `svg.<view>.<name>.svg`. Fritzing does not
- * store pin coordinates in the .fzp — connectors name an svgId/terminalId and
+ * store pin coordinates in the .fzp; connectors name an svgId/terminalId and
  * the real point lives *inside* the SVG, under an arbitrary transform stack.
  * We resolve each connector by walking the SVG DOM, accumulating ancestor
  * transforms, then scaling viewBox units to pixels @ 96 DPI (Wokwi space).
  *
  * The conversion mirrors scripts/fritzing-import.mjs (the offline bulk
- * importer) — same anchors, same fallbacks — so a drop-imported part matches
+ * importer): same anchors, same fallbacks, so a drop-imported part matches
  * what a regenerated default pack would produce. Uses the browser DOMParser,
  * so this module is renderer-only (don't import it from core/ or tests).
  */
@@ -112,7 +112,10 @@ function localAnchor(el: Element): Anchor | null {
     }
   }
   if (tag === 'polygon' || tag === 'polyline') {
-    const pts = (el.getAttribute('points') || '').trim().split(/[\s,]+/).map(parseFloat)
+    const pts = (el.getAttribute('points') || '')
+      .trim()
+      .split(/[\s,]+/)
+      .map(parseFloat)
     if (pts.length >= 2) return bboxCenter(chunk(pts))
   }
   if (tag === 'path') {
@@ -211,7 +214,10 @@ function extractView(
   const svg = doc.getElementsByTagName('svg')[0]
   if (!svg) return null
 
-  let vb = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(parseFloat)
+  let vb = (svg.getAttribute('viewBox') || '')
+    .trim()
+    .split(/[\s,]+/)
+    .map(parseFloat)
   const wPx = toPx(svg.getAttribute('width'))
   const hPx = toPx(svg.getAttribute('height'))
   if (vb.length !== 4 || vb.some(Number.isNaN)) {
@@ -235,8 +241,7 @@ function extractView(
       continue
     }
     // terminal is the precise wire point in schematic; pin element in breadboard
-    const ids =
-      view === 'schematic' ? [cv.terminalId, cv.svgId] : [cv.svgId, cv.terminalId]
+    const ids = view === 'schematic' ? [cv.terminalId, cv.svgId] : [cv.svgId, cv.terminalId]
     let pt: Pt2 | null = null
     for (const id of ids) {
       if (!id) continue
@@ -263,13 +268,13 @@ function extractView(
       unresolved.push(c.id)
       continue
     }
-    let name = c.name || c.id
+    const name = c.name || c.id
     let n = name
     let i = 2
     while (usedNames.has(n)) n = `${name}.${i++}`
     usedNames.add(n)
     pins[n] = [round((pt.x - vbx) * sx), round((pt.y - vby) * sy)]
-    // bendable rubber-band leg (LED/resistor class parts) — see scripts/
+    // bendable rubber-band leg (LED/resistor class parts); see scripts/
     // fritzing-import.mjs for the matching bulk-importer half of this.
     if (cv.legId) legPins.push(n)
   }
@@ -316,15 +321,13 @@ export async function importFzpz(bytes: Uint8Array, fileName?: string): Promise<
   const byName = new Map(entries.map((e) => [e.name, e]))
 
   const fzpEntry = entries.find((e) => e.name.toLowerCase().endsWith('.fzp'))
-  if (!fzpEntry) throw new Error('no .fzp inside the archive — is this a Fritzing part?')
+  if (!fzpEntry) throw new Error('no .fzp inside the archive. Is this a Fritzing part?')
   const decoder = new TextDecoder()
   const fzp = parseFzp(decoder.decode(fzpEntry.data))
 
   // "part.<name>.fzp" → <name>; fall back to the dropped filename / title
   const base =
-    /^part\.(.+)\.fzp$/i.exec(fzpEntry.name)?.[1] ??
-    fileName?.replace(/\.fzpz$/i, '') ??
-    fzp.title
+    /^part\.(.+)\.fzp$/i.exec(fzpEntry.name)?.[1] ?? fileName?.replace(/\.fzpz$/i, '') ?? fzp.title
   const type = slug(base)
 
   // view image "breadboard/foo.svg" is stored flat as "svg.breadboard.foo.svg"

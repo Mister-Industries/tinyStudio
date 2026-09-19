@@ -3,35 +3,20 @@ import './assets/base.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
-import { Toaster } from 'sonner'
 import App from './App'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { ThemedToaster } from './components/ThemedToaster'
 import { ThemeProvider } from './lib/ThemeProvider'
 import { store } from './redux'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="light">
       <Provider store={store}>
         <ErrorBoundary>
           <App />
         </ErrorBoundary>
-        {/* Toast host — without this, no toast.* feedback ever renders. */}
-        <Toaster
-          theme="dark"
-          position="bottom-right"
-          closeButton
-          toastOptions={{
-            style: {
-              background: 'var(--surface-overlay)',
-              color: 'var(--text-body)',
-              border: '1.5px solid var(--border-default)',
-              borderRadius: 'var(--radius-lg)',
-              boxShadow: 'var(--shadow-soft)',
-              fontFamily: 'var(--font-sans)'
-            }
-          }}
-        />
+        <ThemedToaster />
       </Provider>
     </ThemeProvider>
   </StrictMode>

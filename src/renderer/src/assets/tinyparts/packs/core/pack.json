@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "id": "core",
+  "name": "Core",
+  "version": "2.0.0",
+  "group": "tinyStudio",
+  "icon": "Co",
+  "bundled": true,
+  "description": "Everyday components that ship with tinyStudio: resistors, LEDs, switches, sensors and more.",
+  "sections": [
+    "Basic", "Input", "Output", "Textile", "ICs", "Power", "Microcontroller", "Computer",
+    "Connection", "Breadboard View"
+  ],
+  "parts": [
+    {
+      "type": "resistor",
+      "dir": "parts/resistor",
+      "section": "Basic"
+    },
+    {
+      "type": "capacitor-ceramic-100mil",
+      "dir": "parts/capacitor-ceramic-100mil",
+      "section": "Basic"
+    },
+    {
+      "type": "capacitor-ceramic-200mil",
+      "dir": "parts/capacitor-ceramic-200mil",
+      "section": "Basic"
+    },
+    {
+      "type": "capacitor-electrolytic-medium",
+      "dir": "parts/capacitor-electrolytic-medium",
+      "section": "Basic"
+    },
+    {
+      "type": "smd-inductor-0805",
+      "dir": "parts/smd-inductor-0805",
+      "section": "Basic"
+    },
+    {
+      "type": "diode-1n4001-300mil",
+      "dir": "parts/diode-1n4001-300mil",
+      "section": "Basic"
+    },
+    {
+      "type": "diode-zener-0-5w-3-6v-300mil",
+      "dir": "parts/diode-zener-0-5w-3-6v-300mil",
+      "section": "Basic"
+    },
+    {
+      "type": "transistor-signal-pnp-to92-ebc",
+      "dir": "parts/transistor-signal-pnp-to92-ebc",
+      "section": "Basic"
+    },
+    {
+      "type": "transistor-signal-npn-to92-ebc",
+      "dir": "parts/transistor-signal-npn-to92-ebc",
+      "section": "Basic"
+    },
+    {
+      "type": "sparkfun-discretesemi-mosfet-nchannel-pth",
+      "dir": "parts/sparkfun-discretesemi-mosfet-nchannel-pth",
+      "section": "Basic"
+    },
+    {
+      "type": "potentiometer-trimmer-6mm-5",
+      "dir": "parts/potentiometer-trimmer-6mm-5",
+      "section": "Input"
+    },
+    {
+      "type": "potentiometer-rotary-16mm-5",
+      "dir": "parts/potentiometer-rotary-16mm-5",
+      "section": "Input"
+    },
+    {
+      "type": "pushbutton",
+      "dir": "parts/pushbutton",
+      "section": "Input"
+    },
+    {
+      "type": "switch-spst",
+      "dir": "parts/switch-spst",
+      "section": "Input"
+    },
+    {
+      "type": "ldr-photocell-300mil-v5",
+      "dir": "parts/ldr-photocell-300mil-v5",
+      "section": "Input"
+    },
+    {
+      "type": "ir-receiver-v14",
+      "dir": "parts/ir-receiver-v14",
+      "section": "Input"
+    },
+    {
+      "type": "thermistor-300mil",
+      "dir": "parts/thermistor-300mil",
+      "section": "Input"
+    },
+    {
+      "type": "reedswitch-500mil",
+      "dir": "parts/reedswitch-500mil",
+      "section": "Input"
+    },
+    {
+      "type": "sparkfun-sensors-mic-electret-smd",
+      "dir": "parts/sparkfun-sensors-mic-electret-smd",
+      "section": "Input"
+    },
+    {
+      "type": "led-generic-5mm",
+      "dir": "parts/led-generic-5mm",
+      "section": "Output"
+    },
+    {
+      "type": "led-generic-3mm",
+      "dir": "parts/led-generic-3mm",
+      "section": "Output"
+    },
+    {
+      "type": "7segment-100-cat",
+      "dir": "parts/7segment-100-cat",
+      "section": "Output"
+    },
+    {
+      "type": "piezo-sensor",
+      "dir": "parts/piezo-sensor",
+      "section": "Output"
+    },
+    {
+      "type": "buzzer-v15",
+      "dir": "parts/buzzer-v15",
+      "section": "Output"
+    },
+    {
+      "type": "servo",
+      "dir": "parts/servo",
+      "section": "Output"
+    },
+    {
+      "type": "te-relay",
+      "dir": "parts/te-relay",
+      "section": "Output"
+    },
+    {
+      "type": "battery-aa",
+      "dir": "parts/battery-aa",
+      "section": "Power"
+    },
+    {
+      "type": "voltage-regulator-7805",
+      "dir": "parts/voltage-regulator-7805",
+      "section": "Power"
+    },
+    {
+      "type": "sparkfun-passives-fuse-x20mm",
+      "dir": "parts/sparkfun-passives-fuse-x20mm",
+      "section": "Power"
+    }
+  ]
+}

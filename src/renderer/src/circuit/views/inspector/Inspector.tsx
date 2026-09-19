@@ -1,12 +1,20 @@
 /**
- * circuit/views/inspector/Inspector — right-rail editing for the selection.
+ * circuit/views/inspector/Inspector: right-rail editing for the selection.
  * Part: refdes (rename with uniqueness check), label, location, rotation,
  * typed attrs. Wire: color, net info. Multi-select: summary + delete.
  * All edits dispatch Commands (undoable); moves/rotations reroute wires with
  * frozen bends like canvas drags do.
  */
 
-import { CircuitBoard, FlipHorizontal2, Plus, RotateCw, Spline, Trash2 } from 'lucide-react'
+import {
+  CircuitBoard,
+  FlipHorizontal2,
+  ListOrdered,
+  Plus,
+  RotateCw,
+  Spline,
+  Trash2
+} from 'lucide-react'
 import React from 'react'
 import { getPart } from '../../../lib/partsLibrary'
 import * as cmd from '../../core/commands'
@@ -31,27 +39,28 @@ import {
   rotateBoardAssemblyCmd,
   rotateNetLabelCmd
 } from '../partsAdapter'
-import { WIRE_COLORS } from '../palette/Palette'
-import type { Selection } from '../canvas/Canvas'
+import { WIRE_COLORS } from '../palette/wireColors'
+import type { Selection } from '../canvas/selection'
 
 const field =
   'bg-bg-sunken border border-border-default rounded px-2 py-1 text-text-strong outline-none focus:border-brand w-full'
 const rowLabel = 'text-[11px] text-text-muted'
 
-function titleCase(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/\b([a-z])/g, (m) => m.toUpperCase())
-    .replace(/\bIc\b/, 'IC')
-}
-
+/**
+ * The Properties panel: everything about whatever is selected.
+ *
+ * Lives inside the shell's tabbed right rail (Properties | Simulate), so it
+ * renders as a plain column; the tab strip above it is the panel's header.
+ */
 export function InspectorRail({
   doc,
   store,
   sel,
   setSel,
   netModel,
-  view
+  view,
+  editable = true,
+  onRenumber
 }: {
   doc: CircuitDoc
   store: CircuitStore
@@ -59,6 +68,9 @@ export function InspectorRail({
   setSel: (s: Selection) => void
   netModel: NetModel
   view: ViewId
+  editable?: boolean
+  /** Rewrite every part id to a conventional refdes (offered when ids are slugs). */
+  onRenumber?: () => void
 }): React.JSX.Element {
   const part =
     sel.parts.size === 1 && sel.wires.size === 0
@@ -75,10 +87,7 @@ export function InspectorRail({
       : undefined
 
   return (
-    <div className="w-64 shrink-0 min-h-0 relative z-20 border-l border-border-default bg-bg-raised flex flex-col">
-      <div className="h-9 flex items-center px-3 border-b border-border-default shrink-0">
-        <span className="text-[13px] font-semibold text-text-body">Inspector</span>
-      </div>
+    <div className="flex-1 min-h-0 flex flex-col">
       <div className="flex-1 min-h-0 overflow-y-auto p-3 flex flex-col gap-3 text-xs">
         {part ? (
           <PartInspector
@@ -103,11 +112,23 @@ export function InspectorRail({
           <LabelInspector key={label.id} label={label} doc={doc} store={store} setSel={setSel} />
         ) : (
           <div className="text-text-faint text-[11px] leading-relaxed">
-            Select a component to edit its refdes, location, rotation, and properties — or a wire to
-            recolor it. Shift-click or drag a marquee for multi-select.
+            {editable
+              ? 'Select a component to edit its refdes, location, rotation, and properties, or a wire to recolor it. Shift-click or drag a marquee for multi-select.'
+              : 'Switch on editing to change component properties. Select a component to inspect it.'}
           </div>
         )}
       </div>
+      {onRenumber && (
+        <div className="shrink-0 border-t border-border-default p-2">
+          <button
+            className="w-full h-7 flex items-center justify-center gap-1.5 rounded-md bg-surface-card border border-border-default text-[11px] text-text-muted hover:text-text-body"
+            title="Rename every part to a conventional reference designator (R1, C2, D3…), numbered the way the sheet reads"
+            onClick={onRenumber}
+          >
+            <ListOrdered size={12} /> Renumber refdes
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -163,7 +184,7 @@ function PartInspector({
     if (!pv) return
     const next = (((deg % 360) + 360) % 360) as 0 | 90 | 180 | 270
     // Breadboards rotate as a rigid assembly (board + seated parts + wires
-    // between them) — same path as the canvas R / right-click gesture.
+    // between them): same path as the canvas R / right-click gesture.
     if (view === 'bb' && isBreadboard(part.type)) {
       const steps = ((next - (pv.rotate ?? 0)) / 90 + 4) % 4
       const c = rotateBoardAssemblyCmd(doc, part.id, implicitSeats(doc), steps)
@@ -192,7 +213,7 @@ function PartInspector({
     [w.from, w.to].some((e) => typeof e === 'string' && e.split(':')[0] === part.id)
   ).length
 
-  const simAttrs = simAttrsFor(part.type, def?.family)
+  const simAttrs = simAttrsFor(part.type, def?.simFamily ?? def?.family)
   const simKeys = new Set(simAttrs.map((a) => a.key))
   const propRows = Object.entries(part.attrs || {}).filter(
     ([k]) => k !== 'label' && !simKeys.has(k)
@@ -223,10 +244,12 @@ function PartInspector({
         />
       </div>
       <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 items-center text-text-muted">
-        <span className={rowLabel}>Type</span>
-        <span className="text-text-body truncate text-[11px]">{part.type}</span>
-        <span className={rowLabel}>Family</span>
-        <span className="text-text-body truncate">{def?.family ? titleCase(def.family) : '—'}</span>
+        <span className={rowLabel}>Component</span>
+        <span className="text-text-body truncate" title={part.type}>
+          {def?.label ?? part.type}
+        </span>
+        <span className={rowLabel}>Category</span>
+        <span className="text-text-body truncate">{def?.family ?? '-'}</span>
         <span className={rowLabel}>Wires</span>
         <span className="text-text-body">{wiresTouching}</span>
       </div>
@@ -268,7 +291,7 @@ function PartInspector({
                 ))}
               </select>
               <button
-                className="tactile-bordered rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand"
+                className="tactile-outline rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand"
                 title="Rotate 90°"
                 onClick={() => setRotation((pv.rotate || 0) + 90)}
               >
@@ -276,7 +299,7 @@ function PartInspector({
               </button>
               {view === 'sch' && (
                 <button
-                  className={`tactile-bordered rounded-md p-1.5 bg-surface-card hover:text-brand ${pv.flip ? 'text-brand' : 'text-text-muted'}`}
+                  className={`tactile-outline rounded-md p-1.5 bg-surface-card hover:text-brand ${pv.flip ? 'text-brand' : 'text-text-muted'}`}
                   title="Mirror horizontally (F)"
                   onClick={toggleFlip}
                 >
@@ -303,7 +326,11 @@ function PartInspector({
                 title={a.hint}
                 onChange={(e) =>
                   store.dispatch(
-                    cmd.setPartAttr(part.id, a.key, e.target.value === '' ? undefined : e.target.value)
+                    cmd.setPartAttr(
+                      part.id,
+                      a.key,
+                      e.target.value === '' ? undefined : e.target.value
+                    )
                   )
                 }
               />
@@ -319,7 +346,7 @@ function PartInspector({
         <span className={rowLabel}>Properties</span>
         {propRows.length === 0 && (
           <div className="text-[11px] text-text-faint">
-            No properties yet. Add one below — e.g. a resistor’s{' '}
+            No properties yet. Add one below, e.g. a resistor’s{' '}
             <span className="text-text-body">value</span>.
           </div>
         )}
@@ -356,7 +383,7 @@ function PartInspector({
             }}
           />
           <button
-            className="tactile-bordered rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand shrink-0"
+            className="tactile-outline rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand shrink-0"
             title="Add property"
             onClick={() => {
               if (newAttr.trim()) {
@@ -542,7 +569,7 @@ function LabelInspector({
               let c: ReturnType<typeof rotateNetLabelCmd> = null
               let d = doc
               // rotateNetLabelCmd is a single 90° step; compose to reach target
-              const steps = (((target - (label.sch.rotate || 0)) / 90 + 4) % 4 + 4) % 4
+              const steps = ((((target - (label.sch.rotate || 0)) / 90 + 4) % 4) + 4) % 4
               const cmds: cmd.Command[] = []
               for (let i = 0; i < steps; i++) {
                 c = rotateNetLabelCmd(d, label.id)
@@ -573,7 +600,7 @@ function LabelInspector({
         </div>
       </label>
       <p className="text-[11px] text-text-faint leading-relaxed">
-        Labels sharing a name join the same net — a clean way to wire power and ground without long
+        Labels sharing a name join the same net: a clean way to wire power and ground without long
         wires.
       </p>
       <button

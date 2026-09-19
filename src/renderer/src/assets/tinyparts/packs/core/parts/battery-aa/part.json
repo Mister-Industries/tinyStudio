@@ -1,0 +1,31 @@
+{
+  "type": "battery-aa",
+  "label": "Battery",
+  "family": "Battery",
+  "description": "Your standard 2x AA battery pack (3 Volts)",
+  "source": {
+    "fzp": "battery-AA.fzp",
+    "moduleId": "1000AFDF10011leg"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 222.88,
+      "height": 116.64,
+      "pins": {
+        "-": [215.99, 63.58],
+        "+": [215.99, 45.33]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 39.33,
+      "height": 30.34,
+      "pins": {
+        "-": [38.87, 15.17],
+        "+": [0.47, 15.17]
+      }
+    }
+  }
+}

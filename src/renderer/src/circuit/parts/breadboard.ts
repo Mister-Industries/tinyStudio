@@ -1,16 +1,16 @@
 /**
- * circuit/parts/breadboard — procedural breadboard PartDefs (spec §5.1).
+ * circuit/parts/breadboard: procedural breadboard PartDefs (spec §5.1).
  *
  * Generates crisp SVG + pin maps for three sizes; sizes are parametric so a
  * new size is one line. Hole pitch is GRID_BB (2.54 mm @ 96 DPI) and the
  * FIRST PIN sits exactly on a pitch multiple, so snap-by-first-pin placement
- * puts every hole on the canvas grid — which is what makes drop-to-connect
+ * puts every hole on the canvas grid, which is what makes drop-to-connect
  * degenerate to exact coordinate matches.
  *
  * Pin naming: main grid `a1…j63` (rows a–e top bank, f–j bottom bank, column
  * numbers 1..N). Power rails: `t+1…`, `t-1…` (top), `b+1…`, `b-1…` (bottom).
  * Buses (internally common groups): each column's [a…e] and [f…j], plus one
- * bus per rail — consumed by buildNets via `busesFor`.
+ * bus per rail, consumed by buildNets via `busesFor`.
  *
  * Registered into the (legacy, M1-era) partsLibrary at Circuit View mount;
  * the M2+ pack registry will take over ownership without changing geometry.
@@ -112,6 +112,8 @@ export function generateBreadboard(spec: BreadboardSpec): GeneratedBreadboard {
     label: spec.label,
     family: 'Breadboards',
     builtin: true,
+    bin: 'core',
+    section: 'Breadboard View',
     views: { breadboard: { svg: renderSvg(spec, L), w: L.w, h: L.h, pins } }
   }
   return { def, buses }

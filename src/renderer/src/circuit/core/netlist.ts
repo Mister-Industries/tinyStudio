@@ -1,21 +1,21 @@
 /**
- * circuit/core/netlist — SPICE netlist generation (M4, spec §10.2).
+ * circuit/core/netlist: SPICE netlist generation (M4, spec §10.2).
  *
  * Pure: takes the document + a prebuilt NetModel (so breadboard seating and
  * registry buses are included exactly as the editor sees them) and returns
- * netlist text + node naming + warnings. No React, no DOM, no engine — the
+ * netlist text + node naming + warnings. No React, no DOM, no engine; the
  * SimBackend consumes the text; tests golden-file it.
  *
  * Node naming: a net named GND (ground labels) is node `0`; other named nets
  * keep their (sanitized) label name; everything else is `n<k>` in stable net
- * order — diffable golden files.
+ * order: diffable golden files.
  *
  * Part mapping: built-in table keyed on family/type keywords (resistor, led,
  * battery, the sim-* sources…). Pins are matched by name (anode/cathode/+/-)
  * with positional fallback, since the Fritzing catalogue is inconsistent
  * ("Pin 0" vs "leg1" vs "0"). Parts without a mapping: breadboards are
  * transparent (their buses already merged nets), boards/MCUs are excluded
- * with an info (model their pins with sources — §10.2.5), other parts are
+ * with an info (model their pins with sources; §10.2.5), other parts are
  * excluded with a warning. The curated tinyparts overlay replaces this table
  * eventually; keep the shape compatible.
  */
@@ -26,7 +26,7 @@ import type { NetModel } from './nets'
 // ── SPICE value normalization ────────────────────────────────────────────────
 
 /** Normalize a human attr ("4.7kΩ", "10 µF", "1M") into a SPICE number.
- * Note SPICE reads `m` as milli — a trailing capital M (common for megohm)
+ * Note SPICE reads `m` as milli: a trailing capital M (common for megohm)
  * becomes `Meg`; lowercase m stays milli. */
 export function spiceNum(v: string | number | boolean | undefined, fallback: string): string {
   if (v === undefined || v === true || v === false) return fallback
@@ -46,6 +46,24 @@ function nodeToken(name: string): string {
   return name.replace(/[^A-Za-z0-9_.]+/g, '_')
 }
 
+/**
+ * Node name per net index (spec §10.2.2): a net named GND is `0`, other named
+ * nets keep their sanitized label, everything else is `n<k>` in net order.
+ *
+ * Exported because the canvas needs the same names the netlist will use; a
+ * probe tag reading `n3` while SPICE calls that node `n4` is worse than no
+ * label at all, so there is exactly one implementation and both callers use it.
+ */
+export function nodeNamesForNets(net: NetModel): string[] {
+  let seq = 1
+  return net.nets.map((_members, i) => {
+    const name = net.netNames[i]
+    if (name && name.toUpperCase() === 'GND') return '0'
+    if (name) return nodeToken(name)
+    return `n${seq++}`
+  })
+}
+
 // ── part mapping ─────────────────────────────────────────────────────────────
 
 export interface SpiceCard {
@@ -60,6 +78,14 @@ export type MappingKind = 'element' | 'transparent' | 'board' | 'unknown'
 export interface NetlistOptions {
   /** family for a part type (from the parts registry); improves matching */
   familyOf?: (type: string) => string | undefined
+  /**
+   * Per-part starting values (parts/naming PART_DEFAULT_ATTRS), consulted
+   * before this table's generic keyword defaults. Without it a 2xAA pack that
+   * the user never edited would simulate as the generic 5 V source while the
+   * schematic prints 3 V beside it; the sheet must never disagree with what
+   * SPICE is given.
+   */
+  defaultAttrsOf?: (type: string) => Record<string, string> | undefined
   title?: string
 }
 
@@ -71,13 +97,13 @@ export interface NetlistResult {
   /** part ids not simulated (unknown/board) */
   excluded: string[]
   /** SPICE element/device names emitted per part id (e.g. R1 → ['rr1']),
-   *  lowercased to match ngspice's own casing — feeds mapSimIssue. */
+   *  lowercased to match ngspice's own casing; feeds mapSimIssue. */
   elementOfPart: Record<string, string[]>
 }
 
 interface Ctx {
   part: CircuitPart
-  /** ordered pin names actually referenced by nets or the registry — here we
+  /** ordered pin names actually referenced by nets or the registry; here we
    * only know what the doc wired; order = wire discovery order. */
   nodeOf: (pin: string) => string
   pins: string[]
@@ -93,7 +119,7 @@ function pinLike(ctx: Ctx, res: RegExp[], positional: number, what: string): str
   }
   const p = ctx.pins[positional]
   if (p === undefined) {
-    ctx.warn(`${ctx.part.id}: no pin for ${what} — grounded`)
+    ctx.warn(`${ctx.part.id}: no pin for ${what}; grounded`)
     return '0'
   }
   return ctx.nodeOf(p)
@@ -210,8 +236,7 @@ const EMITTERS: {
     emit: (c) => {
       const plus = c.pins.find((p) => PLUS.some((re) => re.test(p)))
       const minus = c.pins.find((p) => MINUS.some((re) => re.test(p)))
-      const [a, b] =
-        plus && minus ? [c.nodeOf(plus), c.nodeOf(minus)] : two(c)
+      const [a, b] = plus && minus ? [c.nodeOf(plus), c.nodeOf(minus)] : two(c)
       return { lines: [`C${c.part.id} ${a} ${b} ${c.attr(['capacitance', 'value'], '100n')}`] }
     }
   },
@@ -281,14 +306,14 @@ const EMITTERS: {
   },
   {
     // current probe (spec §10.3): a 0V series source, so ngspice reports
-    // i(v<id>) through it without disturbing the circuit — an ideal ammeter.
+    // i(v<id>) through it without disturbing the circuit: an ideal ammeter.
     match: /^sim-probe-i\b/i,
     emit: (c) => {
       const [a, b] = two(c)
       return { lines: [`V${c.part.id} ${a} ${b} DC 0`] }
     }
   },
-  // voltage / diff. voltage probes need no element — every node's voltage is
+  // voltage / diff. voltage probes need no element; every node's voltage is
   // already reported by ngspice; core/probes.ts reads it back by node name
   // (and computes the diff-probe subtraction). Just don't warn about them.
   { match: /^sim-probe-vdiff\b/i, kind: 'transparent' },
@@ -310,7 +335,16 @@ function spiceScale(total: string, frac: number): string {
   const m = total.match(/^([0-9.eE+-]+)\s*(Meg|[kKmunpfgt])?$/)
   if (!m) return total
   const mult: Record<string, number> = {
-    Meg: 1e6, k: 1e3, K: 1e3, m: 1e-3, u: 1e-6, n: 1e-9, p: 1e-12, f: 1e-15, g: 1e9, t: 1e12
+    Meg: 1e6,
+    k: 1e3,
+    K: 1e3,
+    m: 1e-3,
+    u: 1e-6,
+    n: 1e-9,
+    p: 1e-12,
+    f: 1e-15,
+    g: 1e9,
+    t: 1e12
   }
   const base = parseFloat(m[1]) * (m[2] ? mult[m[2]] : 1)
   const v = base * frac
@@ -334,13 +368,7 @@ export function generateNetlist(
   const excluded: string[] = []
 
   // node names per net (spec §10.2.2)
-  let seq = 1
-  const nodeOfNet = net.nets.map((_members, i) => {
-    const name = net.netNames[i]
-    if (name && name.toUpperCase() === 'GND') return '0'
-    if (name) return nodeToken(name)
-    return `n${seq++}`
-  })
+  const nodeOfNet = nodeNamesForNets(net)
   let ncSeq = 1
 
   const lines: string[] = []
@@ -353,13 +381,15 @@ export function generateNetlist(
     const entry = EMITTERS.find((e) => e.match.test(key))
     if (!entry) {
       excluded.push(part.id)
-      warnings.push(`${part.id} (${part.type}) has no simulation model — excluded`)
+      warnings.push(`${part.id} (${part.type}) has no simulation model; excluded`)
       continue
     }
     if (entry.kind === 'transparent') continue
     if (entry.kind === 'board') {
       excluded.push(part.id)
-      warnings.push(`${part.id} (${part.type}) is a board — not simulated; drive its pins with sources`)
+      warnings.push(
+        `${part.id} (${part.type}) is a board, not simulated; drive its pins with sources`
+      )
       continue
     }
 
@@ -381,8 +411,9 @@ export function generateNetlist(
         return nodeOfNet[idx]
       },
       attr: (names, fallback) => {
+        const defaults = opts.defaultAttrsOf?.(part.type)
         for (const n of names) {
-          const v = part.attrs?.[n]
+          const v = part.attrs?.[n] ?? defaults?.[n]
           if (v !== undefined) return spiceNum(v, fallback)
         }
         return fallback
@@ -399,7 +430,7 @@ export function generateNetlist(
     }
   }
 
-  // analyses (spec §10.2.4) — default to .op
+  // analyses (spec §10.2.4); default to .op
   const analyses = (doc.sim?.analyses ?? []).filter((a) => a.enabled !== false)
   const resolved = analyses.map(analysisCard).filter(Boolean)
   const cards = resolved.length ? resolved : ['.op'] // never emit a card-less netlist
@@ -453,7 +484,7 @@ function escapeReg(s: string): string {
  * Map one raw ngspice error/warning line back to the parts and nets it names,
  * using the element/node names `generateNetlist` recorded for this run.
  * Case-insensitive, word-boundary matching (ngspice lowercases everything it
- * prints). Ground (`0`) is skipped — it appears in far too much numeric text
+ * prints). Ground (`0`) is skipped; it appears in far too much numeric text
  * to be a useful match.
  */
 export function mapSimIssue(text: string, gen: NetlistResult): SimIssueRef {
@@ -482,3 +513,75 @@ export function mapSimIssues(lines: string[], gen: NetlistResult): SimIssueRef {
   }
   return { parts: [...parts], nets: [...nets] }
 }
+
+// ── analysis sizing (crash guard) ────────────────────────────────────────────
+
+const SPICE_SUFFIX: Record<string, number> = {
+  meg: 1e6,
+  t: 1e12,
+  g: 1e9,
+  k: 1e3,
+  m: 1e-3,
+  u: 1e-6,
+  n: 1e-9,
+  p: 1e-12,
+  f: 1e-15
+}
+
+/** Numeric value of a SPICE-ish quantity ("10u", "4.7k", "1Meg", "1e3"). */
+export function spiceValue(v: string | number | boolean | undefined, fallback = NaN): number {
+  if (v === undefined || typeof v === 'boolean') return fallback
+  if (typeof v === 'number') return v
+  const s = spiceNum(v, '').toLowerCase()
+  const m = /^([-+]?(?:[0-9]*\.)?[0-9]+(?:e[-+]?[0-9]+)?)\s*(meg|[tgkmunpf])?/.exec(s)
+  if (!m) return fallback
+  const base = parseFloat(m[1])
+  if (!Number.isFinite(base)) return fallback
+  return m[2] ? base * SPICE_SUFFIX[m[2]] : base
+}
+
+/**
+ * Points an analysis will produce. ngspice materializes every vector at every
+ * point, so this is the number that decides whether a run costs a megabyte or
+ * eats the renderer: `.tran 1n 10` is ten billion points, and asking for it
+ * would take the whole app down with it. The panel refuses anything past
+ * MAX_SIM_POINTS and says which knob to turn.
+ */
+export function estimatePoints(a: Analysis): number {
+  const n = (k: string, d: number): number => {
+    const v = spiceValue(a[k] as string | number | undefined, NaN)
+    return Number.isFinite(v) ? v : d
+  }
+  switch (a.kind) {
+    case 'op':
+      return 1
+    case 'tran': {
+      const step = n('step', 10e-6)
+      const stop = n('stop', 10e-3)
+      const start = n('start', 0)
+      if (!(step > 0) || !(stop > start)) return 0
+      return Math.floor((stop - start) / step) + 1
+    }
+    case 'dc': {
+      const step = Math.abs(n('step', 0.1))
+      const span = Math.abs(n('to', 5) - n('from', 0))
+      if (!(step > 0)) return 0
+      return Math.floor(span / step) + 1
+    }
+    case 'ac': {
+      const pts = Math.max(1, n('points', 20))
+      const f0 = n('fstart', 1)
+      const f1 = n('fstop', 1e6)
+      if (!(f1 > 0) || !(f0 > 0) || f1 <= f0) return Math.round(pts)
+      const variation = String(a.variation ?? 'dec')
+      if (variation === 'lin') return Math.round(pts)
+      const spans = variation === 'oct' ? Math.log2(f1 / f0) : Math.log10(f1 / f0)
+      return Math.round(pts * spans) + 1
+    }
+    default:
+      return 0
+  }
+}
+
+/** Above this an analysis is refused before it reaches the engine. */
+export const MAX_SIM_POINTS = 250_000

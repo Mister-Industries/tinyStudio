@@ -1,20 +1,25 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { notify as toast } from './lib/notify'
+import { notify as toast, reportError } from './lib/notify'
+import { completeWebSignIn, isCallbackUrl } from './lib/githubWebAuth'
 import { BackendPrompt } from './components/BackendPrompt'
-import { LoadGitHubProjectCommand, OpenWorkspaceCommand } from './commands/fileCommands'
+import { loadGitHubProject, openRecentFolder, openFolder } from './commands/fileCommands'
+import { listRecentProjects } from './lib/projectStore'
+import { STORAGE_KEYS } from './lib/storageKeys'
 import { parseProjectRoute } from './lib/projectRouting'
+import { serveStudioRequests } from './lib/studioBridge'
 import { DocsPanel } from './components/DocsPanel'
 import { EditorPanel } from './components/EditorPanel'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { FileExplorer } from './components/FileExplorer'
 import { Header } from './components/Header'
+import { ProjectDialogs } from './components/ProjectDialogs'
 import { SerialMonitor } from './components/SerialMonitor'
 import { StatusBar } from './components/StatusBar'
 import { Toolbar } from './components/Toolbar'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './components/ui/Resizable'
 import { getPanelGroupElement, type ImperativePanelHandle } from 'react-resizable-panels'
-import { ArduinoProvider } from './contexts/ArduinoContext'
-import { SerialProvider } from './contexts/SerialContext'
+import { ArduinoProvider } from './contexts/ArduinoProvider'
+import { SerialProvider } from './contexts/SerialProvider'
 import { fileSystem } from './lib/fileSystem'
 import {
   selectEditorView,
@@ -29,6 +34,9 @@ export default function App(): React.JSX.Element {
   const { isFileExplorerOpen, isSerialMonitorOpen, isDocsPanelOpen } =
     useAppSelector(selectPanelState)
   const editorView = useAppSelector(selectEditorView)
+  // A boolean, not the workspace itself: a file-tree refresh swaps the object,
+  // and that mustn't re-open a monitor the user closed.
+  const hasWorkspace = useAppSelector((state) => state.file.workspace !== null)
   const dispatch = useAppDispatch()
   const [editorSize, setEditorSize] = useState(50)
 
@@ -74,16 +82,21 @@ export default function App(): React.JSX.Element {
     return () => cancelAnimationFrame(id)
   }, [isDocsPanelOpen, isSerialMonitorOpen, isFileExplorerOpen, applyFilePanelWidth])
 
-  // The serial monitor / output dock only makes sense while coding — close it
-  // when switching to the full-window Circuit or Visual views, reopen on Code.
+  // The serial monitor / output dock only makes sense while coding a project;
+  // close it for the full-window Circuit or Visual views and when nothing is
+  // open (the start screen gets the whole column), reopen on Code once a
+  // project is.
   useEffect(() => {
-    dispatch(setPanelOpen({ panel: 'monitor', isOpen: editorView === 'code' }))
-  }, [editorView, dispatch])
+    dispatch(setPanelOpen({ panel: 'monitor', isOpen: editorView === 'code' && hasWorkspace }))
+  }, [editorView, hasWorkspace, dispatch])
+
+  // Desktop: Studio AI runs in the main process, but the parts registry and the
+  // serial buffer its tools read live here (lib/studioBridge).
+  useEffect(() => serveStudioRequests(), [])
 
   // Cleanup Arduino service on unmount
   useEffect(() => {
     return () => {
-      console.log('Cleaning up Arduino service on app unmount')
       ArduinoServiceFactory.cleanup()
     }
   }, [])
@@ -96,37 +109,60 @@ export default function App(): React.JSX.Element {
   // takes precedence over reopening the last local workspace. Otherwise, reopen
   // the last workspace (if it still exists on disk).
   //
-  // Guard against running twice — StrictMode double-invokes effects in dev, and a
-  // second open rebuilds the tree with new ids, which previously opened a
-  // duplicate tab for the auto-opened sketch.
+  // Guard against running twice: StrictMode double-invokes effects in dev, and a
+  // second open rebuilds the tree with new ids, which would open a duplicate
+  // tab for the auto-opened sketch.
   const reopenedRef = useRef(false)
   useEffect(() => {
     if (reopenedRef.current) return
     reopenedRef.current = true
 
-    const route = parseProjectRoute()
-    if (route) {
-      new LoadGitHubProjectCommand(route.owner, route.repo, route.path).execute().catch((e) => {
-        console.error('Failed to load project from URL:', e)
-        toast.error('Could not open that project', {
-          description: e instanceof Error ? e.message : String(e)
-        })
+    // Back from github.com (web build): finish signing in, then carry on from
+    // the page the user was on, which may itself be a project deep link.
+    if (!fileSystem.isElectron() && isCallbackUrl()) {
+      void completeWebSignIn().then((result) => {
+        window.history.replaceState(null, '', result.returnTo)
+        if (result.account) toast.success(`Signed in as ${result.account.login}`)
+        else if (result.error) toast.error('GitHub sign-in failed', { description: result.error })
+        const back = parseProjectRoute(new URL(result.returnTo, window.location.origin).pathname)
+        if (back) {
+          loadGitHubProject(back.owner, back.repo, back.path).catch((e) =>
+            reportError('Could not open that project', e)
+          )
+        }
       })
       return
     }
 
-    const last = localStorage.getItem('tinystudio.lastWorkspace')
+    const route = parseProjectRoute()
+    if (route) {
+      loadGitHubProject(route.owner, route.repo, route.path).catch((e) =>
+        reportError('Could not open that project', e)
+      )
+      return
+    }
+
+    const last = localStorage.getItem(STORAGE_KEYS.lastWorkspace)
     if (!last) return
-    fileSystem
-      .pathExists(last)
-      .then((exists) => {
-        if (exists) {
-          void new OpenWorkspaceCommand(last).execute()
-        } else {
-          localStorage.removeItem('tinystudio.lastWorkspace')
-        }
+    if (!fileSystem.isElectron()) {
+      // Browser: a folder only comes back through its stored handle, and only
+      // while access is still granted. Asking again needs a click, so otherwise
+      // it waits under Recent on the start screen.
+      const entry = listRecentProjects().find((r) => r.kind === 'folder' && r.location === last)
+      if (entry) {
+        openRecentFolder(entry, { prompt: false }).catch((e) =>
+          console.warn('Could not reopen the last folder at launch:', e)
+        )
+      }
+      return
+    }
+    Promise.all([fileSystem.pathExists(last), window.api.fs.hasAccess(last)])
+      .then(([exists, allowed]) => {
+        if (!exists) localStorage.removeItem(STORAGE_KEYS.lastWorkspace)
+        // A folder from before access was tracked waits under Recent until it's chosen again.
+        else if (allowed) void openFolder(last)
       })
-      .catch((e) => console.error('Failed to reopen last workspace:', e))
+      .catch((e) => console.warn('Could not reopen the last workspace at launch:', e))
   }, [])
 
   // Honor browser back/forward between projects.
@@ -134,9 +170,9 @@ export default function App(): React.JSX.Element {
     const onPop = (): void => {
       const route = parseProjectRoute()
       if (route) {
-        new LoadGitHubProjectCommand(route.owner, route.repo, route.path)
-          .execute()
-          .catch((e) => console.error('Failed to load project on navigation:', e))
+        loadGitHubProject(route.owner, route.repo, route.path).catch((e) =>
+          reportError('Could not open that project', e)
+        )
       }
     }
     window.addEventListener('popstate', onPop)
@@ -202,6 +238,7 @@ export default function App(): React.JSX.Element {
           </ResizablePanelGroup>
           <StatusBar />
           <BackendPrompt />
+          <ProjectDialogs />
         </div>
       </SerialProvider>
     </ArduinoProvider>

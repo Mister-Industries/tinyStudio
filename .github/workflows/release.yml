@@ -1,0 +1,151 @@
+name: Release
+
+# Builds the desktop installers on Windows, macOS and Linux.
+#
+# - Pushing a tag like v0.4.0 builds all three and creates a DRAFT GitHub
+#   release with the installers attached. Check it, then click Publish.
+# - Running it by hand (Actions → Release → Run workflow) builds the installers
+#   and keeps them as workflow artifacts, without making a release: a dry run.
+#
+# The installers are unsigned (macOS: ad-hoc signed), so Windows SmartScreen and
+# macOS Gatekeeper warn on first launch. The release notes say how to get past
+# that. See docs/releasing.md.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            target: win
+            vendor: windows-x64
+            files: dist/*.exe
+          - name: macOS
+            os: macos-latest
+            target: mac
+            vendor: macos-arm64 macos-x64
+            files: dist/*.dmg
+          - name: Linux
+            os: ubuntu-latest
+            target: linux
+            vendor: linux-x64
+            files: |
+              dist/*.AppImage
+              dist/*.deb
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check the tag matches package.json
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME doesn't match package.json version $version"
+            exit 1
+          fi
+
+      - run: npm ci
+
+      # Only this platform's binaries (npm run build's prebuild hook would fetch
+      # every platform, which can't unpack the Windows .zip on Linux).
+      - name: Fetch arduino-cli and the language server
+        shell: bash
+        run: |
+          node scripts/fetch-arduino-cli.mjs ${{ matrix.vendor }}
+          node scripts/fetch-language-server.mjs ${{ matrix.vendor }}
+
+      - run: npm run typecheck
+      - run: npx electron-vite build
+
+      - name: Package
+        run: npx electron-builder --${{ matrix.target }} --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tinystudio-${{ matrix.target }}
+          path: ${{ matrix.files }}
+          if-no-files-found: error
+
+  release:
+    name: Draft the GitHub release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
+
+      - name: Release notes
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          {
+            echo "## Download"
+            echo
+            echo "| System | File |"
+            echo "| --- | --- |"
+            row() { for f in dist/$2; do if [ -e "$f" ]; then echo "| $1 | \`$(basename "$f")\` |"; fi; done; }
+            row "Windows 10 and 11 (64-bit)" "*.exe"
+            row "macOS, Apple Silicon (M1 and later)" "*arm64.dmg"
+            row "macOS, Intel" "*x64.dmg"
+            row "Linux (64-bit), any distribution" "*.AppImage"
+            row "Debian, Ubuntu" "*.deb"
+            echo
+            echo "The installers aren't signed yet, so your system warns the first time:"
+            echo
+            echo "- **Windows:** on \"Windows protected your PC\", click **More info**, then **Run anyway**."
+            echo "- **macOS:** open the .dmg and drag tinyStudio to Applications. The first time you open it,"
+            echo "  macOS says it can't check it. Open **System Settings → Privacy & Security**, scroll down"
+            echo "  and click **Open Anyway**."
+            echo "- **Linux AppImage:** make it executable (\`chmod +x tinystudio-*.AppImage\`), then run it."
+            echo
+            echo "Board support (ESP32, tinyCore, AVR) downloads on your first compile."
+            echo
+            # this version's section of the changelog, without its heading
+            awk -v v="$version" '
+              $0 ~ "^## " v "( |$)" { on = 1; next }
+              on && /^## / { exit }
+              on { print }
+            ' CHANGELOG.md
+          } > notes.md
+          cat notes.md
+
+      - name: Create the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --draft \
+            --title "tinyStudio ${GITHUB_REF_NAME#v}" \
+            --notes-file notes.md

@@ -1,5 +1,5 @@
 /**
- * circuit/core/routing tests — journey decode/encode incl. the Wokwi "*"
+ * circuit/core/routing tests: journey decode/encode incl. the Wokwi "*"
  * semantics (B2 fix), bend extraction, simplification, junction parametrics.
  * Runner: `npm run test:circuit` (esbuild bundle → node --test).
  */
@@ -43,7 +43,7 @@ test('decodeJourney: empty journey auto-completes orthogonally', () => {
   }
 })
 
-test('decodeJourney: Wokwi "*" — post-star applies in reverse from target (B2)', () => {
+test('decodeJourney: Wokwi "*"; post-star applies in reverse from target (B2)', () => {
   // Wokwi docs example: ["v10","h5","*","v-15","h10"]
   // v10,h5 from source; from TARGET walk back: h10 → 10px left of target,
   // then v-15 → 15px below target; gap auto-completed.

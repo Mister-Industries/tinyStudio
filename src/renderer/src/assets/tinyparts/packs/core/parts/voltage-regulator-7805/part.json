@@ -1,0 +1,33 @@
+{
+  "type": "voltage-regulator-7805",
+  "label": "Voltage Regulator - 5V",
+  "family": "Voltage Regulator",
+  "description": "5V DC Voltage Regulator",
+  "source": {
+    "fzp": "voltage_regulator_7805.fzp",
+    "moduleId": "1238DBDC00-voltage-reg_7805"
+  },
+  "icon": "icon.svg",
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": 35.52,
+      "height": 59.82,
+      "pins": {
+        "input voltage": [8.64, 58.08],
+        "GND": [18.24, 58.08],
+        "output voltage": [27.84, 58.08]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 134.4,
+      "height": 57.6,
+      "pins": {
+        "input voltage": [0, 9.6],
+        "GND": [67.2, 57.6],
+        "output voltage": [134.4, 9.6]
+      }
+    }
+  }
+}

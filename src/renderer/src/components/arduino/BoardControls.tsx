@@ -1,5 +1,5 @@
 /**
- * BoardControls — the serial-port picker for the toolbar.
+ * BoardControls: the serial-port picker for the toolbar.
  *
  * The port pill chooses which detected serial port to upload to. The board
  * TYPE (FQBN) is chosen in the Boards Manager modal (see BoardManager.tsx);
@@ -62,7 +62,8 @@ export function PortPicker(): React.JSX.Element {
       onValueChange={handleChange}
       disabled={!isAgentConnected}
     >
-      <SelectTrigger size="sm"
+      <SelectTrigger
+        size="sm"
         className={`${PILL} [&>svg]:hidden`}
         onPointerDown={(e) => {
           // Active = connected: a click disconnects rather than opening the menu.
@@ -74,10 +75,17 @@ export function PortPicker(): React.JSX.Element {
           }
         }}
       >
-        <Usb size={14} className={disconnected ? 'text-fg-4' : 'text-fg-3'} />
-        {selectedBoard?.port || <span className="text-fg-3 font-medium">No port</span>}
-        {disconnected && <span className="text-[11px] font-medium text-fg-4">released</span>}
-        <ChevronDown size={14} className="text-fg-4" />
+        <Usb
+          size={14}
+          className={disconnected ? 'text-[var(--text-faint)]' : 'text-[var(--text-muted)]'}
+        />
+        {selectedBoard?.port || (
+          <span className="text-[var(--text-muted)] font-medium">No port</span>
+        )}
+        {disconnected && (
+          <span className="text-[11px] font-medium text-[var(--text-faint)]">released</span>
+        )}
+        <ChevronDown size={14} className="text-[var(--text-faint)]" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

@@ -55,7 +55,13 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
             d.file &&
             d.line &&
             diagnosticMatchesFile(
-              { file: d.file, line: d.line ?? 1, column: d.column ?? 1, severity: 'error', message: d.message },
+              {
+                file: d.file,
+                line: d.line ?? 1,
+                column: d.column ?? 1,
+                severity: 'error',
+                message: d.message
+              },
               filePath
             )
         )
@@ -84,10 +90,9 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
       if (!filePath || filePath.startsWith('mem://')) return
       const detach = attachLspToEditor(monaco, editor, filePath, fqbn)
       return detach
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedBoard?.config.fqbn, isAgentConnected, activeFile.path, editorReady])
 
-    function handleBeforeMount(monaco): void {
+    function handleBeforeMount(monaco: Monaco): void {
       // Design-system surfaces (cold charcoal dark / near-white light) with the
       // existing tinyForge syntax hues kept on dark; light uses deeper variants
       // of the same hues for contrast on a pale background.
