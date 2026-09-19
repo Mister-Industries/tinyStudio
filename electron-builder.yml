@@ -12,55 +12,70 @@ files:
 # @mister-industries/tinyservice (an ESM package) from node_modules, which Node's
 # ESM loader can't do from inside an asar archive.
 asar: false
-extraResources:
-  # arduino-cli binaries are fetched into vendor/ by scripts/fetch-arduino-cli.mjs
-  # (run automatically via the "prebuild" npm hook).
-  - from: vendor/arduino-cli/macos-x64/arduino-cli
-    to: arduino-cli/darwin-x64/arduino-cli
-    filter:
-      - '**/*'
-  - from: vendor/arduino-cli/macos-arm64/arduino-cli
-    to: arduino-cli/darwin-arm64/arduino-cli
-    filter:
-      - '**/*'
-  - from: vendor/arduino-cli/linux-x64/arduino-cli
-    to: arduino-cli/linux-x64/arduino-cli
-    filter:
-      - '**/*'
-  - from: vendor/arduino-cli/linux-arm64/arduino-cli
-    to: arduino-cli/linux-arm64/arduino-cli
-    filter:
-      - '**/*'
-  - from: vendor/arduino-cli/windows-x64/arduino-cli.exe
-    to: arduino-cli/win32-x64/arduino-cli.exe
-    filter:
-      - '**/*'
-  # arduino-language-server + clangd (optional; fetched by
-  # scripts/fetch-language-server.mjs). Powers editor code intelligence via
-  # tinyService's /lsp bridge; the app degrades gracefully when absent.
-  - from: vendor/language-server
-    to: language-server
-    filter:
-      - '**/*'
+# Each installer ships the arduino-cli (and, when fetched, the language server)
+# for its own platform only: scripts/fetch-arduino-cli.mjs and
+# scripts/fetch-language-server.mjs put them in vendor/<tool>/<platform>/, and
+# the app looks under resources/ (src/main/ServiceManager.ts). The language
+# server is optional; without it the editor has no code intelligence.
 win:
   executableName: tinystudio
+  target:
+    - target: nsis
+      arch: [x64]
+  extraResources:
+    - from: vendor/arduino-cli/windows-x64/arduino-cli.exe
+      to: arduino-cli/win32-x64/arduino-cli.exe
+    - from: vendor/language-server/windows-x64
+      to: language-server/windows-x64
+      filter: ['**/*']
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  # Ad-hoc signed ("-"), not notarized: Apple Silicon won't run an unsigned app
+  # at all, and a Developer ID certificate and notarization are a beta task
+  # (docs/release-plan.md, GAP-3). The hardened runtime is only needed for
+  # notarization, and ad-hoc signing with it on needs extra entitlements.
+  identity: '-'
+  hardenedRuntime: false
   entitlementsInherit: build/entitlements.mac.plist
   notarize: false
+  # both architectures' binaries: one build step makes the arm64 and x64 apps
+  extraResources:
+    - from: vendor/arduino-cli/macos-arm64/arduino-cli
+      to: arduino-cli/darwin-arm64/arduino-cli
+    - from: vendor/arduino-cli/macos-x64/arduino-cli
+      to: arduino-cli/darwin-x64/arduino-cli
+    - from: vendor/language-server/macos-arm64
+      to: language-server/macos-arm64
+      filter: ['**/*']
+    - from: vendor/language-server/macos-x64
+      to: language-server/macos-x64
+      filter: ['**/*']
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
 linux:
   target:
-    - AppImage
-    - snap
-    - deb
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
   maintainer: MR.INDUSTRIES
   category: Development
+  extraResources:
+    - from: vendor/arduino-cli/linux-x64/arduino-cli
+      to: arduino-cli/linux-x64/arduino-cli
+    - from: vendor/language-server/linux-x64
+      to: language-server/linux-x64
+      filter: ['**/*']
 appImage:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
+deb:
+  artifactName: ${name}_${version}_${arch}.${ext}
 npmRebuild: false

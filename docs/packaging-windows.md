@@ -1,5 +1,9 @@
 # Packaging tinyStudio for Windows
 
+Release installers for every system are built by GitHub Actions; see
+[releasing.md](releasing.md). This page covers the Windows installer in detail,
+and building it on your own machine.
+
 How to build the Windows installer: a single `tinystudio-<version>-setup.exe` that
 runs on Windows 10 and 11 (x64) with nothing else installed. No Node, no Arduino
 IDE.
@@ -52,7 +56,8 @@ npm install
 pinned arduino-cli release (the `VERSION` constant at the top of the script) for
 every platform into `vendor/arduino-cli/<platform>/`. It runs automatically before
 every build through the `prebuild` hook and skips platforms already present.
-`vendor/` is git-ignored.
+`vendor/` is git-ignored. The Windows installer takes only the `windows-x64`
+binaries (`win.extraResources` in electron-builder.yml).
 
 ```powershell
 npm run fetch:arduino-cli                        # all platforms

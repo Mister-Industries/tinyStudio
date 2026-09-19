@@ -58,6 +58,13 @@ most sketches and boards (an Arduino Uno, an ESP32) work too.
   can read your project, circuit and serial output, and edit files with your
   permission.
 
+## Download
+
+Installers for Windows, macOS (Apple Silicon and Intel) and Linux (AppImage and
+.deb) are on the [Releases](https://github.com/Mister-Industries/tinyStudio/releases)
+page. They aren't signed yet, so Windows and macOS warn the first time you open
+tinyStudio; the release notes say how to get past that.
+
 ## The tinyFamily
 
 | Board         | Description                       |
@@ -119,11 +126,13 @@ CI runs these, plus the web build, on every push to `main` and each version bran
 ```bash
 npm run build:win     # Windows installer
 npm run build:mac     # macOS app
-npm run build:linux   # AppImage, snap and deb
+npm run build:linux   # AppImage and deb
 npm run build:web     # static web bundle in dist-web/
 ```
 
-Windows packaging: [docs/packaging-windows.md](docs/packaging-windows.md). Hosting
+Releases for all three systems are built on GitHub:
+[docs/releasing.md](docs/releasing.md). Windows packaging details:
+[docs/packaging-windows.md](docs/packaging-windows.md). Hosting
 the web build: [docs/web-deploy.md](docs/web-deploy.md).
 
 ## Example projects

@@ -3,7 +3,7 @@
 What changed in each tinyStudio release. Dates are when the version was
 finished; versions follow [semantic versioning](https://semver.org).
 
-## 0.4.0 — unreleased
+## 0.4.0 (2026-09-19)
 
 0.3.0 was merged to `main` in July 2026 but never tagged or released, so 0.4.0
 is the first release since 0.2.0 and includes everything under 0.3.0 below.
@@ -175,7 +175,7 @@ is the first release since 0.2.0 and includes everything under 0.3.0 below.
 - Part art from packs and imports is sanitised before it's shown.
 - A strict Content Security Policy in the built app.
 
-## 0.3.0 — not released
+## 0.3.0 (not released)
 
 Merged to `main` between 3 and 22 July 2026 and included in 0.4.0: the new
 circuit editor with breadboard, schematic and simulation; Arduino IDE parity for

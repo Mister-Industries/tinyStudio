@@ -2,7 +2,7 @@ name: CI
 
 # Typecheck, lint, test and build the web bundle on every push to main or a
 # version branch, and on pull requests into main. Desktop installers are built
-# by hand (see docs/packaging-windows.md), so they aren't built here.
+# by release.yml (see docs/releasing.md), not here.
 
 on:
   push:
