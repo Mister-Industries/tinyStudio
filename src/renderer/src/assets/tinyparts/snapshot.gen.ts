@@ -94,7 +94,7 @@ export interface TinypartsSnapshot {
 
 export const SNAPSHOT: TinypartsSnapshot = {
   "repo": "Mister-Industries/tinyparts",
-  "commit": "d952101940bbeddc7cecadb549f54a34198be38c",
+  "commit": "b72b53b5ddbbea6ca4ecb64e951633fa477117a6",
   "dirty": false,
   "packs": [
     {
@@ -102,19 +102,19 @@ export const SNAPSHOT: TinypartsSnapshot = {
       "files": {
         "pack.json": "326f843ade0dbd0bbee0b8319fe5cf7525331653",
         "parts/tinycore/breadboard.svg": "1779cf14d778fc1a9344ff7a79fd2c4ecc3c968f",
-        "parts/tinycore/icon.svg": "334dfafa8d2954026c2448486a7aafeadac28e51",
+        "parts/tinycore/icon.svg": "ef63f0f404c31716a0a2258304aaa77628644073",
         "parts/tinycore/part.json": "4168f74b75e81176d4d09a3bbc36cc0782e5322b",
         "parts/tinydisplay/breadboard.svg": "411211170cdd786ed66bf34ce09190a928661c5c",
         "parts/tinydisplay/icon.svg": "5c090fc0fe43c4250087c233f68feab4a616c1e9",
         "parts/tinydisplay/part.json": "2fc0bf7f33de43eb5d2069fade89b327a0414a1c",
-        "parts/tinyglow/breadboard.svg": "cec2d1227f82df2bd3e0e376d509fa1bbe7230c9",
-        "parts/tinyglow/icon.svg": "f30714fbc20507685d08595d35282577a228d845",
-        "parts/tinyglow/part.json": "b75e1713e62cf730b0806b5392b7a5c6edd0d7b9",
+        "parts/tinyglow/breadboard.svg": "7422edffb825837211d63e4a6a98252badcf9118",
+        "parts/tinyglow/icon.svg": "7422edffb825837211d63e4a6a98252badcf9118",
+        "parts/tinyglow/part.json": "cc0d3615fb4d7484da25a71689c7a9a995394e90",
         "parts/tinyproto/breadboard.svg": "3772b77d543b004105083515e9de76bb49dc0b9c",
         "parts/tinyproto/icon.svg": "3772b77d543b004105083515e9de76bb49dc0b9c",
         "parts/tinyproto/part.json": "5f8707d4a2f3d2344443b7638eb0863104615af9",
-        "parts/tinysniff/breadboard.svg": "1f2919cefb222c0db630bcf4db8db192e457ae0e",
-        "parts/tinysniff/icon.svg": "92f9363ecb9755bca44ad5bc3eed9212202c39e6",
+        "parts/tinysniff/breadboard.svg": "50e7244c365f9038d3dcc01d046bbe774c4b12c3",
+        "parts/tinysniff/icon.svg": "d2b4c97d4a80841707da10a850090e652faf8bb7",
         "parts/tinysniff/part.json": "8ceeef62e1b245133d19a76694fd24deaf0810ce",
         "parts/tinyspeak/breadboard.svg": "e9dcf76268ab87f0f3f7b7e9a601b62ab8c69221",
         "parts/tinyspeak/icon.svg": "e9dcf76268ab87f0f3f7b7e9a601b62ab8c69221",

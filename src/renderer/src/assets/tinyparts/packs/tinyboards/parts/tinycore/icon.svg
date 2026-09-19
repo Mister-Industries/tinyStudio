@@ -331,7 +331,6 @@
     </g>
     <circle class="st71" cx="96.7" cy="93.1" r="1.8"/>
   </g>
-  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
   <g id="layer1">
     <g id="g1938">
       <g id="usb-c-16p">
@@ -364,9 +363,6 @@
       </g>
     </g>
   </g>
-  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
-  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
-  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
   <g id="layer11" data-name="layer1">
     <g id="_x30_402-cap">
       <g id="g985">
@@ -396,7 +392,6 @@
       </g>
     </g>
   </g>
-  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
   <rect class="st57" x="33.1" y="8.7" width="9" height="12.3" rx=".8" ry=".8"/>
   <circle class="st29" cx="37.6" cy="14.9" r="2.8"/>
   <ellipse class="st55" cx="37.6" cy="14.6" rx="2.2" ry="2"/>
@@ -408,7 +403,6 @@
   <text class="st27" transform="translate(120.6 73.8)"><tspan x="0" y="0">12</tspan></text>
   <text class="st27" transform="translate(120.3 80.9)"><tspan x="0" y="0">13</tspan></text>
   <text class="st21" transform="translate(118 82.1) rotate(-90)"><tspan x="0" y="0">DIGITAL</tspan></text>
-  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
   <g id="layer12" data-name="layer1">
     <g id="g2769">
       <g id="g1375">
@@ -581,8 +575,6 @@
   <text class="st8" transform="translate(117.1 94.3)"><tspan x="0" y="0">GND</tspan></text>
   <text class="st27" transform="translate(10.1 87.4)"><tspan x="0" y="0">A1</tspan></text>
   <text class="st27" transform="translate(10.1 93.4)"><tspan x="0" y="0">A0</tspan></text>
-  <sodipodi:namedview id="namedview7001" bordercolor="#666666" borderopacity="1" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" gridtolerance="10" guidetolerance="10" objecttolerance="10" pagecolor="#ffffff" showgrid="false"/>
-  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
   <g id="layer14" data-name="layer1">
     <g id="g726">
       <g id="g728">
@@ -1717,7 +1709,6 @@
   <text class="st8" transform="translate(66.9 73.1)"><tspan x="0" y="0">BOOT</tspan></text>
   <text class="st8" transform="translate(51.1 73.1)"><tspan x="0" y="0">CRG</tspan></text>
   <text class="st8" transform="translate(86.2 73.1)"><tspan x="0" y="0">SIG</tspan></text>
-  <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" fit-margin-bottom="0" fit-margin-left="0" fit-margin-right="0" fit-margin-top="0" pagecolor="#ffffff" showgrid="false"/>
   <rect class="st40" x=".6" y="39.7" width="8.5" height="57" rx=".7" ry=".7"/>
   <g>
     <g id="layer138" data-name="layer1">

@@ -62,10 +62,15 @@ test('the whole family ships bundled, 1.9in square, and loads without warnings',
     assert.equal(meta?.layer, 'bundled', type)
     assert.ok(meta?.icon?.startsWith('<svg'), `${type} has a palette icon`)
     assert.deepEqual(getPart(type)!.source?.warnings, [], type)
+    // pins come from the art's pin-* shapes, unless part.json fixes their
+    // positions (tinyGlow, whose LED-strip pins aren't in the art); either way
+    // the stack connector is checked against tinyCore's below
+    const declared = getPart(type)!.source?.json?.views.breadboard?.pins
+    const fixed = !!declared && !Array.isArray(declared)
     assert.equal(
       getPart(type)!.source?.pinsFromSvg?.breadboard,
-      true,
-      `${type} pins come from its art`
+      !fixed,
+      `${type} pins come from ${fixed ? 'part.json' : 'its art'}`
     )
   }
 })
