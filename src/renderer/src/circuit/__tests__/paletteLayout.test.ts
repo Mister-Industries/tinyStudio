@@ -34,7 +34,7 @@ const PACKS: Record<string, PackInfo> = {
     id: 'tinyboards',
     name: 'tinyBoards',
     group: 'tinyStudio',
-    sections: ['tinyCore Boards']
+    sections: ['tinyBoards']
   },
   'sparkfun-sensors': { id: 'sparkfun-sensors', name: 'SparkFun · Sensors', group: 'SparkFun' },
   'sparkfun-rf': { id: 'sparkfun-rf', name: 'SparkFun · RF', group: 'SparkFun' },
@@ -72,7 +72,7 @@ test('sections follow the pack.json order, parts their listing position', () => 
       part('ldr', { bin: 'core', section: 'Input', position: 3 }),
       part('capacitor', { bin: 'core', section: 'Basic', position: 1 }),
       part('resistor', { bin: 'core', section: 'Basic', position: 0 }),
-      part('tinycore', { bin: 'tinyboards', section: 'tinyCore Boards', position: 0 }),
+      part('tinycore', { bin: 'tinyboards', section: 'tinyBoards', position: 0 }),
       part('breadboard', { bin: 'core', section: 'Breadboard View' })
     ],
     lookup
@@ -82,11 +82,29 @@ test('sections follow the pack.json order, parts their listing position', () => 
     core.sections.map((s) => [s.title, s.parts.map((p) => p.type)]),
     [
       // tinyBoards sorts before Core, so its declared section comes first
-      ['tinyCore Boards', ['tinycore']],
+      ['tinyBoards', ['tinycore']],
       ['Basic', ['resistor', 'capacitor']],
       ['Input', ['ldr']],
       // not declared by any pack: after the declared ones
       ['Breadboard View', ['breadboard']]
+    ]
+  )
+})
+
+test('a tinyBoards part with no section still sits in the top tinyBoards section', () => {
+  const core = paletteTabs(
+    [
+      part('resistor', { bin: 'core', section: 'Basic', position: 0 }),
+      part('tinyglow', { bin: 'tinyboards', position: 2 }),
+      part('tinycore', { bin: 'tinyboards', section: 'tinyBoards', position: 0 })
+    ],
+    lookup
+  ).find((t) => t.id === CORE_TAB)!
+  assert.deepEqual(
+    core.sections.map((s) => [s.title, s.parts.map((p) => p.type)]),
+    [
+      ['tinyBoards', ['tinycore', 'tinyglow']],
+      ['Basic', ['resistor']]
     ]
   )
 })
@@ -142,13 +160,13 @@ test('tabIdFor: packs in the tinyStudio group share Core, unknown packs get thei
   )
 })
 
-test('bundled packs: Core opens with the tinyCore boards, then Fritzing Core order', () => {
+test('bundled packs: Core opens with the tinyBoards, then Fritzing Core order', () => {
   const { def } = generateBreadboard(BREADBOARDS[0])
   registerPart(def)
   try {
     const core = paletteTabs(PART_MANIFEST, getPackInfo).find((t) => t.id === CORE_TAB)!
     const titles = core.sections.map((s) => s.title)
-    assert.deepEqual(titles.slice(0, 5), ['tinyCore Boards', 'Basic', 'Input', 'Output', 'Power'])
+    assert.deepEqual(titles.slice(0, 5), ['tinyBoards', 'Basic', 'Input', 'Output', 'Power'])
     assert.ok(titles.includes('Breadboard View'), 'generated breadboards sit in Breadboard View')
     assert.equal(core.sections[0].parts[0].type, 'tinycore')
     assert.equal(core.sections[1].parts[0].type, 'resistor')

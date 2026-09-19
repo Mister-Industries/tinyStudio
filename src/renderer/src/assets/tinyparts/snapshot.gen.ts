@@ -100,7 +100,7 @@ export const SNAPSHOT: TinypartsSnapshot = {
     {
       "id": "tinyboards",
       "files": {
-        "pack.json": "3f87e28bb0bad7aa72505c0dae9a66b1e91ae291",
+        "pack.json": "326f843ade0dbd0bbee0b8319fe5cf7525331653",
         "parts/tinycore/breadboard.svg": "1779cf14d778fc1a9344ff7a79fd2c4ecc3c968f",
         "parts/tinycore/icon.svg": "334dfafa8d2954026c2448486a7aafeadac28e51",
         "parts/tinycore/part.json": "4168f74b75e81176d4d09a3bbc36cc0782e5322b",

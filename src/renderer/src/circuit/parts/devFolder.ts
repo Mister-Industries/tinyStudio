@@ -40,6 +40,7 @@ import {
   parsePackJson,
   parsePartJson,
   type PackJson,
+  type PackPartRef,
   type PartJson,
   type PartJsonView,
   type ReadText
@@ -515,7 +516,9 @@ export async function savePartToFolder(s: FolderSave): Promise<string> {
   const { views: partViews, ...head } = json
   await writeIfChanged(src, partPath, formatJson({ ...head, views: partViews }))
 
-  const nextRef = { type, dir: dirRel }
+  // keep the entry's other keys (its palette section); a single-file part loses `file`
+  const nextRef: PackPartRef = { ...ref, type, dir: dirRel }
+  delete nextRef.file
   const parts = ref ? pack.parts.map((r) => (r === ref ? nextRef : r)) : [...pack.parts, nextRef]
   await writeIfChanged(src, packRel, formatJson({ ...pack, parts }))
   if (ref?.file) await src.remove(`packs/${s.pack}/${ref.file}`)
