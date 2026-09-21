@@ -2,6 +2,7 @@
  * useArduino - Main hook for Arduino operations (compile, upload, board management)
  */
 
+import { resolveBuildTarget } from '@renderer/lib/boardFallbacks'
 import { parseCompileDiagnostics } from '@renderer/lib/compileErrors'
 import { getArduinoService } from '@renderer/services/arduino/ArduinoServiceFactory'
 import {
@@ -211,6 +212,18 @@ export function useArduino(): UseArduinoReturn {
           return boardsList[0]
         }
 
+        // A board type picked by hand in the Boards Manager has no port yet.
+        // That isn't a stale detection, so keep it rather than replacing it
+        // with boardsList[0] (which would silently undo the user's choice) or
+        // clearing it (which disables Verify/Upload). Adopt a port as soon as
+        // one is detected.
+        if (currentBoard && !currentBoard.port) {
+          const first = boardsList[0]
+          return first
+            ? { ...currentBoard, port: first.port, connected: first.connected }
+            : currentBoard
+        }
+
         // If current board is no longer available, select first available or null
         if (currentBoard && !boardsList.find((b) => b.port === currentBoard.port)) {
           if (boardsList.length === 0) {
@@ -246,9 +259,19 @@ export function useArduino(): UseArduinoReturn {
         throw new Error('Compilation already in progress')
       }
 
-      const targetBoard = boardConfig || selectedBoard?.config
-      if (!targetBoard) {
+      const selected = boardConfig || selectedBoard?.config
+      if (!selected) {
         throw new Error('No board selected for compilation')
+      }
+      // A USB-discovery placeholder can be detected but not built; swap in the
+      // real board of the same platform (boardFallbacks.ts).
+      const targetBoard = resolveBuildTarget(selected)
+      if (targetBoard.fqbn !== selected.fqbn) {
+        addLog({
+          type: 'info',
+          message: `Building as ${targetBoard.name}`,
+          details: `${selected.name} (${selected.fqbn}) is a USB-discovery placeholder, not a buildable board. Using ${targetBoard.fqbn} instead.`
+        })
       }
 
       setIsCompiling(true)
@@ -422,11 +445,14 @@ export function useArduino(): UseArduinoReturn {
       }
 
       const targetPort = port || selectedBoard?.port
-      const targetBoard = boardConfig || selectedBoard?.config
+      const selected = boardConfig || selectedBoard?.config
 
-      if (!targetPort || !targetBoard) {
+      if (!targetPort || !selected) {
         throw new Error('No board/port selected for upload')
       }
+
+      // Same placeholder swap as compileSketch (boardFallbacks.ts).
+      const targetBoard = resolveBuildTarget(selected)
 
       setIsUploading(true)
       setUploadProgress({ percentage: 0, stage: 'preparing' })
@@ -641,6 +667,18 @@ export function useArduino(): UseArduinoReturn {
         if (!currentBoard) {
           return boardsList[0] || null
         }
+        // A board type picked by hand in the Boards Manager has no port yet.
+        // That isn't a stale detection, so keep it rather than replacing it
+        // with boardsList[0] (which would silently undo the user's choice) or
+        // clearing it (which disables Verify/Upload). Adopt a port as soon as
+        // one is detected.
+        if (!currentBoard.port) {
+          const first = boardsList[0]
+          return first
+            ? { ...currentBoard, port: first.port, connected: first.connected }
+            : currentBoard
+        }
+
         // Same port still present: keep the user's choice (incl. any manual
         // board override / FQBN options), but follow arduino-cli if the
         // board on that port changed identity.

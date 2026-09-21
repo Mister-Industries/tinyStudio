@@ -3,6 +3,22 @@
 What changed in each tinyStudio release. Dates are when the version was
 finished; versions follow [semantic versioning](https://semver.org).
 
+## Unreleased
+
+### Fixed
+
+- Choosing a board type in the Boards Manager sticks. Picking one before a
+  board is plugged in left the selection without a port, and the next board-list
+  update either swapped it back to the detected board or cleared it, which
+  greyed out Verify and Upload. A hand-picked board is now kept and adopts a
+  port as soon as one is detected.
+- A tinyCore on USB is identified as **tinyCore ESP32-S3 No PSRAM** rather than
+  **ESP32 Family Device**. Every ESP32-S3 enumerates as 303a:1001, which only
+  the platform's hidden USB-discovery entry claims; that entry has no build
+  settings, so compiling against it failed inside arduino-cli with no
+  diagnostics. Detected placeholders are now mapped to the real board, and a
+  build against an unmapped one fails with an explanation instead.
+
 ## 0.4.0 (2026-09-19)
 
 0.3.0 was merged to `main` in July 2026 but never tagged or released, so 0.4.0

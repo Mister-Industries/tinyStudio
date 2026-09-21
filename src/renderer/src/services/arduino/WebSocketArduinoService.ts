@@ -33,6 +33,7 @@ import {
   PlatformEntry,
   UploadResult
 } from './types'
+import { withRealBoard } from '@renderer/lib/boardFallbacks'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { isTextPath } from '@renderer/lib/github'
 import { STORAGE_KEYS } from '@renderer/lib/storageKeys'
@@ -119,7 +120,10 @@ function resolveServiceUrl(): string {
  * make other variants unselectable.
  */
 function toBoard(info: SharedBoardInfo): Board {
-  return {
+  // withRealBoard swaps a USB-discovery placeholder (ESP32 Family Device, which
+  // every ESP32-S3 matches) for the real board of that platform; anything else
+  // passes through untouched. See lib/boardFallbacks.ts.
+  return withRealBoard({
     port: info.port || '',
     config: {
       fqbn: info.fqbn,
@@ -127,7 +131,7 @@ function toBoard(info: SharedBoardInfo): Board {
     },
     connected: true,
     guess: (info as { guess?: boolean }).guess
-  }
+  })
 }
 
 /**
