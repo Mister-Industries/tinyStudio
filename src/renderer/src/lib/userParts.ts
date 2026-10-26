@@ -70,6 +70,23 @@ async function idbPut(def: PartDef): Promise<void> {
   }
 }
 
+/** One transaction for many defs — the pack migration re-writes hundreds of
+ * parts at once and a transaction each would take seconds. */
+async function idbPutMany(defs: PartDef[]): Promise<void> {
+  const db = await openDb()
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite')
+      const store = tx.objectStore(STORE)
+      for (const d of defs) store.put(d)
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error ?? new Error('putMany failed'))
+    })
+  } finally {
+    db.close()
+  }
+}
+
 async function idbDelete(type: string): Promise<void> {
   const db = await openDb()
   try {
@@ -146,6 +163,26 @@ export async function saveUserPart(def: PartDef): Promise<void> {
   const defs = lsRead().filter((d) => d.type !== def.type)
   defs.push(def)
   lsWrite(defs)
+}
+
+/**
+ * Persist many already-registered defs in one go. Unlike saveUserPart this
+ * does NOT re-register them — callers have mutated defs that are already in
+ * the live registry (the pack migration) and only need them written back.
+ */
+export async function saveUserParts(defs: PartDef[]): Promise<void> {
+  if (!defs.length) return
+  if (idbAvailable()) {
+    try {
+      await idbPutMany(defs)
+      return
+    } catch {
+      /* fall through to localStorage */
+    }
+  }
+  const changed = new Map(defs.map((d) => [d.type, d]))
+  const kept = lsRead().filter((d) => !changed.has(d.type))
+  lsWrite([...kept, ...changed.values()])
 }
 
 /** Remove a part from persistent storage. */

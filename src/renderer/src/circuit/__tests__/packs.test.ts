@@ -5,7 +5,7 @@
 
 import assert from 'node:assert/strict'
 import { beforeEach, test } from 'node:test'
-import { getPart } from '../../lib/partsLibrary'
+import { getPart, sourceOf, PART_MANIFEST } from '../../lib/partsLibrary'
 import {
   DEFAULT_INDEX_URL,
   fetchIndex,
@@ -14,6 +14,7 @@ import {
   getInstalledPacks,
   installPack,
   setIndexUrls,
+  uninstallPack,
   type PackManifest
 } from '../parts/packs'
 
@@ -136,8 +137,46 @@ test('installPack registers every valid part via saveUserPart, continues past on
   // the successfully-installed part is live in the registry
   assert.ok(getPart('pack-test-resistor'))
 
+  // parts are stamped with the pack id, which is what gives the pack its own
+  // bin (one palette tab per installed pack)
+  assert.equal(getPart('pack-test-resistor')?.pack, 'core')
+  assert.equal(sourceOf(getPart('pack-test-resistor')!), 'pack:core')
+
   // a pack with at least one success is marked installed at its version
-  assert.equal(getInstalledPacks().core, '2.0.0')
+  assert.equal(getInstalledPacks().core?.version, '2.0.0')
+})
+
+test('getInstalledPacks reads the legacy id → version shape', () => {
+  localStorage.setItem(
+    'tinystudio.packs.installed',
+    JSON.stringify({ old: '1.0.0', fresh: { id: 'fresh', version: '2.0.0', name: 'Fresh' } })
+  )
+  const map = getInstalledPacks()
+  assert.deepEqual(map.old, { id: 'old', version: '1.0.0' })
+  assert.equal(map.fresh.name, 'Fresh')
+  assert.equal(map.fresh.version, '2.0.0')
+})
+
+test('uninstallPack removes the pack’s parts and its install record', async () => {
+  const manifest: PackManifest = {
+    schema: 1,
+    id: 'throwaway',
+    name: 'Throwaway',
+    version: '1.0.0',
+    parts: [{ type: 'pack-test-temp', file: 'parts/temp.json' }]
+  }
+  stubFetch({
+    'https://example.com/parts/temp.json': { ...RESISTOR_DEF, type: 'pack-test-temp' }
+  })
+  await installPack(manifest, 'https://example.com/pack.json')
+  assert.ok(getPart('pack-test-temp'))
+  assert.ok(getInstalledPacks().throwaway)
+
+  const removed = await uninstallPack('throwaway')
+  assert.equal(removed, 1)
+  assert.equal(getPart('pack-test-temp'), undefined)
+  assert.equal(getInstalledPacks().throwaway, undefined)
+  assert.ok(!PART_MANIFEST.some((m) => m.type === 'pack-test-temp'))
 })
 
 test('installPack does not mark a pack installed when every part fails', async () => {

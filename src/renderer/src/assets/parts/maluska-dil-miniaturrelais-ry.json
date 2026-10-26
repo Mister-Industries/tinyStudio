@@ -1,0 +1,104 @@
+{
+  "type": "maluska-dil-miniaturrelais-ry",
+  "label": "maluska dil miniaturrelais",
+  "family": "relay",
+  "tags": [
+    "Relay",
+    "Maluska",
+    "miniatur",
+    "Relais"
+  ],
+  "source": {
+    "fzp": "maluska_dil_miniaturrelais_ry.fzp",
+    "moduleId": "maluska_dil_miniaturrelais_ry"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.1\" id=\"Ebene_1\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 58.455 47.034\" enable-background=\"new 0 0 58.455 47.034\" xml:space=\"preserve\"><g id=\"breadboard\"><g><g><circle id=\"connector16pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"3.999\" cy=\"43.699\" r=\"1.843\"/><circle id=\"connector13pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"25.599\" cy=\"43.698\" r=\"1.843\"/><circle id=\"connector11pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"39.999\" cy=\"43.698\" r=\"1.843\"/><circle id=\"connector9pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"54.399\" cy=\"43.698\" r=\"1.843\"/><circle id=\"connector8pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"54.399\" cy=\"22.098\" r=\"1.843\"/><circle id=\"connector6pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"39.999\" cy=\"22.098\" r=\"1.843\"/><circle id=\"connector4pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"25.599\" cy=\"22.098\" r=\"1.843\"/><g id=\"connector1pin\"><circle fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"3.999\" cy=\"22.098\" r=\"1.843\"/><rect x=\"2.156\" y=\"20.255\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" width=\"3.685\" height=\"3.686\"/></g></g></g><g><path fill=\"#1A1A1A\" d=\"M57.857,46.325c0,0.39-0.319,0.709-0.709,0.709H1.308c-0.39,0-0.708-0.319-0.708-0.709v-18.74    c0-0.39,0.319-0.709,0.708-0.709h55.841c0.39,0,0.709,0.319,0.709,0.709V46.325z\"/></g><g><path fill=\"#333333\" d=\"M57.857,27.17c0,0.39-0.319,0.709-0.709,0.709H1.308c-0.39,0-0.708-0.319-0.708-0.709V0.808    c0-0.39,0.319-0.708,0.708-0.708h55.841c0.39,0,0.709,0.319,0.709,0.708V27.17z\"/></g><g id=\"silkscreen\"><g><rect x=\"8.816\" y=\"9.18\" fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" width=\"1.705\" height=\"9.425\"/><line fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" x1=\"9.669\" y1=\"9.18\" x2=\"9.669\" y2=\"7.977\"/><line fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" x1=\"9.669\" y1=\"19.808\" x2=\"9.669\" y2=\"18.605\"/><line fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" x1=\"8.816\" y1=\"15.096\" x2=\"10.521\" y2=\"13.091\"/></g><polyline fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" points=\"26.018,20.208 26.018,18.003 42.877,18.003 41.674,19.106     37.567,19.106 37.567,20.208   \"/><polyline fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" points=\"43.679,19.106 49.117,19.106 49.117,20.208   \"/><polyline fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" points=\"26.018,7.777 26.018,9.982 42.877,9.982 41.674,8.879     37.567,8.879 37.567,7.777   \"/><polyline fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" points=\"43.679,8.879 49.117,8.879 49.117,7.777   \"/><rect x=\"7.688\" y=\"4.4\" fill=\"#FFFFFF\" width=\"4.313\" height=\"2.85\"/><rect x=\"7.688\" y=\"20.525\" fill=\"#FFFFFF\" width=\"4.313\" height=\"2.85\"/><rect x=\"23.86\" y=\"4.4\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/><rect x=\"23.86\" y=\"20.525\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/><rect x=\"35.412\" y=\"4.4\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/><rect x=\"35.412\" y=\"20.525\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/><rect x=\"46.96\" y=\"4.4\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/><rect x=\"46.96\" y=\"20.525\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/></g><rect x=\"0.599\" y=\"10.937\" fill=\"#1A1A1A\" width=\"2.689\" height=\"6.105\"/></g></svg>",
+      "w": 58.46,
+      "h": 47.03,
+      "pins": {
+        "1": [
+          4,
+          22.1
+        ],
+        "4": [
+          25.6,
+          22.1
+        ],
+        "6": [
+          40,
+          22.1
+        ],
+        "8": [
+          54.4,
+          22.1
+        ],
+        "9": [
+          54.4,
+          43.7
+        ],
+        "11": [
+          40,
+          43.7
+        ],
+        "13": [
+          25.6,
+          43.7
+        ],
+        "16": [
+          4,
+          43.7
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg version=\"1.1\" id=\"Ebene_1\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 57.6 36\" enable-background=\"new 0 0 57.6 36\" xml:space=\"preserve\"><desc><referenceFile>generic_ic_dip_8_schem.svg</referenceFile></desc><g id=\"schematic\"><rect x=\"14.4\" y=\"0.45\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" width=\"28.351\" height=\"35.1\"/><text id=\"label\" transform=\"matrix(1 0 0 1 19.4636 34.2344)\" font-family=\"Noto Sans\" font-size=\"3\">maluska relay</text><line fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"0.35\" y1=\"7.2\" x2=\"14.4\" y2=\"7.2\"/><rect id=\"connector1pin\" x=\"0\" y=\"6.85\" fill=\"none\" width=\"14.399\" height=\"0.7\"/><rect id=\"connector1terminal\" x=\"0\" y=\"6.85\" fill=\"none\" width=\"0\" height=\"0.7\"/><text transform=\"matrix(1 0 0 1 6.512 6.1504)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">1</text><line fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"0.35\" y1=\"14.4\" x2=\"14.4\" y2=\"14.4\"/><rect id=\"connector4pin\" x=\"0\" y=\"14.05\" fill=\"none\" width=\"14.399\" height=\"0.7\"/><rect id=\"connector4terminal\" x=\"0\" y=\"14.05\" fill=\"none\" width=\"0\" height=\"0.7\"/><text transform=\"matrix(1 0 0 1 6.512 13.3501)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">4</text><line fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"0.35\" y1=\"21.6\" x2=\"14.4\" y2=\"21.6\"/><rect id=\"connector6pin\" x=\"0\" y=\"21.25\" fill=\"none\" width=\"14.399\" height=\"0.7\"/><rect id=\"connector6terminal\" x=\"0\" y=\"21.25\" fill=\"none\" width=\"0\" height=\"0.7\"/><text transform=\"matrix(1 0 0 1 6.512 20.5498)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">6</text><line fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"0.35\" y1=\"28.8\" x2=\"14.4\" y2=\"28.8\"/><rect id=\"connector8pin\" x=\"0\" y=\"28.45\" fill=\"none\" width=\"14.399\" height=\"0.7\"/><rect id=\"connector8terminal\" x=\"0\" y=\"28.45\" fill=\"none\" width=\"0\" height=\"0.7\"/><text transform=\"matrix(1 0 0 1 6.512 27.75)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">8</text><line fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"42.85\" y1=\"7.2\" x2=\"57.25\" y2=\"7.2\"/><rect id=\"connector9pin\" x=\"43.2\" y=\"6.85\" fill=\"none\" width=\"14.399\" height=\"0.7\"/><rect id=\"connector9terminal\" x=\"57.6\" y=\"6.85\" fill=\"none\" width=\"0\" height=\"0.7\"/><text transform=\"matrix(1 0 0 1 49.7122 6.1504)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">9</text><line fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"42.85\" y1=\"14.4\" x2=\"57.25\" y2=\"14.4\"/><rect id=\"connector11pin\" x=\"43.2\" y=\"14.05\" fill=\"none\" width=\"14.399\" height=\"0.7\"/><rect id=\"connector11terminal\" x=\"57.6\" y=\"14.05\" fill=\"none\" width=\"0\" height=\"0.7\"/><text transform=\"matrix(1 0 0 1 49.7122 13.3501)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">11</text><line fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"42.85\" y1=\"21.6\" x2=\"57.25\" y2=\"21.6\"/><rect id=\"connector13pin\" x=\"43.2\" y=\"21.25\" fill=\"none\" width=\"14.399\" height=\"0.7\"/><rect id=\"connector13terminal\" x=\"57.6\" y=\"21.25\" fill=\"none\" width=\"0\" height=\"0.7\"/><text transform=\"matrix(1 0 0 1 49.7122 20.5498)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">13</text><line fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"42.85\" y1=\"28.8\" x2=\"57.25\" y2=\"28.8\"/><rect id=\"connector16pin\" x=\"43.2\" y=\"28.45\" fill=\"none\" width=\"14.399\" height=\"0.7\"/><rect id=\"connector16terminal\" x=\"57.6\" y=\"28.45\" fill=\"none\" width=\"0\" height=\"0.7\"/><text transform=\"matrix(1 0 0 1 49.7122 27.75)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">16</text><g id=\"silkscreen\"><g><g><rect x=\"22.861\" y=\"6.448\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" width=\"11.868\" height=\"1.248\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" x1=\"34.729\" y1=\"7.072\" x2=\"36.242\" y2=\"7.072\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" x1=\"21.345\" y1=\"7.072\" x2=\"22.861\" y2=\"7.072\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" x1=\"27.279\" y1=\"6.448\" x2=\"29.803\" y2=\"7.696\"/></g><rect x=\"37.156\" y=\"5.621\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" width=\"3.589\" height=\"3.159\"/><rect x=\"16.855\" y=\"5.621\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" width=\"3.588\" height=\"3.159\"/></g><g><polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" points=\"36.494,14.407 33.716,14.407      33.716,25.554 35.107,24.672 35.107,21.664 36.494,21.664    \"/><rect x=\"37.156\" y=\"12.827\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" width=\"3.589\" height=\"3.159\"/><rect x=\"37.156\" y=\"20.087\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" width=\"3.589\" height=\"3.16\"/></g><g><polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" points=\"20.841,14.407 23.617,14.407      23.617,25.554 22.231,24.672 22.231,21.664 20.841,21.664    \"/><rect x=\"16.855\" y=\"12.827\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" width=\"3.588\" height=\"3.159\"/><rect x=\"16.855\" y=\"20.087\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" width=\"3.588\" height=\"3.16\"/></g><g><polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" points=\"35.107,26.14 35.107,28.802      36.494,28.802    \"/><rect x=\"37.156\" y=\"27.221\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" width=\"3.589\" height=\"3.159\"/></g><g><polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" points=\"22.231,26.14 22.231,28.802      20.841,28.802    \"/><rect x=\"16.855\" y=\"27.221\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-miterlimit=\"10\" width=\"3.588\" height=\"3.159\"/></g></g></g></svg>",
+      "w": 57.6,
+      "h": 36,
+      "pins": {
+        "1": [
+          0,
+          7.2
+        ],
+        "4": [
+          7.2,
+          14.4
+        ],
+        "6": [
+          0,
+          21.6
+        ],
+        "8": [
+          0,
+          28.8
+        ],
+        "9": [
+          57.6,
+          7.2
+        ],
+        "11": [
+          57.6,
+          14.4
+        ],
+        "13": [
+          57.6,
+          21.6
+        ],
+        "16": [
+          57.6,
+          28.8
+        ]
+      }
+    }
+  },
+  "properties": {
+    "package": "THT",
+    "contact rating": "120VAC @ 0,5 AMP / 24VDC @ 1 AMP",
+    "voltage": "5V - max 96 VDC",
+    "switch": "70-90mW",
+    "part number": "DIL Mini RY"
+  },
+  "icon": "<svg version=\"1.1\" id=\"Ebene_1\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 58.455 47.034\" enable-background=\"new 0 0 58.455 47.034\" xml:space=\"preserve\"><g id=\"breadboard\"><g><g><circle id=\"connector16pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"3.999\" cy=\"43.699\" r=\"1.843\"/><circle id=\"connector13pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"25.599\" cy=\"43.698\" r=\"1.843\"/><circle id=\"connector11pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"39.999\" cy=\"43.698\" r=\"1.843\"/><circle id=\"connector9pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"54.399\" cy=\"43.698\" r=\"1.843\"/><circle id=\"connector8pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"54.399\" cy=\"22.098\" r=\"1.843\"/><circle id=\"connector6pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"39.999\" cy=\"22.098\" r=\"1.843\"/><circle id=\"connector4pin\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"25.599\" cy=\"22.098\" r=\"1.843\"/><g id=\"connector1pin\"><circle fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" cx=\"3.999\" cy=\"22.098\" r=\"1.843\"/><rect x=\"2.156\" y=\"20.255\" fill=\"none\" stroke=\"#FFBF00\" stroke-width=\"1.4173\" width=\"3.685\" height=\"3.686\"/></g></g></g><g><path fill=\"#1A1A1A\" d=\"M57.857,46.325c0,0.39-0.319,0.709-0.709,0.709H1.308c-0.39,0-0.708-0.319-0.708-0.709v-18.74    c0-0.39,0.319-0.709,0.708-0.709h55.841c0.39,0,0.709,0.319,0.709,0.709V46.325z\"/></g><g><path fill=\"#333333\" d=\"M57.857,27.17c0,0.39-0.319,0.709-0.709,0.709H1.308c-0.39,0-0.708-0.319-0.708-0.709V0.808    c0-0.39,0.319-0.708,0.708-0.708h55.841c0.39,0,0.709,0.319,0.709,0.708V27.17z\"/></g><g id=\"silkscreen\"><g><rect x=\"8.816\" y=\"9.18\" fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" width=\"1.705\" height=\"9.425\"/><line fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" x1=\"9.669\" y1=\"9.18\" x2=\"9.669\" y2=\"7.977\"/><line fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" x1=\"9.669\" y1=\"19.808\" x2=\"9.669\" y2=\"18.605\"/><line fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" x1=\"8.816\" y1=\"15.096\" x2=\"10.521\" y2=\"13.091\"/></g><polyline fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" points=\"26.018,20.208 26.018,18.003 42.877,18.003 41.674,19.106     37.567,19.106 37.567,20.208   \"/><polyline fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" points=\"43.679,19.106 49.117,19.106 49.117,20.208   \"/><polyline fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" points=\"26.018,7.777 26.018,9.982 42.877,9.982 41.674,8.879     37.567,8.879 37.567,7.777   \"/><polyline fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.75\" points=\"43.679,8.879 49.117,8.879 49.117,7.777   \"/><rect x=\"7.688\" y=\"4.4\" fill=\"#FFFFFF\" width=\"4.313\" height=\"2.85\"/><rect x=\"7.688\" y=\"20.525\" fill=\"#FFFFFF\" width=\"4.313\" height=\"2.85\"/><rect x=\"23.86\" y=\"4.4\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/><rect x=\"23.86\" y=\"20.525\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/><rect x=\"35.412\" y=\"4.4\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/><rect x=\"35.412\" y=\"20.525\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/><rect x=\"46.96\" y=\"4.4\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/><rect x=\"46.96\" y=\"20.525\" fill=\"#FFFFFF\" width=\"4.314\" height=\"2.85\"/></g><rect x=\"0.599\" y=\"10.937\" fill=\"#1A1A1A\" width=\"2.689\" height=\"6.105\"/></g></svg>",
+  "order": 20068
+}

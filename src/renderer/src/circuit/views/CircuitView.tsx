@@ -1,8 +1,10 @@
 /**
  * circuit/views/CircuitView — the Circuit View v2 shell (M1: breadboard
- * editor parity). Composes: components palette · interactive Canvas ·
- * Inspector rail · toolbar (edit toggle, grid, export, code) · zoom cluster ·
- * status pills. Owns the CircuitStore and the debounced save path
+ * editor parity). Composes, left to right: Inspector rail · interactive
+ * Canvas · components palette — plus the toolbar (edit toggle, grid, export,
+ * code), zoom cluster and status pills. (Palette and Inspector swapped sides
+ * so the parts bin sits on the right, Fritzing-style.)
+ * Owns the CircuitStore and the debounced save path
  * (store.serialize() → onChange → Redux buffer; disk save stays on Ctrl+S,
  * same as every other editor buffer).
  *
@@ -35,6 +37,7 @@ import { ensureParts, getPart, loadPart, registerPart, type PartDef } from '../.
 import { toast } from 'sonner'
 import { initUserParts, saveUserPart } from '../../lib/userParts'
 import { importFzpz } from '../parts/fzpz'
+import { migrateLegacyPacks } from '../parts/packMigration'
 import { PartsEditor } from '../../components/PartsEditor'
 import * as cmd from '../core/commands'
 import { newId, type NetLabelKind, type Pt, type ViewId } from '../core/model'
@@ -51,7 +54,8 @@ import { snapNetLabel } from '../parts/netLabels'
 import { Canvas, emptySel, type Cam, type CanvasHandle, type Selection } from './canvas/Canvas'
 import { exportPng, exportSvg } from './exportImage'
 import { InspectorRail } from './inspector/Inspector'
-import { Palette, WIRE_COLORS } from './palette/Palette'
+import { Palette } from './palette/Palette'
+import { WIRE_COLORS } from './wireColors'
 import {
   circuitBuses,
   ercFloatingPins,
@@ -125,6 +129,24 @@ export function CircuitViewV2({
       else if (n) bumpDefs()
     })
   }, [doc.parts])
+
+  // one-time: re-file parts installed from the retired monolithic pack into
+  // the per-bin packs that replaced it, and hand back the Core packs the app
+  // now ships itself, so everything shows up under the right tab
+  React.useEffect(() => {
+    void initUserParts()
+      .then(() => migrateLegacyPacks())
+      .then((res) => {
+        if (!res.moved && !res.discarded) return
+        bumpDefs()
+        const parts = [
+          res.moved ? `${res.moved} parts sorted into ${res.packs.length} bins` : '',
+          res.discarded ? `${res.discarded} Core parts now ship with tinyStudio` : ''
+        ].filter(Boolean)
+        toast.success('Parts library reorganised', { description: parts.join(' · ') })
+      })
+      .catch(() => undefined)
+  }, [])
 
   // drop selection entries that no longer exist (undo, delete, external edit)
   React.useEffect(() => {
@@ -305,11 +327,9 @@ export function CircuitViewV2({
     setSel({ parts: new Set(), wires: new Set(), labels: new Set([id]) })
   }
 
-  const pickColor = (c: string): void => {
-    setWireColor(c)
-    if (sel.wires.size === 1 && sel.parts.size === 0)
-      store.dispatch(cmd.recolorWire([...sel.wires][0], c))
-  }
+  // Just the "next wire" colour — recolouring the *selected* wire is the
+  // Inspector's job (it owns the picker and knows what's selected).
+  const pickColor = (c: string): void => setWireColor(c)
 
   const editExisting = async (type: string): Promise<void> => {
     const def = getPart(type) || (await loadPart(type))
@@ -322,15 +342,15 @@ export function CircuitViewV2({
   return (
     <div className="size-full relative flex bg-bg overflow-hidden pb-7">
       {editable && (
-        <Palette
+        <InspectorRail
+          doc={doc}
+          store={store}
+          sel={sel}
+          setSel={setSel}
+          netModel={netModel}
           view={view}
           wireColor={wireColor}
-          onPickColor={pickColor}
-          onAdd={(type) => void addPartAt(type)}
-          onAddNetLabel={(kind, name) => addNetLabel(kind as NetLabelKind, name)}
-          onEditPart={(type) => void editExisting(type)}
-          onNewPart={() => setEditorPart(null)}
-          onOpenPacks={() => setShowPacks(true)}
+          onPickWireColor={pickColor}
         />
       )}
 
@@ -583,13 +603,14 @@ export function CircuitViewV2({
       </div>
 
       {editable && (
-        <InspectorRail
-          doc={doc}
-          store={store}
-          sel={sel}
-          setSel={setSel}
-          netModel={netModel}
+        <Palette
           view={view}
+          defsTick={defsTick}
+          onAdd={(type) => void addPartAt(type)}
+          onAddNetLabel={(kind, name) => addNetLabel(kind as NetLabelKind, name)}
+          onEditPart={(type) => void editExisting(type)}
+          onNewPart={() => setEditorPart(null)}
+          onOpenPacks={() => setShowPacks(true)}
         />
       )}
 

@@ -1,0 +1,85 @@
+{
+  "type": "omron-g5v-1-6765513-002",
+  "label": "RELAY (relay-g5v)",
+  "family": "Relay",
+  "tags": [
+    "G5V",
+    "RELAY",
+    "OMRON"
+  ],
+  "description": "Omron G5V-1 Relay \\n This relais is to small to fit on a breadboard, but you can use a stripboard to connect it.",
+  "source": {
+    "fzp": "Omron_G5V-1_6765513_002.fzp",
+    "moduleId": "OmronG5V68f766ba7b39403faf52f76998823b5d"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.1\" id=\"Ebene_1\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 31.1 28.7\" xml:space=\"preserve\"><g id=\"breadboard\"><g transform=\"scale(2.54) translate(12.9 11.5) rotate(180)\"><circle id=\"connector10pin\" connectorname=\"10\" cx=\"11.5316\" cy=\"6.4516\" r=\"0.3\" stroke=\"#F7BD13\" stroke-width=\"0.254\" fill=\"none\"/><circle id=\"connector9pin\" connectorname=\"9\" cx=\"8.992\" cy=\"6.429\" r=\"0.3\" stroke=\"#F7BD13\" stroke-width=\"0.254\" fill=\"none\"/><circle id=\"connector6pin\" connectorname=\"6\" cx=\"1.3716\" cy=\"6.4516\" r=\"0.3\" stroke=\"#F7BD13\" stroke-width=\"0.254\" fill=\"none\"/><circle id=\"connector5pin\" connectorname=\"5\" cx=\"1.372\" cy=\"1.412\" r=\"0.3\" stroke=\"#F7BD13\" stroke-width=\"0.254\" fill=\"none\"/><circle id=\"connector2pin\" connectorname=\"2\" cx=\"8.9916\" cy=\"1.3716\" r=\"0.3\" stroke=\"#F7BD13\" stroke-width=\"0.254\" fill=\"none\"/><circle id=\"connector1pin\" connectorname=\"1\" cx=\"11.520\" cy=\"1.372\" r=\"0.3\" stroke=\"#F7BD13\" stroke-width=\"0.254\" fill=\"none\"/></g><g transform=\"scale(0.85) translate(71.5 21) \"><g><path fill=\"#1A1A1A\" d=\"M-34.09,11.648c0,0.552-0.45,1-1,1h-34.576c-0.55,0-1-0.448-1-1V0.299c0-0.558,0.45-1,1-1h34.576     c0.55,0,1,0.442,1,1V11.648z\"/><path fill-opacity=\"0.7\" d=\"M-70.667,11.329c0,0.551,0.45,1,1,1h34.576c0.55,0,1-0.449,1-1v0.319c0,0.552-0.45,1-1,1h-34.576   c-0.55,0-1-0.448-1-1V11.329z\"/><g transform=\"translate(0 8)\"><g><path fill=\"#1A1A1A\" d=\"M-34.09-8.738c0,0.551-0.45,1-1,1h-34.576c-0.55,0-1-0.449-1-1v-11.35c0-0.553,0.45-1,1-1h34.576      c0.55,0,1,0.447,1,1V-8.738z\"/><path fill=\"#FFFFFF\" fill-opacity=\"0.1\" d=\"M-35.09-20.78h-34.576c-0.55,0-1,0.447-1,1v-0.308c0-0.553,0.45-1,1-1h34.576V-20.78      z\"/></g><path fill=\"#333333\" d=\"m -34.717 -21.088 h -32.061 v 3.605 c 0 0.503 -0.412 0.916 -0.916 0.916 h -2.972 v 14.052 c 0 0.346 0.283 0.629 0.627 0.629 h 35.322 c 0.345 0 0.627 -0.283 0.627 -0.629 v -17.947 c -0 -0.343 -0.283 -0.626 -0.627 -0.626 z\"/><text transform=\"matrix(1 0 0 1 -64.3169 -17.9258)\" fill=\"#808080\" font-family=\"Noto Sans\" font-size=\"2.531\">OMRON</text><text transform=\"matrix(1 0 0 1 -64.3169 -15.4258)\" fill=\"#808080\" font-family=\"Noto Sans\" font-size=\"2.531\">G5V-1</text><g><text transform=\"matrix(1 0 0 1 -66.4814 -6)\" fill=\"#808080\" font-family=\"Noto Sans\" font-size=\"2.531\">12VDC</text><text transform=\"matrix(1 0 0 1 -66.4814 -3)\" fill=\"#808080\" font-family=\"Noto Sans\" font-size=\"2.5\">MADE IN CHINA</text></g><path fill=\"#B3B3B3\" d=\"m-68.044-4.484c0,0.504-0.412,0.916-0.916,0.916h-0.002c-0.503,0-0.916-0.412-0.916-0.916v-10.084   c0-0.503,0.412-0.916,0.916-0.916h0.002c0.503,0,0.916,0.412,0.916,0.916V-2.484z\" transform=\"translate(0.036, 0.036)\"/><path fill=\"#FFFFFF\" fill-opacity=\"0.1\" d=\"m-66.778-20.775h32.061c0.345,0,0.627,0.283,0.627,0.627v-0.313   c0-0.344-0.282-0.627-0.627-0.627h-32.061V-20.775z\"/><path fill=\"#FFFFFF\" fill-opacity=\"0.1\" d=\"m-70.667-16.254h2.972c0.504,0,0.916-0.413,0.916-0.916v-0.313   c0,0.503-0.412,0.916-0.916,0.916h-2.972V-16.254z\"/></g></g></g><g transform=\"translate(2 6) scale(0.85)\"><g fill=\"#808080\" font-family=\"Noto Sans\" font-size=\"2.2714\"><text transform=\"translate(21.078 4.6855)\">10</text><text transform=\"translate(25.399 4.6855)\">9</text><text transform=\"translate(32.668 4.6855)\">6</text><text transform=\"translate(22.104, 18.655)\">1</text><text transform=\"translate(25.4 18.688)\">2</text><text transform=\"translate(32.668 18.686)\">5</text></g><g fill=\"none\" stroke=\"#808080\" stroke-miterlimit=\"10\" stroke-width=\".25\"><g transform=\"translate(3.74)\"><line x1=\"22.705\" x2=\"22.705\" y1=\"5.874\" y2=\"10.583\"/><line x1=\"22.078\" x2=\"23.333\" y1=\"5.874\" y2=\"5.874\"/><rect x=\"21.555\" y=\"10.583\" width=\"2.302\" height=\"1.035\" fill=\"none\" stroke=\"#808080\" stroke-miterlimit=\"10\" stroke-width=\".25\"/><line x1=\"22.705\" x2=\"22.705\" y1=\"16.328\" y2=\"11.619\"/><line x1=\"22.078\" x2=\"23.333\" y1=\"16.328\" y2=\"16.328\"/><line x1=\"18.7\" x2=\"18.7\" y1=\"5.874\" y2=\"8.8\"/><polygon transform=\"translate(-4.2 -15.5) rotate(30)\" points=\"32.235 9.5 31.825 9.737 32.235 9.974\" fill=\"#808080\"/><polygon transform=\"translate(-13.95 20.7) rotate(-30)\" points=\"32.235 9.5 31.825 9.737 32.235 9.974\" fill=\"#808080\"/><line x1=\"18.7\" x2=\"18.7\" y1=\"16.328\" y2=\"13.2\"/><line x1=\"18\" x2=\"19.4\" y1=\"5.874\" y2=\"5.874\"/><line x1=\"18\" x2=\"19.4\" y1=\"16.328\" y2=\"16.328\"/><circle cx=\"29.6\" cy=\"11\" r=\".3\" fill=\"#808080\"/><circle cx=\"15.6\" cy=\"11\" r=\".3\" fill=\"#808080\"/><path d=\"m29.6 11h-3v-9h-12v9h1l3.5 1.3\" fill=\"none\" transform=\"translate(0.036, 0.036)\"/></g><line x1=\"32.668\" x2=\"33.924\" y1=\"5.874\" y2=\"5.874\"/><line x1=\"33.3\" x2=\"33.3\" y1=\"5.874\" y2=\"16.328\"/><line x1=\"32.733\" x2=\"33.989\" y1=\"16.328\" y2=\"16.328\"/></g></g><g font-family=\"OCR-Fritzing-mono\" font-size=\"2\" fill=\"#808080\"><text x=\"1.5\" y=\"27\" transform=\"translate(0.810, 0)\">1</text><text x=\"8\" y=\"27\" transform=\"translate(1.295, 0)\">2</text><text x=\"29\" y=\"27\" transform=\"translate(-0.405, 0)\">5</text></g></g></svg>",
+      "w": 47.24,
+      "h": 43.46,
+      "pins": {
+        "1": [
+          5.32,
+          38.96
+        ],
+        "2": [
+          15.08,
+          38.96
+        ],
+        "5": [
+          44.48,
+          38.81
+        ],
+        "6": [
+          44.48,
+          19.42
+        ],
+        "9": [
+          15.08,
+          19.51
+        ],
+        "10": [
+          5.28,
+          19.42
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg version=\"1.1\" id=\"Layer_1\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 51.1 43.92\" enable-background=\"new 0 0 51.1 43.92\" xml:space=\"preserve\"><g id=\"schematic\"><polygon fill=\"#FFFFFF\" stroke=\"#000000\" stroke-width=\"0.9\" stroke-linecap=\"round\" points=\"7.55,7.56 7.55,36.36 7.55,43.56    43.55,43.56 43.55,36.36 43.55,29.16 43.55,14.76 43.55,7.56 43.55,0.36 7.55,0.36  \"/><path fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" d=\"M14.754,16.92c2.585-0.199,4.519-2.455,4.319-5.04   c-0.179-2.308-2.014-4.142-4.319-4.32\"/><path fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" d=\"M14.75,12.6c-1.193-0.348-2.442,0.337-2.79,1.53   c-0.351,1.193,0.337,2.442,1.527,2.79c0.412,0.12,0.851,0.12,1.263,0\"/><path fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" d=\"M14.75,24.12c3.181-0.895,5.034-4.199,4.14-7.38   c-0.563-2.007-2.133-3.576-4.14-4.14\"/><path fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" d=\"M14.75,19.8c-1.193-0.348-2.442,0.337-2.79,1.53   c-0.351,1.192,0.337,2.442,1.527,2.79c0.412,0.119,0.851,0.119,1.263,0\"/><path fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" d=\"M14.75,31.319c3.181-0.928,5.008-4.258,4.08-7.439   c-0.574-1.968-2.112-3.506-4.08-4.08\"/><path fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" d=\"M14.75,27c-1.193-0.349-2.442,0.337-2.79,1.53   c-0.351,1.191,0.337,2.441,1.527,2.789c0.412,0.121,0.851,0.121,1.263,0\"/><path fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" d=\"M14.75,36.36c2.585-0.199,4.519-2.455,4.317-5.041   c-0.177-2.309-2.012-4.143-4.317-4.319\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"43.55\" y1=\"7.56\" x2=\"29.15\" y2=\"7.56\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"29.15\" y1=\"7.56\" x2=\"29.15\" y2=\"14.76\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"43.55\" y1=\"36.36\" x2=\"29.15\" y2=\"36.36\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"29.15\" y1=\"36.36\" x2=\"29.15\" y2=\"29.16\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"36.35\" y1=\"21.96\" x2=\"31.31\" y2=\"16.92\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"29.15\" y1=\"14.76\" x2=\"31.31\" y2=\"12.6\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"29.15\" y1=\"14.76\" x2=\"26.99\" y2=\"12.6\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"29.15\" y1=\"29.16\" x2=\"31.31\" y2=\"31.319\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"29.15\" y1=\"29.16\" x2=\"26.99\" y2=\"31.319\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"7.55\" y1=\"7.56\" x2=\"14.75\" y2=\"7.56\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"7.55\" y1=\"36.36\" x2=\"14.75\" y2=\"36.36\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"43.55\" y1=\"29.16\" x2=\"39.95\" y2=\"29.16\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"39.95\" y1=\"29.16\" x2=\"39.95\" y2=\"21.96\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"39.95\" y1=\"21.96\" x2=\"39.95\" y2=\"14.76\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"39.95\" y1=\"14.76\" x2=\"43.55\" y2=\"14.76\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.5\" stroke-linecap=\"round\" x1=\"36.35\" y1=\"21.96\" x2=\"39.95\" y2=\"21.96\"/><line id=\"connector4pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" x1=\"0.35\" y1=\"36.36\" x2=\"7.55\" y2=\"36.36\"/><text transform=\"matrix(1 0 0 1 3.2268 35.6602)\" fill=\"#787878\" font-family=\"Noto Sans\" font-size=\"2\">9</text><line id=\"connector3pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" x1=\"50.75\" y1=\"29.16\" x2=\"43.55\" y2=\"29.16\"/><text transform=\"matrix(1 0 0 1 46.426 28.46)\" fill=\"#787878\" font-family=\"Noto Sans\" font-size=\"2\">6</text><line id=\"connector5pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" x1=\"50.75\" y1=\"36.36\" x2=\"43.55\" y2=\"36.36\"/><text transform=\"matrix(1 0 0 1 46.426 35.6602)\" fill=\"#787878\" font-family=\"Noto Sans\" font-size=\"2\">10</text><line id=\"connector0pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" x1=\"50.75\" y1=\"7.56\" x2=\"43.55\" y2=\"7.56\"/><text transform=\"matrix(1 0 0 1 46.426 6.8604)\" fill=\"#787878\" font-family=\"Noto Sans\" font-size=\"2\">1</text><line id=\"connector1pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" x1=\"0.35\" y1=\"7.56\" x2=\"7.55\" y2=\"7.56\"/><text transform=\"matrix(1 0 0 1 3.2268 6.8604)\" fill=\"#787878\" font-family=\"Noto Sans\" font-size=\"2\">2</text><line id=\"connector2pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" x1=\"50.75\" y1=\"14.76\" x2=\"43.55\" y2=\"14.76\"/><text transform=\"matrix(1 0 0 1 46.426 14.0596)\" fill=\"#787878\" font-family=\"Noto Sans\" font-size=\"2\">5</text></g></svg>",
+      "w": 51.1,
+      "h": 43.92,
+      "pins": {
+        "1": [
+          50.75,
+          7.56
+        ],
+        "2": [
+          0.35,
+          7.56
+        ],
+        "5": [
+          50.75,
+          14.76
+        ],
+        "6": [
+          50.75,
+          29.16
+        ],
+        "9": [
+          0.35,
+          36.36
+        ],
+        "10": [
+          50.75,
+          36.36
+        ]
+      }
+    }
+  },
+  "properties": {
+    "package": "relay-g5v",
+    "variant": "G5V-1"
+  },
+  "icon": "<svg version=\"1.1\" viewBox=\"0 0 36.576 34.209\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"icon\"><path d=\"m36.576 32.738c0 0.55-0.45 1-1 1h-34.576c-0.55 0-1-0.45-1-1v-11.35c0-0.55 0.45-1 1-1h34.576c0.55 0 1 0.45 1 1v11.35z\" fill=\"#1A1A1A\"/><path d=\"M36.576,21.574c0,0.346-0.282,0.628-0.627,0.628H0.627C0.283,22.202,0,21.92,0,21.574V0.627     C0,0.283,0.283,0,0.627,0h35.322c0.345,0,0.627,0.283,0.627,0.627V21.574z\" fill=\"#333\"/><circle cx=\"18.251\" cy=\"11.101\" r=\"2.537\" fill=\"#1A1A1A\"/><circle cx=\"18.251\" cy=\"11.362\" r=\".596\"/><path d=\"m18.251 9.088c1.312 0 2.378 0.999 2.511 2.274 9e-3 -0.087 0.026-0.172 0.026-0.262 0-1.4-1.136-2.536-2.537-2.536-1.4 0-2.536 1.136-2.536 2.536 0 0.09 0.018 0.175 0.026 0.262 0.133-1.275 1.198-2.274 2.51-2.274z\"/><text transform=\"translate(1.0576 4)\" fill=\"#CCC\" font-size=\"3.5\" font-family=\"Noto Sans\"> OMRON G5V-1</text><path d=\"M0,0.627C0,0.283,0.283,0,0.627,0h35.322c0.345,0,0.627,0.283,0.627,0.627v0.314   c0-0.345-0.282-0.627-0.627-0.627H0.627C0.283,0.314,0,0.596,0,0.941V0.627z\" fill=\"#fff\" opacity=\".2\"/><path d=\"M36.576,21.574c0,0.346-0.282,0.628-0.627,0.628H0.627C0.283,22.202,0,21.92,0,21.574v-0.313   c0,0.346,0.283,0.628,0.627,0.628h35.322c0.345,0,0.627-0.282,0.627-0.628V21.574z\" opacity=\".75\"/><path d=\"M36.576,33.11c0,0.346-0.282,0.628-0.627,0.628H0.627C0.283,33.738,0,33.456,0,33.11v-0.313   c0,0.346,0.283,0.628,0.627,0.628h35.322c0.345,0,0.627-0.282,0.627-0.628V33.11z\" opacity=\".75\"/><rect y=\"9.702\" width=\"3.888\" height=\"2.798\" fill=\"#1A1A1A\"/></g></svg>",
+  "order": 20070
+}

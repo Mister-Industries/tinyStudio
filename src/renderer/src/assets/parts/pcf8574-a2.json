@@ -1,0 +1,168 @@
+{
+  "type": "pcf8574-a2",
+  "label": "PCF8574",
+  "family": "pcf8574",
+  "tags": [
+    "DIP",
+    "I2C",
+    "Expander Port"
+  ],
+  "description": "8-bit parallel-load shift registers",
+  "source": {
+    "fzp": "PCF8574_A2.fzp",
+    "moduleId": "PCF8574A_f92705dc5bbcb278fb8f55ff08c7872a_1"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 57.6 23.76\" x=\"0px\" id=\"svg2\" gorn=\"0\" version=\"1.1\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" enable-background=\"new 0 0 57.6 23.76\" xml:space=\"preserve\" y=\"0px\"><desc><referenceFile>PCF8574.svg</referenceFile></desc><metadata id=\"metadata3850\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><cc:Work xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:cc=\"http://creativecommons.org/ns#\" rdf:about=\"\"><dc:format xmlns:dc=\"http://purl.org/dc/elements/1.1/\">image/svg+xml</dc:format><dc:type xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\"/><dc:title xmlns:dc=\"http://purl.org/dc/elements/1.1/\"/></cc:Work></rdf:RDF></metadata><defs id=\"defs3848\"/><rect x=\"2.52\" id=\"connector0pin\" height=\"3.124\" gorn=\"0.3\" width=\"2.16\" fill=\"none\" y=\"20.636\"/><rect x=\"9.72\" id=\"connector1pin\" height=\"3.124\" gorn=\"0.4\" width=\"2.16\" fill=\"none\" y=\"20.636\"/><rect x=\"16.92\" id=\"connector2pin\" height=\"3.124\" gorn=\"0.5\" width=\"2.159\" fill=\"none\" y=\"20.636\"/><rect x=\"24.119\" id=\"connector3pin\" height=\"3.124\" gorn=\"0.6\" width=\"2.16\" fill=\"none\" y=\"20.636\"/><rect x=\"31.319\" id=\"connector4pin\" height=\"3.124\" gorn=\"0.7\" width=\"2.16\" fill=\"none\" y=\"20.636\"/><rect x=\"38.521\" id=\"connector5pin\" height=\"3.124\" gorn=\"0.8\" width=\"2.159\" fill=\"none\" y=\"20.636\"/><rect x=\"45.719\" id=\"connector6pin\" height=\"3.124\" gorn=\"0.9\" width=\"2.16\" fill=\"none\" y=\"20.636\"/><rect x=\"52.919\" id=\"connector7pin\" height=\"3.124\" gorn=\"0.10\" width=\"2.16\" fill=\"none\" y=\"20.636\"/><rect x=\"52.919\" id=\"connector8pin\" height=\"3.125\" gorn=\"0.11\" width=\"2.16\" fill=\"none\" y=\"0\"/><rect x=\"45.719\" id=\"connector9pin\" height=\"3.125\" gorn=\"0.12\" width=\"2.16\" fill=\"none\" y=\"0\"/><rect x=\"38.521\" id=\"connector10pin\" height=\"3.125\" gorn=\"0.13\" width=\"2.159\" fill=\"none\" y=\"0\"/><rect x=\"31.319\" id=\"connector11pin\" height=\"3.125\" gorn=\"0.14\" width=\"2.16\" fill=\"none\" y=\"0\"/><rect x=\"24.119\" id=\"connector12pin\" height=\"3.125\" gorn=\"0.15\" width=\"2.16\" fill=\"none\" y=\"0\"/><rect x=\"16.92\" id=\"connector13pin\" height=\"3.125\" gorn=\"0.16\" width=\"2.159\" fill=\"none\" y=\"0\"/><rect x=\"9.72\" id=\"connector14pin\" height=\"3.125\" gorn=\"0.17\" width=\"2.16\" fill=\"none\" y=\"0\"/><rect x=\"2.52\" id=\"connector15pin\" height=\"3.125\" gorn=\"0.18\" width=\"2.16\" fill=\"none\" y=\"0\"/><rect x=\"2.52\" id=\"connector0terminal\" height=\"2.159\" gorn=\"0.19\" width=\"2.16\" fill=\"none\" y=\"21.601\"/><rect x=\"9.72\" id=\"connector1terminal\" height=\"2.159\" gorn=\"0.20\" width=\"2.16\" fill=\"none\" y=\"21.601\"/><rect x=\"16.92\" id=\"connector2terminal\" height=\"2.159\" gorn=\"0.21\" width=\"2.159\" fill=\"none\" y=\"21.601\"/><rect x=\"24.119\" id=\"connector3terminal\" height=\"2.159\" gorn=\"0.22\" width=\"2.16\" fill=\"none\" y=\"21.601\"/><rect x=\"31.319\" id=\"connector4terminal\" height=\"2.159\" gorn=\"0.23\" width=\"2.16\" fill=\"none\" y=\"21.601\"/><rect x=\"38.521\" id=\"connector5terminal\" height=\"2.159\" gorn=\"0.24\" width=\"2.159\" fill=\"none\" y=\"21.601\"/><rect x=\"45.719\" id=\"connector6terminal\" height=\"2.159\" gorn=\"0.25\" width=\"2.16\" fill=\"none\" y=\"21.601\"/><rect x=\"52.919\" id=\"connector7terminal\" height=\"2.159\" gorn=\"0.26\" width=\"2.16\" fill=\"none\" y=\"21.601\"/><rect x=\"52.919\" id=\"connector8terminal\" height=\"2.16\" gorn=\"0.27\" width=\"2.16\" fill=\"none\" y=\"0\"/><rect x=\"45.719\" id=\"connector9terminal\" height=\"2.16\" gorn=\"0.28\" width=\"2.16\" fill=\"none\" y=\"0\"/><rect x=\"38.521\" id=\"connector10terminal\" height=\"2.16\" gorn=\"0.29\" width=\"2.159\" fill=\"none\" y=\"0\"/><rect x=\"31.319\" id=\"connector11terminal\" height=\"2.16\" gorn=\"0.30\" width=\"2.16\" fill=\"none\" y=\"0\"/><rect x=\"24.119\" id=\"connector12terminal\" height=\"2.16\" gorn=\"0.31\" width=\"2.16\" fill=\"none\" y=\"0\"/><rect x=\"16.92\" id=\"connector13terminal\" height=\"2.16\" gorn=\"0.32\" width=\"2.159\" fill=\"none\" y=\"0\"/><rect x=\"9.72\" id=\"connector14terminal\" height=\"2.16\" gorn=\"0.33\" width=\"2.16\" fill=\"none\" y=\"0\"/><rect x=\"2.52\" id=\"connector15terminal\" height=\"2.16\" gorn=\"0.34\" width=\"2.16\" fill=\"none\" y=\"0\"/><g id=\"breadboard\" gorn=\"0.35\"><rect x=\"2.52\" id=\"rect3760\" height=\"4.811\" gorn=\"0.35.0\" width=\"2.16\" fill=\"#8C8C8C\" y=\"18.949\"/><rect x=\"9.72\" id=\"rect3762\" height=\"4.811\" gorn=\"0.35.1\" width=\"2.16\" fill=\"#8C8C8C\" y=\"18.949\"/><rect x=\"16.92\" id=\"rect3764\" height=\"4.811\" gorn=\"0.35.2\" width=\"2.159\" fill=\"#8C8C8C\" y=\"18.949\"/><rect x=\"24.119\" id=\"rect3766\" height=\"4.811\" gorn=\"0.35.3\" width=\"2.16\" fill=\"#8C8C8C\" y=\"18.949\"/><rect x=\"31.319\" id=\"rect3768\" height=\"4.811\" gorn=\"0.35.4\" width=\"2.16\" fill=\"#8C8C8C\" y=\"18.949\"/><rect x=\"38.521\" id=\"rect3770\" height=\"4.811\" gorn=\"0.35.5\" width=\"2.159\" fill=\"#8C8C8C\" y=\"18.949\"/><rect x=\"45.719\" id=\"rect3772\" height=\"4.811\" gorn=\"0.35.6\" width=\"2.16\" fill=\"#8C8C8C\" y=\"18.949\"/><rect x=\"52.919\" id=\"rect3774\" height=\"4.811\" gorn=\"0.35.7\" width=\"2.16\" fill=\"#8C8C8C\" y=\"18.949\"/><rect x=\"52.919\" id=\"rect3776\" height=\"4.81\" gorn=\"0.35.8\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><rect x=\"45.719\" id=\"rect3778\" height=\"4.81\" gorn=\"0.35.9\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><rect x=\"38.521\" id=\"rect3780\" height=\"4.81\" gorn=\"0.35.10\" width=\"2.159\" fill=\"#8C8C8C\" y=\"0\"/><rect x=\"31.319\" id=\"rect3782\" height=\"4.81\" gorn=\"0.35.11\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><rect x=\"24.119\" id=\"rect3784\" height=\"4.81\" gorn=\"0.35.12\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><rect x=\"16.92\" id=\"rect3786\" height=\"4.81\" gorn=\"0.35.13\" width=\"2.159\" fill=\"#8C8C8C\" y=\"0\"/><rect x=\"9.72\" id=\"rect3788\" height=\"4.81\" gorn=\"0.35.14\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><rect x=\"2.52\" id=\"rect3790\" height=\"4.81\" gorn=\"0.35.15\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><polygon id=\"polygon3792\" gorn=\"0.35.16\" points=\"0,2.16 57.6,2.16 57.059,8.281 0,8.281  \" fill=\"#3D3D3D\"/><polygon id=\"polygon3794\" gorn=\"0.35.17\" points=\"0,15.479 57.059,15.479 57.6,21.601 0,21.601  \"/><polygon id=\"polygon3796\" gorn=\"0.35.18\" points=\"6.12,3.125 6.12,2.347 4.68,1.685 2.52,1.685 2.52,3.125  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3798\" gorn=\"0.35.19\" points=\"55.079,3.125 55.079,1.685 52.919,1.685 51.478,2.347 51.478,3.125  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3800\" gorn=\"0.35.20\" points=\"2.52,20.636 2.52,22.074 4.68,22.074 6.12,21.412 6.12,20.636  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3802\" gorn=\"0.35.21\" points=\"51.478,20.636 51.478,21.412 52.919,22.074 55.079,22.074 55.079,20.636  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3804\" gorn=\"0.35.22\" points=\"13.32,3.125 13.32,2.347 11.88,1.685 9.72,1.685 8.28,2.347 8.28,3.125  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3806\" gorn=\"0.35.23\" points=\"8.28,20.636 8.28,21.412 9.72,22.074 11.88,22.074 13.32,21.412 13.32,20.636  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3808\" gorn=\"0.35.24\" points=\"20.52,3.125 20.52,2.347 19.079,1.685 16.92,1.685 15.48,2.347 15.48,3.125  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3810\" gorn=\"0.35.25\" points=\"15.48,20.636 15.48,21.412 16.92,22.074 19.079,22.074 20.52,21.412 20.52,20.636  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3812\" gorn=\"0.35.26\" points=\"27.72,3.125 27.72,2.347 26.28,1.685 24.119,1.685 22.68,2.347 22.68,3.125  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3814\" gorn=\"0.35.27\" points=\"22.68,20.636 22.68,21.412 24.119,22.074 26.28,22.074 27.72,21.412 27.72,20.636  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3816\" gorn=\"0.35.28\" points=\"34.919,3.125 34.919,2.347 33.479,1.685 31.319,1.685 29.879,2.347 29.879,3.125  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3818\" gorn=\"0.35.29\" points=\"29.879,20.636 29.879,21.412 31.319,22.074 33.479,22.074 34.919,21.412 34.919,20.636  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3820\" gorn=\"0.35.30\" points=\"42.119,3.125 42.119,2.347 40.68,1.685 38.521,1.685 37.079,2.347 37.079,3.125  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3822\" gorn=\"0.35.31\" points=\"37.079,20.636 37.079,21.412 38.521,22.074 40.68,22.074 42.119,21.412 42.119,20.636  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3824\" gorn=\"0.35.32\" points=\"49.319,3.125 49.319,2.347 47.879,1.685 45.719,1.685 44.28,2.347 44.28,3.125  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3826\" gorn=\"0.35.33\" points=\"44.28,20.636 44.28,21.412 45.719,22.074 47.879,22.074 49.319,21.412 49.319,20.636  \" fill=\"#8C8C8C\"/><polygon id=\"polygon3828\" gorn=\"0.35.34\" points=\"57.6,2.16 57.059,3.931 56.053,3.931 56.053,19.821 57.059,19.828 57.6,21.601  \" fill=\"#141414\"/><polygon id=\"polygon3830\" gorn=\"0.35.35\" points=\"0,2.16 0.54,3.931 0.54,8.281 3.6,8.281 3.6,15.479 0.54,15.479 0.54,19.828 0,21.601  \" fill=\"#1F1F1F\"/><polygon id=\"polygon3832\" gorn=\"0.35.36\" points=\"3.6,8.281 0.54,8.281 0.403,9.792 0.403,11.88 3.6,11.88  \" fill=\"#1C1C1C\"/><polygon id=\"polygon3834\" gorn=\"0.35.37\" points=\"0.54,15.479 3.6,15.479 3.6,11.88 0.403,11.88 0.403,13.968  \" fill=\"#383838\"/><path id=\"path3836\" gorn=\"0.35.38\" fill=\"#303030\" d=\"M0.54,3.931v4.32c1.713,0.324,3.017,1.822,3.017,3.629s-1.296,3.313-3.017,3.637v4.319h56.519V3.931H0.54z\"/><path id=\"path3838\" gorn=\"0.35.39\" fill=\"#262626\" d=\"M0.403,9.792v4.196c1.059-0.121,1.887-1.008,1.887-2.102C2.29,10.8,1.469,9.9,0.403,9.792z\"/><circle id=\"circle3840\" cy=\"16.898\" gorn=\"0.35.40\" fill=\"#212121\" r=\"1.483\" cx=\"4.68\"/></g><rect x=\"6.494\" id=\"rect3842\" height=\"5.95\" gorn=\"0.36\" width=\"32.372\" fill=\"none\" y=\"9.792\"/><g transform=\"scale(1.0575413,0.94558955)\"><g><text x=\"14.1829\" id=\"text3844\" gorn=\"0.37.0.0\" y=\"14.671088\" style=\"font-size:6.09143782px;fill:#e5e5e5;font-family:OCRA\" font-size=\"5.76\">PCF8574</text></g></g></svg>",
+      "w": 76.8,
+      "h": 31.68,
+      "pins": {
+        "VCC": [
+          4.8,
+          2.08
+        ],
+        "P0": [
+          33.6,
+          29.6
+        ],
+        "P1": [
+          43.2,
+          29.6
+        ],
+        "P2": [
+          52.8,
+          29.6
+        ],
+        "P3": [
+          62.4,
+          29.6
+        ],
+        "GND": [
+          72,
+          29.6
+        ],
+        "P4": [
+          72,
+          2.08
+        ],
+        "P5": [
+          62.4,
+          2.08
+        ],
+        "P6": [
+          52.8,
+          2.08
+        ],
+        "P7": [
+          43.2,
+          2.08
+        ],
+        "INT": [
+          33.6,
+          2.08
+        ],
+        "A0": [
+          4.8,
+          29.6
+        ],
+        "A1": [
+          14.4,
+          29.6
+        ],
+        "SCL": [
+          24,
+          2.08
+        ],
+        "SDA": [
+          14.4,
+          2.08
+        ],
+        "A2": [
+          24,
+          29.6
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 72 64.8\" id=\"Layer_1\" x=\"0px\" version=\"1.1\" gorn=\"0\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" enable-background=\"new 0 0 72 64.8\" xml:space=\"preserve\" y=\"0px\"><desc><referenceFile>PCF8574.svg</referenceFile></desc><g id=\"schematic\" gorn=\"0.1\"><rect x=\"14.85\" height=\"63.9\" stroke-linecap=\"round\" stroke=\"#000000\" fill=\"#FFFFFF\" width=\"42.3\" stroke-width=\"0.3175\" y=\"0.45\"/><line x1=\"57.25\" id=\"connector15pin\" gorn=\"0.1.1\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"71.65\" fill=\"none\" y1=\"7.2\" y2=\"7.2\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 63.0723 6.1499)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">16</text></g></g><g transform=\"matrix(1 0 0 1 49.7813 7.8999)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">VCC</text></g></g><rect id=\"connector15terminal\" x=\"71.65\" height=\"0.7\" gorn=\"0.1.4\" fill=\"none\" width=\"0.699\" y=\"6.85\"/><line x1=\"57.25\" id=\"connector14pin\" gorn=\"0.1.5\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"71.65\" fill=\"none\" y1=\"14.4\" y2=\"14.4\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 63.0723 13.3491)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">15</text></g></g><g transform=\"matrix(1 0 0 1 49.5449 15.0991)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">SDA</text></g></g><rect id=\"connector14terminal\" x=\"71.65\" height=\"0.7\" gorn=\"0.1.8\" fill=\"none\" width=\"0.699\" y=\"14.05\"/><line x1=\"57.25\" id=\"connector13pin\" gorn=\"0.1.9\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"71.65\" fill=\"none\" y1=\"21.6\" y2=\"21.6\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 63.0723 20.5503)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">14</text></g></g><g transform=\"matrix(1 0 0 1 50.2031 22.3003)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">SCL</text></g></g><rect id=\"connector13terminal\" x=\"71.65\" height=\"0.7\" gorn=\"0.1.12\" fill=\"none\" width=\"0.699\" y=\"21.25\"/><line x1=\"57.25\" id=\"connector12pin\" gorn=\"0.1.13\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"71.65\" fill=\"none\" y1=\"28.8\" y2=\"28.8\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 63.0723 27.7495)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">13</text></g></g><g transform=\"matrix(1 0 0 1 50.2949 29.4995)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">INT</text></g></g><rect id=\"connector12terminal\" x=\"71.65\" height=\"0.7\" gorn=\"0.1.16\" fill=\"none\" width=\"0.699\" y=\"28.45\"/><line x1=\"57.25\" id=\"connector11pin\" gorn=\"0.1.17\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"71.65\" fill=\"none\" y1=\"36\" y2=\"36\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 63.0723 34.9507)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">12</text></g></g><g transform=\"matrix(1 0 0 1 51.9043 36.7007)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">P7</text></g></g><rect id=\"connector11terminal\" x=\"71.65\" height=\"0.7\" gorn=\"0.1.20\" fill=\"none\" width=\"0.699\" y=\"35.65\"/><line x1=\"57.25\" id=\"connector10pin\" gorn=\"0.1.21\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"71.65\" fill=\"none\" y1=\"43.201\" y2=\"43.201\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 63.0723 42.1499)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">11</text></g></g><g transform=\"matrix(1 0 0 1 51.9043 43.8999)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">P6</text></g></g><rect id=\"connector10terminal\" x=\"71.65\" height=\"0.7\" gorn=\"0.1.24\" fill=\"none\" width=\"0.699\" y=\"42.85\"/><line x1=\"57.25\" id=\"connector9pin\" gorn=\"0.1.25\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"71.65\" fill=\"none\" y1=\"50.4\" y2=\"50.4\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 63.0723 49.3491)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">10</text></g></g><g transform=\"matrix(1 0 0 1 51.9043 51.0991)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">P5</text></g></g><rect id=\"connector9terminal\" x=\"71.65\" height=\"0.699\" gorn=\"0.1.28\" fill=\"none\" width=\"0.699\" y=\"50.05\"/><line x1=\"57.25\" id=\"connector8pin\" gorn=\"0.1.29\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"71.65\" fill=\"none\" y1=\"57.6\" y2=\"57.6\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 63.7617 56.5503)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">9</text></g></g><g transform=\"matrix(1 0 0 1 51.9043 58.3003)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">P4</text></g></g><rect id=\"connector8terminal\" x=\"71.65\" height=\"0.7\" gorn=\"0.1.32\" fill=\"none\" width=\"0.699\" y=\"57.25\"/><line x1=\"0.35\" id=\"connector0pin\" gorn=\"0.1.33\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"14.75\" fill=\"none\" y1=\"7.2\" y2=\"7.2\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 6.8618 6.1499)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">1</text></g></g><g transform=\"matrix(1 0 0 1 16.1509 7.8999)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">A0</text></g></g><rect id=\"connector0terminal\" x=\"-0.35\" height=\"0.7\" gorn=\"0.1.36\" fill=\"none\" width=\"0.7\" y=\"6.85\"/><line x1=\"0.35\" id=\"connector1pin\" gorn=\"0.1.37\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"14.75\" fill=\"none\" y1=\"14.4\" y2=\"14.4\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 6.8618 13.3491)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">2</text></g></g><g transform=\"matrix(1 0 0 1 16.1509 15.0991)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">A1</text></g></g><rect id=\"connector1terminal\" x=\"-0.35\" height=\"0.7\" gorn=\"0.1.40\" fill=\"none\" width=\"0.7\" y=\"14.05\"/><line x1=\"0.35\" id=\"connector2pin\" gorn=\"0.1.41\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"14.75\" fill=\"none\" y1=\"21.6\" y2=\"21.6\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 6.8618 20.5503)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">3</text></g></g><g transform=\"matrix(1 0 0 1 16.1509 22.3003)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">A2</text></g></g><rect id=\"connector2terminal\" x=\"-0.35\" height=\"0.7\" gorn=\"0.1.44\" fill=\"none\" width=\"0.7\" y=\"21.25\"/><line x1=\"0.35\" id=\"connector3pin\" gorn=\"0.1.45\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"14.75\" fill=\"none\" y1=\"28.8\" y2=\"28.8\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 6.8618 27.7495)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">4</text></g></g><g transform=\"matrix(1 0 0 1 16.1509 29.4995)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">P0</text></g></g><rect id=\"connector3terminal\" x=\"-0.35\" height=\"0.7\" gorn=\"0.1.48\" fill=\"none\" width=\"0.7\" y=\"28.45\"/><line x1=\"0.35\" id=\"connector4pin\" gorn=\"0.1.49\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"14.75\" fill=\"none\" y1=\"36\" y2=\"36\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 6.8618 34.9507)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">5</text></g></g><g transform=\"matrix(1 0 0 1 16.1509 36.7007)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">P1</text></g></g><rect id=\"connector4terminal\" x=\"-0.35\" height=\"0.7\" gorn=\"0.1.52\" fill=\"none\" width=\"0.7\" y=\"35.65\"/><line x1=\"0.35\" id=\"connector5pin\" gorn=\"0.1.53\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"14.75\" fill=\"none\" y1=\"43.201\" y2=\"43.201\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 6.8618 42.1499)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">6</text></g></g><g transform=\"matrix(1 0 0 1 16.1509 43.8999)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">P2</text></g></g><rect id=\"connector5terminal\" x=\"-0.35\" height=\"0.7\" gorn=\"0.1.56\" fill=\"none\" width=\"0.7\" y=\"42.85\"/><line x1=\"0.35\" id=\"connector6pin\" gorn=\"0.1.57\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"14.75\" fill=\"none\" y1=\"50.4\" y2=\"50.4\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 6.8618 49.3491)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">7</text></g></g><g transform=\"matrix(1 0 0 1 16.1509 51.0991)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">P3</text></g></g><rect id=\"connector6terminal\" x=\"-0.35\" height=\"0.699\" gorn=\"0.1.60\" fill=\"none\" width=\"0.7\" y=\"50.05\"/><line x1=\"0.35\" id=\"connector7pin\" gorn=\"0.1.61\" stroke-linecap=\"round\" stroke=\"#787878\" x2=\"14.75\" fill=\"none\" y1=\"57.6\" y2=\"57.6\" stroke-width=\"0.2469\"/><g transform=\"matrix(1 0 0 1 6.8618 56.5503)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">8</text></g></g><g transform=\"matrix(1 0 0 1 16.1509 58.3003)\"><g><text fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"3.5\">GND</text></g></g><rect id=\"connector7terminal\" x=\"-0.35\" height=\"0.7\" gorn=\"0.1.64\" fill=\"none\" width=\"0.7\" y=\"57.25\"/><g transform=\"matrix(1 0 0 1 28.2388 30.5835)\"><g><text id=\"label\" gorn=\"0.1.65.0.0\" font-family=\"Noto Sans\" font-size=\"4.25\">PCF8574</text></g></g></g></svg>",
+      "w": 96,
+      "h": 86.4,
+      "pins": {
+        "VCC": [
+          96,
+          9.6
+        ],
+        "P0": [
+          0,
+          38.4
+        ],
+        "P1": [
+          0,
+          48
+        ],
+        "P2": [
+          0,
+          57.6
+        ],
+        "P3": [
+          0,
+          67.2
+        ],
+        "GND": [
+          0,
+          76.8
+        ],
+        "P4": [
+          96,
+          76.8
+        ],
+        "P5": [
+          96,
+          67.2
+        ],
+        "P6": [
+          96,
+          57.6
+        ],
+        "P7": [
+          96,
+          48
+        ],
+        "INT": [
+          96,
+          38.4
+        ],
+        "A0": [
+          0,
+          9.6
+        ],
+        "A1": [
+          0,
+          19.2
+        ],
+        "SCL": [
+          96,
+          28.8
+        ],
+        "SDA": [
+          96,
+          19.2
+        ],
+        "A2": [
+          0,
+          28.8
+        ]
+      }
+    }
+  },
+  "properties": {
+    "package": "DIP16 [THT]",
+    "type": "PCF8574",
+    "part number": "",
+    "layer": "",
+    "variant": "variant 1"
+  },
+  "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 21.6 23.76\" x=\"0px\" id=\"svg2\" gorn=\"0\" version=\"1.1\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" enable-background=\"new 0 0 21.6 23.76\" xml:space=\"preserve\" y=\"0px\"><desc><referenceFile>PCF8574.svg</referenceFile></desc><metadata id=\"metadata44\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><cc:Work xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:cc=\"http://creativecommons.org/ns#\" rdf:about=\"\"><dc:format xmlns:dc=\"http://purl.org/dc/elements/1.1/\">image/svg+xml</dc:format><dc:type xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\"/><dc:title xmlns:dc=\"http://purl.org/dc/elements/1.1/\"/></cc:Work></rdf:RDF></metadata><defs id=\"defs42\"/><g id=\"icon\" gorn=\"0.3\"><rect x=\"0\" id=\"middle\" height=\"19.438\" gorn=\"0.3.0\" width=\"21.6\" fill=\"#303030\" y=\"2.16\"/><rect x=\"0\" id=\"top\" height=\"1.771\" gorn=\"0.3.1\" width=\"21.6\" fill=\"#3D3D3D\" y=\"2.16\"/><rect x=\"0\" id=\"bottom\" height=\"1.771\" gorn=\"0.3.2\" width=\"21.6\" y=\"19.828\"/><polygon id=\"left\" gorn=\"0.3.3\" points=\"0,2.16 0.54,3.931 0.54,19.828 0,21.6  \" fill=\"#1F1F1F\"/><polygon id=\"left-upper-rect\" gorn=\"0.3.4\" points=\"3.6,8.28 0.54,8.251 0.404,9.778 0.404,11.88 3.6,11.88  \" fill=\"#1C1C1C\"/><polygon id=\"left-lower-rect\" gorn=\"0.3.5\" points=\"0.54,15.516 3.6,15.516 3.6,11.88 0.404,11.88 0.404,13.983  \" fill=\"#383838\"/><path id=\"slot\" gorn=\"0.3.6\" fill=\"#262626\" d=\"M0.404,9.778v4.197c1.059-0.122,1.887-1.008,1.887-2.103C2.289,10.779,1.469,9.9,0.404,9.778z\"/><path id=\"cover\" gorn=\"0.3.7\" fill=\"#303030\" d=\"M0.54,3.931v4.313c1.713,0.322,3.017,1.82,3.017,3.628s-1.296,3.313-3.017,3.637v0.007h3.6   V3.931H0.54z\"/><circle id=\"circle12\" cy=\"16.898\" gorn=\"0.3.8\" fill=\"#212121\" r=\"1.483\" cx=\"4.68\"/><text x=\"1.7711747\" id=\"text14\" gorn=\"0.3.9\" y=\"10.563607\" style=\"font-size:7.76000023px;fill:#dddddd;font-family:OCRA\" font-size=\"7.76\">PCF</text><rect x=\"2.52\" id=\"connector0pin\" height=\"3.125\" gorn=\"0.3.10\" width=\"2.16\" fill=\"#8C8C8C\" y=\"20.635\"/><rect x=\"2.52\" id=\"connector0terminal\" height=\"2.16\" gorn=\"0.3.11\" width=\"2.16\" fill=\"#8C8C8C\" y=\"21.6\"/><polygon id=\"polygon18\" gorn=\"0.3.12\" points=\"2.52,20.635 2.52,22.075 4.68,22.075 6.12,21.412 6.12,20.635  \" fill=\"#8C8C8C\"/><rect x=\"2.52\" id=\"connector5pin\" height=\"3.125\" gorn=\"0.3.13\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><rect x=\"2.52\" id=\"connector5terminal\" height=\"2.16\" gorn=\"0.3.14\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><polygon id=\"polygon22\" gorn=\"0.3.15\" points=\"6.12,3.125 6.12,2.347 4.68,1.685 2.52,1.685 2.52,3.125  \" fill=\"#8C8C8C\"/><rect x=\"16.92\" id=\"connector2pin\" height=\"3.125\" gorn=\"0.3.16\" width=\"2.16\" fill=\"#8C8C8C\" y=\"20.635\"/><rect x=\"16.92\" id=\"connector2terminal\" height=\"2.16\" gorn=\"0.3.17\" width=\"2.16\" fill=\"#8C8C8C\" y=\"21.6\"/><polygon id=\"polygon26\" gorn=\"0.3.18\" points=\"15.48,20.635 15.48,21.412 16.92,22.075 19.08,22.075 19.08,20.635  \" fill=\"#8C8C8C\"/><rect x=\"16.92\" id=\"connector3pin\" height=\"3.125\" gorn=\"0.3.19\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><rect x=\"16.92\" id=\"connector3terminal\" height=\"2.16\" gorn=\"0.3.20\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><polygon id=\"polygon30\" gorn=\"0.3.21\" points=\"19.08,3.125 19.08,1.685 16.92,1.685 15.48,2.347 15.48,3.125  \" fill=\"#8C8C8C\"/><rect x=\"9.72\" id=\"connector1pin\" height=\"3.125\" gorn=\"0.3.22\" width=\"2.16\" fill=\"#8C8C8C\" y=\"20.635\"/><rect x=\"9.72\" id=\"connector1terminal\" height=\"2.16\" gorn=\"0.3.23\" width=\"2.16\" fill=\"#8C8C8C\" y=\"21.6\"/><polygon id=\"polygon34\" gorn=\"0.3.24\" points=\"8.28,20.635 8.28,21.412 9.72,22.075 11.88,22.075 13.32,21.412 13.32,20.635  \" fill=\"#8C8C8C\"/><rect x=\"9.72\" id=\"connector4pin\" height=\"3.125\" gorn=\"0.3.25\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><rect x=\"9.72\" id=\"connector4terminal\" height=\"2.16\" gorn=\"0.3.26\" width=\"2.16\" fill=\"#8C8C8C\" y=\"0\"/><polygon id=\"polygon38\" gorn=\"0.3.27\" points=\"13.32,3.125 13.32,2.347 11.88,1.685 9.72,1.685 8.28,2.347 8.28,3.125  \" fill=\"#8C8C8C\"/><g transform=\"scale(0.95338456,1.0488947)\"><g><text x=\"1.3671272\" id=\"text14-1\" gorn=\"0.3.28.0.0\" y=\"16.661699\" style=\"font-size:7.39826441px;fill:#dddddd;font-family:OCRA\" font-size=\"7.76\">8574</text></g></g></g></svg>",
+  "order": 90005
+}

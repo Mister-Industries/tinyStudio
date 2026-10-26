@@ -20,19 +20,27 @@
  * URL, so a pack can ship as a self-contained folder of relative paths.
  */
 
-import type { PartDef } from '../../lib/partsLibrary'
-import { saveUserPart } from '../../lib/userParts'
+import { PART_MANIFEST, unregisterParts, type PartDef } from '../../lib/partsLibrary'
+import { deleteUserPart, saveUserPart } from '../../lib/userParts'
 
 export interface PackIndexEntry {
   id: string
   name: string
   version: string
   description?: string
+  /** heading the installer files this pack under ("Core", "SparkFun", …) */
+  group?: string
+  /** 2-letter monogram (or inline SVG) for the palette's vertical tab rail */
+  icon?: string
+  /** part count, so the installer can show a size without fetching the manifest */
+  count?: number
   url: string
 }
 
 export interface PackIndex {
   schema: number
+  /** preferred group order; anything unlisted sorts after, alphabetically */
+  groups?: string[]
   packs: PackIndexEntry[]
 }
 
@@ -47,7 +55,19 @@ export interface PackManifest {
   name: string
   version: string
   description?: string
+  group?: string
+  icon?: string
   parts: PackPartRef[]
+}
+
+/** What we remember about an installed pack, so its palette tab can show a
+ * real name and icon after a reload without re-fetching the index. */
+export interface InstalledPack {
+  id: string
+  version: string
+  name?: string
+  icon?: string
+  group?: string
 }
 
 /** Seeded per the M2 decision log ("new tinyparts repo under
@@ -135,7 +155,9 @@ export async function installPack(
       const url = resolveUrl(ref.file, manifestUrl)
       const json = await fetchJson(url)
       if (!isPartDef(json)) throw new Error(`${url} is not a valid part definition`)
-      await saveUserPart(json)
+      // stamp the pack id so the palette can give this pack its own bin
+      // (persisted with the def, so the tab survives a reload)
+      await saveUserPart({ ...json, pack: manifest.id })
       installed.push(ref.type)
     } catch (e) {
       failed.push({ type: ref.type, error: e instanceof Error ? e.message : String(e) })
@@ -144,8 +166,24 @@ export async function installPack(
       onProgress?.(done, manifest.parts.length)
     }
   }
-  if (installed.length) markInstalled(manifest.id, manifest.version)
+  if (installed.length)
+    recordPackMeta({
+      id: manifest.id,
+      version: manifest.version,
+      name: manifest.name,
+      icon: manifest.icon,
+      group: manifest.group
+    })
   return { installed, failed }
+}
+
+/** Remove every part belonging to a pack, and forget the pack itself. */
+export async function uninstallPack(id: string): Promise<number> {
+  const types = PART_MANIFEST.filter((m) => m.pack === id).map((m) => m.type)
+  for (const t of types) await deleteUserPart(t)
+  unregisterParts(types)
+  forgetPack(id)
+  return types.length
 }
 
 // ── settings (index URL list + installed-version tracking) ─────────────────
@@ -171,21 +209,55 @@ export function setIndexUrls(urls: string[]): void {
   }
 }
 
-export function getInstalledPacks(): Record<string, string> {
+/**
+ * Installed packs, keyed by id. The stored shape used to be `id → version`;
+ * reads normalise that into the richer record so an upgrade doesn't lose
+ * anyone's install history.
+ */
+export function getInstalledPacks(): Record<string, InstalledPack> {
+  let raw: unknown
   try {
-    const raw = localStorage.getItem(LS_INSTALLED)
-    return raw ? (JSON.parse(raw) as Record<string, string>) : {}
+    const s = localStorage.getItem(LS_INSTALLED)
+    raw = s ? JSON.parse(s) : {}
   } catch {
     return {}
   }
+  if (!raw || typeof raw !== 'object') return {}
+  const out: Record<string, InstalledPack> = {}
+  for (const [id, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof v === 'string') out[id] = { id, version: v }
+    else if (v && typeof v === 'object')
+      out[id] = { version: '', ...(v as Partial<InstalledPack>), id }
+  }
+  return out
 }
 
-function markInstalled(id: string, version: string): void {
-  const map = getInstalledPacks()
-  map[id] = version
+/** Look up one installed pack's display metadata (name / icon / group). */
+export function getPackMeta(id: string): InstalledPack | undefined {
+  return getInstalledPacks()[id]
+}
+
+function writeInstalled(map: Record<string, InstalledPack>): void {
   try {
     localStorage.setItem(LS_INSTALLED, JSON.stringify(map))
   } catch {
     /* quota / privacy mode */
   }
+}
+
+/** Remember (or refresh) a pack's install record. Fields already stored are
+ * kept when the caller doesn't supply them — the migration knows ids and
+ * versions but not names, and shouldn't clobber a real install's metadata. */
+export function recordPackMeta(pack: InstalledPack): void {
+  const map = getInstalledPacks()
+  map[pack.id] = { ...map[pack.id], ...pack }
+  writeInstalled(map)
+}
+
+/** Drop a pack's install record (its parts are handled separately). */
+export function forgetPack(id: string): void {
+  const map = getInstalledPacks()
+  if (!(id in map)) return
+  delete map[id]
+  writeInstalled(map)
 }

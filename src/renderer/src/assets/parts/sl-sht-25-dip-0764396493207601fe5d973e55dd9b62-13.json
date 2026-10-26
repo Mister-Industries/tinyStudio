@@ -1,0 +1,75 @@
+{
+  "type": "sl-sht-25-dip-0764396493207601fe5d973e55dd9b62-13",
+  "label": "StrawberryLinux SHT25 Sensor module",
+  "family": "SHT",
+  "tags": [
+    "SHT",
+    "Temperature",
+    "Sensor",
+    "Humidity"
+  ],
+  "description": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'MS UI Gothic'; font-size:9pt; font-weight:400; font-style:normal;\">\nStrawberry Linux SHT-25 / ストロベリーリナックス SHT-25\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
+  "source": {
+    "fzp": "SL-SHT-25-DIP_0764396493207601fe5d973e55dd9b62_13.fzp",
+    "moduleId": "SL-SHT-25-DIP_0764396493207601fe5d973e55dd9b62_13"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.1\" viewBox=\"0 0 37.204 54.921\" xmlns=\"http://www.w3.org/2000/svg\"><metadata><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><cc:Work rdf:about=\"\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><dc:format xmlns:dc=\"http://purl.org/dc/elements/1.1/\">image/svg+xml</dc:format><dc:type rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"/><dc:title xmlns:dc=\"http://purl.org/dc/elements/1.1/\"/></cc:Work></rdf:RDF></metadata><g id=\"breadboard\"><path d=\"m0.06996 0.06996v54.781h37.064v-54.781h-37.064zm19.365 20.375a3.7205 3.7205 0 0 1 3.7207 3.7188 3.7205 3.7205 0 0 1-3.7207 3.7207 3.7205 3.7205 0 0 1-3.7207-3.7207 3.7205 3.7205 0 0 1 3.7207-3.7188zm-14.371 30.455a1.35 1.35 0 0 1 1.3496 1.3496 1.35 1.35 0 0 1-1.3496 1.3496 1.35 1.35 0 0 1-1.3496-1.3496 1.35 1.35 0 0 1 1.3496-1.3496zm9 0a1.35 1.35 0 0 1 1.3496 1.3496 1.35 1.35 0 0 1-1.3496 1.3496 1.35 1.35 0 0 1-1.3496-1.3496 1.35 1.35 0 0 1 1.3496-1.3496zm9 0a1.35 1.35 0 0 1 1.3496 1.3496 1.35 1.35 0 0 1-1.3496 1.3496 1.35 1.35 0 0 1-1.3496-1.3496 1.35 1.35 0 0 1 1.3496-1.3496zm9 0a1.35 1.35 0 0 1 1.3496 1.3496 1.35 1.35 0 0 1-1.3496 1.3496 1.35 1.35 0 0 1-1.3496-1.3496 1.35 1.35 0 0 1 1.3496-1.3496z\" fill=\"#008000\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\".13992\"/><path d=\"m19.54 16.864a7.0866 7.0866 0 0 0-7.0859 7.0879 7.0866 7.0866 0 0 0 7.0859 7.0859 7.0866 7.0866 0 0 0 7.0859-7.0859 7.0866 7.0866 0 0 0-7.0859-7.0879zm-0.0742 3.584a3.7205 3.7205 0 0 1 3.7207 3.7207 3.7205 3.7205 0 0 1-3.7207 3.7207 3.7205 3.7205 0 0 1-3.7207-3.7207 3.7205 3.7205 0 0 1 3.7207-3.7207z\" fill=\"#ccc\"/><rect x=\"13.852\" y=\"3.9013\" width=\"10.63\" height=\"10.63\"/><g transform=\"rotate(-90)\"><g fill=\"#ffffff\" font-family=\"Noto Sans\" font-size=\"5\" letter-spacing=\"0px\" word-spacing=\"0px\" style=\"line-height:100%\" xml:space=\"preserve\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><text x=\"-48.26091\" y=\"6.8134522\" style=\"line-height:100%\">VCC</text><text x=\"-48.299606\" y=\"15.947653\" style=\"line-height:100%\">SCL</text><text x=\"-48.440048\" y=\"24.957428\" style=\"line-height:100%\">SDA</text><text x=\"-48.578049\" y=\"33.669258\" style=\"line-height:100%\">GND</text></g></g><circle id=\"connector0pin\" cx=\"5.0689\" cy=\"52.337\" r=\"1.9543\" fill=\"none\" stroke=\"#f7bd13\" stroke-width=\"1.1657\"/><circle id=\"connector1pin\" cx=\"14.069\" cy=\"52.337\" r=\"1.9543\" fill=\"none\" stroke=\"#f7bd13\" stroke-width=\"1.1657\"/><circle id=\"connector2pin\" cx=\"23.069\" cy=\"52.337\" r=\"1.9543\" fill=\"none\" stroke=\"#f7bd13\" stroke-width=\"1.1657\"/><circle id=\"connector3pin\" cx=\"32.069\" cy=\"52.337\" r=\"1.9543\" fill=\"none\" stroke=\"#f7bd13\" stroke-width=\"1.1657\"/><g fill=\"#fff\" font-family=\"Noto Sans\" font-size=\"3.75\" letter-spacing=\"0px\" word-spacing=\"0px\" style=\"line-height:100%\" xml:space=\"preserve\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><text x=\"15.530303\" y=\"10.413593\">SHT</text></g></g></svg>",
+      "w": 39.69,
+      "h": 58.58,
+      "pins": {
+        "VCC": [
+          5.41,
+          55.83
+        ],
+        "SCL": [
+          15.01,
+          55.83
+        ],
+        "SDA": [
+          24.61,
+          55.83
+        ],
+        "GND": [
+          34.21,
+          55.83
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg baseProfile=\"tiny\" version=\"1.2\" viewBox=\"0 0 22.86 25.4\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"schematic\"><rect class=\"interior rect\" x=\".15875\" y=\"5.2388\" width=\"17.462\" height=\"14.922\" fill=\"#fff\" stroke=\"#000\" stroke-linecap=\"round\" stroke-width=\".3175\"/><line id=\"connector0pin\" class=\"pin\" x1=\"17.656\" x2=\"22.736\" y1=\"10.16\" y2=\"10.16\" fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".24694\"/><text class=\"text\" x=\"20.1965\" y=\"9.78958\" fill=\"#8c8c8c\" font-family=\"'Noto Sans'\" font-size=\"0.88194\" stroke-width=\"0\" text-anchor=\"middle\">2</text><text class=\"text\" x=\"17.1626\" y=\"10.4069\" fill=\"#8c8c8c\" font-family=\"'Noto Sans'\" font-size=\"1.2347\" stroke-width=\"0\" text-anchor=\"end\">SCL</text><rect id=\"connector0terminal\" class=\"terminal\" x=\"22.736\" y=\"10.036\" width=\".24694\" height=\".24694\" fill=\"none\" stroke-width=\"0\"/><line id=\"connector2pin\" class=\"pin\" x1=\"17.656\" x2=\"22.736\" y1=\"12.7\" y2=\"12.7\" fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".24694\"/><text class=\"text\" x=\"20.1965\" y=\"12.3296\" fill=\"#8c8c8c\" font-family=\"'Noto Sans'\" font-size=\"0.88194\" stroke-width=\"0\" text-anchor=\"middle\">3</text><text class=\"text\" x=\"17.1626\" y=\"12.9469\" fill=\"#8c8c8c\" font-family=\"'Noto Sans'\" font-size=\"1.2347\" stroke-width=\"0\" text-anchor=\"end\">SDA</text><rect id=\"connector2terminal\" class=\"terminal\" x=\"22.736\" y=\"12.576\" width=\".24694\" height=\".24694\" fill=\"none\" stroke-width=\"0\"/><line id=\"connector3pin\" class=\"pin\" x1=\"7.62\" x2=\"7.62\" y1=\"20.196\" y2=\"25.276\" fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".24694\"/><g transform=\"translate(7.2496 22.736)\"><g transform=\"rotate(270)\"><text class=\"text\" fill=\"#8c8c8c\" font-family=\"'Noto Sans'\" font-size=\"0.88194\" stroke-width=\"0\" text-anchor=\"middle\">1</text></g></g><g transform=\"translate(7.8669 19.703)\"><g transform=\"rotate(270)\"><text class=\"text\" fill=\"#8c8c8c\" font-family=\"'Noto Sans'\" font-size=\"1.2347\" stroke-width=\"0\">GND</text></g></g><rect id=\"connector3terminal\" class=\"terminal\" x=\"7.4965\" y=\"25.276\" width=\".24694\" height=\".24694\" fill=\"none\" stroke-width=\"0\"/><line id=\"connector1pin\" class=\"pin\" x1=\"7.62\" x2=\"7.62\" y1=\".12347\" y2=\"5.2035\" fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".24694\"/><g transform=\"translate(7.2496 2.6635)\"><g transform=\"rotate(270)\"><text class=\"text\" fill=\"#8c8c8c\" font-family=\"'Noto Sans'\" font-size=\"0.88194\" stroke-width=\"0\" text-anchor=\"middle\">4</text></g></g><g transform=\"translate(7.8669 5.6974)\"><g transform=\"rotate(270)\"><text class=\"text\" fill=\"#8c8c8c\" font-family=\"'Noto Sans'\" font-size=\"1.2347\" stroke-width=\"0\" text-anchor=\"end\">VCC</text></g></g><rect id=\"connector1terminal\" class=\"terminal\" x=\"7.4965\" y=\"-.12347\" width=\".24694\" height=\".24694\" fill=\"none\" stroke-width=\"0\"/><g id=\"label\"><text class=\"text\" x=\"9.04875\" y=\"9.87194\" fill=\"#000000\" font-family=\"'Noto Sans'\" font-size=\"1.4993\" stroke-width=\"0\" text-anchor=\"middle\">Humidity</text><text class=\"text\" x=\"9.04875\" y=\"11.4712\" fill=\"#000000\" font-family=\"'Noto Sans'\" font-size=\"1.4993\" stroke-width=\"0\" text-anchor=\"middle\">Temperature</text><text class=\"text\" x=\"9.04875\" y=\"13.0706\" fill=\"#000000\" font-family=\"'Noto Sans'\" font-size=\"1.4993\" stroke-width=\"0\" text-anchor=\"middle\">Sensor</text><text class=\"text\" x=\"9.04875\" y=\"14.6699\" fill=\"#000000\" font-family=\"'Noto Sans'\" font-size=\"1.4993\" stroke-width=\"0\" text-anchor=\"middle\">SHT-25</text></g></g></svg>",
+      "w": 86.4,
+      "h": 96,
+      "pins": {
+        "VCC": [
+          28.8,
+          0
+        ],
+        "SCL": [
+          86.4,
+          38.4
+        ],
+        "SDA": [
+          86.4,
+          48
+        ],
+        "GND": [
+          28.8,
+          96
+        ]
+      }
+    }
+  },
+  "properties": {
+    "package": "DIP"
+  },
+  "icon": "<svg version=\"1.1\" viewBox=\"0 0 32 47.238\" xmlns=\"http://www.w3.org/2000/svg\"><metadata><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><cc:Work rdf:about=\"\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><dc:format xmlns:dc=\"http://purl.org/dc/elements/1.1/\">image/svg+xml</dc:format><dc:type rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"/><dc:title xmlns:dc=\"http://purl.org/dc/elements/1.1/\"/></cc:Work></rdf:RDF></metadata><g id=\"icon\"><g transform=\"scale(.86011)\"><path d=\"m0.06996 0.06996v54.781h37.064v-54.781h-37.064zm19.365 20.375a3.7205 3.7205 0 0 1 3.7207 3.7188 3.7205 3.7205 0 0 1-3.7207 3.7207 3.7205 3.7205 0 0 1-3.7207-3.7207 3.7205 3.7205 0 0 1 3.7207-3.7188zm-14.371 30.455a1.35 1.35 0 0 1 1.3496 1.3496 1.35 1.35 0 0 1-1.3496 1.3496 1.35 1.35 0 0 1-1.3496-1.3496 1.35 1.35 0 0 1 1.3496-1.3496zm9 0a1.35 1.35 0 0 1 1.3496 1.3496 1.35 1.35 0 0 1-1.3496 1.3496 1.35 1.35 0 0 1-1.3496-1.3496 1.35 1.35 0 0 1 1.3496-1.3496zm9 0a1.35 1.35 0 0 1 1.3496 1.3496 1.35 1.35 0 0 1-1.3496 1.3496 1.35 1.35 0 0 1-1.3496-1.3496 1.35 1.35 0 0 1 1.3496-1.3496zm9 0a1.35 1.35 0 0 1 1.3496 1.3496 1.35 1.35 0 0 1-1.3496 1.3496 1.35 1.35 0 0 1-1.3496-1.3496 1.35 1.35 0 0 1 1.3496-1.3496z\" fill=\"#008000\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\".13992\"/><path d=\"m19.54 16.864a7.0866 7.0866 0 0 0-7.0859 7.0879 7.0866 7.0866 0 0 0 7.0859 7.0859 7.0866 7.0866 0 0 0 7.0859-7.0859 7.0866 7.0866 0 0 0-7.0859-7.0879zm-0.0742 3.584a3.7205 3.7205 0 0 1 3.7207 3.7207 3.7205 3.7205 0 0 1-3.7207 3.7207 3.7205 3.7205 0 0 1-3.7207-3.7207 3.7205 3.7205 0 0 1 3.7207-3.7207z\" fill=\"#ccc\"/><rect x=\"13.852\" y=\"3.9013\" width=\"10.63\" height=\"10.63\"/><g transform=\"rotate(-90)\"><g fill=\"#ffffff\" font-family=\"Noto Sans\" font-size=\"5\" letter-spacing=\"0px\" word-spacing=\"0px\" style=\"line-height:100%\" xml:space=\"preserve\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><text x=\"-48.26091\" y=\"6.8134522\" style=\"line-height:100%\">VCC</text><text x=\"-48.299606\" y=\"15.947653\" style=\"line-height:100%\">SCL</text><text x=\"-48.440048\" y=\"24.957428\" style=\"line-height:100%\">SDA</text><text x=\"-48.578049\" y=\"33.669258\" style=\"line-height:100%\">GND</text></g></g><circle cx=\"5.0689\" cy=\"52.337\" r=\"1.9543\" fill=\"none\" stroke=\"#f7bd13\" stroke-width=\"1.1657\"/><circle cx=\"14.069\" cy=\"52.337\" r=\"1.9543\" fill=\"none\" stroke=\"#f7bd13\" stroke-width=\"1.1657\"/><circle cx=\"23.069\" cy=\"52.337\" r=\"1.9543\" fill=\"none\" stroke=\"#f7bd13\" stroke-width=\"1.1657\"/><circle cx=\"32.069\" cy=\"52.337\" r=\"1.9543\" fill=\"none\" stroke=\"#f7bd13\" stroke-width=\"1.1657\"/><g fill=\"#fff\" font-family=\"Noto Sans\" font-size=\"3.75\" letter-spacing=\"0px\" word-spacing=\"0px\" style=\"line-height:100%\" xml:space=\"preserve\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><text x=\"15.530303\" y=\"10.413593\">SHT</text></g></g></g></svg>",
+  "order": 10079,
+  "variants": [
+    {
+      "type": "sl-sht-25-realsize-4be6181ca26c416ea6944fbbfc5094eb-2",
+      "package": "DFN6-3x3"
+    }
+  ]
+}

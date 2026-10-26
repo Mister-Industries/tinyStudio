@@ -1,0 +1,61 @@
+{
+  "type": "dcpower-pulse",
+  "label": "DC Pulse",
+  "family": "voltage source",
+  "tags": [
+    "voltage source",
+    "dc power",
+    "symbol",
+    "fritzing core"
+  ],
+  "description": "A generic dc power symbol",
+  "source": {
+    "fzp": "dcpower_pulse.fzp",
+    "moduleId": "DCPulseSourceModuleID"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\" x=\"0in\" y=\"0in\" viewBox=\"0 0 10.4069 8.0264\"><g id=\"schematic\"><circle cx=\"5.2\" cy=\"4\" r=\"2\" stroke=\"#000000\" stroke-width=\"0.4064\" stroke-linecap=\"round\" fill=\"transparent\"/><line x1=\"4.5\" y1=\"5\" x2=\"5.5\" y2=\"5\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line x1=\"4.5\" y1=\"4.0\" x2=\"4.5\" y2=\"5.0\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line x1=\"4.5\" y1=\"4\" x2=\"5.5\" y2=\"4\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line x1=\"5.5\" y1=\"3.0\" x2=\"5.5\" y2=\"4.0\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line class=\"other\" x1=\"2.66347\" y1=\"4.0132\" x2=\"3.0\" y2=\"4.0132\" stroke=\"#000000\" stroke-width=\"0.1524\" stroke-linecap=\"round\"/><line class=\"other\" x1=\"7.3\" y1=\"4.0132\" x2=\"8.0\" y2=\"4.0132\" stroke=\"#000000\" stroke-width=\"0.1524\" stroke-linecap=\"round\"/><line class=\"pin\" id=\"connector0pin\" connectorname=\"-\" x1=\"10.2835\" y1=\"4.0132\" x2=\"7.74347\" y2=\"4.0132\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><rect class=\"terminal\" id=\"connector0terminal\" x=\"10.2835\" y=\"4.0132\" width=\"0.0001\" height=\"0.0001\" stroke=\"none\" stroke-width=\"0\" fill=\"none\"/><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"0.881944\" x=\"9.01347\" y=\"3.64278\" text-anchor=\"middle\">1</text><line class=\"pin\" id=\"connector1pin\" connectorname=\"+\" x1=\"0.123472\" y1=\"4.0132\" x2=\"2.66347\" y2=\"4.0132\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><rect class=\"terminal\" id=\"connector1terminal\" x=\"0.123472\" y=\"4.0132\" width=\"0.0001\" height=\"0.0001\" stroke=\"none\" stroke-width=\"0\" fill=\"none\"/><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"0.881944\" x=\"1.39347\" y=\"3.64278\" text-anchor=\"middle\">2</text></g></svg>",
+      "w": 39.33,
+      "h": 30.34,
+      "pins": {
+        "V+": [
+          38.87,
+          15.17
+        ],
+        "V-": [
+          0.47,
+          15.17
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\" x=\"0in\" y=\"0in\" viewBox=\"0 0 10.4069 8.0264\"><g id=\"schematic\"><circle cx=\"5.2\" cy=\"4\" r=\"2\" stroke=\"#000000\" stroke-width=\"0.4064\" stroke-linecap=\"round\" fill=\"transparent\"/><line x1=\"4.5\" y1=\"5\" x2=\"5.5\" y2=\"5\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line x1=\"4.5\" y1=\"4.0\" x2=\"4.5\" y2=\"5.0\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line x1=\"4.5\" y1=\"4\" x2=\"5.5\" y2=\"4\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line x1=\"5.5\" y1=\"3.0\" x2=\"5.5\" y2=\"4.0\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line class=\"other\" x1=\"2.66347\" y1=\"4.0132\" x2=\"3.0\" y2=\"4.0132\" stroke=\"#000000\" stroke-width=\"0.1524\" stroke-linecap=\"round\"/><line class=\"other\" x1=\"7.3\" y1=\"4.0132\" x2=\"8.0\" y2=\"4.0132\" stroke=\"#000000\" stroke-width=\"0.1524\" stroke-linecap=\"round\"/><line class=\"pin\" id=\"connector0pin\" connectorname=\"-\" x1=\"10.2835\" y1=\"4.0132\" x2=\"7.74347\" y2=\"4.0132\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><rect class=\"terminal\" id=\"connector0terminal\" x=\"10.2835\" y=\"4.0132\" width=\"0.0001\" height=\"0.0001\" stroke=\"none\" stroke-width=\"0\" fill=\"none\"/><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"0.881944\" x=\"9.01347\" y=\"3.64278\" text-anchor=\"middle\">1</text><line class=\"pin\" id=\"connector1pin\" connectorname=\"+\" x1=\"0.123472\" y1=\"4.0132\" x2=\"2.66347\" y2=\"4.0132\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><rect class=\"terminal\" id=\"connector1terminal\" x=\"0.123472\" y=\"4.0132\" width=\"0.0001\" height=\"0.0001\" stroke=\"none\" stroke-width=\"0\" fill=\"none\"/><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"0.881944\" x=\"1.39347\" y=\"3.64278\" text-anchor=\"middle\">2</text></g></svg>",
+      "w": 39.33,
+      "h": 30.34,
+      "pins": {
+        "V+": [
+          38.87,
+          15.17
+        ],
+        "V-": [
+          0.47,
+          15.17
+        ]
+      }
+    }
+  },
+  "properties": {
+    "type": "dc pulse power supply",
+    "initial voltage": "0V",
+    "pulsed voltage": "5V",
+    "delay time": "0ms",
+    "rise time": "1ms",
+    "fall time": "1ms",
+    "pulse width": "50ms",
+    "period": "100ms",
+    "internal resistance": "0.1Ω"
+  },
+  "icon": "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\" x=\"0in\" y=\"0in\" viewBox=\"0 0 10.4069 8.0264\"><g id=\"schematic\"><circle cx=\"5.2\" cy=\"4\" r=\"2\" stroke=\"#000000\" stroke-width=\"0.4064\" stroke-linecap=\"round\" fill=\"transparent\"/><line x1=\"4.5\" y1=\"5\" x2=\"5.5\" y2=\"5\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line x1=\"4.5\" y1=\"4.0\" x2=\"4.5\" y2=\"5.0\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line x1=\"4.5\" y1=\"4\" x2=\"5.5\" y2=\"4\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line x1=\"5.5\" y1=\"3.0\" x2=\"5.5\" y2=\"4.0\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><line class=\"other\" x1=\"2.66347\" y1=\"4.0132\" x2=\"3.0\" y2=\"4.0132\" stroke=\"#000000\" stroke-width=\"0.1524\" stroke-linecap=\"round\"/><line class=\"other\" x1=\"7.3\" y1=\"4.0132\" x2=\"8.0\" y2=\"4.0132\" stroke=\"#000000\" stroke-width=\"0.1524\" stroke-linecap=\"round\"/><line class=\"pin\" id=\"connector0pin\" connectorname=\"-\" x1=\"10.2835\" y1=\"4.0132\" x2=\"7.74347\" y2=\"4.0132\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><rect class=\"terminal\" id=\"connector0terminal\" x=\"10.2835\" y=\"4.0132\" width=\"0.0001\" height=\"0.0001\" stroke=\"none\" stroke-width=\"0\" fill=\"none\"/><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"0.881944\" x=\"9.01347\" y=\"3.64278\" text-anchor=\"middle\">1</text><line class=\"pin\" id=\"connector1pin\" connectorname=\"+\" x1=\"0.123472\" y1=\"4.0132\" x2=\"2.66347\" y2=\"4.0132\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><rect class=\"terminal\" id=\"connector1terminal\" x=\"0.123472\" y=\"4.0132\" width=\"0.0001\" height=\"0.0001\" stroke=\"none\" stroke-width=\"0\" fill=\"none\"/><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"0.881944\" x=\"1.39347\" y=\"3.64278\" text-anchor=\"middle\">2</text></g></svg>",
+  "order": 40024
+}

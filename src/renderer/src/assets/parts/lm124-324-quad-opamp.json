@@ -1,0 +1,152 @@
+{
+  "type": "lm124-324-quad-opamp",
+  "label": "LM124-324 Quad Opamp",
+  "family": "Quad Opamp",
+  "tags": [
+    "user part",
+    "DIP"
+  ],
+  "description": "A Quadruple Operational Amplifier (Opamp)",
+  "source": {
+    "fzp": "LM124-324 Quad Opamp.fzp",
+    "moduleId": "849f978c8022bc21e03c01a989238882"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg id=\"0\" version=\"1.1\" viewBox=\"0 0 50.4 23.76\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><desc id=\"0.0\"><referenceFile id=\"0.0.0\">svg.breadboard.LM124-324_Quad_Opamp.svg</referenceFile></desc><g id=\"breadboard\"><rect id=\"middle\" y=\"2.16\" width=\"50.4\" height=\"19.44\" fill=\"#303030\"/><rect id=\"top\" y=\"2.16\" width=\"50.4\" height=\"1.771\" fill=\"#3d3d3d\"/><rect id=\"bottom\" y=\"19.83\" width=\"50.4\" height=\"1.771\"/><polygon id=\"right\" points=\"50.4 2.16 49.86 3.931 49.86 19.83 50.4 21.6\" fill=\"#141414\"/><polygon id=\"left\" points=\"0 2.16 .54 3.931 .54 19.83 0 21.6\" fill=\"#1f1f1f\"/><polygon id=\"left-upper-rect\" points=\".403 11.88 3.6 11.88 3.6 8.28 .54 8.251 .403 9.777\" fill=\"#1c1c1c\"/><polygon id=\"left-lower-rect\" points=\".403 11.88 .403 13.98 .54 15.52 3.6 15.52 3.6 11.88\" fill=\"#383838\"/><path id=\"slot\" d=\"m.403 9.777v4.199c1.059-.123 1.887-1.009 1.887-2.104s-.821-1.972-1.887-2.095z\" fill=\"#262626\"/><path id=\"cover\" d=\"m.54 3.931v4.313c1.714.324 3.018 1.821 3.018 3.629s-1.298 3.312-3.018 3.636v.008h3.6v-11.59h-3.6z\" fill=\"#303030\"/><circle id=\"circle13\" cx=\"4.68\" cy=\"16.9\" r=\"1.483\" fill=\"#212121\"/><g fill=\"#8c8c8c\"><rect id=\"connector0pin\" x=\"2.52\" y=\"20.64\" width=\"2.16\" height=\"3.124\"/><rect id=\"rect6651\" x=\"2.52\" y=\"21.6\" width=\"2.16\" height=\"2.159\"/><polygon id=\"polygon18\" points=\"6.12 21.41 6.12 20.64 2.52 20.64 2.52 22.08 4.68 22.08\"/><rect id=\"connector13pin\" x=\"2.52\" width=\"2.16\" height=\"3.125\"/><rect id=\"rect6655\" x=\"2.52\" width=\"2.16\" height=\"2.16\"/><polygon id=\"polygon22\" points=\"2.52 1.685 2.52 3.125 6.12 3.125 6.12 2.347 4.68 1.685\"/><rect id=\"connector6pin\" x=\"45.72\" y=\"20.64\" width=\"2.158\" height=\"3.124\"/><rect id=\"rect6659\" x=\"45.72\" y=\"21.6\" width=\"2.158\" height=\"2.159\"/><polygon id=\"polygon26\" points=\"47.88 22.08 47.88 20.64 44.28 20.64 44.28 21.41 45.72 22.08\"/><rect id=\"connector7pin\" x=\"45.72\" width=\"2.158\" height=\"3.125\"/><rect id=\"rect6663\" x=\"45.72\" width=\"2.158\" height=\"2.16\"/><polygon id=\"polygon30\" points=\"44.28 2.347 44.28 3.125 47.88 3.125 47.88 1.685 45.72 1.685\"/><rect id=\"connector1pin\" x=\"9.72\" y=\"20.64\" width=\"2.158\" height=\"3.124\"/><rect id=\"rect6667\" x=\"9.72\" y=\"21.6\" width=\"2.158\" height=\"2.159\"/><polygon id=\"polygon34\" points=\"9.72 22.08 11.88 22.08 13.32 21.41 13.32 20.64 8.28 20.64 8.28 21.41\"/><rect id=\"connector12pin\" x=\"9.72\" width=\"2.158\" height=\"3.125\"/><rect id=\"rect6671\" x=\"9.72\" width=\"2.158\" height=\"2.16\"/><polygon id=\"polygon38\" points=\"11.88 1.685 9.72 1.685 8.28 2.347 8.28 3.125 13.32 3.125 13.32 2.347\"/><rect id=\"connector2pin\" x=\"16.92\" y=\"20.64\" width=\"2.16\" height=\"3.124\"/><rect id=\"rect6675\" x=\"16.92\" y=\"21.6\" width=\"2.16\" height=\"2.159\"/><polygon id=\"polygon42\" points=\"16.92 22.08 19.08 22.08 20.52 21.41 20.52 20.64 15.48 20.64 15.48 21.41\"/><rect id=\"connector11pin\" x=\"16.92\" width=\"2.16\" height=\"3.125\"/><rect id=\"rect6679\" x=\"16.92\" width=\"2.16\" height=\"2.16\"/><polygon id=\"polygon46\" points=\"19.08 1.685 16.92 1.685 15.48 2.347 15.48 3.125 20.52 3.125 20.52 2.347\"/><rect id=\"connector3pin\" x=\"24.12\" y=\"20.64\" width=\"2.16\" height=\"3.124\"/><rect id=\"rect6683\" x=\"24.12\" y=\"21.6\" width=\"2.16\" height=\"2.159\"/><polygon id=\"polygon50\" points=\"24.12 22.08 26.28 22.08 27.72 21.41 27.72 20.64 22.68 20.64 22.68 21.41\"/><rect id=\"connector10pin\" x=\"24.12\" width=\"2.16\" height=\"3.125\"/><rect id=\"rect6687\" x=\"24.12\" width=\"2.16\" height=\"2.16\"/><polygon id=\"polygon54\" points=\"26.28 1.685 24.12 1.685 22.68 2.347 22.68 3.125 27.72 3.125 27.72 2.347\"/><rect id=\"connector4pin\" x=\"31.32\" y=\"20.64\" width=\"2.16\" height=\"3.124\"/><rect id=\"rect6691\" x=\"31.32\" y=\"21.6\" width=\"2.16\" height=\"2.159\"/><polygon id=\"polygon58\" points=\"31.32 22.08 33.48 22.08 34.92 21.41 34.92 20.64 29.88 20.64 29.88 21.41\"/><rect id=\"connector9pin\" x=\"31.32\" width=\"2.16\" height=\"3.125\"/><rect id=\"rect6695\" x=\"31.32\" width=\"2.16\" height=\"2.16\"/><polygon id=\"polygon62\" points=\"33.48 1.685 31.32 1.685 29.88 2.347 29.88 3.125 34.92 3.125 34.92 2.347\"/><rect id=\"connector5pin\" x=\"38.52\" y=\"20.64\" width=\"2.16\" height=\"3.124\"/><rect id=\"rect6699\" x=\"38.52\" y=\"21.6\" width=\"2.16\" height=\"2.159\"/><polygon id=\"polygon66\" points=\"38.52 22.08 40.68 22.08 42.12 21.41 42.12 20.64 37.08 20.64 37.08 21.41\"/><rect id=\"connector8pin\" x=\"38.52\" width=\"2.16\" height=\"3.125\"/><rect id=\"rect6703\" x=\"38.52\" width=\"2.16\" height=\"2.16\"/><polygon id=\"polygon70\" points=\"40.68 1.685 38.52 1.685 37.08 2.347 37.08 3.125 42.12 3.125 42.12 2.347\"/></g><g fill=\"#b3b3b3\" font-family=\"Droid Sans\" font-size=\"5.12\" font-weight=\"bold\" letter-spacing=\"0px\" word-spacing=\"0px\" style=\"line-height:125%\"><text id=\"tspan3226\" x=\"8.7359381\" y=\"14.165937\">LM124-324</text></g></g></svg>",
+      "w": 63,
+      "h": 29.7,
+      "pins": {
+        "1OUT": [
+          4.5,
+          27.75
+        ],
+        "1IN-": [
+          13.5,
+          27.75
+        ],
+        "1IN+": [
+          22.5,
+          27.75
+        ],
+        "VCC+": [
+          31.5,
+          27.75
+        ],
+        "2IN+": [
+          40.5,
+          27.75
+        ],
+        "2IN-": [
+          49.5,
+          27.75
+        ],
+        "2OUT": [
+          58.5,
+          27.75
+        ],
+        "3OUT": [
+          58.5,
+          1.95
+        ],
+        "3IN-": [
+          49.5,
+          1.95
+        ],
+        "3IN+": [
+          40.5,
+          1.95
+        ],
+        "VCC-": [
+          31.5,
+          1.95
+        ],
+        "4IN+": [
+          22.5,
+          1.95
+        ],
+        "4IN-": [
+          13.5,
+          1.95
+        ],
+        "4OUT": [
+          4.5,
+          1.95
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg id=\"Ebene_1\" enable-background=\"new 0 0 93.6 115.2\" version=\"1.1\" viewBox=\"0 0 93.6 115\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><g id=\"schematic\"><g fill=\"none\"><rect id=\"connector0pin\" x=\".105\" y=\"13.7\" width=\"13.7\" height=\"1.37\"/><rect id=\"connector0terminal\" x=\".952\" y=\"14.4\" width=\".001\" height=\".001\"/><rect id=\"connector1pin\" y=\"28.2\" width=\"13.7\" height=\"1.37\"/><rect id=\"connector1terminal\" x=\".952\" y=\"28.9\" width=\".001\" height=\".001\"/><rect id=\"connector2pin\" y=\"42.4\" width=\"13.7\" height=\"1.37\"/><rect id=\"connector2terminal\" x=\".952\" y=\"43.2\" width=\".001\" height=\".001\"/><rect id=\"connector3pin\" y=\"57.1\" width=\"13.7\" height=\"1.37\"/><rect id=\"connector3terminal\" x=\".952\" y=\"57.7\" width=\".001\" height=\".001\"/><rect id=\"connector4pin\" y=\"71.3\" width=\"13.7\" height=\"1.37\"/><rect id=\"connector4terminal\" x=\".952\" y=\"72.1\" width=\".001\" height=\".001\"/><rect id=\"connector5pin\" y=\"85.8\" width=\"13.7\" height=\"1.37\"/><rect id=\"connector5terminal\" x=\".952\" y=\"86.5\" width=\".001\" height=\".001\"/><rect id=\"connector6pin\" y=\"100\" width=\"13.7\" height=\"1.37\"/><rect id=\"connector6terminal\" x=\".952\" y=\"101\" width=\".001\" height=\".001\"/><rect id=\"connector7pin\" x=\"79.7\" y=\"100\" width=\"13.9\" height=\"1.37\"/><rect id=\"connector7terminal\" x=\"93.3\" y=\"101\" width=\".001\" height=\".001\"/><rect id=\"connector8pin\" x=\"79.7\" y=\"85.8\" width=\"13.9\" height=\"1.37\"/><rect id=\"connector8terminal\" x=\"93.3\" y=\"86.5\" width=\".001\" height=\".001\"/><rect id=\"connector9pin\" x=\"79.7\" y=\"71.3\" width=\"13.9\" height=\"1.37\"/><rect id=\"connector9terminal\" x=\"93.3\" y=\"72.1\" width=\".001\" height=\".001\"/><rect id=\"connector10pin\" x=\"79.7\" y=\"57.1\" width=\"13.9\" height=\"1.37\"/><rect id=\"connector10terminal\" x=\"93.3\" y=\"57.7\" width=\".001\" height=\".001\"/><rect id=\"connector11pin\" x=\"79.7\" y=\"42.4\" width=\"13.9\" height=\"1.37\"/><rect id=\"connector11terminal\" x=\"93.3\" y=\"43.2\" width=\".001\" height=\".001\"/><rect id=\"connector12pin\" x=\"79.7\" y=\"28.2\" width=\"13.9\" height=\"1.37\"/><rect id=\"connector12terminal\" x=\"93.3\" y=\"28.9\" width=\".001\" height=\".001\"/><rect id=\"connector13pin\" x=\"79.7\" y=\"13.7\" width=\"13.9\" height=\"1.37\"/><rect id=\"connector13terminal\" x=\"93.3\" y=\"14.4\" width=\".001\" height=\".001\"/></g><rect id=\"rect-outline\" x=\"14.4\" y=\".438\" width=\"64.8\" height=\"114\" fill=\"#fff\" stroke=\"#000\" stroke-miterlimit=\"10\"/><g font-family=\"Noto Sans\"><text id=\"tspan3927\" transform=\"translate(36.4 9.47)\" font-size=\"4\">LM124-324</text><text id=\"label-power-pos\" transform=\"translate(17.1 58.5)\" font-size=\"3.5\">VCC+</text><text id=\"label-power-neg\" transform=\"translate(71.9 59.2)\" font-size=\"3.5\">VCC-</text></g><g fill=\"none\" stroke=\"#000\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\".75\"><line id=\"line00\" x1=\".446\" x2=\"14.3\" y1=\"14.4\" y2=\"14.4\"/><line id=\"line01\" x1=\".446\" x2=\"14.3\" y1=\"28.9\" y2=\"28.9\"/><line id=\"line02\" x1=\".446\" x2=\"14.3\" y1=\"43.3\" y2=\"43.3\"/><line id=\"line03\" x1=\".446\" x2=\"14.3\" y1=\"57.8\" y2=\"57.8\"/><line id=\"line04\" x1=\".446\" x2=\"14.3\" y1=\"72.1\" y2=\"72.1\"/><line id=\"line05\" x1=\".446\" x2=\"14.3\" y1=\"86.5\" y2=\"86.5\"/><line id=\"line06\" x1=\".368\" x2=\"14.3\" y1=\"101\" y2=\"101\"/><line id=\"line07\" x1=\"79.5\" x2=\"93.2\" y1=\"101\" y2=\"101\"/><line id=\"line08\" x1=\"79.5\" x2=\"93.3\" y1=\"86.5\" y2=\"86.5\"/><line id=\"line09\" x1=\"79.5\" x2=\"93.3\" y1=\"72.1\" y2=\"72.1\"/><line id=\"line10\" x1=\"79.5\" x2=\"93.3\" y1=\"57.7\" y2=\"57.7\"/><line id=\"line11\" x1=\"79.5\" x2=\"93.3\" y1=\"43.2\" y2=\"43.2\"/><line id=\"line12\" x1=\"79.5\" x2=\"93.3\" y1=\"28.9\" y2=\"28.9\"/><line id=\"line13\" x1=\"79.5\" x2=\"93.3\" y1=\"14.4\" y2=\"14.4\"/></g><g font-family=\"Noto Sans\" font-size=\"3.5\"><text id=\"label0\" transform=\"translate(16.8 12.7)\">1OUT</text><text id=\"label1\" transform=\"translate(16.8 27.6)\">1IN-</text><text id=\"label2\" transform=\"translate(16.8 41.7)\">1IN+</text></g><g fill=\"none\" stroke=\"#000\" stroke-width=\".64\"><path id=\"path3615\" d=\"m14.4 43.1h29v-10.3\"/><path id=\"path3617\" d=\"m14.4 28.9h18v6.81h6.8v-2.84\"/><path id=\"path3621\" d=\"m14.4 14.3h27v8.43\"/><path id=\"path3601\" d=\"m35.5 32.8 5.9-10.2 5.9 10.2h-11.8z\"/><path id=\"path3929\" d=\"m38.2 30.6h2.3\"/><path id=\"path3929-8\" d=\"m42.4 30.6h2.3\"/><path id=\"path3929-2-1\" d=\"m43.6 31.8v-2.3\"/></g><g font-family=\"Noto Sans\" font-size=\"3.5\"><text id=\"label13\" transform=\"translate(69.3 12.7)\">4OUT</text><text id=\"label12\" transform=\"translate(72.6 27.6)\">4IN-</text><text id=\"label11\" transform=\"translate(71.3 41.7)\">4IN+</text></g><g fill=\"none\" stroke=\"#000\" stroke-width=\".64\"><path id=\"path3601-2\" d=\"m63.4 32.8-5.9-10.2-5.9 10.2h11.8z\"/><path id=\"path3929-2\" d=\"m60.8 30.6h-2.3\"/><path id=\"path3929-8-7\" d=\"m56.6 30.6h-2.3\"/><path id=\"path3929-2-1-4\" d=\"m55.4 31.7v-2.3\"/><path id=\"path4774\" d=\"m79.6 43.1h-24.3v-10.4\"/><path id=\"path4776\" d=\"m79.7 28.9h-14.2v8.15h-5.96l-.005-4.27\"/><path id=\"path4778\" d=\"m79.6 14.4h-22.2v8.43\"/></g><g font-family=\"Noto Sans\" font-size=\"3.5\"><text id=\"label9\" transform=\"translate(71.9 70.2)\">3IN+</text><text id=\"label8\" transform=\"translate(72.6 84.9)\">3IN-</text><text id=\"label7\" transform=\"translate(69.3 99.3)\">3OUT</text></g><g fill=\"none\" stroke=\"#000\" stroke-width=\".64\"><path id=\"path3601-20-2-9\" d=\"m63.4 82.2-5.9 10.2-5.9-10.2h11.8z\"/><path id=\"path3929-1\" d=\"m60.8 84.3h-2.3\"/><path id=\"path3929-8-6\" d=\"m56.6 84.3h-2.3\"/><path id=\"path3929-2-1-6\" d=\"m55.4 85.5v-2.3\"/><path id=\"path4780\" d=\"m79.7 72h-24.5v10.3\"/><path id=\"path4782\" d=\"m79.7 86.5h-13.1v-6.21h-7.06v2.19\"/><path id=\"path4784\" d=\"m57.7 101h21.7-22l.072-8.34\"/></g><g font-family=\"Noto Sans\" font-size=\"3.5\"><text id=\"label4\" transform=\"translate(17.5 70.2)\">2IN+</text><text id=\"label5\" transform=\"translate(16.8 84.9)\">2IN-</text><text id=\"label6\" transform=\"translate(16.8 99.3)\">2OUT</text></g><g fill=\"none\" stroke=\"#000\" stroke-width=\".64\"><path id=\"path3601-20-2\" d=\"m35.5 82.2 5.9 10.2 5.9-10.2h-11.8z\"/><path id=\"path3929-9\" d=\"m38.2 84.2h2.3\"/><path id=\"path3929-8-2\" d=\"m42.4 84.2h2.3\"/><path id=\"path3929-2-1-1\" d=\"m43.6 85.4v-2.3\"/><path id=\"path4786\" d=\"m14.4 72h29v9.98\"/><path id=\"path4788\" d=\"m14.4 86.5h18.8v-7.18h6.02v2.68\"/><path id=\"path4792\" d=\"m14.3 101h27.1l.072-8.59\"/></g></g></svg>",
+      "w": 93.6,
+      "h": 115,
+      "pins": {
+        "1OUT": [
+          0.95,
+          14.4
+        ],
+        "1IN-": [
+          0.95,
+          28.9
+        ],
+        "1IN+": [
+          0.95,
+          43.2
+        ],
+        "VCC+": [
+          0.95,
+          57.7
+        ],
+        "2IN+": [
+          0.95,
+          72.1
+        ],
+        "2IN-": [
+          0.95,
+          86.5
+        ],
+        "2OUT": [
+          0.95,
+          101
+        ],
+        "3OUT": [
+          93.3,
+          101
+        ],
+        "3IN-": [
+          93.3,
+          86.5
+        ],
+        "3IN+": [
+          93.3,
+          72.1
+        ],
+        "VCC-": [
+          93.3,
+          57.7
+        ],
+        "4IN+": [
+          93.3,
+          43.2
+        ],
+        "4IN-": [
+          93.3,
+          28.9
+        ],
+        "4OUT": [
+          93.3,
+          14.4
+        ]
+      }
+    }
+  },
+  "properties": {
+    "variant": "variant 1",
+    "package": "DIP (Dual Inline)",
+    "chip label": "LM124-324",
+    "part number": "",
+    "pins": "14",
+    "spacing": "300mil"
+  },
+  "icon": "<svg version=\"1.1\" viewBox=\"0 0 23.8 23.8\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><desc><referenceFile>svg.icon.LM124-324_Quad_Opamp.svg</referenceFile></desc><metadata oldid=\"metadata6708\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><cc:Work rdf:about=\"\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><dc:format xmlns:dc=\"http://purl.org/dc/elements/1.1/\">image/svg+xml</dc:format><dc:type rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"/><dc:title xmlns:dc=\"http://purl.org/dc/elements/1.1/\"/></cc:Work></rdf:RDF></metadata><g id=\"icon\"><path d=\"m0 2.15v19.4h23.8v-19.4h-23.8z\" fill=\"#303030\"/><path d=\"m0 2.15v1.78h23.8v-1.78h-23.8z\" fill=\"#3d3d3d\"/><path d=\"m0 19.8v1.78h23.8v-1.78h-23.8z\"/><polygon points=\".54 3.93 .54 19.8 0 21.6 0 2.16\" fill=\"#1f1f1f\"/><polygon points=\".403 11.9 3.6 11.9 3.6 8.28 .54 8.25 .403 9.78\" fill=\"#1c1c1c\"/><polygon points=\".403 11.9 .403 14 .54 15.5 3.6 15.5 3.6 11.9\" fill=\"#383838\"/><path d=\"m.403 9.78v4.2c1.06-.123 1.89-1.01 1.89-2.1s-.821-1.97-1.89-2.09z\" fill=\"#262626\"/><path d=\"m.54 3.93v4.31c1.71.324 3.02 1.82 3.02 3.63s-1.3 3.31-3.02 3.64v.008h3.6v-11.6h-3.6z\" fill=\"#303030\"/><circle cx=\"4.68\" cy=\"16.9\" r=\"1.48\" fill=\"#212121\"/><rect x=\"2.52\" y=\"20.6\" width=\"2.16\" height=\"3.12\" fill=\"#8c8c8c\"/><rect x=\"2.52\" y=\"21.6\" width=\"2.16\" height=\"2.16\" fill=\"#8c8c8c\"/><polygon points=\"6.12 21.4 6.12 20.6 2.52 20.6 2.52 22.1 4.68 22.1\" fill=\"#8c8c8c\"/><rect x=\"2.52\" y=\"-6.1e-7\" width=\"2.16\" height=\"3.12\" fill=\"#8c8c8c\"/><rect x=\"2.52\" y=\"-6.1e-7\" width=\"2.16\" height=\"2.16\" fill=\"#8c8c8c\"/><polygon points=\"2.52 1.68 2.52 3.12 6.12 3.12 6.12 2.35 4.68 1.68\" fill=\"#8c8c8c\"/><rect x=\"9.72\" y=\"20.6\" width=\"2.16\" height=\"3.12\" fill=\"#8c8c8c\"/><rect x=\"9.72\" y=\"21.6\" width=\"2.16\" height=\"2.16\" fill=\"#8c8c8c\"/><polygon points=\"8.28 21.4 9.72 22.1 11.9 22.1 13.3 21.4 13.3 20.6 8.28 20.6\" fill=\"#8c8c8c\"/><rect x=\"9.72\" y=\"-6.1e-7\" width=\"2.16\" height=\"3.12\" fill=\"#8c8c8c\"/><rect x=\"9.72\" y=\"-6.1e-7\" width=\"2.16\" height=\"2.16\" fill=\"#8c8c8c\"/><polygon points=\"13.3 2.35 11.9 1.68 9.72 1.68 8.28 2.35 8.28 3.12 13.3 3.12\" fill=\"#8c8c8c\"/><rect x=\"16.9\" y=\"20.6\" width=\"2.16\" height=\"3.12\" fill=\"#8c8c8c\"/><rect x=\"16.9\" y=\"21.6\" width=\"2.16\" height=\"2.16\" fill=\"#8c8c8c\"/><polygon points=\"15.5 21.4 16.9 22.1 19.1 22.1 20.5 21.4 20.5 20.6 15.5 20.6\" fill=\"#8c8c8c\"/><rect x=\"16.9\" y=\"-6.1e-7\" width=\"2.16\" height=\"3.12\" fill=\"#8c8c8c\"/><rect x=\"16.9\" y=\"-6.1e-7\" width=\"2.16\" height=\"2.16\" fill=\"#8c8c8c\"/><polygon points=\"20.5 2.35 19.1 1.68 16.9 1.68 15.5 2.35 15.5 3.12 20.5 3.12\" fill=\"#8c8c8c\"/><path d=\"m22.7 20.6v.8l1.08.475v-1.28h-1.08z\" fill=\"#8c8c8c\"/><path d=\"m23.8 1.85-1.08.5v.775h1.08v-1.28z\" fill=\"#8c8c8c\"/><g fill=\"#b3b3b3\" font-family=\"Droid Sans\" font-size=\"5.12\" font-weight=\"bold\" letter-spacing=\"0px\" word-spacing=\"0px\" style=\"line-height:125%\" xml:space=\"preserve\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><text x=\"3.9264407\" y=\"14.192186\">LM124</text></g></g></svg>",
+  "order": 30124
+}

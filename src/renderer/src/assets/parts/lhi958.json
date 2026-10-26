@@ -1,0 +1,70 @@
+{
+  "type": "lhi958",
+  "label": "LHi958",
+  "family": "sensors",
+  "tags": [
+    "TO-39",
+    "LHi958",
+    "Dual Element Detector"
+  ],
+  "description": "The LHi 954 and LHi 958 pyroelectric infrared-detectors have been a world\nstandard for more than 10 years. They both are dual element types with FET in\nsource follower connection. The LHi 954 detector is available in TO-39 housing\nwith standard infrared filter whereas the LHi 958 is the same detector in a TO-5\nhousing with standard infrared filter.\nIt offers a highly stable responsivity with excellent common mode performance\n(match) and low noise .",
+  "source": {
+    "fzp": "Lhi958.fzp",
+    "moduleId": "lhi958"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.2\" baseProfile=\"tiny\" id=\"Layer_1\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 25.82 35.359\" xml:space=\"preserve\"><g id=\"breadboard\"><polygon id=\"connector2pin\" fill=\"#808080\" points=\"6.48,28.162 4.941,28.162 4.168,24.81 7.252,24.81  \"/><polygon id=\"connector3pin\" fill=\"#808080\" points=\"13.656,35.339 12.117,35.339 11.344,31.986 14.428,31.986  \"/><polygon id=\"connector0pin\" fill=\"#808080\" points=\"20.879,28.162 19.342,28.162 18.568,24.81 21.652,24.81  \"/><polygon id=\"connector1pin\" fill=\"#808080\" points=\"13.68,22.48 12.142,22.48 11.369,19.128 14.453,19.128  \"/><g id=\"icon\"><polygon fill=\"#808080\" points=\"4.168,15.462 4.168,24.81 4.941,28.162 6.48,28.162 7.252,24.81 7.252,15.462  \"/><polygon fill=\"#808080\" points=\"6.991,24.81 6.219,28.162 6.48,28.162 7.252,24.81  \"/><polygon fill=\"#666666\" points=\"5.222,28.162 4.449,24.81 4.168,24.81 4.941,28.162  \"/><polygon fill=\"#808080\" points=\"11.344,22.639 11.344,31.986 12.117,35.339 13.656,35.339 14.428,31.986 14.428,22.639  \"/><polygon fill=\"#999999\" points=\"14.042,22.639 14.042,31.986 13.271,35.339 13.656,35.339 14.428,31.986 14.428,22.639  \"/><polygon fill=\"#666666\" points=\"12.503,35.339 11.73,31.986 11.73,22.639 11.344,22.639 11.344,31.986 12.117,35.339  \"/><polygon fill=\"#808080\" points=\"11.369,9.78 11.369,19.128 12.142,22.48 13.68,22.48 14.453,19.128 14.453,9.78  \"/><polygon fill=\"#808080\" points=\"18.568,15.462 18.568,24.81 19.342,28.162 20.879,28.162 21.652,24.81 21.652,15.462  \"/><polygon fill=\"#999999\" points=\"21.373,24.81 20.6,28.162 20.879,28.162 21.652,24.81  \"/><path fill=\"#999999\" d=\"M0,12.931c0,7.131,5.78,12.909,12.91,12.909c7.131,0,12.91-5.778,12.91-12.909v4.049   c0,7.131-5.779,12.91-12.91,12.91C5.78,29.89,0,24.11,0,16.979V12.931z\"/><path fill=\"#808080\" d=\"M0.001,16.734c0,7.131,5.78,12.91,12.91,12.91c7.131,0,12.91-5.779,12.91-12.91l-0.001,0.245   c0,7.131-5.779,12.91-12.91,12.91C5.78,29.89,0,24.11,0,16.979L0.001,16.734z\"/><rect x=\"21.667\" y=\"24.98\" transform=\"matrix(0.7074 0.7068 -0.7068 0.7074 25.2191 -8.2618)\" fill=\"#CCCCCC\" width=\"1.842\" height=\"2.694\"/><polygon fill=\"#B3B3B3\" points=\"22.289,27.931 24.193,26.025 24.193,26.541 22.289,28.446  \"/><polygon fill=\"#999999\" points=\"20.986,26.628 22.289,27.931 22.289,28.446 20.986,27.144  \"/><circle fill=\"#B3B3B3\" cx=\"12.91\" cy=\"12.931\" r=\"12.91\"/><path fill=\"#CCCCCC\" d=\"M25.82,13.417c0-7.13-5.779-12.91-12.91-12.91C5.78,0.507,0,6.287,0,13.417v-0.485   c0-7.131,5.78-12.91,12.91-12.91c7.131,0,12.91,5.779,12.91,12.91V13.417z\"/><path fill=\"#CCCCCC\" d=\"M0,12.673c0,7.132,5.78,12.91,12.91,12.91c7.131,0,12.91-5.778,12.91-12.91v0.259   c0,7.131-5.779,12.909-12.91,12.909C5.78,25.841,0,20.062,0,12.931V12.673z\"/><rect x=\"3.201\" y=\"6.479\" transform=\"matrix(-0.7071 -0.7071 0.7071 -0.7071 12.8952 31.202)\" fill=\"#3D4656\" width=\"19.417\" height=\"12.903\"/><polygon fill=\"#2E3541\" points=\"24.337,15.233 10.606,1.846 1.483,10.628 10.606,1.504  \"/><polygon fill=\"#CCCCCC\" points=\"1.483,10.627 15.191,24.504 24.336,15.233 15.213,24.357  \"/></g></g></svg>",
+      "w": 25.82,
+      "h": 35.36,
+      "pins": {
+        "S": [
+          12.91,
+          20.8
+        ],
+        "GND": [
+          20.11,
+          26.49
+        ],
+        "D": [
+          5.71,
+          26.49
+        ],
+        "n.a.": [
+          12.89,
+          33.66
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg version=\"1.1\" id=\"Layer_1\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 51.1 44.352\" enable-background=\"new 0 0 51.1 44.352\" xml:space=\"preserve\"><g id=\"schematic\"><rect x=\"7.55\" y=\"0.576\" fill=\"#FFFFFF\" width=\"36\" height=\"43.198\"/><text id=\"label\" transform=\"matrix(1 0 0 1 18.7874 19.9084)\" font-family=\"Noto Sans\" font-size=\"4.25\">LHi958</text><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.9\" stroke-linecap=\"round\" x1=\"7.55\" y1=\"43.776\" x2=\"43.55\" y2=\"43.776\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.9\" stroke-linecap=\"round\" x1=\"43.55\" y1=\"43.776\" x2=\"43.55\" y2=\"0.576\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.9\" stroke-linecap=\"round\" x1=\"43.55\" y1=\"0.576\" x2=\"7.55\" y2=\"0.576\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.9\" stroke-linecap=\"round\" x1=\"7.55\" y1=\"0.576\" x2=\"7.55\" y2=\"43.776\"/><line id=\"connector0pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" x1=\"0.35\" y1=\"7.776\" x2=\"7.55\" y2=\"7.776\"/><rect id=\"connector0terminal\" x=\"0.35\" y=\"7.776\" fill=\"none\" width=\"0\" height=\"0.001\"/><text transform=\"matrix(1 0 0 1 3.262 6.7249)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">1</text><text transform=\"matrix(1 0 0 1 9.6506 8.4749)\" fill=\"#787878\" font-family=\"Noto Sans\" font-size=\"3.5\">GND</text><line id=\"connector3pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" x1=\"50.75\" y1=\"36.576\" x2=\"43.55\" y2=\"36.576\"/><polygon id=\"connector3terminal\" fill=\"none\" points=\"50.75,36.576 50.75,36.576 50.75,36.576  \"/><text transform=\"matrix(1 0 0 1 46.4612 35.5256)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">4</text><text transform=\"matrix(1 0 0 1 35.6008 37.2756)\" fill=\"#787878\" font-family=\"Noto Sans\" font-size=\"3.5\">N.C.</text><line id=\"connector1pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" x1=\"50.75\" y1=\"7.776\" x2=\"43.55\" y2=\"7.776\"/><rect id=\"connector1terminal\" x=\"50.75\" y=\"7.776\" fill=\"none\" width=\"0\" height=\"0.001\"/><text transform=\"matrix(1 0 0 1 46.4612 6.7249)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">2</text><text transform=\"matrix(1 0 0 1 40.0598 8.4749)\" fill=\"#787878\" font-family=\"Noto Sans\" font-size=\"3.5\">S</text><line id=\"connector2pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" x1=\"0.35\" y1=\"36.576\" x2=\"7.55\" y2=\"36.576\"/><polygon id=\"connector2terminal\" fill=\"none\" points=\"0.35,36.576 0.35,36.576 0.35,36.576  \"/><text transform=\"matrix(1 0 0 1 3.262 35.5256)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">3</text><text transform=\"matrix(1 0 0 1 9.6506 37.2756)\" fill=\"#787878\" font-family=\"Noto Sans\" font-size=\"3.5\">D</text></g></svg>",
+      "w": 51.1,
+      "h": 44.35,
+      "pins": {
+        "S": [
+          50.75,
+          7.78
+        ],
+        "GND": [
+          0.35,
+          7.78
+        ],
+        "D": [
+          0.35,
+          36.58
+        ],
+        "n.a.": [
+          50.75,
+          36.58
+        ]
+      }
+    }
+  },
+  "properties": {
+    "package": "to-39",
+    "features": "",
+    "variant": "pyroelectric infrared-detectors"
+  },
+  "icon": "<svg version=\"1.2\" baseProfile=\"tiny\" id=\"Layer_1\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 25.82 35.359\" xml:space=\"preserve\"><g id=\"breadboard\"><polygon id=\"connector2pin\" fill=\"#808080\" points=\"6.48,28.162 4.941,28.162 4.168,24.81 7.252,24.81  \"/><polygon id=\"connector3pin\" fill=\"#808080\" points=\"13.656,35.339 12.117,35.339 11.344,31.986 14.428,31.986  \"/><polygon id=\"connector0pin\" fill=\"#808080\" points=\"20.879,28.162 19.342,28.162 18.568,24.81 21.652,24.81  \"/><polygon id=\"connector1pin\" fill=\"#808080\" points=\"13.68,22.48 12.142,22.48 11.369,19.128 14.453,19.128  \"/><g id=\"icon\"><polygon fill=\"#808080\" points=\"4.168,15.462 4.168,24.81 4.941,28.162 6.48,28.162 7.252,24.81 7.252,15.462  \"/><polygon fill=\"#808080\" points=\"6.991,24.81 6.219,28.162 6.48,28.162 7.252,24.81  \"/><polygon fill=\"#666666\" points=\"5.222,28.162 4.449,24.81 4.168,24.81 4.941,28.162  \"/><polygon fill=\"#808080\" points=\"11.344,22.639 11.344,31.986 12.117,35.339 13.656,35.339 14.428,31.986 14.428,22.639  \"/><polygon fill=\"#999999\" points=\"14.042,22.639 14.042,31.986 13.271,35.339 13.656,35.339 14.428,31.986 14.428,22.639  \"/><polygon fill=\"#666666\" points=\"12.503,35.339 11.73,31.986 11.73,22.639 11.344,22.639 11.344,31.986 12.117,35.339  \"/><polygon fill=\"#808080\" points=\"11.369,9.78 11.369,19.128 12.142,22.48 13.68,22.48 14.453,19.128 14.453,9.78  \"/><polygon fill=\"#808080\" points=\"18.568,15.462 18.568,24.81 19.342,28.162 20.879,28.162 21.652,24.81 21.652,15.462  \"/><polygon fill=\"#999999\" points=\"21.373,24.81 20.6,28.162 20.879,28.162 21.652,24.81  \"/><path fill=\"#999999\" d=\"M0,12.931c0,7.131,5.78,12.909,12.91,12.909c7.131,0,12.91-5.778,12.91-12.909v4.049   c0,7.131-5.779,12.91-12.91,12.91C5.78,29.89,0,24.11,0,16.979V12.931z\"/><path fill=\"#808080\" d=\"M0.001,16.734c0,7.131,5.78,12.91,12.91,12.91c7.131,0,12.91-5.779,12.91-12.91l-0.001,0.245   c0,7.131-5.779,12.91-12.91,12.91C5.78,29.89,0,24.11,0,16.979L0.001,16.734z\"/><rect x=\"21.667\" y=\"24.98\" transform=\"matrix(0.7074 0.7068 -0.7068 0.7074 25.2191 -8.2618)\" fill=\"#CCCCCC\" width=\"1.842\" height=\"2.694\"/><polygon fill=\"#B3B3B3\" points=\"22.289,27.931 24.193,26.025 24.193,26.541 22.289,28.446  \"/><polygon fill=\"#999999\" points=\"20.986,26.628 22.289,27.931 22.289,28.446 20.986,27.144  \"/><circle fill=\"#B3B3B3\" cx=\"12.91\" cy=\"12.931\" r=\"12.91\"/><path fill=\"#CCCCCC\" d=\"M25.82,13.417c0-7.13-5.779-12.91-12.91-12.91C5.78,0.507,0,6.287,0,13.417v-0.485   c0-7.131,5.78-12.91,12.91-12.91c7.131,0,12.91,5.779,12.91,12.91V13.417z\"/><path fill=\"#CCCCCC\" d=\"M0,12.673c0,7.132,5.78,12.91,12.91,12.91c7.131,0,12.91-5.778,12.91-12.91v0.259   c0,7.131-5.779,12.909-12.91,12.909C5.78,25.841,0,20.062,0,12.931V12.673z\"/><rect x=\"3.201\" y=\"6.479\" transform=\"matrix(-0.7071 -0.7071 0.7071 -0.7071 12.8952 31.202)\" fill=\"#3D4656\" width=\"19.417\" height=\"12.903\"/><polygon fill=\"#2E3541\" points=\"24.337,15.233 10.606,1.846 1.483,10.628 10.606,1.504  \"/><polygon fill=\"#CCCCCC\" points=\"1.483,10.627 15.191,24.504 24.336,15.233 15.213,24.357  \"/></g></g></svg>",
+  "order": 10077
+}

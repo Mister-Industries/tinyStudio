@@ -1,0 +1,62 @@
+{
+  "type": "tsop312",
+  "label": "TSOP312.., 314..",
+  "family": "infrared",
+  "tags": [
+    "ir, infrared, receiver, remote, control"
+  ],
+  "description": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">The TSOP312.., TSOP314.. series are miniaturized receivers for infrared remote control systems. A PIN diode and a preamplifier are assembled on a lead frame, the epoxy package acts as an IR filter.</p>\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">The demodulated output signal can be directly decoded by a microprocessor. The TSOP312.. is compatible with all common IR remote control data formats. The TSOP314.. is optimized to suppress almost all spurious pulses from</p>\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">energy saving fluorescent lamps but will also suppress some data signals. </p></body></html>",
+  "source": {
+    "fzp": "tsop312.fzp",
+    "moduleId": "2d505f861194750183f944ba86c13b44_28"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.1\" id=\"_x30_\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 30 62\" enable-background=\"new 0 0 30 62\" xml:space=\"preserve\"><desc id=\"0.0\" oldid=\"0.0\"><referenceFile id=\"0.0.0\" oldid=\"0.0.0\">breadboard.svg</referenceFile></desc><g id=\"breadboard\"><polygon id=\"_x30_.2\" points=\"0,36.85 0,0 28.348,0 29.872,1.44 29.872,38.289 1.526,38.289  \"/><rect id=\"connector0pin\" x=\"3.027\" y=\"37.618\" fill=\"#8C8C8C\" width=\"2.151\" height=\"23.532\"/><rect id=\"connector0terminal\" x=\"4.101\" y=\"61.127\" fill=\"none\" width=\"0.004\" height=\"0.048\"/><rect id=\"connector1pin\" x=\"10.227\" y=\"37.618\" fill=\"#8C8C8C\" width=\"2.151\" height=\"23.532\"/><rect id=\"connector1terminal\" x=\"11.3\" y=\"61.127\" fill=\"none\" width=\"0.004\" height=\"0.048\"/><rect id=\"connector2pin\" x=\"24.626\" y=\"37.618\" fill=\"#8C8C8C\" width=\"2.151\" height=\"23.532\"/><rect id=\"connector2terminal\" x=\"25.699\" y=\"61.127\" fill=\"none\" width=\"0.005\" height=\"0.048\"/><rect id=\"_x30_.6\" fill=\"#303030\" width=\"28.348\" height=\"36.85\"/><path id=\"color_path32_3_\" d=\"M13.403,36.121c6.521,0,8.486,0.72,8.486,0.72l0.002-28.226c0-3.912-3.496-7.087-7.821-7.087   c-4.318,0-7.823,3.169-7.823,7.087L6.243,36.841C6.243,36.841,6.882,36.121,13.403,36.121z\"/><path id=\"path34_1_\" fill=\"#FFFFFF\" d=\"M18.039,5.281l1.585-0.273c-0.931-1.131-2.298-1.956-3.908-2.237l0.28,1.08   C16.839,4.121,17.548,4.631,18.039,5.281z\"/><path id=\"path38_1_\" fill=\"#FFFFFF\" d=\"M9.119,36.266c0.791-0.076,1.168-0.076,1.169-0.076l-0.039-22.744V8.619   c0-1.471,0.936-2.729,2.289-3.35l-0.026-0.053l-1.377-1.511C9.293,4.707,8.056,6.527,8.056,8.617l0.04,27.754   C8.096,36.371,8.328,36.34,9.119,36.266z\"/><path id=\"color_path32_2_\" d=\"M13.425,36.102c6.521,0,8.485,0.719,8.485,0.719l0.003,0.186l-15.647,0.02V36.82   C6.266,36.82,6.905,36.102,13.425,36.102z\"/></g></svg>",
+      "w": 30,
+      "h": 62,
+      "pins": {
+        "GND": [
+          4.1,
+          49.38
+        ],
+        "Vs": [
+          11.3,
+          49.38
+        ],
+        "Data": [
+          25.7,
+          49.38
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg version=\"1.1\" id=\"_x30_\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 -0.5 37.333 28.4\" enable-background=\"new 0 -0.5 37.333 28.4\" xml:space=\"preserve\"><desc oldid=\"0.0\" id=\"0.0\"><referenceFile oldid=\"0.0.0\" id=\"0.0.0\">schematic.svg</referenceFile></desc><polygon id=\"_x30_.2\" points=\"27.989,7.241 31.676,2.712 33.579,5.553 \"/><polygon id=\"_x30_.3\" points=\"30.288,10.673 33.978,6.145 35.879,8.986 \"/><polygon id=\"_x30_.4\" points=\"31.11,5.835 30.477,4.889 34.264,2.352 34.899,3.298 \"/><polygon id=\"_x30_.5\" points=\"33.41,9.268 32.776,8.321 36.564,5.783 37.198,6.729 \"/><path id=\"_x30_.6\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"  M21.667,5.899c4.707,0,8.521,3.815,8.521,8.521c0,4.707-3.814,8.521-8.521,8.521\"/><rect id=\"_x30_.7\" x=\"7.2\" y=\"-0.05\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" width=\"14.4\" height=\"27.499\"/><g><line id=\"connector1pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"0.35\" y1=\"6.703\" x2=\"7.55\" y2=\"6.703\"/><polygon id=\"connector1terminal\" fill=\"none\" points=\"0,7.085 0,6.314 1.313,6.335 1.333,7.043  \"/></g><rect id=\"connector8\" y=\"4.879\" fill=\"none\" width=\"4\" height=\"0.708\"/><g><line id=\"connector2pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"0.35\" y1=\"13.9\" x2=\"7.55\" y2=\"13.9\"/><polygon id=\"connector2terminal\" fill=\"none\" points=\"0,13.552 1.031,13.568 1.078,14.24 0,14.255  \"/><rect id=\"connector9\" y=\"13.525\" fill=\"none\" width=\"4\" height=\"0.75\"/></g><g><line id=\"connector0pin\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"0.35\" y1=\"21.093\" x2=\"7.55\" y2=\"21.093\"/><polygon id=\"connector0terminal\" fill=\"none\" points=\"0,20.751 1.313,20.767 1.297,21.47 0,21.47  \"/><rect id=\"connector10\" y=\"20.725\" fill=\"none\" width=\"4\" height=\"0.75\"/></g><text transform=\"matrix(1 0 0 1 9.7041 7.7271)\" font-family=\"Noto Sans\" font-size=\"3.5\">Vcc</text><text transform=\"matrix(1 0 0 1 9.7041 15.041)\" font-family=\"Noto Sans\" font-size=\"3.5\">DATA</text><text transform=\"matrix(1 0 0 1 9.7041 22.1763)\" font-family=\"Noto Sans\" font-size=\"3.5\">GND</text></svg>",
+      "w": 37.33,
+      "h": 28.4,
+      "pins": {
+        "GND": [
+          0.66,
+          21.61
+        ],
+        "Vs": [
+          0.67,
+          7.2
+        ],
+        "Data": [
+          0.54,
+          14.4
+        ]
+      }
+    }
+  },
+  "properties": {
+    "package": "THT",
+    "row": "single",
+    "pin spacing": "0.1in (2.54mm)",
+    "pins": "3",
+    "part number": ""
+  },
+  "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" x=\"0px\" version=\"1.2\" y=\"0px\" viewBox=\"0 0 30 62\" baseProfile=\"tiny\" id=\"0\"><desc id=\"0.0\"><referenceFile id=\"0.0.0\">breadboard.svg</referenceFile></desc><defs id=\"0.1\"/><polygon points=\"0,36.85 0,0 28.347,0 29.872,1.44 29.872,38.289 1.526,38.289 \" id=\"0.2\"/><rect width=\"2.151\" x=\"3.027\" y=\"37.618\" fill=\"#8C8C8C\" height=\"23.533\" id=\"connector0pin_1_\"/><rect width=\"2.151\" x=\"10.227\" y=\"37.618\" fill=\"#8C8C8C\" height=\"23.533\" id=\"connector1pin_1_\"/><rect width=\"2.152\" x=\"24.626\" y=\"37.618\" fill=\"#8C8C8C\" height=\"23.533\" id=\"connector3pin_1_\"/><rect width=\"28.347\" fill=\"#303030\" height=\"36.85\" id=\"0.6\"/><path id=\"color_path32_3_\" d=\"M13.403,36.121c6.521,0,8.485,0.72,8.485,0.72l0.003-28.226c0-3.912-3.497-7.087-7.821-7.087c-4.318,0-7.823,3.169-7.823,7.087L6.243,36.841C6.243,36.841,6.882,36.121,13.403,36.121z\"/><path fill=\"#FFFFFF\" id=\"path34_1_\" d=\"M18.039,5.281l1.585-0.273c-0.93-1.131-2.298-1.956-3.908-2.237l0.28,1.08C16.839,4.121,17.548,4.631,18.039,5.281z\"/><path fill=\"#FFFFFF\" id=\"path38_1_\" d=\"M9.119,36.265c0.791-0.075,1.168-0.075,1.169-0.075l-0.039-22.744V8.619c0-1.471,0.936-2.729,2.289-3.35l-0.026-0.053l-1.377-1.511C9.293,4.707,8.056,6.527,8.056,8.617l0.04,27.754C8.096,36.371,8.328,36.34,9.119,36.265z\"/><path id=\"color_path32_2_\" d=\"M13.425,36.101c6.521,0,8.485,0.72,8.485,0.72l0.003,0.185L6.266,37.025V36.82C6.266,36.82,6.905,36.101,13.425,36.101z\"/></svg>",
+  "order": 10046
+}

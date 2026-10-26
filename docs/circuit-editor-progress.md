@@ -41,7 +41,7 @@ This file is the running context for agents working on the Circuit View v2. Read
 
 ### Known gaps / notes for the next agent
 
-- v1 free-point junction endpoints migrate as *pending junctions* (`{wire:'', t:-1, x, y}`) — geometric resolution to `{wire,t}` must happen in the editor on first render (M1, where pin geometry exists). `CircuitView.tsx#makeResolver` already renders them via raw coords.
+- v1 free-point junction endpoints migrate as _pending junctions_ (`{wire:'', t:-1, x, y}`) — geometric resolution to `{wire,t}` must happen in the editor on first render (M1, where pin geometry exists). `CircuitView.tsx#makeResolver` already renders them via raw coords.
 - The preview resolves pins through the legacy `partsLibrary` (breadboard view only, no flip support there). The v2 parts registry (M2, `circuit/parts/`) replaces this adapter.
 - `deleteParts` cascade removes wires in BOTH views (correct per spec §6.1) — the M1 UI should communicate that.
 - Editing is NOT wired yet — M1 is: pointer state machines (`views/canvas/`), palette, inspector, wire gestures, camera polish, save path (debounced `store.serialize()` → Redux `updateFileContent`, writing `circuit.json` + one-time `diagram.json.bak`).
@@ -136,7 +136,7 @@ Geoff's testing found SVG export rendering symbols wrong and PNG export dead. Ro
 Five fixes, all in the editor layer (no core/model changes). `npm run typecheck` clean · `npm run test:circuit` → 63/63.
 
 - **Breadboards are transparent on the schematic.** They no longer appear as a placeable/`U1` part in the schematic — only their row/rail buses still merge nets globally. Three-part fix: `refdes.ts` now matches `FAMILY_PREFIX` keys longest-first so `breadboard` wins over `board` (`BB1`, not `U1`); `CircuitView` drops breadboards from the "unplaced here" tray in the sch view; `Canvas` render loop skips `isBreadboard` parts when `view === 'sch'`. Added a `prefixForFamily` guard test.
-- **Rigid breadboard rotation.** Rotating a breadboard (right-click, or `R` with a lone board selected) now turns the board, its seated parts, and the wires *between* seated parts as one rigid assembly about the board's centre — layout is preserved instead of the wires rerouting. Uses `reroutesFor`'s `transformBoth` hook (rot90-about-centre) for both-ends-on-board wires; seated parts get their centres rotated + `rotate += 90`. Grid-aligned seating means holes map to holes, so pins re-seat exactly. New `rotateBoardAssembly` helper in `Canvas`; `rotateSelection` and the board context-menu delegate to it. (Wires with only one end on the board still reroute — expected, that end left the assembly.)
+- **Rigid breadboard rotation.** Rotating a breadboard (right-click, or `R` with a lone board selected) now turns the board, its seated parts, and the wires _between_ seated parts as one rigid assembly about the board's centre — layout is preserved instead of the wires rerouting. Uses `reroutesFor`'s `transformBoth` hook (rot90-about-centre) for both-ends-on-board wires; seated parts get their centres rotated + `rotate += 90`. Grid-aligned seating means holes map to holes, so pins re-seat exactly. New `rotateBoardAssembly` helper in `Canvas`; `rotateSelection` and the board context-menu delegate to it. (Wires with only one end on the board still reroute — expected, that end left the assembly.)
 - **Straight-wire modifier moved Shift → Space.** Shift is now free for shift-select while drawing on a breadboard. Space was previously bound to rotate; rotate is now `R`/right-click only. Keydown on Space `preventDefault`s to stop page scroll; status hint updated ("hold Space for straight", bb only).
 - **Schematic wires thinned, glow/border removed.** New `WIRE_SCH_W = 1` (was the shared `2.8`, ~3× too thick). In the sch view the color-outline path and the persistent border are dropped — a single thin ink stroke. A transparent fat stroke is layered under every wire so the thin line stays clickable. The net-highlight glow is kept but slimmed in sch.
 - **Connected pins drop their yellow "open lead" dot.** A pin whose net has ≥2 members (wired or seated) is `connected`; its dot is hidden unless armed/hovered (then brand-colored) or its net is highlighted. Open leads still show yellow. Hit target is unchanged, so connected pins remain clickable to re-wire.
@@ -161,7 +161,7 @@ Closes the remaining M3 scope (schematic view). All work is in `circuit/` behind
 ### ERC (spec §9)
 
 - `core/erc.ts` — net-model rule checks (pure, tested): **rail short** (two named rails/grounds on one net → error), **floating net label** (placed but unwired → info), **missing ground** (power rails but no GND → info), **dangling junction host** (error, reuses `danglingJunctions`).
-- `partsAdapter.ercFloatingPins` — view-side floating-pin finding (needs pin geometry); only flags *partially* connected parts to avoid noise.
+- `partsAdapter.ercFloatingPins` — view-side floating-pin finding (needs pin geometry); only flags _partially_ connected parts to avoid noise.
 - `CircuitView` — an **ERC pill** in the status row (clean / err·warn·info counts) toggles a non-blocking findings panel; clicking a row selects the offending part/wire/label.
 
 ### Schematic polish
@@ -195,7 +195,7 @@ Eleven fixes across the circuit editor + app shell. `npm run typecheck` clean ·
 ### Placement & interaction
 
 - **Collision-avoidance placement** (`partsAdapter.occupiedBoxes` / `findFreePlacement` / `freePasteOffset`): new parts, tray placements, and copy/paste all spiral out on the grid to a slot that clears existing parts, net labels, and wire segments — parity with the pre-rewrite editor. `addPartAt` and paste now route through these.
-- **Unplaced tray auto-places** (reverting the click-then-click attach-to-cursor): clicking a tray chip drops the part straight onto a free slot *and* flips the view into edit mode so it can be dragged immediately.
+- **Unplaced tray auto-places** (reverting the click-then-click attach-to-cursor): clicking a tray chip drops the part straight onto a free slot _and_ flips the view into edit mode so it can be dragged immediately.
 - **Double-click any component → edit mode** (`Canvas.onRequestEdit`, wired to `CircuitView.enterEdit`): double-clicking a part or net label in view-only mode enters edit mode.
 
 ### Visuals
@@ -211,7 +211,7 @@ Eleven fixes across the circuit editor + app shell. `npm run typecheck` clean ·
 
 ### App shell
 
-- **Stable left panel** (`App`): the Files panel no longer gets shoved around when the right (docs) or bottom (serial) panel toggles. We remember a manual drag (`ResizableHandle onDragging` → `manualFilePct`) and otherwise the toolbar-divider alignment, and re-assert that width via the imperative panel handle after any panel toggle. So it only changes when *you* drag it.
+- **Stable left panel** (`App`): the Files panel no longer gets shoved around when the right (docs) or bottom (serial) panel toggles. We remember a manual drag (`ResizableHandle onDragging` → `manualFilePct`) and otherwise the toolbar-divider alignment, and re-assert that width via the imperative panel handle after any panel toggle. So it only changes when _you_ drag it.
 - **Docs panel reopens on view mode** (`EditorPanel.onEditChange`): entering circuit edit mode still closes the docs panel to free space; returning to view mode reopens it (`isOpen: !editing`).
 
 ### Notes for the next agent
@@ -265,7 +265,7 @@ Four chunks, committed separately. `npm run typecheck` clean · `npm run test:ci
 - **Inspector "Simulation" section**: `netlist.simAttrsFor(type, family)` exposes each mapping's editable attrs (resistance/capacitance/inductance, voltage, amplitude+frequency+offset, current, pot position, switch closed) as labeled fields with the emitter's default as placeholder + unit hint. No more guessing magic attr names; the keys are excluded from the generic Properties rows. Attr edits are mergeKey'd (one undo step per field).
 - **Trace picking**: the transient plot's legend is now clickable — toggle traces on/off (state survives reruns; results still auto-clear on doc edits). Visible traces cap at 6 colors.
 - **Readable DC table**: each `v(node)` row shows the net's members ("R1:Pin 1 · LED1:anode"), `i(vxx)` rows say "current through …".
-- Real probe *parts* (§10.3, `sim.probes`) remain backlog — this pass makes everything probeable-by-default usable.
+- Real probe _parts_ (§10.3, `sim.probes`) remain backlog — this pass makes everything probeable-by-default usable.
 - `npm run typecheck` clean · `npm run test:circuit` → 89/89.
 
 ---
@@ -310,7 +310,7 @@ Seven commits, each independently typechecked + tested. `npm run typecheck` (nod
 
 - **Rigid "all pins must seat" rule** (`e70ce3a`). `partsAdapter.implicitSeats()` previously seated each pin independently against its nearest hole — a part with one leg near a hole and another off-grid reported a spurious single connection while the rest silently dangled. Now a part seats as a rigid body: **all** its pins must land within `SEAT_RADIUS` at the current placement, or none do (Fritzing's rule). Not unit-tested in isolation — `implicitSeats` depends on the legacy `partsLibrary` registry like the rest of `partsAdapter.ts`, consistent with that module's existing (lack of) coverage.
 - **Bendable rubber-band legs** (`dc3dd87`). Both importers (`scripts/fritzing-import.mjs`, `circuit/parts/fzpz.ts`) now read each connector's `legId` and tag the resolved pin into a new `PartView.legs: string[]`. Geometry needed no change — `pinWorld`/`pinWorldOf` were already leg-offset aware (`Placement.legs` existed since M0/M1 but nothing produced or consumed it). Canvas (bb view only): a leg-tagged pin drags independent of the part body (`beginLegDrag`, live-dispatched merged `placePart` commands, same pattern as the existing label-offset drag — no separate drag-override path needed since wires re-anchor through the normal `doc → resolve()` recompute); a real drag suppresses the trailing click; double-click resets a bent leg. Visual is a simple ink line from rest to tip overlaid on the existing static Fritzing leg art (real per-instance SVG leg-path warping is still future work — noted in code). `implicitSeats`'s rigid rule (above) now lets a stretched leg actually reach and seat in an adjacent hole. **Not automated-tested**: this is gesture code in `Canvas.tsx`, which has no test coverage anywhere in the suite (same caveat as every other canvas interaction in this repo) — verified by typecheck + code review only, not click-tested in a real browser (no display in this environment).
-- **Parts-pack manager + GitHub index installer** (`be71da3`). Targets the app's *actual* pipeline (legacy `PartDef` v1 + `lib/userParts.ts`/IndexedDB persistence), not the unbuilt v2 `registry.ts` the spec's §5.3/§5.4 assumes. `circuit/parts/packs.ts`: `fetchIndex`/`fetchManifest` (validated, relative URLs resolved against their own manifest), `installPack` (per-part fetch + `saveUserPart`, continues past individual failures). `circuit/views/packs/PackManager.tsx`: modal off a new Components-rail icon — add/remove index URLs, per-pack Install/Update with progress + toast summaries. `scripts/make-pack-index.mjs`: wraps a `fritzing-import.mjs` output directory into `pack.json`/`index.json` — re-shapes the existing manifest, no new conversion logic. `docs/tinyparts-pack-setup.md`: full guide for Geoff to create the `tinyparts` repo by hand (he offered to do this manually rather than granting repo access this session) — layout, exact schemas, the generator command, local testing, ATTRIBUTION requirement (M0 licensing decision), explicit gaps (no hash verification, no launch-time update check, no zip hosting). +7 unit tests against mocked fetch/localStorage, **plus a real end-to-end smoke test outside the suite**: ran `make-pack-index.mjs` against the app's actual 29-part bundled catalogue, served it over a plain local HTTP server, installed it through the real `packs.ts` client — 29/29, 0 failures.
+- **Parts-pack manager + GitHub index installer** (`be71da3`). Targets the app's _actual_ pipeline (legacy `PartDef` v1 + `lib/userParts.ts`/IndexedDB persistence), not the unbuilt v2 `registry.ts` the spec's §5.3/§5.4 assumes. `circuit/parts/packs.ts`: `fetchIndex`/`fetchManifest` (validated, relative URLs resolved against their own manifest), `installPack` (per-part fetch + `saveUserPart`, continues past individual failures). `circuit/views/packs/PackManager.tsx`: modal off a new Components-rail icon — add/remove index URLs, per-pack Install/Update with progress + toast summaries. `scripts/make-pack-index.mjs`: wraps a `fritzing-import.mjs` output directory into `pack.json`/`index.json` — re-shapes the existing manifest, no new conversion logic. `docs/tinyparts-pack-setup.md`: full guide for Geoff to create the `tinyparts` repo by hand (he offered to do this manually rather than granting repo access this session) — layout, exact schemas, the generator command, local testing, ATTRIBUTION requirement (M0 licensing decision), explicit gaps (no hash verification, no launch-time update check, no zip hosting). +7 unit tests against mocked fetch/localStorage, **plus a real end-to-end smoke test outside the suite**: ran `make-pack-index.mjs` against the app's actual 29-part bundled catalogue, served it over a plain local HTTP server, installed it through the real `packs.ts` client — 29/29, 0 failures.
 
 ### Both milestones: what's left
 
@@ -325,3 +325,60 @@ Seven commits, each independently typechecked + tested. `npm run typecheck` (nod
 - **`uplot` was declared in `package.json`/`package-lock.json` but missing from `node_modules`** at session start (stale install, unrelated to this session's changes) — Geoff needs to run `npm install` on his machine; not done here since this sandbox's platform-native deps would corrupt the Windows install.
 - `package.json`/`package-lock.json` carry a small pre-existing uncommitted diff (a `postinstall` fix, and a `0.2.0`→`0.3.0` lockfile version mismatch) that predates this session — left alone, not part of any commit above.
 - Bendable legs and the rigid seat rule are both real behavior changes to breadboard placement that would benefit from a manual click-through (drop a resistor near-but-not-quite on holes; drag an LED leg) before calling M2 done-done — flagged, not blocking, since the logic itself is straightforward and typechecked.
+
+---
+
+## 2026-07-30 — Parts bins: duplicate tiles, bundled Core, palette rework
+
+Four complaints from Geoff, all in the components rail. `npm run typecheck` (web) clean · circuit suite **123/123** · eslint clean.
+
+### 1. "A ton of duplicates in Core Basic and such" — the fold rule was too narrow
+
+The old variant merge (`split-parts-packs.mjs`) fingerprinted each part on _everything the app can render_ — family, title, per-view w/h, pin coordinates, artwork — and folded only exact collisions. That catches `resistor` vs `SMD_resistor_0603` (same art, same pins) and misses every case where the footprint also changes the part's physical size, which is most of them. Hence sixteen tiles all called "Inductors" in SparkFun · Passives, thirteen called "Capacitor", eighteen "Capacitor Polarized", seven "Film/Foil Capacitor".
+
+Geoff's guess ("something like resistor values") was close: it's the `package` property, not the value.
+
+New rule in **`scripts/lib/fold-variants.mjs`** (shared by the importer and the re-pass, so they can't drift): one tile per **(pack, family, base title)**, base title being the label with any generated `(package)` suffix stripped back off. Two guards keep it honest, because Fritzing families sometimes lump together parts that aren't interchangeable:
+
+- **Pin names.** Connections are keyed by pin name, so parts offering different pin names never fold. Keeps the 2-pin and 3-pin ceramic resonators apart — same family, both titled "Resonator".
+- **Behaviour tokens.** A package string carrying `anode`/`cathode`, `npn`/`pnp`, `spst`/`spdt`/`dpdt`, `male`/`female`, an EBC/ECB/CBE pinout or a waveform name splits its group. The nine 7-segment displays stay as two tiles (common-anode, common-cathode) rather than one that lies about which it is.
+
+**1650 → 1345 tiles** over the same 1776 files. Passives 68 → 19, Core · Basic 71 → 25, SparkFun · Connectors 144 → 83. Audited: no two tiles share a label in any bin, every `variantOf` resolves to a present primary in the same bin, every `variants` list round-trips.
+
+Folded parts keep their file, keep their `(package)` suffix, and **`searchParts` now returns them** (ranked below every primary). That's deliberate and it's what makes the fold safe — with captions gone from the grid, search is the only route back to a specific footprint.
+
+### 2. Core packs now ship with the app
+
+The ten `core-*` packs (642 files, 554 tiles) moved into `src/renderer/src/assets/parts` and render as one **Core** bin. Removed from the tinyparts index; the repo now publishes only SparkFun sub-bins and vendor packs (33 packs, 868 tiles).
+
+`packMigration.json` gained `bundledPackIds`. On first launch after the upgrade, `discardBundled()` deletes the downloaded copies and calls the new **`restoreBundledParts()`** in `partsLibrary` — note `unregisterParts` would have been wrong here, since a pack part _overwrote_ the bundled manifest row for its type and dropping it would take the type out of the manifest entirely. `restoreBundledParts` puts the shipped row back and clears the cached def. Migration version → `1.3.0`.
+
+Cost: **+74 MB** in the repo. Runtime is unaffected (part JSON stays lazy-loaded; startup only pays for the ~14 MB manifest), but the installer grows. Geoff chose to leave it for now — the obvious lever is running the artwork through `minifySvg` and rounding pin coordinates, worth 30-50% with no visual change.
+
+### 3. tinyStudio boards have their own tab
+
+New `PartSource` `'tiny'`; `sourceOf({ builtin: true })` returns it. The five tiny\* boards were five squares lost among five hundred generic ones. Palette opens on this bin.
+
+### 4. Palette tiles: artwork only
+
+No card, no border, no caption, and the `--warm-150` box behind each thumb is gone — that box was the "white outline around every icon". Grid went 2 → 4 columns. The name is a hover tooltip (family, pin count, folded packages, drag hint) rendered **fixed-position at the palette root**, not inside the tile: the bin scrolls, and a scroll container clips on both axes, so an absolutely-positioned label inside a 48px cell would be cut off at exactly the palette's edge. It flips left when there's no room right. Search results keep their captions — that's how you tell "Capacitor (0805)" from "Capacitor (1210)" in a list you asked for by typing.
+
+### 5. Fritzing bin icons (`bins/more`)
+
+`scripts/lib/bin-icons.mjs` reads each `.fzb`'s `icon=` attribute and inlines the artwork as a data URI. Three shapes in the wild, all handled: a PNG filename (most vendors); **nothing at all** — every SparkFun sub-bin, whose PNGs are sitting there unreferenced, so the `.fzb` basename is tried as a filename; and an entire XML-escaped SVG document (`voltage_regulators.fzb`). Colour over `-mono`: the rail sits on light or dark chrome depending on theme, and flat black artwork vanishes on one of them.
+
+**22 of 33 packs** now have real artwork. The rest keep monograms — `lilypad.fzb` / `picaxe.fzb` / `parallax.fzb` name PNGs that aren't in the repo, and five SparkFun sub-bins have no `.fzb` at all.
+
+New `circuit/parts/PackGlyph.tsx` renders all three forms; used by the palette rail and the Pack Manager list (which previously would have printed a data URI as text). `PackManager.refreshIndex` now re-records name/icon/group for installed packs, so an existing install picks up the artwork on its next look at the panel rather than only after a reinstall.
+
+### New scripts
+
+- **`scripts/refold-parts.mjs`** — re-pass over a published tinyparts checkout. Re-folds using the current rule, optionally bundles `core-*` into the app, stamps bin icons. Needs no Fritzing source: it only rewrites presentation metadata.
+- **`scripts/lib/{fold-variants,bin-icons,bin-map}.mjs`** — shared with `split-parts-packs.mjs`, which was rewired onto them (its `fingerprint`/`primaryScore`/`packageLabel`/`sharedPrefixLength` block and its inline `BIN_TO_PACK` are gone). Classification now runs _before_ folding, since folding is per-pack.
+
+### Session notes for the next agent
+
+- **`refold-parts.mjs` is chunked on purpose** (`--packs a,b,c`). The library is 125 MB on a mounted Windows filesystem; a single `--all --bundle` pass runs for minutes, and background processes do not survive between sandbox shell calls, so a long run gets killed mid-write and truncates whatever JSON it was writing. The `write()` helper skips byte-identical files, which makes re-runs cheap, and `foldVariants` resets `label`/`variantOf`/`variants` from `baseTitle` first, so it's idempotent — a re-run after an interrupted one is safe. One file (`sparkfun-displays-lcd-g12864-full.json`, 3.3 MB) was truncated twice this way and restored from the `tinystudio-core` blob still in tinyparts' git history.
+- `.git/index.lock` in tinyparts was stale and unremovable until `allow_cowork_file_delete` — same as the 07-11 and 07-22 sessions. It still doesn't stick across sessions. Deletes on the mounted folders need it too.
+- Windows-native `node_modules` again: `npm run test:circuit` needs the `/tmp` esbuild workaround from the 07-22 notes, run from the repo root.
+- **Not click-tested** — no display here. The tooltip's fixed positioning, the 4-column grid at 554 tiles, and the PNG tab icons against both themes all want a real look before this is called done.

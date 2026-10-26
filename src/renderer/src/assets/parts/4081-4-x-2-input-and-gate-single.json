@@ -1,0 +1,162 @@
+{
+  "type": "4081-4-x-2-input-and-gate-single",
+  "label": "4081 4 x 2 Input AND Gate, single part",
+  "family": "40xx 4x2 input logic gate (single part)",
+  "tags": [
+    "DIP",
+    "4081",
+    "AND Gate",
+    "2 input AND Gate",
+    "logic gates",
+    "DIP14",
+    "fritzing core"
+  ],
+  "description": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Oxygen-Sans'; font-size:10pt;\">4081 4 x 2 Input AND Gate as a single part</span></p></body></html>",
+  "source": {
+    "fzp": "4081_4_x_2_input_AND_gate_single.fzp",
+    "moduleId": "4081_4_x_2_input_AND_gate_single"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" id=\"svg2\" viewBox=\"0 0 700 330\"><metadata id=\"metadata76\"><rdf:RDF><cc:Work rdf:about=\"\"><dc:format>image/svg+xml</dc:format><dc:type rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\"/><dc:title/></cc:Work></rdf:RDF></metadata><defs id=\"defs74\"/><g id=\"breadboard\"><rect stroke-width=\"10\" fill=\"#303030\" id=\"middle\" x=\"0\" y=\"30\" width=\"700\" height=\"270\"/><rect stroke-width=\"10\" fill=\"#3d3d3d\" id=\"top\" x=\"0\" y=\"30\" width=\"700\" height=\"24.6\"/><rect stroke-width=\"10\" fill=\"#000000\" id=\"bottom\" x=\"0\" y=\"275\" width=\"700\" height=\"24.6\"/><polygon fill=\"#141414\" id=\"right\" points=\"692.5,275.4 700,300 700,30 692.5,54.6 \"/><polygon fill=\"#1f1f1f\" id=\"left\" points=\"7.5,275 0,300 0,30 7.5,54 \"/><polygon fill=\"#1c1c1c\" id=\"left-upper-rect\" points=\"50,115 7.5,114 5.6,135 5.6,165 50,165 \"/><polygon fill=\"#383838\" id=\"left-lower-rect\" points=\"7.5,215 50,215 50,165 5.6,165 5.6,190 \"/><path stroke-width=\"10\" fill=\"#262626\" id=\"slot\" d=\"m 5.6,135 v 58.3 c 14.7,-1.7 26,-14 26,-29 0,-15 -11,-27 -26,-29 z\"/><path stroke-width=\"10\" fill=\"#303030\" id=\"cover\" d=\"m 7.5,54 v 60 c 24,4.5 42,25 42,50 0,25 -18,46 -42,50 v 0.1 H 58 V 55 Z\"/><circle stroke-width=\"10\" fill=\"#212121\" cx=\"65\" cy=\"234\" r=\"20.6\" id=\"circle13\"/><text id=\"label\" x=\"341.05634\" y=\"184.71831\" font-size=\"60\" font-family=\"OCRA\" text-anchor=\"middle\" fill=\"#e6e6e6\">IC</text><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector0pin\" x=\"35\" y=\"286\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector0terminal\" x=\"35\" y=\"300\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"35,286 35,306 65,306 85,297 85,286 \" id=\"polygon18\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" y=\"0\" id=\"connector13pin\" x=\"35\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" y=\"0\" id=\"connector13terminal\" x=\"35\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"85,43 85,32 65,23 35,23 35,43 \" id=\"polygon22\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector6pin\" x=\"635\" y=\"286\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector6terminal\" x=\"635\" y=\"300\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"615,286 615,297 635,306 665,306 665,286 \" id=\"polygon26\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector7pin\" x=\"635\" y=\"0\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector7terminal\" x=\"635\" y=\"0\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"665,43 665,23 635,23 615,32 615,43 \" id=\"polygon30\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector12pin\" x=\"135\" y=\"0\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" y=\"0\" id=\"connector12terminal\" x=\"135\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"115,32 115,43 185,43 185,32 165,23 135,23 \" id=\"polygon34\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector11pin\" x=\"235\" y=\"0\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" y=\"0\" id=\"connector11terminal\" x=\"235\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"215,32 215,43 285,43 285,32 265,23 235,23 \" id=\"polygon38\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector10pin\" x=\"335\" y=\"0\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" y=\"0\" id=\"connector10terminal\" x=\"335\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"315,32 315,43 385,43 385,32 365,23 335,23 \" id=\"polygon42\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector9pin\" x=\"435\" y=\"0\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" y=\"0\" id=\"connector9terminal\" x=\"435\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"415,32 415,43 485,43 485,32 465,23 435,23 \" id=\"polygon46\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector8pin\" x=\"535\" y=\"0\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" y=\"0\" id=\"connector8terminal\" x=\"535\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"515,32 515,43 585,43 585,32 565,23 535,23 \" id=\"polygon50\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector1pin\" x=\"135\" y=\"286\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector1terminal\" x=\"135\" y=\"300\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"185,297 185,286 115,286 115,297 135,306 165,306 \" id=\"polygon54\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector2pin\" x=\"235\" y=\"286\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector2terminal\" x=\"235\" y=\"300\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"285,297 285,286 215,286 215,297 235,306 265,306 \" id=\"polygon58\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector3pin\" x=\"335\" y=\"286\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector3terminal\" x=\"335\" y=\"300\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"385,297 385,286 315,286 315,297 335,306 365,306 \" id=\"polygon62\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector4pin\" x=\"435\" y=\"286\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector4terminal\" x=\"435\" y=\"300\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"485,297 485,286 415,286 415,297 435,306 465,306 \" id=\"polygon66\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector5pin\" x=\"535\" y=\"286\" width=\"30\" height=\"43\"/><rect stroke-width=\"10\" fill=\"#8c8c8c\" id=\"connector5terminal\" x=\"535\" y=\"300\" width=\"30\" height=\"30\"/><polygon fill=\"#8c8c8c\" points=\"585,297 585,286 515,286 515,297 535,306 565,306 \" id=\"polygon70\"/></g></svg>",
+      "w": 67.2,
+      "h": 31.68,
+      "pins": {
+        "A1": [
+          4.8,
+          29.52
+        ],
+        "B1": [
+          14.4,
+          29.52
+        ],
+        "Q1": [
+          24,
+          29.52
+        ],
+        "Q2": [
+          33.6,
+          29.52
+        ],
+        "A2": [
+          43.2,
+          29.52
+        ],
+        "B2": [
+          52.8,
+          29.52
+        ],
+        "GND": [
+          62.4,
+          29.52
+        ],
+        "A3": [
+          62.4,
+          2.06
+        ],
+        "B3": [
+          52.8,
+          2.06
+        ],
+        "Q3": [
+          43.2,
+          2.06
+        ],
+        "Q4": [
+          33.6,
+          2.06
+        ],
+        "A4": [
+          24,
+          2.06
+        ],
+        "B4": [
+          14.4,
+          2.06
+        ],
+        "VDD": [
+          4.8,
+          2.06
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 910.21589 810.00026\" id=\"svg6563\" version=\"1.1\"><defs id=\"defs6565\"/><metadata id=\"metadata6568\"><rdf:RDF><cc:Work rdf:about=\"\"><dc:format>image/svg+xml</dc:format><dc:type rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\"/><dc:title/></cc:Work></rdf:RDF></metadata><g id=\"schematic\"><rect x=\"100.14104\" y=\"4.9999995\" width=\"700.00024\" height=\"800.00024\" id=\"rect7\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"round\"/><text font-size=\"60\" id=\"label\" x=\"366.01053\" y=\"754.72644\" font-family=\"'Droid Sans'\" text-anchor=\"middle\" fill=\"#000000\">4081</text><line x1=\"5.0712123\" y1=\"704.99908\" x2=\"100.21072\" y2=\"704.99908\" id=\"connector6pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect x=\"0.21008155\" y=\"700.13965\" width=\"10\" height=\"10\" id=\"connector6terminal\" fill=\"none\" stroke-width=\"0\"/><text font-size=\"35\" x=\"52.284313\" y=\"680.30341\" id=\"text57\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">7</text><line x1=\"805.29877\" y1=\"105.00008\" x2=\"904.70184\" y2=\"105.00008\" id=\"connector13pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect x=\"900.21588\" y=\"100.13855\" width=\"10\" height=\"10\" id=\"connector13terminal\" fill=\"none\" stroke-width=\"0\"/><text font-size=\"49\" id=\"text6039\" y=\"722.49255\" x=\"117.14574\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">GND</text><text font-size=\"35\" x=\"855.07886\" y=\"79.992889\" id=\"text64\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">14</text><text id=\"text5967\" y=\"122.71091\" x=\"782.92328\" font-size=\"49\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">VDD</text><line x1=\"805.29877\" y1=\"404.99997\" x2=\"904.70184\" y2=\"404.99997\" id=\"connector10pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect id=\"connector10terminal\" height=\"10\" width=\"10\" y=\"400.13913\" x=\"900.21588\" fill=\"none\" stroke-width=\"0\"/><text font-size=\"35\" x=\"855.68933\" y=\"390.00528\" id=\"text85\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">11</text><text id=\"text5979\" y=\"380.67349\" x=\"781.17023\" font-size=\"49\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">Q4</text><path d=\"M 475.14115,255.00113 V 405.00004 H 795.03062\" id=\"path9336\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"square\"/><path id=\"path9380\" d=\"M 475.14113,655.00013 V 505.00007 h 318.69099\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"square\"/><line id=\"connector9pin\" y2=\"504.99896\" x2=\"904.70184\" y1=\"504.99896\" x1=\"805.29877\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect id=\"connector9terminal\" height=\"10\" width=\"10\" y=\"500.13956\" x=\"900.21588\" fill=\"none\" stroke-width=\"0\"/><text id=\"text92\" y=\"490.00256\" x=\"855.99268\" font-size=\"35\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">10</text><text id=\"text5973\" y=\"480.06693\" x=\"782.66833\" font-size=\"49\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">Q3</text><line x1=\"5.0712123\" y1=\"404.99997\" x2=\"100.21072\" y2=\"404.99997\" id=\"connector3pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect id=\"connector3terminal\" height=\"10\" width=\"10\" y=\"400.13913\" x=\"0.21008155\" fill=\"none\" stroke-width=\"0\"/><text font-size=\"35\" x=\"51.68507\" y=\"379.69455\" id=\"text36\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">4</text><text font-size=\"49\" x=\"117.14767\" y=\"370.66611\" id=\"text6033\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">Q2</text><path d=\"M 430.03186,555.0001 V 405.00004 H 100.14103\" id=\"path9358\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\"/><line x1=\"5.0712123\" y1=\"304.99957\" x2=\"100.21072\" y2=\"304.99957\" id=\"connector2pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect id=\"connector2terminal\" height=\"10\" width=\"10\" y=\"300.1387\" x=\"0.21008155\" fill=\"none\" stroke-width=\"0\"/><text id=\"text29\" y=\"279.9903\" x=\"52.276821\" font-size=\"35\" font-family=\"'Droid Sans'\" fill=\"#555555\">3</text><text id=\"text5961\" y=\"270.0509\" x=\"116.54094\" font-size=\"49\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">Q1</text><path id=\"path8338\" d=\"M 435.14302,155.00063 V 305 H 110.14103\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"square\"/><line id=\"connector0pin\" y2=\"105.00008\" x2=\"100.21072\" y1=\"105.00008\" x1=\"5.0712123\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect x=\"0.21008155\" y=\"100.13855\" width=\"10\" height=\"10\" id=\"connector0terminal\" fill=\"none\" stroke-width=\"0\"/><line id=\"connector1pin\" y2=\"204.9998\" x2=\"100.21072\" y1=\"204.9998\" x1=\"5.0712123\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect x=\"0.21008155\" y=\"200.13898\" width=\"10\" height=\"10\" id=\"connector1terminal\" fill=\"none\" stroke-width=\"0\"/><text id=\"text15\" y=\"80.042366\" x=\"57.856384\" font-size=\"35\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">1</text><text id=\"text22\" y=\"180.42809\" x=\"52.847927\" font-size=\"35\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">2</text><text font-size=\"49\" x=\"115.27633\" y=\"179.89955\" id=\"text5937\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">B1</text><text id=\"text5913\" y=\"79.684875\" x=\"120.15887\" font-size=\"49\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">A1</text><path d=\"m 202.91673,65.000695 h 80.0005 c 80.00051,0 120.00076,40.000045 120.00076,90.000055 0,50.00002 -40.00025,90.00006 -120.00076,90.00006 h -80.0005 v -40.00004 -50.00002 -50.00001 z\" id=\"body-4081-0\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><path d=\"m 100.14103,105.00074 h 99.85903\" id=\"a-pin-4081-0\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><path d=\"m 100.14104,205.00077 h 99.85903\" id=\"b-pin-4081-0\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><path d=\"m 400.00012,155.00075 h 35.14254\" id=\"q-pin-4081-0\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><line x1=\"5.0712123\" y1=\"504.99896\" x2=\"100.21072\" y2=\"504.99896\" id=\"connector4pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect x=\"0.21008155\" y=\"500.13956\" width=\"10\" height=\"10\" id=\"connector4terminal\" fill=\"none\" stroke-width=\"0\"/><line x1=\"5.0712123\" y1=\"604.99933\" x2=\"100.21072\" y2=\"604.99933\" id=\"connector5pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect x=\"0.21008155\" y=\"600.13922\" width=\"10\" height=\"10\" id=\"connector5terminal\" fill=\"none\" stroke-width=\"0\"/><text font-size=\"35\" x=\"52.602661\" y=\"479.70306\" id=\"text43\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">5</text><text font-size=\"35\" x=\"52.276821\" y=\"579.99908\" id=\"text50\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">6</text><text id=\"text6027\" y=\"580.27594\" x=\"115.95667\" font-size=\"49\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">B2</text><text font-size=\"49\" x=\"120.44725\" y=\"479.99576\" id=\"text6021\" font-family=\"'Droid Sans'\" text-anchor=\"start\" fill=\"#555555\">A2</text><path id=\"path369\" d=\"m 202.91673,465.00085 h 80.0005 c 80.00051,0 120.00076,40.00003 120.00076,90.00006 0,50.00001 -40.00025,89.99994 -120.00076,89.99994 h -80.0005 v -39.99993 -50.00001 -50.00003 z\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><path id=\"path371\" d=\"m 100.14103,505.00088 h 99.85903\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><path id=\"path373\" d=\"m 100.14103,605.00092 h 99.85903\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><path id=\"path375\" d=\"m 400.00012,555.00016 h 35.14252\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><line id=\"connector8pin\" y2=\"604.99933\" x2=\"904.47455\" y1=\"604.99933\" x1=\"805.07147\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect x=\"900.21588\" y=\"600.13922\" width=\"10\" height=\"10\" id=\"connector8terminal\" fill=\"none\" stroke-width=\"0\"/><line id=\"connector7pin\" y2=\"704.99908\" x2=\"904.70184\" y1=\"704.99908\" x1=\"805.29877\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect x=\"900.21588\" y=\"700.13965\" width=\"10\" height=\"10\" id=\"connector7terminal\" fill=\"none\" stroke-width=\"0\"/><text id=\"text99\" y=\"589.69928\" x=\"837.52472\" font-size=\"35\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">9</text><text font-size=\"49\" x=\"782.66455\" y=\"589.69153\" id=\"text5949\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">B3</text><text id=\"text106\" y=\"689.40063\" x=\"837.53223\" font-size=\"35\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">8</text><text id=\"text5925\" y=\"689.39203\" x=\"782.97168\" font-size=\"49\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">A3</text><path id=\"path357\" d=\"m 705.00142,744.99961 h -80.00051 c -80.00051,0 -120.00076,-40.00004 -120.00076,-90.00005 0,-50.00002 40.00025,-90.00006 120.00076,-90.00006 h 80.00051 v 40.00004 50.00002 50.00001 z\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><path id=\"path359\" d=\"M 800.14123,704.99955 H 705.12056\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><path id=\"path361\" d=\"M 800.14126,604.99957 H 705.42395\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10.00000095\" stroke-linecap=\"butt\"/><path id=\"path363\" d=\"M 504.5483,654.99955 H 470.14114\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><line x1=\"805.29877\" y1=\"204.9998\" x2=\"904.70184\" y2=\"204.9998\" id=\"connector12pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect x=\"900.21588\" y=\"200.13898\" width=\"10\" height=\"10\" id=\"connector12terminal\" fill=\"none\" stroke-width=\"0\"/><line x1=\"805.29877\" y1=\"305.00021\" x2=\"904.70184\" y2=\"305.00021\" id=\"connector11pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"10\" stroke-linecap=\"round\"/><rect x=\"900.21588\" y=\"300.1387\" width=\"10\" height=\"10\" id=\"connector11terminal\" fill=\"none\" stroke-width=\"0\"/><text font-size=\"35\" x=\"855.69305\" y=\"189.69788\" id=\"text71\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">13</text><text font-size=\"35\" x=\"855.69305\" y=\"289.69803\" id=\"text78\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">12</text><text font-size=\"49\" x=\"780.55975\" y=\"189.99059\" id=\"text5955\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">B4</text><text id=\"text5931\" y=\"290.2941\" x=\"781.46985\" font-size=\"49\" font-family=\"'Droid Sans'\" text-anchor=\"end\" fill=\"#555555\">A4</text><path id=\"path345\" d=\"m 705.00142,345.00011 h -80.00051 c -80.00051,0 -120.00076,-40.00004 -120.00076,-90.00007 0,-50.00001 40.00025,-89.99993 120.00076,-89.99993 h 80.00051 v 39.99992 50.00001 50.00003 z\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><path id=\"path347\" d=\"M 800.14124,304.99942 H 706.03068\" fill=\"none\" stroke=\"#000000\" stroke-width=\"9.99999905\" stroke-linecap=\"butt\"/><path id=\"path349\" d=\"m 800.14129,204.9994 h -93.8072\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/><path id=\"path351\" d=\"M 510.00015,255.00008 H 470.14114\" fill=\"none\" stroke=\"#000000\" stroke-width=\"10\" stroke-linecap=\"butt\"/></g></svg>",
+      "w": 87.38,
+      "h": 77.76,
+      "pins": {
+        "A1": [
+          0.5,
+          10.09
+        ],
+        "B1": [
+          0.5,
+          19.69
+        ],
+        "Q1": [
+          0.5,
+          29.29
+        ],
+        "Q2": [
+          0.5,
+          38.89
+        ],
+        "A2": [
+          0.5,
+          48.49
+        ],
+        "B2": [
+          0.5,
+          58.09
+        ],
+        "GND": [
+          0.5,
+          67.69
+        ],
+        "A3": [
+          86.9,
+          67.69
+        ],
+        "B3": [
+          86.9,
+          58.09
+        ],
+        "Q3": [
+          86.9,
+          48.49
+        ],
+        "Q4": [
+          86.9,
+          38.89
+        ],
+        "A4": [
+          86.9,
+          29.29
+        ],
+        "B4": [
+          86.9,
+          19.69
+        ],
+        "VDD": [
+          86.9,
+          10.09
+        ]
+      }
+    }
+  },
+  "properties": {
+    "chip label": "4081",
+    "editable pin labels": "false",
+    "variant": "4 x 2 Input AND gate, single part",
+    "part number": "4081",
+    "pins": "14",
+    "hole size": "",
+    "pin spacing": "300mil",
+    "layer": "",
+    "package": "DIP (Dual Inline) [THT]",
+    "devices": "4",
+    "inputs per device": "2"
+  },
+  "icon": "<svg xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 700 330\" id=\"svg2\" version=\"1.2\"><metadata id=\"metadata76\"><rdf:RDF><cc:Work rdf:about=\"\"><dc:format>image/svg+xml</dc:format><dc:type rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\"/><dc:title/></cc:Work></rdf:RDF></metadata><defs id=\"defs74\"/><g id=\"icon\"><rect height=\"270\" width=\"700\" y=\"30\" x=\"0\" id=\"middle\" fill=\"#303030\" stroke-width=\"10\"/><rect height=\"24.6\" width=\"700\" y=\"30\" x=\"0\" id=\"top\" fill=\"#3d3d3d\" stroke-width=\"10\"/><rect height=\"24.6\" width=\"700\" y=\"275\" x=\"0\" id=\"bottom\" fill=\"#000000\" stroke-width=\"10\"/><polygon points=\"692.5,275.4 700,300 700,30 692.5,54.6 \" id=\"right\" fill=\"#141414\"/><polygon points=\"7.5,275 0,300 0,30 7.5,54 \" id=\"left\" fill=\"#1f1f1f\"/><polygon points=\"50,115 7.5,114 5.6,135 5.6,165 50,165 \" id=\"left-upper-rect\" fill=\"#1c1c1c\"/><polygon points=\"7.5,215 50,215 50,165 5.6,165 5.6,190 \" id=\"left-lower-rect\" fill=\"#383838\"/><path d=\"m 5.6,135 v 58.3 c 14.7,-1.7 26,-14 26,-29 0,-15 -11,-27 -26,-29 z\" id=\"slot\" fill=\"#262626\" stroke-width=\"10\"/><path d=\"m 7.5,54 v 60 c 24,4.5 42,25 42,50 0,25 -18,46 -42,50 v 0.1 H 58 V 55 Z\" id=\"cover\" fill=\"#303030\" stroke-width=\"10\"/><circle id=\"circle13\" r=\"20.6\" cy=\"234\" cx=\"65\" fill=\"#212121\" stroke-width=\"10\"/><text font-size=\"60\" y=\"144.85881\" x=\"348.36569\" id=\"label\" style=\"font-size:60px;font-family:OCRA;text-anchor:middle;fill:#e6e6e6\">IC</text><text font-size=\"49\" y=\"233.97148\" x=\"352.57333\" id=\"text4196\" style=\"font-size:49px;font-family:OCRA;text-anchor:middle;fill:#ff00ff\">Single</text><rect height=\"43\" width=\"30\" y=\"286\" x=\"35\" id=\"connector0pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" y=\"300\" x=\"35\" id=\"connector0terminal\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon18\" points=\"35,286 35,306 65,306 85,297 85,286 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" x=\"35\" id=\"connector13pin\" y=\"0\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" x=\"35\" id=\"connector13terminal\" y=\"0\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon22\" points=\"85,43 85,32 65,23 35,23 35,43 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"286\" x=\"635\" id=\"connector6pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" y=\"300\" x=\"635\" id=\"connector6terminal\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon26\" points=\"615,286 615,297 635,306 665,306 665,286 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"0\" x=\"635\" id=\"connector7pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" y=\"0\" x=\"635\" id=\"connector7terminal\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon30\" points=\"665,43 665,23 635,23 615,32 615,43 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"0\" x=\"135\" id=\"connector12pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" x=\"135\" id=\"connector12terminal\" y=\"0\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon34\" points=\"115,32 115,43 185,43 185,32 165,23 135,23 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"0\" x=\"235\" id=\"connector11pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" x=\"235\" id=\"connector11terminal\" y=\"0\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon38\" points=\"215,32 215,43 285,43 285,32 265,23 235,23 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"0\" x=\"335\" id=\"connector10pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" x=\"335\" id=\"connector10terminal\" y=\"0\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon42\" points=\"315,32 315,43 385,43 385,32 365,23 335,23 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"0\" x=\"435\" id=\"connector9pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" x=\"435\" id=\"connector9terminal\" y=\"0\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon46\" points=\"415,32 415,43 485,43 485,32 465,23 435,23 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"0\" x=\"535\" id=\"connector8pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" x=\"535\" id=\"connector8terminal\" y=\"0\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon50\" points=\"515,32 515,43 585,43 585,32 565,23 535,23 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"286\" x=\"135\" id=\"connector1pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" y=\"300\" x=\"135\" id=\"connector1terminal\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon54\" points=\"185,297 185,286 115,286 115,297 135,306 165,306 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"286\" x=\"235\" id=\"connector2pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" y=\"300\" x=\"235\" id=\"connector2terminal\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon58\" points=\"285,297 285,286 215,286 215,297 235,306 265,306 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"286\" x=\"335\" id=\"connector3pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" y=\"300\" x=\"335\" id=\"connector3terminal\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon62\" points=\"385,297 385,286 315,286 315,297 335,306 365,306 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"286\" x=\"435\" id=\"connector4pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" y=\"300\" x=\"435\" id=\"connector4terminal\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon66\" points=\"485,297 485,286 415,286 415,297 435,306 465,306 \" fill=\"#8c8c8c\"/><rect height=\"43\" width=\"30\" y=\"286\" x=\"535\" id=\"connector5pin\" fill=\"#8c8c8c\" stroke-width=\"10\"/><rect height=\"30\" width=\"30\" y=\"300\" x=\"535\" id=\"connector5terminal\" fill=\"#8c8c8c\" stroke-width=\"10\"/><polygon id=\"polygon70\" points=\"585,297 585,286 515,286 515,297 535,306 565,306 \" fill=\"#8c8c8c\"/></g></svg>",
+  "order": 30024
+}

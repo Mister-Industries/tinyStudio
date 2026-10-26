@@ -1,0 +1,58 @@
+{
+  "type": "fairchild-mbr745",
+  "label": "MBR745 Schottky",
+  "family": "Semiconductor",
+  "tags": [
+    "DIODE",
+    "Schottky",
+    "Fairchild"
+  ],
+  "description": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'.Lucida Grande UI'; font-size:13pt; font-weight:400; font-style:normal;\">\n<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Arial,Bold'; font-size:12pt;\">Features </span></p>\n<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Arial'; font-size:9pt;\">• LowPowerLoss,HighEfficiency<br />• HighSurgeCapacity<br />• MetalSiliconJunction,MajorityCarrierConduction • HighCurrentCapacity,LowForward-VoltageDrop • GuardRingforOver-VoltageProtection(OVP) </span></p>\n<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Arial'; font-size:9pt;\">Usage:</span></p>\n<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Arial'; font-size:9pt;\">Low-Voltage,High-FrequencyInverters </span><span style=\" font-family:'Arial'; font-size:8pt;\">• </span><span style=\" font-family:'Arial'; font-size:9pt;\">Free Wheeling and Polarity Protection </span></p></body></html>",
+  "source": {
+    "fzp": "Fairchild_MBR745.fzp",
+    "moduleId": "Fairchild_MBR745"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.1\" viewBox=\"0 0 38 73\" xmlns=\"http://www.w3.org/2000/svg\"><desc><referenceFile>MBR745_Schottky_breadboard.svg</referenceFile></desc><title>MBR745_Schottky_breadboard</title><description>Created with Sketch (http://www.bohemiancoding.com/sketch)</description><g fill=\"none\" fill-rule=\"evenodd\" type=\"MSPage\"><g transform=\"translate(1)\"><g id=\"breadboard\" type=\"MSLayerGroup\"><rect x=\"7\" y=\"60\" width=\"3\" height=\"1\" type=\"MSShapeGroup\"/><rect x=\"16\" y=\"60\" width=\"3\" height=\"1\" type=\"MSShapeGroup\"/><path id=\"connector0pin\" d=\"m8.001 62.317v10\" stroke=\"#8C8C8C\" stroke-width=\"3\" type=\"MSShapeGroup\"/><path id=\"connector1pin\" d=\"m27.997 62.317v10\" stroke=\"#8C8C8C\" stroke-width=\"3\" type=\"MSShapeGroup\"/><path id=\"Shape\" d=\"m32.997 0.5h-14.998v2.502c4.354 0 7.875 2.47 7.875 5.516-2e-3 3.044-3.523 5.513-7.875 5.513v8.087h14.998v-21.618z\" fill=\"#BFBCBC\" type=\"MSShapeGroup\"/><path id=\"Shape\" d=\"m10.126 8.514c0-3.047 3.523-5.514 7.873-5.514v-2.501h-14.998v21.611h14.998v-8.086c-4.35 2e-3 -7.873-2.465-7.873-5.51z\" fill=\"#808080\" type=\"MSShapeGroup\"/><rect x=\"7\" y=\"47\" width=\"3\" height=\"15.787\" fill=\"#8C8C8C\" type=\"MSShapeGroup\"/><rect x=\"26\" y=\"47\" width=\"3\" height=\"15.787\" fill=\"#8C8C8C\" type=\"MSShapeGroup\"/><path d=\"m-0.499 4.525v13.34h3.5v-17.365l-3.5 4.025z\" fill=\"#ccc\" type=\"MSShapeGroup\"/><path d=\"m36.497 4.525-3.5-4.025v17.365h3.5v-13.34z\" fill=\"#999\" type=\"MSShapeGroup\"/><path d=\"m11.501 56.675-2.24 1h-2.52l-2.24-1v-12.18h7v12.18z\" fill=\"#8C8C8C\" type=\"MSShapeGroup\"/><path d=\"m31.497 56.675-2.24 1h-2.518l-2.24-1v-12.18h6.998v12.18z\" fill=\"#8C8C8C\" type=\"MSShapeGroup\"/><rect id=\"Rectangle\" x=\"24\" y=\"32\" width=\"12\" height=\"22.222\" fill=\"#141414\" type=\"MSShapeGroup\"/><rect y=\"32\" width=\"12\" height=\"22.222\" fill=\"#333\" type=\"MSShapeGroup\"/><path d=\"m-0.499 39.659v7.176c2.83 0 5.125-1.604 5.125-3.588 0-1.981-2.295-3.588-5.125-3.588z\" fill=\"#262626\" type=\"MSShapeGroup\"/><path d=\"m36.497 39.659c-2.83 0-5.125 1.604-5.125 3.588 0 1.979 2.295 3.588 5.125 3.588v-7.176z\" fill=\"#000\" type=\"MSShapeGroup\"/><path d=\"m-0.499 31.522v9.888c2.83 0 5.125 1.606 5.125 3.588s-2.295 3.588-5.125 3.588v5.158h36.998v-22.222h-36.998zm36.996 17.063c-2.83 0-5.125-1.604-5.125-3.588 0-1.979 2.295-3.588 5.125-3.588v7.176z\" fill=\"#1A1A1A\" type=\"MSShapeGroup\"/><rect y=\"27\" width=\"36.998\" height=\"4.649\" fill=\"#000\" type=\"MSShapeGroup\"/><rect y=\"21\" width=\"36.998\" height=\"5.748\" fill=\"#333\" type=\"MSShapeGroup\"/><rect x=\"3\" y=\"1\" width=\"29.998\" height=\"4.25\" fill=\"#B2B2B2\" type=\"MSShapeGroup\"/><path d=\"m32.997 3.759h-29.996l-3.5 4.024v13.34h36.996v-13.34l-3.5-4.024zm-14.998 13.527c-4.35 0-7.873-2.468-7.873-5.513 0-3.044 3.523-5.511 7.873-5.511 4.354 0 7.875 2.468 7.875 5.511-2e-3 3.044-3.523 5.513-7.875 5.513z\" fill=\"#8C8C8C\" type=\"MSShapeGroup\"/><g transform=\"translate(5 25)\"><g fill=\"#fff\" font-family=\"Droid Sans\" font-size=\"12\" font-style=\"italic\" type=\"MSTextLayer\"><text y=\"11\">MBR</text><text y=\"25\">745</text></g></g></g></g></g></svg>",
+      "w": 38,
+      "h": 73,
+      "pins": {
+        "Cathode": [
+          9,
+          62.32
+        ],
+        "Anode": [
+          29,
+          62.32
+        ]
+      },
+      "legs": [
+        "Cathode",
+        "Anode"
+      ]
+    },
+    "schematic": {
+      "svg": "<svg enable-background=\"new 0 0 8.176 21.6\" version=\"1.1\" viewBox=\"0 0 8.176 21.6\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><desc><referenceFile>MBR745_schottky_schematic.svg</referenceFile></desc><g id=\"schematic\"><g stroke=\"#000\" stroke-linecap=\"round\" stroke-width=\".7\"><polyline points=\"6.945 16.297 7.746 16.297 7.746 14.396 4.145 14.396\" fill=\"none\"/><polyline points=\"4.145 14.396 0.547 14.396 0.547 12.5 1.347 12.5\" fill=\"none\"/><polygon points=\"4.145 14.396 0.546 7.197 4.145 7.197 7.746 7.197\" fill=\"#fff\"/></g><g fill=\"none\"><line id=\"connector0pin\" x1=\"4.145\" x2=\"4.145\" y1=\"21.246\" y2=\"14.396\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".7\"/><rect x=\"3.803\" y=\"20.465\" width=\".688\" height=\"1.135\"/></g><line id=\"connector1pin\" x1=\"4.145\" x2=\"4.145\" y1=\".347\" y2=\"7.197\" fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".7\"/></g></svg>",
+      "w": 10.9,
+      "h": 28.8,
+      "pins": {
+        "Cathode": [
+          5.53,
+          28.33
+        ],
+        "Anode": [
+          5.53,
+          0.46
+        ]
+      }
+    }
+  },
+  "properties": {
+    "variant": "Skotty Doide",
+    "package": "TO220 [THT]",
+    "part number": "MBR745"
+  },
+  "icon": "<svg version=\"1.1\" viewBox=\"0 0 38 73\" xmlns=\"http://www.w3.org/2000/svg\"><desc><referenceFile>MBR745_Schottky_breadboard.svg</referenceFile></desc><title>MBR745_Schottky_breadboard</title><description>Created with Sketch (http://www.bohemiancoding.com/sketch)</description><g fill=\"none\" fill-rule=\"evenodd\" id=\"icon\"><g transform=\"translate(1)\"><g id=\"breadboard\" type=\"MSLayerGroup\"><rect x=\"7\" y=\"60\" width=\"3\" height=\"1\" type=\"MSShapeGroup\"/><rect x=\"16\" y=\"60\" width=\"3\" height=\"1\" type=\"MSShapeGroup\"/><rect x=\"26\" y=\"60\" width=\"3\" height=\"1\" type=\"MSShapeGroup\"/><path d=\"m8.001 62.317v10\" stroke=\"#8C8C8C\" stroke-width=\"3\" type=\"MSShapeGroup\"/><path d=\"m27.997 62.317v10\" stroke=\"#8C8C8C\" stroke-width=\"3\" type=\"MSShapeGroup\"/><path d=\"m32.997 0.5h-14.998v2.502c4.354 0 7.875 2.47 7.875 5.516-2e-3 3.044-3.523 5.513-7.875 5.513v8.087h14.998v-21.618z\" fill=\"#BFBCBC\" type=\"MSShapeGroup\"/><path d=\"m10.126 8.514c0-3.047 3.523-5.514 7.873-5.514v-2.501h-14.998v21.611h14.998v-8.086c-4.35 2e-3 -7.873-2.465-7.873-5.51z\" fill=\"#808080\" type=\"MSShapeGroup\"/><rect x=\"7\" y=\"47\" width=\"3\" height=\"15.787\" fill=\"#8C8C8C\" type=\"MSShapeGroup\"/><rect x=\"26\" y=\"47\" width=\"3\" height=\"15.787\" fill=\"#8C8C8C\" type=\"MSShapeGroup\"/><path d=\"m-0.499 4.525v13.34h3.5v-17.365l-3.5 4.025z\" fill=\"#ccc\" type=\"MSShapeGroup\"/><path d=\"m36.497 4.525-3.5-4.025v17.365h3.5v-13.34z\" fill=\"#999\" type=\"MSShapeGroup\"/><path d=\"m11.501 56.675-2.24 1h-2.52l-2.24-1v-12.18h7v12.18z\" fill=\"#8C8C8C\" type=\"MSShapeGroup\"/><path d=\"m31.497 56.675-2.24 1h-2.518l-2.24-1v-12.18h6.998v12.18z\" fill=\"#8C8C8C\" type=\"MSShapeGroup\"/><rect x=\"24\" y=\"32\" width=\"12\" height=\"22.222\" fill=\"#141414\" type=\"MSShapeGroup\"/><rect y=\"32\" width=\"12\" height=\"22.222\" fill=\"#333\" type=\"MSShapeGroup\"/><path d=\"m-0.499 39.659v7.176c2.83 0 5.125-1.604 5.125-3.588 0-1.981-2.295-3.588-5.125-3.588z\" fill=\"#262626\" type=\"MSShapeGroup\"/><path d=\"m36.497 39.659c-2.83 0-5.125 1.604-5.125 3.588 0 1.979 2.295 3.588 5.125 3.588v-7.176z\" fill=\"#000\" type=\"MSShapeGroup\"/><path d=\"m-0.499 31.522v9.888c2.83 0 5.125 1.606 5.125 3.588s-2.295 3.588-5.125 3.588v5.158h36.998v-22.222h-36.998zm36.996 17.063c-2.83 0-5.125-1.604-5.125-3.588 0-1.979 2.295-3.588 5.125-3.588v7.176z\" fill=\"#1A1A1A\" type=\"MSShapeGroup\"/><rect y=\"27\" width=\"36.998\" height=\"4.649\" fill=\"#000\" type=\"MSShapeGroup\"/><rect y=\"21\" width=\"36.998\" height=\"5.748\" fill=\"#333\" type=\"MSShapeGroup\"/><rect x=\"3\" y=\"1\" width=\"29.998\" height=\"4.25\" fill=\"#B2B2B2\" type=\"MSShapeGroup\"/><path d=\"m32.997 3.759h-29.996l-3.5 4.024v13.34h36.996v-13.34l-3.5-4.024zm-14.998 13.527c-4.35 0-7.873-2.468-7.873-5.513 0-3.044 3.523-5.511 7.873-5.511 4.354 0 7.875 2.468 7.875 5.511-2e-3 3.044-3.523 5.513-7.875 5.513z\" fill=\"#8C8C8C\" type=\"MSShapeGroup\"/><g transform=\"translate(5 25)\"><g fill=\"#fff\" font-family=\"Droid Sans\" font-size=\"12\" font-style=\"italic\" type=\"MSTextLayer\"><text y=\"11\">MBR</text><text y=\"25\">745</text></g></g></g></g></g></svg>",
+  "order": 58
+}

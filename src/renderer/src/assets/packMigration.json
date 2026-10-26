@@ -1,0 +1,6256 @@
+{
+  "schema": 2,
+  "version": "1.3.0",
+  "legacyPackIds": [
+    "tinystudio-core"
+  ],
+  "packs": {
+    "sparkfun-analogic": [
+      {
+        "type": "sparkfun-analogic-556",
+        "label": "556",
+        "order": 34
+      },
+      {
+        "type": "sparkfun-analogic-74hc4051-mux",
+        "label": "74HC4051",
+        "order": 4
+      },
+      {
+        "type": "sparkfun-analogic-74hc4052-dip",
+        "label": "74HC4052 (dil16)",
+        "order": 5
+      },
+      {
+        "type": "sparkfun-analogic-74hc4052-so",
+        "label": "74HC4052 (so16)",
+        "order": 6
+      },
+      {
+        "type": "sparkfun-analogic-74vhc4052-analog-mux",
+        "label": "74VHC4052",
+        "order": 8
+      },
+      {
+        "type": "sparkfun-analogic-acs712",
+        "label": "ACS712",
+        "order": 15
+      },
+      {
+        "type": "sparkfun-analogic-ad5330",
+        "label": "AD5330",
+        "order": 16
+      },
+      {
+        "type": "sparkfun-analogic-ad725",
+        "label": "AD725",
+        "order": 37
+      },
+      {
+        "type": "sparkfun-analogic-ad7302-smd",
+        "label": "AD7302",
+        "order": 17
+      },
+      {
+        "type": "sparkfun-analogic-ad7745",
+        "label": "AD7745",
+        "order": 13
+      },
+      {
+        "type": "sparkfun-analogic-ad7781-cruz",
+        "label": "AD7781 (tssop-16)",
+        "order": 1
+      },
+      {
+        "type": "sparkfun-analogic-ad7781-crz",
+        "label": "AD7781 (soic-14)",
+        "order": 0
+      },
+      {
+        "type": "sparkfun-analogic-ad8397-epad-epad",
+        "label": "AD8397",
+        "order": 24
+      },
+      {
+        "type": "sparkfun-analogic-ad9835",
+        "label": "AD9835",
+        "order": 40
+      },
+      {
+        "type": "sparkfun-analogic-as3400",
+        "label": "AS3400",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-analogic-dac-mcp4725-sot",
+        "label": "MCP4725",
+        "order": 18
+      },
+      {
+        "type": "sparkfun-analogic-ht8950",
+        "label": "HT8950",
+        "order": 39
+      },
+      {
+        "type": "sparkfun-analogic-lm358",
+        "label": "LM358",
+        "order": 27
+      },
+      {
+        "type": "sparkfun-analogic-lm386",
+        "label": "LM386",
+        "order": 3
+      },
+      {
+        "type": "sparkfun-analogic-lm393",
+        "label": "LM393",
+        "order": 14
+      },
+      {
+        "type": "sparkfun-analogic-lmv324",
+        "label": "LMV324",
+        "order": 28
+      },
+      {
+        "type": "sparkfun-analogic-lmv358",
+        "label": "LMV358",
+        "order": 29
+      },
+      {
+        "type": "sparkfun-analogic-lt1014",
+        "label": "LT1014",
+        "order": 30
+      },
+      {
+        "type": "sparkfun-analogic-ltc6244",
+        "label": "LTC6244",
+        "order": 31
+      },
+      {
+        "type": "sparkfun-analogic-max323",
+        "label": "MAX323",
+        "order": 22
+      },
+      {
+        "type": "sparkfun-analogic-max6675",
+        "label": "MAX6675",
+        "order": 33
+      },
+      {
+        "type": "sparkfun-analogic-mcp41xxx",
+        "label": "MCP41xxx",
+        "order": 19
+      },
+      {
+        "type": "sparkfun-analogic-mcp42xxx",
+        "label": "MCP42xxx",
+        "order": 20
+      },
+      {
+        "type": "sparkfun-analogic-msgeq7-soic",
+        "label": "MSGEQ7",
+        "order": 23
+      },
+      {
+        "type": "sparkfun-analogic-mux-74hc4067-smd",
+        "label": "74HC4067",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-analogic-mux-ts3a5017",
+        "label": "TS3A5017",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-analogic-ne555-d",
+        "label": "General purpose bipolar Timer (d)",
+        "order": 35
+      },
+      {
+        "type": "sparkfun-analogic-ne555-p",
+        "label": "General purpose bipolar Timer (p)",
+        "order": 36
+      },
+      {
+        "type": "sparkfun-analogic-opa344",
+        "label": "OPA344",
+        "order": 32
+      },
+      {
+        "type": "sparkfun-analogic-opamp-dual",
+        "label": "Dual Op-Amp (dip08)",
+        "order": 25
+      },
+      {
+        "type": "sparkfun-analogic-opamp-dual-u",
+        "label": "Dual Op-Amp (so08)",
+        "order": 26
+      },
+      {
+        "type": "sparkfun-analogic-pcm1803-smd",
+        "label": "PCM1803",
+        "order": 2
+      },
+      {
+        "type": "sparkfun-analogic-sv74lv4052apwr",
+        "label": "SV74LV4052APWR (tssop16)",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-analogic-sv74lv4052apwr-2",
+        "label": "SV74LV4052APWR (tvsop16)",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-analogic-tvp5150-ntsc-decoder",
+        "label": "TVP5150",
+        "order": 38
+      },
+      {
+        "type": "sparkfun-analogic-x9015-digi-pot-s",
+        "label": "X9015",
+        "order": 21
+      }
+    ],
+    "sparkfun-boards": [
+      {
+        "type": "sparkfun-boards-wiz811mj",
+        "label": "WIZ811MJ",
+        "order": 3
+      },
+      {
+        "type": "sparkfun-boards-xport",
+        "label": "XPORT",
+        "order": 0
+      },
+      {
+        "type": "sparkfun-boards-xport-direct",
+        "label": "XPORT-DIRECT (xport direct module)",
+        "order": 2
+      },
+      {
+        "type": "sparkfun-boards-xport-direct-smd",
+        "label": "XPORT-DIRECT (xport direct module-smd)",
+        "order": 1
+      }
+    ],
+    "sparkfun-connectors": [
+      {
+        "type": "sparkfun-connectors-50-pin-centronics-f-female",
+        "label": "50-PIN-CENTRONICS-F",
+        "order": 2
+      },
+      {
+        "type": "sparkfun-connectors-50-pin-centronics-m-male",
+        "label": "50-PIN-CENTRONICS-M",
+        "order": 3
+      },
+      {
+        "type": "sparkfun-connectors-atx24-rh",
+        "label": "ATX24 Pin Power Supply Connector",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-connectors-audio-jack-2-5mm",
+        "label": "2.5mm Audio Jack (stereojack2.5mm stereojack2.5mm)",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-connectors-audio-jack-pth",
+        "label": "3.5mm Audio Jack (audio-jack)",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-connectors-audio-jack-smd",
+        "label": "2.5mm Audio Jack (stereojack2.5mm smd)",
+        "order": 8
+      },
+      {
+        "type": "sparkfun-connectors-audio-jack-smd2",
+        "label": "3.5mm Audio Jack (audio-jack-3.5mm-smd)",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-connectors-audio-jack-special-pogo-pins",
+        "label": "2.5mm Audio Jack (stereojack2.5mm specia pogopins)",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-connectors-audio-jack2-pth",
+        "label": "AUDIO-JACK2 (audio-jack)",
+        "order": 14
+      },
+      {
+        "type": "sparkfun-connectors-audio-jack2-smd",
+        "label": "AUDIO-JACK2 (audio-jack-3.5mm-smd)",
+        "order": 13
+      },
+      {
+        "type": "sparkfun-connectors-avr-mini-prog-smd",
+        "label": "AVR_MINI_PROG",
+        "order": 1
+      },
+      {
+        "type": "sparkfun-connectors-avr-spi-prg-6-2x3-lock",
+        "label": "AVR ISP 6 Pin",
+        "order": 44,
+        "variantOf": "sparkfun-connectors-avr-spi-prg-6-ns"
+      },
+      {
+        "type": "sparkfun-connectors-avr-spi-prg-6-ns",
+        "label": "AVR ISP 6 Pin",
+        "order": 45,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-avr-spi-prg-6-pth",
+            "package": "2x3"
+          },
+          {
+            "type": "sparkfun-connectors-avr-spi-prg-6-2x3-lock",
+            "package": "2x3 lock"
+          },
+          {
+            "type": "sparkfun-connectors-avr-spi-prg-6-offset-pads",
+            "package": "2x3 offset"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-avr-spi-prg-6-offset-pads",
+        "label": "AVR ISP 6 Pin",
+        "order": 46,
+        "variantOf": "sparkfun-connectors-avr-spi-prg-6-ns"
+      },
+      {
+        "type": "sparkfun-connectors-avr-spi-prg-6-pth",
+        "label": "AVR ISP 6 Pin",
+        "order": 47,
+        "variantOf": "sparkfun-connectors-avr-spi-prg-6-ns"
+      },
+      {
+        "type": "sparkfun-connectors-avr-spi-prog",
+        "label": "AVR 10-pin ICSP Header (prog)",
+        "order": 40
+      },
+      {
+        "type": "sparkfun-connectors-avr-spi-prog2-pth",
+        "label": "AVR 10-pin ICSP Header (prog2-pth)",
+        "order": 41,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-avr-spi-prog2-smd",
+            "package": "2x5-shrouded smd"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-avr-spi-prog2-smd",
+        "label": "AVR 10-pin ICSP Header",
+        "order": 39,
+        "variantOf": "sparkfun-connectors-avr-spi-prog2-pth"
+      },
+      {
+        "type": "sparkfun-connectors-banana-conn",
+        "label": "BANANA_CONN",
+        "order": 15
+      },
+      {
+        "type": "sparkfun-connectors-bc9vpc",
+        "label": "BC9VPC",
+        "order": 4
+      },
+      {
+        "type": "sparkfun-connectors-bnc-pth",
+        "label": "BNC",
+        "order": 16
+      },
+      {
+        "type": "sparkfun-connectors-computer-peripheral-power-ra",
+        "label": "COMPUTER-PERIPHERAL-POWER (computer-peripheral-power-ra)",
+        "order": 57
+      },
+      {
+        "type": "sparkfun-connectors-computer-peripheral-power-vertical",
+        "label": "COMPUTER-PERIPHERAL-POWER (computer-peripheral-power)",
+        "order": 58
+      },
+      {
+        "type": "sparkfun-connectors-db25-d",
+        "label": "DB25 (d)",
+        "order": 20
+      },
+      {
+        "type": "sparkfun-connectors-db25-h",
+        "label": "DB25 (h)",
+        "order": 21,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-db25-v",
+            "package": "db25"
+          },
+          {
+            "type": "sparkfun-connectors-db25-vb",
+            "package": "db25"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-db25-hp",
+        "label": "DB25 (hp)",
+        "order": 22,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-db25-vp",
+            "package": "db25"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-db25-v",
+        "label": "DB25",
+        "order": 17,
+        "variantOf": "sparkfun-connectors-db25-h"
+      },
+      {
+        "type": "sparkfun-connectors-db25-vb",
+        "label": "DB25",
+        "order": 18,
+        "variantOf": "sparkfun-connectors-db25-h"
+      },
+      {
+        "type": "sparkfun-connectors-db25-vp",
+        "label": "DB25",
+        "order": 19,
+        "variantOf": "sparkfun-connectors-db25-hp"
+      },
+      {
+        "type": "sparkfun-connectors-db9-female",
+        "label": "DB9 Connector (female)",
+        "order": 23
+      },
+      {
+        "type": "sparkfun-connectors-db9-male",
+        "label": "DB9 Connector (male)",
+        "order": 24
+      },
+      {
+        "type": "sparkfun-connectors-din7",
+        "label": "DIN7",
+        "order": 55
+      },
+      {
+        "type": "sparkfun-connectors-ds-touch-connector",
+        "label": "DS_TOUCH_CONNECTOR",
+        "order": 123
+      },
+      {
+        "type": "sparkfun-connectors-eb-85a-smd",
+        "label": "EB-85A Connector",
+        "order": 34
+      },
+      {
+        "type": "sparkfun-connectors-em406",
+        "label": "EM406 GPS Connector",
+        "order": 35
+      },
+      {
+        "type": "sparkfun-connectors-em408-con",
+        "label": "EM408_CON",
+        "order": 36
+      },
+      {
+        "type": "sparkfun-connectors-f25-d",
+        "label": "F25 (d)",
+        "order": 29,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-f25-h",
+            "package": "db25"
+          },
+          {
+            "type": "sparkfun-connectors-f25-v",
+            "package": "db25"
+          },
+          {
+            "type": "sparkfun-connectors-f25-vb",
+            "package": "db25"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-f25-h",
+        "label": "F25",
+        "order": 25,
+        "variantOf": "sparkfun-connectors-f25-d"
+      },
+      {
+        "type": "sparkfun-connectors-f25-hp",
+        "label": "F25 (hp)",
+        "order": 30,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-f25-vp",
+            "package": "db25"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-f25-v",
+        "label": "F25",
+        "order": 26,
+        "variantOf": "sparkfun-connectors-f25-d"
+      },
+      {
+        "type": "sparkfun-connectors-f25-vb",
+        "label": "F25",
+        "order": 27,
+        "variantOf": "sparkfun-connectors-f25-d"
+      },
+      {
+        "type": "sparkfun-connectors-f25-vp",
+        "label": "F25",
+        "order": 28,
+        "variantOf": "sparkfun-connectors-f25-hp"
+      },
+      {
+        "type": "sparkfun-connectors-ftdi-basic-pth",
+        "label": "FTDI_BASIC",
+        "order": 33
+      },
+      {
+        "type": "sparkfun-connectors-ipod-connector-female",
+        "label": "iPod Female Connector",
+        "order": 42
+      },
+      {
+        "type": "sparkfun-connectors-ipod-connector-male",
+        "label": "iPod Male Connector",
+        "order": 43
+      },
+      {
+        "type": "sparkfun-connectors-kent-lcd-conn",
+        "label": "KENT_LCD_CONN",
+        "order": 124
+      },
+      {
+        "type": "sparkfun-connectors-little-bits-conn",
+        "label": "LITTLE_BITS_CONN",
+        "order": 48
+      },
+      {
+        "type": "sparkfun-connectors-littlebits-female",
+        "label": "LITTLEBITS_FEMALE",
+        "order": 49
+      },
+      {
+        "type": "sparkfun-connectors-littlebits-male",
+        "label": "LITTLEBITS_MALE",
+        "order": 50
+      },
+      {
+        "type": "sparkfun-connectors-m01-smd",
+        "label": "Header 1 (luxeon-pad)",
+        "order": 63
+      },
+      {
+        "type": "sparkfun-connectors-m01-smd-4-5x1-5",
+        "label": "Header 1 (pad-1.5x4.5)",
+        "order": 64
+      },
+      {
+        "type": "sparkfun-connectors-m01-smtra-256-8-6",
+        "label": "Header 1 (smtra-256-8-6)",
+        "order": 65
+      },
+      {
+        "type": "sparkfun-connectors-m01-smtso-256-et",
+        "label": "Header 1 (smtso-256-et)",
+        "order": 66
+      },
+      {
+        "type": "sparkfun-connectors-m01-snap-female",
+        "label": "Header 1 (snap-female)",
+        "order": 67
+      },
+      {
+        "type": "sparkfun-connectors-m01-snap-male",
+        "label": "Header 1 (snap-male)",
+        "order": 68
+      },
+      {
+        "type": "sparkfun-connectors-m02-3-5mm-lock",
+        "label": "Header 2 (screwterminal-3.5mm-2 lock)",
+        "order": 77
+      },
+      {
+        "type": "sparkfun-connectors-m02-4ucon-15767",
+        "label": "Header 2 (jst-2-smd-vert)",
+        "order": 73
+      },
+      {
+        "type": "sparkfun-connectors-m02-jst-2-pth-no-silk",
+        "label": "Header 2",
+        "order": 70,
+        "variantOf": "sparkfun-connectors-m02-jst-pth-2"
+      },
+      {
+        "type": "sparkfun-connectors-m02-jst-2mm-smt",
+        "label": "Header 2 (jst-2-smd)",
+        "order": 74
+      },
+      {
+        "type": "sparkfun-connectors-m02-jst-pth-2",
+        "label": "Header 2 (jst-2-pth)",
+        "order": 72,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-m02-jst-pth-2-kit",
+            "package": "jst-2-pth-kit"
+          },
+          {
+            "type": "sparkfun-connectors-m02-jst-2-pth-no-silk",
+            "package": "jst-2-pth-ns"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-m02-jst-pth-2-kit",
+        "label": "Header 2",
+        "order": 71,
+        "variantOf": "sparkfun-connectors-m02-jst-pth-2"
+      },
+      {
+        "type": "sparkfun-connectors-m02-polar-lock",
+        "label": "Header 2 (molex-1x2 lock)",
+        "order": 75
+      },
+      {
+        "type": "sparkfun-connectors-m02-rocker",
+        "label": "Header 2 (r sw th)",
+        "order": 76
+      },
+      {
+        "type": "sparkfun-connectors-m02-spring-2-54-ra",
+        "label": "Header 2 (springterminal-2.54mm-2)",
+        "order": 78
+      },
+      {
+        "type": "sparkfun-connectors-m03",
+        "label": "Header 3 (jst-3-smd)",
+        "order": 81
+      },
+      {
+        "type": "sparkfun-connectors-m03-jst-pth",
+        "label": "Header 3 (jst-3-pth)",
+        "order": 80
+      },
+      {
+        "type": "sparkfun-connectors-m03-polar-lock",
+        "label": "Header 3 (molex-1x3 lock)",
+        "order": 82
+      },
+      {
+        "type": "sparkfun-connectors-m03-screw-lock",
+        "label": "Header 3 (screwterminal-3.5mm-3 lock.007s)",
+        "order": 83
+      },
+      {
+        "type": "sparkfun-connectors-m03-smd",
+        "label": "Header 3 (1x03-1mm-ra)",
+        "order": 79
+      },
+      {
+        "type": "sparkfun-connectors-m04-jst-pth",
+        "label": "Header 4 (jst-4-pth)",
+        "order": 86
+      },
+      {
+        "type": "sparkfun-connectors-m04-polar-lock",
+        "label": "Header 4 (molex-1x4 lock)",
+        "order": 87
+      },
+      {
+        "type": "sparkfun-connectors-m04-screw-lock",
+        "label": "Header 4 (screwterminal-3.5mm-4 lock)",
+        "order": 88
+      },
+      {
+        "type": "sparkfun-connectors-m04-smd",
+        "label": "Header 4 (1x04-smd)",
+        "order": 85
+      },
+      {
+        "type": "sparkfun-connectors-m04-smd2",
+        "label": "Header 4 (1x04-1mm-ra)",
+        "order": 84
+      },
+      {
+        "type": "sparkfun-connectors-m05-smd",
+        "label": "Header 5 (1x05-1mm)",
+        "order": 90
+      },
+      {
+        "type": "sparkfun-connectors-m05-smd2",
+        "label": "Header 5 (1x05-1mm-ra)",
+        "order": 89
+      },
+      {
+        "type": "sparkfun-connectors-m05x2-pth",
+        "label": "Header 5x2 (avr icsp)",
+        "order": 94,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-m05x2-shd-smd",
+            "package": "2x5-shrouded smd"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-m05x2-ra",
+        "label": "Header 5x2 (2x5-ra)",
+        "order": 92
+      },
+      {
+        "type": "sparkfun-connectors-m05x2-raf",
+        "label": "Header 5x2 (2x5-raf)",
+        "order": 93
+      },
+      {
+        "type": "sparkfun-connectors-m05x2-shd-smd",
+        "label": "Header 5x2",
+        "order": 91,
+        "variantOf": "sparkfun-connectors-m05x2-pth"
+      },
+      {
+        "type": "sparkfun-connectors-m06-1x06-smd-edge-female",
+        "label": "Header 6 (1x06-smd edge)",
+        "order": 97
+      },
+      {
+        "type": "sparkfun-connectors-m06-em406",
+        "label": "Header 6 (em406)",
+        "order": 101
+      },
+      {
+        "type": "sparkfun-connectors-m06-polar-lock",
+        "label": "Header 6 (molex-1x6 lock)",
+        "order": 102
+      },
+      {
+        "type": "sparkfun-connectors-m06-ra",
+        "label": "Header 6 (molex-1x6-ra)",
+        "order": 104
+      },
+      {
+        "type": "sparkfun-connectors-m06-ra-lock",
+        "label": "Header 6 (molex-1x6-ra lock)",
+        "order": 103
+      },
+      {
+        "type": "sparkfun-connectors-m06-smd",
+        "label": "Header 6 (1x06-smd)",
+        "order": 100
+      },
+      {
+        "type": "sparkfun-connectors-m06-smd-female-v2",
+        "label": "Header 6 (1x06-smd-female-v2)",
+        "order": 98
+      },
+      {
+        "type": "sparkfun-connectors-m06-smd-straight",
+        "label": "Header 6 (1x06 smd straight)",
+        "order": 96
+      },
+      {
+        "type": "sparkfun-connectors-m06-smd-straight-combo",
+        "label": "Header 6 (1x06 smd straight combo)",
+        "order": 95
+      },
+      {
+        "type": "sparkfun-connectors-m06-smdf",
+        "label": "Header 6 (1x06-smd-female)",
+        "order": 99
+      },
+      {
+        "type": "sparkfun-connectors-m08-bm08b-srss-tb",
+        "label": "Header 8 (bm08b-srss-tb)",
+        "order": 106
+      },
+      {
+        "type": "sparkfun-connectors-m08-smd-combo",
+        "label": "Header 8 (1x08 smd combined)",
+        "order": 105
+      },
+      {
+        "type": "sparkfun-connectors-m10x2-2x10-lock",
+        "label": "M10X2 (2x10 lock)",
+        "order": 108
+      },
+      {
+        "type": "sparkfun-connectors-m10x2-special",
+        "label": "M10X2 (2x10 lock special)",
+        "order": 107
+      },
+      {
+        "type": "sparkfun-connectors-m11-smd",
+        "label": "Header 11",
+        "order": 69
+      },
+      {
+        "type": "sparkfun-connectors-magjack",
+        "label": "MAGJACK",
+        "order": 120
+      },
+      {
+        "type": "sparkfun-connectors-magjack-2",
+        "label": "MAGJACK-2",
+        "order": 121
+      },
+      {
+        "type": "sparkfun-connectors-magjack-poe",
+        "label": "MAGJACK-POE",
+        "order": 122
+      },
+      {
+        "type": "sparkfun-connectors-midi-conn-female",
+        "label": "MIDI_CONN_FEMALE",
+        "order": 31
+      },
+      {
+        "type": "sparkfun-connectors-midi-conn-female-support",
+        "label": "MIDI_CONN_FEMALE_SUPPORT",
+        "order": 32
+      },
+      {
+        "type": "sparkfun-connectors-mini-din6-pth",
+        "label": "mini DIN 6 Connector",
+        "order": 54
+      },
+      {
+        "type": "sparkfun-connectors-mma-accel-connector",
+        "label": "MMA_ACCEL_CONNECTOR",
+        "order": 56
+      },
+      {
+        "type": "sparkfun-connectors-obdii",
+        "label": "OBDII",
+        "order": 59
+      },
+      {
+        "type": "sparkfun-connectors-pic-icsp-mini",
+        "label": "PIC-ICSP-Mini",
+        "order": 62
+      },
+      {
+        "type": "sparkfun-connectors-pic-icsp-polar-lock",
+        "label": "PIC-ICSP (molex-1x6 lock)",
+        "order": 60
+      },
+      {
+        "type": "sparkfun-connectors-pic-icsp-pth",
+        "label": "PIC-ICSP (molex-1x6)",
+        "order": 61
+      },
+      {
+        "type": "sparkfun-connectors-power-jack-combo",
+        "label": "Power Jack",
+        "order": 109,
+        "variantOf": "sparkfun-connectors-power-jack-pth"
+      },
+      {
+        "type": "sparkfun-connectors-power-jack-pth",
+        "label": "Power Jack (power jack pth)",
+        "order": 111,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-power-jack-combo",
+            "package": "power jack combo"
+          },
+          {
+            "type": "sparkfun-connectors-power-jack-pth-lock",
+            "package": "power jack pth lock"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-power-jack-pth-lock",
+        "label": "Power Jack",
+        "order": 110,
+        "variantOf": "sparkfun-connectors-power-jack-pth"
+      },
+      {
+        "type": "sparkfun-connectors-power-jack-slt",
+        "label": "Power Jack (power jack slot)",
+        "order": 112
+      },
+      {
+        "type": "sparkfun-connectors-power-jack-smd",
+        "label": "Power Jack (power jack smd)",
+        "order": 113
+      },
+      {
+        "type": "sparkfun-connectors-psp-connector",
+        "label": "PSP_CONNECTOR",
+        "order": 125
+      },
+      {
+        "type": "sparkfun-connectors-psp-touch-connector",
+        "label": "PSP_TOUCH_CONNECTOR",
+        "order": 126
+      },
+      {
+        "type": "sparkfun-connectors-rca",
+        "label": "RCA (rca)",
+        "order": 115
+      },
+      {
+        "type": "sparkfun-connectors-rca-lock",
+        "label": "RCA (rca lock)",
+        "order": 114
+      },
+      {
+        "type": "sparkfun-connectors-rj11-6-pth-fix",
+        "label": "RJ11 Jack",
+        "order": 116
+      },
+      {
+        "type": "sparkfun-connectors-rj45-8-pth-fix",
+        "label": "RJ45 Jack",
+        "order": 117,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-rj45-8-pth-fix2",
+            "package": "rj45-8"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-rj45-8-pth-fix2",
+        "label": "RJ45 Jack",
+        "order": 118,
+        "variantOf": "sparkfun-connectors-rj45-8-pth-fix"
+      },
+      {
+        "type": "sparkfun-connectors-rj9-pth",
+        "label": "RJ9",
+        "order": 119
+      },
+      {
+        "type": "sparkfun-connectors-screenkeymatingconnector",
+        "label": "SCREENKEYMATINGCONNECTOR",
+        "order": 127
+      },
+      {
+        "type": "sparkfun-connectors-sd-card-socket-4ucon",
+        "label": "SD_CARD_SOCKET",
+        "order": 129
+      },
+      {
+        "type": "sparkfun-connectors-simholder",
+        "label": "SIM Socket",
+        "order": 51
+      },
+      {
+        "type": "sparkfun-connectors-simholder2",
+        "label": "SIMHOLDER2",
+        "order": 130
+      },
+      {
+        "type": "sparkfun-connectors-simholder3",
+        "label": "SIMHOLDER3",
+        "order": 131
+      },
+      {
+        "type": "sparkfun-connectors-sma-edge",
+        "label": "SMA Antenna Connector",
+        "order": 5
+      },
+      {
+        "type": "sparkfun-connectors-smartcard-smd",
+        "label": "SMARTCARD",
+        "order": 132
+      },
+      {
+        "type": "sparkfun-connectors-starboard-gnd",
+        "label": "STARBOARD_GND (starboard ground)",
+        "order": 136
+      },
+      {
+        "type": "sparkfun-connectors-starboard-gnd-small",
+        "label": "STARBOARD_GND (starboard ground small)",
+        "order": 133
+      },
+      {
+        "type": "sparkfun-connectors-starboard-gnd-small2",
+        "label": "STARBOARD_GND (starboard ground small2)",
+        "order": 134
+      },
+      {
+        "type": "sparkfun-connectors-starboard-gnd-wide",
+        "label": "STARBOARD_GND (starboard ground wide)",
+        "order": 135
+      },
+      {
+        "type": "sparkfun-connectors-starboard-pwr-tall",
+        "label": "STARBOARD_PWR (starboard pwr)",
+        "order": 138
+      },
+      {
+        "type": "sparkfun-connectors-starboard-pwr-wide",
+        "label": "STARBOARD_PWR (starboard pwr wide)",
+        "order": 137
+      },
+      {
+        "type": "sparkfun-connectors-touch-screen",
+        "label": "TOUCH-SCREEN",
+        "order": 128
+      },
+      {
+        "type": "sparkfun-connectors-u-fl",
+        "label": "U.FL",
+        "order": 6
+      },
+      {
+        "type": "sparkfun-connectors-usb",
+        "label": "USB Connectors (usb-a-s-silk-female)",
+        "order": 147,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-usb-a-s",
+            "package": "usb-a-s"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-usb-a-h",
+        "label": "USB Connectors (usb-a-h)",
+        "order": 143
+      },
+      {
+        "type": "sparkfun-connectors-usb-a-s",
+        "label": "USB Connectors",
+        "order": 140,
+        "variantOf": "sparkfun-connectors-usb"
+      },
+      {
+        "type": "sparkfun-connectors-usb-a-smd",
+        "label": "USB Connectors (usb-a-s-nosilk-female)",
+        "order": 145
+      },
+      {
+        "type": "sparkfun-connectors-usb-ab",
+        "label": "USB_AB",
+        "order": 155
+      },
+      {
+        "type": "sparkfun-connectors-usb-b-s",
+        "label": "USB Connectors (usb-b-smt)",
+        "order": 149
+      },
+      {
+        "type": "sparkfun-connectors-usb-jst-2mm-smt",
+        "label": "USB Connectors (s4b-ph)",
+        "order": 142
+      },
+      {
+        "type": "sparkfun-connectors-usb-mb-h",
+        "label": "USB Connectors (usb-mb-h)",
+        "order": 150
+      },
+      {
+        "type": "sparkfun-connectors-usb-microb",
+        "label": "USB Connectors (usb-microb)",
+        "order": 151
+      },
+      {
+        "type": "sparkfun-connectors-usb-microb-plug",
+        "label": "USB_MICROB_PLUG (micro-b-ra-smt)",
+        "order": 157
+      },
+      {
+        "type": "sparkfun-connectors-usb-microb-plug-pth",
+        "label": "USB_MICROB_PLUG (micro-b-ra-th)",
+        "order": 158
+      },
+      {
+        "type": "sparkfun-connectors-usb-microb-plug-pth2",
+        "label": "USB_MICROB_PLUG (micro-b-th)",
+        "order": 160
+      },
+      {
+        "type": "sparkfun-connectors-usb-microb-plug-smt",
+        "label": "USB_MICROB_PLUG (micro-b-smt)",
+        "order": 159
+      },
+      {
+        "type": "sparkfun-connectors-usb-minib-5pin",
+        "label": "Mini-USB _B_ connector with 5th pin broken out.",
+        "order": 139
+      },
+      {
+        "type": "sparkfun-connectors-usb-old",
+        "label": "USB Connectors (usb-minib-old)",
+        "order": 153
+      },
+      {
+        "type": "sparkfun-connectors-usb-pcb",
+        "label": "USB Connectors (usb-a-pcb)",
+        "order": 144
+      },
+      {
+        "type": "sparkfun-connectors-usb-pth",
+        "label": "USB Connectors (usb-b-pth)",
+        "order": 148,
+        "variants": [
+          {
+            "type": "sparkfun-connectors-usb-pth-vertical",
+            "package": "usb-b-pth-vertical"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-connectors-usb-pth-vertical",
+        "label": "USB Connectors",
+        "order": 141,
+        "variantOf": "sparkfun-connectors-usb-pth"
+      },
+      {
+        "type": "sparkfun-connectors-usb-shield",
+        "label": "USB+SHIELD",
+        "order": 156
+      },
+      {
+        "type": "sparkfun-connectors-usb-smd",
+        "label": "USB Connectors (usb-minib)",
+        "order": 154
+      },
+      {
+        "type": "sparkfun-connectors-usb-smd-ns",
+        "label": "USB Connectors (usb-minib-nostop)",
+        "order": 152
+      },
+      {
+        "type": "sparkfun-connectors-usb-usb-a-s-nosilk",
+        "label": "USB Connectors (usb-a-s-nosilk)",
+        "order": 146
+      },
+      {
+        "type": "sparkfun-connectors-usd-socket-new",
+        "label": "microSD Socket (micro-sd-socket-pp)",
+        "order": 52
+      },
+      {
+        "type": "sparkfun-connectors-usd-socket-usd",
+        "label": "microSD Socket (usd-socket-pp)",
+        "order": 53
+      },
+      {
+        "type": "sparkfun-connectors-watn001002bf",
+        "label": "***Unproven!!!***",
+        "order": 0
+      },
+      {
+        "type": "sparkfun-connectors-xlr3-ncfah2",
+        "label": "XLR3_NCFAH2",
+        "order": 161
+      },
+      {
+        "type": "sparkfun-connectors-zifsocket-28-3-ziffsocket-28-3",
+        "label": "ZIFSOCKET-28-3",
+        "order": 37
+      },
+      {
+        "type": "sparkfun-connectors-zifsocket-40-6-dil40-6-zif-socket",
+        "label": "ZIFSOCKET-40-6",
+        "order": 38
+      },
+      {
+        "type": "sparkfun-connectors-zune-connector-male",
+        "label": "ZUNE_CONNECTOR_MALE",
+        "order": 162
+      }
+    ],
+    "sparkfun-digitalic": [
+      {
+        "type": "sparkfun-digitalic-74-08-se",
+        "label": "74*08",
+        "order": 71
+      },
+      {
+        "type": "sparkfun-digitalic-74-157-fk",
+        "label": "SELECTOR_MULTIPLEXER (lcc20)",
+        "order": 76
+      },
+      {
+        "type": "sparkfun-digitalic-74-157-n",
+        "label": "SELECTOR_MULTIPLEXER (dil16)",
+        "order": 75
+      },
+      {
+        "type": "sparkfun-digitalic-74-157-so",
+        "label": "SELECTOR_MULTIPLEXER (so016)",
+        "order": 77
+      },
+      {
+        "type": "sparkfun-digitalic-74-32-se",
+        "label": "74*32",
+        "order": 72
+      },
+      {
+        "type": "sparkfun-digitalic-74-595",
+        "label": "SHIFT REGISTER (tssop16)",
+        "order": 81
+      },
+      {
+        "type": "sparkfun-digitalic-74-595-d",
+        "label": "SHIFT REGISTER (so16)",
+        "order": 80
+      },
+      {
+        "type": "sparkfun-digitalic-74-595-fk",
+        "label": "SHIFT REGISTER (lcc20)",
+        "order": 79
+      },
+      {
+        "type": "sparkfun-digitalic-74-595-n",
+        "label": "SHIFT REGISTER (dil16)",
+        "order": 78
+      },
+      {
+        "type": "sparkfun-digitalic-74act125d",
+        "label": "74ACT125D",
+        "order": 73
+      },
+      {
+        "type": "sparkfun-digitalic-74ahc1g08",
+        "label": "74AHC1G08",
+        "order": 74
+      },
+      {
+        "type": "sparkfun-digitalic-74hc04-hex-inverter",
+        "label": "74HC04_HEX_INVERTER",
+        "order": 59
+      },
+      {
+        "type": "sparkfun-digitalic-74lvc138ad",
+        "label": "74LVC138AD",
+        "order": 40
+      },
+      {
+        "type": "sparkfun-digitalic-a6282-es",
+        "label": "A6282 (qfn-24 alt2)",
+        "order": 62
+      },
+      {
+        "type": "sparkfun-digitalic-a6282-lp",
+        "label": "A6282 (tssop-24)",
+        "order": 63
+      },
+      {
+        "type": "sparkfun-digitalic-at25fs010",
+        "label": "AT25FS010",
+        "order": 49
+      },
+      {
+        "type": "sparkfun-digitalic-at45db041b",
+        "label": "AT45DB041B (so08)",
+        "order": 50
+      },
+      {
+        "type": "sparkfun-digitalic-at45db041b-wide",
+        "label": "AT45DB041B (so08wide)",
+        "order": 51
+      },
+      {
+        "type": "sparkfun-digitalic-at45db161d",
+        "label": "AT45DB161D",
+        "order": 52
+      },
+      {
+        "type": "sparkfun-digitalic-atmega128-smd",
+        "label": "ATMEGA128",
+        "order": 0
+      },
+      {
+        "type": "sparkfun-digitalic-atmega168",
+        "label": "ATMEGA168 (tqfp)",
+        "order": 2
+      },
+      {
+        "type": "sparkfun-digitalic-atmega168-mlf",
+        "label": "ATMEGA168 (mlf)",
+        "order": 1
+      },
+      {
+        "type": "sparkfun-digitalic-atmega2560-au",
+        "label": "ATMEGA2560",
+        "order": 3
+      },
+      {
+        "type": "sparkfun-digitalic-atmega32u4-qfn",
+        "label": "ATMEGA32U4 (qfn)",
+        "order": 4
+      },
+      {
+        "type": "sparkfun-digitalic-atmega32u4-qfn2",
+        "label": "ATMEGA32U4 (qfn2)",
+        "order": 5
+      },
+      {
+        "type": "sparkfun-digitalic-atmega8u2-au",
+        "label": "ATMEGA8U2",
+        "order": 6
+      },
+      {
+        "type": "sparkfun-digitalic-attiny13-dip",
+        "label": "ATTINY13 (dip)",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-digitalic-attiny13-soic",
+        "label": "ATTINY13 (so)",
+        "order": 8
+      },
+      {
+        "type": "sparkfun-digitalic-attiny24-qfn",
+        "label": "ATTINY24",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-digitalic-attiny45",
+        "label": "ATTINY45 (so)",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-digitalic-attiny45-dip8",
+        "label": "ATTINY45 (dip)",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-digitalic-avr-mega8-ai",
+        "label": "MICROCONTROLLER (tqfp32-08)",
+        "order": 20
+      },
+      {
+        "type": "sparkfun-digitalic-avr-mega8-mi",
+        "label": "MICROCONTROLLER (mlf32)",
+        "order": 19
+      },
+      {
+        "type": "sparkfun-digitalic-avr-mega8-p-kit",
+        "label": "MICROCONTROLLER (dil28-3-simon-kit)",
+        "order": 18,
+        "variants": [
+          {
+            "type": "sparkfun-digitalic-avr-mega8-p-pth",
+            "package": "dil28-3"
+          },
+          {
+            "type": "sparkfun-digitalic-avr-mega8-p-sim",
+            "package": "dil28-3-simon"
+          },
+          {
+            "type": "sparkfun-digitalic-avr-mega8-p-zif-socket",
+            "package": "dil28-3-zif socket"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-digitalic-avr-mega8-p-pth",
+        "label": "MICROCONTROLLER",
+        "order": 15,
+        "variantOf": "sparkfun-digitalic-avr-mega8-p-kit"
+      },
+      {
+        "type": "sparkfun-digitalic-avr-mega8-p-sim",
+        "label": "MICROCONTROLLER",
+        "order": 16,
+        "variantOf": "sparkfun-digitalic-avr-mega8-p-kit"
+      },
+      {
+        "type": "sparkfun-digitalic-avr-mega8-p-zif-socket",
+        "label": "MICROCONTROLLER",
+        "order": 17,
+        "variantOf": "sparkfun-digitalic-avr-mega8-p-kit"
+      },
+      {
+        "type": "sparkfun-digitalic-cp2103-usb-uart",
+        "label": "Single-Chip USB to UART Bridge (cp2103-usb-uart)",
+        "order": 120
+      },
+      {
+        "type": "sparkfun-digitalic-cp210x-usb-uart",
+        "label": "Single-Chip USB to UART Bridge (cp210x-usb-uart)",
+        "order": 121
+      },
+      {
+        "type": "sparkfun-digitalic-cy7c64215",
+        "label": "CY7C64215",
+        "order": 116
+      },
+      {
+        "type": "sparkfun-digitalic-dosonchip-ic-lqfp",
+        "label": "DOSonCHIP IC (lqfp-32)",
+        "order": 36
+      },
+      {
+        "type": "sparkfun-digitalic-dosonchip-ic-qfn",
+        "label": "DOSonCHIP IC (qfn-24)",
+        "order": 38
+      },
+      {
+        "type": "sparkfun-digitalic-dosonchip-ic-qfn-alt1",
+        "label": "DOSonCHIP IC (qfn-24 alt1.pac)",
+        "order": 37
+      },
+      {
+        "type": "sparkfun-digitalic-dspic30f4011",
+        "label": "DSPIC30F4011 (tqfp44)",
+        "order": 42
+      },
+      {
+        "type": "sparkfun-digitalic-dspic30f4011-dil",
+        "label": "DSPIC30F4011 (dil40)",
+        "order": 41
+      },
+      {
+        "type": "sparkfun-digitalic-dspic30f6015-smd",
+        "label": "DSPIC30F6015",
+        "order": 43
+      },
+      {
+        "type": "sparkfun-digitalic-dspic33fj256gp710",
+        "label": "DSPIC33FJ256GP710",
+        "order": 44
+      },
+      {
+        "type": "sparkfun-digitalic-eeprom-i2c-smd",
+        "label": "EEPROM-I2C",
+        "order": 45
+      },
+      {
+        "type": "sparkfun-digitalic-enc28j60",
+        "label": "ENC28J60",
+        "order": 48
+      },
+      {
+        "type": "sparkfun-digitalic-ep2c8-pq208",
+        "label": "EP2C8_PQ208",
+        "order": 55
+      },
+      {
+        "type": "sparkfun-digitalic-ft2232d",
+        "label": "FT2232D",
+        "order": 117
+      },
+      {
+        "type": "sparkfun-digitalic-ft232rl-basic-ssop",
+        "label": "USB UART (basic-ssop)",
+        "order": 123
+      },
+      {
+        "type": "sparkfun-digitalic-ft232rl-ssop",
+        "label": "USB UART (ssop)",
+        "order": 124
+      },
+      {
+        "type": "sparkfun-digitalic-ft232rq",
+        "label": "FT232RQ",
+        "order": 118
+      },
+      {
+        "type": "sparkfun-digitalic-ft245rl",
+        "label": "USB FIFO Controller",
+        "order": 122
+      },
+      {
+        "type": "sparkfun-digitalic-hef4543-pth",
+        "label": "HEF4543",
+        "order": 64
+      },
+      {
+        "type": "sparkfun-digitalic-hex-converter",
+        "label": "HEX_CONVERTER",
+        "order": 58
+      },
+      {
+        "type": "sparkfun-digitalic-icl3232",
+        "label": "ICL3232",
+        "order": 107
+      },
+      {
+        "type": "sparkfun-digitalic-inverter",
+        "label": "INVERTER",
+        "order": 61
+      },
+      {
+        "type": "sparkfun-digitalic-inverting-schmitt-trigger",
+        "label": "INVERTING_SCHMITT_TRIGGER",
+        "order": 60
+      },
+      {
+        "type": "sparkfun-digitalic-isd1900-isd1932",
+        "label": "ISD1900",
+        "order": 21
+      },
+      {
+        "type": "sparkfun-digitalic-lpc2103",
+        "label": "LPC2103",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-digitalic-lpc213x",
+        "label": "LPC213X",
+        "order": 13
+      },
+      {
+        "type": "sparkfun-digitalic-m74hc238",
+        "label": "M74HC238",
+        "order": 39
+      },
+      {
+        "type": "sparkfun-digitalic-m93c46",
+        "label": "M93C46",
+        "order": 46
+      },
+      {
+        "type": "sparkfun-digitalic-max232-pth",
+        "label": "RS232 Transceiver (dil16)",
+        "order": 109
+      },
+      {
+        "type": "sparkfun-digitalic-max232-soic16",
+        "label": "RS232 Transceiver (so016)",
+        "order": 110
+      },
+      {
+        "type": "sparkfun-digitalic-max3421e-smd",
+        "label": "MAX3421E",
+        "order": 115
+      },
+      {
+        "type": "sparkfun-digitalic-max485-dil",
+        "label": "MAX485",
+        "order": 108
+      },
+      {
+        "type": "sparkfun-digitalic-max7219-dip",
+        "label": "MAX7219",
+        "order": 65
+      },
+      {
+        "type": "sparkfun-digitalic-max7456",
+        "label": "MAX7456 (tssop28)",
+        "order": 127
+      },
+      {
+        "type": "sparkfun-digitalic-max7456-groundpad",
+        "label": "MAX7456 (tssop28-groundpad)",
+        "order": 126
+      },
+      {
+        "type": "sparkfun-digitalic-mbed-nxp-lpc1768",
+        "label": "MBED_NXP_LPC1768",
+        "order": 14
+      },
+      {
+        "type": "sparkfun-digitalic-mc9s12xs64",
+        "label": "MC9S12XS64",
+        "order": 86
+      },
+      {
+        "type": "sparkfun-digitalic-mcp130-sot",
+        "label": "MCP130",
+        "order": 87
+      },
+      {
+        "type": "sparkfun-digitalic-mcp2551",
+        "label": "MCP2551",
+        "order": 32
+      },
+      {
+        "type": "sparkfun-digitalic-nand256",
+        "label": "NAND256",
+        "order": 88
+      },
+      {
+        "type": "sparkfun-digitalic-nc7wz07",
+        "label": "NC7WZ07",
+        "order": 89
+      },
+      {
+        "type": "sparkfun-digitalic-ncp303lsn09",
+        "label": "NCP303LSN09",
+        "order": 90
+      },
+      {
+        "type": "sparkfun-digitalic-p8x32a-q44",
+        "label": "P8X32A-Q44",
+        "order": 91
+      },
+      {
+        "type": "sparkfun-digitalic-pca9306",
+        "label": "PCA9306",
+        "order": 92
+      },
+      {
+        "type": "sparkfun-digitalic-pcf8575c",
+        "label": "PCF8575C",
+        "order": 93
+      },
+      {
+        "type": "sparkfun-digitalic-pic16f688-smd",
+        "label": "PIC 16F688",
+        "order": 94
+      },
+      {
+        "type": "sparkfun-digitalic-pic16f88-dip",
+        "label": "PIC16F88-DIP",
+        "order": 96
+      },
+      {
+        "type": "sparkfun-digitalic-pic16f88-ssop",
+        "label": "PIC 16F8x",
+        "order": 95
+      },
+      {
+        "type": "sparkfun-digitalic-pic16f883",
+        "label": "PIC16F883",
+        "order": 97
+      },
+      {
+        "type": "sparkfun-digitalic-pic16f913-soic28",
+        "label": "PIC16F913",
+        "order": 98
+      },
+      {
+        "type": "sparkfun-digitalic-pic18f2455-smd",
+        "label": "PIC18F2455",
+        "order": 99
+      },
+      {
+        "type": "sparkfun-digitalic-pic18f2550",
+        "label": "PIC18F2550",
+        "order": 100
+      },
+      {
+        "type": "sparkfun-digitalic-pic24fxxxdax06",
+        "label": "PIC24FXXXDAX06",
+        "order": 101
+      },
+      {
+        "type": "sparkfun-digitalic-pic24hj32gp202-dip",
+        "label": "PIC24HJ32GP202 (dil28-3)",
+        "order": 102
+      },
+      {
+        "type": "sparkfun-digitalic-pic24hj32gp202-smd",
+        "label": "PIC24HJ32GP202 (so-28w)",
+        "order": 103
+      },
+      {
+        "type": "sparkfun-digitalic-pic32mx440f512h",
+        "label": "PIC32MX440F512H",
+        "order": 104
+      },
+      {
+        "type": "sparkfun-digitalic-pl-2303xa",
+        "label": "PL-2303XA",
+        "order": 119
+      },
+      {
+        "type": "sparkfun-digitalic-rs485-soic",
+        "label": "RS485",
+        "order": 34
+      },
+      {
+        "type": "sparkfun-digitalic-rs485-sp491",
+        "label": "RS485_SP491",
+        "order": 35
+      },
+      {
+        "type": "sparkfun-digitalic-sc16is750",
+        "label": "SC16IS750",
+        "order": 111
+      },
+      {
+        "type": "sparkfun-digitalic-scantool",
+        "label": "SCANTOOL",
+        "order": 112
+      },
+      {
+        "type": "sparkfun-digitalic-sn74hc251-smd",
+        "label": "SN74HC251",
+        "order": 82
+      },
+      {
+        "type": "sparkfun-digitalic-sn74lvc1g08",
+        "label": "SN74LVC1G08",
+        "order": 83
+      },
+      {
+        "type": "sparkfun-digitalic-speakjet-dip",
+        "label": "SPEAKJET (dil18)",
+        "order": 22
+      },
+      {
+        "type": "sparkfun-digitalic-speakjet-smd",
+        "label": "SPEAKJET (soic-18)",
+        "order": 23
+      },
+      {
+        "type": "sparkfun-digitalic-spi-flash-x25xx-smd",
+        "label": "SPI_FLASH-X25XX",
+        "order": 53,
+        "variants": [
+          {
+            "type": "sparkfun-digitalic-spi-flash-x25xx-smd1",
+            "package": "so08-eiaj"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-digitalic-spi-flash-x25xx-smd1",
+        "label": "SPI_FLASH-X25XX",
+        "order": 54,
+        "variantOf": "sparkfun-digitalic-spi-flash-x25xx-smd"
+      },
+      {
+        "type": "sparkfun-digitalic-stm811",
+        "label": "STM811",
+        "order": 106
+      },
+      {
+        "type": "sparkfun-digitalic-stp16cp05",
+        "label": "STP16CP05",
+        "order": 69
+      },
+      {
+        "type": "sparkfun-digitalic-stw5093",
+        "label": "STW5093",
+        "order": 24
+      },
+      {
+        "type": "sparkfun-digitalic-tc7su04f",
+        "label": "TC7SU04F",
+        "order": 84
+      },
+      {
+        "type": "sparkfun-digitalic-tja1040",
+        "label": "TJA1040",
+        "order": 33
+      },
+      {
+        "type": "sparkfun-digitalic-tlc5940-nt",
+        "label": "Packages: (dil28-3)",
+        "order": 66
+      },
+      {
+        "type": "sparkfun-digitalic-tlc5940-pwp",
+        "label": "Packages: (tssop28-groundpad)",
+        "order": 68
+      },
+      {
+        "type": "sparkfun-digitalic-tlc5940-rhb",
+        "label": "Packages: (qfn-32)",
+        "order": 67
+      },
+      {
+        "type": "sparkfun-digitalic-ubw32-pic32mx4xxl-tqfp100",
+        "label": "UBW32_PIC32MX4XXL",
+        "order": 105
+      },
+      {
+        "type": "sparkfun-digitalic-um-fpu-v3-1-dil",
+        "label": "UM-FPU_V3_1 (dil18)",
+        "order": 113
+      },
+      {
+        "type": "sparkfun-digitalic-um-fpu-v3-1-so",
+        "label": "UM-FPU_V3_1 (soic18-w)",
+        "order": 114
+      },
+      {
+        "type": "sparkfun-digitalic-unbuffered-inverter",
+        "label": "UNBUFFERED_INVERTER",
+        "order": 85
+      },
+      {
+        "type": "sparkfun-digitalic-usb3318",
+        "label": "USB3318",
+        "order": 125
+      },
+      {
+        "type": "sparkfun-digitalic-vs1000",
+        "label": "VS1000",
+        "order": 25
+      },
+      {
+        "type": "sparkfun-digitalic-vs1002",
+        "label": "VS1002",
+        "order": 26
+      },
+      {
+        "type": "sparkfun-digitalic-vs1033",
+        "label": "VS1033",
+        "order": 27
+      },
+      {
+        "type": "sparkfun-digitalic-vs1103",
+        "label": "VS1103",
+        "order": 28
+      },
+      {
+        "type": "sparkfun-digitalic-w5100",
+        "label": "LQFP-80",
+        "order": 47
+      },
+      {
+        "type": "sparkfun-digitalic-ws2801",
+        "label": "WS2801",
+        "order": 70
+      },
+      {
+        "type": "sparkfun-digitalic-wtv020sd",
+        "label": "WTV020SD",
+        "order": 29
+      },
+      {
+        "type": "sparkfun-digitalic-xc3s250-500e-pq208",
+        "label": "XC3S250_500E-PQ208",
+        "order": 56
+      },
+      {
+        "type": "sparkfun-digitalic-xmega-100-smd",
+        "label": "XMEGA-100",
+        "order": 30
+      },
+      {
+        "type": "sparkfun-digitalic-xmega-a3-au",
+        "label": "XMEGA-A3",
+        "order": 31
+      },
+      {
+        "type": "sparkfun-digitalic-xr2206",
+        "label": "XR2206",
+        "order": 57
+      },
+      {
+        "type": "sparkfun-digitalic-xs1-l1-64lqfp",
+        "label": "XS1_L1_64LQFP",
+        "order": 128
+      }
+    ],
+    "sparkfun-discretesemi": [
+      {
+        "type": "sparkfun-discretesemi-bav99",
+        "label": "BAV99",
+        "order": 0
+      },
+      {
+        "type": "sparkfun-discretesemi-bc847pn",
+        "label": "BC847PN",
+        "order": 28
+      },
+      {
+        "type": "sparkfun-discretesemi-cnz1120-pth",
+        "label": "CNZ1120",
+        "order": 21
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-1n4148-v2",
+        "label": "Diode",
+        "order": 1,
+        "variantOf": "sparkfun-discretesemi-diode-hv-v2"
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-hv-v2",
+        "label": "Diode (diode-hv)",
+        "order": 5,
+        "variants": [
+          {
+            "type": "sparkfun-discretesemi-diode-pth-v2",
+            "package": "diode-1n4001"
+          },
+          {
+            "type": "sparkfun-discretesemi-diode-1n4148-v2",
+            "package": "diode-1n4148"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-pth-v2",
+        "label": "Diode",
+        "order": 2,
+        "variantOf": "sparkfun-discretesemi-diode-hv-v2"
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-schottky",
+        "label": "DIODE-SCHOTTKY",
+        "order": 26
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-sma",
+        "label": "Diode (sma-diode)",
+        "order": 6,
+        "variants": [
+          {
+            "type": "sparkfun-discretesemi-diode-sma-alt",
+            "package": "sma-diode alt"
+          },
+          {
+            "type": "sparkfun-discretesemi-diode-sma-kit",
+            "package": "sma-diode-kit"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-sma-alt",
+        "label": "Diode",
+        "order": 3,
+        "variantOf": "sparkfun-discretesemi-diode-sma"
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-sma-kit",
+        "label": "Diode",
+        "order": 4,
+        "variantOf": "sparkfun-discretesemi-diode-sma"
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-smb",
+        "label": "Diode (smb-diode)",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-sod",
+        "label": "Diode (sod-323)",
+        "order": 8
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-sod523",
+        "label": "Diode (sod523)",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-sot23",
+        "label": "Diode (sot23-3)",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-zener-bzt52",
+        "label": "DIODE-ZENER (sod-323)",
+        "order": 49
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-zener-pth",
+        "label": "DIODE-ZENER (diode-zener)",
+        "order": 47
+      },
+      {
+        "type": "sparkfun-discretesemi-diode-zener-smb",
+        "label": "DIODE-ZENER (smb-diode)",
+        "order": 48
+      },
+      {
+        "type": "sparkfun-discretesemi-gp1a57hr",
+        "label": "GP1A57HR",
+        "order": 22
+      },
+      {
+        "type": "sparkfun-discretesemi-ild213t",
+        "label": "ILD213T",
+        "order": 23
+      },
+      {
+        "type": "sparkfun-discretesemi-irf7507",
+        "label": "IRF7507",
+        "order": 29
+      },
+      {
+        "type": "sparkfun-discretesemi-mmbz27vclt1",
+        "label": "MMBZ27VCLT1",
+        "order": 50
+      },
+      {
+        "type": "sparkfun-discretesemi-mmdt3904",
+        "label": "MMDT3904",
+        "order": 30
+      },
+      {
+        "type": "sparkfun-discretesemi-moc3031-m",
+        "label": "MOC3031-M",
+        "order": 41
+      },
+      {
+        "type": "sparkfun-discretesemi-mosfet-nchannel-fdd8580",
+        "label": "MOSFET-NCHANNEL (dpak)",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-discretesemi-mosfet-nchannel-pth",
+        "label": "MOSFET-NCHANNEL (to-92)",
+        "order": 14
+      },
+      {
+        "type": "sparkfun-discretesemi-mosfet-nchannel-pth2",
+        "label": "MOSFET-NCHANNEL (to220v)",
+        "order": 15
+      },
+      {
+        "type": "sparkfun-discretesemi-mosfet-nchannel-smd",
+        "label": "MOSFET-NCHANNEL (sot23-3)",
+        "order": 13
+      },
+      {
+        "type": "sparkfun-discretesemi-mosfet-nchannel-soic8",
+        "label": "MOSFET-NCHANNEL-SOIC8",
+        "order": 16
+      },
+      {
+        "type": "sparkfun-discretesemi-mosfet-nchannel-sot323",
+        "label": "MOSFET-NCHANNEL (sot323)",
+        "order": 27
+      },
+      {
+        "type": "sparkfun-discretesemi-mosfet-pchannel-smd",
+        "label": "MOSFET-PCHANNEL",
+        "order": 18
+      },
+      {
+        "type": "sparkfun-discretesemi-mosfet-pchannel-soic8-soic8",
+        "label": "MOSFET-PCHANNEL-SOIC8",
+        "order": 19
+      },
+      {
+        "type": "sparkfun-discretesemi-nds8434",
+        "label": "NDS8434",
+        "order": 17
+      },
+      {
+        "type": "sparkfun-discretesemi-opto-darl-6n138s",
+        "label": "OPTO_DARL_6N138S",
+        "order": 24
+      },
+      {
+        "type": "sparkfun-discretesemi-tcmt1103-opto",
+        "label": "TCMT1103-OPTO",
+        "order": 25
+      },
+      {
+        "type": "sparkfun-discretesemi-transistor-npn",
+        "label": "TRANSISTOR_NPN (sot223)",
+        "order": 32
+      },
+      {
+        "type": "sparkfun-discretesemi-transistor-npn-2-pth",
+        "label": "TRANSISTOR_NPN_2",
+        "order": 37
+      },
+      {
+        "type": "sparkfun-discretesemi-transistor-npn-sot23",
+        "label": "TRANSISTOR_NPN (sot23)",
+        "order": 34
+      },
+      {
+        "type": "sparkfun-discretesemi-transistor-npn-sot23-3",
+        "label": "TRANSISTOR_NPN (sot23-3)",
+        "order": 33
+      },
+      {
+        "type": "sparkfun-discretesemi-transistor-npn-sot89",
+        "label": "TRANSISTOR_NPN (sot89)",
+        "order": 35
+      },
+      {
+        "type": "sparkfun-discretesemi-transistor-npn-to-92-ammo",
+        "label": "TRANSISTOR_NPN",
+        "order": 31,
+        "variantOf": "sparkfun-discretesemi-transistor-npn-to92"
+      },
+      {
+        "type": "sparkfun-discretesemi-transistor-npn-to92",
+        "label": "TRANSISTOR_NPN (to-92)",
+        "order": 36,
+        "variants": [
+          {
+            "type": "sparkfun-discretesemi-transistor-npn-to-92-ammo",
+            "package": "to-92-ammo"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-discretesemi-transistor-pnp",
+        "label": "TRANSISTOR_PNP (sot89)",
+        "order": 39
+      },
+      {
+        "type": "sparkfun-discretesemi-transistor-pnp-smd",
+        "label": "TRANSISTOR_PNP (sot23-3)",
+        "order": 38
+      },
+      {
+        "type": "sparkfun-discretesemi-transistor-pnp-to92",
+        "label": "TRANSISTOR_PNP (to-92)",
+        "order": 40
+      },
+      {
+        "type": "sparkfun-discretesemi-triac-pth",
+        "label": "TRIAC (to-92)",
+        "order": 43
+      },
+      {
+        "type": "sparkfun-discretesemi-triac-smd",
+        "label": "TRIAC (sot223)",
+        "order": 42
+      },
+      {
+        "type": "sparkfun-discretesemi-tvs",
+        "label": "TVS",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-discretesemi-v-reference-smd",
+        "label": "V-REFERENCE",
+        "order": 51
+      },
+      {
+        "type": "sparkfun-discretesemi-v18za2p",
+        "label": "V18ZA2P",
+        "order": 44
+      },
+      {
+        "type": "sparkfun-discretesemi-varistor-0402",
+        "label": "VARISTOR (0402-res)",
+        "order": 45
+      },
+      {
+        "type": "sparkfun-discretesemi-varistor-0603",
+        "label": "VARISTOR (0603-res)",
+        "order": 46
+      },
+      {
+        "type": "sparkfun-discretesemi-xn04312-sot",
+        "label": "NPN_PNP Transistor Array",
+        "order": 20
+      }
+    ],
+    "sparkfun-displays": [
+      {
+        "type": "sparkfun-displays-7-segment-4digit",
+        "label": "7-SEGMENT-4DIGIT (7-segment-4digit-youngsun)",
+        "order": 13
+      },
+      {
+        "type": "sparkfun-displays-7-segment-4digit-for-pogobed-only",
+        "label": "7-SEGMENT-4DIGIT (7-segment-4digit longpads for pogobed)",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-displays-7-segment-4digit-pth",
+        "label": "7-SEGMENT-4DIGIT (7-segment-4digit)",
+        "order": 14
+      },
+      {
+        "type": "sparkfun-displays-7-segment-4digit-youngsun",
+        "label": "7-SEGMENT-4DIGIT-YOUNGSUN (7-segment-4digit-youngsun)",
+        "order": 16
+      },
+      {
+        "type": "sparkfun-displays-7-segment-4digit-youngsun-longpads",
+        "label": "7-SEGMENT-4DIGIT-YOUNGSUN (7-segment-4digit-youngsun-longpads)",
+        "order": 15
+      },
+      {
+        "type": "sparkfun-displays-7-segment-display-1-red",
+        "label": "7-SEGMENT-DISPLAY-1_-RED",
+        "order": 0
+      },
+      {
+        "type": "sparkfun-displays-7-segment-display-pth",
+        "label": "7-SEGMENT-DISPLAY",
+        "order": 17
+      },
+      {
+        "type": "sparkfun-displays-alphanumeric-pth",
+        "label": "Alphanumeric LED Display",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-displays-lcd-16x2-8x2",
+        "label": "LCD-16X2 (lcd-8x2)",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-displays-lcd-16x2-8x2-kit",
+        "label": "LCD-16X2 (lcd-8x2-kit)",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-displays-lcd-16x2-noholes",
+        "label": "LCD-16X2 (lcd-16x2 noholes)",
+        "order": 6
+      },
+      {
+        "type": "sparkfun-displays-lcd-16x2-nosilk",
+        "label": "LCD-16X2 (lcd-16x2 nosilk)",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-displays-lcd-16x2-silk",
+        "label": "LCD-16X2 (lcd-16x2)",
+        "order": 8
+      },
+      {
+        "type": "sparkfun-displays-lcd-backlight-pads",
+        "label": "LCD_BACKLIGHT_PADS",
+        "order": 3
+      },
+      {
+        "type": "sparkfun-displays-lcd-cfax",
+        "label": "LCD_CFAX",
+        "order": 4
+      },
+      {
+        "type": "sparkfun-displays-lcd-g12864-bare",
+        "label": "Graphical LCD 128x64 (1x20)",
+        "order": 1
+      },
+      {
+        "type": "sparkfun-displays-lcd-g12864-full",
+        "label": "Graphical LCD 128x64 (lcd-g12864)",
+        "order": 2
+      },
+      {
+        "type": "sparkfun-displays-nokia6100-lcd",
+        "label": "Nokia 6100 Color LCD",
+        "order": 5
+      }
+    ],
+    "sparkfun-electromechanical": [
+      {
+        "type": "sparkfun-electromechanical-6400bg-heatsink",
+        "label": "6400BG_HEATSINK",
+        "order": 42
+      },
+      {
+        "type": "sparkfun-electromechanical-ayz0202",
+        "label": "SPDT Slide Switch",
+        "order": 77
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-1100",
+        "label": "Battery Holders (lipo-1100mAh)",
+        "order": 15
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-12mm",
+        "label": "Battery Holders (battcon 12mm)",
+        "order": 6
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-12pth",
+        "label": "Battery Holders (battcon 12mm pth)",
+        "order": 5
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-20mm-4legs",
+        "label": "Battery Holders (battcon 20mm 4legs)",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-20pth",
+        "label": "Battery Holders (battcom 20mm pth)",
+        "order": 4
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-20pth2",
+        "label": "Battery Holders (battery)",
+        "order": 14
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-20smd",
+        "label": "Battery Holders (battcon 20mm)",
+        "order": 8
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-245mm",
+        "label": "Battery Holders (battcon 245mm)",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-245pth",
+        "label": "Battery Holders (battcon 245mm pth)",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-aa",
+        "label": "Battery Holders (battery-aa)",
+        "order": 13
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-aa-panel",
+        "label": "Battery Holders (battery-aa-panel)",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-electromechanical-battery-fob",
+        "label": "Battery Holders (battery 20mm pth compact)",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-electromechanical-button-conductive",
+        "label": "BUTTON-CONDUCTIVE (button-conductive-mini)",
+        "order": 21
+      },
+      {
+        "type": "sparkfun-electromechanical-button-conductive-smd",
+        "label": "BUTTON-CONDUCTIVE (button-conductive)",
+        "order": 22
+      },
+      {
+        "type": "sparkfun-electromechanical-button-conductive-smd-0-1",
+        "label": "BUTTON-CONDUCTIVE (button-conductive-0.1)",
+        "order": 20
+      },
+      {
+        "type": "sparkfun-electromechanical-button-magnetic-10mm-female",
+        "label": "BUTTON-MAGNETIC (10mm-female)",
+        "order": 0
+      },
+      {
+        "type": "sparkfun-electromechanical-button-magnetic-10mm-male",
+        "label": "BUTTON-MAGNETIC (10mm-male)",
+        "order": 1
+      },
+      {
+        "type": "sparkfun-electromechanical-button-magnetic-18mm-female",
+        "label": "BUTTON-MAGNETIC (18mm-female)",
+        "order": 2
+      },
+      {
+        "type": "sparkfun-electromechanical-button-magnetic-18mm-male",
+        "label": "BUTTON-MAGNETIC (18mm-male)",
+        "order": 3
+      },
+      {
+        "type": "sparkfun-electromechanical-buttonpad-2x2",
+        "label": "BUTTONPAD-2X2 (buttonpad-2x2)",
+        "order": 24
+      },
+      {
+        "type": "sparkfun-electromechanical-buttonpad-2x2-special",
+        "label": "BUTTONPAD-2X2 (buttonpad-2x2-special)",
+        "order": 23
+      },
+      {
+        "type": "sparkfun-electromechanical-buttonpad-2x2single",
+        "label": "BUTTONPAD-2X2SINGLE (buttonpad-2x2single)",
+        "order": 26
+      },
+      {
+        "type": "sparkfun-electromechanical-buttonpad-2x2single-kit",
+        "label": "BUTTONPAD-2X2SINGLE (buttonpad-2x2single-kit)",
+        "order": 25
+      },
+      {
+        "type": "sparkfun-electromechanical-buttonpad-4x4",
+        "label": "BUTTONPAD-4X4 (buttonpad-4x4)",
+        "order": 28
+      },
+      {
+        "type": "sparkfun-electromechanical-buttonpad-4x4-special",
+        "label": "BUTTONPAD-4X4 (buttonpad-4x4-special)",
+        "order": 27
+      },
+      {
+        "type": "sparkfun-electromechanical-buzzer-ns",
+        "label": "Buzzer 12mm (buzzer-12mm-ns)",
+        "order": 31
+      },
+      {
+        "type": "sparkfun-electromechanical-buzzer-pth",
+        "label": "Buzzer 12mm (buzzer-12mm)",
+        "order": 32
+      },
+      {
+        "type": "sparkfun-electromechanical-buzzer-pth-ns-kit",
+        "label": "Buzzer 12mm (buzzer-12mm-ns-kit)",
+        "order": 30
+      },
+      {
+        "type": "sparkfun-electromechanical-buzzer-smd",
+        "label": "Buzzer 12mm (buzzer-cmt1603)",
+        "order": 35
+      },
+      {
+        "type": "sparkfun-electromechanical-buzzer-smd2",
+        "label": "Buzzer 12mm (buzzer-ccv)",
+        "order": 33,
+        "variants": [
+          {
+            "type": "sparkfun-electromechanical-buzzer-smd2-kit",
+            "package": "buzzer-ccv-kit"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-electromechanical-buzzer-smd2-kit",
+        "label": "Buzzer 12mm",
+        "order": 29,
+        "variantOf": "sparkfun-electromechanical-buzzer-smd2"
+      },
+      {
+        "type": "sparkfun-electromechanical-buzzer-smd3",
+        "label": "Buzzer 12mm (buzzer-cmt1102)",
+        "order": 34
+      },
+      {
+        "type": "sparkfun-electromechanical-capsense-pad",
+        "label": "CAPSENSE_PAD",
+        "order": 102
+      },
+      {
+        "type": "sparkfun-electromechanical-encoder-2led",
+        "label": "ENCODER_2LED",
+        "order": 74
+      },
+      {
+        "type": "sparkfun-electromechanical-encoder-quadrature",
+        "label": "ENCODER-QUADRATURE",
+        "order": 76
+      },
+      {
+        "type": "sparkfun-electromechanical-encoder-rgb-ca",
+        "label": "ENCODER_RGB_CA",
+        "order": 75
+      },
+      {
+        "type": "sparkfun-electromechanical-fkit-coin-cell-lir2450-h",
+        "label": "FKIT-COIN_CELL",
+        "order": 16
+      },
+      {
+        "type": "sparkfun-electromechanical-fkit-ribbon-connector-2mm-l-rev2",
+        "label": "FKIT-RIBBON_CONNECTOR (fkit-ribbon connector 03 2mm l)",
+        "order": 38
+      },
+      {
+        "type": "sparkfun-electromechanical-fkit-ribbon-connector-2mm-r-rev2",
+        "label": "FKIT-RIBBON_CONNECTOR (fkit-ribbon connector 03 2mm r)",
+        "order": 39
+      },
+      {
+        "type": "sparkfun-electromechanical-fkit-snap-connector-female",
+        "label": "FKIT-SNAP_CONNECTOR (fkit-snap female)",
+        "order": 40
+      },
+      {
+        "type": "sparkfun-electromechanical-fkit-snap-connector-male",
+        "label": "FKIT-SNAP_CONNECTOR (fkit-snap male)",
+        "order": 41
+      },
+      {
+        "type": "sparkfun-electromechanical-g3vm-61e1",
+        "label": "G3VM-61E1",
+        "order": 78
+      },
+      {
+        "type": "sparkfun-electromechanical-joystick-mini",
+        "label": "JOYSTICK_MINI",
+        "order": 43
+      },
+      {
+        "type": "sparkfun-electromechanical-joystick-psp1000",
+        "label": "JOYSTICK-PSP1000",
+        "order": 44
+      },
+      {
+        "type": "sparkfun-electromechanical-joystick-pth",
+        "label": "Thumb Joystick",
+        "order": 46
+      },
+      {
+        "type": "sparkfun-electromechanical-lipo-outline-100",
+        "label": "LIPO-110mAh",
+        "order": 18
+      },
+      {
+        "type": "sparkfun-electromechanical-lipo-outline-1100",
+        "label": "LIPO-1000mAh",
+        "order": 17
+      },
+      {
+        "type": "sparkfun-electromechanical-lipo-outline-2000",
+        "label": "LIPO-2000mAh",
+        "order": 19
+      },
+      {
+        "type": "sparkfun-electromechanical-magnet-18mm",
+        "label": "MAGNET",
+        "order": 47
+      },
+      {
+        "type": "sparkfun-electromechanical-motor-10mm",
+        "label": "Vibration Motor- ROB-08449",
+        "order": 48
+      },
+      {
+        "type": "sparkfun-electromechanical-n35p112",
+        "label": "N35P112",
+        "order": 45
+      },
+      {
+        "type": "sparkfun-electromechanical-nav-switch-smd",
+        "label": "Navigation Switch",
+        "order": 49
+      },
+      {
+        "type": "sparkfun-electromechanical-pot",
+        "label": "POT (alps pot)",
+        "order": 51
+      },
+      {
+        "type": "sparkfun-electromechanical-pot-100k-3362u",
+        "label": "POT (3362u)",
+        "order": 50
+      },
+      {
+        "type": "sparkfun-electromechanical-pot-mam",
+        "label": "POT (pot mammoth)",
+        "order": 53
+      },
+      {
+        "type": "sparkfun-electromechanical-pot-rv16af-20",
+        "label": "POT (pot alpha rv16af-20)",
+        "order": 52
+      },
+      {
+        "type": "sparkfun-electromechanical-pot-switch-pot-pth",
+        "label": "POT_SWITCH (pot pth)",
+        "order": 56
+      },
+      {
+        "type": "sparkfun-electromechanical-pot-switch-pot-pth-switch",
+        "label": "POT_SWITCH (pot pth switch)",
+        "order": 55
+      },
+      {
+        "type": "sparkfun-electromechanical-pot-trim",
+        "label": "POT (trim pot)",
+        "order": 54
+      },
+      {
+        "type": "sparkfun-electromechanical-relay-pth",
+        "label": "RELAY (relay-g5q)",
+        "order": 70
+      },
+      {
+        "type": "sparkfun-electromechanical-relay-pth2",
+        "label": "RELAY (relay-t9a)",
+        "order": 73
+      },
+      {
+        "type": "sparkfun-electromechanical-relay-pth3",
+        "label": "RELAY (relay-t9a-2)",
+        "order": 72
+      },
+      {
+        "type": "sparkfun-electromechanical-relay-pth4",
+        "label": "RELAY (relay-jzc)",
+        "order": 71
+      },
+      {
+        "type": "sparkfun-electromechanical-relay-solidstate-pth",
+        "label": "RELAY-SOLIDSTATE",
+        "order": 79
+      },
+      {
+        "type": "sparkfun-electromechanical-slider",
+        "label": "SLIDER",
+        "order": 57
+      },
+      {
+        "type": "sparkfun-electromechanical-speaker",
+        "label": "SPEAKER",
+        "order": 80
+      },
+      {
+        "type": "sparkfun-electromechanical-stand-off",
+        "label": "#4 Stand Off (stand-off)",
+        "order": 82
+      },
+      {
+        "type": "sparkfun-electromechanical-stand-off-tight",
+        "label": "#4 Stand Off (stand-off-tight)",
+        "order": 81
+      },
+      {
+        "type": "sparkfun-electromechanical-sw-dip-2",
+        "label": "DIP SWITCH",
+        "order": 36
+      },
+      {
+        "type": "sparkfun-electromechanical-sw-dip-8",
+        "label": "DIP Switch 8 Position",
+        "order": 37
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-4pdt-cnk-lock",
+        "label": "SWITCH-4PDT",
+        "order": 61
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-dpdt-eg2211",
+        "label": "SWITCH-DPDT (eg2211)",
+        "order": 85
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-dpdt-es",
+        "label": "SWITCH-DPDT (es)",
+        "order": 86
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-dpdt-gpi",
+        "label": "SWITCH-DPDT (gpi-152-3013)",
+        "order": 87
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-dpdt-os",
+        "label": "SWITCH-DPDT (os)",
+        "order": 90,
+        "variants": [
+          {
+            "type": "sparkfun-electromechanical-switch-dpdt-smd",
+            "package": "ayz0202"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-dpdt-pth",
+        "label": "SWITCH-DPDT (mss22)",
+        "order": 89
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-dpdt-pth1",
+        "label": "SWITCH-DPDT (ms)",
+        "order": 88
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-dpdt-smd",
+        "label": "SWITCH-DPDT",
+        "order": 84,
+        "variantOf": "sparkfun-electromechanical-switch-dpdt-os"
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-momentary-2",
+        "label": "SWITCH-MOMENTARY-2 (tactile switch tall)",
+        "order": 64
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-momentary-2-12mm",
+        "label": "SWITCH-MOMENTARY-2 (tactile-pth-12mm)",
+        "order": 65
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-momentary-2-pth",
+        "label": "SWITCH-MOMENTARY-2 (tactile-pth)",
+        "order": 66
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-momentary-2-pth-reed",
+        "label": "SWITCH-MOMENTARY-2 (reed switch pth)",
+        "order": 69,
+        "variants": [
+          {
+            "type": "sparkfun-electromechanical-switch-momentary-2-pth-reed2",
+            "package": "reed switch plastic"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-momentary-2-pth-reed2",
+        "label": "SWITCH-MOMENTARY-2",
+        "order": 68,
+        "variantOf": "sparkfun-electromechanical-switch-momentary-2-pth-reed"
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-momentary-2-smd",
+        "label": "SWITCH-MOMENTARY-2 (tactile switch smd)",
+        "order": 63
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-momentary-2-smd-1101ne",
+        "label": "SWITCH-MOMENTARY-2 (tactile-switch-1101ne)",
+        "order": 67
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-momentary-2-smd-2",
+        "label": "SWITCH-MOMENTARY-2 (tactile switch smd-2)",
+        "order": 62
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-sp3t",
+        "label": "SWITCH-SP3T",
+        "order": 83
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-spdt",
+        "label": "SWITCH_SPDT",
+        "order": 99
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-spdt-kit",
+        "label": "SPST Switch (switch-spdt kit)",
+        "order": 94
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-spdt-pth",
+        "label": "SPST Switch (switch-spdt)",
+        "order": 96,
+        "variants": [
+          {
+            "type": "sparkfun-electromechanical-switch-spdt-pth-lock",
+            "package": "switch-spdt lock.007s"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-spdt-pth-lock",
+        "label": "SPST Switch",
+        "order": 91,
+        "variantOf": "sparkfun-electromechanical-switch-spdt-pth"
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-spdt-pth2",
+        "label": "SPST Switch (switche-dpdt)",
+        "order": 98
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-spdt-pth3",
+        "label": "SPST Switch (r sw th)",
+        "order": 93
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-spdt-smd",
+        "label": "SPST Switch (ayz0202)",
+        "order": 92
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-spdt-smd-a",
+        "label": "SPST Switch (switch-spst-smd-a)",
+        "order": 97
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-spdt-smd2",
+        "label": "SPST Switch (switch-spdt-smd)",
+        "order": 95
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-spst-2-ra",
+        "label": "SWITCH-SPST-2 (r sw th)",
+        "order": 100
+      },
+      {
+        "type": "sparkfun-electromechanical-switch-spst-2-tv",
+        "label": "SWITCH-SPST-2 (switch-spst-vertical)",
+        "order": 101
+      },
+      {
+        "type": "sparkfun-electromechanical-tac-switch-ksa-sealed",
+        "label": "Momentary Switch (ksa sealed tac switch)",
+        "order": 58
+      },
+      {
+        "type": "sparkfun-electromechanical-tac-switch-pth",
+        "label": "Momentary Switch (tactile-pth)",
+        "order": 60
+      },
+      {
+        "type": "sparkfun-electromechanical-tac-switch-smd",
+        "label": "Momentary Switch (tactile switch smd)",
+        "order": 59
+      },
+      {
+        "type": "sparkfun-electromechanical-trackball-mech",
+        "label": "TRACKBALL",
+        "order": 103
+      },
+      {
+        "type": "sparkfun-electromechanical-trimpot-2",
+        "label": "TRIMPOT (trimpot tc33)",
+        "order": 110,
+        "variants": [
+          {
+            "type": "sparkfun-electromechanical-trimpot-smd",
+            "package": "trimpot-3mm"
+          },
+          {
+            "type": "sparkfun-electromechanical-trimpot-3mm-2",
+            "package": "trimpot-3mm-2"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-electromechanical-trimpot-3362u-2",
+        "label": "TRIMPOT (3362u-2)",
+        "order": 106
+      },
+      {
+        "type": "sparkfun-electromechanical-trimpot-3mm-2",
+        "label": "TRIMPOT",
+        "order": 104,
+        "variantOf": "sparkfun-electromechanical-trimpot-2"
+      },
+      {
+        "type": "sparkfun-electromechanical-trimpot-pth",
+        "label": "TRIMPOT (trim pot pth)",
+        "order": 108
+      },
+      {
+        "type": "sparkfun-electromechanical-trimpot-pth-knob",
+        "label": "TRIMPOT (3386u)",
+        "order": 107
+      },
+      {
+        "type": "sparkfun-electromechanical-trimpot-smd",
+        "label": "TRIMPOT",
+        "order": 105,
+        "variantOf": "sparkfun-electromechanical-trimpot-2"
+      },
+      {
+        "type": "sparkfun-electromechanical-trimpot-trimpot-5mm",
+        "label": "TRIMPOT (trimpot-5mm)",
+        "order": 111
+      },
+      {
+        "type": "sparkfun-electromechanical-trimpot-trimpot-pth-s3-lock",
+        "label": "TRIMPOT (trimpot pth s3 lock)",
+        "order": 109
+      }
+    ],
+    "sparkfun-freqctrl": [
+      {
+        "type": "sparkfun-freqctrl-crystal-10-5x4-8",
+        "label": "CRYSTAL",
+        "order": 0,
+        "variantOf": "sparkfun-freqctrl-crystal-smd"
+      },
+      {
+        "type": "sparkfun-freqctrl-crystal-32-smd",
+        "label": "CRYSTAL",
+        "order": 1,
+        "variantOf": "sparkfun-freqctrl-crystal-tc26h"
+      },
+      {
+        "type": "sparkfun-freqctrl-crystal-5x3",
+        "label": "CRYSTAL",
+        "order": 2,
+        "variantOf": "sparkfun-freqctrl-crystal-smd"
+      },
+      {
+        "type": "sparkfun-freqctrl-crystal-epsonmc146",
+        "label": "CRYSTAL",
+        "order": 3,
+        "variantOf": "sparkfun-freqctrl-crystal-tc26h"
+      },
+      {
+        "type": "sparkfun-freqctrl-crystal-hc49us",
+        "label": "CRYSTAL",
+        "order": 4,
+        "variantOf": "sparkfun-freqctrl-crystal-smd"
+      },
+      {
+        "type": "sparkfun-freqctrl-crystal-hc49uv",
+        "label": "CRYSTAL",
+        "order": 5,
+        "variantOf": "sparkfun-freqctrl-crystal-smd"
+      },
+      {
+        "type": "sparkfun-freqctrl-crystal-smd",
+        "label": "CRYSTAL (hc49up)",
+        "order": 7,
+        "variants": [
+          {
+            "type": "sparkfun-freqctrl-crystal-hc49us",
+            "package": "hc49us"
+          },
+          {
+            "type": "sparkfun-freqctrl-crystal-hc49uv",
+            "package": "hc49u-v"
+          },
+          {
+            "type": "sparkfun-freqctrl-crystal-5x3",
+            "package": "crystal-smd-5x3"
+          },
+          {
+            "type": "sparkfun-freqctrl-crystal-10-5x4-8",
+            "package": "crystal-smd-10.5x4.8-2pin"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-freqctrl-crystal-tc26h",
+        "label": "CRYSTAL (tc26h)",
+        "order": 8,
+        "variants": [
+          {
+            "type": "sparkfun-freqctrl-crystal-tc38h",
+            "package": "tc38h"
+          },
+          {
+            "type": "sparkfun-freqctrl-crystal-32-smd",
+            "package": "crystal-32khz-smd"
+          },
+          {
+            "type": "sparkfun-freqctrl-crystal-epsonmc146",
+            "package": "crystal-32khz-smd epson mc146"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-freqctrl-crystal-tc38h",
+        "label": "CRYSTAL",
+        "order": 6,
+        "variantOf": "sparkfun-freqctrl-crystal-tc26h"
+      },
+      {
+        "type": "sparkfun-freqctrl-ds1077",
+        "label": "DS1077",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-freqctrl-ds1307-so8",
+        "label": "DS1307",
+        "order": 15
+      },
+      {
+        "type": "sparkfun-freqctrl-ds3234",
+        "label": "DS3234",
+        "order": 16
+      },
+      {
+        "type": "sparkfun-freqctrl-oscillator-5x3",
+        "label": "OSCILLATOR (crystal-smd-5x3)",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-freqctrl-oscillator-5x3-pin1-indicated",
+        "label": "OSCILLATOR (crystal-osc-smd-5x3)",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-freqctrl-oscillator-smd",
+        "label": "OSCILLATOR (crystal-smd-7x5)",
+        "order": 13
+      },
+      {
+        "type": "sparkfun-freqctrl-oscillator-smd6",
+        "label": "OSCILLATOR (crystal-smd-7.5x5.2-6pin)",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-freqctrl-resonator-nocap",
+        "label": "RESONATOR_NOCAP",
+        "order": 19
+      },
+      {
+        "type": "sparkfun-freqctrl-resonator-pth",
+        "label": "Resonator (resonator-pth)",
+        "order": 17
+      },
+      {
+        "type": "sparkfun-freqctrl-resonator-smd",
+        "label": "Resonator (resonator-smd)",
+        "order": 18
+      },
+      {
+        "type": "sparkfun-freqctrl-resonator-wide",
+        "label": "RESONATOR-WIDE",
+        "order": 20
+      },
+      {
+        "type": "sparkfun-freqctrl-sit8002",
+        "label": "SIT8002",
+        "order": 14
+      }
+    ],
+    "sparkfun-led": [
+      {
+        "type": "sparkfun-led-apa3010sf4c",
+        "label": "APA3010SF4C",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-led-led-0603",
+        "label": "LEDs (led-0603)",
+        "order": 2
+      },
+      {
+        "type": "sparkfun-led-led-10mm-fix",
+        "label": "LEDs (led10mm)",
+        "order": 4
+      },
+      {
+        "type": "sparkfun-led-led-1206",
+        "label": "LEDs (led-1206)",
+        "order": 3,
+        "variants": [
+          {
+            "type": "sparkfun-led-led-fkit-1206",
+            "package": "fkit-led-1206"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-led-led-bargraph-10",
+        "label": "LED_BARGRAPH_10",
+        "order": 6
+      },
+      {
+        "type": "sparkfun-led-led-fkit-1206",
+        "label": "LEDs",
+        "order": 1,
+        "variantOf": "sparkfun-led-led-1206"
+      },
+      {
+        "type": "sparkfun-led-led-ring",
+        "label": "LED_RING",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-led-led-tricolor",
+        "label": "Tri-Color LED SMD",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-led-lightpipe-7511",
+        "label": "LIGHTPIPE-7511",
+        "order": 5
+      },
+      {
+        "type": "sparkfun-led-lte-302",
+        "label": "LTE-302",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-led-luxeon-rebel",
+        "label": "LUXEON-REBEL",
+        "order": 8
+      },
+      {
+        "type": "sparkfun-led-luxeon-smd",
+        "label": "Luxeon LED",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-led-ws2812",
+        "label": "SMD RGB LED (WS2812)",
+        "order": 0
+      }
+    ],
+    "sparkfun-passives": [
+      {
+        "type": "sparkfun-passives-cap",
+        "label": "Capacitor (axial-5mm)",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-passives-cap-0402-cap",
+        "label": "Capacitor (0402-cap)",
+        "order": 5
+      },
+      {
+        "type": "sparkfun-passives-cap-0603-cap",
+        "label": "Capacitor (0603-cap)",
+        "order": 6
+      },
+      {
+        "type": "sparkfun-passives-cap-0805",
+        "label": "Capacitor (0805)",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-passives-cap-1206",
+        "label": "Capacitor (1206)",
+        "order": 8
+      },
+      {
+        "type": "sparkfun-passives-cap-1210",
+        "label": "Capacitor (1210)",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-passives-cap-adj-smd",
+        "label": "CAP_ADJ",
+        "order": 33
+      },
+      {
+        "type": "sparkfun-passives-cap-asmd",
+        "label": "Capacitor (ctz3)",
+        "order": 13
+      },
+      {
+        "type": "sparkfun-passives-cap-kit",
+        "label": "Capacitor (cap-pth-small-kit)",
+        "order": 11,
+        "variants": [
+          {
+            "type": "sparkfun-passives-cap-pth",
+            "package": "cap-pth-small"
+          },
+          {
+            "type": "sparkfun-passives-cap-pth1",
+            "package": "cap-pth-5mm"
+          },
+          {
+            "type": "sparkfun-passives-cap-pth3",
+            "package": "cap-pth-large"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-1206",
+        "label": "Capacitor Polarized (eia3216)",
+        "order": 21,
+        "variants": [
+          {
+            "type": "sparkfun-passives-cap-pol-1206-kit",
+            "package": "eia3216-kit"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-1206-kit",
+        "label": "Capacitor Polarized",
+        "order": 15,
+        "variantOf": "sparkfun-passives-cap-pol-1206"
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-3528",
+        "label": "Capacitor Polarized (eia3528)",
+        "order": 22,
+        "variants": [
+          {
+            "type": "sparkfun-passives-cap-pol-3528-kit",
+            "package": "eia3528-kit"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-3528-kit",
+        "label": "Capacitor Polarized",
+        "order": 16,
+        "variantOf": "sparkfun-passives-cap-pol-3528"
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-6032",
+        "label": "Capacitor Polarized (eia6032)",
+        "order": 23
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-7343",
+        "label": "Capacitor Polarized (eia7343)",
+        "order": 24
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-c",
+        "label": "Capacitor Polarized (panasonic c)",
+        "order": 27
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-d",
+        "label": "Capacitor Polarized (panasonic d)",
+        "order": 28
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-e",
+        "label": "Capacitor Polarized (panasonic e)",
+        "order": 29
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-en-j2",
+        "label": "Capacitor Polarized (en j2)",
+        "order": 25
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-f80",
+        "label": "Capacitor Polarized (nippon f80)",
+        "order": 26
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-g",
+        "label": "Capacitor Polarized (panasonic g)",
+        "order": 30
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-h13",
+        "label": "Capacitor Polarized (panasonic h13)",
+        "order": 31
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-pth1",
+        "label": "Capacitor Polarized (cpol-radial-100uf-25v)",
+        "order": 20,
+        "variants": [
+          {
+            "type": "sparkfun-passives-cap-pol-pth2",
+            "package": "cpol-radial-10uf-25v"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-pth2",
+        "label": "Capacitor Polarized",
+        "order": 17,
+        "variantOf": "sparkfun-passives-cap-pol-pth1"
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-pth3",
+        "label": "Capacitor Polarized (cpol-radial-1000uf-63v)",
+        "order": 19
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-pth4",
+        "label": "Capacitor Polarized (cpol-radial-1000uf-25v)",
+        "order": 18
+      },
+      {
+        "type": "sparkfun-passives-cap-pol-smd",
+        "label": "Capacitor Polarized (vishay c)",
+        "order": 32
+      },
+      {
+        "type": "sparkfun-passives-cap-pth",
+        "label": "Capacitor",
+        "order": 2,
+        "variantOf": "sparkfun-passives-cap-kit"
+      },
+      {
+        "type": "sparkfun-passives-cap-pth1",
+        "label": "Capacitor",
+        "order": 3,
+        "variantOf": "sparkfun-passives-cap-kit"
+      },
+      {
+        "type": "sparkfun-passives-cap-pth2",
+        "label": "Capacitor (cap-pth-small2)",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-passives-cap-pth3",
+        "label": "Capacitor",
+        "order": 4,
+        "variantOf": "sparkfun-passives-cap-kit"
+      },
+      {
+        "type": "sparkfun-passives-cap-smd",
+        "label": "Capacitor (grm43d)",
+        "order": 14
+      },
+      {
+        "type": "sparkfun-passives-fb",
+        "label": "FB",
+        "order": 34
+      },
+      {
+        "type": "sparkfun-passives-fuse-x20mm",
+        "label": "FUSE",
+        "order": 35
+      },
+      {
+        "type": "sparkfun-passives-gnd-connect",
+        "label": "GND_CONNECT",
+        "order": 63
+      },
+      {
+        "type": "sparkfun-passives-inductor",
+        "label": "Inductors (cooper up4b)",
+        "order": 44
+      },
+      {
+        "type": "sparkfun-passives-inductor-0402",
+        "label": "Inductors (c0402)",
+        "order": 42
+      },
+      {
+        "type": "sparkfun-passives-inductor-0603",
+        "label": "Inductors (0603)",
+        "order": 37
+      },
+      {
+        "type": "sparkfun-passives-inductor-0805",
+        "label": "Inductors (0805)",
+        "order": 38
+      },
+      {
+        "type": "sparkfun-passives-inductor-1007",
+        "label": "Inductors (1007)",
+        "order": 39
+      },
+      {
+        "type": "sparkfun-passives-inductor-1210",
+        "label": "Inductors (1210)",
+        "order": 40
+      },
+      {
+        "type": "sparkfun-passives-inductor-b82462g",
+        "label": "Inductors (b82462g)",
+        "order": 41
+      },
+      {
+        "type": "sparkfun-passives-inductor-cr54",
+        "label": "Inductors (cr54)",
+        "order": 45,
+        "variants": [
+          {
+            "type": "sparkfun-passives-inductor-cr54-kit",
+            "package": "cr54-kit"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-inductor-cr54-kit",
+        "label": "Inductors",
+        "order": 36,
+        "variantOf": "sparkfun-passives-inductor-cr54"
+      },
+      {
+        "type": "sparkfun-passives-inductor-cr75",
+        "label": "Inductors (cr75)",
+        "order": 47
+      },
+      {
+        "type": "sparkfun-passives-inductor-cr75-v2",
+        "label": "Inductors (cr75 v2)",
+        "order": 46
+      },
+      {
+        "type": "sparkfun-passives-inductor-h",
+        "label": "Inductors (inductor-1206)",
+        "order": 48
+      },
+      {
+        "type": "sparkfun-passives-inductor-npi75",
+        "label": "Inductors (npi75c)",
+        "order": 49
+      },
+      {
+        "type": "sparkfun-passives-inductor-pwr",
+        "label": "Inductors (cdrh125)",
+        "order": 43
+      },
+      {
+        "type": "sparkfun-passives-inductor-sru1038",
+        "label": "Inductors (sru1038)",
+        "order": 50
+      },
+      {
+        "type": "sparkfun-passives-inductor-sru5028",
+        "label": "Inductors (sru5028)",
+        "order": 51
+      },
+      {
+        "type": "sparkfun-passives-jumper-2-old-smd-nc",
+        "label": "Jumper",
+        "order": 52,
+        "variantOf": "sparkfun-passives-jumper-2-smd-nc"
+      },
+      {
+        "type": "sparkfun-passives-jumper-2-old-smd-no",
+        "label": "Jumper",
+        "order": 53,
+        "variantOf": "sparkfun-passives-jumper-2-smd-no"
+      },
+      {
+        "type": "sparkfun-passives-jumper-2-smd-nc",
+        "label": "Jumper (sj 2s)",
+        "order": 56,
+        "variants": [
+          {
+            "type": "sparkfun-passives-jumper-2-old-smd-nc",
+            "package": "sj 2s"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-jumper-2-smd-no",
+        "label": "Jumper (sj 2s-no)",
+        "order": 55,
+        "variants": [
+          {
+            "type": "sparkfun-passives-jumper-2-old-smd-no",
+            "package": "sj 2s-no"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-jumper-2-smd-no-ns",
+        "label": "Jumper (sj 2s-no-ns)",
+        "order": 54
+      },
+      {
+        "type": "sparkfun-passives-jumper-3-1-2",
+        "label": "JUMPER-3 (sj 3 paste1 2)",
+        "order": 57
+      },
+      {
+        "type": "sparkfun-passives-jumper-3-2-3",
+        "label": "JUMPER-3 (sj 3 paste2 3)",
+        "order": 58
+      },
+      {
+        "type": "sparkfun-passives-jumper-3-old-1-2",
+        "label": "JUMPER-3-OLD (sj 3 paste1 2)",
+        "order": 60
+      },
+      {
+        "type": "sparkfun-passives-jumper-3-old-2-3",
+        "label": "JUMPER-3-OLD (sj 3 paste2 3)",
+        "order": 61
+      },
+      {
+        "type": "sparkfun-passives-jumper-3-old-smd",
+        "label": "JUMPER-3-OLD (sj 3)",
+        "order": 62
+      },
+      {
+        "type": "sparkfun-passives-jumper-3-smd",
+        "label": "JUMPER-3 (sj 3)",
+        "order": 59
+      },
+      {
+        "type": "sparkfun-passives-resistor-2010smd",
+        "label": "Resistor",
+        "order": 0,
+        "variants": [
+          {
+            "type": "sparkfun-passives-resistor-2512smd",
+            "package": "2512"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-resistor-2512smd",
+        "label": "Resistor",
+        "order": 1,
+        "variantOf": "sparkfun-passives-resistor-2010smd"
+      },
+      {
+        "type": "sparkfun-passives-resistor-array-0603-arv",
+        "label": "Array Chip Resistor",
+        "order": 85
+      },
+      {
+        "type": "sparkfun-passives-rpack-bussed-sip-pth-5",
+        "label": "RPACK*",
+        "order": 86
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-2way-old-paste1-2",
+        "label": "Solder Jumper",
+        "order": 64,
+        "variantOf": "sparkfun-passives-solderjumper-2way-paste1-2"
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-2way-old-paste2-3",
+        "label": "Solder Jumper",
+        "order": 65,
+        "variantOf": "sparkfun-passives-solderjumper-2way-paste2-3"
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-2way-old-s",
+        "label": "Solder Jumper",
+        "order": 66,
+        "variantOf": "sparkfun-passives-solderjumper-2way-s"
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-2way-old-t",
+        "label": "Solder Jumper",
+        "order": 67,
+        "variantOf": "sparkfun-passives-solderjumper-2way-t"
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-2way-old-w",
+        "label": "Solder Jumper",
+        "order": 68,
+        "variantOf": "sparkfun-passives-solderjumper-2way-w"
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-2way-paste1-2",
+        "label": "Solder Jumper (sj 3 paste1 2)",
+        "order": 79,
+        "variants": [
+          {
+            "type": "sparkfun-passives-solderjumper-2way-old-paste1-2",
+            "package": "sj 3 paste1 2"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-2way-paste2-3",
+        "label": "Solder Jumper (sj 3 paste2 3)",
+        "order": 80,
+        "variants": [
+          {
+            "type": "sparkfun-passives-solderjumper-2way-old-paste2-3",
+            "package": "sj 3 paste2 3"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-2way-s",
+        "label": "Solder Jumper (sj 3)",
+        "order": 81,
+        "variants": [
+          {
+            "type": "sparkfun-passives-solderjumper-2way-old-s",
+            "package": "sj 3"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-2way-t",
+        "label": "Solder Jumper (sj 2)",
+        "order": 73,
+        "variants": [
+          {
+            "type": "sparkfun-passives-solderjumper-2way-old-t",
+            "package": "sj 2"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-2way-w",
+        "label": "Solder Jumper (sj 2w)",
+        "order": 78,
+        "variants": [
+          {
+            "type": "sparkfun-passives-solderjumper-2way-old-w",
+            "package": "sj 2w"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-nc",
+        "label": "Solder Jumper (sj 2s)",
+        "order": 77,
+        "variants": [
+          {
+            "type": "sparkfun-passives-solderjumper-old-nc",
+            "package": "sj 2s"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-nc2",
+        "label": "Solder Jumper (sj 2s-notrace)",
+        "order": 75,
+        "variants": [
+          {
+            "type": "sparkfun-passives-solderjumper-old-nc2",
+            "package": "sj 2s-notrace"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-no",
+        "label": "Solder Jumper (sj 2s-no)",
+        "order": 74,
+        "variants": [
+          {
+            "type": "sparkfun-passives-solderjumper-old-no",
+            "package": "sj 2s-no"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-old-nc",
+        "label": "Solder Jumper",
+        "order": 69,
+        "variantOf": "sparkfun-passives-solderjumper-nc"
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-old-nc2",
+        "label": "Solder Jumper",
+        "order": 70,
+        "variantOf": "sparkfun-passives-solderjumper-nc2"
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-old-no",
+        "label": "Solder Jumper",
+        "order": 71,
+        "variantOf": "sparkfun-passives-solderjumper-no"
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-old-trace",
+        "label": "Solder Jumper",
+        "order": 72,
+        "variantOf": "sparkfun-passives-solderjumper-trace"
+      },
+      {
+        "type": "sparkfun-passives-solderjumper-trace",
+        "label": "Solder Jumper (sj 2s-trace)",
+        "order": 76,
+        "variants": [
+          {
+            "type": "sparkfun-passives-solderjumper-old-trace",
+            "package": "sj 2s-trace"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-passives-test-point-2",
+        "label": "TEST-POINT (pad.02x.02)",
+        "order": 82
+      },
+      {
+        "type": "sparkfun-passives-test-point-3",
+        "label": "TEST-POINT (pad.03x.03)",
+        "order": 83
+      },
+      {
+        "type": "sparkfun-passives-test-point-3x5",
+        "label": "TEST-POINT (pad.03x.05)",
+        "order": 84
+      }
+    ],
+    "sparkfun-poweric": [
+      {
+        "type": "sparkfun-poweric-a4983",
+        "label": "A4983",
+        "order": 37
+      },
+      {
+        "type": "sparkfun-poweric-adm1087-sc-70",
+        "label": "ADM1087",
+        "order": 72
+      },
+      {
+        "type": "sparkfun-poweric-bd10ka5wf-e2",
+        "label": "BD10KA5WF-E2",
+        "order": 45
+      },
+      {
+        "type": "sparkfun-poweric-bq24022",
+        "label": "Unproven",
+        "order": 14
+      },
+      {
+        "type": "sparkfun-poweric-dc-dc-converter",
+        "label": "DC-DC_CONVERTER",
+        "order": 29
+      },
+      {
+        "type": "sparkfun-poweric-hv826mg-backlight",
+        "label": "HV826MG_BACKLIGHT",
+        "order": 18
+      },
+      {
+        "type": "sparkfun-poweric-l298",
+        "label": "L298 (multiwatt15)",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-poweric-l298-bridge-driver",
+        "label": "L298_BRIDGE_DRIVER",
+        "order": 13
+      },
+      {
+        "type": "sparkfun-poweric-l298-heatsink",
+        "label": "L298 (multiwatt15 6400bgheatsink)",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-poweric-l6470",
+        "label": "L6470",
+        "order": 38
+      },
+      {
+        "type": "sparkfun-poweric-lm2621-smd",
+        "label": "LM2621",
+        "order": 34
+      },
+      {
+        "type": "sparkfun-poweric-lm2931",
+        "label": "LM2931",
+        "order": 46
+      },
+      {
+        "type": "sparkfun-poweric-lm2931-fixed",
+        "label": "LM2931_FIXED",
+        "order": 47
+      },
+      {
+        "type": "sparkfun-poweric-lm3480im4",
+        "label": "LM3480IM4",
+        "order": 48
+      },
+      {
+        "type": "sparkfun-poweric-lm4128-2-5vref",
+        "label": "LM4128-2.5VREF",
+        "order": 44
+      },
+      {
+        "type": "sparkfun-poweric-lm4871",
+        "label": "LM4871",
+        "order": 0
+      },
+      {
+        "type": "sparkfun-poweric-lm5007",
+        "label": "LM5007",
+        "order": 30
+      },
+      {
+        "type": "sparkfun-poweric-lm5574",
+        "label": "LM5574",
+        "order": 31
+      },
+      {
+        "type": "sparkfun-poweric-lmd1820x",
+        "label": "LMD1820X",
+        "order": 23
+      },
+      {
+        "type": "sparkfun-poweric-lmz14203",
+        "label": "LMZ14203",
+        "order": 32
+      },
+      {
+        "type": "sparkfun-poweric-lt1528",
+        "label": "Lt 1528",
+        "order": 49
+      },
+      {
+        "type": "sparkfun-poweric-ltc3588",
+        "label": "LTC3588",
+        "order": 19
+      },
+      {
+        "type": "sparkfun-poweric-max1555",
+        "label": "MAX1555 Lithium Charger IC",
+        "order": 6
+      },
+      {
+        "type": "sparkfun-poweric-max1704x",
+        "label": "MAX1704X",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-poweric-max98300-eta",
+        "label": "Mono 2.6W Class D Amplifier",
+        "order": 1
+      },
+      {
+        "type": "sparkfun-poweric-max98306-etd",
+        "label": "Stereo 3.7W Class D Amplifier",
+        "order": 5
+      },
+      {
+        "type": "sparkfun-poweric-mc34063-smd",
+        "label": "MC34063",
+        "order": 39
+      },
+      {
+        "type": "sparkfun-poweric-mcp73831",
+        "label": "MCP73831",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-poweric-mcp73833",
+        "label": "Unproven!",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-poweric-mcp7384xx",
+        "label": "MCP7384XX",
+        "order": 8
+      },
+      {
+        "type": "sparkfun-poweric-mic2571-smd",
+        "label": "MIC2571",
+        "order": 40
+      },
+      {
+        "type": "sparkfun-poweric-njm2670-smd",
+        "label": "NJM2670",
+        "order": 24
+      },
+      {
+        "type": "sparkfun-poweric-pq1cy1032z",
+        "label": "PQ1CY1032Z",
+        "order": 41
+      },
+      {
+        "type": "sparkfun-poweric-ptc-0603",
+        "label": "Resettable Fuse PTC (0603)",
+        "order": 20
+      },
+      {
+        "type": "sparkfun-poweric-ptc-pth",
+        "label": "Resettable Fuse PTC (ptc)",
+        "order": 22
+      },
+      {
+        "type": "sparkfun-poweric-ptc-smd",
+        "label": "Resettable Fuse PTC (ptc-1206)",
+        "order": 21
+      },
+      {
+        "type": "sparkfun-poweric-spx29302",
+        "label": "SPX29302",
+        "order": 50
+      },
+      {
+        "type": "sparkfun-poweric-sta540",
+        "label": "STA540 (multiwatt15)",
+        "order": 4
+      },
+      {
+        "type": "sparkfun-poweric-sta540-w-6400bg-heatsink",
+        "label": "STA540 (multiwatt15 6400bgheatsink)",
+        "order": 2
+      },
+      {
+        "type": "sparkfun-poweric-sta540-w-yb324g-heatsink",
+        "label": "STA540 (multiwatt15 yb324gheatsink)",
+        "order": 3
+      },
+      {
+        "type": "sparkfun-poweric-tb6621fng",
+        "label": "TB6621FNG",
+        "order": 27
+      },
+      {
+        "type": "sparkfun-poweric-tps61200",
+        "label": "TPS61200",
+        "order": 35
+      },
+      {
+        "type": "sparkfun-poweric-tps6211",
+        "label": "TPS6211*",
+        "order": 33
+      },
+      {
+        "type": "sparkfun-poweric-tps6214x",
+        "label": "TPS6214X",
+        "order": 28
+      },
+      {
+        "type": "sparkfun-poweric-transformer-pth",
+        "label": "Transformer (transformer)",
+        "order": 43
+      },
+      {
+        "type": "sparkfun-poweric-transformer-smd",
+        "label": "Transformer (transformer smd)",
+        "order": 42
+      },
+      {
+        "type": "sparkfun-poweric-uln2803-dip",
+        "label": "Darlington Driver (dil18)",
+        "order": 15
+      },
+      {
+        "type": "sparkfun-poweric-uln2803-soic",
+        "label": "Darlington Driver (so018)",
+        "order": 16
+      },
+      {
+        "type": "sparkfun-poweric-uln2803-soicw",
+        "label": "Darlington Driver (so18l)",
+        "order": 17
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-317-dpack",
+        "label": "Voltage Regulator (317-dpack)",
+        "order": 61
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-317-sink",
+        "label": "Voltage Regulator (317-sink)",
+        "order": 63
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-317-sink-1",
+        "label": "Voltage Regulator (317-sink-1)",
+        "order": 62
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-317-smd",
+        "label": "Voltage Regulator (317-smd)",
+        "order": 64
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-78xx-side",
+        "label": "Voltage Regulator (78xx-side)",
+        "order": 65
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-78xx-sink",
+        "label": "Voltage Regulator (78xx-sink)",
+        "order": 66,
+        "variants": [
+          {
+            "type": "sparkfun-poweric-v-reg-78xx-to-220",
+            "package": "to-220-alt"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-78xx-to-220",
+        "label": "Voltage Regulator",
+        "order": 60,
+        "variantOf": "sparkfun-poweric-v-reg-78xx-sink"
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-78xx-to-92",
+        "label": "Voltage Regulator (78xx-to-92)",
+        "order": 67
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-ld1085-d2",
+        "label": "V_REG_LD1085",
+        "order": 52
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-ld1117vxx",
+        "label": "V_REG_LD1117VXX",
+        "order": 53
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-ldo-smd",
+        "label": "Voltage Regulator LDO (sot23-5)",
+        "order": 70
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-ldo-smd2",
+        "label": "Voltage Regulator LDO (sc70)",
+        "order": 69
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-lm1117-sot223",
+        "label": "Voltage Regulator LM1117",
+        "order": 71
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-mc33269-dt",
+        "label": "V_REG_MC33269",
+        "order": 54
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-mic2920",
+        "label": "V_REG_MIC2920",
+        "order": 55
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-mic5216",
+        "label": "V_REG_MIC5216",
+        "order": 56
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-mic5219-smd",
+        "label": "V_REG MIC5219",
+        "order": 51
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-mic5235",
+        "label": "V_REG_MIC5235",
+        "order": 57
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-ncp1400-sot23-5",
+        "label": "Switching step-up voltage regulator",
+        "order": 36
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-ncp50x",
+        "label": "V_REG_NCP50X",
+        "order": 58
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-tps61040-smd",
+        "label": "V_REG_TPS61040",
+        "order": 59
+      },
+      {
+        "type": "sparkfun-poweric-v-reg-tps76433-sot23-5",
+        "label": "Voltage Regulator (tps76433-sot23-5)",
+        "order": 68
+      },
+      {
+        "type": "sparkfun-poweric-vnh2sp30",
+        "label": "VNH2SP30",
+        "order": 26
+      },
+      {
+        "type": "sparkfun-poweric-zxld1360",
+        "label": "ZXLD1360",
+        "order": 25
+      }
+    ],
+    "sparkfun-rf": [
+      {
+        "type": "sparkfun-rf-alm-1412-smd",
+        "label": "GPS Antenna Amp",
+        "order": 44
+      },
+      {
+        "type": "sparkfun-rf-antenna-smd1",
+        "label": "Chip antenna (antenna-chip)",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-rf-antenna2-smd",
+        "label": "Chip antenna (antenna-chip2)",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-rf-antenna2-smd2",
+        "label": "Chip antenna (antenna-chip3)",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-rf-antenna2-smd3",
+        "label": "Chip antenna (antenna-chip4)",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-rf-antenna2-smd5",
+        "label": "Chip antenna (antenna-chip5)",
+        "order": 13
+      },
+      {
+        "type": "sparkfun-rf-antenna2-smd6",
+        "label": "Chip antenna (antenna-chip6)",
+        "order": 14
+      },
+      {
+        "type": "sparkfun-rf-atmega128rfa1",
+        "label": "ATMEGA128RFA1",
+        "order": 15
+      },
+      {
+        "type": "sparkfun-rf-balun-0805",
+        "label": "BALUN",
+        "order": 16
+      },
+      {
+        "type": "sparkfun-rf-bgb203-bluetooth-old",
+        "label": "BGB203_BLUETOOTH (bgb203 original)",
+        "order": 17
+      },
+      {
+        "type": "sparkfun-rf-bgb203-bluetooth-smd",
+        "label": "BGB203_BLUETOOTH (bgb203)",
+        "order": 18
+      },
+      {
+        "type": "sparkfun-rf-blueradio-br-c40a-bas",
+        "label": "Bluetooth SMD Module (blueradio br-c40a)",
+        "order": 21
+      },
+      {
+        "type": "sparkfun-rf-blueradio-br-c40n-bas",
+        "label": "Bluetooth SMD Module (blueradio br-c40n)",
+        "order": 22,
+        "variants": [
+          {
+            "type": "sparkfun-rf-blueradio-br-c40n-internal",
+            "package": "bluetooth-internal-fp"
+          },
+          {
+            "type": "sparkfun-rf-blueradio-br-c40n-sfe",
+            "package": "bluetooth-smd-fp"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-rf-blueradio-br-c40n-int2",
+        "label": "Bluetooth SMD Module (bluetooth-internal-fp2)",
+        "order": 23
+      },
+      {
+        "type": "sparkfun-rf-blueradio-br-c40n-internal",
+        "label": "Bluetooth SMD Module",
+        "order": 19,
+        "variantOf": "sparkfun-rf-blueradio-br-c40n-bas"
+      },
+      {
+        "type": "sparkfun-rf-blueradio-br-c40n-sfe",
+        "label": "Bluetooth SMD Module",
+        "order": 20,
+        "variantOf": "sparkfun-rf-blueradio-br-c40n-bas"
+      },
+      {
+        "type": "sparkfun-rf-bluetooth-rn41",
+        "label": "BLUETOOTH-RN41",
+        "order": 24
+      },
+      {
+        "type": "sparkfun-rf-btm182",
+        "label": "BTM182",
+        "order": 25
+      },
+      {
+        "type": "sparkfun-rf-copernicus-dip-pth",
+        "label": "COPERNICUS-DIP",
+        "order": 37
+      },
+      {
+        "type": "sparkfun-rf-copernicus-smd",
+        "label": "COPERNICUS",
+        "order": 36
+      },
+      {
+        "type": "sparkfun-rf-d2523t",
+        "label": "D2523T",
+        "order": 38
+      },
+      {
+        "type": "sparkfun-rf-ebm001",
+        "label": "EBM001",
+        "order": 26
+      },
+      {
+        "type": "sparkfun-rf-em406-outline",
+        "label": "EM406_OUTLINE",
+        "order": 39
+      },
+      {
+        "type": "sparkfun-rf-em408-outline",
+        "label": "EM408_OUTLINE",
+        "order": 40
+      },
+      {
+        "type": "sparkfun-rf-et312-smd",
+        "label": "ET312 GPS Receiver",
+        "order": 41
+      },
+      {
+        "type": "sparkfun-rf-ge863-gps",
+        "label": "GE863 Cellular Module with GPS",
+        "order": 42
+      },
+      {
+        "type": "sparkfun-rf-ge864",
+        "label": "GE864",
+        "order": 28
+      },
+      {
+        "type": "sparkfun-rf-ge865",
+        "label": "GE865",
+        "order": 29
+      },
+      {
+        "type": "sparkfun-rf-ge865-2",
+        "label": "GE865_2",
+        "order": 30
+      },
+      {
+        "type": "sparkfun-rf-gm862-gm862-connector",
+        "label": "GM862 Cellular Module with GPS (gm862 connector)",
+        "order": 31
+      },
+      {
+        "type": "sparkfun-rf-gm862-gnd",
+        "label": "GM862 Cellular Module with GPS (gm862)",
+        "order": 32
+      },
+      {
+        "type": "sparkfun-rf-gp-2106",
+        "label": "GP-2106",
+        "order": 46
+      },
+      {
+        "type": "sparkfun-rf-gr-10-smd",
+        "label": "GR-10 GPS Receiver Module",
+        "order": 48
+      },
+      {
+        "type": "sparkfun-rf-gs1011-gs1011mxx",
+        "label": "GS1011",
+        "order": 69
+      },
+      {
+        "type": "sparkfun-rf-gs406smd-mating-smd-special",
+        "label": "GS406SMD (gs406-mating smd ***special)",
+        "order": 49
+      },
+      {
+        "type": "sparkfun-rf-gs406smd-socket",
+        "label": "GS406SMD (gs406smd)",
+        "order": 50
+      },
+      {
+        "type": "sparkfun-rf-id-12-20",
+        "label": "ID-12_20 (id-12)",
+        "order": 63
+      },
+      {
+        "type": "sparkfun-rf-id-12-20-id-12-lock",
+        "label": "ID-12_20 (id-12 lock)",
+        "order": 61
+      },
+      {
+        "type": "sparkfun-rf-id-12-20-smd",
+        "label": "ID-12_20 (id-12 smd)",
+        "order": 62
+      },
+      {
+        "type": "sparkfun-rf-lassen-iq-gps-lassen",
+        "label": "LASSEN_IQ_GPS",
+        "order": 51
+      },
+      {
+        "type": "sparkfun-rf-ls20126",
+        "label": "GPS-09838",
+        "order": 47
+      },
+      {
+        "type": "sparkfun-rf-mirf",
+        "label": "MIRF",
+        "order": 4
+      },
+      {
+        "type": "sparkfun-rf-mlx90121",
+        "label": "MLX90121",
+        "order": 64
+      },
+      {
+        "type": "sparkfun-rf-mn5010hs",
+        "label": "MN5010HS (gr-10)",
+        "order": 53
+      },
+      {
+        "type": "sparkfun-rf-mn5010hs-smd",
+        "label": "MN5010HS (mn5010hs)",
+        "order": 54
+      },
+      {
+        "type": "sparkfun-rf-nrf2401a-smd",
+        "label": "2.4GHz Transceiver",
+        "order": 3
+      },
+      {
+        "type": "sparkfun-rf-nrf24ap1-smd",
+        "label": "2.4GHz ANT IC",
+        "order": 1
+      },
+      {
+        "type": "sparkfun-rf-nrf24l01-smd",
+        "label": "2.4GHz Low Power Transceiver",
+        "order": 2
+      },
+      {
+        "type": "sparkfun-rf-nrf24le1",
+        "label": "NRF24LE1",
+        "order": 5
+      },
+      {
+        "type": "sparkfun-rf-nrf24lu1",
+        "label": "NRF24LU1",
+        "order": 6
+      },
+      {
+        "type": "sparkfun-rf-nrf24z1",
+        "label": "NRF24Z1",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-rf-ns73m-smd",
+        "label": "FM Transmitter",
+        "order": 35
+      },
+      {
+        "type": "sparkfun-rf-rf-link-rx",
+        "label": "RF-LINK_RX",
+        "order": 58
+      },
+      {
+        "type": "sparkfun-rf-rf-link-tx",
+        "label": "RF-LINK_TX",
+        "order": 59
+      },
+      {
+        "type": "sparkfun-rf-rf24g",
+        "label": "RF24G Header",
+        "order": 8
+      },
+      {
+        "type": "sparkfun-rf-rfm22-smd",
+        "label": "RFM22",
+        "order": 60
+      },
+      {
+        "type": "sparkfun-rf-rmcm01-smd",
+        "label": "RMCM01",
+        "order": 57
+      },
+      {
+        "type": "sparkfun-rf-rn-131g",
+        "label": "RN-131G",
+        "order": 56
+      },
+      {
+        "type": "sparkfun-rf-rn171-rn171",
+        "label": "RN171",
+        "order": 70
+      },
+      {
+        "type": "sparkfun-rf-rs9110",
+        "label": "RS9110",
+        "order": 71
+      },
+      {
+        "type": "sparkfun-rf-si4700-smd",
+        "label": "Silicon Labs FM Receiver",
+        "order": 34
+      },
+      {
+        "type": "sparkfun-rf-si470x",
+        "label": "SI470X",
+        "order": 33
+      },
+      {
+        "type": "sparkfun-rf-sm130",
+        "label": "SM130",
+        "order": 65
+      },
+      {
+        "type": "sparkfun-rf-sm5100b",
+        "label": "SM5100B",
+        "order": 55
+      },
+      {
+        "type": "sparkfun-rf-sma661as",
+        "label": "SMA661AS",
+        "order": 45
+      },
+      {
+        "type": "sparkfun-rf-sup500f",
+        "label": "SUP500F",
+        "order": 43
+      },
+      {
+        "type": "sparkfun-rf-tfm-511p",
+        "label": "TFM-511P",
+        "order": 66
+      },
+      {
+        "type": "sparkfun-rf-trf-24g",
+        "label": "TRF-24G",
+        "order": 0
+      },
+      {
+        "type": "sparkfun-rf-venus634-smd",
+        "label": "VENUS634",
+        "order": 67
+      },
+      {
+        "type": "sparkfun-rf-venus638flpx-l",
+        "label": "Venus638FLPX-L GPS Receiver",
+        "order": 52
+      },
+      {
+        "type": "sparkfun-rf-wifly-gsx",
+        "label": "WIFLY_GSX",
+        "order": 72
+      },
+      {
+        "type": "sparkfun-rf-wlanmodule",
+        "label": "DPAC WiFi Module",
+        "order": 68
+      },
+      {
+        "type": "sparkfun-rf-wt32",
+        "label": "WT32",
+        "order": 27
+      },
+      {
+        "type": "sparkfun-rf-xbee-1-b1",
+        "label": "XBEE-1 (xbee-1)",
+        "order": 75,
+        "variants": [
+          {
+            "type": "sparkfun-rf-xbee-1-xbee-1-lock",
+            "package": "xbee-1 lock"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-rf-xbee-1-b2",
+        "label": "XBEE-1 (xbee-silk)",
+        "order": 76
+      },
+      {
+        "type": "sparkfun-rf-xbee-1-b3",
+        "label": "XBEE-1 (xbee-smd)",
+        "order": 77
+      },
+      {
+        "type": "sparkfun-rf-xbee-1-xbee-1-lock",
+        "label": "XBEE-1",
+        "order": 74,
+        "variantOf": "sparkfun-rf-xbee-1-b1"
+      },
+      {
+        "type": "sparkfun-rf-xtend-digi-modem",
+        "label": "XTEND-DIGI-MODEM",
+        "order": 78
+      },
+      {
+        "type": "sparkfun-rf-zg2100m",
+        "label": "ZG2100M",
+        "order": 73
+      }
+    ],
+    "sparkfun-sensors": [
+      {
+        "type": "sparkfun-sensors-admp401",
+        "label": "ADMP401",
+        "order": 66
+      },
+      {
+        "type": "sparkfun-sensors-admp421",
+        "label": "ADMP421",
+        "order": 67
+      },
+      {
+        "type": "sparkfun-sensors-adns2610-pth",
+        "label": "ADNS2610",
+        "order": 68
+      },
+      {
+        "type": "sparkfun-sensors-adxl180",
+        "label": "ADXL180",
+        "order": 0
+      },
+      {
+        "type": "sparkfun-sensors-adxl193",
+        "label": "ADXL193",
+        "order": 1
+      },
+      {
+        "type": "sparkfun-sensors-adxl330-smd",
+        "label": "Triple Axis Accelerometer",
+        "order": 16
+      },
+      {
+        "type": "sparkfun-sensors-adxl335",
+        "label": "ADXL335",
+        "order": 2
+      },
+      {
+        "type": "sparkfun-sensors-adxl345",
+        "label": "ADXL345",
+        "order": 3
+      },
+      {
+        "type": "sparkfun-sensors-adxrsxxx-smd",
+        "label": "ADXRSXXX",
+        "order": 38
+      },
+      {
+        "type": "sparkfun-sensors-at42qt1012",
+        "label": "AT42QT1012",
+        "order": 86
+      },
+      {
+        "type": "sparkfun-sensors-bma180",
+        "label": "BMA180",
+        "order": 4
+      },
+      {
+        "type": "sparkfun-sensors-bmp085",
+        "label": "BMP085 Pressure Sensor",
+        "order": 72
+      },
+      {
+        "type": "sparkfun-sensors-camera-cmos-con-plug",
+        "label": "640x480 CMOS Color Camera (camera cmos plug)",
+        "order": 25
+      },
+      {
+        "type": "sparkfun-sensors-camera-cmos-con-smd",
+        "label": "640x480 CMOS Color Camera (camera cmos con)",
+        "order": 24
+      },
+      {
+        "type": "sparkfun-sensors-cma3000-a01",
+        "label": "CMA3000-A01",
+        "order": 5
+      },
+      {
+        "type": "sparkfun-sensors-cma3000-d01",
+        "label": "CMA3000-D01",
+        "order": 6
+      },
+      {
+        "type": "sparkfun-sensors-dcm01",
+        "label": "DCM01 Reflective Blood Sensor",
+        "order": 74
+      },
+      {
+        "type": "sparkfun-sensors-fc30-smd",
+        "label": "FC30",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-sensors-gas-sensor",
+        "label": "GAS_SENSOR",
+        "order": 17
+      },
+      {
+        "type": "sparkfun-sensors-geiger-tube-lnd712",
+        "label": "GEIGER_TUBE",
+        "order": 37
+      },
+      {
+        "type": "sparkfun-sensors-hall-effect-smd",
+        "label": "HALL-EFFECT",
+        "order": 54
+      },
+      {
+        "type": "sparkfun-sensors-hdjd-s822-qr999",
+        "label": "HDJD-S822-QR999",
+        "order": 27,
+        "variants": [
+          {
+            "type": "sparkfun-sensors-hdjd-s822-qr999-withpic",
+            "package": "qfn-16-(rounded0thermal-pad)"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-sensors-hdjd-s822-qr999-withpic",
+        "label": "HDJD-S822-QR999",
+        "order": 28,
+        "variantOf": "sparkfun-sensors-hdjd-s822-qr999"
+      },
+      {
+        "type": "sparkfun-sensors-hih-4030-smd",
+        "label": "HIH-4030",
+        "order": 55
+      },
+      {
+        "type": "sparkfun-sensors-hmc1041z",
+        "label": "HMC1041Z",
+        "order": 60
+      },
+      {
+        "type": "sparkfun-sensors-hmc1051z",
+        "label": "HMC1051Z (hmc1051z3)",
+        "order": 62
+      },
+      {
+        "type": "sparkfun-sensors-hmc1051z-2",
+        "label": "HMC1051Z (hmc1051z 2)",
+        "order": 61
+      },
+      {
+        "type": "sparkfun-sensors-hmc1052l",
+        "label": "HMC1052L",
+        "order": 63
+      },
+      {
+        "type": "sparkfun-sensors-hmc5843-smd",
+        "label": "HMC5843",
+        "order": 29
+      },
+      {
+        "type": "sparkfun-sensors-hmc5883l-smd",
+        "label": "HMC5883L",
+        "order": 30
+      },
+      {
+        "type": "sparkfun-sensors-hmc6042",
+        "label": "HMC6042",
+        "order": 64
+      },
+      {
+        "type": "sparkfun-sensors-hmc6343-a",
+        "label": "HMC6343",
+        "order": 31
+      },
+      {
+        "type": "sparkfun-sensors-hmc6352",
+        "label": "HMC6352",
+        "order": 32
+      },
+      {
+        "type": "sparkfun-sensors-idg1215-1215",
+        "label": "IDG1215",
+        "order": 39
+      },
+      {
+        "type": "sparkfun-sensors-idg300-smd",
+        "label": "IDG300",
+        "order": 40
+      },
+      {
+        "type": "sparkfun-sensors-idg500",
+        "label": "IDG500",
+        "order": 41
+      },
+      {
+        "type": "sparkfun-sensors-imu3000",
+        "label": "IMU3000",
+        "order": 42
+      },
+      {
+        "type": "sparkfun-sensors-irreceiver-smd",
+        "label": "IRRECEIVER",
+        "order": 90
+      },
+      {
+        "type": "sparkfun-sensors-isl29102",
+        "label": "ISL29102",
+        "order": 58
+      },
+      {
+        "type": "sparkfun-sensors-isz500-smd",
+        "label": "ISZ500",
+        "order": 43
+      },
+      {
+        "type": "sparkfun-sensors-itg-3200",
+        "label": "ITG-3200",
+        "order": 44
+      },
+      {
+        "type": "sparkfun-sensors-ixz500-smd",
+        "label": "IXZ500",
+        "order": 45
+      },
+      {
+        "type": "sparkfun-sensors-l3g4200d",
+        "label": "Package:",
+        "order": 50
+      },
+      {
+        "type": "sparkfun-sensors-lis302dl",
+        "label": "LIS302DL",
+        "order": 8
+      },
+      {
+        "type": "sparkfun-sensors-lis331",
+        "label": "LIS331",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-sensors-lis3lv02dq-smd",
+        "label": "LIS3LV02DQ",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-sensors-lisy300al-smd",
+        "label": "LISY300AL",
+        "order": 46
+      },
+      {
+        "type": "sparkfun-sensors-lm34",
+        "label": "LM34",
+        "order": 79
+      },
+      {
+        "type": "sparkfun-sensors-load-cell-1x03-pth",
+        "label": "LOAD_CELL",
+        "order": 59
+      },
+      {
+        "type": "sparkfun-sensors-lsm303dlh-smd",
+        "label": "LSM303DLH",
+        "order": 33
+      },
+      {
+        "type": "sparkfun-sensors-ltr-301",
+        "label": "LTR-301",
+        "order": 71
+      },
+      {
+        "type": "sparkfun-sensors-ly530al-smd",
+        "label": "LY530AL",
+        "order": 47
+      },
+      {
+        "type": "sparkfun-sensors-lypr540ah",
+        "label": "LYPR540AH",
+        "order": 48
+      },
+      {
+        "type": "sparkfun-sensors-mag3110",
+        "label": "MAG3110",
+        "order": 65
+      },
+      {
+        "type": "sparkfun-sensors-mcp9700-smd",
+        "label": "MCP9700",
+        "order": 80
+      },
+      {
+        "type": "sparkfun-sensors-mic-9-7mm",
+        "label": "MIC (mic-9.7mm)",
+        "order": 36
+      },
+      {
+        "type": "sparkfun-sensors-mic-electret-smd",
+        "label": "MIC (mic electret smd)",
+        "order": 35
+      },
+      {
+        "type": "sparkfun-sensors-mlx90609-smd",
+        "label": "MLX90609",
+        "order": 49
+      },
+      {
+        "type": "sparkfun-sensors-mlx90614",
+        "label": "MLX90614",
+        "order": 81
+      },
+      {
+        "type": "sparkfun-sensors-mma7260",
+        "label": "MMA7260",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-sensors-mma7361",
+        "label": "MMA7361",
+        "order": 12
+      },
+      {
+        "type": "sparkfun-sensors-mma8452q",
+        "label": "MMA8452Q",
+        "order": 13
+      },
+      {
+        "type": "sparkfun-sensors-mpl115a",
+        "label": "_h3_MPL115A1 (SPI) and MPL115A2 (I2C) Miniature Digital Barometer__h3_",
+        "order": 22
+      },
+      {
+        "type": "sparkfun-sensors-mpl3115a2-lga8",
+        "label": "MPL3115A2",
+        "order": 23
+      },
+      {
+        "type": "sparkfun-sensors-mpr121-qfn20",
+        "label": "MPR121",
+        "order": 87
+      },
+      {
+        "type": "sparkfun-sensors-os4000-t",
+        "label": "OS4000-T",
+        "order": 34
+      },
+      {
+        "type": "sparkfun-sensors-photocell-pth",
+        "label": "PHOTOCELL",
+        "order": 69,
+        "variants": [
+          {
+            "type": "sparkfun-sensors-photocell-pth-kit",
+            "package": "photocell-kit"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-sensors-photocell-pth-kit",
+        "label": "PHOTOCELL",
+        "order": 70,
+        "variantOf": "sparkfun-sensors-photocell-pth"
+      },
+      {
+        "type": "sparkfun-sensors-qrb1114",
+        "label": "PHOTOTRANSISTOR REFLECTIVE OBJECT SENSOR",
+        "order": 75
+      },
+      {
+        "type": "sparkfun-sensors-qrd1114",
+        "label": "QRD1114",
+        "order": 76
+      },
+      {
+        "type": "sparkfun-sensors-qre1113",
+        "label": "QRE1113",
+        "order": 77
+      },
+      {
+        "type": "sparkfun-sensors-sca1000",
+        "label": "SCA1000",
+        "order": 14
+      },
+      {
+        "type": "sparkfun-sensors-sca3000",
+        "label": "SCA3000",
+        "order": 15
+      },
+      {
+        "type": "sparkfun-sensors-scp1000-d01-smd",
+        "label": "SCP1000_D01 (scp1000)",
+        "order": 21
+      },
+      {
+        "type": "sparkfun-sensors-scp1000-d01-smd2",
+        "label": "SCP1000_D01 (scp1000-lg)",
+        "order": 20
+      },
+      {
+        "type": "sparkfun-sensors-sht1x-smd",
+        "label": "SHT1x Humdity Sensor",
+        "order": 56
+      },
+      {
+        "type": "sparkfun-sensors-si1120",
+        "label": "SI1120",
+        "order": 19
+      },
+      {
+        "type": "sparkfun-sensors-solar-ixys",
+        "label": "SOLAR-IXYS",
+        "order": 78
+      },
+      {
+        "type": "sparkfun-sensors-spm0204ud5-smd",
+        "label": "SPM0204UD5",
+        "order": 91
+      },
+      {
+        "type": "sparkfun-sensors-st-gyro-pr-lga",
+        "label": "ST-GYRO-PR (st-gyro)",
+        "order": 52
+      },
+      {
+        "type": "sparkfun-sensors-st-gyro-pr-lga28",
+        "label": "ST-GYRO-PR (lga28-4x5)",
+        "order": 51
+      },
+      {
+        "type": "sparkfun-sensors-st-gyro-py-smd",
+        "label": "ST-GYRO-PY",
+        "order": 53
+      },
+      {
+        "type": "sparkfun-sensors-tcm8240md",
+        "label": "TCM8240MD",
+        "order": 26
+      },
+      {
+        "type": "sparkfun-sensors-temperature-sensor",
+        "label": "TEMPERATURE-SENSOR",
+        "order": 82
+      },
+      {
+        "type": "sparkfun-sensors-temt6000",
+        "label": "Ambient Light Sensor",
+        "order": 18
+      },
+      {
+        "type": "sparkfun-sensors-tmp102",
+        "label": "TMP102",
+        "order": 83
+      },
+      {
+        "type": "sparkfun-sensors-tmp36-gt9",
+        "label": "TMP36",
+        "order": 84,
+        "variants": [
+          {
+            "type": "sparkfun-sensors-tmp36-to-92-kit",
+            "package": "to-92-kit"
+          }
+        ]
+      },
+      {
+        "type": "sparkfun-sensors-tmp36-to-92-kit",
+        "label": "TMP36",
+        "order": 85,
+        "variantOf": "sparkfun-sensors-tmp36-gt9"
+      },
+      {
+        "type": "sparkfun-sensors-touch",
+        "label": "TOUCH (touch1)",
+        "order": 88
+      },
+      {
+        "type": "sparkfun-sensors-touch-2",
+        "label": "TOUCH (touch2)",
+        "order": 89
+      },
+      {
+        "type": "sparkfun-sensors-transchiptc5747",
+        "label": "TRANSCHIPTC5747",
+        "order": 57
+      },
+      {
+        "type": "sparkfun-sensors-vcnl4000",
+        "label": "VCNL4000",
+        "order": 73
+      }
+    ],
+    "sparkfun-etc": [
+      {
+        "type": "sparkfun-badgerarray",
+        "label": "LED BadgerArray",
+        "order": 2
+      },
+      {
+        "type": "sparkfun-badgerstick",
+        "label": "BadgerStick",
+        "order": 1
+      },
+      {
+        "type": "sparkfun-bme280-breakout",
+        "label": "BME280 Breakout",
+        "order": 4
+      },
+      {
+        "type": "sparkfun-can-bus-shield",
+        "label": "CAN-Bus Shield",
+        "order": 9
+      },
+      {
+        "type": "sparkfun-imu-breakout-mpu-9250",
+        "label": "SparkFun IMU Breakout - MPU-9250",
+        "order": 0
+      },
+      {
+        "type": "sparkfun-load-sensor-combinator",
+        "label": "SparkFun Load Sensor Combinator",
+        "order": 7
+      },
+      {
+        "type": "sparkfun-lsm303c-6-dof-imu-breakout",
+        "label": "LSM303C (6 DOF)",
+        "order": 5
+      },
+      {
+        "type": "sparkfun-midi-shield",
+        "label": "SparkFun MIDI Shield",
+        "order": 10
+      },
+      {
+        "type": "sparkfun-soil-moisture-sensor",
+        "label": "Soil Moisture Sensor",
+        "order": 6
+      },
+      {
+        "type": "sparkfun-stepoko",
+        "label": "SparkFun Stepoko",
+        "order": 3
+      },
+      {
+        "type": "sparkfun-storage-microsd",
+        "label": "SparkFun - microSD Transflash",
+        "order": 11
+      },
+      {
+        "type": "sparkfun-tilt-a-whirl",
+        "label": "SparkFun RPI-1031 Tilt-a-Whirl Breakout",
+        "order": 8
+      }
+    ],
+    "arduino": [
+      {
+        "type": "arduino-adk-mega-2560-rev3-fix",
+        "label": "Arduino Mega ADK (Rev3) (fix)",
+        "order": 6
+      },
+      {
+        "type": "arduino-adk-mega-2560-rev3-icsp",
+        "label": "Arduino Mega ADK (Rev3) (icsp)",
+        "order": 28
+      },
+      {
+        "type": "arduino-ble-lowpower-revb-final-5",
+        "label": "blueIOT RevB",
+        "order": 35
+      },
+      {
+        "type": "arduino-bt07",
+        "label": "Arduino BT",
+        "order": 4
+      },
+      {
+        "type": "arduino-due-v02b",
+        "label": "Arduino Due (Rev2b)",
+        "order": 7
+      },
+      {
+        "type": "arduino-esplora",
+        "label": "Arduino Esplora (Rev4)",
+        "order": 10
+      },
+      {
+        "type": "arduino-ethernet",
+        "label": "Arduino Board Ethernet",
+        "order": 9
+      },
+      {
+        "type": "arduino-ethernet-v11",
+        "label": "Ethernet Pro",
+        "order": 19
+      },
+      {
+        "type": "arduino-fio-v22-fix",
+        "label": "Arduino Fio (Funnel I/O) (fix)",
+        "order": 16,
+        "variants": [
+          {
+            "type": "arduino-fio-v22-iscp",
+            "package": "arduino-fio-v22-iscp"
+          }
+        ]
+      },
+      {
+        "type": "arduino-fio-v22-fix-bottom",
+        "label": "Arduino Fio (Funnel I/O) (fix-bottom)",
+        "order": 27,
+        "variants": [
+          {
+            "type": "arduino-fio-v22-iscp-bottom",
+            "package": "arduino-fio-v22-iscp-bottom"
+          }
+        ]
+      },
+      {
+        "type": "arduino-fio-v22-iscp",
+        "label": "Arduino Fio (Funnel I/O)",
+        "order": 25,
+        "variantOf": "arduino-fio-v22-fix"
+      },
+      {
+        "type": "arduino-fio-v22-iscp-bottom",
+        "label": "Arduino Fio (Funnel I/O)",
+        "order": 26,
+        "variantOf": "arduino-fio-v22-fix-bottom"
+      },
+      {
+        "type": "arduino-intel-galileo-half-pcb-shape",
+        "label": "Arduino Intel Galileo Shield/2 PCB",
+        "order": 38
+      },
+      {
+        "type": "arduino-intel-galileo-pcb-shape",
+        "label": "Arduino Intel Galileo Shield PCB",
+        "order": 37
+      },
+      {
+        "type": "arduino-leonardo-rev3-fix",
+        "label": "Arduino Leonardo (Rev3b)",
+        "order": 11
+      },
+      {
+        "type": "arduino-mega-2560-rev3-fix",
+        "label": "Arduino Mega 2560 (Rev3)",
+        "order": 5
+      },
+      {
+        "type": "arduino-mega-r3-shield-one-layer",
+        "label": "Arduino Mega Shield PCB",
+        "order": 39,
+        "variants": [
+          {
+            "type": "arduino-mega-rev3-shield-two-layer",
+            "package": "arduino-mega-rev3-shield-two-layer"
+          }
+        ]
+      },
+      {
+        "type": "arduino-mega-rev3-shield-two-layer",
+        "label": "Arduino Mega Shield PCB",
+        "order": 40,
+        "variantOf": "arduino-mega-r3-shield-one-layer"
+      },
+      {
+        "type": "arduino-mega-sensor-shield-v20",
+        "label": "Arduino Mega Sensor Shield v2.0",
+        "order": 21
+      },
+      {
+        "type": "arduino-micro-rev03-fix",
+        "label": "Arduino Micro (Rev3)",
+        "order": 13
+      },
+      {
+        "type": "arduino-mini-v5",
+        "label": "Arduino Mini (Rev5)",
+        "order": 14
+      },
+      {
+        "type": "arduino-motor-shield-rev3",
+        "label": "Arduino Motor Shield (Rev3)",
+        "order": 18
+      },
+      {
+        "type": "arduino-nano-rp2040-tht-1",
+        "label": "Arduino NANO RP2040 CONNECT with headers",
+        "order": 30
+      },
+      {
+        "type": "arduino-nano3-fix",
+        "label": "Arduino Nano (Rev3.0)",
+        "order": 8
+      },
+      {
+        "type": "arduino-nano3-icsp",
+        "label": "Arduino Nano (Rev3.0) (ICSP)",
+        "order": 29
+      },
+      {
+        "type": "arduino-pro",
+        "label": "Arduino Pro",
+        "order": 15
+      },
+      {
+        "type": "arduino-pro-mini-3-3v-v14",
+        "label": "Arduino Pro Mini (3.3V)",
+        "order": 31
+      },
+      {
+        "type": "arduino-pro-mini-5v-v14",
+        "label": "Arduino Pro Mini (5V)",
+        "order": 32
+      },
+      {
+        "type": "arduino-pro-mini-v13-a4-5",
+        "label": "Arduino Pro Mini v13",
+        "order": 12
+      },
+      {
+        "type": "arduino-sensor-shield-v5-1",
+        "label": "Arduino Sensor Shield v5.0",
+        "order": 20
+      },
+      {
+        "type": "arduino-shield",
+        "label": "Arduino Shield PCB",
+        "order": 42,
+        "variants": [
+          {
+            "type": "arduino-shield-r3-two-layer",
+            "package": "arduino-shield-r3-two-layer"
+          }
+        ]
+      },
+      {
+        "type": "arduino-shield-r3-two-layer",
+        "label": "Arduino Shield PCB",
+        "order": 43,
+        "variantOf": "arduino-shield"
+      },
+      {
+        "type": "arduino-shield-r4-two-layer",
+        "label": "Arduino R4 Shield PCB",
+        "order": 41
+      },
+      {
+        "type": "arduino-uno-rev3-fix",
+        "label": "Arduino Uno (Rev3)",
+        "order": 0
+      },
+      {
+        "type": "arduino-uno-rev3-icsp",
+        "label": "Arduino Uno (Rev3) - ICSP (icsp)",
+        "order": 34
+      },
+      {
+        "type": "arduino-uno-rev3-icsp-1",
+        "label": "Arduino Uno (Rev3) - ICSP (icsp-1)",
+        "order": 33
+      },
+      {
+        "type": "arduino-voice-shield-v16",
+        "label": "Arduino Voicebox Shield (Stephen Hawking in a box)",
+        "order": 44
+      },
+      {
+        "type": "arduino-yun-rev1-v1",
+        "label": "Arduino Yun",
+        "order": 1
+      },
+      {
+        "type": "arduinobluetoothmatev13",
+        "label": "Bluetooth Mate Silver",
+        "order": 45
+      },
+      {
+        "type": "arduinoxbeere",
+        "label": "Arduino Xbee Libellium Shield",
+        "order": 24
+      },
+      {
+        "type": "gsm-quectel-updatetid-2-v1-3",
+        "label": "Arduino GSM Shield",
+        "order": 17
+      },
+      {
+        "type": "intel-arduino-galileo",
+        "label": "Intel Galileo",
+        "order": 36,
+        "variantOf": "intel-arduino-galileo-simple"
+      },
+      {
+        "type": "intel-arduino-galileo-simple",
+        "label": "Intel Galileo",
+        "order": 3,
+        "variants": [
+          {
+            "type": "intel-arduino-galileo",
+            "package": "intel-arduino-galileo"
+          }
+        ]
+      },
+      {
+        "type": "proto-shield-rev3",
+        "label": "Arduino Prototyping Shield",
+        "order": 22
+      },
+      {
+        "type": "shield-eth06-poe",
+        "label": "Arduino Ethernet Shield (Rev3)",
+        "order": 2
+      },
+      {
+        "type": "wireless-sd-v3",
+        "label": "Arduino Wireless SD Shield",
+        "order": 23
+      }
+    ],
+    "lilypad": [
+      {
+        "type": "buzzer-v15",
+        "label": "LilyPad Buzzer",
+        "order": 14
+      },
+      {
+        "type": "lilypad-accelerometer-v17",
+        "label": "LilyPad Accelerometer ADXL335",
+        "order": 8
+      },
+      {
+        "type": "lilypad-arduino-usb",
+        "label": "LilyPad Arduino USB",
+        "order": 0
+      },
+      {
+        "type": "lilypad-battery-connect-v11",
+        "label": "Lilypad Battery Connect",
+        "order": 3
+      },
+      {
+        "type": "lilypad-button-v12",
+        "label": "LilyPad Button Board",
+        "order": 9
+      },
+      {
+        "type": "lilypad-coincell-battery-v17",
+        "label": "LilyPad Coin Cell Battery Holder",
+        "order": 4
+      },
+      {
+        "type": "lilypad-led-v14",
+        "label": "LilyPad LED",
+        "order": 6
+      },
+      {
+        "type": "lilypad-light-sensor-v13",
+        "label": "LilyPad Light Sensor",
+        "order": 10
+      },
+      {
+        "type": "lilypad-powersupply-v18",
+        "label": "Lilypad Power Supply",
+        "order": 7
+      },
+      {
+        "type": "lilypad-simple-v25",
+        "label": "LilyPad Arduino Simple Board",
+        "order": 1
+      },
+      {
+        "type": "lilypad-simplepower-v13",
+        "label": "LilyPad Simple Power",
+        "order": 5
+      },
+      {
+        "type": "lilypad-slide-switch13",
+        "label": "LilyPad Slide Switch",
+        "order": 11
+      },
+      {
+        "type": "lilypad-temp-v12",
+        "label": "LilyPad Temperature Sensor",
+        "order": 12
+      },
+      {
+        "type": "lilypad-vibe-motor",
+        "label": "Lilypad Vibe Motor",
+        "order": 16
+      },
+      {
+        "type": "lilypad-xbee-v15",
+        "label": "LilyPad XBee",
+        "order": 17
+      },
+      {
+        "type": "mainboard-v18",
+        "label": "Lilypad Arduino Board",
+        "order": 2
+      },
+      {
+        "type": "powersupply-lipo-v15",
+        "label": "LilyPad LiPower",
+        "order": 13
+      },
+      {
+        "type": "tricolor-led-v16",
+        "label": "LilyPad Tri-Color LED",
+        "order": 15
+      }
+    ],
+    "picaxe": [
+      {
+        "type": "picaxe-08",
+        "label": "PICAXE-08",
+        "order": 0
+      },
+      {
+        "type": "picaxe-08m",
+        "label": "PICAXE-08M",
+        "order": 1
+      },
+      {
+        "type": "picaxe-14m",
+        "label": "PICAXE-14M",
+        "order": 2
+      },
+      {
+        "type": "picaxe-18",
+        "label": "PICAXE-18",
+        "order": 3
+      },
+      {
+        "type": "picaxe-18a",
+        "label": "PICAXE-18A",
+        "order": 4
+      },
+      {
+        "type": "picaxe-18m",
+        "label": "PICAXE-18M",
+        "order": 5
+      },
+      {
+        "type": "picaxe-18x",
+        "label": "PICAXE-18X",
+        "order": 6
+      },
+      {
+        "type": "picaxe-20m",
+        "label": "PICAXE-20M",
+        "order": 7
+      },
+      {
+        "type": "picaxe-20x2",
+        "label": "PICAXE-20X2",
+        "order": 8
+      },
+      {
+        "type": "picaxe-28",
+        "label": "PICAXE-28",
+        "order": 9
+      },
+      {
+        "type": "picaxe-28a",
+        "label": "PICAXE-28A",
+        "order": 10
+      },
+      {
+        "type": "picaxe-28x",
+        "label": "PICAXE-28X",
+        "order": 11
+      },
+      {
+        "type": "picaxe-28x1",
+        "label": "PICAXE-28X1",
+        "order": 12
+      },
+      {
+        "type": "picaxe-28x2",
+        "label": "PICAXE-28X2",
+        "order": 13
+      },
+      {
+        "type": "picaxe-28x2-3v",
+        "label": "PICAXE-28X2-3V",
+        "order": 14
+      },
+      {
+        "type": "picaxe-40x",
+        "label": "PICAXE-40X",
+        "order": 15
+      },
+      {
+        "type": "picaxe-40x1",
+        "label": "PICAXE-40X1",
+        "order": 16
+      },
+      {
+        "type": "picaxe-40x2",
+        "label": "PICAXE-40X2",
+        "order": 17
+      },
+      {
+        "type": "picaxe-40x2-3v",
+        "label": "PICAXE-40X2-3V",
+        "order": 18
+      }
+    ],
+    "seeed": [
+      {
+        "type": "grove-beginner-kit",
+        "label": "Grove Beginner Kit",
+        "order": 12
+      },
+      {
+        "type": "seeed-arch-pro-v1",
+        "label": "Arch Pro V1.0",
+        "order": 0
+      },
+      {
+        "type": "seeed-arch-v1-1",
+        "label": "Arch V1.1",
+        "order": 1
+      },
+      {
+        "type": "seeed-grove-3axis-digital-accelerometer-16g",
+        "label": "Grove 3 Axis Digital Accelerometer 16g",
+        "order": 10
+      },
+      {
+        "type": "seeed-grove-4digit-display",
+        "label": "Grove 4 Digit Display",
+        "order": 11
+      },
+      {
+        "type": "seeed-grove-button",
+        "label": "Grove Button",
+        "order": 9
+      },
+      {
+        "type": "seeed-grove-buzz",
+        "label": "Grove Buzz",
+        "order": 8
+      },
+      {
+        "type": "seeed-grove-infrared-emitter",
+        "label": "Grove Infrared Emitter",
+        "order": 7
+      },
+      {
+        "type": "seeed-grove-infrared-receiver",
+        "label": "Grove Infrared Receiver",
+        "order": 6
+      },
+      {
+        "type": "seeed-grove-light-sensor",
+        "label": "Grove Light Sensor",
+        "order": 4
+      },
+      {
+        "type": "seeed-grove-oled-128x96",
+        "label": "Grove OLED 128x96",
+        "order": 3
+      },
+      {
+        "type": "seeed-grove-temperature-sensor",
+        "label": "Grove Temperature Sensor",
+        "order": 5
+      },
+      {
+        "type": "seeed-seeeduino-v3",
+        "label": "Seeeduino V3.0",
+        "order": 2
+      },
+      {
+        "type": "seeedstudio-linkit-one",
+        "label": "LinkIt ONE board",
+        "order": 13
+      }
+    ],
+    "wemos": [
+      {
+        "type": "wemos-d1-mini-1-button-shield-no-headers",
+        "label": "WeMos D1 Mini 1 Button Shield",
+        "order": 2
+      },
+      {
+        "type": "wemos-d1-mini-battery-shield-no-headers",
+        "label": "WeMos D1 Mini Battery Shield",
+        "order": 3
+      },
+      {
+        "type": "wemos-d1-mini-dual-base-shield-no-headers",
+        "label": "WeMos D1 Mini Dual Base Shield",
+        "order": 4
+      },
+      {
+        "type": "wemos-d1-mini-female-headers-above-fixed",
+        "label": "WeMos D1 Mini (female-headers-above-fixed)",
+        "order": 0
+      },
+      {
+        "type": "wemos-d1-mini-male-headers-above-fixed",
+        "label": "WeMos D1 Mini (male-headers-above-fixed)",
+        "order": 1
+      },
+      {
+        "type": "wemos-d1-mini-micro-sd-shield-no-headers",
+        "label": "WeMos D1 Mini Micro SD Shield",
+        "order": 5
+      },
+      {
+        "type": "wemos-d1-mini-motor-shield-no-headers",
+        "label": "WeMos D1 Mini Motor Shield",
+        "order": 11
+      },
+      {
+        "type": "wemos-d1-mini-oled-shield-no-headers",
+        "label": "WeMos D1 Mini OLED Shield",
+        "order": 6
+      },
+      {
+        "type": "wemos-d1-mini-protoboard-shield-no-headers",
+        "label": "WeMos D1 Mini Protoboard Shield",
+        "order": 7
+      },
+      {
+        "type": "wemos-d1-mini-relay-shield-no-headers",
+        "label": "WeMos D1 Mini Relay Shield",
+        "order": 8
+      },
+      {
+        "type": "wemos-d1-mini-relay-shield-v2-no-headers",
+        "label": "WeMos D1 Mini Relay Shield V2",
+        "order": 9
+      },
+      {
+        "type": "wemos-d1-mini-ws2812b-rgb-shield-no-headers",
+        "label": "WeMos D1 Mini WS2812B RGB Shield",
+        "order": 10
+      }
+    ],
+    "analog-devices": [
+      {
+        "type": "adi-ad22100ktz-analogdevices-ad22100ktz",
+        "label": "AD22100 - Voltage Output Temperature Sensor with Signal Conditioning",
+        "order": 16
+      },
+      {
+        "type": "adi-ad22151-analogdevices-ad22151yrz",
+        "label": "AD22151 - Linear Output Magnetic Field Sensor",
+        "order": 13
+      },
+      {
+        "type": "adi-ad584-analogdevices-ad584jnz",
+        "label": "AD584 - Pin Programmable Precision Voltage Reference",
+        "order": 6
+      },
+      {
+        "type": "adi-ad654-analogdevices-ad654jnz",
+        "label": "AD654 - Low Cost Monolithic Voltage-to-Frequency Converter",
+        "order": 7
+      },
+      {
+        "type": "adi-ad8210-analogdevices-ad8210yrz",
+        "label": "AD8210 - High Voltage Birdirectional Current Shunt Monitor",
+        "order": 12
+      },
+      {
+        "type": "adi-ad8226-analogdevices-ad8226arz",
+        "label": "AD8226 - Rail-to-Rail output Instrumentation Amplifier",
+        "order": 0
+      },
+      {
+        "type": "adi-ad8541-analogdevices-ad8541arz",
+        "label": "AD8541 - CMOS Rail-to-Rail Op Amp",
+        "order": 4
+      },
+      {
+        "type": "adi-ad8561-analogdevices-ad8561anz",
+        "label": "AD8561 - Ultrafast 7ns Single Supply Comparator",
+        "order": 8
+      },
+      {
+        "type": "adi-admp504cez-analogdevices-admp504cez",
+        "label": "ADMP504 - Ultralow Noise Microphone with Bottom Port and Analog Output",
+        "order": 15
+      },
+      {
+        "type": "adi-adp3300-analogdevices-adp3300artz",
+        "label": "ADP3300 - High Accuracy 50mA Low Dropout Linear Regulator",
+        "order": 5
+      },
+      {
+        "type": "adi-adtl082-analogdevices-adtl082arz",
+        "label": "ADTL082 - Dual JFET Input Op Amps",
+        "order": 3
+      },
+      {
+        "type": "adi-adxl327-analogdevices-adxl327cpz",
+        "label": "ADXL327 - Small, Low Power, #-Axis +/-2G Accelerometer",
+        "order": 14
+      },
+      {
+        "type": "adi-op27-analogdevices-op27gpz",
+        "label": "OP27 - Low Noise, Precision Op Amp",
+        "order": 9
+      },
+      {
+        "type": "adi-op37-analogdevices-op37gpz",
+        "label": "OP37 - Low Noise, Precision, High Speed Op Amp",
+        "order": 10
+      },
+      {
+        "type": "adi-op482-analogdevices-op482gpz",
+        "label": "OP482 - Low Power, High Speed JFET Quad Operational Amplifier",
+        "order": 11
+      },
+      {
+        "type": "adi-ssm2212-analogdevices-ssm2212rz",
+        "label": "SSM2212 - Audio Dual Matched NPN Transistor",
+        "order": 2
+      },
+      {
+        "type": "adi-ssm2220-analogdevices-ssm2220s",
+        "label": "SSM2220 - Audio Dual Matched PNP Transistor",
+        "order": 1
+      },
+      {
+        "type": "adi-tmp01-analogdevices-tmp01fpz",
+        "label": "TMP01 - Low Power, Programmable Temperature Controller",
+        "order": 17
+      }
+    ],
+    "atlas-scientific": [
+      {
+        "type": "atlas-sientific-conductivity-circuit",
+        "label": "Conductivity Circuit",
+        "order": 7
+      },
+      {
+        "type": "atlas-sientific-d-o-circuit",
+        "label": "D.O. Circuit",
+        "order": 8
+      },
+      {
+        "type": "atlas-sientific-debugger",
+        "label": "Debugger",
+        "order": 10
+      },
+      {
+        "type": "atlas-sientific-env-32x",
+        "label": "ENV-32X Flash Memory Data Logger",
+        "order": 6
+      },
+      {
+        "type": "atlas-sientific-flo-30-circuit",
+        "label": "FLO-30 Circuit",
+        "order": 5
+      },
+      {
+        "type": "atlas-sientific-orp-circuit",
+        "label": "ORP Circuit",
+        "order": 3
+      },
+      {
+        "type": "atlas-sientific-ph-circuit",
+        "label": "pH Circuit",
+        "order": 2
+      },
+      {
+        "type": "atlas-sientific-pre-assembledfemalebnc",
+        "label": "Pre-Assembled Female BNC",
+        "order": 9
+      },
+      {
+        "type": "atlas-sientific-pwr-sns",
+        "label": "PWR-SNS",
+        "order": 0
+      },
+      {
+        "type": "atlas-sientific-rj-11",
+        "label": "RJ-11 Connector with Breakout Board",
+        "order": 4
+      },
+      {
+        "type": "atlas-sientific-serial-port-connector",
+        "label": "Serial Port Connector",
+        "order": 1
+      }
+    ],
+    "infineon": [
+      {
+        "type": "infineon-bldc-shield-ifx007t",
+        "label": "BLDC-SHIELD_IFX007T",
+        "order": 7
+      },
+      {
+        "type": "infineon-cy8ckit-062s2-ai",
+        "label": "CY8CKIT-062S2-AI",
+        "order": 3
+      },
+      {
+        "type": "infineon-cy8cproto-062-4343w",
+        "label": "CY8CPROTO-062-4343W",
+        "order": 5
+      },
+      {
+        "type": "infineon-h-bridge-kit2go",
+        "label": "H-BRIDGE_KIT2GO",
+        "order": 1
+      },
+      {
+        "type": "infineon-kit-xmc11-boot-001",
+        "label": "KIT_XMC11_BOOT_001",
+        "order": 4
+      },
+      {
+        "type": "infineon-kit-xmc14-2go",
+        "label": "KIT_XMC14_2GO",
+        "order": 2
+      },
+      {
+        "type": "infineon-my-iot-adapter",
+        "label": "MY_IOT_ADAPTER",
+        "order": 0
+      },
+      {
+        "type": "infineon-tle493d-p2b6-ms2go",
+        "label": "Infineon_Infineon_TLE493D-P2B6_MS2GO",
+        "order": 6
+      }
+    ],
+    "intel": [
+      {
+        "type": "intel-arduino-galileo-gen2",
+        "label": "Intel Galileo Gen2",
+        "order": 5,
+        "variantOf": "intel-arduino-galileo-gen2-simple"
+      },
+      {
+        "type": "intel-arduino-galileo-gen2-simple",
+        "label": "Intel Galileo Gen2",
+        "order": 0,
+        "variants": [
+          {
+            "type": "intel-arduino-galileo-gen2",
+            "package": "intel-arduino-galileo-gen2"
+          }
+        ]
+      },
+      {
+        "type": "intel-edison-arduinobreakout",
+        "label": "Intel Edison Arduinobreakout",
+        "order": 2
+      },
+      {
+        "type": "intel-edison-hirosedf40",
+        "label": "EDISON (hirosedf40)",
+        "order": 1
+      },
+      {
+        "type": "intel-edison-minibreakout-bottom-fix",
+        "label": "EDISON (minibreakout-bottom-fix)",
+        "order": 3
+      },
+      {
+        "type": "intel-edison-minibreakout-fix",
+        "label": "EDISON (minibreakout-fix)",
+        "order": 4
+      }
+    ],
+    "spresense": [
+      {
+        "type": "sonyspresense-cxd5602pwbcam1",
+        "label": "Sony's Spresense Camera Board",
+        "order": 3
+      },
+      {
+        "type": "sonyspresense-cxd5602pwblm1",
+        "label": "Sony's Spresense LTE Extension Board",
+        "order": 2
+      },
+      {
+        "type": "sonyspresense-cxd5602pwdmain1",
+        "label": "Sony's Spresense Main Board",
+        "order": 0
+      },
+      {
+        "type": "sonyspresenseextension-cxd5602pwbext1",
+        "label": "Sony's Spresense Extension Board",
+        "order": 1
+      }
+    ],
+    "dagu": [
+      {
+        "type": "dagu-dgservo-9g-end-view",
+        "label": "Dagu DGServo 9g (End View)",
+        "order": 2
+      },
+      {
+        "type": "dagu-dgservo-9g-header-connector-female",
+        "label": "Dagu DGServo 9g header connector (female)",
+        "order": 6
+      },
+      {
+        "type": "dagu-dgservo-9g-header-male",
+        "label": "Dagu DGServo 9g header (male)",
+        "order": 5
+      },
+      {
+        "type": "dagu-dgservo-9g-pan-and-tilt",
+        "label": "Dagu DGServo 9g (Pan and tilt)",
+        "order": 3
+      },
+      {
+        "type": "dagu-dgservo-9g-top-view",
+        "label": "Dagu DGServo 9g (Top view)",
+        "order": 4
+      },
+      {
+        "type": "jst-b3p-vh",
+        "label": "JST-B3P-VH",
+        "order": 0
+      },
+      {
+        "type": "jst-vhr-3n",
+        "label": "JST-VHR-3N",
+        "order": 1
+      }
+    ],
+    "frc": [
+      {
+        "type": "amt103-1",
+        "label": "AMT103",
+        "order": 5
+      },
+      {
+        "type": "pcm-1",
+        "label": "PCM",
+        "order": 2
+      },
+      {
+        "type": "pdp-1",
+        "label": "PDP",
+        "order": 3
+      },
+      {
+        "type": "roborio-1",
+        "label": "roboRIO",
+        "order": 0
+      },
+      {
+        "type": "router-1",
+        "label": "Rounter OpenMesh",
+        "order": 7
+      },
+      {
+        "type": "talonsrx-1",
+        "label": "Talon SRX",
+        "order": 4
+      },
+      {
+        "type": "vrm-1",
+        "label": "VRM",
+        "order": 1
+      },
+      {
+        "type": "yumoe6b2-1",
+        "label": "YumoE6B2",
+        "order": 6
+      }
+    ],
+    "raspberry-pi": [
+      {
+        "type": "raspberry-pi-2-v1-1",
+        "label": "Raspberry Pi 2",
+        "order": 3
+      },
+      {
+        "type": "raspberry-pi-3",
+        "label": "Raspberry Pi 3",
+        "order": 1
+      },
+      {
+        "type": "raspberry-pi-4b-1",
+        "label": "Raspberry Pi 4B",
+        "order": 0
+      },
+      {
+        "type": "raspberry-pi-a",
+        "label": "Raspberry Pi A",
+        "order": 4
+      },
+      {
+        "type": "raspberry-pi-b",
+        "label": "Raspberry Pi B+",
+        "order": 7
+      },
+      {
+        "type": "raspberry-pi-b-rev1",
+        "label": "Raspberry Pi B rev1",
+        "order": 5
+      },
+      {
+        "type": "raspberry-pi-b-rev2",
+        "label": "Raspberry Pi B rev2",
+        "order": 6
+      },
+      {
+        "type": "raspberry-pi-zero-1",
+        "label": "Raspberry Pi Zero",
+        "order": 2
+      },
+      {
+        "type": "raspberrypi-b-pcb-shape",
+        "label": "Raspberry Pi Shield",
+        "order": 8,
+        "variantOf": "raspberrypi-pcb-shape"
+      },
+      {
+        "type": "raspberrypi-pcb-shape",
+        "label": "Raspberry Pi Shield",
+        "order": 9,
+        "variants": [
+          {
+            "type": "raspberrypi-b-pcb-shape",
+            "package": "raspberrypi-b-pcb-shape"
+          }
+        ]
+      }
+    ],
+    "chipkit": [
+      {
+        "type": "chipkit-basicioshield",
+        "label": "chipKIT Basic I/O Shield",
+        "order": 1
+      },
+      {
+        "type": "chipkit-motorshield",
+        "label": "chipKIT Motor Shield",
+        "order": 2
+      },
+      {
+        "type": "chipkit-mx4",
+        "label": "chipKIT™Pro MX4",
+        "order": 3
+      },
+      {
+        "type": "chipkit-wf32",
+        "label": "chipKIT WF32",
+        "order": 0
+      }
+    ],
+    "calliope": [
+      {
+        "type": "calliope-mini-3-2",
+        "label": "Calliope mini 3",
+        "order": 2
+      },
+      {
+        "type": "calliope-mini-v-1-0",
+        "label": "Calliope Mini V 1.0",
+        "order": 0
+      },
+      {
+        "type": "calliope-mini-v-1-3",
+        "label": "Calliope Mini V 1.3",
+        "order": 1
+      }
+    ],
+    "esp": [
+      {
+        "type": "esp8266-7",
+        "label": "ESP8266 WiFi Module (7)",
+        "order": 0
+      },
+      {
+        "type": "esp8266-module",
+        "label": "ESP8266 WiFi Module (module)",
+        "order": 1
+      },
+      {
+        "type": "esp8266-thing-dev",
+        "label": "SparkFun ESP8266 Thing",
+        "order": 3
+      },
+      {
+        "type": "espruinopico-8fb644a5b6642112445ed6d90bc494d8-6",
+        "label": "Espruino Pico",
+        "order": 2
+      }
+    ],
+    "adafruit": [
+      {
+        "type": "adafruit-atmega32u4-breakout",
+        "label": "Adafruit Atmega32u4 Breakout Board",
+        "order": 0
+      }
+    ],
+    "voltage-regulators": [
+      {
+        "type": "aoz3013pi-0671c5779d4831e9bb583672ac1d7afe-1",
+        "label": "APZ3013PI",
+        "order": 21
+      },
+      {
+        "type": "aoz3018pi-4b4d7335497bbf379c232d88829b4eaf-1",
+        "label": "APZ3018PI",
+        "order": 22
+      },
+      {
+        "type": "icl7660-44fc8a045bba7b5d59c3f73c1e79ff67-1",
+        "label": "ICL7660",
+        "order": 24
+      },
+      {
+        "type": "icl7660-dip-a69567b07fdd8c38176b0c6f9ef2093f-1",
+        "label": "ICL7660 (DIP)",
+        "order": 25
+      },
+      {
+        "type": "icl7662-dip-b0b26f8cea2efc2a43aad86f232f436b-1",
+        "label": "ICL7662 (DIP)",
+        "order": 27
+      },
+      {
+        "type": "icl7662-soic-ceb3f31b17d1c702d898c345cb9aa959-1",
+        "label": "ICL7662 (SOIC)",
+        "order": 26
+      },
+      {
+        "type": "lm2574-dip-66badd838e8393d3c0dbcb8723600919-5",
+        "label": "LM2574 (DIP)",
+        "order": 0
+      },
+      {
+        "type": "lm2574-soic-139fde836b26224f66fa149e18beb2eb-2",
+        "label": "LM2574 (SOIC)",
+        "order": 1
+      },
+      {
+        "type": "lm2575-f4990627fb40e38fcd573bd74d3d7e4c-2",
+        "label": "LM2575 (TO220)",
+        "order": 3
+      },
+      {
+        "type": "lm2575-to263-5b86049dfb531778c02a1ede4e31e375-1",
+        "label": "LM2575 (TO263)",
+        "order": 2
+      },
+      {
+        "type": "lm2576-af865fdbce219b6e1655050c6b30f5cb-10",
+        "label": "LM2576 (TO263-5L)",
+        "order": 4
+      },
+      {
+        "type": "lm2576-to220-1dca9729a1f57f4b234b0ac8bb7693a7-3",
+        "label": "LM2576 (TO220)",
+        "order": 5
+      },
+      {
+        "type": "lm2577-to220-1585e1a79523015d3bb04fa3c119ed4b-1",
+        "label": "LM2577 (TO220)",
+        "order": 9
+      },
+      {
+        "type": "lm2577-to263-8fc1255a99f187de1e702ceedefc2a0b-1",
+        "label": "LM2577 (TO263)",
+        "order": 8
+      },
+      {
+        "type": "lm2596-to220-f44cb37d8d6021cdacac7094cee01f17-1",
+        "label": "LM2596 (TO220)",
+        "order": 7
+      },
+      {
+        "type": "lm2596-to263-2cc7b20badfc99329be65b67ba7adc35-1",
+        "label": "LM2596 (TO263)",
+        "order": 6
+      },
+      {
+        "type": "mic2171-to263-428b5a4f1a2a4e9650fa890d6eadc123-1",
+        "label": "MIC2171 (TO263)",
+        "order": 10
+      },
+      {
+        "type": "mic4574-5ee57349869fd1a1da296bd15e8e1743-1",
+        "label": "MIC4574",
+        "order": 11
+      },
+      {
+        "type": "mic4575-to220-606f336f4be80536825ec230d0d79b65-1",
+        "label": "MIC4575 (TO220)",
+        "order": 13
+      },
+      {
+        "type": "mic4575-to263-e9f75c5adeaad0de490ebb2c6da6e995-1",
+        "label": "MIC4575 (TO263)",
+        "order": 12
+      },
+      {
+        "type": "mic4576-to220-7ca7aead36ea07c96091208b0122f0cc-1",
+        "label": "MIC4576 (TO220)",
+        "order": 15
+      },
+      {
+        "type": "mic4576-to263-98ea17460fdaa28f8d6fb0856792dbff-1",
+        "label": "MIC4576 (TO263)",
+        "order": 14
+      },
+      {
+        "type": "st662-d8b963bc77dd4b623cd15dc5ffd12c1a-6",
+        "label": "ST662",
+        "order": 23
+      },
+      {
+        "type": "xl4005-dd04c65a74197e075712ad6517003651-1",
+        "label": "XL4005",
+        "order": 16
+      },
+      {
+        "type": "xl4015-6b5078816154b8728cafe03e7fce04a5-1",
+        "label": "XL4015",
+        "order": 17
+      },
+      {
+        "type": "xl4016-d347983e432b7485814462ea48d5bf18-1",
+        "label": "XL4016",
+        "order": 18
+      },
+      {
+        "type": "xl6009-8044d35aa5770759ef09c66c0795aa37-5",
+        "label": "XL6009",
+        "order": 19
+      },
+      {
+        "type": "xl6019-536dee8208b446ab0afc0b18a22594dc-2",
+        "label": "XL6019",
+        "order": 20
+      }
+    ],
+    "simulator": [
+      {
+        "type": "7segment-9-9-an",
+        "label": "7 Segment Display",
+        "order": 6
+      },
+      {
+        "type": "fuse-with-handler",
+        "label": "Fuse with Handler",
+        "order": 11
+      },
+      {
+        "type": "humidity-and-temperature-sensor-rht03",
+        "label": "Humidity and Temperature Sensor RHT03",
+        "order": 3
+      },
+      {
+        "type": "led-flux-blue-anode",
+        "label": "Super Flux LED blue",
+        "order": 4
+      },
+      {
+        "type": "led-matrix-kingbright-ta07-11",
+        "label": "LED Dot Matrix 18mm (0.7 INCH)",
+        "order": 7,
+        "variants": [
+          {
+            "type": "led-matrix-kingbright-tc07-11",
+            "package": "led-matrix-kingbright-tc07-11"
+          }
+        ]
+      },
+      {
+        "type": "led-matrix-kingbright-tc07-11",
+        "label": "LED Dot Matrix 18mm (0.7 INCH)",
+        "order": 15,
+        "variantOf": "led-matrix-kingbright-ta07-11"
+      },
+      {
+        "type": "led-prolight-rgb",
+        "label": "Prolight RGB 3 Watt Star",
+        "order": 5
+      },
+      {
+        "type": "lm35",
+        "label": "LM35 Temperature Sensor",
+        "order": 1
+      },
+      {
+        "type": "power-plug",
+        "label": "Power plug",
+        "order": 9
+      },
+      {
+        "type": "power-supply-dc-5",
+        "label": "DC Power",
+        "order": 12
+      },
+      {
+        "type": "power-supply-pulse-1",
+        "label": "Pulse Power",
+        "order": 14
+      },
+      {
+        "type": "power-supply-sine-1",
+        "label": "AC Power",
+        "order": 13
+      },
+      {
+        "type": "reedswitch-500mil",
+        "label": "Reed switch",
+        "order": 2
+      },
+      {
+        "type": "smd-vreg-7805",
+        "label": "Voltage Regulator - 5V",
+        "order": 16,
+        "variantOf": "voltage-regulator-7805"
+      },
+      {
+        "type": "solenoid",
+        "label": "Solenoid",
+        "order": 8
+      },
+      {
+        "type": "tilt-switch",
+        "label": "Tilt Switch",
+        "order": 0
+      },
+      {
+        "type": "voltage-regulator-7805",
+        "label": "Voltage Regulator - 5V",
+        "order": 10,
+        "variants": [
+          {
+            "type": "smd-vreg-7805",
+            "package": "DPak"
+          }
+        ]
+      }
+    ]
+  },
+  "bundledPackIds": [
+    "core-basic",
+    "core-input",
+    "core-output",
+    "core-ics",
+    "core-power",
+    "core-microcontroller",
+    "core-connection",
+    "core-communication",
+    "core-tools",
+    "core-misc"
+  ]
+}

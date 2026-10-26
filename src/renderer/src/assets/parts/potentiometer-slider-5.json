@@ -1,0 +1,76 @@
+{
+  "type": "potentiometer-slider-5",
+  "label": "Slide Potentiometer",
+  "family": "Potentiometer",
+  "tags": [
+    "potentiometer",
+    "poti",
+    "adjustable",
+    "resistor",
+    "slider",
+    "fritzing core"
+  ],
+  "description": "A sliding adjustable resistor (potentiometer).",
+  "source": {
+    "fzp": "potentiometer_slider_5.fzp",
+    "moduleId": "potentiometer_slider_5_PotentiometerModuleID"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.1\" viewBox=\"0 0 3281.7 553.6\" xml:space=\"preserve\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"breadboard\"><polyline transform=\"matrix(13.58 0 0 13.889 -67.572 0)\" points=\"13.588 20.53 13.588 15.149 246.61 15.149 246.61 20.53\" fill=\"#727272\" stroke-width=\"1.0113\"/><line x1=\"117.21\" x2=\"117.21\" y1=\"247.76\" y2=\"236.89\" stroke-width=\"13.889\"/><rect x=\".23626\" y=\"202\" width=\"116.97\" height=\"63.33\" fill=\"#808080\" stroke-width=\"0\"/><path d=\"m20.056 226.06c-2.3889 9.5972 14.111 18.333 37.194 18.333 23.069 0 39.722-8.7361 37.472-18.333-2-8.5139-18.569-14.806-37.222-14.806-18.625 0-35.305 6.2917-37.444 14.806z\" stroke-width=\"13.889\"/><polygon transform=\"matrix(13.889 0 0 13.889 -71.764 0)\" points=\"13.588 19.065 5.167 19.065 5.167 37.843 241.45 37.843 241.45 19.065 233.03 19.065 233.03 20.481 13.588 20.481\" fill=\"#3f3f3f\"/><rect x=\"3164.4\" y=\"201.54\" width=\"116.97\" height=\"63.33\" fill=\"#808080\" stroke-width=\"0\"/><g stroke-width=\"13.889\"><path d=\"m3261.6 226.06c2.3889 9.5972-14.111 18.333-37.194 18.333-23.056 0-39.736-8.7361-37.458-18.333 1.9861-8.5139 18.556-14.806 37.222-14.806 18.611 0 35.292 6.2917 37.43 14.806z\"/><rect x=\"117.21\" y=\"239.89\" width=\"3047.2\" height=\"15.764\"/><g faction=\"resistance\" faction-resistance=\"transform:translate(f{resistance}, 0)\" frange-resistance-start=\"-1810\" frange-resistance-end=\"975\"><rect x=\"1937.4\" y=\"216.53\" width=\"246.25\" height=\"56.805\" fill=\"#212121\"/><rect x=\"1937.4\" y=\"210.56\" width=\"246.25\" height=\"54.417\" fill=\"#333\"/><path d=\"m2107.9 159.61 1.0555-77.569-11.875-16.444 12.403-29.375-10.972-36.222h-21.889l-8.9027 148.71h-14.264l-9-148.71h-21.889l-11 36.222 12.431 29.375-11.875 16.5 0.9722 77.514c1.6806 34.125 2.1667 86.222-9.5972 86.222 0 0 17.528 7.5416 57.042 7.5416s56.917-7.5416 56.917-7.5416c-11.722 0-11.264-52.097-9.5555-86.222z\" fill=\"#333\" transform=\"translate(5.752, 0)\"/><path d=\"m2013.1 87.416c-0.2222 35.86 2.1667 158.42-9.5972 158.42 14.375 0 16.486-131.15 9.5972-158.42z\" fill=\"#212121\" transform=\"translate(14.000, 0.000)\"/><path d=\"m2107.9 87.416c0.25 34.889-2.1667 158.42 9.5555 158.42-14.361 0-16.5-131.15-9.5555-158.42z\" fill=\"#212121\"/></g></g><g fill=\"#8c8c8c\" stroke-width=\"13.889\"><rect x=\"2897\" y=\"508.97\" width=\"47.25\" height=\"44.625\"/><rect x=\"2700.2\" y=\"508.98\" width=\"47.222\" height=\"44.625\"/><rect x=\"2690.6\" y=\"508.98\" width=\"66.486\" height=\"16.625\"/><rect x=\"327.56\" y=\"508.98\" width=\"66.486\" height=\"16.625\"/><rect x=\"2887.4\" y=\"508.97\" width=\"66.486\" height=\"16.625\"/><rect x=\"337.18\" y=\"508.98\" width=\"47.236\" height=\"44.625\"/><rect x=\"524.41\" y=\"508.98\" width=\"66.486\" height=\"16.625\"/><rect x=\"534.03\" y=\"508.98\" width=\"47.236\" height=\"44.625\"/></g><g fill=\"none\" stroke-width=\"0\"><rect id=\"connector0pin\" x=\"534.03\" y=\"508.98\" width=\"47.236\" height=\"44.625\"/><rect id=\"connector1pin\" x=\"337.18\" y=\"508.98\" width=\"47.236\" height=\"44.625\"/><rect id=\"connector2pin\" x=\"2700.2\" y=\"508.98\" width=\"47.222\" height=\"44.625\"/><rect id=\"connector3pin\" x=\"2897\" y=\"508.97\" width=\"47.25\" height=\"44.625\"/></g></g></svg>",
+      "w": 315.04,
+      "h": 53.15,
+      "pins": {
+        "leg1": [
+          53.53,
+          51
+        ],
+        "wiper": [
+          34.64,
+          51
+        ],
+        "leg2": [
+          261.49,
+          51
+        ],
+        "wiper-1": [
+          280.38,
+          51
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg enable-background=\"new 0 0 28.8 43.2\" version=\"1.1\" viewBox=\"0 0 250.26 410.16\" xml:space=\"preserve\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><g id=\"schematic\"><g faction=\"resistance\" faction-resistance=\"transform:translate(245,205) rotate(f{resistance}) translate(-245,-205)\" frange-resistance-start=\"-40\" frange-resistance-end=\"40\"><line x1=\"124.81\" x2=\"245\" y1=\"205\" y2=\"205\" fill=\"none\" stroke=\"#000\" stroke-linecap=\"round\" stroke-width=\"10\"/><polygon faction=\"slider\" transform=\"matrix(10.391 0 0 10.417 -9.4161 -20.007)\" points=\"13.6 23.1 13.6 20.1 9.4 21.6\" stroke-width=\"1.0012\"/><line id=\"connector1pin\" x1=\"150.260\" x2=\"245.100\" y1=\"205.602\" y2=\"205.602\" stroke=\"#555\" stroke-linecap=\"round\" stroke-width=\"10\"/><line id=\"connector3pin\" x1=\"150.26\" x2=\"245.1\" y1=\"205\" y2=\"205\" stroke-linecap=\"round\" stroke-width=\"10\"/></g><g fill=\"#555555\" font-family=\"Noto Sans\" font-size=\"25\" stroke-width=\"10.417\"><text x=\"15.771643\" y=\"344.28427\">1</text><text x=\"16.946949\" y=\"86.790543\">3</text><text x=\"174.26567\" y=\"191.2489\">2</text></g><g stroke=\"#000\" stroke-linecap=\"round\" stroke-width=\"6\"><line x1=\"45.121\" x2=\"3\" y1=\"308.39\" y2=\"290\"/><line x1=\"3\" x2=\"83\" y1=\"290\" y2=\"265\"/><line x1=\"83\" x2=\"3\" y1=\"265\" y2=\"240\"/><line x1=\"3\" x2=\"83\" y1=\"240\" y2=\"215\"/><line x1=\"83\" x2=\"3\" y1=\"215\" y2=\"190\"/><line x1=\"3\" x2=\"83\" y1=\"190\" y2=\"165\"/><line x1=\"83\" x2=\"3\" y1=\"165\" y2=\"140\"/><line x1=\"3\" x2=\"83\" y1=\"140\" y2=\"115\"/><line x1=\"83\" x2=\"45.97\" y1=\"115\" y2=\"101.61\"/></g><g fill=\"none\"><line id=\"connector0pin\" x1=\"45.761\" x2=\"45.761\" y1=\"405.16\" y2=\"309.86\" stroke=\"#555\" stroke-linecap=\"round\" stroke-width=\"10\"/><rect id=\"connector0terminal\" x=\"40.264\" y=\"400\" width=\"10\" height=\"10\" stroke-width=\"0\"/><rect id=\"connector1terminal\" x=\"240.26\" y=\"200\" width=\"10\" height=\"10\" stroke-width=\"0\"/><line id=\"connector2pin\" x1=\"45.761\" x2=\"45.761\" y1=\"5\" y2=\"99.618\" stroke=\"#555\" stroke-linecap=\"round\" stroke-width=\"10\"/><g><rect id=\"connector2terminal\" x=\"40.264\" y=\"1.4211e-14\" width=\"10\" height=\"10\" stroke-width=\"0\"/><rect id=\"connector3terminal\" x=\"240.26\" y=\"200\" width=\"10\" height=\"10\" stroke-width=\"0\"/></g></g></g></svg>",
+      "w": 24.02,
+      "h": 39.38,
+      "pins": {
+        "leg1": [
+          4.35,
+          38.88
+        ],
+        "wiper": [
+          23.54,
+          19.68
+        ],
+        "leg2": [
+          4.35,
+          0.48
+        ],
+        "wiper-1": [
+          23.54,
+          19.68
+        ]
+      }
+    }
+  },
+  "properties": {
+    "track": "Linear",
+    "type": "Slider",
+    "power": "0.5W",
+    "maximum resistance": "10kΩ",
+    "knob status": "50%",
+    "package": "THT"
+  },
+  "icon": "<svg version=\"1.1\" viewBox=\"0 0 3281.7 553.6\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"icon\"><polyline transform=\"matrix(13.58 0 0 13.889 -67.572 0)\" points=\"13.588 20.53 13.588 15.149 246.61 15.149 246.61 20.53\" fill=\"#727272\" stroke-width=\"1.0113\"/><rect x=\".23626\" y=\"202\" width=\"116.97\" height=\"63.33\" fill=\"#808080\"/><path d=\"m20.056 226.06c-2.3889 9.5972 14.111 18.333 37.194 18.333 23.069 0 39.722-8.7361 37.472-18.333-2-8.5139-18.569-14.806-37.222-14.806-18.625 0-35.305 6.2917-37.444 14.806z\" stroke-width=\"13.889\"/><polygon transform=\"matrix(13.889 0 0 13.889 -71.764 0)\" points=\"13.588 19.065 5.167 19.065 5.167 37.843 241.45 37.843 241.45 19.065 233.03 19.065 233.03 20.481 13.588 20.481\" fill=\"#3f3f3f\"/><rect x=\"3164.4\" y=\"201.54\" width=\"116.97\" height=\"63.33\" fill=\"#808080\"/><g stroke-width=\"13.889\"><path d=\"m3261.6 226.06c2.3889 9.5972-14.111 18.333-37.194 18.333-23.056 0-39.736-8.7361-37.458-18.333 1.9861-8.5139 18.556-14.806 37.222-14.806 18.611 0 35.292 6.2917 37.43 14.806z\"/><rect x=\"117.21\" y=\"239.89\" width=\"3047.2\" height=\"15.764\"/><rect x=\"1937.4\" y=\"216.53\" width=\"246.25\" height=\"56.805\" fill=\"#212121\"/><rect x=\"1937.4\" y=\"210.56\" width=\"246.25\" height=\"54.417\" fill=\"#333\"/><path d=\"m2107.9 159.61 1.0555-77.569-11.875-16.444 12.403-29.375-10.972-36.222h-21.889l-8.9027 148.71h-14.264l-9-148.71h-21.889l-11 36.222 12.431 29.375-11.875 16.5 0.9722 77.514c1.6806 34.125 2.1667 86.222-9.5972 86.222 0 0 17.528 7.5416 57.042 7.5416s56.917-7.5416 56.917-7.5416c-11.722 0-11.264-52.097-9.5555-86.222z\" fill=\"#333\"/><path d=\"m2013.1 87.416c-0.2222 35.861 2.1667 158.42-9.5972 158.42 14.375 0 16.486-131.15 9.5972-158.42z\" fill=\"#212121\"/><path d=\"m2107.9 87.416c0.25 34.889-2.1667 158.42 9.5555 158.42-14.361 0-16.5-131.15-9.5555-158.42z\" fill=\"#212121\"/></g><g fill=\"#8c8c8c\" stroke-width=\"13.889\"><rect x=\"2897\" y=\"508.97\" width=\"47.25\" height=\"44.625\"/><rect x=\"2700.2\" y=\"508.98\" width=\"47.222\" height=\"44.625\"/><rect x=\"2690.6\" y=\"508.98\" width=\"66.486\" height=\"16.625\"/><rect x=\"327.56\" y=\"508.98\" width=\"66.486\" height=\"16.625\"/><rect x=\"2887.4\" y=\"508.97\" width=\"66.486\" height=\"16.625\"/><rect x=\"337.18\" y=\"508.98\" width=\"47.236\" height=\"44.625\"/><rect x=\"524.41\" y=\"508.98\" width=\"66.486\" height=\"16.625\"/><rect x=\"534.03\" y=\"508.98\" width=\"47.236\" height=\"44.625\"/></g><g fill=\"none\" stroke-width=\"0\"><rect id=\"connector0pin\" x=\"534.03\" y=\"508.98\" width=\"47.236\" height=\"44.625\"/><rect id=\"connector1pin\" x=\"337.18\" y=\"508.98\" width=\"47.236\" height=\"44.625\"/><rect id=\"connector2pin\" x=\"2700.2\" y=\"508.98\" width=\"47.222\" height=\"44.625\"/><rect id=\"connector3pin\" x=\"2897\" y=\"508.97\" width=\"47.25\" height=\"44.625\"/></g></g></svg>",
+  "order": 10002
+}

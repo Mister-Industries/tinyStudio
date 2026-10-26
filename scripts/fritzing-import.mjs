@@ -333,6 +333,10 @@ function parseFzp(xml) {
     label: text(mod, 'label'),
     description: text(mod, 'description'),
     family: props.family || '',
+    // <tags><tag>led</tag>… — keywords the palette search matches on
+    tags: Array.from(mod.getElementsByTagName('tag'))
+      .map((t) => (t.textContent || '').trim())
+      .filter(Boolean),
     props,
     viewImage,
     connectors
@@ -581,6 +585,7 @@ function main() {
       type,
       label: fzp.title || fzp.label || type,
       family: fzp.family || 'Misc',
+      ...(fzp.tags?.length ? { tags: fzp.tags } : {}),
       description: fzp.description || undefined,
       source: { fzp: file, moduleId: fzp.moduleId },
       views: {}
@@ -608,9 +613,24 @@ function main() {
       continue
     }
 
-    // palette thumbnail: Fritzing iconView, else a small breadboard SVG fallback
-    const bb = def.views.breadboard?.svg || def.views.schematic?.svg || ''
-    def.icon = extractIcon(fzp, srcRoot) || (bb.length < 4000 ? bb : null) || undefined
+    // Fritzing's <properties> — package, spacing, resistance, and friends.
+    // `family` is hoisted to its own field; the rest ride along so the palette
+    // can tell a 5mm film cap from a 37.5mm one, and so the splitter can spot
+    // parts that differ only by package (THT vs 0603 [SMD]) and merge them.
+    const props = { ...fzp.props }
+    delete props.family
+    if (Object.keys(props).length) def.properties = props
+
+    // Palette thumbnail. Fritzing's iconView is the right art — it's drawn for
+    // exactly this, at 32×32. ~250 core parts declare no iconView and ~40 point
+    // at a file that isn't in the repo, so fall back to the schematic symbol
+    // (small and legible) and then the breadboard art. The old code capped the
+    // fallback at 4000 chars, which left the biggest parts with no icon at all.
+    def.icon =
+      extractIcon(fzp, srcRoot) ||
+      def.views.schematic?.svg ||
+      def.views.breadboard?.svg ||
+      undefined
 
     // write per-part file — flat directory (Vite dynamic-import variables only
     // support a single path segment, so family lives in the manifest, not dirs)
@@ -621,6 +641,8 @@ function main() {
       label: def.label,
       family: def.family,
       familySlug: family,
+      ...(def.tags ? { tags: def.tags } : {}),
+      ...(def.properties ? { properties: def.properties } : {}),
       views: Object.keys(def.views),
       pins: Object.keys(def.views[Object.keys(def.views)[0]].pins).length,
       icon: def.icon,

@@ -4,6 +4,11 @@
  * typed attrs. Wire: color, net info. Multi-select: summary + delete.
  * All edits dispatch Commands (undoable); moves/rotations reroute wires with
  * frozen bends like canvas drags do.
+ *
+ * The wire tool (colour picker) is pinned to the bottom of this rail — it used
+ * to sit in the components palette, but it belongs with the other property
+ * editors. It always shows: with a wire selected it recolours that wire, and
+ * otherwise it sets the colour the next drawn wire will use.
  */
 
 import { CircuitBoard, FlipHorizontal2, Plus, RotateCw, Spline, Trash2 } from 'lucide-react'
@@ -31,7 +36,7 @@ import {
   rotateBoardAssemblyCmd,
   rotateNetLabelCmd
 } from '../partsAdapter'
-import { WIRE_COLORS } from '../palette/Palette'
+import { WireColorRow } from '../wireColors'
 import type { Selection } from '../canvas/Canvas'
 
 const field =
@@ -51,7 +56,9 @@ export function InspectorRail({
   sel,
   setSel,
   netModel,
-  view
+  view,
+  wireColor,
+  onPickWireColor
 }: {
   doc: CircuitDoc
   store: CircuitStore
@@ -59,6 +66,9 @@ export function InspectorRail({
   setSel: (s: Selection) => void
   netModel: NetModel
   view: ViewId
+  /** colour the next drawn wire will use */
+  wireColor: string
+  onPickWireColor: (c: string) => void
 }): React.JSX.Element {
   const part =
     sel.parts.size === 1 && sel.wires.size === 0
@@ -75,7 +85,7 @@ export function InspectorRail({
       : undefined
 
   return (
-    <div className="w-64 shrink-0 min-h-0 relative z-20 border-l border-border-default bg-bg-raised flex flex-col">
+    <div className="w-64 shrink-0 min-h-0 relative z-20 border-r border-border-default bg-bg-raised flex flex-col">
       <div className="h-9 flex items-center px-3 border-b border-border-default shrink-0">
         <span className="text-[13px] font-semibold text-text-body">Inspector</span>
       </div>
@@ -107,6 +117,21 @@ export function InspectorRail({
             recolor it. Shift-click or drag a marquee for multi-select.
           </div>
         )}
+      </div>
+
+      {/* wire tool — pinned, always available (moved here from the palette) */}
+      <div className="shrink-0 border-t border-border-default px-3 py-2.5 flex flex-col gap-2">
+        <div className="flex items-center gap-1.5">
+          <Spline size={13} className="text-text-muted shrink-0" />
+          <span className={rowLabel}>{wire ? 'Wire color' : 'Wire color (new wires)'}</span>
+        </div>
+        <WireColorRow
+          value={wire ? wire.color || wireColor : wireColor}
+          onPick={(c) => {
+            onPickWireColor(c)
+            if (wire) store.dispatch(cmd.recolorWire(wire.id, c))
+          }}
+        />
       </div>
     </div>
   )
@@ -396,31 +421,13 @@ function WireInspector({
 }): React.JSX.Element {
   const netIdx = netModel.wireToNet.get(wire.id)
   const netPins = netIdx != null ? (netModel.nets[netIdx]?.length ?? 0) : 0
-  const color = wire.color || '#2fa46a'
+  // colour lives in the pinned wire tool at the bottom of the rail, which
+  // targets this wire whenever one is selected — no second picker here.
   return (
     <>
       <div className="flex items-center gap-2">
         <Spline size={16} className="text-brand shrink-0" />
         <span className="text-text-strong font-semibold">Wire</span>
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <span className={rowLabel}>Color</span>
-        <div className="flex items-center gap-2">
-          {WIRE_COLORS.map((c) => (
-            <button
-              key={c}
-              onClick={() => store.dispatch(cmd.recolorWire(wire.id, c))}
-              className="w-5 h-5 rounded-full border-2 transition-transform hover:scale-110"
-              style={{
-                background: c,
-                borderColor:
-                  c.toLowerCase() === color.toLowerCase()
-                    ? 'var(--brand)'
-                    : 'rgba(255,255,255,0.18)'
-              }}
-            />
-          ))}
-        </div>
       </div>
       <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 items-center">
         <span className={rowLabel}>Net pins</span>

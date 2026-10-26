@@ -1,0 +1,101 @@
+{
+  "type": "ds2809-ic",
+  "label": "DS1809",
+  "family": "DS1806",
+  "tags": [
+    "DIP",
+    "fritzing core"
+  ],
+  "description": "The DS1809 Dallastat is a nonvolatile digitally controlled potentiometer that provides 64 uniform wiper\npositions over the entire resistor range; including the high-end and low-end terminals of the device. The\nDS1809 is a low-power device capable of operating from power supplies of +4.5V to +5.5V. The device\nis ideal for low-power, portable, or battery powered applications.",
+  "source": {
+    "fzp": "ds2809_ic.fzp",
+    "moduleId": "ds1809_ic_dip"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 330\" y=\"0in\" baseProfile=\"tiny\" version=\"1.2\" x=\"0in\"><g id=\"breadboard\" gorn=\"0.1\"><rect y=\"30\" width=\"400\" id=\"middle\" gorn=\"0.1.0\" height=\"270\" x=\"0\" fill=\"#303030\"/><rect y=\"30\" width=\"400\" id=\"top\" gorn=\"0.1.1\" height=\"24.6\" x=\"0\" fill=\"#3D3D3D\"/><rect y=\"275.4\" width=\"400\" id=\"bottom\" gorn=\"0.1.2\" height=\"24.6\" x=\"0\" fill=\"#000000\"/><polygon points=\"400,30,392.5,54.6,392.5,275.4,400,300\" id=\"right\" gorn=\"0.1.3\" fill=\"#141414\"/><polygon points=\"0,30,7.5,54.6,7.5,275.4,0,300\" id=\"left\" gorn=\"0.1.4\" fill=\"#1F1F1F\"/><polygon points=\"50,115,7.5,114.6,5.6,135.8,5.6,165,50,165\" id=\"left-upper-rect\" gorn=\"0.1.5\" fill=\"#1C1C1C\"/><polygon points=\"7.5,215.5,50,215.5,50,165,5.6,165,5.6,194.2\" id=\"left-lower-rect\" gorn=\"0.1.6\" fill=\"#383838\"/><path id=\"slot\" gorn=\"0.1.7\" d=\"M5.6,135.8l0,58.3c14.7,-1.7,26.2,-14,26.2,-29.2C31.8,149.7,20.4,137.5,5.6,135.8z\" fill=\"#262626\"/><path id=\"cover\" gorn=\"0.1.8\" d=\"M7.5,54.6L7.5,114.5c23.8,4.5,41.9,25.3,41.9,50.4c0,25.1,-18,46,-41.9,50.5L7.5,215.5l50,0L57.5,54.6L7.5,54.6z\" fill=\"#303030\"/><circle cy=\"234.7\" cx=\"65\" fill=\"#212121\" r=\"20.6\"/><text y=\"165\" id=\"label\" gorn=\"0.1.10\" font-family=\"OCRA\" stroke=\"none\" x=\"63\" text-anchor=\"start\" fill=\"#e6e6e6\" font-size=\"70\">DS1809</text><rect y=\"286.6\" width=\"30\" id=\"connector0pin\" gorn=\"0.1.11\" height=\"43.4\" x=\"35\" fill=\"#8C8C8C\"/><rect y=\"300\" width=\"30\" id=\"connector0terminal\" gorn=\"0.1.12\" height=\"30\" x=\"35\" fill=\"#8C8C8C\"/><polygon points=\"35,286.6,35,306.6,65,306.6,85,297.4,85,286.6\" fill=\"#8C8C8C\"/><rect width=\"30\" id=\"connector7pin\" gorn=\"0.1.14\" height=\"43.4\" x=\"35\" fill=\"#8C8C8C\"/><rect width=\"30\" id=\"connector7terminal\" gorn=\"0.1.15\" height=\"30\" x=\"35\" fill=\"#8C8C8C\"/><polygon points=\"85,43.4,85,32.6,65,23.4,35,23.4,35,43.4\" fill=\"#8C8C8C\"/><rect y=\"286.6\" width=\"30\" id=\"connector3pin\" gorn=\"0.1.17\" height=\"43.4\" x=\"335\" fill=\"#8C8C8C\"/><rect y=\"300\" width=\"30\" id=\"connector3terminal\" gorn=\"0.1.18\" height=\"30\" x=\"335\" fill=\"#8C8C8C\"/><polygon points=\"315,286.6,315,297.4,335,306.6,365,306.6,365,286.6\" fill=\"#8C8C8C\"/><rect y=\"0\" width=\"30\" id=\"connector4pin\" gorn=\"0.1.20\" height=\"43.4\" x=\"335\" fill=\"#8C8C8C\"/><rect y=\"0\" width=\"30\" id=\"connector4terminal\" gorn=\"0.1.21\" height=\"30\" x=\"335\" fill=\"#8C8C8C\"/><polygon points=\"365,43.4,365,23.4,335,23.4,315,32.6,315,43.4\" fill=\"#8C8C8C\"/><rect y=\"0\" width=\"30\" id=\"connector6pin\" gorn=\"0.1.23\" height=\"43.4\" x=\"135\" fill=\"#8C8C8C\"/><rect width=\"30\" id=\"connector6terminal\" gorn=\"0.1.24\" height=\"30\" x=\"135\" fill=\"#8C8C8C\"/><polygon points=\"185,43.4,185,32.6,165,23.4,135,23.4,115,32.6,115,43.4\" fill=\"#8C8C8C\"/><rect y=\"0\" width=\"30\" id=\"connector5pin\" gorn=\"0.1.26\" height=\"43.4\" x=\"235\" fill=\"#8C8C8C\"/><rect width=\"30\" id=\"connector5terminal\" gorn=\"0.1.27\" height=\"30\" x=\"235\" fill=\"#8C8C8C\"/><polygon points=\"285,43.4,285,32.6,265,23.4,235,23.4,215,32.6,215,43.4\" fill=\"#8C8C8C\"/><rect y=\"286.6\" width=\"30\" id=\"connector1pin\" gorn=\"0.1.29\" height=\"43.4\" x=\"135\" fill=\"#8C8C8C\"/><rect y=\"300\" width=\"30\" id=\"connector1terminal\" gorn=\"0.1.30\" height=\"30\" x=\"135\" fill=\"#8C8C8C\"/><polygon points=\"115,286.6,115,297.4,135,306.6,165,306.6,185,297.4,185,286.6\" fill=\"#8C8C8C\"/><rect y=\"286.6\" width=\"30\" id=\"connector2pin\" gorn=\"0.1.32\" height=\"43.4\" x=\"235\" fill=\"#8C8C8C\"/><rect y=\"300\" width=\"30\" id=\"connector2terminal\" gorn=\"0.1.33\" height=\"30\" x=\"235\" fill=\"#8C8C8C\"/><polygon points=\"215,286.6,215,297.4,235,306.6,265,306.6,285,297.4,285,286.6\" fill=\"#8C8C8C\"/></g></svg>",
+      "w": 38.4,
+      "h": 31.68,
+      "pins": {
+        "RH": [
+          4.8,
+          29.6
+        ],
+        "UC": [
+          14.4,
+          29.6
+        ],
+        "STR": [
+          24,
+          29.6
+        ],
+        "RL": [
+          33.6,
+          29.6
+        ],
+        "GND": [
+          33.6,
+          2.08
+        ],
+        "RW": [
+          24,
+          2.08
+        ],
+        "DC": [
+          14.4,
+          2.08
+        ],
+        "VCC": [
+          4.8,
+          2.08
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 800 500\" y=\"0in\" baseProfile=\"tiny\" version=\"1.2\" x=\"0in\"><g id=\"schematic\" gorn=\"0.2\"><rect y=\"6.25\" width=\"393.75\" stroke-linecap=\"round\" height=\"487.5\" stroke=\"#000000\" x=\"200\" stroke-width=\"12.5\" stroke-linejoin=\"round\" fill=\"none\"/><text y=\"151.389\" id=\"label\" gorn=\"0.2.1\" font-family=\"'Droid Sans'\" stroke=\"none\" x=\"400\" text-anchor=\"middle\" fill=\"#000000\" font-size=\"48.6111\">DS1809</text><line x1=\"4.8611\" stroke-linecap=\"round\" stroke=\"#787878\" stroke-width=\"9.7222\" stroke-linejoin=\"round\" y1=\"100\" x2=\"200\" fill=\"none\" y2=\"100\"/><rect y=\"95.1389\" width=\"200\" id=\"connector0pin\" gorn=\"0.2.3\" height=\"9.7222\" x=\"0\" connectorName=\"RH\" stroke-width=\"0\" fill=\"none\"/><rect y=\"95.1389\" width=\"0\" id=\"connector0terminal\" gorn=\"0.2.4\" height=\"9.7222\" x=\"0\" stroke-width=\"0\" fill=\"none\"/><text y=\"109.722\" id=\"label0\" gorn=\"0.2.5\" font-family=\"'Droid Sans'\" stroke=\"none\" x=\"219.444\" text-anchor=\"start\" fill=\"#8c8c8c\" font-size=\"48.6111\">RH</text><text y=\"85.4167\" class=\"text\" font-family=\"Droid Sans\" stroke=\"none\" x=\"100\" stroke-width=\"0\" text-anchor=\"middle\" fill=\"#8c8c8c\" font-size=\"34.7222\">1</text><line x1=\"4.8611\" stroke-linecap=\"round\" stroke=\"#787878\" stroke-width=\"9.7222\" stroke-linejoin=\"round\" y1=\"200\" x2=\"200\" fill=\"none\" y2=\"200\"/><rect y=\"195.139\" width=\"200\" id=\"connector1pin\" gorn=\"0.2.8\" height=\"9.7222\" x=\"0\" connectorName=\"UC\" stroke-width=\"0\" fill=\"none\"/><rect y=\"195.139\" width=\"0\" id=\"connector1terminal\" gorn=\"0.2.9\" height=\"9.7222\" x=\"0\" stroke-width=\"0\" fill=\"none\"/><text y=\"209.722\" id=\"label1\" gorn=\"0.2.10\" font-family=\"'Droid Sans'\" stroke=\"none\" x=\"219.444\" text-anchor=\"start\" fill=\"#8c8c8c\" font-size=\"48.6111\">UC</text><text y=\"185.417\" class=\"text\" font-family=\"Droid Sans\" stroke=\"none\" x=\"100\" stroke-width=\"0\" text-anchor=\"middle\" fill=\"#8c8c8c\" font-size=\"34.7222\">2</text><line x1=\"4.8611\" stroke-linecap=\"round\" stroke=\"#787878\" stroke-width=\"9.7222\" stroke-linejoin=\"round\" y1=\"300\" x2=\"200\" fill=\"none\" y2=\"300\"/><rect y=\"295.139\" width=\"200\" id=\"connector2pin\" gorn=\"0.2.13\" height=\"9.7222\" x=\"0\" connectorName=\"STR\" stroke-width=\"0\" fill=\"none\"/><rect y=\"295.139\" width=\"0\" id=\"connector2terminal\" gorn=\"0.2.14\" height=\"9.7222\" x=\"0\" stroke-width=\"0\" fill=\"none\"/><text y=\"309.722\" id=\"label2\" gorn=\"0.2.15\" font-family=\"'Droid Sans'\" stroke=\"none\" x=\"219.444\" text-anchor=\"start\" fill=\"#8c8c8c\" font-size=\"48.6111\">STR</text><text y=\"285.417\" class=\"text\" font-family=\"Droid Sans\" stroke=\"none\" x=\"100\" stroke-width=\"0\" text-anchor=\"middle\" fill=\"#8c8c8c\" font-size=\"34.7222\">3</text><line x1=\"4.8611\" stroke-linecap=\"round\" stroke=\"#787878\" stroke-width=\"9.7222\" stroke-linejoin=\"round\" y1=\"400\" x2=\"200\" fill=\"none\" y2=\"400\"/><rect y=\"395.139\" width=\"200\" id=\"connector3pin\" gorn=\"0.2.18\" height=\"9.7222\" x=\"0\" connectorName=\"RL\" stroke-width=\"0\" fill=\"none\"/><rect y=\"395.139\" width=\"0\" id=\"connector3terminal\" gorn=\"0.2.19\" height=\"9.7222\" x=\"0\" stroke-width=\"0\" fill=\"none\"/><text y=\"409.722\" id=\"label3\" gorn=\"0.2.20\" font-family=\"'Droid Sans'\" stroke=\"none\" x=\"219.444\" text-anchor=\"start\" fill=\"#8c8c8c\" font-size=\"48.6111\">RL</text><text y=\"385.417\" class=\"text\" font-family=\"Droid Sans\" stroke=\"none\" x=\"100\" stroke-width=\"0\" text-anchor=\"middle\" fill=\"#8c8c8c\" font-size=\"34.7222\">4</text><line x1=\"595.139\" stroke-linecap=\"round\" stroke=\"#787878\" stroke-width=\"9.7222\" stroke-linejoin=\"round\" y1=\"100\" x2=\"795.139\" fill=\"none\" y2=\"100\"/><rect y=\"95.1389\" width=\"200\" id=\"connector7pin\" connectorname=\"VCC\" gorn=\"0.2.23\" height=\"9.7222\" x=\"600\" stroke-width=\"0\" fill=\"none\"/><rect y=\"95.1389\" width=\"0\" id=\"connector7terminal\" gorn=\"0.2.24\" height=\"9.7222\" x=\"800\" stroke-width=\"0\" fill=\"none\"/><text y=\"109.722\" id=\"label7\" gorn=\"0.2.25\" font-family=\"'Droid Sans'\" stroke=\"none\" x=\"580.556\" text-anchor=\"end\" fill=\"#8c8c8c\" font-size=\"48.6111\">VCC</text><text y=\"85.4167\" class=\"text\" font-family=\"Droid Sans\" stroke=\"none\" x=\"700\" stroke-width=\"0\" text-anchor=\"middle\" fill=\"#8c8c8c\" font-size=\"34.7222\">8</text><line x1=\"595.139\" stroke-linecap=\"round\" stroke=\"#787878\" stroke-width=\"9.7222\" stroke-linejoin=\"round\" y1=\"200\" x2=\"795.139\" fill=\"none\" y2=\"200\"/><rect y=\"195.139\" width=\"200\" id=\"connector6pin\" connectorname=\"DC\" gorn=\"0.2.28\" height=\"9.7222\" x=\"600\" stroke-width=\"0\" fill=\"none\"/><rect y=\"195.139\" width=\"0\" id=\"connector6terminal\" gorn=\"0.2.29\" height=\"9.7222\" x=\"800\" stroke-width=\"0\" fill=\"none\"/><text y=\"209.722\" id=\"label6\" gorn=\"0.2.30\" font-family=\"'Droid Sans'\" stroke=\"none\" x=\"580.556\" text-anchor=\"end\" fill=\"#8c8c8c\" font-size=\"48.6111\">DC</text><text y=\"185.417\" class=\"text\" font-family=\"Droid Sans\" stroke=\"none\" x=\"700\" stroke-width=\"0\" text-anchor=\"middle\" fill=\"#8c8c8c\" font-size=\"34.7222\">7</text><line x1=\"595.139\" stroke-linecap=\"round\" stroke=\"#787878\" stroke-width=\"9.7222\" stroke-linejoin=\"round\" y1=\"300\" x2=\"795.139\" fill=\"none\" y2=\"300\"/><rect y=\"295.139\" width=\"200\" id=\"connector5pin\" connectorname=\"RW\" gorn=\"0.2.33\" height=\"9.7222\" x=\"600\" stroke-width=\"0\" fill=\"none\"/><rect y=\"295.139\" width=\"0\" id=\"connector5terminal\" gorn=\"0.2.34\" height=\"9.7222\" x=\"800\" stroke-width=\"0\" fill=\"none\"/><text y=\"309.722\" id=\"label5\" gorn=\"0.2.35\" font-family=\"'Droid Sans'\" stroke=\"none\" x=\"580.556\" text-anchor=\"end\" fill=\"#8c8c8c\" font-size=\"48.6111\">RW</text><text y=\"285.417\" class=\"text\" font-family=\"Droid Sans\" stroke=\"none\" x=\"700\" stroke-width=\"0\" text-anchor=\"middle\" fill=\"#8c8c8c\" font-size=\"34.7222\">6</text><line x1=\"595.139\" stroke-linecap=\"round\" stroke=\"#787878\" stroke-width=\"9.7222\" stroke-linejoin=\"round\" y1=\"400\" x2=\"795.139\" fill=\"none\" y2=\"400\"/><rect y=\"395.139\" width=\"200\" id=\"connector4pin\" connectorname=\"GND\" gorn=\"0.2.38\" height=\"9.7222\" x=\"600\" stroke-width=\"0\" fill=\"none\"/><rect y=\"395.139\" width=\"0\" id=\"connector4terminal\" gorn=\"0.2.39\" height=\"9.7222\" x=\"800\" stroke-width=\"0\" fill=\"none\"/><text y=\"409.722\" id=\"label4\" gorn=\"0.2.40\" font-family=\"'Droid Sans'\" stroke=\"none\" x=\"580.556\" text-anchor=\"end\" fill=\"#8c8c8c\" font-size=\"48.6111\">GND</text><text y=\"385.417\" class=\"text\" font-family=\"Droid Sans\" stroke=\"none\" x=\"700\" stroke-width=\"0\" text-anchor=\"middle\" fill=\"#8c8c8c\" font-size=\"34.7222\">5</text></g></svg>",
+      "w": 76.8,
+      "h": 48,
+      "pins": {
+        "RH": [
+          0,
+          9.6
+        ],
+        "UC": [
+          0,
+          19.2
+        ],
+        "STR": [
+          0,
+          28.8
+        ],
+        "RL": [
+          0,
+          38.4
+        ],
+        "GND": [
+          76.8,
+          38.4
+        ],
+        "RW": [
+          76.8,
+          28.8
+        ],
+        "DC": [
+          76.8,
+          19.2
+        ],
+        "VCC": [
+          76.8,
+          9.6
+        ]
+      }
+    }
+  },
+  "properties": {
+    "package": "DS1806",
+    "part number": "DS1809",
+    "variant": "variant 1"
+  },
+  "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 30.0 33.0\" id=\"svg2\" gorn=\"0\" baseProfile=\"tiny\" version=\"1.2\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xml:space=\"preserve\"><g id=\"icon\" gorn=\"0.0\"><rect y=\"3\" width=\"30.0\" id=\"middle\" gorn=\"0.0.0\" height=\"27.0\" x=\"0\" fill=\"#303030\"/><rect y=\"3.0\" width=\"30.0\" id=\"top\" gorn=\"0.0.1\" height=\"2.46\" x=\"0\" fill=\"#3D3D3D\"/><rect y=\"27.54\" width=\"30.0\" id=\"bottom\" gorn=\"0.0.2\" height=\"2.46\" x=\"0\" fill=\"#000000\"/><polygon points=\"30.0,3 29.25,5.46 29.25,27.54 30.0,30.0\" id=\"right\" gorn=\"0.0.3\" fill=\"#141414\"/><polygon points=\"0,3 0.75,5.46 0.75,27.54 0,30.0\" id=\"left\" gorn=\"0.0.4\" fill=\"#1F1F1F\"/><polygon points=\"5,11.5 0.75,11.46 0.56,13.58 0.56,16.5 5,16.5\" id=\"left-upper-rect\" gorn=\"0.0.5\" fill=\"#1C1C1C\"/><polygon points=\"0.75,21.55 5,21.55 5,16.5 0.56,16.5 0.56,19.42\" id=\"left-lower-rect\" gorn=\"0.0.6\" fill=\"#383838\"/><path id=\"slot\" gorn=\"0.0.7\" d=\"M0.56,13.58v5.83c1.47-0.17,2.62-1.4,2.62-2.92C3.18,14.97,2.04,13.75,0.56,13.58z\" fill=\"#262626\"/><path id=\"cover\" gorn=\"0.0.8\" d=\"M0.75,5.46V11.45c2.38,0.45,4.19,2.53,4.19,5.04c0,2.51-1.8,4.6-4.19,5.05V21.55h5.0V5.46H0.75z\" fill=\"#303030\"/><circle cy=\"23.47\" cx=\"6.5\" fill=\"#212121\" r=\"2.06\"/><text y=\"16.5\" id=\"label\" gorn=\"0.0.10\" font-family=\"OCRA\" stroke=\"none\" x=\"6.5\" text-anchor=\"start\" fill=\"#dddddd\" font-size=\"8\">DS1809</text><rect y=\"28.66\" width=\"3\" id=\"connector0pin\" gorn=\"0.0.11\" height=\"4.34\" x=\"3.5\" fill=\"#8C8C8C\"/><rect y=\"30.0\" width=\"3\" id=\"connector0terminal\" gorn=\"0.0.12\" height=\"3\" x=\"3.5\" fill=\"#8C8C8C\"/><polygon points=\"3.5,28.66 3.5,30.66 6.5,30.66 8.5,29.74 8.5,28.66 &#9;\" fill=\"#8C8C8C\"/><rect width=\"3\" id=\"connector5pin\" gorn=\"0.0.14\" height=\"4.34\" x=\"3.5\" fill=\"#8C8C8C\"/><rect width=\"3\" id=\"connector5terminal\" gorn=\"0.0.15\" height=\"3\" x=\"3.5\" fill=\"#8C8C8C\"/><polygon points=\"8.5,4.34 8.5,3.26 6.5,2.34 3.5,2.34 3.5,4.34\" fill=\"#8C8C8C\"/><rect y=\"28.66\" width=\"3\" id=\"connector2pin\" gorn=\"0.0.17\" height=\"4.34\" x=\"23.5\" fill=\"#8C8C8C\"/><rect y=\"30.0\" width=\"3\" id=\"connector2terminal\" gorn=\"0.0.18\" height=\"3\" x=\"23.5\" fill=\"#8C8C8C\"/><polygon points=\"21.5,28.66 21.5,29.74 23.5,30.66 26.5,30.66 26.5,28.66\" fill=\"#8C8C8C\"/><rect y=\"0\" width=\"3\" id=\"connector3pin\" gorn=\"0.0.20\" height=\"4.34\" x=\"23.5\" fill=\"#8C8C8C\"/><rect y=\"0\" width=\"3\" id=\"connector3terminal\" gorn=\"0.0.21\" height=\"3\" x=\"23.5\" fill=\"#8C8C8C\"/><polygon points=\"26.5,4.34 26.5,2.34 23.5,2.34 21.5,3.26 21.5,4.34 &#9;\" fill=\"#8C8C8C\"/><rect y=\"28.66\" width=\"3\" id=\"connector1pin\" gorn=\"0.0.23\" height=\"4.34\" x=\"13.5\" fill=\"#8C8C8C\"/><rect y=\"30.0\" width=\"3\" id=\"connector1terminal\" gorn=\"0.0.24\" height=\"3\" x=\"13.5\" fill=\"#8C8C8C\"/><polygon points=\"11.5,28.66 11.5,29.74 13.5,30.66 16.5,30.66 18.5,29.74 18.5,28.66\" fill=\"#8C8C8C\"/><rect y=\"0\" width=\"3\" id=\"connector4pin\" gorn=\"0.0.26\" height=\"4.34\" x=\"13.5\" fill=\"#8C8C8C\"/><rect width=\"3\" id=\"connector4terminal\" gorn=\"0.0.27\" height=\"3\" x=\"13.5\" fill=\"#8C8C8C\"/><polygon points=\"18.5,4.34 18.5,3.26 16.5,2.34 13.5,2.34 11.5,3.26 11.5,4.34\" fill=\"#8C8C8C\"/></g></svg>",
+  "order": 90003
+}

@@ -1,0 +1,61 @@
+{
+  "type": "trimmer-3-2-v-hole",
+  "label": "Variable Capacitor (trimmer-3-2-v-hole)",
+  "family": "variable capacitor",
+  "tags": [
+    "capacitor",
+    "variable"
+  ],
+  "source": {
+    "fzp": "trimmer_3_2_v_hole.fzp",
+    "moduleId": "trimmer_3_2_v_holeVariableCapacitorModuleID"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg enable-background=\"new 0 0 32.024 29.13\" id=\"svg2\" version=\"1.1\" viewBox=\"0 0 32.024 29.13\" x=\"0px\" xml:space=\"preserve\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" y=\"0px\"><g id=\"breadboard\"><rect fill=\"none\" height=\"3.251\" id=\"connector0pin\" width=\"2.16\" x=\"14.922\" y=\"25.53\"/><rect fill=\"none\" height=\"2.16\" id=\"connector2pin\" width=\"2.881\" x=\"0.661\" y=\"17.894\"/><rect fill=\"none\" height=\"2.159\" id=\"connector1pin\" width=\"3.076\" x=\"28.415\" y=\"17.762\"/><rect fill=\"none\" height=\"3.16\" id=\"connector0terminal\" width=\"2.16\" x=\"14.922\" y=\"25.621\"/><rect fill=\"none\" height=\"2.159\" id=\"connector1terminal\" width=\"2.16\" x=\"29.331\" y=\"17.762\"/><rect fill=\"none\" height=\"2.16\" id=\"connector2terminal\" width=\"2.16\" x=\"0.661\" y=\"17.894\"/><g id=\"legs\"><g id=\"pin0\"><rect fill=\"#8C8C8C\" height=\"4.89\" id=\"rect10\" width=\"1.439\" x=\"2.91\" y=\"16.382\"/><rect fill=\"#8C8C8C\" height=\"2.16\" id=\"rect14\" width=\"3.679\" x=\"0.477\" y=\"17.822\"/></g><g id=\"pin2\"><rect fill=\"#8C8C8C\" height=\"4.915\" id=\"rect8\" width=\"1.441\" x=\"27.56\" y=\"16.235\"/><rect fill=\"#8C8C8C\" height=\"2.16\" id=\"rect16\" width=\"3.699\" x=\"27.754\" y=\"17.676\"/></g><g id=\"legs_1_\"><g id=\"pin0_1_\"><rect fill=\"#8C8C8C\" height=\"4.891\" id=\"rect10_1_\" width=\"2.272\" x=\"26.748\" y=\"16.295\"/><rect fill=\"#8C8C8C\" height=\"2.16\" id=\"rect14_1_\" width=\"3.679\" x=\"27.774\" y=\"17.584\"/></g><g id=\"pin2_1_\"><rect fill=\"#8C8C8C\" height=\"4.916\" id=\"rect8_1_\" width=\"2.277\" x=\"2.928\" y=\"16.416\"/><rect fill=\"#8C8C8C\" height=\"2.16\" id=\"rect16_1_\" width=\"3.699\" x=\"0.477\" y=\"17.73\"/></g><g id=\"pin1_1_\"><rect fill=\"#8C8C8C\" height=\"2.24\" id=\"rect18_1_\" width=\"2.16\" x=\"14.915\" y=\"26.447\"/></g></g></g><rect fill=\"#8C8C8C\" height=\"3.06\" id=\"rect12\" width=\"4.465\" x=\"13.64\" y=\"6.261\"/><path d=\"M27.56,14.796c1.021,4.261-0.812,10.136-7.312,12.761S6.653,25.799,4.935,21.827s-2-4.625-2-4.625   L26.06,8.827C26.06,8.827,26.54,10.535,27.56,14.796z\" fill=\"#B78F2A\"/><circle cx=\"14.531\" cy=\"13.113\" fill=\"#D8B45D\" r=\"11.75\" stroke=\"#DBAA21\" stroke-width=\"1\"/><path d=\"M6.689,5c-4.328,4.321-4.149,10.88,0,15.031c4.151,4.148,10.879,4.148,15.028,0L6.689,5z\" fill=\"#AAAAAA\"/><circle cx=\"13.812\" cy=\"11.072\" fill=\"#8C8C8C\" r=\"2.625\"/><path d=\"M13.822,0.384C7.706,0.377,3.196,5.143,3.196,11.014c0,5.868,4.758,10.624,10.626,10.624V0.384z\" fill=\"#8C8C8C\"/><circle cx=\"13.593\" cy=\"10.958\" fill=\"#BCA061\" r=\"2.438\"/><polygon fill=\"#BCA061\" points=\"11.437,12.076 15.891,10.176 14.453,6.755 10.107,8.927  \"/><circle cx=\"12.31\" cy=\"7.896\" fill=\"#FFD56C\" r=\"2.438\"/><line fill=\"none\" stroke=\"#DBAA21\" stroke-width=\"0.5\" x1=\"14.154\" x2=\"10.435\" y1=\"6.303\" y2=\"9.451\"/><g id=\"pin1_2_\"><rect fill=\"#8C8C8C\" height=\"2.24\" id=\"rect18_2_\" width=\"2.16\" x=\"14.915\" y=\"26.53\"/></g><g id=\"pin1_3_\"><polygon fill=\"#AAAAAA\" id=\"rect18_3_\" points=\"14.005,25.357 16.165,25.357 17.076,26.747 14.916,26.747   \"/></g><rect fill=\"#AAAAAA\" height=\"3.958\" width=\"2.16\" x=\"14.005\" y=\"21.399\"/></g></svg>",
+      "w": 32.02,
+      "h": 29.13,
+      "pins": {
+        "0": [
+          16,
+          27.16
+        ],
+        "1": [
+          29.95,
+          18.84
+        ],
+        "2": [
+          2.1,
+          18.97
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\" x=\"0in\" y=\"0in\" viewBox=\"0 0 10.16 22.86\"><g id=\"schematic\"><rect class=\"interior rect\" x=\"0.15875\" y=\"5.23875\" width=\"9.8425\" height=\"12.3825\" fill=\"#FFFFFF\" stroke=\"#000000\" stroke-width=\"0.3175\" stroke-linecap=\"round\"/><line class=\"pin\" x1=\"5.08\" y1=\"17.6565\" x2=\"5.08\" y2=\"22.7365\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\" id=\"connector0pin\"/><g transform=\"translate(4.70958,20.1965)\"><g transform=\"rotate(270)\"><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"0.881944\" x=\"0\" y=\"0\" text-anchor=\"middle\">1</text></g></g><g transform=\"translate(5.32694,17.1626)\"><g transform=\"rotate(270)\"><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"1.23472\" x=\"0\" y=\"0\" text-anchor=\"start\">0</text></g></g><rect class=\"terminal\" x=\"4.95653\" y=\"22.7365\" width=\"0.246944\" height=\"0.246944\" fill=\"none\" stroke=\"none\" stroke-width=\"0\" id=\"connector0terminal\"/><line class=\"pin\" x1=\"5.08\" y1=\"0.123472\" x2=\"5.08\" y2=\"5.20347\" fill=\"none\" stroke=\"none\" stroke-width=\"0\" stroke-linecap=\"round\" id=\"connector1pin\"/><rect class=\"terminal\" x=\"4.95653\" y=\"-0.123472\" width=\"0.246944\" height=\"0.246944\" fill=\"none\" stroke=\"none\" stroke-width=\"0\" id=\"connector1terminal\"/><line class=\"pin\" x1=\"5.08\" y1=\"0.123472\" x2=\"5.08\" y2=\"5.20347\" fill=\"none\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\" id=\"connector2pin\"/><g transform=\"translate(4.70958,2.66347)\"><g transform=\"rotate(270)\"><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"0.881944\" x=\"0\" y=\"0\" text-anchor=\"middle\">3</text></g></g><g transform=\"translate(5.32694,5.69736)\"><g transform=\"rotate(270)\"><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"1.23472\" x=\"0\" y=\"0\" text-anchor=\"end\">2</text></g></g><rect class=\"terminal\" x=\"4.95653\" y=\"-0.123472\" width=\"0.246944\" height=\"0.246944\" fill=\"none\" stroke=\"none\" stroke-width=\"0\" id=\"connector2terminal\"/><text class=\"text\" id=\"label\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#000000\" font-size=\"1.49931\" x=\"5.23875\" y=\"9.98944\" text-anchor=\"middle\">Variable</text><text class=\"text\" id=\"label\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#000000\" font-size=\"1.49931\" x=\"5.23875\" y=\"11.5887\" text-anchor=\"middle\">Capacitor</text></g></svg>",
+      "w": 38.4,
+      "h": 86.4,
+      "pins": {
+        "0": [
+          19.2,
+          86.4
+        ],
+        "1": [
+          19.2,
+          0
+        ],
+        "2": [
+          19.2,
+          0
+        ]
+      }
+    }
+  },
+  "properties": {
+    "max capacitance": "10pF",
+    "type": "7 S-Triko 160 V DC for PCB mounting, Adjustable from both sides, vertical to PCB",
+    "min capacitance": "2pF"
+  },
+  "icon": "<svg enable-background=\"new 0 0 32.024 29.13\" id=\"svg2\" version=\"1.1\" viewBox=\"0 0 32.024 29.13\" x=\"0px\" xml:space=\"preserve\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" y=\"0px\"><g id=\"breadboard\"><rect fill=\"none\" height=\"3.251\" id=\"connector0pin\" width=\"2.16\" x=\"14.922\" y=\"25.53\"/><rect fill=\"none\" height=\"2.16\" id=\"connector2pin\" width=\"2.881\" x=\"0.661\" y=\"17.894\"/><rect fill=\"none\" height=\"2.159\" id=\"connector1pin\" width=\"3.076\" x=\"28.415\" y=\"17.762\"/><rect fill=\"none\" height=\"3.16\" id=\"connector0terminal\" width=\"2.16\" x=\"14.922\" y=\"25.621\"/><rect fill=\"none\" height=\"2.159\" id=\"connector1terminal\" width=\"2.16\" x=\"29.331\" y=\"17.762\"/><rect fill=\"none\" height=\"2.16\" id=\"connector2terminal\" width=\"2.16\" x=\"0.661\" y=\"17.894\"/><g id=\"legs\"><g id=\"pin0\"><rect fill=\"#8C8C8C\" height=\"4.89\" id=\"rect10\" width=\"1.439\" x=\"2.91\" y=\"16.382\"/><rect fill=\"#8C8C8C\" height=\"2.16\" id=\"rect14\" width=\"3.679\" x=\"0.477\" y=\"17.822\"/></g><g id=\"pin2\"><rect fill=\"#8C8C8C\" height=\"4.915\" id=\"rect8\" width=\"1.441\" x=\"27.56\" y=\"16.235\"/><rect fill=\"#8C8C8C\" height=\"2.16\" id=\"rect16\" width=\"3.699\" x=\"27.754\" y=\"17.676\"/></g><g id=\"legs_1_\"><g id=\"pin0_1_\"><rect fill=\"#8C8C8C\" height=\"4.891\" id=\"rect10_1_\" width=\"2.272\" x=\"26.748\" y=\"16.295\"/><rect fill=\"#8C8C8C\" height=\"2.16\" id=\"rect14_1_\" width=\"3.679\" x=\"27.774\" y=\"17.584\"/></g><g id=\"pin2_1_\"><rect fill=\"#8C8C8C\" height=\"4.916\" id=\"rect8_1_\" width=\"2.277\" x=\"2.928\" y=\"16.416\"/><rect fill=\"#8C8C8C\" height=\"2.16\" id=\"rect16_1_\" width=\"3.699\" x=\"0.477\" y=\"17.73\"/></g><g id=\"pin1_1_\"><rect fill=\"#8C8C8C\" height=\"2.24\" id=\"rect18_1_\" width=\"2.16\" x=\"14.915\" y=\"26.447\"/></g></g></g><rect fill=\"#8C8C8C\" height=\"3.06\" id=\"rect12\" width=\"4.465\" x=\"13.64\" y=\"6.261\"/><path d=\"M27.56,14.796c1.021,4.261-0.812,10.136-7.312,12.761S6.653,25.799,4.935,21.827s-2-4.625-2-4.625   L26.06,8.827C26.06,8.827,26.54,10.535,27.56,14.796z\" fill=\"#B78F2A\"/><circle cx=\"14.531\" cy=\"13.113\" fill=\"#D8B45D\" r=\"11.75\" stroke=\"#DBAA21\" stroke-width=\"1\"/><path d=\"M6.689,5c-4.328,4.321-4.149,10.88,0,15.031c4.151,4.148,10.879,4.148,15.028,0L6.689,5z\" fill=\"#AAAAAA\"/><circle cx=\"13.812\" cy=\"11.072\" fill=\"#8C8C8C\" r=\"2.625\"/><path d=\"M13.822,0.384C7.706,0.377,3.196,5.143,3.196,11.014c0,5.868,4.758,10.624,10.626,10.624V0.384z\" fill=\"#8C8C8C\"/><circle cx=\"13.593\" cy=\"10.958\" fill=\"#BCA061\" r=\"2.438\"/><polygon fill=\"#BCA061\" points=\"11.437,12.076 15.891,10.176 14.453,6.755 10.107,8.927  \"/><circle cx=\"12.31\" cy=\"7.896\" fill=\"#FFD56C\" r=\"2.438\"/><line fill=\"none\" stroke=\"#DBAA21\" stroke-width=\"0.5\" x1=\"14.154\" x2=\"10.435\" y1=\"6.303\" y2=\"9.451\"/><g id=\"pin1_2_\"><rect fill=\"#8C8C8C\" height=\"2.24\" id=\"rect18_2_\" width=\"2.16\" x=\"14.915\" y=\"26.53\"/></g><g id=\"pin1_3_\"><polygon fill=\"#AAAAAA\" id=\"rect18_3_\" points=\"14.005,25.357 16.165,25.357 17.076,26.747 14.916,26.747   \"/></g><rect fill=\"#AAAAAA\" height=\"3.958\" width=\"2.16\" x=\"14.005\" y=\"21.399\"/></g></svg>",
+  "order": 10100,
+  "variantOf": "trimmer-3-1-v"
+}

@@ -1,0 +1,60 @@
+{
+  "type": "smd-tantalum-capacitor-a-3216",
+  "label": "Tantalum Capacitor (A 3216)",
+  "family": "Capacitor [unidirectional]",
+  "tags": [
+    "Capacitor",
+    "Ceramic Capacitor",
+    "fritzing core",
+    "SMD"
+  ],
+  "description": "1 uF multilayered Ceramic Capacitor",
+  "source": {
+    "fzp": "SMD_tantalum_capacitor_A_3216.fzp",
+    "moduleId": "fd80c64b-5cb0-4ae6-8254-6db49f6504ebCapacitorModuleID"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.1\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\" viewBox=\"0 0 17.5 28.82\"><g id=\"breadboard\"><rect id=\"connector0pin\" x=\"4.292\" y=\"27.82\" fill=\"none\" width=\"2.083\" height=\"1\"/><rect id=\"connector1pin\" x=\"11.365\" y=\"27.82\" fill=\"none\" width=\"2.275\" height=\"1\"/><line id=\"connector0leg\" stroke-linecap=\"round\" x1=\"5.332\" y1=\"28.82\" x2=\"5.332\" y2=\"49.0\" stroke=\"#8C8C8C\" fill=\"none\" stroke-width=\"2.146\"/><line id=\"connector1leg\" stroke-linecap=\"round\" x1=\"12.502\" y1=\"28.82\" x2=\"12.502\" y2=\"49.0\" stroke=\"#8C8C8C\" fill=\"none\" stroke-width=\"2.346\"/><g><rect x=\"4.259\" y=\"14.828\" fill=\"#8C8C8C\" width=\"2.146\" height=\"13.92\"/><path fill=\"#8C8C8C\" d=\"M13.68,28.229c0-1.467-1.331-2.628-2.609-3.739c-0.521-0.459-1.5-1.252-1.5-1.781v-6.838    H7.203v7.226c0,1.323,1.186,2.349,2.435,3.437c0.556,0.47,1.687,1.563,1.687,2.211c0,0.263,0.004,0,0.004,0h2.355    \"/><path fill=\"#EA9821\" fill-opacity=\"0.9961\" d=\"M17.5,8.287    c0,7.082-0.467,12.509-1.626,16.485c-0.642,2.207-5.005,0.779-6.853,0.779c-1.881,0-6.19,1.39-6.854-0.854    c-1.002-3.388-1.628-9.401-1.628-16.41c0-8.092,3.77-8.092,8.481-8.092C13.732,0.195,17.5,0.195,17.5,8.287z\"/><path opacity=\"0.5\" fill=\"#FFFFFF\" d=\"M14.083,4.408l1.491-0.285    c-0.873-1.174-2.164-2.033-3.68-2.325l0.264,1.123C12.953,3.201,13.621,3.73,14.083,4.408z\"/><path opacity=\"0.8\" transform=\"scale(0.009 0.01)\" d=\"m 1400 2050 c 0 27 21 52 49 52 h 148 v 148 c 0 28 24 50 51 50 s 50 -23 50 -50 v -148 h 149 s 27 -101 10 -100 h -159 v -149 c 0 -27 -22 -51 -50 -51 s -51 23 -51 51 v 148 h -148 c -27 0 -49 22 -49 49 z\" fill=\"#684312\"/><path opacity=\"0.5\" fill=\"#FFFFFF\" d=\"M3.826,5.273l-1.644-0.24    c1.195-2.371,2.58-3.188,4.872-3.451l-0.111,1.51C5.384,3.092,4.241,3.716,3.826,5.273z\"/><path opacity=\"0.1632\" fill=\"#550000\" d=\"M5.835,25.951c-0.373,0.078,0.697-1.939,0.592-2.631    c-0.108-0.691-0.483-0.535,0.326-0.729c0.813-0.197,3.083-0.144,3.68,0s0.642-0.067,0.54,0.729    c-0.107,0.795,0.801,2.596,0.489,2.526C9.332,25.354,7.384,25.561,5.835,25.951z\"/></g></g></svg>",
+      "w": 23.33,
+      "h": 38.43,
+      "pins": {
+        "-": [
+          7.11,
+          37.76
+        ],
+        "+": [
+          16.67,
+          37.76
+        ]
+      },
+      "legs": [
+        "-",
+        "+"
+      ]
+    },
+    "schematic": {
+      "svg": "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\" x=\"0in\" y=\"0in\" viewBox=\"0 0 5.334 7.86694\"><g id=\"schematic\"><line class=\"other\" x1=\"0.127\" y1=\"2.66347\" x2=\"5.207\" y2=\"2.66347\" stroke=\"#000000\" stroke-width=\"0.254\" stroke-linecap=\"round\"/><line class=\"other\" x1=\"2.667\" y1=\"3.67947\" x2=\"2.667\" y2=\"5.20347\" stroke=\"#000000\" stroke-width=\"0.1524\" stroke-linecap=\"round\"/><path class=\"other\" fill=\"none\" d=\"M2.667,3.66347 A4.0542,4.0542 0 0 1 5.1562,4.51767\" stroke-width=\"0.254\" stroke=\"#000000\"/><path class=\"other\" fill=\"none\" d=\"M0.2001,4.51387 A4.0637,4.0637 0 0 1 2.667,3.67957\" stroke-width=\"0.254\" stroke=\"#000000\"/><rect class=\"other\" x=\"0.414\" y=\"1.86847\" width=\"0.889\" height=\"0.127\" stroke=\"none\" stroke-width=\"0\" fill=\"#000000\" stroke-linecap=\"round\"/><rect class=\"other\" x=\"0.795\" y=\"1.48747\" width=\"0.127\" height=\"0.889\" stroke=\"none\" stroke-width=\"0\" fill=\"#000000\" stroke-linecap=\"round\"/><line class=\"pin\" id=\"connector1pin\" connectorname=\"+\" x1=\"2.667\" y1=\"0.123472\" x2=\"2.667\" y2=\"2.66347\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><rect class=\"terminal\" id=\"connector1terminal\" x=\"2.667\" y=\"0.123472\" width=\"0.0001\" height=\"0.0001\" stroke=\"none\" stroke-width=\"0\" fill=\"none\"/><g transform=\"translate(2.29658,1.39347)\"><g transform=\"rotate(270)\"><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"0.881944\" x=\"0\" y=\"0\" text-anchor=\"middle\">2</text></g></g><line class=\"pin\" id=\"connector0pin\" connectorname=\"-\" x1=\"2.667\" y1=\"7.74347\" x2=\"2.667\" y2=\"5.20347\" stroke=\"#787878\" stroke-width=\"0.246944\" stroke-linecap=\"round\"/><rect class=\"terminal\" id=\"connector0terminal\" x=\"2.667\" y=\"7.74347\" width=\"0.0001\" height=\"0.0001\" stroke=\"none\" stroke-width=\"0\" fill=\"none\"/><g transform=\"translate(2.29658,6.47347)\"><g transform=\"rotate(270)\"><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"0.881944\" x=\"0\" y=\"0\" text-anchor=\"middle\">1</text></g></g></g></svg>",
+      "w": 20.16,
+      "h": 29.73,
+      "pins": {
+        "-": [
+          10.08,
+          29.27
+        ],
+        "+": [
+          10.08,
+          0.47
+        ]
+      }
+    }
+  },
+  "properties": {
+    "capacitance": "1 μF",
+    "package": "A 3216 [SMD, tantalum]",
+    "voltage": ""
+  },
+  "icon": "<svg version=\"1.1\" viewBox=\"0 0 32 32\" xml:space=\"preserve\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"icon\"><rect x=\"11.092\" y=\"17.829\" width=\"2.146\" height=\"34.123\" fill=\"#8C8C8C\"/><path d=\"m20.514 31.229c0-1.467-1.33-2.627-2.609-3.738-0.521-0.459-1.5-1.252-1.5-1.781v-6.838h-2.368v7.227c0 1.322 1.186 2.348 2.437 3.438 0.555 0.469 1.687 1.563 1.687 2.211 0 0.262 4e-3 20.256 4e-3 20.256h2.354l-5e-3 -20.775z\" fill=\"#8C8C8C\"/><path d=\"m24.333 11.288c0 7.083-0.467 12.508-1.626 16.485-0.643 2.207-5.005 0.779-6.854 0.779-1.88 0-6.189 1.391-6.854-0.854-1.002-3.389-1.628-9.402-1.628-16.411 0-8.092 3.77-8.092 8.481-8.092 4.712 0 8.481 0 8.481 8.093z\" fill=\"#EA9821\"/><path d=\"m20.916 7.409 1.491-0.285c-0.873-1.174-2.164-2.033-3.681-2.325l0.265 1.123c0.795 0.28 1.463 0.808 1.925 1.487z\" fill=\"#fff\" opacity=\".5\"/><path opacity=\"0.8\" transform=\"scale(.009 .01)\" d=\"m2170 2300c0 27 21 52 49 52h148v148c0 28 24 50 51 50s50-23 50-50v-148h149s27-101 10-100h-159v-149c0-27-22-51-50-51s-51 23-51 51v148h-148c-27 0-49 22-49 49z\" fill=\"#684312\"/><path d=\"m10.659 8.273-1.644-0.24c1.195-2.371 2.58-3.188 4.872-3.451l-0.111 1.51c-1.559 0-2.702 0.624-3.117 2.181z\" fill=\"#fff\" opacity=\".5\"/><path d=\"m12.668 28.952c-0.373 0.078 0.697-1.939 0.592-2.631-0.108-0.691-0.483-0.535 0.326-0.73 0.813-0.195 3.083-0.143 3.682 0 0.596 0.145 0.642-0.066 0.539 0.73-0.106 0.795 0.801 2.596 0.488 2.525-2.13-0.492-4.078-0.284-5.627 0.106z\" fill=\"#500\" opacity=\".1632\"/></g></svg>",
+  "order": 32,
+  "variantOf": "capacitor-tantalum-100mil"
+}

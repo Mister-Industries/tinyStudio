@@ -1,0 +1,60 @@
+{
+  "type": "hirose-df13-2p-125v-50",
+  "label": "Hirose DF13 Series Header (DF13C-2P-1.25V)",
+  "family": "Hirose DF13 Series",
+  "tags": [
+    "smd",
+    "DF13",
+    "Hirose",
+    "1.25mm"
+  ],
+  "description": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600;\">Hirose DF13 Header:</span><span style=\" font-size:8pt;\"> 1.25mm Pitch Miniature Crimping Connector. Single Row Straight Pin Header (SMT)</span></p></body></html>",
+  "source": {
+    "fzp": "hirose-df13-2p-125v_50.fzp",
+    "moduleId": "hirose-df13-2p-125v"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg clip-rule=\"evenodd\" fill-rule=\"evenodd\" image-rendering=\"optimizeQuality\" shape-rendering=\"geometricPrecision\" text-rendering=\"geometricPrecision\" version=\"1.1\" viewBox=\"0 0 2346 3351\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><desc><referenceFile>Hirose_DF13-2p-smd-v_bb.svg</referenceFile></desc><g id=\"DF13-2p-smd-v\"><g id=\"breadboard\"><g id=\"icon\"><rect width=\"2346\" height=\"3351\" fill=\"#1F7A34\"/><rect x=\"230\" y=\"1308\" width=\"1887\" height=\"366\" fill=\"#D2D3D5\"/><rect x=\"230\" y=\"1308\" width=\"49\" height=\"366\" fill=\"#FEFEFE\"/><rect x=\"279\" y=\"1433\" width=\"81\" height=\"111\" fill=\"#1F7A34\"/><rect x=\"230\" y=\"1631\" width=\"49\" height=\"43\" fill=\"#96989A\"/><rect x=\"2067\" y=\"1308\" width=\"49\" height=\"366\" fill=\"#FEFEFE\"/><rect x=\"1986\" y=\"1433\" width=\"81\" height=\"111\" fill=\"#1F7A34\"/><rect x=\"2067\" y=\"1631\" width=\"49\" height=\"43\" fill=\"#96989A\"/><rect x=\"458\" y=\"1357\" width=\"1430\" height=\"345\" fill=\"#848688\"/><rect x=\"458\" y=\"920\" width=\"1430\" height=\"430\" fill=\"#E6E7E8\"/><rect x=\"625\" y=\"622\" width=\"1095\" height=\"1137\" fill=\"#727376\"/><g fill=\"#FEFEFE\"><rect x=\"691\" y=\"1085\" width=\"963\" height=\"53\"/><rect x=\"691\" y=\"622\" width=\"963\" height=\"46\"/></g><rect x=\"810\" y=\"1066\" width=\"725\" height=\"321\" fill=\"#727376\"/><rect x=\"810\" y=\"1176\" width=\"725\" height=\"122\" fill=\"#D2D3D5\"/><rect x=\"810\" y=\"1297\" width=\"725\" height=\"51\" fill=\"#FEFEFE\"/><rect x=\"883\" y=\"1176\" width=\"581\" height=\"369\" fill=\"#D2D3D5\"/><rect x=\"625\" y=\"622\" width=\"66\" height=\"516\" fill=\"#FEFEFE\"/><rect x=\"625\" y=\"803\" width=\"66\" height=\"153\" fill=\"#606062\"/><rect x=\"1655\" y=\"622\" width=\"66\" height=\"516\" fill=\"#FEFEFE\"/><rect x=\"1655\" y=\"803\" width=\"66\" height=\"153\" fill=\"#606062\"/><rect x=\"962\" y=\"850\" width=\"92\" height=\"411\" fill=\"#9D98CA\"/><rect x=\"962\" y=\"850\" width=\"92\" height=\"59\" fill=\"#FEFEFE\"/><rect x=\"962\" y=\"1712\" width=\"92\" height=\"314\" fill=\"#FEFEFE\"/><rect x=\"962\" y=\"1997\" width=\"92\" height=\"39\" fill=\"#9D98CA\"/><rect x=\"1292\" y=\"850\" width=\"92\" height=\"411\" fill=\"#9D98CA\"/><rect x=\"1292\" y=\"850\" width=\"92\" height=\"59\" fill=\"#FEFEFE\"/><rect x=\"1292\" y=\"1712\" width=\"92\" height=\"314\" fill=\"#FEFEFE\"/><rect x=\"1292\" y=\"1997\" width=\"92\" height=\"39\" fill=\"#9D98CA\"/><text x=\"478\" y=\"2366\" fill=\"white\" font-family=\"OCRA\" font-size=\"279.25\" font-weight=\"500\">DF13-2P</text><text x=\"585\" y=\"437\" fill=\"white\" font-family=\"OCRA\" font-size=\"279.25\" font-weight=\"500\">HIROSE</text><g transform=\"matrix(2.6484e-14 -1 1 2.6484e-14 -709.76 20356)\"><text x=\"17500\" y=\"1632\" fill=\"white\" font-family=\"OCRA\" font-size=\"301.6\" font-weight=\"500\">1</text></g><g transform=\"matrix(2.6484e-14 -1 1 2.6484e-14 -39.478 20356)\"><text x=\"17500\" y=\"1632\" fill=\"white\" font-family=\"OCRA\" font-size=\"301.6\" font-weight=\"500\">2</text></g></g><g id=\"connector0pin\"><rect x=\"725\" y=\"2909\" width=\"214\" height=\"214\" fill=\"#8D8C8C\"/><rect x=\"777\" y=\"2961\" width=\"110\" height=\"110\" fill=\"#8C8663\"/><polygon points=\"725 3123 777 3071 777 2956 725 2909\" fill=\"#B8AF82\"/><polygon points=\"887 2961 778 2961 725 2909 939 2909\" fill=\"#80795B\"/><polygon points=\"887 3071 887 2961 939 2909 939 3123\" fill=\"#5E5B43\"/><polygon points=\"725 3123 778 3071 887 3071 939 3123\" fill=\"#9A916C\"/></g><g id=\"connector1pin\"><rect x=\"1395\" y=\"2909\" width=\"214\" height=\"214\" fill=\"#8D8C8C\"/><rect x=\"1448\" y=\"2961\" width=\"110\" height=\"110\" fill=\"#8C8663\"/><polygon points=\"1395 3123 1448 3071 1448 2956 1395 2909\" fill=\"#B8AF82\"/><polygon points=\"1558 2961 1448 2961 1395 2909 1609 2909\" fill=\"#80795B\"/><polygon points=\"1558 3071 1558 2961 1609 2909 1609 3123\" fill=\"#5E5B43\"/><polygon points=\"1395 3123 1448 3071 1558 3071 1609 3123\" fill=\"#9A916C\"/></g></g></g></svg>",
+      "w": 33.6,
+      "h": 48,
+      "pins": {
+        "1": [
+          11.92,
+          43.2
+        ],
+        "2": [
+          21.51,
+          43.2
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" shape-rendering=\"geometricPrecision\" viewBox=\"0 0 963 852\" image-rendering=\"optimizeQuality\" fill-rule=\"evenodd\" xml:space=\"preserve\" text-anchor=\"middle\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" version=\"1.1\" text-rendering=\"geometricPrecision\" clip-rule=\"evenodd\" baseProfile=\"tiny\"><desc><referenceFile>Hirose_DF13-2p_schematic.svg</referenceFile></desc><g id=\"DF13-2p_Schematic\" gorn=\"0.1\"><metadata id=\"CorelCorpID_0Corel-Layer\"/><g id=\"schematic\" gorn=\"0.1.1\"><polygon fill=\"#FEFEFE\" stroke-width=\"26.0726\" stroke=\"black\" points=\"386,13 950,13 950,839 386,839 \"/><line x1=\"18\" x2=\"383\" stroke-linejoin=\"round\" fill=\"none\" stroke-width=\"36.4839\" stroke=\"black\" id=\"connector0pin\" y1=\"229\" gorn=\"0.1.1.1\" stroke-linecap=\"round\" y2=\"229\"/><line x1=\"23\" x2=\"14\" stroke-linejoin=\"round\" fill=\"none\" stroke-width=\"25.0226\" stroke=\"black\" id=\"connector0terminal\" y1=\"229\" gorn=\"0.1.1.2\" stroke-linecap=\"round\" y2=\"229\"/><line x1=\"570\" x2=\"252\" stroke-linejoin=\"round\" fill=\"none\" stroke-width=\"36.4839\" stroke=\"black\" id=\"line\" y1=\"229\" gorn=\"0.1.1.3\" stroke-linecap=\"round\" y2=\"229\"/><line x1=\"757\" x2=\"570\" stroke-linejoin=\"round\" fill=\"none\" stroke-width=\"62.5566\" stroke=\"black\" id=\"line_0\" y1=\"229\" gorn=\"0.1.1.4\" stroke-linecap=\"round\" y2=\"229\"/><g transform=\"matrix(1 0 0 1 -12601.6 -1333.49)\"><g><g><g><text font-family=\"Droid Sans\" x=\"12813\" fill=\"#8C8C8C\" y=\"1506\" font-size=\"130.319\" font-weight=\"normal\">1</text></g></g></g></g><line x1=\"18\" x2=\"383\" stroke-linejoin=\"round\" fill=\"none\" stroke-width=\"36.4839\" stroke=\"black\" id=\"connector1pin\" y1=\"608\" gorn=\"0.1.1.6\" stroke-linecap=\"round\" y2=\"608\"/><line x1=\"23\" x2=\"14\" stroke-linejoin=\"round\" fill=\"none\" stroke-width=\"25.0226\" stroke=\"black\" id=\"connector1terminal\" y1=\"608\" gorn=\"0.1.1.7\" stroke-linecap=\"round\" y2=\"608\"/><line x1=\"570\" x2=\"252\" stroke-linejoin=\"round\" fill=\"none\" stroke-width=\"36.4839\" stroke=\"black\" id=\"line_1\" y1=\"608\" gorn=\"0.1.1.8\" stroke-linecap=\"round\" y2=\"608\"/><line x1=\"757\" x2=\"570\" stroke-linejoin=\"round\" fill=\"none\" stroke-width=\"62.5566\" stroke=\"black\" id=\"line_2\" y1=\"608\" gorn=\"0.1.1.9\" stroke-linecap=\"round\" y2=\"608\"/><g transform=\"matrix(1 0 0 1 -12589.6 -957.204)\"><g><g><g><text font-family=\"Droid Sans\" x=\"12813\" fill=\"#8C8C8C\" y=\"1506\" font-size=\"130.319\" font-weight=\"normal\">2</text></g></g></g></g></g></g></svg>",
+      "w": 24.6,
+      "h": 21.79,
+      "pins": {
+        "1": [
+          0.36,
+          5.86
+        ],
+        "2": [
+          0.36,
+          15.55
+        ]
+      }
+    }
+  },
+  "properties": {
+    "connector": "straight smt",
+    "part number": "DF13#-2P-1.25V",
+    "variant": "DF13-2P-smd-vert",
+    "layer": "",
+    "pins": "2",
+    "package": "DF13C-2P-1.25V",
+    "pitch": "0.049\" (1.25mm)"
+  },
+  "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" shape-rendering=\"geometricPrecision\" viewBox=\"0 0 3159 3159\" image-rendering=\"optimizeQuality\" fill-rule=\"evenodd\" xml:space=\"preserve\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" version=\"1.1\" text-rendering=\"geometricPrecision\" clip-rule=\"evenodd\"><desc><referenceFile>Hirose_DF13-2p-smd-v_icon.svg</referenceFile></desc><g id=\"DF13-2p-smd-v\" gorn=\"0.1\"><metadata id=\"CorelCorpID_0Corel-Layer\"/><g id=\"icon\" gorn=\"0.1.1\"><rect fill=\"#373435\" width=\"3159\" height=\"3159\"/><g><rect x=\"316\" fill=\"#D2D3D5\" y=\"1509\" width=\"2528\" height=\"491\"/><g><rect x=\"316\" fill=\"#FEFEFE\" y=\"1509\" width=\"66\" height=\"491\"/><rect x=\"382\" fill=\"#373435\" y=\"1676\" width=\"109\" height=\"148\"/><rect x=\"316\" fill=\"#96989A\" y=\"1941\" width=\"66\" height=\"58\"/></g><g><rect x=\"2777\" fill=\"#FEFEFE\" y=\"1509\" width=\"66\" height=\"491\"/><rect x=\"2668\" fill=\"#373435\" y=\"1676\" width=\"109\" height=\"148\"/><rect x=\"2777\" fill=\"#96989A\" y=\"1941\" width=\"66\" height=\"58\"/></g><g><rect x=\"622\" fill=\"#848688\" y=\"1575\" width=\"1916\" height=\"462\"/><rect x=\"622\" fill=\"#E6E7E8\" y=\"990\" width=\"1916\" height=\"576\"/></g><rect x=\"846\" fill=\"#727376\" y=\"590\" width=\"1467\" height=\"1523\"/><g><rect x=\"934\" fill=\"#FEFEFE\" y=\"1210\" width=\"1290\" height=\"71\"/><rect x=\"934\" fill=\"#FEFEFE\" y=\"590\" width=\"1290\" height=\"62\"/></g><g><rect x=\"1094\" fill=\"#727376\" y=\"1184\" width=\"971\" height=\"430\"/><rect x=\"1094\" fill=\"#D2D3D5\" y=\"1332\" width=\"971\" height=\"163\"/><rect x=\"1094\" fill=\"#FEFEFE\" y=\"1495\" width=\"971\" height=\"68\"/><rect x=\"1191\" fill=\"#D2D3D5\" y=\"1332\" width=\"778\" height=\"495\"/></g><g><rect x=\"846\" fill=\"#FEFEFE\" y=\"590\" width=\"88\" height=\"691\"/><rect x=\"846\" fill=\"#606062\" y=\"833\" width=\"88\" height=\"205\"/></g><g><rect x=\"2225\" fill=\"#FEFEFE\" y=\"590\" width=\"88\" height=\"691\"/><rect x=\"2225\" fill=\"#606062\" y=\"833\" width=\"88\" height=\"205\"/></g><g><rect x=\"1297\" fill=\"#9D98CA\" y=\"896\" width=\"124\" height=\"550\"/><rect x=\"1297\" fill=\"#FEFEFE\" y=\"896\" width=\"124\" height=\"79\"/><rect x=\"1297\" fill=\"#FEFEFE\" y=\"2050\" width=\"124\" height=\"421\"/><rect x=\"1297\" fill=\"#9D98CA\" y=\"2432\" width=\"124\" height=\"52\"/></g><g><rect x=\"1739\" fill=\"#9D98CA\" y=\"896\" width=\"124\" height=\"550\"/><rect x=\"1739\" fill=\"#FEFEFE\" y=\"896\" width=\"124\" height=\"79\"/><rect x=\"1739\" fill=\"#FEFEFE\" y=\"2050\" width=\"124\" height=\"421\"/><rect x=\"1739\" fill=\"#9D98CA\" y=\"2432\" width=\"124\" height=\"52\"/></g></g></g></g></svg>",
+  "order": 60005,
+  "variantOf": "hirose-df13-2p-125h-42"
+}

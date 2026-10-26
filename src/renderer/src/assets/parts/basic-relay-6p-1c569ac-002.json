@@ -1,0 +1,87 @@
+{
+  "type": "basic-relay-6p-1c569ac-002",
+  "label": "Relay (THT)",
+  "family": "Relay",
+  "tags": [
+    "Relay",
+    "fritzing core"
+  ],
+  "description": "An SPDT relay.",
+  "source": {
+    "fzp": "basic-relay-6p_1c569ac_002.fzp",
+    "moduleId": "basic-re0750cfe91b854b78be2154ffc8101a37"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.2\" viewBox=\"-20 -10 560 445\" xmlns=\"http://www.w3.org/2000/svg\"><desc oldid=\"0.0\"><referenceFile oldid=\"0.0.0\">relay_reloaded.svg</referenceFile></desc><g id=\"breadboard\"><rect x=\"-10\" y=\"12.5\" width=\"540\" height=\"400\" fill=\"#2d2d2d\"/><rect id=\"connector0pin\" x=\"500\" y=\"0\" width=\"20\" height=\"25\" fill=\"#8c8c8c\"/><rect id=\"connector1pin\" x=\"400\" y=\"0\" width=\"20\" height=\"25\" fill=\"#8c8c8c\"/><rect id=\"connector2pin\" x=\"0\" y=\"0\" width=\"20\" height=\"25\" fill=\"#8c8c8c\"/><rect id=\"connector3pin\" x=\"0\" y=\"400\" width=\"20\" height=\"25\" fill=\"#8c8c8c\"/><rect id=\"connector4pin\" x=\"400\" y=\"400\" width=\"20\" height=\"25\" fill=\"#8c8c8c\"/><rect id=\"connector5pin\" x=\"500\" y=\"400\" width=\"20\" height=\"25\" fill=\"#8c8c8c\"/><line x1=\"10\" x2=\"10\" y1=\"20\" y2=\"405\" fill=\"none\" stroke=\"#606060\" stroke-width=\"10\" stroke-linecap=\"round\"/><g transform=\"translate(80, 212.5)\"><g transform=\"rotate(-3.6)\" data-state-off=\"rotate(-3.6)\" data-state-on=\"rotate(3.6)\"><circle cx=\"0\" cy=\"0\" r=\"25\" fill=\"#606060\"/><circle cx=\"0\" cy=\"0\" r=\"15\" fill=\"#333\"/><path d=\"m406.2 -5 l-6 -13.5h-41l-6 13.5z\" fill=\"#b23820\"/><path d=\"m406.2 5 l-6 13.5h-41l-6-13.5z\" fill=\"#b23820\"/><line x1=\"0\" x2=\"405\" y1=\"0\" y2=\"0\" fill=\"none\" stroke=\"#7c7c7c\" stroke-width=\"10\" stroke-linecap=\"round\"/></g></g><line x1=\"10\" x2=\"60\" y1=\"212.5\" y2=\"212.5\" fill=\"none\" stroke=\"#606060\" stroke-width=\"10\"/><g transform=\"scale(12.4)\"><path d=\"m41.15 1.7v8.6c0 0.95016-0.58042 1.7281-1.2918 1.7281h-5.2\" fill=\"none\" stroke=\"#606060\" stroke-linecap=\"round\" stroke-width=\".96\"/><g transform=\"matrix(-1.44 0 0 1.44 42 0.765)\"><polygon points=\"2.01 8.17 2.365 8.945 4.616 8.945 4.969 8.17\" fill=\"#b23820\"/><polygon points=\"2.01 14.577 2.365 13.802 4.616 13.802 4.969 14.577\" fill=\"#b23820\"/></g><path d=\"m41.15 32.5v-8.6c0-0.95164-0.58042-1.7266-1.2918-1.7266h-5.2\" fill=\"none\" stroke=\"#606060\" stroke-linecap=\"round\" stroke-width=\"0.96\"/><g transform=\"matrix(-1.45 0 0 1.45 44.8 -1)\"><path d=\"m22.797 15.132c0.921 0.607-6.856 0.787-7.891 0.683\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 15.975c0.933 0.611-6.871 0.78-7.891 0.682\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 16.819c0.922 0.602-6.86 0.782-7.891 0.678\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 17.661c0.521 0.34-2.353 0.962-7.891 0.962\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 11.763c0.921 0.606-6.854 0.785-7.891 0.682\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 12.606c0.93 0.608-6.868 0.778-7.891 0.68\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 13.448c0.925 0.603-6.86 0.785-7.891 0.681\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 14.29c0.916 0.601-6.845 0.789-7.891 0.681\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 8.393c0.911 0.603-6.845 0.789-7.891 0.682\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 9.236c0.921 0.604-6.854 0.786-7.891 0.683\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 10.079c0.929 0.606-6.867 0.782-7.891 0.679\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 10.921c0.931 0.611-6.877 0.782-7.891 0.682\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.655 6.71c0.924 0.604-6.72 0.781-7.75 0.679\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m22.797 7.551c0.933 0.61-6.871 0.778-7.891 0.679\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 7.412c2.514-0.527 5.224-0.594 7.967 0.25\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 8.251c2.514-0.527 5.224-0.594 7.967 0.25\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 9.09c2.514-0.528 5.224-0.594 7.967 0.25\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 9.928c2.514-0.528 5.224-0.595 7.967 0.25\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 10.768c2.514-0.528 5.224-0.595 7.967 0.249\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 11.608c2.514-0.528 5.224-0.595 7.967 0.249\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 12.447c2.514-0.528 5.224-0.595 7.967 0.249\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 13.287c2.514-0.528 5.224-0.595 7.967 0.249\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 14.125c2.514-0.528 5.224-0.595 7.967 0.249\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 14.964c2.514-0.527 5.224-0.594 7.967 0.25\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 15.803c2.514-0.527 5.224-0.595 7.967 0.249\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 16.643c2.514-0.527 5.224-0.595 7.967 0.249\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 17.495c2.514-0.527 5.224-0.595 7.967 0.249\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m14.906 6.155c3.955 0 5.637-0.087 7.923 0.622\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/><path d=\"m8.088 23.124v-3.312c0-0.641 0.523-1.164 1.164-1.164h5.653\" fill=\"none\" stroke=\"#752119\" stroke-linecap=\"round\" stroke-width=\".7311\"/><path d=\"m8.088 2.009v2.982c0 0.64 0.523 1.164 1.164 1.164h5.653\" fill=\"none\" stroke=\"#b23820\" stroke-linecap=\"round\" stroke-width=\".75\"/></g></g></g></svg>",
+      "w": 53.76,
+      "h": 42.72,
+      "pins": {
+        "C2": [
+          2.88,
+          40.56
+        ],
+        "COIL2": [
+          41.28,
+          40.56
+        ],
+        "B": [
+          50.88,
+          40.56
+        ],
+        "A": [
+          50.88,
+          2.16
+        ],
+        "COIL1": [
+          41.28,
+          2.16
+        ],
+        "C1": [
+          2.88,
+          2.16
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\" viewBox=\"0 0 36 29.6\" enable-background=\"new 0 0 36 29.6\" xml:space=\"preserve\"><g id=\"schematic\"><g><g transform=\"matrix(1.2500001,0,0,1.2500001,201.9491,375.78003)\"><path id=\"path3892_2_\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"     M-149.983-282.846v-1.346c0.635,0,1.15-0.516,1.15-1.15c0-0.634-0.515-1.149-1.15-1.149c0.635,0,1.15-0.514,1.15-1.149     c0-0.634-0.515-1.15-1.15-1.15c0.635,0,1.15-0.515,1.15-1.15c0-0.635-0.515-1.15-1.15-1.15c0.635,0,1.15-0.515,1.15-1.15     s-0.515-1.15-1.15-1.15h-0.056v-1.155\"/></g><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"7.2\" y1=\"22\" x2=\"18\" y2=\"22\"/><circle fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" cx=\"21.602\" cy=\"18.4\" r=\"0.36\"/><circle fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" cx=\"21.602\" cy=\"11.2\" r=\"0.36\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"7.2\" y1=\"7.6\" x2=\"18\" y2=\"7.6\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"28.801\" y1=\"7.6\" x2=\"28.801\" y2=\"22\"/><line id=\"connector5pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"7.2\" y1=\"0.4\" x2=\"7.2\" y2=\"7.6\"/><rect id=\"connector5terminal\" x=\"6.833\" y=\"0\" fill=\"none\" width=\"0.708\" height=\"1.837\"/><rect id=\"connector0terminal\" x=\"6.833\" y=\"27.762\" fill=\"none\" width=\"0.708\" height=\"1.838\"/><line id=\"connector0pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"7.2\" y1=\"22\" x2=\"7.2\" y2=\"29.201\"/><line id=\"connector3pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"28.8\" y1=\"0.4\" x2=\"28.8\" y2=\"7.6\"/><polygon id=\"connector3terminal\" fill=\"none\" points=\"29.146,0 28.458,0.021 28.438,1.443 29.125,1.443   \"/><polygon id=\"connector2terminal\" fill=\"none\" points=\"29.146,28.156 28.458,28.177 28.438,29.6 29.125,29.6   \"/><line id=\"connector2pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"28.8\" y1=\"22\" x2=\"28.8\" y2=\"29.201\"/><line id=\"connector1pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"14.4\" y1=\"22\" x2=\"14.4\" y2=\"29.201\"/><rect id=\"connector1terminal\" x=\"14.052\" y=\"27.762\" fill=\"none\" width=\"0.708\" height=\"1.838\"/><rect id=\"connector4terminal\" x=\"14.052\" y=\"0\" fill=\"none\" width=\"0.708\" height=\"1.838\"/><line id=\"connector4pin\" fill=\"none\" stroke=\"#555555\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"14.4\" y1=\"0.4\" x2=\"14.4\" y2=\"7.6\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"18\" y1=\"18.4\" x2=\"18\" y2=\"22\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"18\" y1=\"7.6\" x2=\"18\" y2=\"11.2\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"21.6\" y1=\"11.2\" x2=\"18\" y2=\"11.2\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"28.6\" y1=\"14.8\" x2=\"25\" y2=\"14.8\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"25\" y1=\"14.8\" x2=\"21.038\" y2=\"12.656\"/><line fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" x1=\"21.6\" y1=\"18.4\" x2=\"18\" y2=\"18.4\"/></g></g></svg>",
+      "w": 36,
+      "h": 29.6,
+      "pins": {
+        "C2": [
+          28.79,
+          0.72
+        ],
+        "COIL2": [
+          14.41,
+          0.92
+        ],
+        "B": [
+          7.19,
+          0.92
+        ],
+        "A": [
+          7.19,
+          28.68
+        ],
+        "COIL1": [
+          14.41,
+          28.68
+        ],
+        "C1": [
+          28.79,
+          28.88
+        ]
+      }
+    }
+  },
+  "properties": {
+    "voltage": "5V",
+    "contact rating": "125VAC / 30VDC @ 1 AMP",
+    "switching circuit": "SPDT",
+    "part number": "FRS1B-S",
+    "package": "THT"
+  },
+  "icon": "<svg version=\"1.2\" viewBox=\"0 0 520 425\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"icon\"><rect x=\"0\" y=\"12.5\" width=\"520\" height=\"400\" fill=\"#2d2d2d\"/><g fill=\"#8c8c8c\"><rect x=\"500\" width=\"20\" height=\"25\"/><rect x=\"400\" width=\"20\" height=\"25\"/><rect width=\"20\" height=\"25\"/><rect y=\"400\" width=\"20\" height=\"25\"/><rect x=\"400\" y=\"400\" width=\"20\" height=\"25\"/><rect x=\"500\" y=\"400\" width=\"20\" height=\"25\"/></g><line x1=\"10\" x2=\"10\" y1=\"20\" y2=\"405\" fill=\"none\" stroke=\"#606060\" stroke-linecap=\"round\" stroke-width=\"10\"/><g transform=\"translate(80 212.5)\"><g transform=\"rotate(-3.6)\" data-state-off=\"rotate(-3.6)\" data-state-on=\"rotate(3.6)\"><circle r=\"25\" fill=\"#606060\"/><circle r=\"15\" fill=\"#333\"/><path d=\"m406.2-5-6-13.5h-41l-6 13.5z\" fill=\"#b23820\"/><path d=\"m406.2 5-6 13.5h-41l-6-13.5z\" fill=\"#b23820\"/><line x2=\"405\" fill=\"none\" stroke=\"#7c7c7c\" stroke-linecap=\"round\" stroke-width=\"10\"/></g></g><line x1=\"10\" x2=\"60\" y1=\"212.5\" y2=\"212.5\" fill=\"none\" stroke=\"#606060\" stroke-width=\"10\"/><g transform=\"scale(12.4)\"><path d=\"m41.15 1.7v8.6c0 0.95016-0.58042 1.7281-1.2918 1.7281h-5.2\" fill=\"none\" stroke=\"#606060\" stroke-linecap=\"round\" stroke-width=\".96\"/><g transform=\"matrix(-1.44 0 0 1.44 42 .765)\" fill=\"#b23820\"><polygon points=\"2.01 8.17 2.365 8.945 4.616 8.945 4.969 8.17\"/><polygon points=\"2.01 14.577 2.365 13.802 4.616 13.802 4.969 14.577\"/></g><path d=\"m41.15 32.5v-8.6c0-0.95164-0.58042-1.7266-1.2918-1.7266h-5.2\" fill=\"none\" stroke=\"#606060\" stroke-linecap=\"round\" stroke-width=\".96\"/><g transform=\"matrix(-1.45 0 0 1.45 44.8 -1)\" fill=\"none\" stroke-linecap=\"round\"><g stroke=\"#752119\" stroke-width=\".75\"><path d=\"m22.797 15.132c0.921 0.607-6.856 0.787-7.891 0.683\"/><path d=\"m22.797 15.975c0.933 0.611-6.871 0.78-7.891 0.682\"/><path d=\"m22.797 16.819c0.922 0.602-6.86 0.782-7.891 0.678\"/><path d=\"m22.797 17.661c0.521 0.34-2.353 0.962-7.891 0.962\"/><path d=\"m22.797 11.763c0.921 0.606-6.854 0.785-7.891 0.682\"/><path d=\"m22.797 12.606c0.93 0.608-6.868 0.778-7.891 0.68\"/><path d=\"m22.797 13.448c0.925 0.603-6.86 0.785-7.891 0.681\"/><path d=\"m22.797 14.29c0.916 0.601-6.845 0.789-7.891 0.681\"/><path d=\"m22.797 8.393c0.911 0.603-6.845 0.789-7.891 0.682\"/><path d=\"m22.797 9.236c0.921 0.604-6.854 0.786-7.891 0.683\"/><path d=\"m22.797 10.079c0.929 0.606-6.867 0.782-7.891 0.679\"/><path d=\"m22.797 10.921c0.931 0.611-6.877 0.782-7.891 0.682\"/><path d=\"m22.655 6.71c0.924 0.604-6.72 0.781-7.75 0.679\"/><path d=\"m22.797 7.551c0.933 0.61-6.871 0.778-7.891 0.679\"/></g><g stroke=\"#b23820\" stroke-width=\".75\"><path d=\"m14.906 7.412c2.514-0.527 5.224-0.594 7.967 0.25\"/><path d=\"m14.906 8.251c2.514-0.527 5.224-0.594 7.967 0.25\"/><path d=\"m14.906 9.09c2.514-0.528 5.224-0.594 7.967 0.25\"/><path d=\"m14.906 9.928c2.514-0.528 5.224-0.595 7.967 0.25\"/><path d=\"m14.906 10.768c2.514-0.528 5.224-0.595 7.967 0.249\"/><path d=\"m14.906 11.608c2.514-0.528 5.224-0.595 7.967 0.249\"/><path d=\"m14.906 12.447c2.514-0.528 5.224-0.595 7.967 0.249\"/><path d=\"m14.906 13.287c2.514-0.528 5.224-0.595 7.967 0.249\"/><path d=\"m14.906 14.125c2.514-0.528 5.224-0.595 7.967 0.249\"/><path d=\"m14.906 14.964c2.514-0.527 5.224-0.594 7.967 0.25\"/><path d=\"m14.906 15.803c2.514-0.527 5.224-0.595 7.967 0.249\"/><path d=\"m14.906 16.643c2.514-0.527 5.224-0.595 7.967 0.249\"/><path d=\"m14.906 17.495c2.514-0.527 5.224-0.595 7.967 0.249\"/><path d=\"m14.906 6.155c3.955 0 5.637-0.087 7.923 0.622\"/></g><path d=\"m8.088 23.124v-3.312c0-0.641 0.523-1.164 1.164-1.164h5.653\" stroke=\"#752119\" stroke-width=\".7311\"/><path d=\"m8.088 2.009v2.982c0 0.64 0.523 1.164 1.164 1.164h5.653\" stroke=\"#b23820\" stroke-width=\".75\"/></g></g></g></svg>",
+  "order": 20012
+}

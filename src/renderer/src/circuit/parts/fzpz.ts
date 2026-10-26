@@ -34,6 +34,7 @@ interface Fzp {
   moduleId: string
   title: string
   family: string
+  tags: string[]
   viewImage: Partial<Record<string, string>>
   connectors: FzpConnector[]
 }
@@ -196,8 +197,13 @@ function parseFzp(xml: string): Fzp {
     }
   }
 
+  // <tags><tag>led</tag>… — free-text keywords, used for palette search
+  const tags = Array.from(mod.getElementsByTagName('tag'))
+    .map((t) => (t.textContent || '').trim())
+    .filter(Boolean)
+
   const title = (mod.getElementsByTagName('title')[0]?.textContent || '').trim()
-  return { moduleId: mod.getAttribute('moduleId') || '', title, family, viewImage, connectors }
+  return { moduleId: mod.getAttribute('moduleId') || '', title, family, tags, viewImage, connectors }
 }
 
 // ── per-view SVG extraction ──────────────────────────────────────────────────
@@ -363,6 +369,7 @@ export async function importFzpz(bytes: Uint8Array, fileName?: string): Promise<
     type,
     label: fzp.title || type,
     family: fzp.family || 'Imported',
+    ...(fzp.tags.length ? { tags: fzp.tags } : {}),
     icon,
     views
   }

@@ -1,0 +1,73 @@
+{
+  "type": "polarizedheader4pin-0-156in",
+  "label": "polarizedheader 4pin 0.156in",
+  "family": "polarized header",
+  "tags": [
+    "4pin header",
+    "polarized",
+    "0.156in",
+    "tht",
+    "center locking"
+  ],
+  "description": ".156” CENTERS LOCKING POLARIZED HEADERS",
+  "source": {
+    "fzp": "polarizedheader4pin_0.156in.fzp",
+    "moduleId": "polarizedheader4pin_0.156in"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.1\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 29.521 24.934\" enable-background=\"new 0 0 29.521 24.934\" xml:space=\"preserve\"><g id=\"breadboard\"><circle id=\"connector0pin\" fill=\"none\" stroke=\"#9A916C\" stroke-width=\"0.4318\" cx=\"3.42\" cy=\"17.554\" r=\"2.052\"/><circle id=\"connector1pin\" fill=\"none\" stroke=\"#9A916C\" stroke-width=\"0.4318\" cx=\"10.606\" cy=\"17.554\" r=\"2.052\"/><circle id=\"connector2pin\" fill=\"none\" stroke=\"#9A916C\" stroke-width=\"0.4318\" cx=\"17.807\" cy=\"17.554\" r=\"2.052\"/><circle id=\"connector3pin\" fill=\"none\" stroke=\"#9A916C\" stroke-width=\"0.4318\" cx=\"25.007\" cy=\"17.554\" r=\"2.052\"/><g><path fill=\"#E6E6E6\" d=\"M0,9.077h29.52V23H0V9.077z\"/><g><g><rect x=\"4.556\" y=\"13.056\" fill-opacity=\"0.2\" width=\"20.451\" height=\"0.184\"/><path fill=\"#C3C3C3\" d=\"M26.173,4.65c0-2.79-1.835-4.349-7.415-4.349c-0.561,0-6.557,0-9.059,0c-5.58,0-7.415,1.559-7.415,4.349      c0,0.038,0.007,0.075,0.012,0.112v8.384h0.012H26.15h0.012V4.762C26.166,4.725,26.173,4.688,26.173,4.65z\"/><path fill=\"#E6E6E6\" d=\"M18.758,0c-0.022,0-9.036,0-9.059,0c-5.58,0-7.415,1.559-7.415,4.349V4.65      c0-2.79,1.835-4.349,7.415-4.349c0.014,0,9.044,0,9.059,0c5.58,0,7.415,1.559,7.415,4.349V4.349C26.173,1.559,24.338,0,18.758,0      z\"/></g><title>MTA100_3.fp</title><desc>Geda footprint file 'MTA100_3.fp' converted by Fritzing</desc><g><rect x=\"1.356\" y=\"15.485\" fill=\"#999999\" width=\"4.104\" height=\"4.104\"/><g><polygon fill=\"#808080\" points=\"1.652,9.114 5.173,9.114 5.173,19.304 1.652,19.304      \"/></g><g><rect x=\"2.505\" y=\"6.444\" fill=\"#B3B3B3\" width=\"1.813\" height=\"1.817\"/><polygon fill=\"#CCCCCC\" points=\"1.649,5.585 2.505,6.444 4.403,6.444 5.171,5.585      \"/><polygon fill=\"#999999\" points=\"4.315,8.259 4.315,6.458 5.171,5.585 5.171,9.114      \"/><polygon fill=\"#CCCCCC\" points=\"2.505,8.259 4.315,8.259 5.171,9.114 1.649,9.114      \"/><polygon fill=\"#999999\" points=\"1.649,5.585 2.505,6.454 2.505,8.259 1.649,9.114      \"/></g></g><g><rect x=\"8.555\" y=\"15.485\" fill=\"#999999\" width=\"4.104\" height=\"4.104\"/><g><polygon fill=\"#808080\" points=\"8.842,9.077 12.369,9.077 12.369,19.304 8.842,19.304      \"/></g><g><rect x=\"9.699\" y=\"6.444\" fill=\"#B3B3B3\" width=\"1.814\" height=\"1.817\"/><polygon fill=\"#CCCCCC\" points=\"8.844,5.585 9.699,6.444 11.6,6.444 12.369,5.585      \"/><polygon fill=\"#999999\" points=\"11.512,8.259 11.512,6.458 12.369,5.585 12.369,9.114      \"/><polygon fill=\"#CCCCCC\" points=\"9.699,8.259 11.512,8.259 12.369,9.114 8.844,9.114      \"/><polygon fill=\"#999999\" points=\"8.844,5.585 9.699,6.454 9.699,8.259 8.844,9.114      \"/></g></g><g><rect x=\"15.755\" y=\"15.485\" fill=\"#999999\" width=\"4.104\" height=\"4.104\"/><g><polygon fill=\"#808080\" points=\"16.042,9.077 19.57,9.077 19.57,19.304 16.042,19.304      \"/></g><g><rect x=\"16.9\" y=\"6.444\" fill=\"#B3B3B3\" width=\"1.814\" height=\"1.817\"/><polygon fill=\"#CCCCCC\" points=\"16.044,5.585 16.9,6.444 18.8,6.444 19.57,5.585      \"/><polygon fill=\"#999999\" points=\"18.712,8.259 18.712,6.458 19.57,5.585 19.57,9.114      \"/><polygon fill=\"#CCCCCC\" points=\"16.9,8.259 18.712,8.259 19.57,9.114 16.044,9.114      \"/><polygon fill=\"#999999\" points=\"16.044,5.585 16.9,6.454 16.9,8.259 16.044,9.114      \"/></g></g><g><rect x=\"22.955\" y=\"15.485\" fill=\"#999999\" width=\"4.104\" height=\"4.104\"/><g><polygon fill=\"#808080\" points=\"23.242,9.077 26.77,9.077 26.77,19.304 23.242,19.304      \"/></g><g><rect x=\"24.1\" y=\"6.444\" fill=\"#B3B3B3\" width=\"1.814\" height=\"1.817\"/><polygon fill=\"#CCCCCC\" points=\"23.244,5.585 24.1,6.444 26,6.444 26.77,5.585      \"/><polygon fill=\"#999999\" points=\"25.912,8.259 25.912,6.458 26.77,5.585 26.77,9.114      \"/><polygon fill=\"#CCCCCC\" points=\"24.1,8.259 25.912,8.259 26.77,9.114 23.244,9.114      \"/><polygon fill=\"#999999\" points=\"23.244,5.585 24.1,6.454 24.1,8.259 23.244,9.114      \"/></g></g></g><rect x=\"0\" y=\"23\" fill=\"#C3C3C3\" width=\"29.52\" height=\"1.934\"/></g></g></svg>",
+      "w": 29.52,
+      "h": 24.93,
+      "pins": {
+        "pin1": [
+          3.42,
+          17.55
+        ],
+        "pin2": [
+          10.61,
+          17.55
+        ],
+        "pin3": [
+          17.81,
+          17.55
+        ],
+        "pin4": [
+          25.01,
+          17.55
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg version=\"1.2\" baseProfile=\"tiny\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0in\" y=\"0in\" viewBox=\"0 0 14.4 28.8\"><g id=\"schematic\"><line id=\"connector0pin\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"0.35\" y1=\"3.6\" x2=\"7.346\" y2=\"3.6\"/><rect id=\"connector0terminal\" x=\"-0.252\" y=\"3.504\" fill=\"none\" width=\"0.546\" height=\"0.208\"/><polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" points=\"14.1,5.557 9.928,3.6 14.1,1.643\"/><line id=\"line\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"10.11\" y1=\"3.6\" x2=\"4.804\" y2=\"3.6\"/><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"2.5\" x=\"5.05\" y=\"2.58\" text-anchor=\"middle\">1</text><line id=\"connector1pin\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"0.35\" y1=\"10.8\" x2=\"7.346\" y2=\"10.8\"/><rect id=\"connector1terminal\" x=\"-0.252\" y=\"10.704\" fill=\"none\" width=\"0.546\" height=\"0.208\"/><polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" points=\"14.1,12.757 9.928,10.8 14.1,8.843\"/><line id=\"line\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"10.11\" y1=\"10.8\" x2=\"4.804\" y2=\"10.8\"/><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"2.5\" x=\"5.05\" y=\"9.78\" text-anchor=\"middle\">2</text><line id=\"connector2pin\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"0.35\" y1=\"18\" x2=\"7.346\" y2=\"18\"/><rect id=\"connector2terminal\" x=\"-0.252\" y=\"17.904\" fill=\"none\" width=\"0.546\" height=\"0.208\"/><polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" points=\"14.1,19.957 9.928,18 14.1,16.043\"/><line id=\"line\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"10.11\" y1=\"18\" x2=\"4.804\" y2=\"18\"/><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"2.5\" x=\"5.05\" y=\"16.98\" text-anchor=\"middle\">3</text><line id=\"connector3pin\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"0.35\" y1=\"25.2\" x2=\"7.346\" y2=\"25.2\"/><rect id=\"connector3terminal\" x=\"-0.252\" y=\"25.104\" fill=\"none\" width=\"0.546\" height=\"0.208\"/><polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" points=\"14.1,27.157 9.928,25.2 14.1,23.243\"/><line id=\"line\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x1=\"10.11\" y1=\"25.2\" x2=\"4.804\" y2=\"25.2\"/><text class=\"text\" font-family=\"'Droid Sans'\" stroke=\"none\" stroke-width=\"0\" fill=\"#8c8c8c\" font-size=\"2.5\" x=\"5.05\" y=\"24.18\" text-anchor=\"middle\">4</text></g></svg>",
+      "w": 19.2,
+      "h": 38.4,
+      "pins": {
+        "pin1": [
+          0.03,
+          4.81
+        ],
+        "pin2": [
+          0.03,
+          14.41
+        ],
+        "pin3": [
+          0.03,
+          24.01
+        ],
+        "pin4": [
+          0.03,
+          33.61
+        ]
+      }
+    }
+  },
+  "properties": {
+    "hole size": "",
+    "pins": "4",
+    "pin spacing": "0.156in (3.96mm)",
+    "package": "THT"
+  },
+  "icon": "<svg version=\"1.1\" id=\"Layer_1\" xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 29.521 24.934\" enable-background=\"new 0 0 29.521 24.934\" xml:space=\"preserve\"><g id=\"icon\"><g><path fill=\"#E6E6E6\" d=\"M0,9.077H29.52V23H0V9.077z\"/><g><g><rect x=\"4.556\" y=\"13.056\" fill-opacity=\"0.2\" width=\"20.45\" height=\"0.185\"/><path fill=\"#C3C3C3\" d=\"M26.173,4.65c0-2.79-1.835-4.349-7.415-4.349c-0.561,0-6.557,0-9.059,0c-5.58,0-7.415,1.559-7.415,4.349      c0,0.038,0.007,0.075,0.012,0.112v8.384h0.013H26.15h0.012V4.762C26.166,4.725,26.173,4.688,26.173,4.65z\"/><path fill=\"#E6E6E6\" d=\"M18.758,0c-0.021,0-9.035,0-9.059,0c-5.58,0-7.415,1.559-7.415,4.349V4.65      c0-2.79,1.835-4.349,7.415-4.349c0.014,0,9.044,0,9.059,0c5.58,0,7.415,1.559,7.415,4.349V4.349C26.173,1.559,24.338,0,18.758,0      z\"/></g><title>MTA100_3.fp</title><desc>Geda footprint file 'MTA100_3.fp' converted by Fritzing</desc><g><rect x=\"1.356\" y=\"15.485\" fill=\"#999999\" width=\"4.104\" height=\"4.104\"/><g><polygon fill=\"#808080\" points=\"1.652,9.115 5.173,9.115 5.173,19.304 1.652,19.304      \"/></g><g><rect x=\"2.505\" y=\"6.444\" fill=\"#B3B3B3\" width=\"1.813\" height=\"1.817\"/><polygon fill=\"#CCCCCC\" points=\"1.649,5.585 2.505,6.444 4.403,6.444 5.171,5.585      \"/><polygon fill=\"#999999\" points=\"4.315,8.259 4.315,6.458 5.171,5.585 5.171,9.115      \"/><polygon fill=\"#CCCCCC\" points=\"2.505,8.259 4.315,8.259 5.171,9.115 1.649,9.115      \"/><polygon fill=\"#999999\" points=\"1.649,5.585 2.505,6.454 2.505,8.259 1.649,9.115      \"/></g></g><g><rect x=\"8.555\" y=\"15.485\" fill=\"#999999\" width=\"4.104\" height=\"4.104\"/><g><polygon fill=\"#808080\" points=\"8.842,9.077 12.369,9.077 12.369,19.304 8.842,19.304      \"/></g><g><rect x=\"9.699\" y=\"6.444\" fill=\"#B3B3B3\" width=\"1.814\" height=\"1.817\"/><polygon fill=\"#CCCCCC\" points=\"8.844,5.585 9.699,6.444 11.6,6.444 12.369,5.585      \"/><polygon fill=\"#999999\" points=\"11.512,8.259 11.512,6.458 12.369,5.585 12.369,9.115      \"/><polygon fill=\"#CCCCCC\" points=\"9.699,8.259 11.512,8.259 12.369,9.115 8.844,9.115      \"/><polygon fill=\"#999999\" points=\"8.844,5.585 9.699,6.454 9.699,8.259 8.844,9.115      \"/></g></g><g><rect x=\"15.755\" y=\"15.485\" fill=\"#999999\" width=\"4.104\" height=\"4.104\"/><g><polygon fill=\"#808080\" points=\"16.042,9.077 19.57,9.077 19.57,19.304 16.042,19.304      \"/></g><g><rect x=\"16.9\" y=\"6.444\" fill=\"#B3B3B3\" width=\"1.813\" height=\"1.817\"/><polygon fill=\"#CCCCCC\" points=\"16.044,5.585 16.9,6.444 18.8,6.444 19.57,5.585      \"/><polygon fill=\"#999999\" points=\"18.712,8.259 18.712,6.458 19.57,5.585 19.57,9.115      \"/><polygon fill=\"#CCCCCC\" points=\"16.9,8.259 18.712,8.259 19.57,9.115 16.044,9.115      \"/><polygon fill=\"#999999\" points=\"16.044,5.585 16.9,6.454 16.9,8.259 16.044,9.115      \"/></g></g><g><rect x=\"22.955\" y=\"15.485\" fill=\"#999999\" width=\"4.104\" height=\"4.104\"/><g><polygon fill=\"#808080\" points=\"23.242,9.077 26.77,9.077 26.77,19.304 23.242,19.304      \"/></g><g><rect x=\"24.1\" y=\"6.444\" fill=\"#B3B3B3\" width=\"1.813\" height=\"1.817\"/><polygon fill=\"#CCCCCC\" points=\"23.244,5.585 24.1,6.444 26,6.444 26.77,5.585      \"/><polygon fill=\"#999999\" points=\"25.912,8.259 25.912,6.458 26.77,5.585 26.77,9.115      \"/><polygon fill=\"#CCCCCC\" points=\"24.1,8.259 25.912,8.259 26.77,9.115 23.244,9.115      \"/><polygon fill=\"#999999\" points=\"23.244,5.585 24.1,6.454 24.1,8.259 23.244,9.115      \"/></g></g></g><rect x=\"0\" y=\"23\" fill=\"#C3C3C3\" width=\"29.521\" height=\"1.934\"/></g></g></svg>",
+  "order": 60060
+}

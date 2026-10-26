@@ -1,0 +1,96 @@
+{
+  "type": "dip-relay-d31a-14fadb0-002",
+  "label": "DIP-Relay-D31A",
+  "family": "Relay",
+  "description": "<div id=\"idTab1\" class=\"rte\"><p>Dip-Relay</p>\n\n<p> <a href=\"https://www.digchip.com/datasheets/download_datasheet.php?id=2731261&part-number=D31A\" target=\"_blank\">Datasheet</a></p>",
+  "source": {
+    "fzp": "DIP_Relay_D31A_14fadb0_002.fzp",
+    "moduleId": "DIPRelay170495d155b24134b5d3f59be2e098ed"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 63 29.7\"><g id=\"breadboard\"><g transform=\"translate(0 -1022.7)\"><rect x=\".87373\" y=\"1026.2\" width=\"61.298\" height=\"22.559\" fill=\"#333\" stroke=\"#333\" stroke-dasharray=\"10.24724745, 1.70787459\" stroke-linecap=\"square\" stroke-width=\"1.7079\"/><rect x=\".0041323\" y=\"1025.4\" width=\"63\" height=\"2.2138\" fill=\"#3d3d3d\"/><rect x=\".0041323\" y=\"1047.5\" width=\"63\" height=\"2.2138\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"49.86 3.931 49.86 19.829 50.4 21.601 50.4 2.16\" fill=\"#141414\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"0.54 3.931 0.54 19.829 0 21.601 0 2.16\" fill=\"#1f1f1f\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"0.403 9.777 0.403 11.88 3.6 11.88 3.6 8.28 0.54 8.251\" fill=\"#1c1c1c\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"3.6 11.88 0.403 11.88 0.403 13.981 0.54 15.517 3.6 15.517\" fill=\"#383838\"/><path d=\"m0.50788 1034.9v5.2487c1.3238-0.1537 2.3588-1.2612 2.3588-2.63 0-1.3687-1.0262-2.465-2.3588-2.6187z\" fill=\"#262626\"/><path d=\"m0.67913 1027.6v5.3913c2.1425 0.405 3.7725 2.2762 3.7725 4.5362s-1.6225 4.1401-3.7725 4.5451v0.01h4.5v-14.483h-4.5z\" fill=\"#303030\"/><circle transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" cx=\"4.68\" cy=\"16.898\" r=\"1.483\" fill=\"#212121\"/><g transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" fill=\"#ccc\" font-family=\"OCR-Fritzing-mono\" font-size=\"5\"><text x=\"6.8302426\" y=\"13.406791\" fill=\"#cccccc\">D31A*</text></g><rect id=\"connector0\" x=\"3.1541\" y=\"1048.5\" width=\"2.7\" height=\"3.905\" fill=\"#8c8c8c\"/><rect x=\"3.1462\" y=\"1049.7\" width=\"2.7\" height=\"2.6988\" fill=\"#999\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"4.68 22.075 6.12 21.413 6.12 20.636 2.52 20.636 2.52 22.075\" fill=\"#8c8c8c\"/><rect id=\"connector13\" x=\"3.1541\" y=\"1022.7\" width=\"2.7\" height=\"3.9062\" fill=\"#8c8c8c\"/><rect x=\"3.1463\" y=\"1022.7\" width=\"2.7\" height=\"2.7\" fill=\"#999\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"4.68 1.685 2.52 1.685 2.52 3.125 6.12 3.125 6.12 2.347\" fill=\"#8c8c8c\"/><rect id=\"connector6\" x=\"57.154\" y=\"1048.5\" width=\"2.6975\" height=\"3.905\" fill=\"#8c8c8c\"/><rect x=\"57.157\" y=\"1049.7\" width=\"2.6975\" height=\"2.6988\" fill=\"#999\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"45.72 22.075 47.88 22.075 47.88 20.636 44.28 20.636 44.28 21.413\" fill=\"#8c8c8c\"/><rect id=\"connector7\" x=\"57.154\" y=\"1022.7\" width=\"2.6975\" height=\"3.9062\" fill=\"#8c8c8c\"/><rect x=\"57.157\" y=\"1022.7\" width=\"2.6975\" height=\"2.7\" fill=\"#999\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"45.72 1.685 44.28 2.347 44.28 3.125 47.88 3.125 47.88 1.685\" fill=\"#8c8c8c\"/><rect id=\"connector1\" x=\"12.154\" y=\"1048.5\" width=\"2.6975\" height=\"3.905\" fill=\"#8c8c8c\"/><rect x=\"12.157\" y=\"1049.7\" width=\"2.6975\" height=\"2.6988\" fill=\"#999\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"13.32 20.636 8.28 20.636 8.28 21.413 9.72 22.075 11.88 22.075 13.32 21.413\" fill=\"#8c8c8c\"/><rect id=\"connector12\" x=\"12.154\" y=\"1022.7\" width=\"2.6975\" height=\"3.9062\" fill=\"#8c8c8c\"/><rect x=\"12.16\" y=\"1022.7\" width=\"2.6975\" height=\"2.7\" fill=\"#999\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"8.28 3.125 13.32 3.125 13.32 2.347 11.88 1.685 9.72 1.685 8.28 2.347\" fill=\"#8c8c8c\"/><rect id=\"connector5\" x=\"48.154\" y=\"1048.5\" width=\"2.7\" height=\"3.905\" fill=\"#8c8c8c\"/><rect x=\"48.154\" y=\"1049.7\" width=\"2.7\" height=\"2.6988\" fill=\"#999\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"42.12 20.636 37.08 20.636 37.08 21.413 38.52 22.075 40.68 22.075 42.12 21.413\" fill=\"#8c8c8c\"/><rect id=\"connector8\" x=\"48.154\" y=\"1022.7\" width=\"2.7\" height=\"3.9062\" fill=\"#8c8c8c\"/><rect x=\"48.154\" y=\"1022.7\" width=\"2.7\" height=\"2.7\" fill=\"#999\"/><polygon transform=\"matrix(1.25 0 0 1.25 .0041326 1022.7)\" points=\"37.08 3.125 42.12 3.125 42.12 2.347 40.68 1.685 38.52 1.685 37.08 2.347\" fill=\"#8c8c8c\"/></g></g></svg>",
+      "w": 63,
+      "h": 29.7,
+      "pins": {
+        "Coil2 -": [
+          49.5,
+          27.75
+        ],
+        "B1 Switch Terminal B": [
+          58.5,
+          27.75
+        ],
+        "B2 Switch Terminal B": [
+          58.5,
+          1.95
+        ],
+        "Coil Sheeld": [
+          49.5,
+          1.95
+        ],
+        "A1 Switch Terminal A": [
+          4.5,
+          27.75
+        ],
+        "n.c.": [
+          13.5,
+          1.95
+        ],
+        "COIL1 +": [
+          13.5,
+          27.75
+        ],
+        "A2 Switch Terminal A": [
+          4.5,
+          1.95
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg version=\"1.1\" viewBox=\"0 0 62.667 76.585\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"schematic\"><g transform=\"translate(-202 -375.87)\"><rect x=\"210.72\" y=\"376.36\" width=\"45.265\" height=\"76.1\" fill=\"#fff\" stroke=\"#000\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\".9\"/><g fill=\"#787878\" font-family=\"'Droid Sans'\" font-size=\"2\"><text transform=\"translate(205.42 439.17)\">7</text><text transform=\"translate(205.42 431.97)\">6-</text><text transform=\"translate(205.42 395.97)\">2+</text><text transform=\"translate(205.42 388.77)\">1</text><text transform=\"translate(259.47 439.17)\">8</text><text transform=\"translate(259.47 431.97)\">9</text><text transform=\"translate(259.47 395.97)\">13</text><text transform=\"translate(259.47 388.77)\">14</text></g><g fill=\"none\" stroke=\"#000\" stroke-linejoin=\"round\"><g transform=\"matrix(1.25 0 0 1.25 201.95 375.78)\"><path d=\"m6.918 46.575h12.634v-4.979h0.098c1.122 0 2.032-0.91 2.032-2.032 0-1.123-0.91-2.031-2.032-2.031 1.122 0 2.032-0.91 2.032-2.032s-0.91-2.031-2.032-2.031c1.122 0 2.032-0.909 2.032-2.031s-0.91-2.032-2.032-2.032c1.122 0 2.032-0.91 2.032-2.032s-0.91-2.032-2.032-2.032c1.122 0 2.032-0.91 2.032-2.032s-0.91-2.032-2.032-2.032h-0.098v-3.521h-12.634\" stroke-linecap=\"round\" stroke-width=\".4\"/><g stroke-linecap=\"square\" stroke-miterlimit=\"1\"><path d=\"m13.004 17.773c0 0.095-0.077 0.173-0.173 0.173s-0.173-0.077-0.173-0.173 0.077-0.173 0.173-0.173 0.173 0.077 0.173 0.173z\" stroke-width=\".5783\"/><path d=\"m13.062 46.557c0 0.095-0.077 0.173-0.173 0.173-0.095 0-0.173-0.077-0.173-0.173 0-0.095 0.077-0.173 0.173-0.173 0.095 0 0.173 0.078 0.173 0.173z\" stroke-width=\".5783\"/><path d=\"m12.843 29.681 1.752 3.596h-3.504s1.745-3.596 1.752-3.596z\" stroke-width=\".4\"/></g><path d=\"M12.831,29.861V17.765\" stroke-width=\".4\"/><path d=\"m10.842 29.405h3.913\" stroke-width=\".4\"/></g><path d=\"m231.6 402.05v25.938\" stroke-dasharray=\"3.4697,0.5783\" stroke-width=\".4\"/><path d=\"m255.99 434h-24.38v-6.081\" stroke-width=\".4\"/><g transform=\"matrix(1.25 0 0 1.25 201.95 375.78)\"><g stroke-width=\".4\"><path d=\"m7.345 52.375h35.539\"/><path d=\"m7.345 12h35.539\"/><path d=\"m34.546 36.028v16.598\"/><path d=\"m34.527 12.092v17.581l2.755 6.778\"/></g><path d=\"m34.703 52.335c0 0.095-0.077 0.173-0.173 0.173-0.095 0-0.173-0.077-0.173-0.173v0c0-0.095 0.077-0.173 0.173-0.173 0.095 0 0.173 0.077 0.173 0.173v0z\" stroke-linecap=\"square\" stroke-miterlimit=\"1\" stroke-width=\".5783\"/><path d=\"m34.686 12.036c0 0.096-0.077 0.173-0.173 0.173-0.095 0-0.173-0.077-0.173-0.173v0c0-0.095 0.077-0.173 0.173-0.173s0.173 0.077 0.173 0.173v0z\" stroke-linecap=\"square\" stroke-miterlimit=\"1\" stroke-width=\".5783\"/></g><path d=\"m218.06 417.33v16.529\" stroke-width=\".4\"/></g><text transform=\"translate(225.3 385.95)\" font-family=\"'Droid Sans'\" font-size=\"5.5\">D31A*</text><g fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\".7\"><line x1=\"255.98\" x2=\"264.67\" y1=\"441.16\" y2=\"441.16\"/><line x1=\"255.98\" x2=\"264.67\" y1=\"433.96\" y2=\"433.96\"/><line x1=\"255.98\" x2=\"264.67\" y1=\"397.96\" y2=\"397.96\"/><line x1=\"255.98\" x2=\"264.67\" y1=\"390.76\" y2=\"390.76\"/><line x1=\"202\" x2=\"210.68\" y1=\"441.16\" y2=\"441.16\"/><line x1=\"202\" x2=\"210.68\" y1=\"433.96\" y2=\"433.96\"/><line x1=\"202\" x2=\"210.68\" y1=\"397.96\" y2=\"397.96\"/><line x1=\"202\" x2=\"210.68\" y1=\"390.76\" y2=\"390.76\"/></g></g><g fill=\"none\" opacity=\".2\" stroke=\"#787878\" stroke-width=\".1\"><rect id=\"connector6\" y=\"64.787\" width=\"6\" height=\".993\"/><rect id=\"connector7\" x=\"56.6\" y=\"64.79\" width=\"6\" height=\".994\"/><rect id=\"connector8\" x=\"56.6\" y=\"57.684\" width=\"6\" height=\".806\"/><rect id=\"connector12\" x=\"56.6\" y=\"21.589\" width=\"6\" height=\".994\"/><rect id=\"connector13\" x=\"56.6\" y=\"14.388\" width=\"6\" height=\".994\"/><rect id=\"connector0\" y=\"14.438\" width=\"6\" height=\".888\"/><rect id=\"connector1\" y=\"21.585\" width=\"6\" height=\".994\"/><rect id=\"connector5\" y=\"57.492\" width=\"6\" height=\".994\"/></g></g></svg>",
+      "w": 62.67,
+      "h": 76.58,
+      "pins": {
+        "Coil2 -": [
+          3,
+          57.99
+        ],
+        "B1 Switch Terminal B": [
+          3,
+          65.28
+        ],
+        "B2 Switch Terminal B": [
+          59.6,
+          65.29
+        ],
+        "Coil Sheeld": [
+          59.6,
+          58.09
+        ],
+        "A1 Switch Terminal A": [
+          3,
+          14.88
+        ],
+        "n.c.": [
+          59.6,
+          22.09
+        ],
+        "COIL1 +": [
+          3,
+          22.08
+        ],
+        "A2 Switch Terminal A": [
+          59.6,
+          14.89
+        ]
+      }
+    }
+  },
+  "properties": {
+    "part number": "D31A*",
+    "pins": "8"
+  },
+  "icon": "<svg enable-background=\"new 0 0 50.4 23.76\" version=\"1.1\" viewBox=\"0 0 50.4 23.76\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><g id=\"icon\"><rect y=\"2.16\" width=\"50.4\" height=\"19.44\" fill=\"#303030\"/><rect y=\"2.16\" width=\"50.4\" height=\"1.771\" fill=\"#3d3d3d\"/><rect y=\"19.829\" width=\"50.4\" height=\"1.771\"/><polygon points=\"49.86 19.829 50.4 21.601 50.4 2.16 49.86 3.931\" fill=\"#141414\"/><polygon points=\"0.54 19.829 0 21.601 0 2.16 0.54 3.931\" fill=\"#1f1f1f\"/><polygon points=\"0.403 9.777 0.403 11.88 3.6 11.88 3.6 8.28 0.54 8.251\" fill=\"#1c1c1c\"/><polygon points=\"3.6 11.88 0.403 11.88 0.403 13.981 0.54 15.517 3.6 15.517\" fill=\"#383838\"/><path d=\"m0.403 9.777v4.199c1.059-0.123 1.887-1.009 1.887-2.104s-0.821-1.972-1.887-2.095z\" fill=\"#262626\"/><path d=\"m0.54 3.931v4.313c1.714 0.324 3.018 1.821 3.018 3.629s-1.298 3.312-3.018 3.636v8e-3h3.6v-11.586h-3.6z\" fill=\"#303030\"/><circle cx=\"4.68\" cy=\"16.898\" r=\"1.483\" fill=\"#212121\"/><g fill=\"#ccc\" font-family=\"OCR-Fritzing-mono\" font-size=\"5\" xml:space=\"preserve\"><text x=\"6.8302426\" y=\"13.406791\">D31A*</text></g><g fill=\"#8c8c8c\"><rect x=\"2.52\" y=\"21.601\" width=\"2.16\" height=\"2.159\"/><polygon points=\"4.68 22.075 6.12 21.413 6.12 20.636 2.52 20.636 2.52 22.075\"/><rect x=\"2.52\" width=\"2.16\" height=\"2.16\"/><polygon points=\"4.68 1.685 2.52 1.685 2.52 3.125 6.12 3.125 6.12 2.347\"/><rect x=\"45.72\" y=\"21.601\" width=\"2.158\" height=\"2.159\"/><polygon points=\"45.72 22.075 47.88 22.075 47.88 20.636 44.28 20.636 44.28 21.413\"/><rect x=\"45.72\" width=\"2.158\" height=\"2.16\"/><polygon points=\"45.72 1.685 44.28 2.347 44.28 3.125 47.88 3.125 47.88 1.685\"/><rect x=\"9.72\" y=\"21.601\" width=\"2.158\" height=\"2.159\"/><polygon points=\"9.72 22.075 11.88 22.075 13.32 21.413 13.32 20.636 8.28 20.636 8.28 21.413\"/><rect x=\"9.72\" width=\"2.158\" height=\"2.16\"/><polygon points=\"11.88 1.685 9.72 1.685 8.28 2.347 8.28 3.125 13.32 3.125 13.32 2.347\"/><rect x=\"38.52\" y=\"21.601\" width=\"2.16\" height=\"2.159\"/><polygon points=\"38.52 22.075 40.68 22.075 42.12 21.413 42.12 20.636 37.08 20.636 37.08 21.413\"/><rect x=\"38.52\" width=\"2.16\" height=\"2.16\"/><polygon points=\"40.68 1.685 38.52 1.685 37.08 2.347 37.08 3.125 42.12 3.125 42.12 2.347\"/></g></g></svg>",
+  "order": 20013
+}

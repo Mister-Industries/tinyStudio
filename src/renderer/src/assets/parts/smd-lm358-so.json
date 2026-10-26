@@ -1,0 +1,102 @@
+{
+  "type": "smd-lm358-so",
+  "label": "LM 358 Dual Op-Amp (SO 08)",
+  "family": "Op-Amp IC",
+  "tags": [
+    "Op-Amp,LM358",
+    "IC",
+    "DIP",
+    "SMD"
+  ],
+  "description": "The classic LM 358 Dual Operational Amplifier (Op-Amp).  The analog swiss-army knife.",
+  "source": {
+    "fzp": "SMD_lm358_SO.fzp",
+    "moduleId": "c27f4ada-fa5c-46ad-9946-a7defxyg687faba7"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg version=\"1.0\" viewBox=\"0 0 40 33\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"#8c8c8c\"><rect id=\"connector0pin\" x=\"3.5\" y=\"28.66\" width=\"3\" height=\"4.34\"/><rect id=\"connector1pin\" x=\"13.5\" y=\"28.66\" width=\"3\" height=\"4.34\"/><rect id=\"connector2pin\" x=\"23.5\" y=\"28.66\" width=\"3\" height=\"4.34\"/><rect id=\"connector3pin\" x=\"33.5\" y=\"28.66\" width=\"3\" height=\"4.34\"/><rect id=\"connector4pin\" x=\"33.5\" width=\"3\" height=\"4.34\"/><rect id=\"connector5pin\" x=\"23.5\" width=\"3\" height=\"4.34\"/><rect id=\"connector6pin\" x=\"13.5\" width=\"3\" height=\"4.34\"/><rect id=\"connector7pin\" x=\"3.5\" width=\"3\" height=\"4.34\"/><rect id=\"connector0terminal\" x=\"3.5\" y=\"30\" width=\"3\" height=\"3\"/><rect id=\"connector1terminal\" x=\"13.5\" y=\"30\" width=\"3\" height=\"3\"/><rect id=\"connector2terminal\" x=\"23.5\" y=\"30\" width=\"3\" height=\"3\"/><rect id=\"connector3terminal\" x=\"33.5\" y=\"30\" width=\"3\" height=\"3\"/><rect id=\"connector4terminal\" x=\"33.5\" width=\"3\" height=\"3\"/><rect id=\"connector5terminal\" x=\"23.5\" width=\"3\" height=\"3\"/><rect id=\"connector6terminal\" x=\"13.5\" width=\"3\" height=\"3\"/><rect id=\"connector7terminal\" x=\"3.5\" width=\"3\" height=\"3\"/></g><g id=\"breadboard\"><g fill=\"#8c8c8c\"><rect x=\"3.5\" y=\"26.32\" width=\"3\" height=\"6.68\"/><rect x=\"13.5\" y=\"26.32\" width=\"3\" height=\"6.68\"/><rect x=\"23.5\" y=\"26.32\" width=\"3\" height=\"6.68\"/><rect x=\"33.5\" y=\"26.32\" width=\"3\" height=\"6.68\"/><rect x=\"3.5\" width=\"3\" height=\"6.68\"/><rect x=\"13.5\" width=\"3\" height=\"6.68\"/><rect x=\"23.5\" width=\"3\" height=\"6.68\"/><rect x=\"33.5\" width=\"3\" height=\"6.68\"/></g><polygon points=\"0 3 40 3 39.25 11.5 0 11.5\" fill=\"#3d3d3d\"/><polygon points=\"0 21.5 39.25 21.5 40 30 0 30\"/><g fill=\"#8c8c8c\"><polygon points=\"8.5 4.34 8.5 3.26 6.5 2.34 3.5 2.34 3.5 4.34\"/><polygon points=\"18.5 4.34 18.5 3.26 16.5 2.34 13.5 2.34 11.5 3.26 11.5 4.34\"/><polygon points=\"36.5 4.34 36.5 2.34 33.5 2.34 31.5 3.26 31.5 4.34\"/><polygon points=\"28.5 4.34 28.5 3.26 26.5 2.34 23.5 2.34 21.5 3.26 21.5 4.34\"/><polygon points=\"3.5 28.66 3.5 30.66 6.5 30.66 8.5 29.74 8.5 28.66\"/><polygon points=\"31.5 28.66 31.5 29.74 33.5 30.66 36.5 30.66 36.5 28.66\"/><polygon points=\"11.5 28.66 11.5 29.74 13.5 30.66 16.5 30.66 18.5 29.74 18.5 28.66\"/><polygon points=\"21.5 28.66 21.5 29.74 23.5 30.66 26.5 30.66 28.5 29.74 28.5 28.66\"/></g><polygon points=\"40 3 39.25 5.46 37.853 5.46 37.853 27.53 39.25 27.54 40 30\" fill=\"#141414\"/><polygon points=\"0 3 0.75 5.46 0.75 11.5 5 11.5 5 21.5 0.75 21.5 0.75 27.54 0 30\" fill=\"#1f1f1f\"/><polygon points=\"5 11.5 0.75 11.46 0.56 13.58 0.56 16.49 5 16.49\" fill=\"#1c1c1c\"/><polygon points=\"0.75 21.55 5 21.55 5 16.49 0.56 16.49 0.56 19.42\" fill=\"#383838\"/><path d=\"m0.75 5.46v5.99c2.38 0.45 4.19 2.53 4.19 5.04s-1.8 4.6-4.19 5.05v5.99h38.5v-22.07h-38.5z\" fill=\"#303030\"/><path d=\"m0.56 13.58v5.83c1.47-0.17 2.62-1.4 2.62-2.92s-1.14-2.74-2.62-2.91z\" fill=\"#262626\"/><circle cx=\"6.5\" cy=\"23.47\" r=\"2.06\" fill=\"#212121\"/><text x=\"6\" y=\"18\" fill=\"#e3dbdb\" font-family=\"'OCRA'\" font-size=\"9\">LM358</text></g></svg>",
+      "w": 38.4,
+      "h": 31.68,
+      "pins": {
+        "Pin 4": [
+          33.6,
+          29.6
+        ],
+        "Pin 5": [
+          33.6,
+          2.08
+        ],
+        "Pin 6": [
+          24,
+          2.08
+        ],
+        "Pin 7": [
+          14.4,
+          2.08
+        ],
+        "Pin 8": [
+          4.8,
+          2.08
+        ],
+        "Pin 1": [
+          4.8,
+          29.6
+        ],
+        "Pin 2": [
+          14.4,
+          29.6
+        ],
+        "Pin 3": [
+          24,
+          29.6
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg enable-background=\"new 0 0 43.9 137.727\" version=\"1.1\" viewBox=\"0 0 43.9 137.73\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"schematic\"><polygon points=\"7.551 108.35 36.35 122.75 7.551 137.15\" fill=\"#fff\" stroke=\"#000\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\".9\"/><polygon points=\"7.551 36.35 36.35 21.95 7.551 7.55\" fill=\"#fff\" stroke=\"#000\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\".9\"/><g fill=\"none\" stroke-linecap=\"round\"><g stroke=\"#000\"><g stroke-width=\".5\"><line x1=\"11.15\" x2=\"11.15\" y1=\"30.95\" y2=\"27.35\"/><line x1=\"9.35\" x2=\"12.95\" y1=\"29.15\" y2=\"29.15\"/><line x1=\"9.35\" x2=\"12.95\" y1=\"14.75\" y2=\"14.75\"/></g><line x1=\"14.75\" x2=\"14.75\" y1=\"36.35\" y2=\"32.967\" stroke-width=\".75\"/><line x1=\"14.75\" x2=\"14.75\" y1=\"10.862\" y2=\"7.55\" stroke-width=\".75\"/></g><line id=\"connector2pin\" x1=\".35\" x2=\"7.551\" y1=\"29.15\" y2=\"29.15\" stroke=\"#787878\" stroke-width=\".75\"/></g><text transform=\"translate(3.2605 28.099)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">3</text><line id=\"connector1pin\" x1=\".35\" x2=\"7.551\" y1=\"14.75\" y2=\"14.75\" fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".75\"/><text transform=\"translate(3.2605 13.7)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">2</text><line id=\"connector0pin\" x1=\"43.551\" x2=\"36.35\" y1=\"21.95\" y2=\"21.95\" fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".75\"/><text transform=\"translate(39.26 20.901)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">1</text><line id=\"connector7pin\" x1=\"14.75\" x2=\"14.75\" y1=\".35\" y2=\"7.55\" fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".75\"/><g transform=\"translate(4.8331 1.3935)\"><g transform=\"rotate(270)\"><text transform=\"translate(-3.2459 8.8659)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">8</text></g></g><line id=\"connector3pin\" x1=\"14.75\" x2=\"14.75\" y1=\"43.551\" y2=\"36.35\" fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".75\"/><rect id=\"connector3terminal\" x=\"14.75\" y=\"43.551\" width=\".001\" height=\".001\" fill=\"none\"/><g transform=\"translate(4.8331 14.094)\"><g transform=\"rotate(270)\"><text transform=\"translate(-26.546 8.8659)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">4</text></g></g><g fill=\"none\" stroke-linecap=\"round\"><g stroke=\"#000\" stroke-width=\".5\"><line x1=\"11.15\" x2=\"11.15\" y1=\"113.75\" y2=\"117.35\"/><line x1=\"9.35\" x2=\"12.95\" y1=\"115.55\" y2=\"115.55\"/><line x1=\"9.35\" x2=\"12.95\" y1=\"129.95\" y2=\"129.95\"/></g><line id=\"connector4pin\" x1=\".35\" x2=\"7.551\" y1=\"115.55\" y2=\"115.55\" stroke=\"#787878\" stroke-width=\".75\"/></g><text transform=\"translate(3.2605 114.5)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">5</text><line id=\"connector5pin\" x1=\".35\" x2=\"7.551\" y1=\"129.95\" y2=\"129.95\" fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".75\"/><text transform=\"translate(3.2605 128.9)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">6</text><line id=\"connector6pin\" x1=\"43.551\" x2=\"36.35\" y1=\"122.75\" y2=\"122.75\" fill=\"none\" stroke=\"#787878\" stroke-linecap=\"round\" stroke-width=\".75\"/><text transform=\"translate(39.26 121.7)\" fill=\"#8C8C8C\" font-family=\"Noto Sans\" font-size=\"2.5\">7</text></g></svg>",
+      "w": 43.9,
+      "h": 137.73,
+      "pins": {
+        "Pin 4": [
+          14.75,
+          43.55
+        ],
+        "Pin 5": [
+          0.35,
+          115.55
+        ],
+        "Pin 6": [
+          0.35,
+          129.95
+        ],
+        "Pin 7": [
+          43.55,
+          122.75
+        ],
+        "Pin 8": [
+          14.75,
+          0.35
+        ],
+        "Pin 1": [
+          43.55,
+          21.95
+        ],
+        "Pin 2": [
+          0.35,
+          14.75
+        ],
+        "Pin 3": [
+          0.35,
+          29.15
+        ]
+      }
+    }
+  },
+  "properties": {
+    "package": "SO 08 [SMD]"
+  },
+  "icon": "<svg baseProfile=\"tiny\" version=\"1.2\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"><g id=\"icon\" transform=\"matrix(.8 0 0 .8 0 2.8)\"><g fill=\"#8c8c8c\"><rect x=\"3.5\" y=\"26.3\" width=\"3\" height=\"6.68\"/><rect x=\"13.5\" y=\"26.3\" width=\"3\" height=\"6.68\"/><rect x=\"23.5\" y=\"26.3\" width=\"3\" height=\"6.68\"/><rect x=\"33.5\" y=\"26.3\" width=\"3\" height=\"6.68\"/><rect x=\"3.5\" width=\"3\" height=\"6.68\"/><rect x=\"13.5\" width=\"3\" height=\"6.68\"/><rect x=\"23.5\" width=\"3\" height=\"6.68\"/><rect x=\"33.5\" width=\"3\" height=\"6.68\"/></g><rect y=\"3\" width=\"40\" height=\"8.5\" fill=\"#3d3d3d\"/><rect y=\"21.5\" width=\"40\" height=\"8.5\"/><g fill=\"#8c8c8c\"><polygon points=\"8.5 4.34 8.5 3.26 6.5 2.34 3.5 2.34 3.5 4.34\"/><polygon points=\"18.5 4.34 18.5 3.26 16.5 2.34 13.5 2.34 11.5 3.26 11.5 4.34\"/><polygon points=\"36.5 4.34 36.5 2.34 33.5 2.34 31.5 3.26 31.5 4.34\"/><polygon points=\"28.5 4.34 28.5 3.26 26.5 2.34 23.5 2.34 21.5 3.26 21.5 4.34\"/><polygon points=\"3.5 28.7 3.5 30.7 6.5 30.7 8.5 29.7 8.5 28.7\"/><polygon points=\"31.5 28.7 31.5 29.7 33.5 30.7 36.5 30.7 36.5 28.7\"/><polygon points=\"11.5 28.7 11.5 29.7 13.5 30.7 16.5 30.7 18.5 29.7 18.5 28.7\"/><polygon points=\"21.5 28.7 21.5 29.7 23.5 30.7 26.5 30.7 28.5 29.7 28.5 28.7\"/></g><polygon points=\"40 3 39.2 5.46 39.2 27.5 40 30\" fill=\"#141414\"/><polygon points=\"0 3 0.75 5.46 0.75 11.5 5 11.5 5 21.5 0.75 21.5 0.75 27.5 0 30\" fill=\"#1f1f1f\"/><linearGradient id=\"SVGID_1_\" x1=\"2.78\" x2=\"2.78\" y1=\"21.5\" y2=\"11.5\" gradientUnits=\"userSpaceOnUse\"><stop stop-color=\"#424242\" offset=\"0\"/><stop offset=\"1\"/></linearGradient><polygon points=\"0.75 11.5 0.56 13.6 0.56 19.4 0.75 21.6 5 21.6 5 11.5\" fill=\"url(#SVGID_1_)\"/><path d=\"m0.75 5.46v5.99c2.38 0.45 4.19 2.53 4.19 5.04s-1.8 4.6-4.19 5.05v5.99h38.5v-22.1h-38.5z\" fill=\"#303030\"/><path d=\"m0.56 13.6v5.83c1.47-0.17 2.62-1.4 2.62-2.92s-1.14-2.74-2.62-2.91z\" fill=\"#262626\"/><linearGradient id=\"SVGID_2_\" x1=\"6.5\" x2=\"6.5\" y1=\"21.4\" y2=\"25.5\" gradientUnits=\"userSpaceOnUse\"><stop stop-color=\"#121212\" offset=\"0\"/><stop stop-color=\"#404040\" offset=\"1\"/></linearGradient><text x=\"6\" y=\"18\" fill=\"#e3dbdb\" font-family=\"'OCRA'\" font-size=\"9\">LM358</text><circle cx=\"6.5\" cy=\"23.5\" r=\"2.06\" fill=\"url(#SVGID_2_)\"/></g></svg>",
+  "order": 30120,
+  "variantOf": "lm358"
+}

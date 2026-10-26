@@ -1,0 +1,79 @@
+{
+  "type": "us-100-ultrasonic-distance-sensor",
+  "label": "US-100 Ultrasonic Distance Sensor",
+  "family": "distance sensor",
+  "tags": [
+    "us-100",
+    "ultrasonic",
+    "distance sensor",
+    "range",
+    "ultrasonic distance sensor"
+  ],
+  "description": "Ultrasonic distance sensor with a detection range of 2cm to 450cm and an\n    operating voltage range of 2.4V to 5V.",
+  "source": {
+    "fzp": "US-100_ultrasonic-distance-sensor.fzp",
+    "moduleId": "US-100"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\" viewBox=\"0 0 44 26\"><g id=\"breadboard\" transform=\"translate(22,0)\"><g display=\"none\" class=\"def\"><radialGradient id=\"membraneGradient\"><stop stop-color=\"#ccc\" offset=\"0.0\"/><stop stop-color=\"#ddd\" offset=\"0.5\"/><stop stop-color=\"#bbb\" offset=\"1.0\"/></radialGradient><radialGradient id=\"tubeGradient\"><stop stop-color=\"#ccc\" offset=\"0.8\"/><stop stop-color=\"#fff\" offset=\"0.9\"/><stop stop-color=\"#ccc\" offset=\"1.0\"/></radialGradient><g id=\"us_tube\" stroke=\"none\" fill=\"none\"><circle cx=\"0\" cy=\"0\" r=\"8.5\" stroke=\"#fff\" stroke-width=\"0.2\"/><circle cx=\"0\" cy=\"0\" r=\"8\" fill=\"url(#tubeGradient)\"/><circle cx=\"0\" cy=\"0\" r=\"6.5\" fill=\"#404040\"/><circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"#999999\"/><circle cx=\"0\" cy=\"0\" r=\"3.5\" fill=\"url(#membraneGradient)\"/><circle cx=\"0\" cy=\"0\" r=\"6.5\" fill=\"url(#grid)\"/><path d=\"M-6.5,-0.0V0.0 M-6.0,-2.4V2.4 M-5.5,-3.4V3.4 M-5.0,-4.1V4.1 M-4.5,-4.6V4.6 M-4.0,-5.1V5.1 M-3.5,-5.4V5.4 M-3.0,-5.7V5.7 M-2.5,-6.0V6.0 M-2.0,-6.1V6.1 M-1.5,-6.3V6.3 M-1.0,-6.4V6.4 M-0.5,-6.4V6.4 M0.0,-6.5V6.5 M0.5,-6.4V6.4 M1.0,-6.4V6.4 M1.5,-6.3V6.3 M2.0,-6.1V6.1 M2.5,-6.0V6.0 M3.0,-5.7V5.7 M3.5,-5.4V5.4 M4.0,-5.1V5.1 M4.5,-4.6V4.6 M5.0,-4.1V4.1 M5.5,-3.4V3.4 M6.0,-2.4V2.4              M-0.0,-6.5H0.0 M-2.4,-6.0H2.4 M-3.4,-5.5H3.4 M-4.1,-5.0H4.1 M-4.6,-4.5H4.6 M-5.1,-4.0H5.1 M-5.4,-3.5H5.4 M-5.7,-3.0H5.7 M-6.0,-2.5H6.0 M-6.1,-2.0H6.1 M-6.3,-1.5H6.3 M-6.4,-1.0H6.4 M-6.4,-0.5H6.4 M-6.5,0.0H6.5 M-6.4,0.5H6.4 M-6.4,1.0H6.4 M-6.3,1.5H6.3 M-6.1,2.0H6.1 M-6.0,2.5H6.0 M-5.7,3.0H5.7 M-5.4,3.5H5.4 M-5.1,4.0H5.1 M-4.6,4.5H4.6 M-4.1,5.0H4.1 M-3.4,5.5H3.4 M-2.4,6.0H2.4\" stroke=\"#000\" stroke-width=\"0.03\" stroke-linecap=\"none\"/></g></g><path d=\"         M-22,0 L22,0 L22,20 L-22,20         M 20, 1.25 a 0.75,0.75 0 1,0 1.5,0 a 0.75,0.75 0 1,0 -1.5,0         M -21.5, 18.75 a 0.75,0.75 0 1,0 1.5,0 a 0.75,0.75 0 1,0 -1.5,0       \" fill=\"#00A63D\"/><g font-family=\"Droid Sans\" fill=\"#fff\" text-anchor=\"middle\"><text x=\"-21.5\" y=\"2\" font-size=\"2\" text-anchor=\"start\">US-100</text><text font-family=\"OCRA\" x=\"0\" y=\"6.5\" font-size=\"2.7\">\n        Y401\n      </text><text x=\"-19.5\" y=\"19\" font-size=\"4\">T</text><text x=\"19.5\" y=\"19\" font-size=\"4\">R</text></g><g transform=\"translate(0, 0.75)\"><rect x=\"-5\" y=\"0\" rx=\"1.5\" width=\"10\" height=\"3\" fill=\"#ccc\" stroke=\"#aaa\" stroke-width=\"0.5\"/><text font-family=\"OCRA\" x=\"0\" y=\"2.3\" font-size=\"2\" fill=\"#aaa\" text-anchor=\"middle\">\n        3.200\n      </text></g><use href=\"#us_tube\" transform=\"translate(-11.5, 10)\"/><use href=\"#us_tube\" transform=\"translate(11.5, 10)\"/><g fill=\"#8C8C8C\" transform=\"translate(-5.08,20)\" font-family=\"OCRA\" font-size=\"1\"><rect x=\"-0.75\" y=\"-2\" rx=\"0.25\" width=\"1.5\" height=\"1.5\"/><rect x=\"-0.375\" y=\"0\" width=\"0.75\" height=\"6\"/><rect x=\"-0.375\" y=\"5.25\" width=\"0.75\" height=\"0.75\" id=\"connector0pin\"/><text fill=\"#fff\" transform=\"translate(0.4,-2.2) rotate(-90)\">\n        VCC\n      </text></g><g fill=\"#8C8C8C\" transform=\"translate(-2.54,20)\" font-family=\"OCRA\" font-size=\"1\"><rect x=\"-0.75\" y=\"-2\" rx=\"0.25\" width=\"1.5\" height=\"1.5\"/><rect x=\"-0.375\" y=\"0\" width=\"0.75\" height=\"6\"/><rect x=\"-0.375\" y=\"5.25\" width=\"0.75\" height=\"0.75\" id=\"connector1pin\"/><text fill=\"#fff\" transform=\"translate(0.4,-2.2) rotate(-90)\">\n        Trig/Tx\n      </text></g><g fill=\"#8C8C8C\" transform=\"translate(0,20)\" font-family=\"OCRA\" font-size=\"1\"><rect x=\"-0.75\" y=\"-2\" rx=\"0.25\" width=\"1.5\" height=\"1.5\"/><rect x=\"-0.375\" y=\"0\" width=\"0.75\" height=\"6\"/><rect x=\"-0.375\" y=\"5.25\" width=\"0.75\" height=\"0.75\" id=\"connector2pin\"/><text fill=\"#fff\" transform=\"translate(0.4,-2.2) rotate(-90)\">\n        Echo/Rx\n      </text></g><g fill=\"#8C8C8C\" transform=\"translate(2.54,20)\" font-family=\"OCRA\" font-size=\"1\"><rect x=\"-0.75\" y=\"-2\" rx=\"0.25\" width=\"1.5\" height=\"1.5\"/><rect x=\"-0.375\" y=\"0\" width=\"0.75\" height=\"6\"/><rect x=\"-0.375\" y=\"5.25\" width=\"0.75\" height=\"0.75\" id=\"connector3pin\"/><text fill=\"#fff\" transform=\"translate(0.4,-2.2) rotate(-90)\">\n        GND\n      </text></g><g fill=\"#8C8C8C\" transform=\"translate(5.08,20)\" font-family=\"OCRA\" font-size=\"1\"><rect x=\"-0.75\" y=\"-2\" rx=\"0.25\" width=\"1.5\" height=\"1.5\"/><rect x=\"-0.375\" y=\"0\" width=\"0.75\" height=\"6\"/><rect x=\"-0.375\" y=\"5.25\" width=\"0.75\" height=\"0.75\" id=\"connector4pin\"/><text fill=\"#fff\" transform=\"translate(0.4,-2.2) rotate(-90)\">\n        GND\n      </text></g></g></svg>",
+      "w": 166.3,
+      "h": 98.27,
+      "pins": {
+        "VCC": [
+          63.95,
+          96.85
+        ],
+        "TRIG": [
+          73.55,
+          96.85
+        ],
+        "ECHO": [
+          83.15,
+          96.85
+        ],
+        "GND": [
+          92.75,
+          96.85
+        ],
+        "GND-2": [
+          102.35,
+          96.85
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\" viewBox=\"0 0 710 310\"><g id=\"schematic\" fill=\"none\" stroke=\"none\" stroke-width=\"10\" stroke-linecap=\"round\" font-family=\"Noto Sans\" transform=\"translate(105, 5)\"><rect x=\"0\" y=\"0\" width=\"500\" height=\"300\" stroke=\"#000\"/><text x=\"250\" y=\"170\" font-size=\"59\" fill=\"#000\" text-anchor=\"middle\">\n      US-100\n    </text><g transform=\"translate(0,100)\"><path d=\"m0,0 h-100\" id=\"connector0pin\" stroke=\"#555\"/><rect x=\"-101\" y=\"-1\" width=\"2\" height=\"2\" id=\"connector0terminal\" fill=\"none\" stroke=\"none\"/><text transform=\"\" x=\"20\" y=\"15\" font-size=\"49\" fill=\"#555\" text-anchor=\"start\">\n        VCC\n      </text><text transform=\"\" x=\"-50\" y=\"-15\" font-size=\"35\" fill=\"#555\" text-anchor=\"middle\">\n        1\n      </text></g><g transform=\"translate(500,100)\"><path d=\"m0,0 h100\" id=\"connector1pin\" stroke=\"#555\"/><rect x=\"99\" y=\"-1\" width=\"2\" height=\"2\" id=\"connector1terminal\" fill=\"none\" stroke=\"none\"/><text transform=\"\" x=\"-20\" y=\"15\" font-size=\"49\" fill=\"#555\" text-anchor=\"end\">\n        Trig/Tx\n      </text><text transform=\"\" x=\"50\" y=\"-15\" font-size=\"35\" fill=\"#555\" text-anchor=\"middle\">\n        2\n      </text></g><g transform=\"translate(500,200)\"><path d=\"m0,0 h100\" id=\"connector2pin\" stroke=\"#555\"/><rect x=\"99\" y=\"-1\" width=\"2\" height=\"2\" id=\"connector2terminal\" fill=\"none\" stroke=\"none\"/><text transform=\"\" x=\"-20\" y=\"15\" font-size=\"49\" fill=\"#555\" text-anchor=\"end\">\n        Echo/Rx\n      </text><text transform=\"\" x=\"50\" y=\"-15\" font-size=\"35\" fill=\"#555\" text-anchor=\"middle\">\n        3\n      </text></g><g transform=\"translate(0,200)\"><path d=\"m0,0 h-100\" id=\"connector3pin\" stroke=\"#555\"/><rect x=\"-101\" y=\"-1\" width=\"2\" height=\"2\" id=\"connector3terminal\" fill=\"none\" stroke=\"none\"/><text transform=\"\" x=\"20\" y=\"15\" font-size=\"49\" fill=\"#555\" text-anchor=\"start\">\n        GND\n      </text><text transform=\"\" x=\"-50\" y=\"-15\" font-size=\"35\" fill=\"#555\" text-anchor=\"middle\">\n        4\n      </text></g><rect x=\"-1000\" y=\"-1000\" width=\"1\" height=\"1\" id=\"connector4pin\" fill=\"none\" stroke=\"none\"/></g></svg>",
+      "w": 68.16,
+      "h": 29.76,
+      "pins": {
+        "VCC": [
+          0.48,
+          10.08
+        ],
+        "TRIG": [
+          67.68,
+          10.08
+        ],
+        "ECHO": [
+          67.68,
+          19.68
+        ],
+        "GND": [
+          0.48,
+          19.68
+        ],
+        "GND-2": [
+          -85.87,
+          -95.47
+        ]
+      }
+    }
+  },
+  "properties": {
+    "type": "ultrasonic distance sensor",
+    "variant": "US-100"
+  },
+  "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\" viewBox=\"0 0 44 26\"><g id=\"breadboard\" transform=\"translate(22,0)\"><g display=\"none\" class=\"def\"><radialGradient id=\"membraneGradient\"><stop stop-color=\"#ccc\" offset=\"0.0\"/><stop stop-color=\"#ddd\" offset=\"0.5\"/><stop stop-color=\"#bbb\" offset=\"1.0\"/></radialGradient><radialGradient id=\"tubeGradient\"><stop stop-color=\"#ccc\" offset=\"0.8\"/><stop stop-color=\"#fff\" offset=\"0.9\"/><stop stop-color=\"#ccc\" offset=\"1.0\"/></radialGradient><g id=\"us_tube\" stroke=\"none\" fill=\"none\"><circle cx=\"0\" cy=\"0\" r=\"8.5\" stroke=\"#fff\" stroke-width=\"0.2\"/><circle cx=\"0\" cy=\"0\" r=\"8\" fill=\"url(#tubeGradient)\"/><circle cx=\"0\" cy=\"0\" r=\"6.5\" fill=\"#404040\"/><circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"#999999\"/><circle cx=\"0\" cy=\"0\" r=\"3.5\" fill=\"url(#membraneGradient)\"/><circle cx=\"0\" cy=\"0\" r=\"6.5\" fill=\"url(#grid)\"/><path d=\"M-6.5,-0.0V0.0 M-6.0,-2.4V2.4 M-5.5,-3.4V3.4 M-5.0,-4.1V4.1 M-4.5,-4.6V4.6 M-4.0,-5.1V5.1 M-3.5,-5.4V5.4 M-3.0,-5.7V5.7 M-2.5,-6.0V6.0 M-2.0,-6.1V6.1 M-1.5,-6.3V6.3 M-1.0,-6.4V6.4 M-0.5,-6.4V6.4 M0.0,-6.5V6.5 M0.5,-6.4V6.4 M1.0,-6.4V6.4 M1.5,-6.3V6.3 M2.0,-6.1V6.1 M2.5,-6.0V6.0 M3.0,-5.7V5.7 M3.5,-5.4V5.4 M4.0,-5.1V5.1 M4.5,-4.6V4.6 M5.0,-4.1V4.1 M5.5,-3.4V3.4 M6.0,-2.4V2.4              M-0.0,-6.5H0.0 M-2.4,-6.0H2.4 M-3.4,-5.5H3.4 M-4.1,-5.0H4.1 M-4.6,-4.5H4.6 M-5.1,-4.0H5.1 M-5.4,-3.5H5.4 M-5.7,-3.0H5.7 M-6.0,-2.5H6.0 M-6.1,-2.0H6.1 M-6.3,-1.5H6.3 M-6.4,-1.0H6.4 M-6.4,-0.5H6.4 M-6.5,0.0H6.5 M-6.4,0.5H6.4 M-6.4,1.0H6.4 M-6.3,1.5H6.3 M-6.1,2.0H6.1 M-6.0,2.5H6.0 M-5.7,3.0H5.7 M-5.4,3.5H5.4 M-5.1,4.0H5.1 M-4.6,4.5H4.6 M-4.1,5.0H4.1 M-3.4,5.5H3.4 M-2.4,6.0H2.4\" stroke=\"#000\" stroke-width=\"0.03\" stroke-linecap=\"none\"/></g></g><path d=\"         M-22,0 L22,0 L22,20 L-22,20         M 20, 1.25 a 0.75,0.75 0 1,0 1.5,0 a 0.75,0.75 0 1,0 -1.5,0         M -21.5, 18.75 a 0.75,0.75 0 1,0 1.5,0 a 0.75,0.75 0 1,0 -1.5,0       \" fill=\"#00A63D\"/><g font-family=\"Droid Sans\" fill=\"#fff\" text-anchor=\"middle\"><text x=\"-21.5\" y=\"2\" font-size=\"2\" text-anchor=\"start\">US-100</text><text font-family=\"OCRA\" x=\"0\" y=\"6.5\" font-size=\"2.7\">\n        Y401\n      </text><text x=\"-19.5\" y=\"19\" font-size=\"4\">T</text><text x=\"19.5\" y=\"19\" font-size=\"4\">R</text></g><g transform=\"translate(0, 0.75)\"><rect x=\"-5\" y=\"0\" rx=\"1.5\" width=\"10\" height=\"3\" fill=\"#ccc\" stroke=\"#aaa\" stroke-width=\"0.5\"/><text font-family=\"OCRA\" x=\"0\" y=\"2.3\" font-size=\"2\" fill=\"#aaa\" text-anchor=\"middle\">\n        3.200\n      </text></g><use href=\"#us_tube\" transform=\"translate(-11.5, 10)\"/><use href=\"#us_tube\" transform=\"translate(11.5, 10)\"/><g fill=\"#8C8C8C\" transform=\"translate(-5.08,20)\" font-family=\"OCRA\" font-size=\"1\"><rect x=\"-0.75\" y=\"-2\" rx=\"0.25\" width=\"1.5\" height=\"1.5\"/><rect x=\"-0.375\" y=\"0\" width=\"0.75\" height=\"6\"/><rect x=\"-0.375\" y=\"5.25\" width=\"0.75\" height=\"0.75\" id=\"connector0pin\"/><text fill=\"#fff\" transform=\"translate(0.4,-2.2) rotate(-90)\">\n        VCC\n      </text></g><g fill=\"#8C8C8C\" transform=\"translate(-2.54,20)\" font-family=\"OCRA\" font-size=\"1\"><rect x=\"-0.75\" y=\"-2\" rx=\"0.25\" width=\"1.5\" height=\"1.5\"/><rect x=\"-0.375\" y=\"0\" width=\"0.75\" height=\"6\"/><rect x=\"-0.375\" y=\"5.25\" width=\"0.75\" height=\"0.75\" id=\"connector1pin\"/><text fill=\"#fff\" transform=\"translate(0.4,-2.2) rotate(-90)\">\n        Trig/Tx\n      </text></g><g fill=\"#8C8C8C\" transform=\"translate(0,20)\" font-family=\"OCRA\" font-size=\"1\"><rect x=\"-0.75\" y=\"-2\" rx=\"0.25\" width=\"1.5\" height=\"1.5\"/><rect x=\"-0.375\" y=\"0\" width=\"0.75\" height=\"6\"/><rect x=\"-0.375\" y=\"5.25\" width=\"0.75\" height=\"0.75\" id=\"connector2pin\"/><text fill=\"#fff\" transform=\"translate(0.4,-2.2) rotate(-90)\">\n        Echo/Rx\n      </text></g><g fill=\"#8C8C8C\" transform=\"translate(2.54,20)\" font-family=\"OCRA\" font-size=\"1\"><rect x=\"-0.75\" y=\"-2\" rx=\"0.25\" width=\"1.5\" height=\"1.5\"/><rect x=\"-0.375\" y=\"0\" width=\"0.75\" height=\"6\"/><rect x=\"-0.375\" y=\"5.25\" width=\"0.75\" height=\"0.75\" id=\"connector3pin\"/><text fill=\"#fff\" transform=\"translate(0.4,-2.2) rotate(-90)\">\n        GND\n      </text></g><g fill=\"#8C8C8C\" transform=\"translate(5.08,20)\" font-family=\"OCRA\" font-size=\"1\"><rect x=\"-0.75\" y=\"-2\" rx=\"0.25\" width=\"1.5\" height=\"1.5\"/><rect x=\"-0.375\" y=\"0\" width=\"0.75\" height=\"6\"/><rect x=\"-0.375\" y=\"5.25\" width=\"0.75\" height=\"0.75\" id=\"connector4pin\"/><text fill=\"#fff\" transform=\"translate(0.4,-2.2) rotate(-90)\">\n        GND\n      </text></g></g></svg>",
+  "order": 10036
+}

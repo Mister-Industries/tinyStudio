@@ -1,0 +1,55 @@
+{
+  "type": "tilt-switch-sw200d",
+  "label": "TILT-SWITCH-SW-200D",
+  "family": "tilt switch",
+  "tags": [
+    "sw-200d",
+    "tilt",
+    "switch"
+  ],
+  "description": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Tilt switch SW-200D</p></body></html>",
+  "source": {
+    "fzp": "tilt-switch-sw200d.fzp",
+    "moduleId": "tilt-switch-sw200d_1b7c85bbf48b8a3270358749bb53b4c6_1"
+  },
+  "views": {
+    "breadboard": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\" version=\"1.1\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" id=\"Layer_1\" viewBox=\"0 0 45.002 8.004\" gorn=\"0\"><desc id=\"desc3\"><referenceFile id=\"referenceFile5\">reed_switch_leg.svg</referenceFile></desc><metadata id=\"metadata162\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><cc:Work rdf:about=\"\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><dc:format xmlns:dc=\"http://purl.org/dc/elements/1.1/\">image/svg+xml</dc:format><dc:type rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"/><dc:title xmlns:dc=\"http://purl.org/dc/elements/1.1/\"/></cc:Work></rdf:RDF></metadata><defs id=\"defs160\"/><g id=\"breadboard\" gorn=\"0.3\"><rect width=\"1\" x=\"0\" y=\"2.937\" height=\"1\" id=\"connector0pin\" style=\"fill:none\" gorn=\"0.3.0\"/><rect width=\"1\" x=\"40.641998\" y=\"2.9360001\" height=\"1\" id=\"connector1pin\" style=\"fill:none\" gorn=\"0.3.1\"/><line fill=\"none\" id=\"connector0leg\" y1=\"4.0619998\" y2=\"4.0619998\" style=\"fill:none;stroke:#6d6d6d;stroke-width:2.5;stroke-linecap:round\" x1=\"0\" stroke-width=\"2.5\" x2=\"3\" gorn=\"0.3.2\" stroke=\"#6D6D6D\" stroke-linecap=\"round\"/><line fill=\"none\" id=\"connector1leg\" y1=\"4.0619998\" y2=\"4.0619998\" style=\"fill:none;stroke:#6d6d6d;stroke-width:2.5;stroke-linecap:round\" x1=\"45.001999\" stroke-width=\"2.5\" x2=\"42.001999\" gorn=\"0.3.3\" stroke=\"#6D6D6D\" stroke-linecap=\"round\"/><line fill=\"none\" id=\"line12\" y1=\"4.0619998\" y2=\"4.0619998\" style=\"fill:none;stroke:#6d6d6d;stroke-width:2.5\" x1=\"6.2319999\" stroke-width=\"2.5\" x2=\"3\" gorn=\"0.3.4\" stroke=\"#6D6D6D\"/><line fill=\"none\" id=\"line14\" y1=\"4.0619998\" y2=\"4.0619998\" style=\"fill:none;stroke:#6d6d6d;stroke-width:2.5\" x1=\"42.001999\" stroke-width=\"2.5\" x2=\"39.016998\" gorn=\"0.3.5\" stroke=\"#6D6D6D\"/></g><rect width=\"32.494068\" x=\"9.3636141\" y=\"-0.17192671\" rx=\"1.5\" ry=\"1.5\" height=\"8.1759262\" id=\"rect3293\" style=\"fill:#333333\" gorn=\"0.4\"/><rect width=\"32.494068\" x=\"9.4432297\" y=\"1.365427\" height=\"5.2409787\" id=\"rect3283\" style=\"fill:#1a1a1a\" gorn=\"0.5\"/><g transform=\"matrix(0.80848488,0,0,0.80848488,-0.41954665,0)\"><g><g><rect width=\"3.8894815\" x=\"8.2111282\" y=\"3.503963\" height=\"3.1115851\" id=\"rect3295\" style=\"fill:#666666\" gorn=\"0.6.0.0.0\"/></g></g></g><g fill-opacity=\"1\" font-size=\"5.13347\" xml:space=\"preserve\" fill=\"#ececec\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" id=\"text3297\" style=\"font-style:normal;font-weight:normal;line-height:118.00000668%;letter-spacing:0px;word-spacing:0px;font-family:Droid Sans\" gorn=\"0.7\" stroke=\"none\"><text x=\"14.185314\" y=\"5.837729\" id=\"tspan3299\" style=\"font-size:4.85090923px;line-height:118.00000668%;letter-spacing:-0.03233939px;fill:#ececec\" gorn=\"0.7.0\">SW-200D</text></g></svg>",
+      "w": 60.48,
+      "h": 10.56,
+      "pins": {
+        "1": [
+          0.67,
+          4.53
+        ],
+        "2": [
+          55.29,
+          4.53
+        ]
+      }
+    },
+    "schematic": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" x=\"0in\" baseProfile=\"tiny\" y=\"0in\" version=\"1.2\" viewBox=\"0 0 10.4069 1.7272\"><desc><referenceFile>sparkfun-electromechanical_switch-momentary-2_schematic.svg</referenceFile></desc><g id=\"schematic\" gorn=\"0.1\"><line class=\"other\" y1=\"1.397\" y2=\"1.397\" x1=\"7.10847\" stroke-width=\"0.254\" x2=\"7.74347\" stroke=\"#000000\" stroke-linecap=\"round\"/><line class=\"other\" y1=\"1.397\" y2=\"0.127\" x1=\"2.66347\" stroke-width=\"0.254\" x2=\"7.10847\" stroke=\"#000000\" stroke-linecap=\"round\"/><circle class=\"other\" fill=\"none\" r=\"0.127\" cx=\"2.66347\" cy=\"1.397\" stroke-width=\"0.4064\" stroke=\"#000000\"/><circle class=\"other\" fill=\"none\" r=\"0.127\" cx=\"7.74347\" cy=\"1.397\" stroke-width=\"0.4064\" stroke=\"#000000\"/><line class=\"pin\" id=\"connector0pin\" y1=\"1.397\" y2=\"1.397\" connectorname=\"1\" x1=\"0.123472\" stroke-width=\"0.246944\" x2=\"2.66347\" gorn=\"0.1.4\" stroke=\"#787878\" stroke-linecap=\"round\"/><rect x=\"0.123472\" width=\"0.0001\" y=\"1.397\" height=\"0.0001\" class=\"terminal\" fill=\"none\" id=\"connector0terminal\" stroke-width=\"0\" gorn=\"0.1.5\" stroke=\"none\"/><text x=\"1.39347\" font-size=\"0.881944\" y=\"1.02658\" class=\"text\" fill=\"#8c8c8c\" font-family=\"'Droid Sans'\" text-anchor=\"middle\" stroke-width=\"0\" stroke=\"none\">1</text><line class=\"pin\" id=\"connector2pin\" y1=\"1.397\" y2=\"1.397\" connectorname=\"2\" x1=\"10.2835\" stroke-width=\"0.246944\" x2=\"7.74347\" gorn=\"0.1.7\" stroke=\"#787878\" stroke-linecap=\"round\"/><rect x=\"10.2835\" width=\"0.0001\" y=\"1.397\" height=\"0.0001\" class=\"terminal\" fill=\"none\" id=\"connector2terminal\" stroke-width=\"0\" gorn=\"0.1.8\" stroke=\"none\"/><text x=\"9.01347\" font-size=\"0.881944\" y=\"1.02658\" class=\"text\" fill=\"#8c8c8c\" font-family=\"'Droid Sans'\" text-anchor=\"middle\" stroke-width=\"0\" stroke=\"none\">3</text></g></svg>",
+      "w": 39.33,
+      "h": 6.53,
+      "pins": {
+        "1": [
+          0.47,
+          5.28
+        ],
+        "2": [
+          38.87,
+          5.28
+        ]
+      }
+    }
+  },
+  "properties": {
+    "package": "reed_switch_plastic",
+    "part number": "",
+    "layer": "",
+    "variant": "variant 1"
+  },
+  "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\" version=\"1.1\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" id=\"Layer_1\" viewBox=\"0 0 45.002 8.004\" gorn=\"0\"><desc id=\"desc3\"><referenceFile id=\"referenceFile5\">reed_switch_leg.svg</referenceFile></desc><metadata id=\"metadata162\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><cc:Work rdf:about=\"\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><dc:format xmlns:dc=\"http://purl.org/dc/elements/1.1/\">image/svg+xml</dc:format><dc:type rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"/><dc:title xmlns:dc=\"http://purl.org/dc/elements/1.1/\"/></cc:Work></rdf:RDF></metadata><defs id=\"defs160\"/><g id=\"breadboard\" gorn=\"0.3\"><rect width=\"1\" x=\"0\" y=\"2.937\" height=\"1\" id=\"connector0pin\" style=\"fill:none\" gorn=\"0.3.0\"/><rect width=\"1\" x=\"40.641998\" y=\"2.9360001\" height=\"1\" id=\"connector1pin\" style=\"fill:none\" gorn=\"0.3.1\"/><line fill=\"none\" id=\"connector0leg\" y1=\"4.0619998\" y2=\"4.0619998\" style=\"fill:none;stroke:#6d6d6d;stroke-width:2.5;stroke-linecap:round\" x1=\"0\" stroke-width=\"2.5\" x2=\"3\" gorn=\"0.3.2\" stroke=\"#6D6D6D\" stroke-linecap=\"round\"/><line fill=\"none\" id=\"connector1leg\" y1=\"4.0619998\" y2=\"4.0619998\" style=\"fill:none;stroke:#6d6d6d;stroke-width:2.5;stroke-linecap:round\" x1=\"45.001999\" stroke-width=\"2.5\" x2=\"42.001999\" gorn=\"0.3.3\" stroke=\"#6D6D6D\" stroke-linecap=\"round\"/><line fill=\"none\" id=\"line12\" y1=\"4.0619998\" y2=\"4.0619998\" style=\"fill:none;stroke:#6d6d6d;stroke-width:2.5\" x1=\"6.2319999\" stroke-width=\"2.5\" x2=\"3\" gorn=\"0.3.4\" stroke=\"#6D6D6D\"/><line fill=\"none\" id=\"line14\" y1=\"4.0619998\" y2=\"4.0619998\" style=\"fill:none;stroke:#6d6d6d;stroke-width:2.5\" x1=\"42.001999\" stroke-width=\"2.5\" x2=\"39.016998\" gorn=\"0.3.5\" stroke=\"#6D6D6D\"/></g><rect width=\"32.494068\" x=\"9.3636141\" y=\"-0.17192671\" rx=\"1.5\" ry=\"1.5\" height=\"8.1759262\" id=\"rect3293\" style=\"fill:#333333\" gorn=\"0.4\"/><rect width=\"32.494068\" x=\"9.4432297\" y=\"1.365427\" height=\"5.2409787\" id=\"rect3283\" style=\"fill:#1a1a1a\" gorn=\"0.5\"/><g transform=\"matrix(0.80848488,0,0,0.80848488,-0.41954665,0)\"><g><g><rect width=\"3.8894815\" x=\"8.2111282\" y=\"3.503963\" height=\"3.1115851\" id=\"rect3295\" style=\"fill:#666666\" gorn=\"0.6.0.0.0\"/></g></g></g><g fill-opacity=\"1\" font-size=\"5.13347\" xml:space=\"preserve\" fill=\"#ececec\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" id=\"text3297\" style=\"font-style:normal;font-weight:normal;line-height:118.00000668%;letter-spacing:0px;word-spacing:0px;font-family:Droid Sans\" gorn=\"0.7\" stroke=\"none\"><text x=\"14.185314\" y=\"5.837729\" id=\"tspan3299\" style=\"font-size:4.85090923px;line-height:118.00000668%;letter-spacing:-0.03233939px;fill:#ececec\" gorn=\"0.7.0\">SW-200D</text></g></svg>",
+  "order": 10095
+}
