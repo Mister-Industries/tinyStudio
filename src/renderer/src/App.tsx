@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { notify as toast, reportError } from './lib/notify'
+import { GITHUB_SIGNIN_EXPIRED_EVENT } from './lib/github'
 import { completeWebSignIn, isCallbackUrl } from './lib/githubWebAuth'
 import { BackendPrompt } from './components/BackendPrompt'
 import { loadGitHubProject, openRecentFolder, openFolder } from './commands/fileCommands'
@@ -99,6 +100,18 @@ export default function App(): React.JSX.Element {
     return () => {
       ArduinoServiceFactory.cleanup()
     }
+  }, [])
+
+  // A saved GitHub sign-in that GitHub no longer accepts is dropped where it
+  // is noticed (lib/github); say so once, so the user knows to sign in again.
+  useEffect(() => {
+    const expired = (): void =>
+      toast.warning('GitHub sign-in expired', {
+        description:
+          'GitHub no longer accepts the saved sign-in. Public projects still open; sign in again (top right) to save to GitHub.'
+      })
+    window.addEventListener(GITHUB_SIGNIN_EXPIRED_EVENT, expired)
+    return () => window.removeEventListener(GITHUB_SIGNIN_EXPIRED_EVENT, expired)
   }, [])
 
   // The "backend not reachable" messaging now lives in <BackendPrompt/> (a

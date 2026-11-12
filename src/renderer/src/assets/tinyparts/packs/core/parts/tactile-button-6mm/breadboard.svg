@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38.4 28.8" width="38.4" height="28.8">
+  <!-- SparkFun Mini Pushbutton Switch (COM-00097), top view. Legs on a 0.3 x 0.2 in grid. -->
+  <g id="legs" stroke="#a9aeb5" stroke-width="1.6" stroke-linecap="round">
+    <line x1="4.8" y1="4.8" x2="9" y2="4.8"/>
+    <line x1="29.4" y1="4.8" x2="33.6" y2="4.8"/>
+    <line x1="4.8" y1="24" x2="9" y2="24"/>
+    <line x1="29.4" y1="24" x2="33.6" y2="24"/>
+  </g>
+  <rect id="body" x="7.86" y="3.06" width="22.68" height="22.68" rx="1.2" fill="#262626" stroke="#121212" stroke-width="0.6"/>
+  <g fill="#3b3b3b">
+    <circle cx="10.6" cy="5.8" r="1"/><circle cx="27.8" cy="5.8" r="1"/>
+    <circle cx="10.6" cy="23" r="1"/><circle cx="27.8" cy="23" r="1"/>
+  </g>
+  <circle id="cap" cx="19.2" cy="14.4" r="6.4" fill="#141414" stroke="#454545" stroke-width="0.8"/>
+  <path d="M15.2 11.6 A5 5 0 0 1 21.6 10" fill="none" stroke="#5a5a5a" stroke-width="0.9" stroke-linecap="round"/>
+  <g fill="#c9cdd2" stroke="#8a9098" stroke-width="0.4">
+    <circle id="pin-1a" cx="4.8" cy="4.8" r="1.4"/>
+    <circle id="pin-1b" cx="33.6" cy="4.8" r="1.4"/>
+    <circle id="pin-2a" cx="4.8" cy="24" r="1.4"/>
+    <circle id="pin-2b" cx="33.6" cy="24" r="1.4"/>
+  </g>
+</svg>

@@ -228,6 +228,42 @@ function ghHeaders(token?: string): Record<string, string> {
   return h
 }
 
+/**
+ * A rejected token, noticed anywhere: GitHub answered 401, so the saved
+ * sign-in is dead (revoked on github.com, or pushed out by newer sign-ins:
+ * GitHub keeps only the latest few tokens per user and app). Drop it and say
+ * so once, instead of failing every request with "GitHub error 401" while the
+ * header still shows the account as signed in.
+ */
+export const GITHUB_SIGNIN_EXPIRED_EVENT = 'tinystudio:github-signin-expired'
+
+export function noteRejectedToken(token?: string): void {
+  if (!currentAccount || (token && currentAccount.token !== token)) return
+  desktopAuth()
+    ?.signOut()
+    .catch(() => {})
+  saveAccount(null)
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(GITHUB_SIGNIN_EXPIRED_EVENT))
+}
+
+/**
+ * fetch for the GitHub API. On a 401 the token is reported (above) and a read
+ * is retried anonymously: public repos (every example, every shared project)
+ * open fine without a token, so a dead sign-in must not stop them. Writes are
+ * not retried; they need the sign-in.
+ */
+async function ghFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  const r = await fetch(url, init)
+  const h = { ...(init.headers as Record<string, string> | undefined) }
+  const auth = h.Authorization
+  if (r.status !== 401 || !auth) return r
+  noteRejectedToken(auth.replace(/^Bearer\s+/i, ''))
+  const method = (init.method ?? 'GET').toUpperCase()
+  if (method !== 'GET' && method !== 'HEAD') return r
+  delete h.Authorization
+  return fetch(url, { ...init, headers: h })
+}
+
 export async function ghUser(token: string): Promise<GitHubAccount> {
   const r = await fetch(GH_API + '/user', { headers: ghHeaders(token) })
   if (!r.ok)
@@ -249,7 +285,7 @@ export interface RepoSummary {
 }
 
 export async function ghRepos(token: string): Promise<RepoSummary[]> {
-  const r = await fetch(
+  const r = await ghFetch(
     GH_API + '/user/repos?per_page=100&sort=updated&affiliation=owner,collaborator',
     {
       headers: ghHeaders(token)
@@ -310,7 +346,7 @@ export function clearRepoCache(): void {
 const NO_PERMISSIONS: RepoPermissions = { admin: false, push: false, pull: false }
 
 async function ghRepoMetaUncached(owner: string, repo: string, token?: string): Promise<RepoMeta> {
-  const r = await fetch(`${GH_API}/repos/${owner}/${repo}`, { headers: ghHeaders(token) })
+  const r = await ghFetch(`${GH_API}/repos/${owner}/${repo}`, { headers: ghHeaders(token) })
   if (!r.ok)
     throw new Error(
       r.status === 404 ? 'Repo not found (private repos need a token).' : 'GitHub error ' + r.status
@@ -366,7 +402,7 @@ async function ghTreeUncached(
   branch: string,
   token?: string
 ): Promise<TreeBlob[]> {
-  const r = await fetch(`${GH_API}/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`, {
+  const r = await ghFetch(`${GH_API}/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`, {
     headers: ghHeaders(token)
   })
   if (!r.ok) throw new Error('Could not read repo tree (' + r.status + ')')
@@ -418,7 +454,7 @@ async function ghBlobResponse(
   const raw = await fetch(rawUrl(owner, repo, branch, path))
   if (raw.ok) return raw
   if (!token) throw new Error('fetch failed ' + path + ' (' + raw.status + ')')
-  const api = await fetch(
+  const api = await ghFetch(
     `${GH_API}/repos/${owner}/${repo}/contents/${path
       .split('/')
       .map(encodeURIComponent)
@@ -639,7 +675,7 @@ async function ghGetSha(
   branch: string,
   token: string
 ): Promise<string | null> {
-  const r = await fetch(
+  const r = await ghFetch(
     `${GH_API}/repos/${owner}/${repo}/contents/${encodePath(path)}?ref=${encodeURIComponent(branch)}`,
     {
       headers: ghHeaders(token)
@@ -668,7 +704,7 @@ async function ghPutFile(
     branch
   }
   if (sha) body.sha = sha
-  const r = await fetch(`${GH_API}/repos/${owner}/${repo}/contents/${encodePath(path)}`, {
+  const r = await ghFetch(`${GH_API}/repos/${owner}/${repo}/contents/${encodePath(path)}`, {
     method: 'PUT',
     headers: { ...ghHeaders(token), 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -685,7 +721,7 @@ export async function ghCreateRepo(
   isPrivate: boolean,
   desc?: string
 ): Promise<{ fullName: string; branch: string }> {
-  const r = await fetch(`${GH_API}/user/repos`, {
+  const r = await ghFetch(`${GH_API}/user/repos`, {
     method: 'POST',
     headers: { ...ghHeaders(token), 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -723,7 +759,7 @@ export async function ghRepoNameAvailable(
   name: string,
   token: string
 ): Promise<boolean> {
-  const r = await fetch(`${GH_API}/repos/${login}/${encodeURIComponent(name)}`, {
+  const r = await ghFetch(`${GH_API}/repos/${login}/${encodeURIComponent(name)}`, {
     headers: ghHeaders(token)
   })
   if (r.status === 404) return true
@@ -911,7 +947,7 @@ export async function pushFile(
  */
 export async function enablePages(remote: string, branch: string, token: string): Promise<string> {
   const [owner, repo] = remote.split('/')
-  const res = await fetch(`${GH_API}/repos/${owner}/${repo}/pages`, {
+  const res = await ghFetch(`${GH_API}/repos/${owner}/${repo}/pages`, {
     method: 'POST',
     headers: { ...ghHeaders(token), 'Content-Type': 'application/json' },
     body: JSON.stringify({ source: { branch, path: '/' } })
@@ -929,7 +965,9 @@ export async function enablePages(remote: string, branch: string, token: string)
   }
   // Fetch the site to get its canonical URL (falls back to the conventional one).
   try {
-    const get = await fetch(`${GH_API}/repos/${owner}/${repo}/pages`, { headers: ghHeaders(token) })
+    const get = await ghFetch(`${GH_API}/repos/${owner}/${repo}/pages`, {
+      headers: ghHeaders(token)
+    })
     if (get.ok) {
       const j = await get.json()
       if (j.html_url) return j.html_url as string
@@ -986,7 +1024,27 @@ export async function initAccount(): Promise<GitHubAccount | null> {
     }
   }
   clearRepoCache()
+  void checkSignIn(currentAccount)
   return currentAccount
+}
+
+/** Tokens already checked this session (initAccount runs once per consumer). */
+const checkedTokens = new Set<string>()
+
+/**
+ * Confirm a restored sign-in still works, so a dead one is noticed at startup
+ * rather than as an error halfway through opening a project. Offline or
+ * rate-limited answers prove nothing and are ignored; only a 401 counts.
+ */
+async function checkSignIn(account: GitHubAccount | null): Promise<void> {
+  if (!account || checkedTokens.has(account.token)) return
+  checkedTokens.add(account.token)
+  try {
+    const r = await fetch(GH_API + '/user', { headers: ghHeaders(account.token) })
+    if (r.status === 401) noteRejectedToken(account.token)
+  } catch {
+    // offline: nothing to conclude
+  }
 }
 
 /** Fired on `window` whenever the account changes; every useGitHubAccount re-reads it. */

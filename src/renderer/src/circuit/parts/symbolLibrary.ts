@@ -30,7 +30,18 @@
  */
 
 import type { PartView } from '../../lib/partsLibrary'
-import { FONT_SYMBOL, INK, SCH_GRID, STROKE, circle, line, path, symbolSvg, text } from './style'
+import {
+  BODY_FILL,
+  FONT_SYMBOL,
+  INK,
+  SCH_GRID,
+  STROKE,
+  circle,
+  line,
+  path,
+  symbolSvg,
+  text
+} from './style'
 
 const P = SCH_GRID // 9.6
 
@@ -44,7 +55,7 @@ const CY = P // 9.6: centre line of a plain two-terminal symbol
 const H3 = 3 * P // 28.8
 const CY3 = 2 * P // 19.2
 /** Body span for a two-terminal symbol: 1.5 grid of lead at each end. */
-const BX0 = 1.5 * P // 14.4
+const BX0 = 0.22 * W2 // 12.67: body spans the middle 56%, CircuitLab's proportion
 const BX1 = W2 - BX0 // 43.2
 
 /** Three-terminal (active) footprint: 4 grid square. */
@@ -76,7 +87,7 @@ function leads(x0: number, x1: number, cy = CY): string {
 }
 
 /** IEEE zigzag between x0 and x1 on centre line cy, `peaks` full swings. */
-function zigzag(x0: number, x1: number, cy: number, peaks = 6, amp = 0.5 * P): string {
+function zigzag(x0: number, x1: number, cy: number, peaks = 6, amp = 0.11 * W2): string {
   const span = x1 - x0
   const step = span / (peaks + 1)
   let d = `M${x0} ${cy}`
@@ -212,7 +223,7 @@ const fuse: SymbolDef = (() => {
     slots: PLAIN2(),
     body:
       leads(x0, x1) +
-      `<rect x="${x0}" y="${round(CY - half)}" width="${round(x1 - x0)}" height="${round(half * 2)}" fill="none" stroke="${INK}" stroke-width="${STROKE}"/>` +
+      `<rect x="${x0}" y="${round(CY - half)}" width="${round(x1 - x0)}" height="${round(half * 2)}" fill="${BODY_FILL}" stroke="${INK}" stroke-width="${STROKE}"/>` +
       line(x0, CY, x1, CY)
   }
 })()
@@ -258,12 +269,17 @@ const zener: SymbolDef = (() => {
   }
 })()
 
-/** LED: diode with emission arrows. */
+/** LED: the diode in its envelope circle, emission arrows leaving it. */
+const LED_R = 1.15 * P
 const led: SymbolDef = {
   w: W2,
   h: H3,
   slots: POLAR2('anode', ANODE, 'cathode', CATHODE, CY3),
-  body: diodeBody(CY3) + lightArrows(W2 / 2 - 0.4 * P, CY3 - 0.9 * P, false)
+  body:
+    circle(W2 / 2, CY3, LED_R) +
+    diodeBody(CY3) +
+    // arrows start just outside the circle, up and to the right (45°)
+    lightArrows(W2 / 2 + LED_R * 0.62, CY3 - LED_R * 0.82, false)
 }
 
 /** Photoresistor: zigzag with incident-light arrows. */
@@ -290,6 +306,8 @@ const thermistor: SymbolDef = {
 }
 
 /** SPST switch: hinged blade between two contacts. */
+const SPST_OPEN = line(2 * P, CY, 3.9 * P, CY - 0.72 * P)
+const SPST_CLOSED = line(2 * P, CY, 4 * P, CY)
 const switchSpst: SymbolDef = {
   w: W2,
   h: H2,
@@ -299,10 +317,16 @@ const switchSpst: SymbolDef = {
     line(4 * P, CY, W2, CY) +
     circle(2 * P, CY, 1.7, STROKE, INK, INK) +
     circle(4 * P, CY, 1.7, STROKE, INK, INK) +
-    line(2 * P, CY, 3.9 * P, CY - 0.72 * P)
+    SPST_OPEN
 }
 
 /** Momentary pushbutton: plunger over a pair of contacts. */
+const plunger = (lift: number): string =>
+  line(1.7 * P, CY3 - lift, 4.3 * P, CY3 - lift) +
+  line(W2 / 2, CY3 - lift, W2 / 2, CY3 - lift - 0.73 * P) +
+  line(W2 / 2 - 0.5 * P, CY3 - lift - 0.73 * P, W2 / 2 + 0.5 * P, CY3 - lift - 0.73 * P)
+const BUTTON_UP = plunger(0.62 * P)
+const BUTTON_DOWN = plunger(0)
 const pushbutton: SymbolDef = {
   w: W2,
   h: H3,
@@ -312,9 +336,17 @@ const pushbutton: SymbolDef = {
     line(4 * P, CY3, W2, CY3) +
     circle(2 * P, CY3, 1.7, STROKE, INK, INK) +
     circle(4 * P, CY3, 1.7, STROKE, INK, INK) +
-    line(1.7 * P, CY3 - 0.62 * P, 4.3 * P, CY3 - 0.62 * P) +
-    line(W2 / 2, CY3 - 0.62 * P, W2 / 2, CY3 - 1.35 * P) +
-    line(W2 / 2 - 0.5 * P, CY3 - 1.35 * P, W2 / 2 + 0.5 * P, CY3 - 1.35 * P)
+    BUTTON_UP
+}
+
+/**
+ * How an operable symbol looks closed (Simulate): the drawing it swaps out
+ * and what replaces it. The switch's blade drops onto its contact; the
+ * button's plunger comes down onto both.
+ */
+export const OPERATED_SYMBOLS: Record<string, { open: string; closed: string }> = {
+  'switch-spst': { open: SPST_OPEN, closed: SPST_CLOSED },
+  pushbutton: { open: BUTTON_UP, closed: BUTTON_DOWN }
 }
 
 /** Reed switch: blades sealed in a glass envelope. */
@@ -325,7 +357,7 @@ const reedSwitch: SymbolDef = {
   body:
     line(0, CY, 1.8 * P, CY) +
     line(4.2 * P, CY, W2, CY) +
-    `<rect x="${1.5 * P}" y="${round(CY - 0.7 * P)}" width="${3 * P}" height="${round(1.4 * P)}" rx="${round(0.7 * P)}" fill="none" stroke="${INK}" stroke-width="1.4"/>` +
+    `<rect x="${1.5 * P}" y="${round(CY - 0.7 * P)}" width="${3 * P}" height="${round(1.4 * P)}" rx="${round(0.7 * P)}" fill="${BODY_FILL}" stroke="${INK}" stroke-width="1.4"/>` +
     line(1.8 * P, CY, 2.9 * P, CY) +
     line(4.2 * P, CY, 3.1 * P, CY - 0.42 * P)
 }
@@ -409,7 +441,7 @@ const microphone: SymbolDef = {
   slots: PLAIN2(),
   body:
     leads(2.2 * P, 4.4 * P) +
-    circle(W2 / 2, CY, 0.85 * P) +
+    circle(W2 / 2, CY, 0.85 * P, STROKE, INK, BODY_FILL) +
     line(W2 / 2 - 0.4 * P, CY - 0.68 * P, W2 / 2 - 0.4 * P, CY + 0.68 * P)
 }
 
@@ -441,7 +473,7 @@ function bjt(npn: boolean): SymbolDef {
       { role: 'emitter', pos: [railX, HA], match: [/^e$/i, /emitter/i] }
     ],
     body:
-      circle(cx, cy, r, 1.4) +
+      circle(cx, cy, r, 1.4, INK, BODY_FILL) +
       line(0, cy, barX, cy) +
       line(barX, barTop, barX, barBot) +
       line(colJoin[0], colJoin[1], colRail[0], colRail[1]) +
@@ -504,7 +536,7 @@ const relay: SymbolDef = (() => {
       { role: 'common', pos: [w, 4 * P], match: [/main|common|^com$/i] }
     ],
     body:
-      `<rect x="${coilX0}" y="${coilY0}" width="${round(coilX1 - coilX0)}" height="${round(coilY1 - coilY0)}" fill="none" stroke="${INK}" stroke-width="${STROKE}"/>` +
+      `<rect x="${coilX0}" y="${coilY0}" width="${round(coilX1 - coilX0)}" height="${round(coilY1 - coilY0)}" fill="${BODY_FILL}" stroke="${INK}" stroke-width="${STROKE}"/>` +
       line(0, 2 * P, coilX0, 2 * P) +
       line(0, 4 * P, coilX0, 4 * P) +
       line(coilX1, 4 * P, w, 4 * P) +

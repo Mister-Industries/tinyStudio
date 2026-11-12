@@ -1,4 +1,5 @@
 import { openFileItem, refreshWorkspace } from '@renderer/commands/fileCommands'
+import type { HatProject } from '../../circuit/export'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { selectOpenFiles, useAppSelector } from '@renderer/redux'
 import type { BaseFileItem, EditorFile, Workspace } from '@renderer/redux/fileSlice'
@@ -74,4 +75,24 @@ export function useProjectFile(name: string): EditorFile | undefined {
   }, [file, workspace, name])
 
   return file
+}
+
+/** Folder in the project that a KiCad export goes into. */
+export const KICAD_FOLDER = 'KiCad'
+
+/**
+ * Write an exported KiCad project into `<project>/KiCad/`. The board and project
+ * files are only written the first time: after that they're the user's layout
+ * and settings, and only the schematic, netlist and README are refreshed.
+ */
+export async function saveKiCadProject(workspace: Workspace, hat: HatProject): Promise<string> {
+  const keep = new Set(hat.keepIfExists)
+  for (const [key, text] of Object.entries(hat.files)) {
+    // the files come keyed "<name>/<file>"; the project folder replaces <name>/
+    const path = `${workspace.path}/${KICAD_FOLDER}/${key.slice(key.indexOf('/') + 1)}`
+    if (keep.has(key) && (await fileSystem.pathExists(path))) continue
+    await fileSystem.writeFile(path, text)
+  }
+  await refreshWorkspace(workspace)
+  return `${KICAD_FOLDER}/`
 }

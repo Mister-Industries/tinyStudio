@@ -3,6 +3,15 @@
  */
 
 import { resolveBuildTarget } from '@renderer/lib/boardFallbacks'
+import {
+  type BoardHistory,
+  deviceKey,
+  forgetBoard,
+  loadBoardHistory,
+  rememberBoard
+} from '@renderer/lib/boardHistory'
+import { resolveDetectedBoards } from '@renderer/lib/detectedBoards'
+import { reconcileSelection } from '@renderer/lib/boardSelection'
 import { parseCompileDiagnostics } from '@renderer/lib/compileErrors'
 import { getArduinoService } from '@renderer/services/arduino/ArduinoServiceFactory'
 import {
@@ -13,10 +22,11 @@ import {
   CompileResult,
   InstallableBoard,
   LibraryEntry,
+  PackageJobsState,
   PlatformEntry,
   UploadResult
 } from '@renderer/services/arduino/types'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useArduinoAgent } from './useArduinoAgent'
 
@@ -45,11 +55,24 @@ export interface UploadProgress {
  */
 export interface UseArduinoReturn {
   // Board management
+  /** One entry per detected port (several for a port with competing matches). */
   boards: Board[]
   selectedBoard: Board | null
+  /**
+   * Select a board. A board with a port is remembered for that device, so the
+   * same choice (options included) comes back whenever it is plugged in.
+   */
   setSelectedBoard: (board: Board | null) => void
+  /** Forget the remembered board for a device and go back to detection. */
+  forgetBoardChoice: (deviceKey: string) => void
   refreshBoards: () => Promise<void>
   isLoadingBoards: boolean
+
+  // Package operations (installs, the automatic board setup)
+  /** What tinyService is installing right now, and the board setup's state. */
+  packageJobs: PackageJobsState | null
+  /** Install any default board platform (tinyCore, ESP32) that is missing. */
+  runBoardSetup: () => Promise<ArduinoActionResult>
 
   // Compilation
   compileSketch: (workspacePath: string, boardConfig?: BoardConfig) => Promise<CompileResult>
@@ -119,10 +142,21 @@ export interface UseArduinoReturn {
  */
 export function useArduino(): UseArduinoReturn {
   // State management
-  const [boards, setBoards] = useState<Board[]>([])
-  const [selectedBoard, setSelectedBoard] = useState<Board | null>(null)
+  // Raw entries from tinyService (one per board arduino-cli matched on a
+  // port); `boards` is what the UI offers after applying the board history.
+  const [rawBoards, setRawBoards] = useState<Board[]>([])
+  const [history, setHistory] = useState<BoardHistory>(() => loadBoardHistory())
+  const [installedFqbns, setInstalledFqbns] = useState<ReadonlySet<string> | undefined>()
+  const boards = useMemo(
+    () => resolveDetectedBoards(rawBoards, history, installedFqbns),
+    [rawBoards, history, installedFqbns]
+  )
+  const rawBoardsRef = useRef(rawBoards)
+  rawBoardsRef.current = rawBoards
+  const [selectedBoard, setSelectedBoardState] = useState<Board | null>(null)
   const [isLoadingBoards, setIsLoadingBoards] = useState(false)
   const [hasLoadedBoards, setHasLoadedBoards] = useState(false)
+  const [packageJobs, setPackageJobs] = useState<PackageJobsState | null>(null)
 
   const [isCompiling, setIsCompiling] = useState(false)
   const [lastCompileResult, setLastCompileResult] = useState<CompileResult | null>(null)
@@ -188,53 +222,21 @@ export function useArduino(): UseArduinoReturn {
 
     try {
       const boardsList = await arduinoService.listBoards()
-      setBoards(boardsList)
+      setRawBoards(boardsList)
       setHasLoadedBoards(true) // Mark that we've completed at least one board scan
 
+      const ports = new Set(boardsList.map((b) => b.port))
       addLog({
         type: 'info',
-        message: `Found ${boardsList.length} board(s)`,
+        message: `Found ${ports.size} device(s)`,
         details:
           boardsList.length > 0
             ? boardsList
-                .map((b, index) => {
-                  const status = b.connected ? '✓ Connected' : '✗ Disconnected'
-                  return `${index + 1}. ${b.config.name} on ${b.port} - ${status}`
-                })
+                .map((b, i) => `${i + 1}. ${b.config.name || 'Unknown'} on ${b.port}`)
                 .join('\n')
-            : 'No Arduino boards detected. Please ensure your board is connected via USB and drivers are installed.'
+            : 'No boards detected. Please ensure your board is connected via USB and drivers are installed.'
       })
-
-      // Auto-select first board if none selected
-      setSelectedBoard((currentBoard) => {
-        // If no board is currently selected, select the first one
-        if (!currentBoard && boardsList.length > 0) {
-          return boardsList[0]
-        }
-
-        // A board type picked by hand in the Boards Manager has no port yet.
-        // That isn't a stale detection, so keep it rather than replacing it
-        // with boardsList[0] (which would silently undo the user's choice) or
-        // clearing it (which disables Verify/Upload). Adopt a port as soon as
-        // one is detected.
-        if (currentBoard && !currentBoard.port) {
-          const first = boardsList[0]
-          return first
-            ? { ...currentBoard, port: first.port, connected: first.connected }
-            : currentBoard
-        }
-
-        // If current board is no longer available, select first available or null
-        if (currentBoard && !boardsList.find((b) => b.port === currentBoard.port)) {
-          if (boardsList.length === 0) {
-            toast.warning('Previously selected board is no longer connected')
-          }
-          return boardsList[0] || null
-        }
-
-        // Keep current selection
-        return currentBoard
-      })
+      // The selection follows `boards` in the reconcile effect below.
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       addLog({
@@ -654,50 +656,126 @@ export function useArduino(): UseArduinoReturn {
   /**
    * Event-driven board detection: the backend watches
    * `arduino-cli board list --watch` and pushes the full board list on every
-   * plug/unplug. Event-driven rather than polled, so an unplug shows up at
-   * once instead of at the next manual refresh.
-   * The selection is reconciled on every event: kept if the same port is
-   * still present, cleared (with a heads-up) if its board was unplugged.
+   * plug/unplug, so an unplug shows up at once instead of at the next manual
+   * refresh. The selection follows in the reconcile effect below.
    */
   useEffect(() => {
     const off = arduinoService.onBoardEvents((boardsList) => {
-      setBoards(boardsList)
+      setRawBoards(boardsList)
       setHasLoadedBoards(true)
-      setSelectedBoard((currentBoard) => {
-        if (!currentBoard) {
-          return boardsList[0] || null
-        }
-        // A board type picked by hand in the Boards Manager has no port yet.
-        // That isn't a stale detection, so keep it rather than replacing it
-        // with boardsList[0] (which would silently undo the user's choice) or
-        // clearing it (which disables Verify/Upload). Adopt a port as soon as
-        // one is detected.
-        if (!currentBoard.port) {
-          const first = boardsList[0]
-          return first
-            ? { ...currentBoard, port: first.port, connected: first.connected }
-            : currentBoard
-        }
-
-        // Same port still present: keep the user's choice (incl. any manual
-        // board override / FQBN options), but follow arduino-cli if the
-        // board on that port changed identity.
-        const samePort = boardsList.find((b) => b.port === currentBoard.port)
-        if (samePort) return currentBoard
-        if (boardsList.length === 0) {
-          toast.warning('Board disconnected', {
-            description: `${currentBoard.config.name} on ${currentBoard.port} was unplugged.`
-          })
-          return null
-        }
-        toast.info('Board changed', {
-          description: `${currentBoard.port} is gone; switched to ${boardsList[0].config.name} (${boardsList[0].port}).`
-        })
-        return boardsList[0]
-      })
     })
     return off
   }, [arduinoService])
+
+  /**
+   * Keep the selection in step with the detected boards.
+   *
+   *  - Same device still present: keep the user's choice (board type and
+   *    options); follow detection only if the selection was detection's own
+   *    guess and the device's identity changed (e.g. a platform was installed).
+   *  - Device gone: keep the selection, marked disconnected, for a grace
+   *    period. An ESP32 drops off USB for a moment on every reset (uploads
+   *    included), and Verify still works without a port. When it comes back,
+   *    the selection re-attaches quietly. Only after the grace period does it
+   *    move to another connected board.
+   *  - Nothing selected: take the first board.
+   */
+  const selectedRef = useRef<Board | null>(null)
+  selectedRef.current = selectedBoard
+  const disconnectedAtRef = useRef<number | null>(null)
+  const [graceTick, setGraceTick] = useState(0)
+  useEffect(() => {
+    const decision = reconcileSelection(
+      selectedRef.current,
+      boards,
+      disconnectedAtRef.current,
+      Date.now()
+    )
+    disconnectedAtRef.current = decision.disconnectedAt
+    if (decision.next !== selectedRef.current) setSelectedBoardState(decision.next)
+    if (decision.switchedFrom && decision.next) {
+      toast.info('Board changed', {
+        description: `${decision.switchedFrom.config.name} on ${decision.switchedFrom.port} is gone; switched to ${decision.next.config.name} (${decision.next.port}).`
+      })
+    }
+    if (decision.recheckInMs !== undefined) {
+      const timer = setTimeout(() => setGraceTick((t) => t + 1), decision.recheckInMs)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [boards, graceTick])
+
+  /** User-facing selection: remembers the choice for the device. */
+  const setSelectedBoard = useCallback((board: Board | null): void => {
+    if (!board) {
+      setSelectedBoardState(null)
+      return
+    }
+    // The device's identity comes from what is detected on the chosen port,
+    // not from the board object: the port picker passes the previous
+    // selection with a new port, which still carries the old device's key.
+    const raw = board.port ? rawBoardsRef.current.find((b) => b.port === board.port) : undefined
+    const metadata = raw ? raw.metadata : board.metadata
+    const key = !board.port
+      ? undefined
+      : raw
+        ? deviceKey(raw)
+        : (board.deviceKey ?? deviceKey({ port: board.port, protocol: board.protocol, metadata }))
+    if (key && board.config.fqbn) {
+      setHistory((h) => rememberBoard(h, key, board.config))
+    }
+    setSelectedBoardState({
+      ...board,
+      metadata,
+      deviceKey: key,
+      source: key ? 'remembered' : board.source,
+      guess: false
+    })
+  }, [])
+
+  const forgetBoardChoice = useCallback((key: string): void => {
+    setHistory((h) => forgetBoard(h, key))
+    // Let detection decide for that device again.
+    setSelectedBoardState((current) =>
+      current?.deviceKey === key ? { ...current, source: 'detected' } : current
+    )
+  }, [])
+
+  /**
+   * Install state from tinyService. When a platform install or removal
+   * finishes, refresh the list of installed boards (it decides which tinyCore
+   * FQBN a generic ESP32 gets) and rescan so the new identities show.
+   */
+  const lastFinishedJobRef = useRef<string | null>(null)
+  const refreshInstalledBoards = useCallback(async (): Promise<void> => {
+    try {
+      const all = await arduinoService.listAllBoards()
+      setInstalledFqbns(new Set(all.map((b) => b.fqbn)))
+    } catch {
+      /* keep the previous list */
+    }
+  }, [arduinoService])
+  useEffect(() => {
+    const off = arduinoService.onPackageJobs((state) => {
+      setPackageJobs(state)
+      const last = state.last
+      if (
+        last &&
+        last.id !== lastFinishedJobRef.current &&
+        last.state === 'succeeded' &&
+        (last.kind === 'core-install' || last.kind === 'core-uninstall')
+      ) {
+        lastFinishedJobRef.current = last.id
+        void refreshInstalledBoards()
+      }
+    })
+    return off
+  }, [arduinoService, refreshInstalledBoards])
+  useEffect(() => {
+    if (isAgentConnected) void refreshInstalledBoards()
+  }, [isAgentConnected, refreshInstalledBoards])
+
+  const runBoardSetup = useCallback(() => arduinoService.runBoardSetup(), [arduinoService])
 
   /**
    * Reset board loading state when agent disconnects
@@ -705,8 +783,8 @@ export function useArduino(): UseArduinoReturn {
   useEffect(() => {
     if (!isAgentConnected) {
       setHasLoadedBoards(false)
-      setBoards([])
-      setSelectedBoard(null)
+      setRawBoards([])
+      setSelectedBoardState(null)
     }
   }, [isAgentConnected])
 
@@ -779,8 +857,13 @@ export function useArduino(): UseArduinoReturn {
     boards,
     selectedBoard,
     setSelectedBoard,
+    forgetBoardChoice,
     refreshBoards,
     isLoadingBoards,
+
+    // Package operations
+    packageJobs,
+    runBoardSetup,
 
     // Compilation
     compileSketch,

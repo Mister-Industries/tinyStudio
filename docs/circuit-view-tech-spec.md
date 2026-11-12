@@ -155,7 +155,8 @@ One file per project (same slot `diagram.json` occupies today). JSON, 2-space, s
       "view": "bb", // each wire belongs to ONE view ("bb" | "sch")
       "color": "#2fa46a", // bb only; schematic wires are always ink
       "route": ["h48", "v-19.2"], // Wokwi-style journey, source-anchored; "d dx,dy" allowed in bb
-      "curve": true // bb only: render as bezier jumper (route still authoritative for hit tests)
+      "curve": true, // bb only: render as bezier jumper (route still authoritative for hit tests)
+      "side": "back" // bb only: on the solder side of a tinyProto/perfboard (absent = front); nets ignore it
     }
   ],
 
@@ -366,6 +367,8 @@ The behaviors below are the Fritzing breadboard contract, restated as requiremen
 - Seated pins render a subtle green seat mark (Fritzing shows green square highlights); hovering a hole tooltips `e12 · net 4 (R1.2, LED1.anode)`.
 - Row/rail buses come from the breadboard PartDef's `buses` and merge nets via `busesFor` (already supported by the DSU engine).
 - Boards are **sticky**: parts seated on a breadboard move with it. Wire ends may plug directly into holes (wire-end = male pin), Fritzing-style.
+- **Hole boards** (`parts/breadboard.ts` `isHoleBoard`): the generated breadboards and the **tinyProto**. Parts seat in their holes, ride along when they move or rotate, and draw on top of them; neither appears on the schematic. A tinyCore under a tinyProto seats on its header pin for pin and draws beneath it.
+- **Front and back.** The breadboard view's Front/Back toggle mirrors the canvas (`x → tx − scale·x`) to show the solder side. Wires drawn there get `side: "back"`; the far side's wires are drawn dashed and faded and can't be hit. Parts stay where they are; only the view turns over.
 - Bendable **legs** (`legs` in PartDef): leg endpoint drags independently of the body, rendered as a curved leg path; the pin position for netting is the leg tip. Body drag keeps seated leg tips anchored (rubber-band), matching Fritzing.
 
 ### 7.4 Wiring

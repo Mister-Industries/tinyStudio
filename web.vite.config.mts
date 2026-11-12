@@ -21,6 +21,8 @@ export default defineConfig({
   base: '/',
   // module workers (sim engine lazy-imports ngspice-WASM inside a worker)
   worker: { format: 'es' },
+  // see electron.vite.config.ts: the sim worker's deps, pre-bundled
+  optimizeDeps: { include: ['eecircuit-engine', 'uplot'] },
   build: {
     outDir: path.resolve(__dirname, 'dist-web'),
     emptyOutDir: true

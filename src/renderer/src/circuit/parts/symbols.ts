@@ -22,9 +22,11 @@
  */
 
 import type { PartDef, PartView } from '../../lib/partsLibrary'
+import { tinyCoreSymbol } from './boardSymbols'
 import { normalizeAuthoredSymbol } from './normalizeSymbol'
 import { SYMBOLS, SYMBOL_BY_TYPE, bindSymbol, symbolIdForKeywords } from './symbolLibrary'
 import {
+  BODY_FILL,
   FONT_PIN,
   FONT_SYMBOL,
   INK,
@@ -75,6 +77,9 @@ const PREFER_BOX = new Set([
 
 function resolveSchematic(def: PartDef): PartView {
   const pins = pinNamesOf(def)
+
+  // 0. a tinyCore is a black-box module symbol (parts/boardSymbols)
+  if (def.type === 'tinycore') return tinyCoreSymbol()
 
   // 1. a hand-authored standard symbol for this exact part
   const id = SYMBOL_BY_TYPE[def.type]
@@ -133,7 +138,7 @@ export function generateBoxSymbol(def: PartDef): PartView {
   const bodyY = P
 
   parts.push(
-    `<rect x="${round(bodyX)}" y="${bodyY}" width="${round(bodyW)}" height="${bodyH}" rx="2" fill="none" stroke="${INK}" stroke-width="${STROKE}"/>`,
+    `<rect x="${round(bodyX)}" y="${bodyY}" width="${round(bodyW)}" height="${bodyH}" rx="2" fill="${BODY_FILL}" stroke="${INK}" stroke-width="${STROKE}"/>`,
     text(w / 2, bodyY - 3, title, { size: FONT_SYMBOL, anchor: 'middle' })
   )
 

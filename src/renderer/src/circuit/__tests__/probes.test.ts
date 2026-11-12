@@ -5,7 +5,13 @@ import { test } from 'node:test'
 import { emptyDoc, type CircuitDoc, type CircuitPart, type CircuitWire } from '../core/model'
 import { buildNets } from '../core/nets'
 import { generateNetlist } from '../core/netlist'
-import { diffProbeVector, diffProbeVectors, probeLabelFor, probesIn } from '../core/probes'
+import {
+  diffProbeVector,
+  diffProbeVectors,
+  probeLabelFor,
+  probesIn,
+  traceNameFor
+} from '../core/probes'
 import type { SimRun } from '../sim/backend'
 
 let wid = 0
@@ -150,4 +156,45 @@ test('probeLabelFor maps vdiff/current/voltage vector names back to a probe labe
   const outNode = gen.nodeOfNet[net.pinToNet.get('VP1:+')!]
   assert.equal(probeLabelFor(`v(${outNode})`, doc, net, gen), 'Vout')
   assert.equal(probeLabelFor('v(some-unrelated-node)', doc, net, gen), undefined)
+})
+
+test('traceNameFor: unnamed nodes read as the parts they join, sources by id', () => {
+  const doc = circuitWithProbes()
+  const net = buildNets(doc)
+  const gen = generateNetlist(doc, net)
+  const nodeOf = (pin: string): string => gen.nodeOfNet[net.pinToNet.get(pin)!]
+  assert.equal(traceNameFor(`v(${nodeOf('R1:Pin 1')})`, doc, net, gen), 'V(R1–R2)')
+  assert.equal(traceNameFor(`v(${nodeOf('V1:+')})`, doc, net, gen), 'V(V1)')
+  assert.equal(traceNameFor('i(vv1)', doc, net, gen), 'I(V1)')
+  assert.equal(traceNameFor('v(nope)', doc, net, gen), undefined)
+})
+
+test('traceNameFor: a node on a tinyCore pin is named by the pin', () => {
+  const doc = emptyDoc()
+  doc.parts = [part('U1', 'tinycore'), part('R1', 'resistor', { resistance: '1k' })]
+  doc.wires = [wire('U1:D9', 'R1:Pin 0'), wire('R1:Pin 1', 'U1:GND')]
+  const net = buildNets(doc)
+  const gen = generateNetlist(doc, net)
+  const node = gen.nodeOfNet[net.pinToNet.get('U1:D9')!]
+  assert.equal(traceNameFor(`v(${node})`, doc, net, gen), 'V(D9)')
+  assert.equal(traceNameFor('i(vu1_3v3)', doc, net, gen), 'I(3V3)')
+})
+
+test('traceNameFor: a named net prints its name as written', () => {
+  const doc = emptyDoc()
+  doc.parts = [part('V1', 'sim-vdc', { voltage: '3.3' }), part('R1', 'resistor')]
+  doc.netLabels = [
+    { id: 'nl1', name: 'GND', kind: 'ground', sch: { x: 0, y: 0 } },
+    { id: 'nl2', name: 'Vout', kind: 'net', sch: { x: 0, y: 0 } }
+  ]
+  doc.wires = [
+    wire('V1:+', 'R1:Pin 0'),
+    wire('nl2:1', 'R1:Pin 0'),
+    wire('R1:Pin 1', 'V1:-'),
+    wire('nl1:1', 'V1:-')
+  ]
+  const net = buildNets(doc)
+  const gen = generateNetlist(doc, net)
+  const node = gen.nodeOfNet[net.pinToNet.get('R1:Pin 0')!]
+  assert.equal(traceNameFor(`v(${node})`, doc, net, gen), 'V(Vout)')
 })

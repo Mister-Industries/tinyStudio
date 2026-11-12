@@ -12,7 +12,17 @@
  */
 
 import type { PartDef, PartView } from '../../lib/partsLibrary'
-import { FONT_SYMBOL, INK, SCH_GRID, STROKE, circle, line, symbolSvg, text } from './style'
+import {
+  BODY_FILL,
+  FONT_SYMBOL,
+  INK,
+  SCH_GRID,
+  STROKE,
+  circle,
+  line,
+  symbolSvg,
+  text
+} from './style'
 
 const P = SCH_GRID // 9.6
 
@@ -42,6 +52,19 @@ export const SIM_SOURCES: SimSourceSpec[] = [
       `<path d="M ${cx - r * 0.55} ${cy} q ${r * 0.28} ${-r * 0.8} ${r * 0.55} 0 q ${r * 0.28} ${r * 0.8} ${r * 0.55} 0" fill="none" stroke="${INK}" stroke-width="${STROKE}" stroke-linecap="round"/>`
   },
   {
+    type: 'sim-vpulse',
+    label: 'Square wave',
+    attrs: { low: '0', high: '3.3', frequency: '1k', duty: '50' },
+    glyph: (cx, cy, r) => {
+      const x0 = cx - r * 0.55
+      const x1 = cx + r * 0.55
+      const hi = cy - r * 0.35
+      const lo = cy + r * 0.35
+      const m = (x0 + x1) / 2
+      return `<path d="M ${x0} ${lo} L ${x0} ${hi} L ${m} ${hi} L ${m} ${lo} L ${x1} ${lo} L ${x1} ${hi}" fill="none" stroke="${INK}" stroke-width="${STROKE}" stroke-linejoin="round" stroke-linecap="round"/>`
+    }
+  },
+  {
     type: 'sim-idc',
     label: 'DC current',
     attrs: { current: '10m' },
@@ -66,7 +89,7 @@ export function generateSimSource(spec: SimSourceSpec): PartDef {
   const svg = symbolSvg(
     line(cx, 0, cx, cy - r) +
       line(cx, cy + r, cx, h) +
-      circle(cx, cy, r) +
+      circle(cx, cy, r, STROKE, INK, BODY_FILL) +
       // polarity beside the positive lead: at the symbol's right edge it
       // was clipped by the viewBox
       text(cx + 4, cy - r - 3, '+', { size: FONT_SYMBOL }) +
@@ -87,7 +110,6 @@ export function generateSimSource(spec: SimSourceSpec): PartDef {
     family: 'Source',
     builtin: true,
     bin: 'core',
-    searchOnly: true,
     views: { breadboard: view, schematic: view }
   }
   cache.set(spec.type, def)

@@ -38,6 +38,11 @@ export default defineConfig({
     },
     // module workers (sim engine lazy-imports ngspice-WASM inside a worker)
     worker: { format: 'es' },
+    // Pre-bundle what only the simulator reaches. Vite's dependency scan
+    // doesn't look inside the sim worker, so in dev the first Simulate used
+    // to "discover" eecircuit-engine, re-optimize, and reload the whole
+    // window, taking every unsaved edit with it.
+    optimizeDeps: { include: ['eecircuit-engine', 'uplot'] },
     // tinypartsDev: dev server only; serves ../tinyparts live (docs/parts-and-art.md)
     plugins: [react(), tailwindcss(), tinypartsDev(), p5Runtime(), devCsp()]
   }

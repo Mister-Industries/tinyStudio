@@ -42,6 +42,24 @@ export interface Board {
    * "choose board for this port" picker.
    */
   guess?: boolean
+  /**
+   * True for a discovery-only placeholder match (`hide=true` in boards.txt,
+   * e.g. "ESP32 Family Device"): it names the port but can't be built for.
+   */
+  isHidden?: boolean
+  /**
+   * Where this port's board came from:
+   *  - remembered: the user chose it for this device before (board history)
+   *  - detected: arduino-cli matched the device to an installed board
+   *  - assumed: a generic ESP32 (USB 303a:1001) with nothing more specific,
+   *    defaulted to tinyCore
+   *  - unknown: nothing matched; the user has to pick a board type
+   */
+  source?: 'remembered' | 'detected' | 'assumed' | 'unknown'
+  /** Stable key for this physical device (see lib/boardHistory.ts). */
+  deviceKey?: string
+  /** Other boards arduino-cli matched on this port, for the picker. */
+  alternatives?: BoardConfig[]
   /** Additional board metadata */
   metadata?: {
     vendorId?: string
@@ -336,6 +354,23 @@ export interface ArduinoService {
   ): () => void
 
   /**
+   * Subscribe to the backend's package-operation state: the install or
+   * uninstall running now (with download progress) and the automatic board
+   * setup. Fired on connect and on every change. Returns an unsubscribe
+   * function.
+   */
+  onPackageJobs(cb: (state: PackageJobsState) => void): () => void
+
+  /** The last package-operation state received, or null before the first. */
+  getPackageJobs(): PackageJobsState | null
+
+  /**
+   * Run the backend's board setup again: board URLs, index, and any default
+   * platform (tinyCore, ESP32) that is missing.
+   */
+  runBoardSetup(): Promise<ArduinoActionResult>
+
+  /**
    * Subscribe to server-pushed board events (event-driven detection via
    * `arduino-cli board list --watch`). Fired with the full current board list
    * whenever a device is plugged/unplugged. Returns an unsubscribe function.
@@ -421,3 +456,65 @@ export const DEFAULT_COMPILE_TIMEOUT = 60000 // 1 minute
  * Default upload timeout in milliseconds
  */
 export const DEFAULT_UPLOAD_TIMEOUT = 30000 // 30 seconds
+
+// ── package operations (mirrors @mister-industries/shared >= 1.3) ─────────────
+
+/**
+ * One package operation (platform/library install or uninstall, index
+ * update). tinyService runs one at a time and pushes its state to every client.
+ */
+export interface PackageJob {
+  id: string
+  kind:
+    | 'core-install'
+    | 'core-uninstall'
+    | 'lib-install'
+    | 'lib-uninstall'
+    | 'index-update'
+    | 'url-add'
+  /** e.g. "esp32:esp32", a library name, or a URL */
+  target: string
+  /** e.g. "Installing esp32:esp32" */
+  label: string
+  /** A user request, or the automatic board setup */
+  origin: 'user' | 'setup'
+  startedAt: number
+  state: 'running' | 'succeeded' | 'failed'
+  /** What arduino-cli is working on right now */
+  current?: {
+    item: string
+    phase: 'downloading' | 'installing' | 'configuring'
+    /** 0–100 while downloading */
+    percent?: number
+    /** e.g. "590.0 MiB" */
+    total?: string
+  }
+  /** Items finished so far */
+  done: string[]
+  lastLine?: string
+  error?: string
+  finishedAt?: number
+}
+
+/** One platform the automatic board setup takes care of. */
+export interface SetupPlatform {
+  id: string
+  name: string
+  status: 'pending' | 'installed' | 'installing' | 'failed' | 'skipped'
+  error?: string
+}
+
+/** The automatic board setup tinyService runs at start. */
+export interface BoardSetupState {
+  state: 'idle' | 'running' | 'done' | 'failed' | 'disabled'
+  message?: string
+  platforms: SetupPlatform[]
+  error?: string
+}
+
+/** Payload of tinyService's "package-jobs" push. */
+export interface PackageJobsState {
+  active: PackageJob | null
+  last: PackageJob | null
+  setup: BoardSetupState
+}

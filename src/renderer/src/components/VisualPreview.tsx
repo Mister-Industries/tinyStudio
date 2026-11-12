@@ -15,10 +15,14 @@ import { getSerialBuffer, onSerialLine } from '../lib/serialBus'
 import { sketchTheme } from '../lib/sketchTheme'
 import { Button } from './ui/Button'
 
-// The desktop app loads from a file, so the runner is a sibling file; the dev
-// server and the web app serve it from the site root (deep links included).
+// The packaged desktop app loads from file://, where Chromium blocks a sandboxed
+// (opaque-origin) iframe from loading file:// URLs, so main/sketchRunnerProtocol
+// serves the runner over tinystudio-sketch:// instead. The dev server and the web
+// app serve it from the site root (deep links included).
 const RUNNER_URL =
-  window.location.protocol === 'file:' ? './sketch-runner/index.html' : '/sketch-runner/index.html'
+  window.location.protocol === 'file:'
+    ? 'tinystudio-sketch://runner/index.html'
+    : '/sketch-runner/index.html'
 
 type RunnerMessage = { type: 'ready' } | { type: 'error'; message: string }
 

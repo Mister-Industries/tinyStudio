@@ -38,6 +38,14 @@ export function isBreadboard(type: string): boolean {
   return type.startsWith('breadboard-')
 }
 
+/**
+ * A board parts plug into: a breadboard, or the tinyProto's hole grid. Parts
+ * seat in its holes, ride along when it moves, and draw on top of it.
+ */
+export function isHoleBoard(type: string): boolean {
+  return isBreadboard(type) || type === 'tinyproto'
+}
+
 const ROWS_TOP = ['a', 'b', 'c', 'd', 'e']
 const ROWS_BOT = ['f', 'g', 'h', 'i', 'j']
 

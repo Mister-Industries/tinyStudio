@@ -4,6 +4,8 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { GRID_BB } from '../core/model'
 import { generateBoxSymbol, schematicVisual } from '../parts/symbols'
+import { INK } from '../parts/style'
+import { OPERATED_SYMBOLS, SYMBOLS } from '../parts/symbolLibrary'
 import type { PartDef } from '../../lib/partsLibrary'
 
 const def: PartDef = {
@@ -37,7 +39,7 @@ test('generated symbol: every pin on the 9.6 major grid, left/right split by ord
 test('generated symbol SVG carries the label and ink strokes', () => {
   const v = generateBoxSymbol(def)
   assert.ok(v.svg.includes('Test Part'))
-  assert.ok(v.svg.includes('var(--text-strong)'))
+  assert.ok(v.svg.includes(INK))
   assert.ok(v.svg.includes('viewBox'))
 })
 
@@ -54,4 +56,15 @@ test('schematicVisual prefers authored art and caches generated symbols', () => 
   const a = schematicVisual(def)
   const b = schematicVisual(def)
   assert.equal(a, b) // cached instance
+})
+
+test('operable symbols: the open drawing is in the symbol, so Simulate can swap it closed', () => {
+  for (const [id, op] of Object.entries(OPERATED_SYMBOLS)) {
+    assert.ok(SYMBOLS[id].body.includes(op.open), `${id} draws its open state`)
+    assert.notEqual(op.open, op.closed)
+  }
+})
+
+test('LED symbol: the diode sits in its envelope circle', () => {
+  assert.match(SYMBOLS.led.body, /<circle cx="28\.8" cy="19\.2"/)
 })

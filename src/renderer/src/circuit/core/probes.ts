@@ -14,6 +14,7 @@
 import type { CircuitDoc, CircuitPart } from './model'
 import type { NetModel } from './nets'
 import type { NetlistResult } from './netlist'
+import { readableNetName } from './simOutputs'
 import type { SimRun, SimVector } from '../sim/backend'
 
 export type ProbeKind = 'voltage' | 'diff' | 'current'
@@ -124,6 +125,49 @@ export function probeLabelFor(
     for (const p of probesIn(doc)) {
       if (p.kind !== 'voltage') continue
       if (net.pinToNet.get(`${p.part.id}:+`) === netIdx) return p.label
+    }
+  }
+  return undefined
+}
+
+/** tinyStudio boards whose header pins name the nets they touch */
+const isBoardType = (type: string): boolean => /^tiny[a-z]+$/.test(type) && type !== 'tinyproto'
+
+/**
+ * A readable name for a result vector when no probe or output label names it:
+ * auto-numbered nodes ("v(n3)") become the board pin they touch ("V(D9)") or
+ * the parts they join ("V(R1–LED1)"); a source's current ("i(vv1)") becomes
+ * "I(V1)". Named nets print as written ("V(3V3)"). Display only: the netlist and the
+ * vector names are unchanged.
+ */
+export function traceNameFor(
+  vecName: string,
+  doc: CircuitDoc,
+  net: NetModel,
+  gen: NetlistResult
+): string | undefined {
+  const vM = /^v\((.+)\)$/i.exec(vecName)
+  if (vM) {
+    const node = vM[1].toLowerCase()
+    const i = gen.nodeOfNet.findIndex((n) => n.toLowerCase() === node)
+    if (i < 0) return undefined
+    // a named net reads as its name, as written on the sheet
+    if (net.netNames[i]) return `V(${net.netNames[i]})`
+    const readable = readableNetName(doc, net, i)
+    return readable ? `V(${readable})` : undefined
+  }
+  const iM = /^i\((.+)\)$/i.exec(vecName)
+  if (iM) {
+    const dev = iM[1].toLowerCase()
+    for (const [id, els] of Object.entries(gen.elementOfPart)) {
+      if (!els.includes(dev)) continue
+      const p = doc.parts.find((q) => q.id === id)
+      // a board's own supply: name the rail, not the board
+      if (p && isBoardType(p.type)) {
+        const rail = /_(\w+)$/.exec(dev)?.[1]
+        return rail ? `I(${rail.toUpperCase()})` : `I(${id})`
+      }
+      return `I(${id})`
     }
   }
   return undefined

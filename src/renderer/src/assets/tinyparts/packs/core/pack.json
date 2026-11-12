@@ -78,6 +78,16 @@
       "section": "Input"
     },
     {
+      "type": "tactile-button-6mm",
+      "dir": "parts/tactile-button-6mm",
+      "section": "Input"
+    },
+    {
+      "type": "tactile-button-12mm",
+      "dir": "parts/tactile-button-12mm",
+      "section": "Input"
+    },
+    {
       "type": "switch-spst",
       "dir": "parts/switch-spst",
       "section": "Input"

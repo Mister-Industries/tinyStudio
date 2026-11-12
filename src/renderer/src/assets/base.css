@@ -135,6 +135,11 @@
 
   /* dot-matrix "notebook" background */
   --dot-color: rgba(24, 26, 30, 0.09);
+  /* schematic sheet, CircuitLab-style: slate ink on white paper, square grid */
+  --sch-ink: #3b4449;
+  --sch-paper: #ffffff;
+  --sch-grid: rgba(59, 68, 73, 0.08);
+  --sch-pin-open: #999999;
 
   /* translucent scrim for blur/overlay layers */
   --scrim: rgba(16, 17, 19, 0.42);
@@ -401,6 +406,10 @@
   --highlight-top-strong: inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18);
 
   --dot-color: rgba(242, 243, 245, 0.07);
+  --sch-ink: #e4e6ea;
+  --sch-paper: #2b2d31;
+  --sch-grid: rgba(242, 243, 245, 0.06);
+  --sch-pin-open: #7a7f87;
   --scrim: rgba(0, 0, 0, 0.6);
 }
 
@@ -493,6 +502,21 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    /* an app, not a web page: dragging across the UI shouldn't paint its
+       titles and labels blue. Reading surfaces opt back in (.select-text:
+       docs, chat, the serial monitor), as do fields, code and editors. */
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  input,
+  textarea,
+  [contenteditable]:not([contenteditable='false']),
+  pre,
+  code,
+  .monaco-editor,
+  .select-text {
+    user-select: text;
+    -webkit-user-select: text;
   }
   ::selection {
     background: var(--yellow);

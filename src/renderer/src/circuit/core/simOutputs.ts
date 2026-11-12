@@ -93,9 +93,42 @@ export function netIndexOfOutput(ref: OutputRef, net: NetModel): number | undefi
  * `n<k>` token the netlist will hand ngspice, so the tag on the canvas, the
  * row in the Outputs list and the vector in the results all read alike.
  */
-export function netLabelFor(net: NetModel, index: number, nodeNames?: string[]): string {
+/** tinyStudio boards whose header pins name the nets they touch */
+const isBoardType = (type: string): boolean => /^tiny[a-z]+$/.test(type) && type !== 'tinyproto'
+
+/**
+ * A name a person would use for an unnamed net: the board pin on it ("D9"),
+ * else the parts it joins ("LED1–R1"). Undefined when it touches neither.
+ */
+export function readableNetName(doc: CircuitDoc, net: NetModel, index: number): string | undefined {
+  const typeOf = new Map(doc.parts.map((p) => [p.id, p.type]))
+  const members = (net.nets[index] ?? []).map((m) => {
+    const k = m.lastIndexOf(':')
+    return { part: m.slice(0, k), pin: m.slice(k + 1) }
+  })
+  const board = members.find((m) => isBoardType(typeOf.get(m.part) ?? ''))
+  if (board) return board.pin.replace(/\.\d+$/, '')
+  const parts = [
+    ...new Set(
+      members
+        .filter((m) => !/breadboard|^tinyproto$|^sim-probe/.test(typeOf.get(m.part) ?? ''))
+        .map((m) => m.part)
+    )
+  ].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+  if (!parts.length) return undefined
+  return parts.slice(0, 3).join('–') + (parts.length > 3 ? '…' : '')
+}
+
+export function netLabelFor(
+  net: NetModel,
+  index: number,
+  nodeNames?: string[],
+  doc?: CircuitDoc
+): string {
   const name = net.netNames[index]
   if (name) return name
+  const readable = doc && readableNetName(doc, net, index)
+  if (readable) return readable
   const node = (nodeNames ?? nodeNamesForNets(net))[index]
   if (node && node !== '0') return node
   const anchor = anchorPinOf(net, index)
@@ -122,7 +155,7 @@ export function availableOutputs(
     out.push({
       ref,
       kind: 'v',
-      label: netLabelFor(net, i, nodeNames),
+      label: netLabelFor(net, i, nodeNames, doc),
       detail: describeNet(net, i),
       netIndex: i
     })

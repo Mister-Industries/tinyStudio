@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 39.3 28.8" width="39.3" height="28.8">
+  <!-- Pushbutton with both legs of each side brought out: 1a/1b are one contact, 2a/2b the other. -->
+  <g fill="none" stroke="#000" stroke-width="0.9" stroke-linecap="round">
+    <line x1="0.45" y1="4.8" x2="9.6" y2="4.8"/>
+    <line x1="0.45" y1="24" x2="9.6" y2="24"/>
+    <line x1="9.6" y1="4.8" x2="9.6" y2="24"/>
+    <line x1="28.8" y1="4.8" x2="38.85" y2="4.8"/>
+    <line x1="28.8" y1="24" x2="38.85" y2="24"/>
+    <line x1="28.8" y1="4.8" x2="28.8" y2="24"/>
+    <line x1="9.6" y1="14.4" x2="13.4" y2="14.4"/>
+    <line x1="25" y1="14.4" x2="28.8" y2="14.4"/>
+    <line x1="13.4" y1="9.2" x2="25" y2="9.2"/>
+    <line x1="19.2" y1="9.2" x2="19.2" y2="4.6"/>
+    <line x1="16.4" y1="4.6" x2="22" y2="4.6"/>
+  </g>
+  <g fill="#fff" stroke="#000" stroke-width="0.8">
+    <circle cx="13.4" cy="14.4" r="1"/>
+    <circle cx="25" cy="14.4" r="1"/>
+  </g>
+</svg>

@@ -23,6 +23,7 @@ import {
   isTextPath,
   MAX_PROJECT_FILES,
   MAX_TEXT_BYTES,
+  noteRejectedToken,
   toRepoPath,
   toWorkspaceRel,
   type RepoLink
@@ -50,6 +51,7 @@ export class GitHubRequestError extends Error {
 }
 
 async function requestError(r: Response, what: string): Promise<GitHubRequestError> {
+  if (r.status === 401) noteRejectedToken()
   const j = (await r.json().catch(() => ({}))) as { message?: string }
   return new GitHubRequestError(`${what}: ${j.message || 'GitHub error'} (${r.status})`, r.status)
 }

@@ -47,7 +47,9 @@ import {
   Usb
 } from 'lucide-react'
 import React from 'react'
+import { boardSourceLabel } from '@renderer/lib/detectedBoards'
 import { notify as toast, reportError } from '@renderer/lib/notify'
+import { PackageJobPanel } from './PackageJobProgress'
 
 const PILL =
   'h-[30px] flex items-center gap-[7px] px-2.5 rounded-[var(--radius-sm)] bg-[var(--surface-card)] border-[1.5px] border-[var(--border-default)] text-[13px] font-semibold text-[var(--text-strong)] hover:border-[var(--border-interactive)] transition-colors outline-none disabled:opacity-50'
@@ -84,8 +86,17 @@ export function BoardManager(): React.JSX.Element {
     listAllBoards,
     listBoardUrls,
     addBoardUrl,
-    removeBoardUrl
+    removeBoardUrl,
+    packageJobs,
+    runBoardSetup,
+    forgetBoardChoice
   } = useArduinoContext()
+
+  // tinyService runs one install at a time; while one runs (a user's or the
+  // automatic setup's), every install/uninstall control is disabled.
+  const activeJob = packageJobs?.active ?? null
+  const jobBusy = activeJob !== null
+  const setup = packageJobs?.setup
 
   const [open, setOpen] = React.useState(false)
 
@@ -157,36 +168,72 @@ export function BoardManager(): React.JSX.Element {
     }
   }
 
+  /** Refuse to start a second operation; tinyService would refuse it too. */
+  const blockedByJob = (): boolean => {
+    if (!activeJob) return false
+    toast.info(`${activeJob.label} is still running`, {
+      description: 'Wait for it to finish, then try again.'
+    })
+    return true
+  }
+
   const install = async (p: PlatformEntry): Promise<void> => {
+    if (blockedByJob()) return
     setBusyCore(p.id)
-    toast.info(`Installing ${p.name}…`, { description: 'This can take a few minutes.' })
     try {
       const r = await installCore(p.id)
       if (r.success) toast.success(`Installed ${p.name}`)
       else toast.error(`Failed to install ${p.name}`, { description: r.error })
       await Promise.all([loadInstalled(), loadAllBoards(), refreshBoards()])
+    } catch (e) {
+      reportError(`Could not install ${p.name}`, e)
     } finally {
       setBusyCore(null)
     }
   }
 
   const uninstall = async (p: PlatformEntry): Promise<void> => {
+    if (blockedByJob()) return
     setBusyCore(p.id)
     try {
       const r = await uninstallCore(p.id)
       if (r.success) toast.success(`Uninstalled ${p.name}`)
       else toast.error(`Failed to uninstall ${p.name}`, { description: r.error })
       await Promise.all([loadInstalled(), loadAllBoards()])
+    } catch (e) {
+      reportError(`Could not uninstall ${p.name}`, e)
     } finally {
       setBusyCore(null)
     }
   }
 
+  const installMissing = async (): Promise<void> => {
+    if (blockedByJob()) return
+    try {
+      const r = await runBoardSetup()
+      if (r.success) toast.success('Board support is installed')
+      else toast.error('Board setup did not finish', { description: r.error })
+      await Promise.all([loadInstalled(), loadAllBoards(), loadUrls()])
+    } catch (e) {
+      reportError('Could not run the board setup', e)
+    }
+  }
+
+  // Reload the lists whenever an install or removal finishes, including ones
+  // the automatic setup ran or another window started.
+  const lastJobId = packageJobs?.last?.id
+  React.useEffect(() => {
+    if (open && lastJobId && isAgentConnected) {
+      loadInstalled()
+      loadAllBoards()
+    }
+  }, [open, lastJobId, isAgentConnected, loadInstalled, loadAllBoards])
+
   const addUrl = async (): Promise<void> => {
     const url = newUrl.trim()
     if (!url || addingUrl) return
+    if (blockedByJob()) return
     setAddingUrl(true)
-    toast.info('Adding board URL…', { description: 'Refreshing the board index.' })
     try {
       const r = await addBoardUrl(url)
       if (r.success) {
@@ -221,7 +268,11 @@ export function BoardManager(): React.JSX.Element {
   // Toolbar dropdown: pick a detected board, or open the Boards Manager.
   const handleDropdownChange = (value: string): void => {
     if (value === OPEN_MANAGER) {
-      setOpen(true)
+      // Open on the next tick, once the dropdown has closed and released its
+      // pointer-events lock on <body>. Opening the dialog in the same tick
+      // lets it capture that lock as its "original" state and restore it on
+      // close, which left the whole UI unclickable.
+      setTimeout(() => setOpen(true), 0)
       return
     }
     if (value === NO_BOARDS) return
@@ -230,13 +281,21 @@ export function BoardManager(): React.JSX.Element {
   }
 
   // Set the active board TYPE (FQBN), keeping the currently selected port.
+  // With a port, the choice is remembered for that device.
   const selectBoardConfig = (config: BoardConfig): void => {
     setSelectedBoard({
       port: selectedBoard?.port || '',
+      protocol: selectedBoard?.protocol,
+      metadata: selectedBoard?.metadata,
+      deviceKey: selectedBoard?.deviceKey,
       config,
       connected: selectedBoard?.connected ?? false
     })
-    toast.success(`Board type set to ${config.name}`)
+    toast.success(`Board type set to ${config.name}`, {
+      description: selectedBoard?.port
+        ? `tinyStudio will use it whenever this device is plugged in.`
+        : undefined
+    })
   }
 
   const selectFqbn = (b: InstallableBoard): void => {
@@ -269,7 +328,7 @@ export function BoardManager(): React.JSX.Element {
           <Cpu size={14} className="text-[var(--text-muted)]" />
           {selectedBoard?.config.name ? (
             <>
-              {selectedBoard.config.name}
+              {selectedBoard.config.fqbn ? selectedBoard.config.name : 'Choose board type'}
               {selectedBoard.config.architecture && (
                 <span className="text-[11px] font-medium text-[var(--text-muted)]">
                   {selectedBoard.config.architecture}
@@ -289,12 +348,18 @@ export function BoardManager(): React.JSX.Element {
                 No boards detected
               </SelectItem>
             ) : (
-              boards.map((b) => (
-                <SelectItem key={boardKey(b)} value={boardKey(b)}>
-                  {b.config.name || 'Unknown board'}
-                  <span className="text-[11px] text-muted-foreground ml-1">{b.port}</span>
-                </SelectItem>
-              ))
+              boards.map((b) => {
+                const tag = boardSourceLabel(b)
+                return (
+                  <SelectItem key={boardKey(b)} value={boardKey(b)}>
+                    {b.config.name || 'Unknown board'}
+                    <span className="text-[11px] text-muted-foreground ml-1">{b.port}</span>
+                    {tag && (
+                      <span className="text-[10px] text-muted-foreground ml-1 italic">{tag}</span>
+                    )}
+                  </SelectItem>
+                )
+              })
             )}
           </SelectGroup>
           <SelectSeparator />
@@ -320,6 +385,29 @@ export function BoardManager(): React.JSX.Element {
             </div>
           ) : (
             <div className="flex flex-col gap-5 min-h-0 overflow-y-auto pr-1">
+              {/* What tinyService is installing right now (user or setup) */}
+              <PackageJobPanel state={packageJobs} />
+              {!jobBusy &&
+                setup?.platforms.some((p) => p.status === 'skipped' || p.status === 'failed') && (
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                    <span className="flex-1">
+                      Not installed:{' '}
+                      {setup.platforms
+                        .filter((p) => p.status === 'skipped' || p.status === 'failed')
+                        .map((p) => p.name)
+                        .join(', ')}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 rounded-lg text-xs"
+                      onClick={installMissing}
+                    >
+                      <Download size={14} /> Install
+                    </Button>
+                  </div>
+                )}
+
               {/* Detected boards (auto-detect) */}
               <div className="flex flex-col">
                 <div className="flex items-center justify-between mb-2">
@@ -363,12 +451,37 @@ export function BoardManager(): React.JSX.Element {
                                 {b.config.fqbn}
                               </div>
                             )}
+                            <DetectedBoardNote board={b} />
+                            {b.source !== 'detected' && (b.alternatives?.length ?? 0) > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {b.alternatives!.map((alt) => (
+                                  <button
+                                    key={alt.fqbn}
+                                    onClick={() => selectDetected({ ...b, config: alt })}
+                                    className="px-2 py-0.5 rounded-full text-[11px] bg-[var(--bg-raised)] border border-[var(--border-default)] text-[var(--text-strong)] hover:bg-[var(--bg-sunken)]"
+                                  >
+                                    {alt.name}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
                           </div>
+                          {b.source === 'remembered' && b.deviceKey && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="rounded-lg text-xs h-7 text-[var(--text-muted)]"
+                              title="Forget the board you chose for this device and go back to automatic detection"
+                              onClick={() => forgetBoardChoice(b.deviceKey!)}
+                            >
+                              Forget
+                            </Button>
+                          )}
                           {active ? (
                             <span className="flex items-center gap-1 text-xs text-[var(--status-ok)] shrink-0">
                               <Check size={15} /> Active
                             </span>
-                          ) : (
+                          ) : b.config.fqbn ? (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -377,7 +490,7 @@ export function BoardManager(): React.JSX.Element {
                             >
                               Use
                             </Button>
-                          )}
+                          ) : null}
                         </div>
                       )
                     })}
@@ -543,10 +656,10 @@ export function BoardManager(): React.JSX.Element {
                                 variant="ghost"
                                 size="sm"
                                 className="rounded-lg text-xs h-7"
-                                disabled={busyCore !== null}
+                                disabled={busyCore !== null || jobBusy}
                                 onClick={() => install(p)}
                               >
-                                {busyCore === p.id ? (
+                                {busyCore === p.id || activeJob?.target === p.id ? (
                                   <Loader2 size={14} className="animate-spin" />
                                 ) : (
                                   <Download size={14} />
@@ -589,10 +702,10 @@ export function BoardManager(): React.JSX.Element {
                         variant="ghost"
                         size="icon"
                         className="size-7 rounded-lg text-[var(--text-muted)] hover:text-[var(--status-error)]"
-                        disabled={busyCore !== null}
+                        disabled={busyCore !== null || jobBusy}
                         onClick={() => uninstall(p)}
                       >
-                        {busyCore === p.id ? (
+                        {busyCore === p.id || activeJob?.target === p.id ? (
                           <Loader2 size={14} className="animate-spin" />
                         ) : (
                           <Trash2 size={14} />
@@ -626,7 +739,7 @@ export function BoardManager(): React.JSX.Element {
                   </div>
                   <Button
                     onClick={addUrl}
-                    disabled={addingUrl || !newUrl.trim()}
+                    disabled={addingUrl || jobBusy || !newUrl.trim()}
                     className="rounded-lg"
                   >
                     {addingUrl ? (
@@ -650,7 +763,7 @@ export function BoardManager(): React.JSX.Element {
                         variant="ghost"
                         size="icon"
                         className="size-7 rounded-lg text-[var(--text-muted)] hover:text-[var(--status-error)]"
-                        disabled={busyUrl !== null}
+                        disabled={busyUrl !== null || jobBusy}
                         onClick={() => removeUrl(url)}
                       >
                         {busyUrl === url ? (
@@ -674,4 +787,27 @@ export function BoardManager(): React.JSX.Element {
       </Dialog>
     </>
   )
+}
+
+/** One line under a detected board saying where its identity came from. */
+function DetectedBoardNote({ board }: { board: Board }): React.JSX.Element | null {
+  const others = board.alternatives?.length ?? 0
+  let note: string | null = null
+  switch (board.source) {
+    case 'remembered':
+      note = 'You chose this board for this device.'
+      break
+    case 'assumed':
+      note =
+        'Generic ESP32 (it only reports its chip family), so tinyStudio assumes a tinyCore.' +
+        (others ? ` Other boards that match it are listed below.` : '')
+      break
+    case 'unknown':
+      note = 'Unrecognized device. Choose its board type below; tinyStudio will remember it.'
+      break
+    default:
+      note = others ? 'This device matches several boards; pick the right one.' : null
+  }
+  if (!note) return null
+  return <div className="text-[11px] text-[var(--text-faint)]">{note}</div>
 }

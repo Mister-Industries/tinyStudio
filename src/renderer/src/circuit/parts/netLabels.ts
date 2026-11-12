@@ -13,7 +13,7 @@
 import type { PartView } from '../../lib/partsLibrary'
 import { pinWorld, snapPlacementToPinGrid } from '../core/geometry'
 import { GRID_BB, type NetLabel, type NetLabelKind, type Placement, type Pt } from '../core/model'
-import { FONT_NET, INK, SCH_GRID, STROKE, symbolSvg, text } from './style'
+import { BODY_FILL, FONT_NET, INK, SCH_GRID, STROKE, symbolSvg, text } from './style'
 
 const P = SCH_GRID // 9.6
 export const NET_LABEL_PIN = '1'
@@ -97,7 +97,8 @@ function powerGlyph(name: string): PartView {
   const h = 2 * P
   const cx = w / 2
   const inner =
-    text(cx, P - 5, name, { size: FONT_NET, anchor: 'middle' }) +
+    // baseline low enough that the capitals stay inside the glyph's box
+    text(cx, P - 3, name, { size: FONT_NET, anchor: 'middle' }) +
     `<line x1="${cx - P}" y1="${P}" x2="${cx + P}" y2="${P}" stroke="${INK}" stroke-width="${STROKE}" stroke-linecap="round"/>` +
     `<line x1="${cx}" y1="${P}" x2="${cx}" y2="${2 * P}" stroke="${INK}" stroke-width="${STROKE}"/>`
   return wrap(inner, w, h, [cx, 2 * P])
@@ -111,7 +112,7 @@ function netGlyph(name: string): PartView {
   const cy = P
   const inner =
     `<line x1="0" y1="${cy}" x2="${stub}" y2="${cy}" stroke="${INK}" stroke-width="${STROKE}"/>` +
-    `<rect x="${stub}" y="${cy - 7}" width="${tagW - 2}" height="14" rx="3" fill="none" stroke="${INK}" stroke-width="${STROKE}"/>` +
+    `<rect x="${stub}" y="${cy - 7}" width="${tagW - 2}" height="14" rx="3" fill="${BODY_FILL}" stroke="${INK}" stroke-width="${STROKE}"/>` +
     text(stub + (tagW - 2) / 2, cy + 3, name, { size: FONT_NET, anchor: 'middle' })
   return wrap(inner, w, h, [0, cy])
 }

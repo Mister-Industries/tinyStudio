@@ -25,22 +25,45 @@ export function Toolbar(): React.JSX.Element {
   const viewingFileId = useAppSelector((state) => state.file.viewingFileId)
   const { isAgentConnected, isLoadingBoards, refreshBoards } = useArduinoContext()
 
-  const handleSaveFile = async (): Promise<void> => {
-    const file = openFiles.find((f) => f.id === viewingFileId)
-    if (file && file.path) {
+  /**
+   * Save writes the file in the Code view plus every buffer with unsaved
+   * changes: in the Circuit and Visual views the thing being edited is a
+   * background buffer (circuit.json, visual.js), not the code tab.
+   */
+  const handleSaveFile = React.useCallback(async (): Promise<void> => {
+    const toSave = openFiles.filter((f) => f.path && (f.id === viewingFileId || f.modified))
+    if (!toSave.length) {
+      if (!promptSaveToComputer())
+        console.warn('Save: the open files have no path, nothing written')
+      return
+    }
+    for (const file of toSave) {
       try {
         await fileSystem.writeFile(file.path, file.content)
         // Save with content to ensure state is properly synced
         dispatch(saveFileWithContent({ id: file.id, content: file.content }))
-        // Browser-only project: ask where it should live for real.
-        promptSaveToComputer()
       } catch (error) {
         reportError(`Could not save ${file.name}`, error)
+        return
       }
-    } else if (!promptSaveToComputer()) {
-      console.warn('Save: the open file has no path, nothing written', file?.name)
     }
-  }
+    // Browser-only project: ask where it should live for real.
+    promptSaveToComputer()
+  }, [dispatch, openFiles, viewingFileId])
+
+  // ⌘S / Ctrl+S everywhere (global.save). The code editor binds its own and
+  // swallows the key, so this only fires in the Circuit and Visual views and
+  // anywhere else outside Monaco.
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.defaultPrevented || e.altKey || e.shiftKey) return
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 's') return
+      e.preventDefault()
+      void handleSaveFile()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [handleSaveFile])
 
   return (
     <div className="px-3 h-[54px] shrink-0 flex items-center gap-2 bg-[var(--bg-raised)] border-b-[1.5px] border-[var(--border-default)]">

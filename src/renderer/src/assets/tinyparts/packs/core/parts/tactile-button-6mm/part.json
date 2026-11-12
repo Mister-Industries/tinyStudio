@@ -1,0 +1,35 @@
+{
+  "type": "tactile-button-6mm",
+  "label": "Tactile Button 6mm",
+  "family": "Switch - 4 pin",
+  "description": "SparkFun Mini Pushbutton Switch (COM-00097): a 6 mm through-hole tactile button. Legs 1a/1b are one contact and 2a/2b the other; pressing joins them.",
+  "icon": "breadboard.svg",
+  "buses": [
+    ["1a", "1b"],
+    ["2a", "2b"]
+  ],
+  "views": {
+    "breadboard": {
+      "svg": "breadboard.svg",
+      "width": "0.4in",
+      "height": "0.3in",
+      "pins": {
+        "1a": [4.8, 4.8],
+        "2a": [4.8, 24],
+        "1b": [33.6, 4.8],
+        "2b": [33.6, 24]
+      }
+    },
+    "schematic": {
+      "svg": "schematic.svg",
+      "width": 39.3,
+      "height": 28.8,
+      "pins": {
+        "1a": [0.45, 4.8],
+        "2a": [38.85, 4.8],
+        "1b": [0.45, 24],
+        "2b": [38.85, 24]
+      }
+    }
+  }
+}

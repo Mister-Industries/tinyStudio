@@ -8,6 +8,9 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { ThemedToaster } from './components/ThemedToaster'
 import { ThemeProvider } from './lib/ThemeProvider'
 import { store } from './redux'
+import { installPointerEventsGuard } from './lib/pointerEventsGuard'
+
+installPointerEventsGuard()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

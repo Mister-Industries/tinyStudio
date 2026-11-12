@@ -1,12 +1,11 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import type { Board, BoardConfig } from '@renderer/services/arduino/types'
+import type { BoardConfig } from '@renderer/services/arduino/types'
 import {
   baseFqbn,
   isDiscoveryStub,
   resolveBuildTarget,
-  substituteDiscoveryStub,
-  withRealBoard
+  substituteDiscoveryStub
 } from '../boardFallbacks'
 
 const stub: BoardConfig = {
@@ -59,27 +58,18 @@ describe('substituteDiscoveryStub', () => {
     assert.equal(out?.architecture, 'esp32')
   })
 
+  it("maps Espressif's placeholder to tinyCore too", () => {
+    // A generic ESP32 defaults to tinyCore whichever platform named it.
+    assert.equal(
+      substituteDiscoveryStub({ fqbn: 'esp32:esp32:esp32_family', name: 'x' })?.fqbn,
+      real.fqbn
+    )
+  })
+
   it('returns null for anything it has no replacement for', () => {
     assert.equal(substituteDiscoveryStub(real), null)
     // Detectable but unmapped: resolveBuildTarget is what refuses these.
-    assert.equal(substituteDiscoveryStub({ fqbn: 'esp32:esp32:esp32_family', name: 'x' }), null)
-  })
-})
-
-describe('withRealBoard', () => {
-  const detected: Board = { port: 'COM5', config: stub, connected: true }
-
-  it('rewrites a detected stub and flags it as a guess', () => {
-    const out = withRealBoard(detected)
-    assert.equal(out.config.fqbn, real.fqbn)
-    assert.equal(out.port, 'COM5')
-    assert.equal(out.connected, true)
-    assert.equal(out.guess, true)
-  })
-
-  it('passes a real board through untouched', () => {
-    const board: Board = { port: 'COM5', config: real, connected: true }
-    assert.equal(withRealBoard(board), board)
+    assert.equal(substituteDiscoveryStub({ fqbn: 'acme:esp32:esp32_family', name: 'x' }), null)
   })
 })
 
@@ -95,8 +85,15 @@ describe('resolveBuildTarget', () => {
 
   it('refuses an unmapped stub instead of letting arduino-cli fail blind', () => {
     assert.throws(
-      () => resolveBuildTarget({ fqbn: 'esp32:esp32:esp32_family', name: 'ESP32 Family Device' }),
+      () => resolveBuildTarget({ fqbn: 'acme:esp32:esp32_family', name: 'ESP32 Family Device' }),
       /placeholder/
+    )
+  })
+
+  it('asks for a board type when the device has none', () => {
+    assert.throws(
+      () => resolveBuildTarget({ fqbn: '', name: 'Unknown device' }),
+      /Pick its board type/
     )
   })
 })

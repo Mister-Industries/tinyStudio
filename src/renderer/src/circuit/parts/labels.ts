@@ -139,7 +139,9 @@ export function labelLayout(
   let spreadX = xs.length ? Math.max(...xs) - Math.min(...xs) : 0
   let spreadY = ys.length ? Math.max(...ys) - Math.min(...ys) : 0
   if (rotate === 90 || rotate === 270) [spreadX, spreadY] = [spreadY, spreadX]
-  const side = spreadY > spreadX
+  // a part with pins on several sides (an IC, a board) has no free side for
+  // text; its refdes goes above it, like a two-terminal part lying flat
+  const side = spreadY > spreadX && Object.keys(pins).length <= 3
 
   if (side) {
     const x = box.left + box.w + GAP

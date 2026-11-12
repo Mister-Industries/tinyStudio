@@ -303,7 +303,7 @@ export function Markdown({
   className?: string
 }): React.JSX.Element {
   return (
-    <div className={['[&>*:last-child]:mb-0', className].filter(Boolean).join(' ')}>
+    <div className={['select-text [&>*:last-child]:mb-0', className].filter(Boolean).join(' ')}>
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {children}
       </ReactMarkdown>

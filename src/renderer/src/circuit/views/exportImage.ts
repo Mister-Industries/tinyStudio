@@ -5,13 +5,21 @@
  * strokes; net labels are rendered from their glyphs.
  */
 
-import { isBreadboard } from '../parts/breadboard'
+import { isHoleBoard } from '../parts/breadboard'
+import { isTinyHeaderBoard } from '../parts/boardSymbols'
 import { netLabelVisualOf } from '../parts/netLabels'
 import { labelLayout, refdesOf, valueOf } from '../parts/labels'
 import { FONT, FONT_REFDES, FONT_VALUE, INK, JUNCTION_R, WIRE_STROKE } from '../parts/style'
 import { escapeXml, namespaceSvgIds, prepareSvgForEmbed, svgNs } from '../parts/svg'
 import { isJunction, type CircuitDoc, type ViewId } from '../core/model'
-import { makeEndResolver, partArtFor, viewBounds, visualFor, wireGeometry } from './partsAdapter'
+import {
+  makeEndResolver,
+  partArtFor,
+  schematicJunctions,
+  viewBounds,
+  visualFor,
+  wireGeometry
+} from './partsAdapter'
 
 const WIRE_W = 2.8
 const WIRE_OUTLINE_W = WIRE_W + 1.8
@@ -97,22 +105,28 @@ export function composeSceneSvg(doc: CircuitDoc, bg: string, view: ViewId = 'bb'
     .join('')
 
   const resolve = makeEndResolver(doc, undefined, view)
-  const dots = doc.wires
-    .filter((w) => w.view === view)
-    .flatMap((w) =>
-      [w.from, w.to].filter(isJunction).map((j) => {
-        const p = resolve(j)
-        return p
-          ? `<circle cx="${p.x}" cy="${p.y}" r="${sch ? JUNCTION_R : 3}" fill="${sch ? INK : w.color || '#c9ced6'}"/>`
-          : ''
-      })
-    )
-    .join('')
+  const dots =
+    doc.wires
+      .filter((w) => w.view === view)
+      .flatMap((w) =>
+        [w.from, w.to].filter(isJunction).map((j) => {
+          const p = resolve(j)
+          return p
+            ? `<circle cx="${p.x}" cy="${p.y}" r="${sch ? JUNCTION_R : 3}" fill="${sch ? INK : w.color || '#c9ced6'}"/>`
+            : ''
+        })
+      )
+      .join('') +
+    (sch
+      ? schematicJunctions(doc, wireGeometry(doc, view))
+          .map((p) => `<circle cx="${p.x}" cy="${p.y}" r="${JUNCTION_R}" fill="${INK}"/>`)
+          .join('')
+      : '')
 
   const partSvg = (part: (typeof doc.parts)[number]): string => {
     const pl = part[view]
     if (!pl) return ''
-    if (sch && isBreadboard(part.type)) return '' // breadboards are transparent in sch
+    if (sch && isHoleBoard(part.type)) return '' // hole boards are transparent in sch
     const vis = visualFor(part.type, view)
     if (!vis) return ''
     const art = partArtFor(part, vis, view)
@@ -127,20 +141,24 @@ export function composeSceneSvg(doc: CircuitDoc, bg: string, view: ViewId = 'bb'
       const refdes = `<text x="${pl.x + lay.refdes[0] + off[0]}" y="${pl.y + lay.refdes[1] + FONT_REFDES + off[1]}" fill="${INK}" font-family="${FONT}" font-size="${FONT_REFDES}" font-weight="600">${escapeXml(refdesOf(part))}</text>`
       const value = valueOf(part, vis.def.simFamily ?? vis.def.family)
       const valueText = value
-        ? `<text x="${pl.x + lay.value[0] + off[0]}" y="${pl.y + lay.value[1] + FONT_VALUE + off[1]}" fill="${INK}" font-family="${FONT}" font-size="${FONT_VALUE}">${escapeXml(value)}</text>`
+        ? `<text x="${pl.x + lay.value[0] + off[0]}" y="${pl.y + lay.value[1] + FONT_VALUE + off[1]}" fill="${INK}" font-family="${FONT}" font-size="${FONT_VALUE}" font-weight="600">${escapeXml(value)}</text>`
         : ''
       return `${g}${refdes}${valueText}`
     }
     const label = `<text x="${pl.x + off[0]}" y="${pl.y + vis.v.h + 13 + off[1]}" fill="#969ba3" font-family="${FONT}" font-size="11">${escapeXml(refdesOf(part))}</text>`
     return `${g}${label}`
   }
-  // boards paint first, under the wires and every other part
-  const boardsSvg = doc.parts
-    .filter((p) => isBreadboard(p.type))
+  // boards paint first, under the wires and every other part: a tinyCore or
+  // HAT, then the breadboard or tinyProto stacked on it (same order as the canvas)
+  const under = (t: string): boolean => !sch && isTinyHeaderBoard(t) && !isHoleBoard(t)
+  const boardsSvg = [
+    ...doc.parts.filter((p) => under(p.type)),
+    ...doc.parts.filter((p) => isHoleBoard(p.type))
+  ]
     .map(partSvg)
     .join('')
   const partsSvg = doc.parts
-    .filter((p) => !isBreadboard(p.type))
+    .filter((p) => !isHoleBoard(p.type) && !under(p.type))
     .map(partSvg)
     .join('')
 
@@ -200,7 +218,7 @@ function download(blob: Blob, name: string): void {
 }
 
 function bgFor(view: ViewId): string {
-  const token = view === 'sch' ? '--bg' : '--bg-sunken'
+  const token = view === 'sch' ? '--sch-paper' : '--bg-sunken'
   return (getComputedStyle(document.documentElement).getPropertyValue(token) || '#1e1f22').trim()
 }
 
@@ -292,6 +310,15 @@ export async function renderPng(
 }
 
 /** Save an already-rendered export. */
+/** Save a text export (netlist, BOM) through the same download path as images. */
+export function downloadBytes(bytes: Uint8Array, name: string, mime: string): void {
+  download(new Blob([bytes as BlobPart], { type: mime }), name)
+}
+
+export function downloadText(text: string, name: string, mime: string): void {
+  download(new Blob([text], { type: `${mime};charset=utf-8` }), name)
+}
+
 export function saveImage(shot: ExportedImage): void {
   download(shot.blob, shot.name)
 }

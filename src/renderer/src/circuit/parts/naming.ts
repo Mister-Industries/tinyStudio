@@ -176,6 +176,18 @@ export const PART_NAMING: Record<string, PartNaming> = {
     sim: 'button',
     prefix: 'SW'
   },
+  'tactile-button-6mm': {
+    label: 'Tactile Button 6mm',
+    category: 'Switches',
+    sim: 'button',
+    prefix: 'SW'
+  },
+  'tactile-button-12mm': {
+    label: 'Tactile Button 12mm',
+    category: 'Switches',
+    sim: 'button',
+    prefix: 'SW'
+  },
   'switch-spst': {
     label: 'Slide Switch (SPST)',
     category: 'Switches',
@@ -241,6 +253,12 @@ export const PART_NAMING: Record<string, PartNaming> = {
   // ── built-in simulation parts (art generated in simParts/simProbes) ───────
   'sim-vdc': { label: 'DC Voltage Source', category: 'Sources', sim: 'sim-vdc', prefix: 'V' },
   'sim-vsin': { label: 'Sine Voltage Source', category: 'Sources', sim: 'sim-vsin', prefix: 'V' },
+  'sim-vpulse': {
+    label: 'Square Wave Source',
+    category: 'Sources',
+    sim: 'sim-vpulse',
+    prefix: 'V'
+  },
   'sim-idc': { label: 'DC Current Source', category: 'Sources', sim: 'sim-idc', prefix: 'I' },
   'sim-probe-v': {
     label: 'Voltage Probe',

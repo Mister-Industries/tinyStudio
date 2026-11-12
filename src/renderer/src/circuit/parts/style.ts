@@ -23,14 +23,22 @@ export const SCH_GRID = GRID_BB // 9.6
 /** Fine grid: the snap used for wire bends and annotation handles. */
 export const SCH_FINE = GRID_SCH // 4.8
 
-/** Schematic ink (theme-aware; inlined on export). */
-export const INK = 'var(--text-strong)'
+/**
+ * Schematic ink (theme-aware; inlined on export). Slate #3b4449 on the light
+ * sheet, measured from CircuitLab's editor: softer than black, still prints dark.
+ */
+export const INK = 'var(--sch-ink)'
 /** Secondary ink: pin names, unit suffixes, anything supporting. */
 export const INK_MUTED = 'var(--text-muted)'
 /** Selection / probe accent. */
 export const ACCENT = 'var(--brand)'
-/** Fill for symbol bodies that are closed shapes (IC boxes, meter circles). */
-export const BODY_FILL = 'none'
+/**
+ * Fill for symbol bodies that are closed shapes (IC boxes, source circles,
+ * fuses, coils): paper, so a wire or grid line never shows through a body.
+ */
+export const BODY_FILL = 'var(--sch-paper)'
+/** Unconnected pin: a grey dot ringed in ink, gone once the pin is wired. */
+export const PIN_OPEN = 'var(--sch-pin-open)'
 
 /** Symbol body stroke: the single weight every symbol outline uses. */
 export const STROKE = 2

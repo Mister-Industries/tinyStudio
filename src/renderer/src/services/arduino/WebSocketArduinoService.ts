@@ -30,10 +30,10 @@ import {
   CompileResult,
   InstallableBoard,
   LibraryEntry,
+  PackageJobsState,
   PlatformEntry,
   UploadResult
 } from './types'
-import { withRealBoard } from '@renderer/lib/boardFallbacks'
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { isTextPath } from '@renderer/lib/github'
 import { STORAGE_KEYS } from '@renderer/lib/storageKeys'
@@ -114,24 +114,44 @@ function resolveServiceUrl(): string {
 }
 
 /**
- * Convert a backend BoardInfo into the renderer's Board shape. The FQBN is
- * passed through untouched: collapsing every tinyCore variant to one FQBN
- * would force all tinyCore boards to compile for the S3 no-PSRAM variant and
- * make other variants unselectable.
+ * How long a package operation may show no sign of life before the UI gives
+ * up on it. tinyService pushes download progress several times a second and
+ * stops a truly stuck arduino-cli itself after 15 minutes of silence.
+ */
+const PACKAGE_IDLE_TIMEOUT_MS = 16 * 60 * 1000
+
+/** tinyService >= 1.3 sends these on each board entry; older ones don't. */
+type BoardInfoWithUsb = SharedBoardInfo & {
+  isHidden?: boolean
+  vid?: string
+  pid?: string
+  serialNumber?: string
+}
+
+/**
+ * Convert a backend BoardInfo (one board arduino-cli matched on a port) into
+ * the renderer's Board shape, unchanged. Deciding what a port is (the user's
+ * remembered choice, a detected board, or tinyCore for a generic ESP32)
+ * happens in useArduino via lib/detectedBoards.ts, which knows the history.
  */
 function toBoard(info: SharedBoardInfo): Board {
-  // withRealBoard swaps a USB-discovery placeholder (ESP32 Family Device, which
-  // every ESP32-S3 matches) for the real board of that platform; anything else
-  // passes through untouched. See lib/boardFallbacks.ts.
-  return withRealBoard({
+  const usb = info as BoardInfoWithUsb
+  const metadata =
+    usb.vid || usb.pid || usb.serialNumber
+      ? { vendorId: usb.vid, productId: usb.pid, serialNumber: usb.serialNumber }
+      : undefined
+  return {
     port: info.port || '',
     config: {
       fqbn: info.fqbn,
       name: info.name
     },
+    protocol: info.protocol,
     connected: true,
-    guess: (info as { guess?: boolean }).guess
-  })
+    guess: info.guess,
+    ...(usb.isHidden ? { isHidden: true } : {}),
+    ...(metadata ? { metadata } : {})
+  }
 }
 
 /**
@@ -217,7 +237,8 @@ export class WebSocketArduinoService implements ArduinoService {
   private waitForResponse(
     action: string,
     timeout = 60000,
-    requestId?: string
+    requestId?: string,
+    options: { idle?: boolean } = {}
   ): Promise<{ success: boolean; output: string; error?: string }> {
     return new Promise((resolve, reject) => {
       if (!this.client) {
@@ -235,12 +256,14 @@ export class WebSocketArduinoService implements ArduinoService {
       let errorMessage = ''
       let messageUnsubscribe: (() => void) | null = null
       let errorUnsubscribe: (() => void) | null = null
+      let disconnectUnsubscribe: (() => void) | null = null
       let isResolved = false
 
       const cleanup = (): void => {
         clearTimeout(timeoutId)
         if (messageUnsubscribe) messageUnsubscribe()
         if (errorUnsubscribe) errorUnsubscribe()
+        if (disconnectUnsubscribe) disconnectUnsubscribe()
       }
 
       const safeResolve = (result: { success: boolean; output: string; error?: string }): void => {
@@ -257,7 +280,7 @@ export class WebSocketArduinoService implements ArduinoService {
         reject(error)
       }
 
-      const timeoutId = setTimeout(() => {
+      const onTimeout = (): void => {
         console.warn(`[${action}] Operation timed out after ${timeout}ms, output so far:`, output)
 
         // Check if the operation might have succeeded based on output
@@ -280,12 +303,37 @@ export class WebSocketArduinoService implements ArduinoService {
             output: output,
             error: hasError ? errorMessage : undefined
           })
+        } else if (options.idle) {
+          safeReject(
+            new Error(
+              `No progress from tinyService for ${Math.round(timeout / 60000)} minutes; the operation may still finish in the background.`
+            )
+          )
         } else {
           safeReject(new Error(`Operation timed out after ${timeout}ms`))
         }
-      }, timeout)
+      }
+      // With `idle`, the timeout is a stall detector: any sign of life for
+      // this request (or install progress) starts it over. Big platform
+      // installs legitimately take many minutes.
+      let timeoutId = setTimeout(onTimeout, timeout)
+      const keepAlive = (): void => {
+        if (!options.idle || isResolved) return
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(onTimeout, timeout)
+      }
+
+      // A request can't complete once the backend is gone; say so now rather
+      // than at the timeout.
+      disconnectUnsubscribe = this.client.onDisconnect(() =>
+        safeReject(new Error('Lost the connection to tinyService'))
+      )
 
       messageUnsubscribe = this.client.onMessage((message: OutgoingMessage) => {
+        if (message.action === 'package-jobs') {
+          keepAlive()
+          return
+        }
         // Only handle messages for this action
         if (message.action !== action) return
         // When both sides carry request ids, require an exact match so
@@ -294,6 +342,7 @@ export class WebSocketArduinoService implements ArduinoService {
           return
         }
 
+        keepAlive()
         if (message.type === 'output') {
           output += message.data.output + '\n'
         } else if (message.type === 'error') {
@@ -699,7 +748,7 @@ export class WebSocketArduinoService implements ArduinoService {
   ): Promise<{ success: boolean; output: string; error?: string }> {
     if (!this.client) throw new Error('Arduino client not initialized')
     const requestId = this.client.libInstall(name, version)
-    return this.waitForResponse('lib-install', 300000, requestId)
+    return this.waitForResponse('lib-install', PACKAGE_IDLE_TIMEOUT_MS, requestId, { idle: true })
   }
 
   async uninstallLibrary(
@@ -707,7 +756,7 @@ export class WebSocketArduinoService implements ArduinoService {
   ): Promise<{ success: boolean; output: string; error?: string }> {
     if (!this.client) throw new Error('Arduino client not initialized')
     const requestId = this.client.libUninstall(name)
-    return this.waitForResponse('lib-uninstall', 60000, requestId)
+    return this.waitForResponse('lib-uninstall', PACKAGE_IDLE_TIMEOUT_MS, requestId, { idle: true })
   }
 
   // ── boards manager ───────────────────────────────────────────────────────────
@@ -746,14 +795,17 @@ export class WebSocketArduinoService implements ArduinoService {
   async installCore(id: string, version?: string): Promise<ArduinoActionResult> {
     if (!this.client) throw new Error('Arduino client not initialized')
     const requestId = this.client.coreInstall(id, version)
-    // Cores (esp32 especially) are large; allow up to 10 minutes.
-    return this.waitForResponse('core-install', 600000, requestId)
+    // Cores are big (Espressif's ESP32 package is ~1.8 GB), so no fixed time
+    // limit: only a long stretch with no progress at all counts as a failure.
+    return this.waitForResponse('core-install', PACKAGE_IDLE_TIMEOUT_MS, requestId, { idle: true })
   }
 
   async uninstallCore(id: string): Promise<ArduinoActionResult> {
     if (!this.client) throw new Error('Arduino client not initialized')
     const requestId = this.client.coreUninstall(id)
-    return this.waitForResponse('core-uninstall', 120000, requestId)
+    return this.waitForResponse('core-uninstall', PACKAGE_IDLE_TIMEOUT_MS, requestId, {
+      idle: true
+    })
   }
 
   async listAllBoards(): Promise<InstallableBoard[]> {
@@ -776,13 +828,52 @@ export class WebSocketArduinoService implements ArduinoService {
     if (!this.client) throw new Error('Arduino client not initialized')
     const requestId = this.client.boardUrlAdd(url)
     // Adding a URL also refreshes the index, which can take a while.
-    return this.waitForResponse('board-url-add', 120000, requestId)
+    return this.waitForResponse('board-url-add', PACKAGE_IDLE_TIMEOUT_MS, requestId, {
+      idle: true
+    })
   }
 
   async removeBoardUrl(url: string): Promise<ArduinoActionResult> {
     if (!this.client) throw new Error('Arduino client not initialized')
     const requestId = this.client.boardUrlRemove(url)
     return this.waitForResponse('board-url-remove', 30000, requestId)
+  }
+
+  // ── package operations (server push) ─────────────────────────────────────────
+
+  private packageJobs: PackageJobsState | null = null
+  private packageJobsWatch: (() => void) | null = null
+  private readonly packageJobsListeners = new Set<(state: PackageJobsState) => void>()
+
+  /** Start listening for package-jobs pushes (once, on first subscriber). */
+  private watchPackageJobs(): void {
+    if (this.packageJobsWatch || !this.client) return
+    this.packageJobsWatch = this.client.onMessage((message: OutgoingMessage) => {
+      if (message.action !== 'package-jobs' || message.type !== 'status') return
+      const state = message.data as PackageJobsState
+      if (!state || typeof state !== 'object' || !state.setup) return
+      this.packageJobs = state
+      this.packageJobsListeners.forEach((cb) => cb(state))
+    })
+  }
+
+  onPackageJobs(cb: (state: PackageJobsState) => void): () => void {
+    this.watchPackageJobs()
+    this.packageJobsListeners.add(cb)
+    if (this.packageJobs) cb(this.packageJobs)
+    return () => this.packageJobsListeners.delete(cb)
+  }
+
+  getPackageJobs(): PackageJobsState | null {
+    return this.packageJobs
+  }
+
+  async runBoardSetup(): Promise<ArduinoActionResult> {
+    if (!this.client) throw new Error('Arduino client not initialized')
+    const requestId = this.client.installCores()
+    return this.waitForResponse('install-cores', PACKAGE_IDLE_TIMEOUT_MS, requestId, {
+      idle: true
+    })
   }
 
   // ── serial monitor (streaming, not request/response) ─────────────────────────

@@ -90,7 +90,11 @@ export function VerifyButton({
   size = 'default',
   showIcon = true
 }: VerifyButtonProps): React.JSX.Element {
-  const { compileSketch, isCompiling, selectedBoard, isAgentConnected } = useArduinoContext()
+  const { compileSketch, isCompiling, isUploading, selectedBoard, isAgentConnected } =
+    useArduinoContext()
+  // Only the button that started a build shows its progress; the other one is
+  // just disabled (an Upload's compile used to label Verify "Compiling..." too).
+  const [running, setRunning] = React.useState(false)
 
   const workspace = useAppSelector((state) => state.file.workspace)
   const sketchDir = useSketchDir()
@@ -118,6 +122,7 @@ export function VerifyButton({
       return
     }
 
+    setRunning(true)
     try {
       await saveAll() // compile the current code, not the last saved version
       await compileSketch(sketchDir || workspace.path, selectedBoard.config)
@@ -126,10 +131,13 @@ export function VerifyButton({
       })
     } catch (error) {
       reportError('Compilation failed', error)
+    } finally {
+      setRunning(false)
     }
   }
 
-  const isDisabled = isCompiling || !selectedBoard || !isAgentConnected || !workspace
+  const busy = running && isCompiling
+  const isDisabled = isCompiling || isUploading || !selectedBoard || !isAgentConnected || !workspace
 
   return (
     <Tooltip>
@@ -143,19 +151,17 @@ export function VerifyButton({
         >
           {showIcon && (
             <>
-              {isCompiling ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Check className="h-4 w-4" />
-              )}
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
             </>
           )}
-          {isCompiling ? 'Compiling...' : 'Verify'}
+          {busy ? 'Compiling...' : 'Verify'}
         </Button>
       </TooltipTrigger>
       <TooltipContent side="bottom">
-        {isCompiling
-          ? 'Compilation in progress...'
+        {isCompiling || isUploading
+          ? busy
+            ? 'Compilation in progress...'
+            : 'Waiting for the current build to finish'
           : !selectedBoard
             ? 'Select a board first'
             : !isAgentConnected
@@ -191,6 +197,8 @@ export function UploadButton({
   const workspace = useAppSelector((state) => state.file.workspace)
   const sketchDir = useSketchDir()
   const saveAll = useSaveAllBeforeBuild()
+  // See VerifyButton: progress shows only on the button that started the job.
+  const [running, setRunning] = React.useState(false)
 
   const handleUpload = async (): Promise<void> => {
     if (!selectedBoard) {
@@ -214,6 +222,7 @@ export function UploadButton({
       return
     }
 
+    setRunning(true)
     try {
       await saveAll() // flash the current code, not the last saved version
       const dir = sketchDir || workspace.path
@@ -225,13 +234,16 @@ export function UploadButton({
       toast.success('Upload complete', { description: 'Your sketch is running on the board.' })
     } catch (error) {
       reportError('Upload failed', error)
+    } finally {
+      setRunning(false)
     }
   }
 
   const isDisabled = isCompiling || isUploading || !selectedBoard || !isAgentConnected || !workspace
-  const isLoading = isCompiling || isUploading
+  const isLoading = running && (isCompiling || isUploading)
 
   const getButtonText = (): string => {
+    if (!running) return 'Upload'
     if (isCompiling) return 'Compiling...'
     if (isUploading) {
       if (uploadProgress) {

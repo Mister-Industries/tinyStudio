@@ -18,8 +18,14 @@ import { registerFileIpc } from './ipc/files'
 import { registerPartsIpc } from './ipc/parts'
 import { registerWindowIpc } from './ipc/window'
 import { ServiceManager } from './ServiceManager'
+import { registerSketchScheme, serveSketchRunner } from './sketchRunnerProtocol'
 import { clearApiKey, getModel, getStatus, setApiKey, setModel } from './settings'
 import { TINYSERVICE_DEFAULT_PORT } from '../shared/tinyservice'
+
+// The Visual view's sketch runner is served over tinystudio-sketch:// in the
+// packaged app (file:// is blocked for its sandboxed iframe). Schemes must be
+// registered before the app is ready.
+registerSketchScheme()
 
 const serviceManager = new ServiceManager({
   port: TINYSERVICE_DEFAULT_PORT,
@@ -115,8 +121,16 @@ app.whenReady().then(async () => {
   // Register standard edit/view accelerators (undo/redo/cut/copy/paste/select-all,
   // reload, devtools). The window is frameless so this menu stays hidden, but
   // without it those shortcuts never bind (e.g. Ctrl+Z wouldn't work in inputs).
+  // On macOS the first menu is always the app menu, whatever its role: without
+  // an explicit appMenu the Edit menu took that slot, so there was no Quit item
+  // and Cmd+Q did nothing (closing the window leaves a Mac app running).
   Menu.setApplicationMenu(
-    Menu.buildFromTemplate([{ role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' }])
+    Menu.buildFromTemplate([
+      ...(process.platform === 'darwin' ? [{ role: 'appMenu' as const }] : []),
+      { role: 'editMenu' },
+      { role: 'viewMenu' },
+      { role: 'windowMenu' }
+    ])
   )
 
   try {
@@ -197,6 +211,7 @@ app.whenReady().then(async () => {
   registerFileIpc()
   registerPartsIpc()
 
+  serveSketchRunner(join(__dirname, '../renderer/sketch-runner'))
   createWindow()
 
   app.on('activate', function () {

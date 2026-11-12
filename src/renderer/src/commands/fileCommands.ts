@@ -511,7 +511,12 @@ export async function adoptCopiedProject(
   // built inline rather than imported from projectRouting, which imports this
   // module, keeping that dependency one-way.
   const url = `/${encodeURIComponent(newOwner)}/${encodeURIComponent(repoName)}`
-  if (typeof window !== 'undefined' && window.location.pathname !== url) {
+  // Not on file:// (the packaged desktop app): there the path is the app's own
+  // file, and replacing it breaks a reload (see lib/projectRouting hasUrlRouting).
+  const routable =
+    typeof window !== 'undefined' &&
+    (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+  if (routable && window.location.pathname !== url) {
     window.history.pushState({ owner: newOwner, repo: repoName, path: '' }, '', url)
   }
 }

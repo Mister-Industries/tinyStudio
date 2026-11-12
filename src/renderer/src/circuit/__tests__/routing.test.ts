@@ -15,6 +15,7 @@ import {
   pointAtT,
   simplifyWirePoints,
   tAtPoint,
+  pinExitPath,
   wirePoints
 } from '../core/routing'
 
@@ -136,4 +137,31 @@ test('pointAtT / tAtPoint are inverse-ish along a polyline', () => {
   assert.deepEqual(mid, { x: 100, y: 0 })
   assert.ok(Math.abs(tAtPoint(pts, { x: 100, y: 1 }) - 0.505) < 0.01)
   assert.ok(Math.abs(tAtPoint(pts, { x: 50, y: 0 }) - 0.25) < 0.001)
+})
+
+test('pinExitPath leaves each pin outward by one stub before turning', () => {
+  // pin on an IC's right edge at (0,0) to a pin pointing left at (48,30)
+  const pts = pinExitPath({ x: 0, y: 0 }, 'r', { x: 48, y: 30 }, 'l', 10)
+  assert.deepEqual(pts, [
+    { x: 0, y: 0 },
+    { x: 38, y: 0 },
+    { x: 38, y: 30 },
+    { x: 48, y: 30 }
+  ])
+  // a pin pointing down leaves downward first
+  const down = pinExitPath({ x: 0, y: 0 }, 'd', { x: 40, y: 40 }, null, 10)
+  assert.equal(down[1].x, 0)
+  assert.ok(down[1].y > 0, 'first move is downward')
+  assert.deepEqual(down[down.length - 1], { x: 40, y: 40 })
+})
+
+test('pinExitPath never doubles back over a stub', () => {
+  // a pin pointing down whose target is up and to the right: going straight
+  // back up would retrace the stub, so the route turns sideways first
+  const pts = pinExitPath({ x: 0, y: 40 }, 'd', { x: 60, y: 0 }, 'l', 10)
+  assert.deepEqual(pts.slice(0, 3), [
+    { x: 0, y: 40 },
+    { x: 0, y: 50 },
+    { x: 50, y: 50 }
+  ])
 })

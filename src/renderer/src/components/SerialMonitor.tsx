@@ -198,7 +198,7 @@ export function SerialMonitorTab({
       {/* Body fills edge-to-edge like the Output pane (sunken code well). */}
       <ScrollArea
         ref={scrollRef}
-        className="flex-1 min-h-0 bg-[var(--bg-sunken)] px-3.5 py-2.5 font-mono text-xs leading-[1.6]"
+        className="flex-1 min-h-0 bg-[var(--bg-sunken)] px-3.5 py-2.5 font-mono text-xs leading-[1.6] select-text"
       >
         {lines.length === 0 ? (
           <div className="text-[var(--text-faint)]">
@@ -288,7 +288,7 @@ export function OutputTab({ autoScroll = true }: { autoScroll?: boolean }): Reac
     <div className="size-full relative bg-[var(--bg-sunken)]">
       <div
         ref={scrollRef}
-        className="absolute inset-0 overflow-auto px-3.5 py-2.5 font-mono text-xs leading-[1.6] whitespace-pre-wrap"
+        className="absolute inset-0 overflow-auto px-3.5 py-2.5 font-mono text-xs leading-[1.6] whitespace-pre-wrap select-text"
       >
         {logs.length === 0 ? (
           <span className="text-[var(--text-faint)]">

@@ -26,6 +26,8 @@ export const STORAGE_KEYS = {
   tinypartsDevFolder: 'tinystudio.tinyparts.devFolder',
   tinypartsLive: 'tinystudio.tinyparts.live',
   paletteTab: 'tinystudio.circuit.paletteTab',
+  // The board (and options) chosen for each device; see lib/boardHistory.ts
+  boardHistory: 'tinystudio.boards.history',
   serviceUrl: 'tinyservice.url'
 } as const
 
@@ -38,3 +40,6 @@ export const monitorSettingsKey = (port: string): string => `tinystudio.monitor.
 /** The GitHub repo a workspace is linked to, and its sync baseline. */
 export const githubLinkKey = (workspacePath: string): string =>
   `tinystudio.github.link.${workspacePath}`
+
+/** The latest unsaved copy of a project file (crash recovery; see lib/unsavedDrafts.ts). */
+export const draftKey = (path: string): string => `tinystudio.draft.${path}`

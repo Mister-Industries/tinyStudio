@@ -14,11 +14,16 @@
 
 import { getPart, viewFor, type PartDef, type PartView } from '../../lib/partsLibrary'
 import { schematicVisual } from '../parts/symbols'
+import { OPERATED_SYMBOLS, SYMBOL_BY_TYPE } from '../parts/symbolLibrary'
 import { netLabelPinWorld, netLabelVisualOf, snapNetLabel } from '../parts/netLabels'
 import { decorateResistor, hasResistorBands } from '../parts/resistorBands'
 import { pinWorld, snapPlacementToPinGrid } from '../core/geometry'
+import { autoroute, type Rect, type RouteRequest } from '../core/autoroute'
+import { junctionPoints } from '../core/junctions'
+import { labelLayout, visibleBox } from '../parts/labels'
 import {
   GRID_BB,
+  GRID_SCH,
   isJunction,
   isPendingJunction,
   splitPinRef,
@@ -35,8 +40,10 @@ import {
   buildWirePoints,
   isStraightRoute,
   journeyFromPoints,
+  pinExitPath,
   pointAtT,
-  wirePoints
+  wirePoints,
+  type PinDir
 } from '../core/routing'
 import {
   composite,
@@ -125,6 +132,235 @@ export function pinWorldOf(
 
 export type EndResolver = (end: WireEnd, seen?: Set<string>) => Pt | null
 
+const TURN: Record<PinDir, PinDir> = { l: 'u', u: 'r', r: 'd', d: 'l' }
+
+/**
+ * Which way a pin's lead leaves its symbol, after the placement's flip and
+ * rotation: a pin on the body's left edge points left, and so on. Null for a
+ * pin that isn't on an edge (a breadboard hole, an odd authored symbol).
+ */
+export function pinDirOf(
+  part: CircuitPart,
+  pin: string,
+  pl: Placement,
+  view: ViewId
+): PinDir | null {
+  const vis = visualFor(part.type, view)
+  return vis ? dirOnVisual(vis.v, pin, pl) : null
+}
+
+function dirOnVisual(v: PartView, pin: string, pl: Placement): PinDir | null {
+  const at = v.pins[pin]
+  if (!at) return null
+  const [x, y] = at
+  const e = 0.5
+  let dir: PinDir | null =
+    x <= e ? 'l' : x >= v.w - e ? 'r' : y <= e ? 'u' : y >= v.h - e ? 'd' : null
+  if (!dir) return null
+  if (pl.flip && (dir === 'l' || dir === 'r')) dir = dir === 'l' ? 'r' : 'l'
+  for (let r = pl.rotate ?? 0; r > 0; r -= 90) dir = TURN[dir]
+  return dir
+}
+
+/**
+ * A schematic wire with no stored route is laid out automatically, leaving
+ * each pin outward (core/routing pinExitPath). It stays automatic, following
+ * its parts as they move, until someone reshapes it.
+ */
+export function isAutoRouted(w: CircuitWire): boolean {
+  return w.view === 'sch' && !w.route?.length
+}
+
+/** Pin direction of a schematic wire end: a part pin or a net label's pin. */
+function schEndDir(
+  doc: CircuitDoc,
+  end: WireEnd,
+  overrides?: Map<string, Placement>
+): PinDir | null {
+  if (typeof end !== 'string') return null
+  const { part: id, pin } = splitPinRef(end)
+  const part = doc.parts.find((p) => p.id === id)
+  if (part) {
+    const pl = overrides?.get(id) ?? part.sch
+    return pl ? pinDirOf(part, pin, pl, 'sch') : null
+  }
+  const label = doc.netLabels?.find((l) => l.id === id)
+  if (!label) return null
+  return dirOnVisual(netLabelVisualOf(label), pin, overrides?.get(id) ?? label.sch)
+}
+
+const endPartId = (end: WireEnd): string | null =>
+  typeof end === 'string' ? splitPinRef(end).part : null
+
+function routedPoints(
+  doc: CircuitDoc,
+  w: CircuitWire,
+  s: Pt,
+  t: Pt,
+  overrides?: Map<string, Placement>
+): Pt[] {
+  if (!isAutoRouted(w)) return wirePoints(s, t, w.route)
+  // mid-drag, wires on parts that aren't moving keep their full route; the
+  // ones on moving parts take the quick pin-exit route until the drop
+  const moving = (end: WireEnd): boolean => {
+    const id = endPartId(end)
+    return !!id && !!overrides?.has(id)
+  }
+  if (!moving(w.from) && !moving(w.to)) {
+    const full = schematicRoutes(doc).get(w.id)
+    if (full) return full
+  }
+  return pinExitPath(
+    s,
+    schEndDir(doc, w.from, overrides),
+    t,
+    schEndDir(doc, w.to, overrides),
+    GRID_BB
+  )
+}
+
+/**
+ * Which schematic wires form one conductor: wires that share a pin, a net
+ * label pin or a junction host. Returns a lookup from wire id to a net key.
+ */
+function wireNets(doc: CircuitDoc): (wireId: string) => string {
+  const parent = new Map<string, string>()
+  const find = (k: string): string => {
+    let r = k
+    while (parent.has(r) && parent.get(r) !== r) r = parent.get(r)!
+    return r
+  }
+  const union = (a: string, b: string): void => {
+    const ra = find(a)
+    const rb = find(b)
+    if (ra !== rb) parent.set(ra, rb)
+  }
+  for (const w of doc.wires) {
+    if (w.view !== 'sch') continue
+    union(`w:${w.id}`, typeof w.from === 'string' ? w.from : `w:${w.from.wire}`)
+    union(`w:${w.id}`, typeof w.to === 'string' ? w.to : `w:${w.to.wire}`)
+  }
+  return (id) => find(`w:${id}`)
+}
+
+/** Solder dots for a schematic: every point where three or more conductors meet. */
+export function schematicJunctions(doc: CircuitDoc, geom: ResolvedWire[]): Pt[] {
+  const net = wireNets(doc)
+  const resolve = makeEndResolver(doc, undefined, 'sch')
+  const pins: Pt[] = []
+  for (const { w } of geom)
+    for (const end of [w.from, w.to]) {
+      if (typeof end !== 'string') continue
+      const p = resolve(end)
+      if (p) pins.push(p)
+    }
+  return junctionPoints(
+    geom.filter((g) => g.pts.length >= 2).map((g) => ({ net: net(g.w.id), pts: g.pts })),
+    pins,
+    GRID_SCH
+  )
+}
+
+const routeCache = new WeakMap<CircuitDoc, Map<string, Pt[]>>()
+
+/**
+ * What a schematic wire or tag must keep clear of: part bodies and net labels
+ * (walls) and the refdes/value text beside each part (soft: avoid, but can be
+ * crossed). `complete` is false while some part's art hasn't loaded yet.
+ */
+export function schematicObstacles(doc: CircuitDoc): {
+  walls: Rect[]
+  soft: Rect[]
+  complete: boolean
+} {
+  let complete = true
+  const walls: Rect[] = []
+  const soft: Rect[] = []
+  for (const part of doc.parts) {
+    const pl = part.sch
+    if (!pl || isHoleBoard(part.type)) continue
+    const vis = visualFor(part.type, 'sch')
+    if (!vis) {
+      complete = false
+      continue
+    }
+    const box = visibleBox(vis.v.w, vis.v.h, pl.rotate)
+    walls.push({ x: pl.x + box.left, y: pl.y + box.top, w: box.w, h: box.h })
+    // keep wires off the refdes and value text where the canvas draws them
+    const lay = labelLayout(vis.v.w, vis.v.h, vis.v.pins, pl.rotate)
+    const off = pl.labelOffset ?? [0, 0]
+    const ref = String(part.attrs?.label ?? part.id)
+    soft.push({
+      x: pl.x + lay.refdes[0] + off[0],
+      y: pl.y + lay.refdes[1] + off[1],
+      w: ref.length * 6,
+      h: 10
+    })
+    soft.push({ x: pl.x + lay.value[0] + off[0], y: pl.y + lay.value[1] + off[1], w: 40, h: 10 })
+  }
+  for (const label of doc.netLabels ?? []) {
+    const v = netLabelVisualOf(label)
+    const box = visibleBox(v.w, v.h, label.sch.rotate)
+    walls.push({ x: label.sch.x + box.left, y: label.sch.y + box.top, w: box.w, h: box.h })
+  }
+
+  return { walls, soft, complete }
+}
+
+/** Part bodies a wire being drawn should go around in this view, and the
+ * text it should rather not cross. */
+export function drawingWalls(doc: CircuitDoc, view: ViewId): { walls: Rect[]; soft: Rect[] } {
+  if (view === 'sch') {
+    const o = schematicObstacles(doc)
+    return { walls: o.walls, soft: o.soft }
+  }
+  const out: Rect[] = []
+  for (const part of doc.parts) {
+    const pl = part.bb
+    // wires run over breadboards and the tinyProto; that is what they are for
+    if (!pl || isHoleBoard(part.type)) continue
+    const vis = visualFor(part.type, 'bb')
+    if (!vis) continue
+    const box = visibleBox(vis.v.w, vis.v.h, pl.rotate)
+    out.push({ x: pl.x + box.left, y: pl.y + box.top, w: box.w, h: box.h })
+  }
+  return { walls: out, soft: [] }
+}
+
+/**
+ * Full obstacle-aware routes (core/autoroute) for every automatic schematic
+ * wire between two pins, computed once per document revision.
+ */
+export function schematicRoutes(doc: CircuitDoc): Map<string, Pt[]> {
+  const hit = routeCache.get(doc)
+  if (hit) return hit
+  const { walls, soft, complete } = schematicObstacles(doc)
+
+  // wires sharing a pin are one conductor and may share a track
+  const find = wireNets(doc)
+  const sch = doc.wires.filter((w) => w.view === 'sch')
+
+  const resolve = makeEndResolver(doc, undefined, 'sch')
+  const reqs: RouteRequest[] = []
+  for (const w of sch) {
+    if (!isAutoRouted(w) || typeof w.from !== 'string' || typeof w.to !== 'string') continue
+    const s = resolve(w.from)
+    const t = resolve(w.to)
+    if (!s || !t) continue
+    reqs.push({
+      id: w.id,
+      net: find(w.id),
+      s,
+      sDir: schEndDir(doc, w.from),
+      t,
+      tDir: schEndDir(doc, w.to)
+    })
+  }
+  const routes = autoroute(reqs, { grid: GRID_SCH, walls, soft, stub: GRID_BB })
+  if (complete) routeCache.set(doc, routes)
+  return routes
+}
+
 /**
  * Endpoint resolver over a doc, with optional per-part placement overrides
  * (used mid-drag so wires track the moving part before the command commits).
@@ -146,7 +382,7 @@ export function makeEndResolver(
       const s = resolve(host.from, seen)
       const t = resolve(host.to, seen)
       if (!s || !t) return null
-      return pointAtT(wirePoints(s, t, host.route), end.t)
+      return pointAtT(routedPoints(doc, host, s, t, overrides), end.t)
     }
     const { part: partId, pin } = splitPinRef(end)
     const part = doc.parts.find((p) => p.id === partId)
@@ -178,7 +414,7 @@ export function wireGeometry(
     .map((w) => {
       const s = resolve(w.from)
       const t = resolve(w.to)
-      return { w, pts: s && t ? wirePoints(s, t, w.route) : [] }
+      return { w, pts: s && t ? routedPoints(doc, w, s, t, overrides) : [] }
     })
 }
 
@@ -253,7 +489,8 @@ export function collectFrozen(
   const touches = (e: WireEnd): boolean => typeof e === 'string' && ids.has(splitPinRef(e).part)
   const out: FrozenWire[] = []
   for (const w of doc.wires) {
-    if (w.view !== view) continue
+    // auto-routed wires re-route live from the moved pins; nothing to freeze
+    if (w.view !== view || isAutoRouted(w)) continue
     const f = touches(w.from)
     const t = touches(w.to)
     if (!f && !t) continue
@@ -323,7 +560,8 @@ export function bbBounds(
 // ── M2: breadboard seating (drop-to-connect, derived, never stored) ─────────
 
 import { SpatialHash } from '../core/geometry'
-import { breadboardBuses, isBreadboard } from '../parts/breadboard'
+import { breadboardBuses, isHoleBoard } from '../parts/breadboard'
+import { headerBuses, isTinyHeaderBoard } from '../parts/boardSymbols'
 
 /** Seat radius: half a hole pitch (spec §7.3). */
 const SEAT_RADIUS = GRID_BB / 2
@@ -331,7 +569,13 @@ const SEAT_RADIUS = GRID_BB / 2
 /** buses resolver for buildNets: a part's own `buses` (tinyProto's power
  * rails, from its part.json), else the generated breadboards'. */
 export function circuitBuses(type: string): string[][] | undefined {
-  return getPart(type)?.buses ?? breadboardBuses(type)
+  const def = getPart(type)
+  const own = def?.buses ?? breadboardBuses(type)
+  if (!def || !isTinyHeaderBoard(type)) return own
+  // a tinyStudio board's repeated GND / 3V3 header pins are one net
+  const pins = Object.keys(def.views.breadboard?.pins ?? {})
+  const header = headerBuses(pins)
+  return header.length ? [...(own ?? []), ...header] : own
 }
 
 export interface Seat {
@@ -356,7 +600,7 @@ export function implicitSeats(doc: CircuitDoc): Seat[] {
   const hash = new SpatialHash<string>()
   let holes = 0
   for (const part of doc.parts) {
-    if (!part.bb || !isBreadboard(part.type)) continue
+    if (!part.bb || !isHoleBoard(part.type)) continue
     const vis = bbVisual(part.type)
     if (!vis) continue
     for (const pin of Object.keys(vis.v.pins)) {
@@ -370,7 +614,7 @@ export function implicitSeats(doc: CircuitDoc): Seat[] {
   if (!holes) return []
   const seats: Seat[] = []
   for (const part of doc.parts) {
-    if (!part.bb || isBreadboard(part.type)) continue
+    if (!part.bb || isHoleBoard(part.type)) continue
     const vis = bbVisual(part.type)
     const pins = vis ? Object.keys(vis.v.pins) : []
     if (!pins.length) continue
@@ -457,9 +701,22 @@ export function ratsnest(doc: CircuitDoc, view: ViewId, global: NetModel): Ratsn
       const { part: partId } = splitPinRef(pin)
       const part = doc.parts.find((p) => p.id === partId)
       if (!part || !part[view]) continue
+      // a hole board has no schematic symbol: its holes aren't pins to wire there
+      if (view === 'sch' && isHoleBoard(part.type)) continue
       const pos = pinWorldOf(part, splitPinRef(pin).pin, undefined, view)
       if (!pos) continue
-      const comp = viewNets.pinToNet.has(pin) ? `n${viewNets.pinToNet.get(pin)}` : `solo:${pin}`
+      // a pin with no wire in this view still rides its part's bus (a header's
+      // second GND pin is the first one)
+      let local = viewNets.pinToNet.get(pin)
+      if (local === undefined) {
+        const name = splitPinRef(pin).pin
+        for (const group of circuitBuses(part.type) ?? []) {
+          if (!group.includes(name)) continue
+          const sib = group.find((n) => viewNets.pinToNet.has(`${partId}:${n}`))
+          if (sib) local = viewNets.pinToNet.get(`${partId}:${sib}`)
+        }
+      }
+      const comp = local !== undefined ? `n${local}` : `solo:${pin}`
       if (!groups.has(comp)) groups.set(comp, [])
       groups.get(comp)!.push({ pin, pos })
     }
@@ -498,7 +755,7 @@ export function ercFloatingPins(doc: CircuitDoc, net: NetModel, view: ViewId): E
   const out: ErcIssue[] = []
   for (const part of doc.parts) {
     const pl = part[view]
-    if (!pl || isBreadboard(part.type)) continue
+    if (!pl || isHoleBoard(part.type)) continue
     const vis = visualFor(part.type, view)
     if (!vis) continue
     const floating: string[] = []
@@ -549,6 +806,8 @@ export function occupiedBoxes(doc: CircuitDoc, view: ViewId, exclude?: Set<strin
     out.push({ x: pl.x, y: pl.y, w: vis.v.w, h: vis.v.h })
   }
   if (view === 'sch') {
+    // the refdes and value text beside each part
+    for (const t of schematicObstacles(doc).soft) out.push(t)
     for (const l of doc.netLabels ?? []) {
       if (exclude?.has(l.id)) continue
       const v = netLabelVisualOf(l)
@@ -655,6 +914,13 @@ export function freePasteOffset(
 // ── rigid rotations (shared by Canvas gestures and the Inspector) ────────────
 
 /**
+ * One rotate step, in degrees: counter-clockwise (CSS rotation is clockwise
+ * positive, so -90 is +270). CCW is the drafting convention, and it means a
+ * part stood upright reads left-to-right in one click instead of three.
+ */
+export const ROTATE_STEP = 270
+
+/**
  * Rigid 90°-step rotation of a breadboard assembly (bb view): the board, its
  * seated parts, and the wires *between* seated parts all turn about the
  * board's centre, so the layout is preserved instead of the wires rerouting.
@@ -674,7 +940,8 @@ export function rotateBoardAssemblyCmd(
   const bvis = board && visualFor(board.type, 'bb')
   if (!board || !bpl || !bvis) return null
   const c = { x: bpl.x + bvis.v.w / 2, y: bpl.y + bvis.v.h / 2 }
-  // 90° CW about c (matching transformLocalPoint's rotation sense), n times.
+  // 90° CW about c (matching transformLocalPoint's rotation sense), n times;
+  // callers pass n = 3 for one counter-clockwise step (ROTATE_STEP).
   const rot90 = (p: Pt): Pt => ({ x: c.x - (p.y - c.y), y: c.y + (p.x - c.x) })
   const rot = (p: Pt): Pt => {
     let q = p
@@ -716,7 +983,7 @@ export function rotateBoardAssemblyCmd(
 export function rotateNetLabelCmd(doc: CircuitDoc, labelId: string): Command | null {
   const label = doc.netLabels?.find((l) => l.id === labelId)
   if (!label) return null
-  const nr = ((((label.sch.rotate ?? 0) + 90) % 360) + 360) % 360
+  const nr = ((((label.sch.rotate ?? 0) + ROTATE_STEP) % 360) + 360) % 360
   const snapped = snapNetLabel(label.kind, label.name, {
     ...label.sch,
     rotate: (nr || undefined) as Placement['rotate']
@@ -731,8 +998,49 @@ export function rotateNetLabelCmd(doc: CircuitDoc, labelId: string): Command | n
  * Today that's resistor color bands following `attrs.resistance` (bb art
  * carries `band_*` ids); everything else renders the stock art.
  */
+/** The slide switch art's knob (left of its track) and where it goes when on. */
+const SLIDE_KNOB_OPEN =
+  /<rect x="16" y="10" width="13" height="10" rx="2" fill="#cfd6ff"\s*(?:\/>|><\/rect>)/
+const SLIDE_KNOB_CLOSED = '<rect x="31" y="10" width="13" height="10" rx="2" fill="#cfd6ff"/>'
+
+/** The pushbutton art's housing ring; everything drawn after it is the cap. */
+const BUTTON_RING = /<ellipse[^>]*fill="#DFDFDF"[^>]*cy="15\.211"[^>]*(?:\/>|><\/ellipse>)/
+
 export function partArtFor(part: CircuitPart, vis: PartVisual, view: ViewId): string {
   if (view === 'bb' && part.attrs?.resistance !== undefined && hasResistorBands(vis.v.svg))
     return decorateResistor(vis.v.svg, part.attrs.resistance)
+  // Simulate: a closed switch or a pressed button is drawn closed
+  const closed = part.attrs?.closed === true || part.attrs?.closed === 'true'
+  if (!closed) return vis.v.svg
+  if (view === 'sch') {
+    const op = OPERATED_SYMBOLS[SYMBOL_BY_TYPE[part.type] ?? '']
+    if (op && vis.v.svg.includes(op.open)) return vis.v.svg.replace(op.open, op.closed)
+  }
+  // the breadboard slide switch: its knob slides from one end of the track
+  // to the other
+  if (view === 'bb' && SLIDE_KNOB_OPEN.test(vis.v.svg))
+    return vis.v.svg.replace(SLIDE_KNOB_OPEN, SLIDE_KNOB_CLOSED)
+  // the breadboard pushbutton: its cap (drawn last, after the housing's top
+  // ring) sinks into the housing
+  if (view === 'bb') {
+    const ring = BUTTON_RING.exec(vis.v.svg)
+    const end = vis.v.svg.lastIndexOf('</g></svg>')
+    if (ring && end > ring.index) {
+      const after = ring.index + ring[0].length
+      // clipped to the housing ring's opening (everything above its centre,
+      // plus the ellipse itself), so the cap sinks into the hole instead of
+      // sliding over the housing
+      const clip = `pb-${part.id.replace(/[^\w-]/g, '_')}`
+      return (
+        vis.v.svg.slice(0, after) +
+        `<clipPath id="${clip}"><rect x="-10" y="-10" width="80" height="25.211"/>` +
+        '<ellipse cx="25.014" cy="15.211" rx="17.54" ry="7.316"/></clipPath>' +
+        `<g clip-path="url(#${clip})"><g transform="translate(0 2.6)">` +
+        vis.v.svg.slice(after, end) +
+        '</g></g>' +
+        vis.v.svg.slice(end)
+      )
+    }
+  }
   return vis.v.svg
 }

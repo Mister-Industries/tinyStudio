@@ -3,9 +3,125 @@
 What changed in each tinyStudio release. Dates are when the version was
 finished; versions follow [semantic versioning](https://semver.org).
 
-## Unreleased
+## 0.5.0 (2026-11-12)
+
+### Boards
+
+- tinyStudio remembers the board you choose for each device, options
+  included. Plug the same board in again, on any USB port, or let it reset
+  during an upload, and your choice comes back instead of whatever detection
+  guesses. ESP32 boards are recognized by their USB serial number (the chip's
+  MAC address); boards without one by their port. **Forget** in the Boards
+  Manager goes back to automatic detection for that device.
+- tinyStudio assumes a tinyCore only for a generic ESP32: a board that reports
+  only Espressif's shared USB id (303a:1001, every ESP32-S3/C3/C6 in its default
+  USB mode) and that you haven't chosen a board for. Any other board is shown
+  as arduino-cli identifies it. When several boards match one device they are
+  all offered, and an unrecognized device asks for its board type instead of
+  being guessed (a CH340 adapter used to become an "Arduino Uno").
+- A board that disappears for a moment, as an ESP32 does on every reset, stays
+  selected; the selection moves to another board only if it is gone for more
+  than five seconds. With nothing else plugged in, the unplugged board stays
+  selected, so Verify keeps working.
+- The Boards Manager shows installs as they happen: what is downloading, how
+  far along, and what is being unpacked. The status bar shows the same from
+  anywhere in the app, including the automatic board setup on first run.
+- Only one install runs at a time. While one runs (yours, another window's, or
+  the automatic setup's), the install buttons are disabled; a second click
+  used to start a duplicate download of a package that was still installing.
+- An install no longer fails after a fixed 10 minutes. Espressif's ESP32
+  package is about 1.8 GB, so only a long stretch with no progress at all
+  counts as a failure, and a lost connection to tinyService fails the request
+  at once.
+- Platforms the automatic setup didn't install (because you removed them, or
+  it failed) are listed in the Boards Manager with an **Install** button.
+
+### Visual view
+
+- New projects come with a `visual.js`: a **Serial Plotter** like the Arduino
+  IDE's, with the latest raw lines underneath like its Serial Monitor. It plots
+  every number on a line, not just the first: `label:value` pairs (or bare
+  numbers, as `value 1`, `value 2`, …) separated by spaces, commas or tabs each
+  get their own coloured line and legend entry. **Create visual.js** in an
+  existing project gives the same sketch. See
+  [docs/visual-default-plotter.md](docs/visual-default-plotter.md).
+- The starter sketch prints `led:1` / `led:0` instead of `LED ON` / `LED OFF`,
+  so the Visual view graphs the blink straight away.
+
+### Circuit
+
+- Parts plug into a **tinyProto**'s holes the way they plug into a breadboard:
+  drop a resistor, LED, button or capacitor on it with its legs in holes and
+  they connect, ride along when the board moves, and turn with it. A tinyProto
+  placed on a tinyCore stacks onto its header, pin for pin, and draws on top of
+  it. Before, nothing seated in a tinyProto, so a part on it connected to
+  nothing.
+- **Wire on both sides of a tinyProto or breadboard.** The **Front/Back**
+  button in the breadboard view turns the board over: the back (solder side) is
+  shown mirrored, with the parts faded through the board, and wires drawn
+  there are back-side wires. Wires on the other side are shown dashed and faded
+  and can't be grabbed by accident. Nets don't care which side a wire is on.
+- SparkFun's **6 mm** (COM-00097) and **12 mm** (COM-09190) tactile buttons are
+  in Core → Input, with schematic symbols that show which legs are joined.
+- The tinyProto no longer appears on the schematic as a 208-pin box. Like a
+  breadboard it only joins nets, so the schematic shows the parts on it.
+- A demo project, **tinyProto_Demo**, walks through the whole flow: two buttons
+  and two LEDs on a tinyProto, wired front and back, laid out as a schematic
+  and exported to KiCad.
+
+### KiCad export
+
+- **Export → KiCad HAT project** now writes a **schematic** (`.kicad_sch`) as
+  well as the board, netlist and project. It uses KiCad's own symbols (embedded
+  in the file, so it opens without any library installed), the parts where you
+  put them on tinyStudio's schematic, net labels on every connection, ground
+  symbols, and no-connect flags on unused pins. It passes KiCad's ERC with no
+  errors, and **Tools → Update PCB from Schematic** brings every part onto the
+  HAT with its ratsnest to the tinyCore headers, which are already linked to
+  their symbols.
+- In the desktop app the project goes into a **KiCad** folder in your project
+  instead of a zip download. Exporting again rewrites the schematic, netlist
+  and README but never the board or project file, so a layout you've started
+  is kept: run Update PCB from Schematic again to pick up the changes.
+- The KiCad files are named after your project, and the project file points at
+  this schematic (it used to name tinyMove's).
+- The project carries `fp-lib-table` and `sym-lib-table` entries for the
+  KiCad stock libraries it uses, so footprints like the radial capacitor and
+  6 mm button resolve even where the global library tables leave them out.
+- The 12 mm button uses SparkFun's `Push_PTH_12x12mm` footprint. A few parts
+  pointed at KiCad symbols that have since moved (3-pin header, BJTs, MOSFET);
+  they use the current names.
+- Values come out right for parts without one: a button is "Tactile Button
+  6mm", not "false".
+- See [docs/kicad-export.md](docs/kicad-export.md).
 
 ### Fixed
+
+- **Save** (and ⌘S / Ctrl+S) saves the circuit in the Circuit view and the
+  sketch in the Visual view. It only ever saved the file open in the code
+  editor, so circuit edits were lost unless you switched back to the code first.
+- The desktop app reopens your last project on launch, and no longer shows a
+  "Repo not found" error at startup. Project links only apply in the web app;
+  the packaged app read its own file path as one.
+- Dialogs with a long line of text no longer push their buttons off the edge:
+  the Library Manager's **Install** and **Search** buttons were clipped.
+- While an upload runs, only **Upload** shows progress. Verify used to show
+  "Verifying…" at the same time.
+- macOS has a proper app menu: **Quit tinyStudio** (⌘Q), Hide, About.
+- Installing a library that depends on one that comes with the board package
+  (most I²C libraries depend on `Wire`) works. arduino-cli refused the whole
+  install because `Wire` isn't in the library index; tinyService 1.3.0 installs
+  the library and its other dependencies and skips the built-in one.
+- The Visual view runs in the installed desktop app. It stayed on
+  "starting…" with a blank canvas because the sandboxed sketch frame was loaded
+  from `file://`, which Chromium won't let a sandboxed page do ("Not allowed to
+  load local resource"). The app now serves the sketch runner over its own
+  `tinystudio-sketch://` scheme. The dev server and the web app were never
+  affected.
+- The app no longer stops responding to clicks after closing the board menu,
+  the Boards Manager or another popup. A menu that opened a dialog while it was
+  still closing left `pointer-events: none` on the page; the Radix UI
+  dependencies are deduplicated and a guard clears a stale lock.
 
 - Choosing a board type in the Boards Manager sticks. Picking one before a
   board is plugged in left the selection without a port, and the next board-list

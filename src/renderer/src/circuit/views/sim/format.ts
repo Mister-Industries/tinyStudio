@@ -1,6 +1,7 @@
 /** Engineering notation for plot readouts: 4.70k, 12.00m, 3.30µ. */
 export function fmtEng(v: number): string {
   const a = Math.abs(v)
+  if (a < 5e-10) return '0'
   if (a >= 1e6) return `${(v / 1e6).toFixed(2)}M`
   if (a >= 1e3) return `${(v / 1e3).toFixed(2)}k`
   if (a >= 1) return v.toFixed(2)
@@ -13,6 +14,8 @@ export function fmtEng(v: number): string {
 /** A value with an SI prefix and unit, for tables: "4.70 kΩ", "3.300 V". */
 export function fmtSI(v: number, unit: string): string {
   const a = Math.abs(v)
+  // solver residue (-0.00 nV) is zero to anyone reading the sheet
+  if (a < 5e-10) return `0 ${unit}`
   if (a >= 1e6) return `${(v / 1e6).toFixed(2)} M${unit}`
   if (a >= 1e3) return `${(v / 1e3).toFixed(2)} k${unit}`
   if (a >= 1) return `${v.toFixed(3)} ${unit}`

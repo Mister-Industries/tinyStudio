@@ -1,8 +1,8 @@
 /**
  * CreateProjectDialog: name a new project, pick where it lives, done.
  *
- * The project is one folder named after the sketch, with the .ino and README
- * inside (see lib/projectLayout), so it opens as-is in the Arduino IDE too.
+ * The project is one folder named after the sketch, with the .ino, README and
+ * visual.js inside (see lib/projectLayout), so it opens as-is in the Arduino IDE too.
  * Browsers that can't write folders get the same project kept in the browser,
  * with the usual banner explaining how to keep it.
  */
@@ -58,7 +58,7 @@ export function CreateProjectDialog({
   const parsed = createProjectSchema.safeParse({ projectTitle: title })
   const validation = title.trim() && !parsed.success ? parsed.error.issues[0]?.message : null
   const sketch = toSketchName(title || placeholder)
-  const previewFiles = useMemo(() => [`${sketch}.ino`, 'README.md'], [sketch])
+  const previewFiles = useMemo(() => [`${sketch}.ino`, 'README.md', 'visual.js'], [sketch])
 
   const create = async (): Promise<void> => {
     if (!parsed.success || busy) return

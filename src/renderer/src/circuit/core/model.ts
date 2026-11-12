@@ -70,6 +70,21 @@ export interface CircuitWire {
   color?: string
   /** bb only: render as a curved jumper (route stays authoritative for geometry). */
   curve?: boolean
+  /**
+   * bb only: which face of the board the wire runs on. Absent = the front (the
+   * component side); 'back' = the solder side of a tinyProto or perfboard,
+   * drawn and edited in the breadboard view's flipped (Back) mode. Electrically
+   * the same either way: nets don't care which side a wire is on.
+   */
+  side?: WireSide
+}
+
+/** The face of the board a breadboard wire runs on. */
+export type WireSide = 'front' | 'back'
+
+/** A wire's side, defaulting to the front. */
+export function wireSide(w: Pick<CircuitWire, 'side'>): WireSide {
+  return w.side === 'back' ? 'back' : 'front'
 }
 
 export type NetLabelKind = 'ground' | 'power' | 'net'
@@ -478,7 +493,8 @@ function serializeWire(w: CircuitWire): Record<string, unknown> {
     view: w.view,
     ...(w.color ? { color: w.color } : {}),
     ...(w.route?.length ? { route: w.route } : {}),
-    ...(w.curve ? { curve: true } : {})
+    ...(w.curve ? { curve: true } : {}),
+    ...(w.view === 'bb' && w.side === 'back' ? { side: 'back' } : {})
   }
 }
 

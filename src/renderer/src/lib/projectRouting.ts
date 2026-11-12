@@ -19,10 +19,29 @@ export interface ProjectRoute {
   path: string
 }
 
-/** Parse a pathname into a project route, or null if it isn't one. */
-export function parseProjectRoute(
-  pathname: string = window.location.pathname
-): ProjectRoute | null {
+/**
+ * Whether this window's URL can carry a project deep link. Only when the app is
+ * served over http(s): the web app and the dev server. The packaged desktop app
+ * loads from file://, where the path is the app's own location on disk
+ * (/Applications/tinyStudio.app/…), not a project. Reading it as one opened
+ * "Applications/tinyStudio.app" on GitHub at every launch, failed, and skipped
+ * reopening the last workspace.
+ */
+export function hasUrlRouting(): boolean {
+  const { protocol } = window.location
+  return protocol === 'http:' || protocol === 'https:'
+}
+
+/**
+ * Parse a pathname into a project route, or null if it isn't one. With no
+ * argument it reads the window's own URL, which is never a route in the
+ * packaged desktop app (see hasUrlRouting).
+ */
+export function parseProjectRoute(pathname?: string): ProjectRoute | null {
+  if (pathname === undefined) {
+    if (!hasUrlRouting()) return null
+    pathname = window.location.pathname
+  }
   const segs = pathname
     .replace(/^\/+|\/+$/g, '')
     .split('/')
@@ -57,7 +76,9 @@ export async function navigateToProject(
   branch?: string
 ): Promise<void> {
   const url = projectRoutePath(owner, repo, path)
-  if (url !== window.location.pathname) {
+  // On file:// a pushed path would replace the app's own file path, and a reload
+  // would then load a file that doesn't exist.
+  if (hasUrlRouting() && url !== window.location.pathname) {
     window.history.pushState({ owner, repo, path }, '', url)
   }
   await loadGitHubProject(owner, repo, path, branch)

@@ -65,16 +65,20 @@ import f58 from "./packs/core/parts/sparkfun-sensors-mic-electret-smd/icon.svg?r
 import f59 from "./packs/core/parts/sparkfun-sensors-mic-electret-smd/part.json?raw"
 import f60 from "./packs/core/parts/switch-spst/breadboard.svg?raw"
 import f61 from "./packs/core/parts/switch-spst/part.json?raw"
-import f62 from "./packs/core/parts/te-relay/icon.svg?raw"
-import f63 from "./packs/core/parts/te-relay/part.json?raw"
-import f64 from "./packs/core/parts/thermistor-300mil/icon.svg?raw"
-import f65 from "./packs/core/parts/thermistor-300mil/part.json?raw"
-import f66 from "./packs/core/parts/transistor-signal-npn-to92-ebc/icon.svg?raw"
-import f67 from "./packs/core/parts/transistor-signal-npn-to92-ebc/part.json?raw"
-import f68 from "./packs/core/parts/transistor-signal-pnp-to92-ebc/icon.svg?raw"
-import f69 from "./packs/core/parts/transistor-signal-pnp-to92-ebc/part.json?raw"
-import f70 from "./packs/core/parts/voltage-regulator-7805/icon.svg?raw"
-import f71 from "./packs/core/parts/voltage-regulator-7805/part.json?raw"
+import f62 from "./packs/core/parts/tactile-button-12mm/breadboard.svg?raw"
+import f63 from "./packs/core/parts/tactile-button-12mm/part.json?raw"
+import f64 from "./packs/core/parts/tactile-button-6mm/breadboard.svg?raw"
+import f65 from "./packs/core/parts/tactile-button-6mm/part.json?raw"
+import f66 from "./packs/core/parts/te-relay/icon.svg?raw"
+import f67 from "./packs/core/parts/te-relay/part.json?raw"
+import f68 from "./packs/core/parts/thermistor-300mil/icon.svg?raw"
+import f69 from "./packs/core/parts/thermistor-300mil/part.json?raw"
+import f70 from "./packs/core/parts/transistor-signal-npn-to92-ebc/icon.svg?raw"
+import f71 from "./packs/core/parts/transistor-signal-npn-to92-ebc/part.json?raw"
+import f72 from "./packs/core/parts/transistor-signal-pnp-to92-ebc/icon.svg?raw"
+import f73 from "./packs/core/parts/transistor-signal-pnp-to92-ebc/part.json?raw"
+import f74 from "./packs/core/parts/voltage-regulator-7805/icon.svg?raw"
+import f75 from "./packs/core/parts/voltage-regulator-7805/part.json?raw"
 
 export interface SnapshotPack {
   id: string
@@ -94,7 +98,7 @@ export interface TinypartsSnapshot {
 
 export const SNAPSHOT: TinypartsSnapshot = {
   "repo": "Mister-Industries/tinyparts",
-  "commit": "b72b53b5ddbbea6ca4ecb64e951633fa477117a6",
+  "commit": "9709103ac5a52198a4c6276f46d5de95b082850a",
   "dirty": false,
   "packs": [
     {
@@ -124,7 +128,7 @@ export const SNAPSHOT: TinypartsSnapshot = {
     {
       "id": "core",
       "files": {
-        "pack.json": "b06a82ce18ab4b3615873fbd04273c763916c997",
+        "pack.json": "5670eeee96e8eed522289658691500c065174709",
         "parts/7segment-100-cat/breadboard.svg": "549167978aff3849ac58e839a9cace3a5b1b5b9a",
         "parts/7segment-100-cat/icon.svg": "1e49653dea165e4387fc708c6f1f09584d42d4ff",
         "parts/7segment-100-cat/part.json": "e9b66edd52a8255306ac0b62d3514914adc51eef",
@@ -215,6 +219,12 @@ export const SNAPSHOT: TinypartsSnapshot = {
         "parts/sparkfun-sensors-mic-electret-smd/schematic.svg": "f354a4ebdfdb99bdcc2cee8c22fe2664d1d0392e",
         "parts/switch-spst/breadboard.svg": "65b55040aa3fa0142449296e9f8dd43298c035ce",
         "parts/switch-spst/part.json": "fa69bfca28dbafa33cfa8309541b9b644874e25e",
+        "parts/tactile-button-12mm/breadboard.svg": "c21a3610dd988986501865820e62f7da3154c8e1",
+        "parts/tactile-button-12mm/part.json": "22b53f1ff0b4de51b58848c27c6dc249a1ecec2d",
+        "parts/tactile-button-12mm/schematic.svg": "adffd2b2ba5908e25de2e5165cdfa0250482d8ad",
+        "parts/tactile-button-6mm/breadboard.svg": "1e4e6d9e83dc4b3d5dccab396977a3d6cd1b7f7e",
+        "parts/tactile-button-6mm/part.json": "159637eec587bd5ef5c0a248e1cc4890fba721f2",
+        "parts/tactile-button-6mm/schematic.svg": "adffd2b2ba5908e25de2e5165cdfa0250482d8ad",
         "parts/te-relay/breadboard.svg": "8cd7f4358b8345e2307e87e1e83e0c4a188188ee",
         "parts/te-relay/icon.svg": "97ac95d7ccc2d2fca31ce077299c3a74bf310f23",
         "parts/te-relay/part.json": "e86b2da7360d240d7d6a0e3b5b804867cc49f884",
@@ -304,16 +314,20 @@ export const EAGER: Record<string, string> = {
   "packs/core/parts/sparkfun-sensors-mic-electret-smd/part.json": f59,
   "packs/core/parts/switch-spst/breadboard.svg": f60,
   "packs/core/parts/switch-spst/part.json": f61,
-  "packs/core/parts/te-relay/icon.svg": f62,
-  "packs/core/parts/te-relay/part.json": f63,
-  "packs/core/parts/thermistor-300mil/icon.svg": f64,
-  "packs/core/parts/thermistor-300mil/part.json": f65,
-  "packs/core/parts/transistor-signal-npn-to92-ebc/icon.svg": f66,
-  "packs/core/parts/transistor-signal-npn-to92-ebc/part.json": f67,
-  "packs/core/parts/transistor-signal-pnp-to92-ebc/icon.svg": f68,
-  "packs/core/parts/transistor-signal-pnp-to92-ebc/part.json": f69,
-  "packs/core/parts/voltage-regulator-7805/icon.svg": f70,
-  "packs/core/parts/voltage-regulator-7805/part.json": f71,
+  "packs/core/parts/tactile-button-12mm/breadboard.svg": f62,
+  "packs/core/parts/tactile-button-12mm/part.json": f63,
+  "packs/core/parts/tactile-button-6mm/breadboard.svg": f64,
+  "packs/core/parts/tactile-button-6mm/part.json": f65,
+  "packs/core/parts/te-relay/icon.svg": f66,
+  "packs/core/parts/te-relay/part.json": f67,
+  "packs/core/parts/thermistor-300mil/icon.svg": f68,
+  "packs/core/parts/thermistor-300mil/part.json": f69,
+  "packs/core/parts/transistor-signal-npn-to92-ebc/icon.svg": f70,
+  "packs/core/parts/transistor-signal-npn-to92-ebc/part.json": f71,
+  "packs/core/parts/transistor-signal-pnp-to92-ebc/icon.svg": f72,
+  "packs/core/parts/transistor-signal-pnp-to92-ebc/part.json": f73,
+  "packs/core/parts/voltage-regulator-7805/icon.svg": f74,
+  "packs/core/parts/voltage-regulator-7805/part.json": f75,
 }
 
 /** repo-relative path → lazy loader for everything else */
@@ -366,6 +380,8 @@ export const LAZY: Record<string, () => Promise<string>> = {
   "packs/core/parts/sparkfun-passives-fuse-x20mm/schematic.svg": () => import("./packs/core/parts/sparkfun-passives-fuse-x20mm/schematic.svg?raw").then((m) => m.default),
   "packs/core/parts/sparkfun-sensors-mic-electret-smd/breadboard.svg": () => import("./packs/core/parts/sparkfun-sensors-mic-electret-smd/breadboard.svg?raw").then((m) => m.default),
   "packs/core/parts/sparkfun-sensors-mic-electret-smd/schematic.svg": () => import("./packs/core/parts/sparkfun-sensors-mic-electret-smd/schematic.svg?raw").then((m) => m.default),
+  "packs/core/parts/tactile-button-12mm/schematic.svg": () => import("./packs/core/parts/tactile-button-12mm/schematic.svg?raw").then((m) => m.default),
+  "packs/core/parts/tactile-button-6mm/schematic.svg": () => import("./packs/core/parts/tactile-button-6mm/schematic.svg?raw").then((m) => m.default),
   "packs/core/parts/te-relay/breadboard.svg": () => import("./packs/core/parts/te-relay/breadboard.svg?raw").then((m) => m.default),
   "packs/core/parts/te-relay/schematic.svg": () => import("./packs/core/parts/te-relay/schematic.svg?raw").then((m) => m.default),
   "packs/core/parts/thermistor-300mil/breadboard.svg": () => import("./packs/core/parts/thermistor-300mil/breadboard.svg?raw").then((m) => m.default),

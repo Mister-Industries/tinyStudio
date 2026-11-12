@@ -56,9 +56,11 @@ function nodeToken(name: string): string {
  */
 export function nodeNamesForNets(net: NetModel): string[] {
   let seq = 1
-  return net.nets.map((_members, i) => {
+  return net.nets.map((members, i) => {
     const name = net.netNames[i]
     if (name && name.toUpperCase() === 'GND') return '0'
+    // a pin named GND (a board's header, a sensor's ground lead) grounds its net
+    if (members.some((m) => /:GND(\.\d+)?$/i.test(m))) return '0'
     if (name) return nodeToken(name)
     return `n${seq++}`
   })
@@ -145,10 +147,117 @@ export interface SimAttrSpec {
   hint?: string
 }
 
-const LED_MODEL = { name: 'DLED', card: '.model DLED D(IS=1e-22 N=2.2 RS=2)' }
+/** The generic LED model's parameters (core/liveState reuses them to read an
+ * LED's current back out of a DC solution). */
+export const LED_PARAMS = { is: 1e-22, n: 2.2, rs: 2 }
+const LED_MODEL = {
+  name: 'DLED',
+  card: `.model DLED D(IS=${LED_PARAMS.is} N=${LED_PARAMS.n} RS=${LED_PARAMS.rs})`
+}
 const D_MODEL = { name: 'DGEN', card: '.model DGEN D(IS=1e-14 N=1.9 RS=0.1)' }
 const NPN_MODEL = { name: 'QNPN', card: '.model QNPN NPN(BF=150 VAF=100)' }
 const PNP_MODEL = { name: 'QPNP', card: '.model QPNP PNP(BF=150 VAF=100)' }
+
+// ── tinyCore: a black-box ESP32-S3 (spec: Simulation) ────────────────────────
+
+/** How a tinyCore GPIO is set up, per pin: part attr `mode.<pin>`. */
+export type PinMode = 'input' | 'pullup' | 'pulldown' | 'high' | 'low' | 'pwm'
+
+export const PIN_MODES: { mode: PinMode; label: string }[] = [
+  { mode: 'input', label: 'Input' },
+  { mode: 'pullup', label: 'Input, pull-up' },
+  { mode: 'pulldown', label: 'Input, pull-down' },
+  { mode: 'high', label: 'Output HIGH' },
+  { mode: 'low', label: 'Output LOW' },
+  { mode: 'pwm', label: 'Output PWM' }
+]
+
+/** ESP32-S3 electrical model. Datasheet values, rounded. */
+export const ESP32S3 = {
+  vdd: 3.3,
+  /** internal pull-up/pull-down resistance */
+  pull: '45k',
+  /** output driver resistance at the default drive strength */
+  rOut: '25',
+  /** input leakage, so an unconnected input never floats the matrix */
+  rIn: '100Meg',
+  /** logic thresholds as a fraction of VDD */
+  vih: 0.75,
+  vil: 0.25,
+  pwmHz: 1000
+} as const
+
+/** The tinyCore's own LEDs: GPIO33 drives SIG high, GPIO21 sinks BOOT from 3V3. */
+const ONBOARD_LEDS = [
+  { pin: 'LED_SIG', gpio: 33, activeHigh: true },
+  { pin: 'LED_BOOT', gpio: 21, activeHigh: false }
+]
+
+const POWER_PIN = /^(3V3|GND|PWR)(\.\d+)?$/i
+
+export function pinModeOf(part: CircuitPart, pin: string): PinMode {
+  const m = part.attrs?.[`mode.${pin}`]
+  return PIN_MODES.some((p) => p.mode === m) ? (m as PinMode) : 'input'
+}
+
+function tinyCoreCard(c: Ctx): SpiceCard {
+  const id = c.part.id
+  const lines: string[] = []
+  const v = ESP32S3.vdd
+  // the 3V3 rail exists whether or not anything is wired to it: pull-ups use it
+  const rail3v3 = c.pins.find((p) => /^3V3/i.test(p))
+  const vdd = rail3v3 ? c.nodeOf(rail3v3) : `${id}_3v3`
+  lines.push(`V${id}_3V3 ${vdd} 0 DC ${v}`)
+  const pwr = c.pins.find((p) => /^PWR$/i.test(p))
+  // I2C_PWR: its own regulator, on unless GPIO6 is driven LOW in the sketch
+  if (pwr && c.part.attrs?.['mode.PWR'] !== 'low')
+    lines.push(`V${id}_PWR ${c.nodeOf(pwr)} 0 DC ${v}`)
+
+  const drive = (name: string, node: string, mode: PinMode, duty: number): void => {
+    const tag = `${id}_${name.replace(/[^A-Za-z0-9]/g, '')}`
+    switch (mode) {
+      case 'pullup':
+        lines.push(`R${tag}_pu ${node} ${vdd} ${ESP32S3.pull}`)
+        break
+      case 'pulldown':
+        lines.push(`R${tag}_pd ${node} 0 ${ESP32S3.pull}`)
+        break
+      case 'high':
+      case 'low':
+      case 'pwm': {
+        const src =
+          mode === 'pwm'
+            ? `DC ${(v * duty).toFixed(4)} PULSE(0 ${v} 0 1n 1n ${(duty / ESP32S3.pwmHz).toExponential(4)} ${(1 / ESP32S3.pwmHz).toExponential(4)})`
+            : `DC ${mode === 'high' ? v : 0}`
+        lines.push(`V${tag} ${tag}_drv 0 ${src}`, `R${tag}_out ${tag}_drv ${node} ${ESP32S3.rOut}`)
+        return
+      }
+      default:
+        break
+    }
+    lines.push(`R${tag}_in ${node} 0 ${ESP32S3.rIn}`)
+  }
+
+  for (const pin of c.pins) {
+    if (POWER_PIN.test(pin)) continue
+    const duty = Math.min(1, Math.max(0, Number(c.part.attrs?.[`duty.${pin}`] ?? 50) / 100))
+    drive(pin, c.nodeOf(pin), pinModeOf(c.part, pin), duty)
+  }
+
+  // on-board LEDs light only when their GPIO is driven
+  for (const led of ONBOARD_LEDS) {
+    const mode = pinModeOf(c.part, led.pin)
+    if (mode !== 'high' && mode !== 'low' && mode !== 'pwm') continue
+    const io = `${id}_io${led.gpio}`
+    const duty = Math.min(1, Math.max(0, Number(c.part.attrs?.[`duty.${led.pin}`] ?? 50) / 100))
+    drive(led.pin, io, mode, duty)
+    const k = `${id}_${led.pin.toLowerCase()}`
+    if (led.activeHigh)
+      lines.push(`D${id}_${led.pin} ${io} ${k} DLED`, `R${id}_${led.pin} ${k} 0 1k`)
+    else lines.push(`D${id}_${led.pin} ${vdd} ${k} DLED`, `R${id}_${led.pin} ${k} ${io} 1k`)
+  }
+  return { lines, model: LED_MODEL }
+}
 
 const EMITTERS: {
   match: RegExp
@@ -157,6 +266,9 @@ const EMITTERS: {
   attrs?: SimAttrSpec[]
 }[] = [
   { match: /breadboard/i, kind: 'transparent' },
+  // tinyProto only joins nets; its header pins ride the board's buses
+  { match: /^tinyproto\b/i, kind: 'transparent' },
+  { match: /^tinycore\b/i, emit: tinyCoreCard },
   { match: /tinystudio|microcontroller|\bboard\b|arduino|esp32/i, kind: 'board' },
   {
     match: /sim-vdc|voltage source|battery/i,
@@ -169,6 +281,31 @@ const EMITTERS: {
         )}`
       ]
     })
+  },
+  {
+    match: /sim-vpulse|pulse|square/i,
+    attrs: [
+      { key: 'low', label: 'Low', default: '0', hint: 'V' },
+      { key: 'high', label: 'High', default: '3.3', hint: 'V' },
+      { key: 'frequency', label: 'Frequency', default: '1k', hint: 'Hz' },
+      { key: 'duty', label: 'Duty', default: '50', hint: '%' }
+    ],
+    emit: (c) => {
+      const lo = c.attr(['low'], '0')
+      const hi = c.attr(['high'], '3.3')
+      const f = spiceValue(c.attr(['frequency'], '1k'), 1000)
+      const duty = Math.min(1, Math.max(0, spiceValue(c.attr(['duty'], '50'), 50) / 100))
+      const period = 1 / (f > 0 ? f : 1000)
+      // 1% edges: square on a plot, and no zero-time steps for the solver
+      const edge = period / 100
+      const on = Math.max(0, period * duty - edge)
+      const n = (v: number): string => v.toExponential(4)
+      return {
+        lines: [
+          `V${c.part.id} ${pinLike(c, PLUS, 0, '+')} ${pinLike(c, MINUS, 1, '-')} DC ${lo} PULSE(${lo} ${hi} 0 ${n(edge)} ${n(edge)} ${n(on)} ${n(period)})`
+        ]
+      }
+    }
   },
   {
     match: /sim-vsin|sine|waveform/i,

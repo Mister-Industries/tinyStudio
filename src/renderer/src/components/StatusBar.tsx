@@ -20,6 +20,7 @@ import {
   useAppSelector
 } from '../redux'
 import { Badge } from './ui/Badge'
+import { PackageJobStatus } from './arduino/PackageJobProgress'
 import { StatusPill } from './ui/StatusPill'
 
 /** Shared dismiss-on-outside-click backdrop for the status-bar popovers. */
@@ -186,8 +187,15 @@ function boardStatus(a: {
 }
 
 export function StatusBar(): React.JSX.Element {
-  const { isAgentConnected, checkAgentStatus, boards, selectedBoard, isCompiling, isUploading } =
-    useArduinoContext()
+  const {
+    isAgentConnected,
+    checkAgentStatus,
+    boards,
+    selectedBoard,
+    isCompiling,
+    isUploading,
+    packageJobs
+  } = useArduinoContext()
   const { connected, disconnected, port, baud, reconnect } = useSerial()
 
   const handleRetry = async (): Promise<void> => {
@@ -242,6 +250,12 @@ export function StatusBar(): React.JSX.Element {
                 </button>
               )}
             </span>
+          </>
+        )}
+        {isAgentConnected && packageJobs?.active && (
+          <>
+            <span className="text-[var(--sb-faint)] mx-2">·</span>
+            <PackageJobStatus state={packageJobs} />
           </>
         )}
       </div>

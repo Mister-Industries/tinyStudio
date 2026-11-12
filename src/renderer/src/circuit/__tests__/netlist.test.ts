@@ -108,16 +108,16 @@ test('unknown parts are excluded with a warning; breadboards are transparent', (
   assert.ok(!res.netlist.includes('BB1'), 'breadboard emits nothing')
 })
 
-test('boards are excluded with an info; open switches drop out, closed conduct', () => {
+test('HATs are excluded with an info; open switches drop out, closed conduct', () => {
   const doc = divider()
   doc.parts.push(
-    part('U1', 'tinycore'),
+    part('U1', 'tinyglow'),
     part('SW1', 'pushbutton'),
     part('SW2', 'pushbutton', { closed: 'true' })
   )
   doc.wires.push(wire('SW2:leg0', 'V1:+'), wire('SW2:leg1', 'R1:Pin 0'))
   const res = generateNetlist(doc, buildNets(doc), {
-    familyOf: (t) => (t === 'tinycore' ? 'tinyStudio board' : undefined)
+    familyOf: (t) => (t === 'tinyglow' ? 'tinyStudio board' : undefined)
   })
   assert.ok(res.excluded.includes('U1'))
   assert.ok(!res.netlist.includes('RSW1'), 'open switch is out')

@@ -11,7 +11,7 @@ import {
   FlipHorizontal2,
   ListOrdered,
   Plus,
-  RotateCw,
+  RotateCcw,
   Spline,
   Trash2
 } from 'lucide-react'
@@ -31,12 +31,13 @@ import type { NetModel } from '../../core/nets'
 import { simAttrsFor } from '../../core/netlist'
 import { isValidRefdes } from '../../core/refdes'
 import type { CircuitStore } from '../../core/store'
-import { isBreadboard } from '../../parts/breadboard'
+import { isHoleBoard } from '../../parts/breadboard'
 import {
   collectFrozen,
   implicitSeats,
   reroutesFor,
   rotateBoardAssemblyCmd,
+  ROTATE_STEP,
   rotateNetLabelCmd
 } from '../partsAdapter'
 import { WIRE_COLORS } from '../palette/wireColors'
@@ -185,7 +186,7 @@ function PartInspector({
     const next = (((deg % 360) + 360) % 360) as 0 | 90 | 180 | 270
     // Breadboards rotate as a rigid assembly (board + seated parts + wires
     // between them): same path as the canvas R / right-click gesture.
-    if (view === 'bb' && isBreadboard(part.type)) {
+    if (view === 'bb' && isHoleBoard(part.type)) {
       const steps = ((next - (pv.rotate ?? 0)) / 90 + 4) % 4
       const c = rotateBoardAssemblyCmd(doc, part.id, implicitSeats(doc), steps)
       if (c) store.dispatch(c)
@@ -292,10 +293,10 @@ function PartInspector({
               </select>
               <button
                 className="tactile-outline rounded-md p-1.5 bg-surface-card text-text-muted hover:text-brand"
-                title="Rotate 90°"
-                onClick={() => setRotation((pv.rotate || 0) + 90)}
+                title="Rotate 90° counter-clockwise (R)"
+                onClick={() => setRotation((pv.rotate || 0) + ROTATE_STEP)}
               >
-                <RotateCw size={13} />
+                <RotateCcw size={13} />
               </button>
               {view === 'sch' && (
                 <button
@@ -589,13 +590,13 @@ function LabelInspector({
           </select>
           <button
             className="h-[26px] px-2 rounded border border-border-default bg-surface-card text-text-body hover:border-brand"
-            title="Rotate 90°"
+            title="Rotate 90° counter-clockwise (R)"
             onClick={() => {
               const c = rotateNetLabelCmd(doc, label.id)
               if (c) store.dispatch(c)
             }}
           >
-            <RotateCw size={13} />
+            <RotateCcw size={13} />
           </button>
         </div>
       </label>

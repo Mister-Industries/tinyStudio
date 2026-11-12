@@ -373,6 +373,26 @@ export function reanchorProbe(
 /** Compose several commands into one undo step (cross-view cascades, paste…).
  * `mergeKey` lets composite gestures (multi-part drags) collapse like single
  * commands do. */
+/**
+ * Replace the schematic wholesale (core/schematicLayout): new symbol
+ * placements, wires and net labels, breadboard untouched. One undo step.
+ */
+export function replaceSchematic(
+  placements: Record<string, Placement>,
+  wires: CircuitWire[],
+  netLabels: NetLabel[]
+): Command {
+  return {
+    label: 'Lay out schematic',
+    apply: (doc) => ({
+      ...doc,
+      parts: doc.parts.map((p) => (placements[p.id] ? { ...p, sch: placements[p.id] } : p)),
+      wires: [...doc.wires.filter((w) => w.view !== 'sch'), ...wires],
+      netLabels
+    })
+  }
+}
+
 export function composite(label: string, commands: Command[], mergeKey?: string): Command {
   return {
     label,

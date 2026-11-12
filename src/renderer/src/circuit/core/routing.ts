@@ -54,6 +54,44 @@ export function calculateOrthogonalPath(
   ]
 }
 
+/** Which way a pin's lead points out of its symbol. */
+export type PinDir = 'l' | 'r' | 'u' | 'd'
+
+const STEP: Record<PinDir, Pt> = {
+  l: { x: -1, y: 0 },
+  r: { x: 1, y: 0 },
+  u: { x: 0, y: -1 },
+  d: { x: 0, y: 1 }
+}
+
+/**
+ * Schematic auto-route: leave each pin straight out of its symbol for one
+ * stub before turning, the way CircuitLab and KiCad draw a wire. An L from
+ * the pin itself would run along the neighbouring pins of an IC.
+ */
+export function pinExitPath(
+  s: Pt,
+  sDir: PinDir | null,
+  t: Pt,
+  tDir: PinDir | null,
+  stub: number
+): Pt[] {
+  const s1 = sDir ? { x: s.x + STEP[sDir].x * stub, y: s.y + STEP[sDir].y * stub } : s
+  const t1 = tDir ? { x: t.x + STEP[tDir].x * stub, y: t.y + STEP[tDir].y * stub } : t
+  const preferH = sDir
+    ? sDir === 'l' || sDir === 'r'
+    : Math.abs(t1.x - s1.x) > Math.abs(t1.y - s1.y)
+  // of the two elbows, take the one that doesn't double back over either stub
+  const reverses = (from: Pt, to: Pt, dir: PinDir | null): boolean =>
+    !!dir && (to.x - from.x) * STEP[dir].x + (to.y - from.y) * STEP[dir].y < 0
+  const cost = (elbow: Pt): number =>
+    Number(reverses(s1, elbow, sDir)) + Number(reverses(t1, elbow, tDir))
+  const h = { x: t1.x, y: s1.y }
+  const v = { x: s1.x, y: t1.y }
+  const elbow = cost(h) < cost(v) ? h : cost(v) < cost(h) ? v : preferH ? h : v
+  return simplifyWirePoints([s, s1, elbow, t1, t])
+}
+
 /** Apply one h/v/d instruction to a cursor; returns null for invalid. */
 function step(cur: Pt, instr: string): Pt | null {
   if (instr.startsWith('d')) {

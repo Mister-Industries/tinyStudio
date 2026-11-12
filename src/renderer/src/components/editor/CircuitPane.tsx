@@ -3,14 +3,17 @@
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { notify as toast } from '@renderer/lib/notify'
 import { useAppDispatch, useAppSelector } from '@renderer/redux'
-import { setEditorView, setPanelOpen } from '@renderer/redux/editorSlice'
+import { setEditorView } from '@renderer/redux/editorSlice'
 import { revealFile, updateFileContent, type Workspace } from '@renderer/redux/fileSlice'
-import { CircuitBoard, FileClock } from 'lucide-react'
+import { CircuitBoard, FileClock, History } from 'lucide-react'
+import React from 'react'
+import { Button } from '../ui/Button'
+import { clearDraft, recoverableDraft, saveDraft, type Draft } from '@renderer/lib/unsavedDrafts'
 import { emptyDoc, parseCircuitFile, serializeDoc } from '../../circuit'
 import { CircuitViewV2 } from '../../circuit/views/CircuitView'
 import { LoadingHint } from './LoadingHint'
 import { MissingFileView } from './MissingFileView'
-import { createProjectFile, findInTree, useProjectFile } from './projectFiles'
+import { createProjectFile, findInTree, saveKiCadProject, useProjectFile } from './projectFiles'
 
 /**
  * The native file is `circuit.json` (spec §4, §13). A project without one gets
@@ -89,21 +92,88 @@ function ConvertDiagramView({
 
 function CircuitFileEditor(): React.JSX.Element {
   const dispatch = useAppDispatch()
+  const workspace = useAppSelector((s) => s.file.workspace)
   const file = useProjectFile('circuit.json')
+  const path = file?.path
+  const content = file?.content
+
+  // crash recovery: offer the unsaved copy once, when the file first loads
+  const [offer, setOffer] = React.useState<Draft | null>(null)
+  const checked = React.useRef<string | null>(null)
+  React.useEffect(() => {
+    if (!path || content === undefined || checked.current === path) return
+    checked.current = path
+    setOffer(recoverableDraft(path, content))
+  }, [path, content])
+
+  // keep the recovery copy current: every edit, and once more as the window
+  // goes away (a reload or quit can land inside the debounce)
+  const latest = React.useRef({ path, content })
+  latest.current = { path, content }
+  React.useEffect(() => {
+    if (!path || content === undefined || checked.current !== path || offer) return
+    const t = setTimeout(() => saveDraft(path, content), 300)
+    return () => clearTimeout(t)
+  }, [path, content, offer])
+  React.useEffect(() => {
+    const flush = (): void => {
+      const { path: p, content: c } = latest.current
+      if (p && c !== undefined && checked.current === p) saveDraft(p, c)
+    }
+    window.addEventListener('pagehide', flush)
+    window.addEventListener('beforeunload', flush)
+    return () => {
+      window.removeEventListener('pagehide', flush)
+      window.removeEventListener('beforeunload', flush)
+    }
+  }, [])
 
   if (!file) return <LoadingHint label="Loading circuit…" />
 
   return (
-    <CircuitViewV2
-      content={file.content}
-      onChange={(content) => dispatch(updateFileContent({ id: file.id, content }))}
-      onOpenCode={() => {
-        dispatch(revealFile(file.id))
-        dispatch(setEditorView('code'))
-      }}
-      onEditChange={(editing) => {
-        dispatch(setPanelOpen({ panel: 'docs', isOpen: !editing }))
-      }}
-    />
+    <div className="relative size-full">
+      <CircuitViewV2
+        content={file.content}
+        onChange={(content) => dispatch(updateFileContent({ id: file.id, content }))}
+        onOpenCode={() => {
+          dispatch(revealFile(file.id))
+          dispatch(setEditorView('code'))
+        }}
+        projectName={workspace?.name}
+        onSaveKiCad={workspace ? (hat) => saveKiCadProject(workspace, hat) : undefined}
+      />
+      {offer && (
+        <div className="absolute left-1/2 top-14 -translate-x-1/2 z-50 flex items-center gap-3 rounded-md border border-border-default bg-surface-card shadow-lg px-3 py-2 text-[12px]">
+          <History size={14} className="text-brand shrink-0" />
+          <span className="text-text-body">
+            This circuit has unsaved changes from{' '}
+            {new Date(offer.at).toLocaleString(undefined, {
+              dateStyle: 'medium',
+              timeStyle: 'short'
+            })}
+            .
+          </span>
+          <Button
+            size="sm"
+            onClick={() => {
+              dispatch(updateFileContent({ id: file.id, content: offer.content }))
+              setOffer(null)
+            }}
+          >
+            Restore
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              clearDraft(file.path)
+              setOffer(null)
+            }}
+          >
+            Discard
+          </Button>
+        </div>
+      )}
+    </div>
   )
 }

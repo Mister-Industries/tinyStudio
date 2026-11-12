@@ -5,6 +5,7 @@
 
 import { fileSystem } from '../../lib/fileSystem'
 import { toSketchName } from '../../lib/projectLayout'
+import { DEFAULT_VISUAL } from '../editor/sketchTemplates'
 
 /**
  * Get icon type for a file based on its name and type
@@ -91,15 +92,22 @@ void setup() {
 void loop() {
   // Turn the LED on
   digitalWrite(LED_PIN, HIGH);
-  Serial.println("LED ON");
+  // label:value lines are graphed by visual.js (switch to the Visual view)
+  Serial.println("led:1");
   delay(1000);  // Wait for a second
   
   // Turn the LED off
   digitalWrite(LED_PIN, LOW);
-  Serial.println("LED OFF");
+  Serial.println("led:0");
   delay(1000);  // Wait for a second
 }
 `
+    },
+    {
+      // A serial plotter + monitor, so the Visual view shows the board's output
+      // from the start. See docs/visual-default-plotter.md.
+      path: 'visual.js',
+      content: DEFAULT_VISUAL
     }
   ]
   return Object.fromEntries(files.map((f) => [f.path, f.content]))
