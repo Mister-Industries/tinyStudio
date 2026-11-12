@@ -13,9 +13,9 @@
 
 ---
 
-> ### ⚠️ Alpha
+> ### ⚠️ Beta
 >
-> tinyStudio is in alpha. It works, but expect rough edges, and expect things to
+> tinyStudio is in beta. It works, but expect rough edges, and expect things to
 > change between versions. See [Known issues](#known-issues) and
 > [Roadmap](#roadmap) for where things stand, and [CHANGELOG.md](CHANGELOG.md)
 > for what changed.
@@ -210,8 +210,7 @@ Nothing here is final.
 
 **Up next**
 
-- Circuit export to KiCad and Wokwi
-- GitHub sign-in in the browser build without a pasted token
+- Wokwi and Fritzing circuit import, and Wokwi export
 - Signed installers and automatic updates
 - Tutorials for using tinyStudio
 
@@ -221,7 +220,7 @@ Nothing here is final.
 
 ## Contributions
 
-tinyStudio is in alpha and **not accepting external contributions** yet. Pull
+tinyStudio is in beta and **not accepting external contributions** yet. Pull
 requests are closed automatically and issues may be closed without review. Feel
 free to **fork** and experiment.
 

@@ -67,6 +67,27 @@ export function placePart(
   }
 }
 
+/**
+ * Bring an older file's breadboard placements up to the current part geometry
+ * (views/partsAdapter `leadMigration`) and mark it current, in one step.
+ */
+export function migrateLeads(
+  moves: { id: string; placement: Placement }[],
+  leads: number
+): Command {
+  const byId = new Map(moves.map((m) => [m.id, m.placement]))
+  return {
+    label: 'Update part leads',
+    apply: (doc) => ({
+      ...doc,
+      meta: { ...doc.meta, leads },
+      parts: byId.size
+        ? doc.parts.map((p) => (byId.has(p.id) ? { ...p, bb: byId.get(p.id) } : p))
+        : doc.parts
+    })
+  }
+}
+
 export function setPartAttr(
   id: string,
   key: string,

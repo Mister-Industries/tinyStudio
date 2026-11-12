@@ -76,7 +76,9 @@ export const LABEL_GAP = 4
 export function symbolSvg(inner: string, w: number, h: number): string {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${round(w)} ${round(h)}" ` +
-    `fill="none" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`
+    // overflow: a symbol may reach a hair past its box (the LED's envelope
+    // circle) and must not be cut off there
+    `fill="none" stroke-linecap="round" stroke-linejoin="round" overflow="visible">${inner}</svg>`
   )
 }
 

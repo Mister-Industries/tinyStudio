@@ -136,7 +136,18 @@ export interface PackRef {
 export interface CircuitDoc {
   format: 'tinystudio-circuit'
   version: 2
-  meta?: { author?: string; created?: string; modified?: string }
+  meta?: {
+    author?: string
+    created?: string
+    modified?: string
+    /**
+     * Breadboard geometry generation. 1: parts with Fritzing legs have their
+     * pins at the ends of drawn leads (views/partsAdapter `withLeads`). Unset:
+     * an older file, placed when those pins sat on the body; the editor moves
+     * its parts once so the pins stay in the same holes, then sets this.
+     */
+    leads?: number
+  }
   packs?: PackRef[]
   parts: CircuitPart[]
   wires: CircuitWire[]
@@ -187,11 +198,14 @@ export function splitPinRef(ref: string): { part: string; pin: string } {
 
 // ── construction / validation ────────────────────────────────────────────────
 
+/** Current `meta.leads`: what a new circuit is placed with. */
+export const LEADS_VERSION = 1
+
 export function emptyDoc(author?: string): CircuitDoc {
   return {
     format: 'tinystudio-circuit',
     version: 2,
-    meta: { author, created: new Date().toISOString() },
+    meta: { author, created: new Date().toISOString(), leads: LEADS_VERSION },
     parts: [],
     wires: []
   }
@@ -260,7 +274,10 @@ export function parseCircuitFile(text: string): ParseResult {
 
 function normalizeV2(raw: Record<string, unknown>, warnings: string[]): CircuitDoc {
   const doc = emptyDoc()
-  doc.meta = (raw.meta as CircuitDoc['meta']) ?? doc.meta
+  // a file's own meta, or none: an old file must not pick up emptyDoc's
+  // `leads`, or its parts would never be moved onto their new pins
+  if (raw.meta) doc.meta = raw.meta as CircuitDoc['meta']
+  else if (doc.meta) delete doc.meta.leads
   doc.packs = raw.packs as PackRef[] | undefined
   doc.netLabels = raw.netLabels as NetLabel[] | undefined
   doc.sim = raw.sim as CircuitDoc['sim']
@@ -318,6 +335,8 @@ type V1Conn = [unknown, unknown, string?, string[]?]
  */
 function migrateV1(raw: Record<string, unknown>, warnings: string[]): CircuitDoc {
   const doc = emptyDoc(typeof raw.author === 'string' ? raw.author : undefined)
+  // placed with the old breadboard geometry (see CircuitDoc.meta.leads)
+  if (doc.meta) delete doc.meta.leads
   const sch =
     (raw.schematic as {
       pos?: Record<string, [number, number]>

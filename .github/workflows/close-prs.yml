@@ -1,6 +1,6 @@
 name: Close external pull requests
 
-# tinyStudio is in early alpha and not accepting outside contributions yet.
+# tinyStudio is in beta and not accepting outside contributions yet.
 # This auto-closes pull requests from non-collaborators (e.g. drive-by / AI PRs)
 # with a polite note. PRs opened by the owner or repo collaborators are left open.
 # Delete this workflow when you're ready to accept contributions.
@@ -30,7 +30,7 @@ jobs:
               body: [
                 'Thanks for your interest in **tinyStudio**! 🙏',
                 '',
-                'This project is in early alpha and is **not accepting external contributions** right now,',
+                'This project is in beta and is **not accepting external contributions** right now,',
                 'so this pull request is being closed automatically. Please feel free to fork and experiment.',
                 '',
                 'Contributions will open up as the project stabilizes.'

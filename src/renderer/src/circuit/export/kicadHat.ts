@@ -35,7 +35,8 @@ import type { NetModel } from '../core/nets'
 import { today, type ExportContext } from './common'
 import { HAT_EDGE_CUTS, HAT_HEADERS, HAT_PCB_HEAD, HAT_PRO } from './hatTemplate'
 import { type StandIn } from './kicadNetlist'
-import { kicadSchematic } from './kicadSch'
+import { kicadSchematic, stableUuid } from './kicadSch'
+import { boardTransform, placeFootprints, type Pt } from './kicadPlace'
 
 /** tinyCore header pins, pad by pad, as the HAT template numbers them. */
 export const TINYCORE_HAT_HEADERS: {
@@ -91,7 +92,8 @@ export function kicadHatProject(
   doc: CircuitDoc,
   net: NetModel,
   ctx: ExportContext = {},
-  title = 'tinyHAT'
+  title = 'tinyHAT',
+  opts: { company?: string; designer?: string; revision?: string } = {}
 ): HatProject {
   const name = hatFileName(title)
   const warnings: string[] = []
@@ -117,7 +119,9 @@ export function kicadHatProject(
     ref: refOf.get(h.ref)!,
     footprint: h.footprint,
     symbol: h.symbol,
-    value: `tinyCore ${h.ref === 'J1' ? 'left' : h.ref === 'J2' ? 'right' : 'bottom'} header`,
+    // the header part the template carries (PPTC081LFBN-RC), and which one it is
+    value: /\(property "Value" "((?:[^"\\]|\\.)*)"/.exec(HAT_HEADERS[h.ref])?.[1] ?? 'Conn',
+    description: `tinyCore ${h.ref === 'J1' ? 'left' : h.ref === 'J2' ? 'right' : 'bottom'} header`,
     pads: Object.fromEntries(h.pins.map((pin, i) => [pin, String(i + 1)])),
     // power pins are on their rail whether this circuit uses them or not
     fixed: Object.fromEntries(
@@ -133,7 +137,16 @@ export function kicadHatProject(
     // no board: the headers still go into the netlist, so they import too
     standIns.set('\u0000no-board', headerComps)
 
-  const sch = kicadSchematic(doc, net, ctx, { name, title, standIns })
+  const revision = opts.revision ?? 'v0.1'
+  const designer = opts.designer ?? doc.meta?.author
+  const sch = kicadSchematic(doc, net, ctx, {
+    name,
+    title,
+    standIns,
+    company: opts.company,
+    designer,
+    revision
+  })
   const netlist = sch.netlist
   warnings.push(...sch.warnings)
 
@@ -143,6 +156,11 @@ export function kicadHatProject(
     let text = HAT_HEADERS[h.ref].replace(
       /\(property "Reference" "J[123]"/,
       `(property "Reference" "${ref}"`
+    )
+    const desc = headerComps.find((c) => c.ref === ref)?.description ?? ''
+    text = text.replace(
+      /\(property "Description" "(?:[^"\\]|\\.)*"/,
+      `(property "Description" "${escapeKicad(desc)}"`
     )
     text = text.replace(/\n(\t+)\{\{NET_(\d+)\}\}/g, (_m, indent: string, pad: string) => {
       const n = netlist.padNets.get(`${ref}:${pad}`)
@@ -158,13 +176,66 @@ export function kicadHatProject(
     )
     return text
   })
+  // the parts, where they sit on the tinyProto (export/kicadPlace)
+  const outline = hatOutline()
+  const core = cores[0]
+  const gndPx = core && ctx.pinAt?.(core.id, 'GND')
+  const d8Px = core && ctx.pinAt?.(core.id, 'D8')
+  const toBoard =
+    gndPx && d8Px
+      ? boardTransform({ px: gndPx, mm: HAT_PAD_GND }, { px: d8Px, mm: HAT_PAD_D8 })
+      : null
+  const { placed, warnings: placeWarnings } = placeFootprints({
+    name,
+    comps: netlist.components,
+    padNets: netlist.padNets,
+    symbolUuids: sch.symbolUuids,
+    pinAt: (id, pin) => ctx.pinAt?.(id, pin) ?? null,
+    toBoard,
+    outline
+  })
+  warnings.push(...placeWarnings)
+
+  const uid = (what: string): string => stableUuid(`${name}:pcb:${what}`)
+  const xs = outline.map((p) => p.x)
+  const ys = outline.map((p) => p.y)
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2
+  const top = Math.min(...ys) + 2.4
+  const boardText = [
+    // the board's name on the silk (SLK-400), its version in bottom copper (SLK-405)
+    `\t(gr_text ${q(title.trim() || 'tinyHAT')}\n\t\t(at ${f(cx)} ${f(top)} 0)\n\t\t(layer "F.SilkS")\n` +
+      `\t\t(uuid ${q(uid('name'))})\n\t\t(effects (font (size 1 1) (thickness 0.15)))\n\t)`,
+    `\t(gr_text ${q(revision)}\n\t\t(at ${f(cx)} ${f(top)} 0)\n\t\t(layer "B.Cu" knockout)\n` +
+      `\t\t(uuid ${q(uid('version'))})\n\t\t(effects (font (size 1 1) (thickness 0.25)) (justify mirror))\n\t)`
+  ]
+  // GND pours on both sides, 8 mil clearance, thermal reliefs (LAY-304)
+  const hasGnd = [...netlist.padNets.values()].includes('GND')
+  const zones = hasGnd
+    ? ['F.Cu', 'B.Cu'].map(
+        (layer) =>
+          `\t(zone\n\t\t(net "GND")\n\t\t(layer ${q(layer)})\n\t\t(uuid ${q(uid(`zone:${layer}`))})\n` +
+          `\t\t(hatch edge 0.5)\n\t\t(connect_pads\n\t\t\t(clearance 0.2032)\n\t\t)\n\t\t(min_thickness 0.254)\n` +
+          `\t\t(fill yes\n\t\t\t(thermal_gap 0.508)\n\t\t\t(thermal_bridge_width 0.508)\n\t\t\t(island_removal_mode 0)\n\t\t)\n` +
+          `\t\t(polygon\n\t\t\t(pts\n\t\t\t\t${outline.map((p) => `(xy ${f(p.x)} ${f(p.y)})`).join(' ')}\n\t\t\t)\n\t\t)\n\t)`
+      )
+    : []
+
+  const head = HAT_PCB_HEAD.replace('{{TITLE}}', escapeKicad(title.trim() || 'tinyHAT'))
+    .replace('{{DATE}}', today(ctx))
+    // the title block matches the schematic's (LAY-120)
+    .replace(
+      /\n\t\t\(rev "[^"]*"\)\n\t\t\(company "[^"]*"\)\n\t\t\(comment 1 "[^"]*"\)/,
+      `\n\t\t(rev ${q(revision)})` +
+        (opts.company ? `\n\t\t(company ${q(opts.company)})` : '') +
+        `\n\t\t(comment 1 ${q(designer ? `Designed by: ${designer}` : 'Exported from tinyStudio')})`
+    )
   const pcb =
-    HAT_PCB_HEAD.replace('{{TITLE}}', escapeKicad(title.trim() || 'tinyHAT')).replace(
-      '{{DATE}}',
-      today(ctx)
-    ) +
+    head +
     HAT_EDGE_CUTS +
     headers.join('') +
+    placed.map((p) => '\n' + p.text).join('') +
+    '\n' +
+    [...boardText, ...zones].join('\n') +
     '\n)\n'
 
   // footprints from KiCad's own libraries (everything that isn't SparkFun's)
@@ -184,17 +255,18 @@ export function kicadHatProject(
     `1. Open the schematic (${name}.kicad_sch): every part, with net labels for its`,
     '   connections and the tinyCore drawn as its three headers (J1-J3). Run ERC if',
     '   you like; tidy the layout as much as you want.',
-    `2. Open the board (${name}.kicad_pcb). The HAT outline and the three tinyCore`,
-    '   headers are already there, on the right nets.',
-    '3. Tools > Update PCB from Schematic... > Update PCB. Every part appears beside',
-    '   the board with its ratsnest to the headers. (Or, without the schematic:',
-    `   File > Import > Netlist..., choose ${name}.net, Update PCB.)`,
-    '4. Place the parts on the HAT (no mounting holes: the HAT clips onto the',
-    '   tinyCore by its headers), route, and run DRC.',
+    `2. Open the board (${name}.kicad_pcb). The HAT outline, the three tinyCore`,
+    '   headers and every part are already there, on their nets: each part where',
+    "   it sits on the tinyProto (parts that aren't on it are lined up below the",
+    '   board). GND pours fill both sides; press B to fill them.',
+    '3. Tidy the placement (no mounting holes: the HAT clips onto the tinyCore by',
+    '   its headers), route (6 mil signals, 10 mil power, 45 degree bends), and run',
+    '   DRC. docs/hardware-standards.md in tinyStudio has the full checklist.',
+    '4. After changing the circuit, export again and run Tools > Update PCB from',
+    '   Schematic to bring the changes onto your layout.',
     '',
     'Exporting again from tinyStudio rewrites the schematic, netlist and this',
-    'README, and leaves the board and project alone, so a layout is never lost:',
-    'run Update PCB from Schematic again to pick up the changes.',
+    'README, and leaves the board and project alone, so a layout is never lost.',
     '',
     'Footprints come from the SparkFun KiCad libraries (and KiCad stock ones for a',
     'few through-hole parts); add the SparkFun libraries in KiCad if pcbnew reports',
@@ -233,6 +305,24 @@ export function hatProjectFile(name: string, sheetUuid: string): string {
   pro.schematic.top_level_sheets = [{ filename: `${name}.kicad_sch`, name, uuid: sheetUuid }]
   pro.schematic.used_designators = ''
   pro.schematic.page_layout_descr_file = ''
+  // track widths 6/10/22/50 mil, vias 24/12 mil, power nets 10 mil (LAY-300, -303)
+  const ds = pro.board.design_settings
+  ds.drc_exclusions = []
+  ds.track_widths = [0, 0.1524, 0.254, 0.5588, 1.27]
+  ds.via_dimensions = [
+    { diameter: 0, drill: 0 },
+    { diameter: 0.6096, drill: 0.3048 }
+  ]
+  const classes = pro.net_settings.classes as Record<string, unknown>[]
+  const base = classes.find((c) => c.name === 'Default')!
+  Object.assign(base, { track_width: 0.1524, via_diameter: 0.6096, via_drill: 0.3048 })
+  pro.net_settings.classes = [
+    ...classes.filter((c) => c.name !== 'Power'),
+    { ...base, name: 'Power', priority: 0, track_width: 0.254 }
+  ].map((c) => (c.name === 'All Nets' ? { ...c, priority: 1 } : c))
+  pro.net_settings.netclass_patterns = ['GND', '3V3', 'PWR', 'VBUS', 'VIN', '5V'].map(
+    (pattern) => ({ netclass: 'Power', pattern })
+  )
   return JSON.stringify(pro, null, 2) + '\n'
 }
 
@@ -266,4 +356,25 @@ export function symLibTable(libs: string[]): string {
     ')',
     ''
   ].join('\n')
+}
+
+const f = (n: number): string => String(Math.round(n * 1e6) / 1e6)
+const q = (s: string): string => `"${escapeKicad(s)}"`
+
+/** Where the HAT template puts the tinyCore's GND (J1 pad 1) and D8 (J2 pad 8). */
+const HAT_PAD_GND: Pt = { x: 126.259995, y: 96.137275 }
+const HAT_PAD_D8: Pt = { x: 170.759995, y: 96.117275 }
+
+/** The HAT's outline, corner by corner, from the template's Edge.Cuts lines. */
+export function hatOutline(): Pt[] {
+  const pts: Pt[] = []
+  for (const m of HAT_EDGE_CUTS.matchAll(/\((?:start|end) ([-\d.]+) ([-\d.]+)\)/g)) {
+    const p = { x: +m[1], y: +m[2] }
+    if (!pts.some((o) => Math.hypot(o.x - p.x, o.y - p.y) < 1e-3)) pts.push(p)
+  }
+  const c = {
+    x: pts.reduce((s, p) => s + p.x, 0) / pts.length,
+    y: pts.reduce((s, p) => s + p.y, 0) / pts.length
+  }
+  return pts.sort((a, b) => Math.atan2(a.y - c.y, a.x - c.x) - Math.atan2(b.y - c.y, b.x - c.x))
 }

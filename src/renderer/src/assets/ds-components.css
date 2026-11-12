@@ -120,6 +120,23 @@
 .tactile-outline:disabled {
   box-shadow: 0 1.5px 0 0 var(--border-interactive);
 }
+/* A toggle key that's on (aria-pressed): brand border, ledge and tint, so it
+   reads as on at a glance even as an icon-only key (the circuit's Grid,
+   Front/Back, Edit). Here rather than as utilities: this file is unlayered and
+   outranks them, so a border-brand utility never showed. */
+.tactile-outline[aria-pressed='true'] {
+  border-color: var(--brand);
+  background-color: var(--brand-soft);
+  color: var(--brand-deep);
+  box-shadow:
+    0 1.5px 0 0 var(--brand),
+    0 4px 10px rgba(20, 19, 16, 0.16);
+}
+.tactile-outline[aria-pressed='true']:hover:not(:disabled) {
+  box-shadow:
+    0 2.5px 0 0 var(--brand),
+    0 7px 16px rgba(20, 19, 16, 0.2);
+}
 
 /* ── CHECKBOX: tactile, hard-edged ──────────────────────────────────────── */
 .ts-check {

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { emptyDoc, type CircuitPart, type CircuitWire } from '../core/model'
 import { buildNets } from '../core/nets'
+import { kicadHatProject } from '../export/kicadHat'
 import {
   kicadSchematic,
   KICAD_SCH_VERSION,
@@ -81,7 +82,12 @@ test('schematic: stock symbols, one label per connected pin, valid file', () => 
   assert.ok(balanced(t), 'brackets balance')
   assert.match(t, new RegExp(`^\\(kicad_sch\\n\\t\\(version ${KICAD_SCH_VERSION}\\)`))
   assert.match(t, /\(title "Demo"\)/)
-  for (const id of ['Device:R', 'Device:LED', 'Switch:SW_Push'])
+  for (const id of [
+    'SparkFun-Resistor:10k_Axial_1/6W',
+    'SparkFun-LED:LED_Red_5mm_PTH_Silk',
+    'SparkFun-Switch:SPST_Push_PTH_12x12mm_h8.0mm',
+    'Switch:SW_Push'
+  ])
     assert.ok(t.includes(`\t\t(symbol "${id}"`), `${id} embedded`)
   // every placed symbol has an instance under this sheet
   const refs = [...t.matchAll(/\(path "\/([^"]+)" \(reference "([^"]+)"\)/g)]
@@ -135,26 +141,159 @@ test('schematic: the same circuit exports the same uuids', () => {
   assert.equal(ta, tb)
 })
 
-test('schematic: a wide layout gets a landscape sheet, a tall one is turned upright', () => {
-  const wide = buttonCircuit()
-  const w = kicadSchematic(wide, buildNets(wide, { busesFor: circuitBuses }), {}, { name: 'w' })
-  assert.match(w.text, /\(paper "A\d"\)\n/)
-  const tall = buttonCircuit()
-  tall.parts.forEach((p, i) => (p.sch = { x: 0, y: i * 160 }))
-  const t = kicadSchematic(tall, buildNets(tall, { busesFor: circuitBuses }), {}, { name: 't' })
-  assert.match(t.text, /\(paper "A\d" portrait\)\n/)
+test('schematic: US Letter, title block, titled blocks with dashed dividers', () => {
+  const doc = buttonCircuit()
+  const t = kicadSchematic(
+    doc,
+    buildNets(doc, { busesFor: circuitBuses }),
+    { date: 'd' },
+    {
+      name: 'b',
+      title: 'Blocks',
+      company: 'Acme',
+      designer: 'Ada'
+    }
+  ).text
+  assert.match(t, /\(paper "USLetter"\)/)
+  assert.match(t, /\(rev "v0\.1"\)/)
+  assert.match(t, /\(company "Acme"\)/)
+  assert.match(t, /\(comment 1 "Designed by: Ada"\)/)
+  for (const title of ['LEDs'])
+    assert.match(t, new RegExp(`\\(text "${title}"[\\s\\S]*?\\(font \\(size 3 3\\)`))
+})
+
+/** A tinyCore with a button and pull-down on D8, and an LED and resistor on D9. */
+function hatCircuit(): ReturnType<typeof emptyDoc> {
+  const doc = emptyDoc()
+  doc.parts = [
+    part('U1', 'tinycore'),
+    part('SW1', 'tactile-button-6mm'),
+    part('R1', 'resistor', { resistance: '10k' }),
+    part('R2', 'resistor', { resistance: '330' }),
+    part('LED1', 'led-generic-5mm'),
+    part('C1', 'capacitor-ceramic-100mil', { capacitance: '100n' })
+  ]
+  doc.wires = [
+    wire('U1:3V3', 'SW1:1a'),
+    wire('SW1:2a', 'U1:D8'),
+    wire('U1:D8', 'R1:Pin 0'),
+    wire('R1:Pin 1', 'U1:GND'),
+    wire('U1:D9', 'R2:Pin 0'),
+    wire('R2:Pin 1', 'LED1:anode'),
+    wire('LED1:cathode', 'U1:GND.2'),
+    wire('C1:0', 'U1:3V3.2'),
+    wire('C1:1', 'U1:GND.3')
+  ]
+  return doc
+}
+
+test('schematic: supplies point up, GND down, signals between blocks are input global labels', () => {
+  const doc = hatCircuit()
+  const hat = kicadHatProject(doc, buildNets(doc, { busesFor: circuitBuses }), {}, 'p')
+  const t = hat.files['p/p.kicad_sch']
+  const power = [...t.matchAll(/\(lib_id "power:(GND|\+3V3)"\)\n\t\t\(at [-\d.]+ [-\d.]+ (\d+)\)/g)]
+  assert.ok(power.some((m) => m[1] === 'GND') && power.some((m) => m[1] === '+3V3'))
+  for (const m of power) assert.equal(m[2], '0', `${m[1]} drawn upright (its library orientation)`)
+  // the supply symbol carries the net's own name
+  assert.match(t, /\(lib_id "power:\+3V3"\)[\s\S]*?\(property "Value" "3V3"/)
+  const shapes = [...t.matchAll(/\(global_label "([^"]+)"\n\t\t\(shape (\w+)\)/g)]
+  assert.deepEqual([...new Set(shapes.map((m) => m[1]))].sort(), ['D8', 'D9'])
+  for (const m of shapes) assert.equal(m[2], 'input')
+  assert.match(t, /\(stroke \(width 0\) \(type dash\)\)/)
+  for (const title of ['tinyCore Headers', 'Buttons', 'LEDs', 'Decoupling'])
+    assert.match(t, new RegExp(`\\(text "${title}"`))
+  assert.deepEqual(connectivity(t).dangling, [])
+})
+
+/** Every point a wire, label, power symbol or flag must meet, checked like ERC's connectivity. */
+function connectivity(t: string): { dangling: string[]; pins: number } {
+  const key = (x: number, y: number): string => `${Math.round(x * 100)},${Math.round(y * 100)}`
+  const wireEnds = new Map<string, number>()
+  const onWire: [number, number, number, number][] = []
+  for (const m of t.matchAll(
+    /\(wire \(pts \(xy ([-\d.]+) ([-\d.]+)\) \(xy ([-\d.]+) ([-\d.]+)\)\)/g
+  )) {
+    const [x0, y0, x1, y1] = [+m[1], +m[2], +m[3], +m[4]]
+    for (const k of [key(x0, y0), key(x1, y1)]) wireEnds.set(k, (wireEnds.get(k) ?? 0) + 1)
+    onWire.push([x0, y0, x1, y1])
+  }
+  const touchesWire = (x: number, y: number): boolean =>
+    onWire.some(
+      ([x0, y0, x1, y1]) =>
+        Math.min(x0, x1) - 1e-6 <= x &&
+        x <= Math.max(x0, x1) + 1e-6 &&
+        Math.min(y0, y1) - 1e-6 <= y &&
+        y <= Math.max(y0, y1) + 1e-6 &&
+        Math.abs((x1 - x0) * (y - y0) - (y1 - y0) * (x - x0)) < 1e-6
+    )
+  const anchors = new Set<string>()
+  for (const m of t.matchAll(
+    /\((?:global_label|label) "[^"]+"\n\t\t(?:\(shape \w+\)\n\t\t)?\(at ([-\d.]+) ([-\d.]+)/g
+  ))
+    anchors.add(key(+m[1], +m[2]))
+  for (const m of t.matchAll(/\(no_connect \(at ([-\d.]+) ([-\d.]+)\)/g))
+    anchors.add(key(+m[1], +m[2]))
+  // every placed symbol's pins, from the same library definitions the file embeds
+  const pinsAt: string[] = []
+  for (const m of t.matchAll(
+    /\n\t\(symbol\n\t\t\(lib_id "([^"]+)"\)\n\t\t\(at ([-\d.]+) ([-\d.]+) (\d+)\)(\n\t\t\(mirror x\))?/g
+  )) {
+    const def = KICAD_LIB_SYMBOLS[m[1]]
+    if (!def) continue
+    const [X, Y, rot, mirror] = [+m[2], +m[3], +m[4], !!m[5]]
+    for (const p of symbolPins(def)) {
+      const dx = p.x
+      let dy = -p.y
+      if (mirror) dy = -dy
+      const a = (rot * Math.PI) / 180
+      const c = Math.round(Math.cos(a))
+      const s = Math.round(Math.sin(a))
+      pinsAt.push(key(X + dx * c + dy * s, Y - dx * s + dy * c))
+    }
+  }
+  // everything that connects sits on the 50 mil grid (ERC's connection grid)
+  const offGrid = [...pinsAt, ...wireEnds.keys(), ...anchors].filter((k) =>
+    k.split(',').some((v) => Math.abs(+v / 127 - Math.round(+v / 127)) > 1e-6)
+  )
+  const pinSet = new Set(pinsAt)
+  const dangling: string[] = []
+  for (const p of pinsAt) {
+    const [x, y] = p.split(',').map((v) => +v / 100)
+    if (
+      !wireEnds.has(p) &&
+      !anchors.has(p) &&
+      !touchesWire(x, y) &&
+      pinsAt.filter((q) => q === p).length < 2
+    )
+      dangling.push(`pin ${p}`)
+  }
+  for (const a of anchors) {
+    const [x, y] = a.split(',').map((v) => +v / 100)
+    if (!wireEnds.has(a) && !pinSet.has(a) && !touchesWire(x, y)) dangling.push(`label/flag ${a}`)
+  }
+  for (const [k, n] of wireEnds) {
+    const [x, y] = k.split(',').map((v) => +v / 100)
+    const joined =
+      n > 1 ||
+      pinSet.has(k) ||
+      anchors.has(k) ||
+      onWire
+        .filter(([x0, y0, x1, y1]) => !(key(x0, y0) === k || key(x1, y1) === k))
+        .some(() => touchesWire(x, y))
+    if (!joined) dangling.push(`wire end ${k}`)
+  }
+  return { dangling: [...dangling, ...offGrid.map((k) => `off grid ${k}`)], pins: pinsAt.length }
+}
+
+test('schematic: nothing dangles, every pin is wired, labelled or flagged', () => {
+  const doc = buttonCircuit()
+  const t = kicadSchematic(doc, buildNets(doc, { busesFor: circuitBuses }), {}, { name: 'c' }).text
+  const { dangling, pins } = connectivity(t)
+  assert.equal(pins, 10)
+  assert.deepEqual(dangling, [])
 })
 
 test('fields go where the KiCad library puts them', () => {
   const r = libField(KICAD_LIB_SYMBOLS['Device:R'], 'Reference')!
   assert.deepEqual([r.x, r.y, r.angle], [2.032, 0, 90])
-  const doc = buttonCircuit()
-  const t = kicadSchematic(doc, buildNets(doc, { busesFor: circuitBuses }), {}, { name: 'f' }).text
-  // R1's reference sits 2.032 mm right of the symbol, turned to read along it
-  const at =
-    /\(lib_id "Device:R"\)\n\t\t\(at ([-\d.]+) ([-\d.]+) 0\)[\s\S]*?\(property "Reference" "R1"\n\t\t\t\(at ([-\d.]+) ([-\d.]+) 90\)/.exec(
-      t
-    )!
-  assert.ok(Math.abs(+at[3] - (+at[1] + 2.032)) < 1e-6)
-  assert.equal(+at[4], +at[2])
 })

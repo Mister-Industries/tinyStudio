@@ -67,6 +67,7 @@ import {
 import { getSyncStatus, onSyncStatus } from '../parts/tinypartsSync'
 import * as cmd from '../core/commands'
 import {
+  LEADS_VERSION,
   newId,
   type NetLabelKind,
   type Placement,
@@ -114,6 +115,7 @@ import {
   ercFloatingPins,
   findFreePlacement,
   implicitSeats,
+  leadMigration,
   occupiedBoxes,
   pinWorldOf,
   ratsnest,
@@ -255,6 +257,28 @@ export function CircuitViewV2({
       else bumpDefs()
     })
   }, [doc.parts])
+
+  // A file from before parts had leads: once every part it uses has loaded,
+  // move the parts whose pins now sit at the ends of their leads so those
+  // pins stay in the same holes (partsAdapter `leadMigration`). A repair, not
+  // an edit: no undo step. Runs again if old text comes back from the Code tab.
+  const leadsCurrent = (doc.meta?.leads ?? 0) >= LEADS_VERSION
+  React.useEffect(() => {
+    if (leadsCurrent) return
+    let live = true
+    void initPartsLibrary()
+      .then(() => ensureParts(store.getDoc().parts.map((p) => p.type)))
+      .then(() => {
+        const now = store.getDoc()
+        if (!live || (now.meta?.leads ?? 0) >= LEADS_VERSION) return
+        // a type that never loads (a missing pack) is left where it is
+        const { moves } = leadMigration(now)
+        store.repair(cmd.migrateLeads(moves, LEADS_VERSION))
+      })
+    return () => {
+      live = false
+    }
+  }, [leadsCurrent, store])
 
   // a part's source changed (an update from GitHub, art saved in the tinyparts
   // folder, a local edit reset): its old geometry is gone; reload what's used
@@ -920,9 +944,17 @@ export function CircuitViewV2({
       pinsOf: (t) => {
         const views = getPart(t)?.views
         return Object.keys(views?.breadboard?.pins ?? views?.schematic?.pins ?? {})
+      },
+      // where a leg is on the breadboard: the hole it's seated in, else its tip
+      // (the KiCad export places footprints from these)
+      pinAt: (partId, pin) => {
+        const seat = seats.find((s) => s.pin === `${partId}:${pin}`)
+        if (seat) return seat.pos
+        const part = doc.parts.find((p) => p.id === partId)
+        return part ? pinWorldOf(part, pin) : null
       }
     }),
-    []
+    [doc, seats]
   )
   /**
    * The circuit as a ready KiCad HAT project (export/kicadHat): written into the
@@ -986,8 +1018,12 @@ export function CircuitViewV2({
     return () => clearTimeout(t)
   }, [savedId])
 
-  const tool =
-    'tactile-outline h-8 px-2.5 flex items-center gap-1.5 rounded-md bg-surface-card text-text-muted text-xs hover:text-text-body'
+  const toolShape = 'tactile-outline h-8 px-2.5 flex items-center gap-1.5 rounded-md text-xs'
+  const tool = `${toolShape} bg-surface-card text-text-muted hover:text-text-body`
+  // a toggle that's on (Edit, Back, Grid; they set aria-pressed): brand
+  // border, ledge and tint from `.tactile-outline[aria-pressed='true']` in
+  // ds-components.css, which outranks utilities. Off, it's a plain `tool`.
+  const toolToggle = (on: boolean): string => (on ? toolShape : tool)
   // filled actions, matching the Upload button in the main toolbar: green for
   // "run it", brand blue for "take it away with you"
   const toolFilled =
@@ -995,11 +1031,13 @@ export function CircuitViewV2({
   const toolBrand = `${toolFilled} bg-[var(--brand)] [--_edge:var(--brand-deep)]`
   // The toolbar follows the stage's own width (a container query), so it also
   // makes room when the palette or the right rail opens. Wide: icons and
-  // labels. Under 700px: icons only. Under 420px: the corner groups turn into
-  // columns so they never run into the Breadboard | Schematic switch.
-  const noLabel = '@max-[700px]:hidden'
-  const iconOnly = '@max-[700px]:w-8 @max-[700px]:justify-center @max-[700px]:px-0'
-  const stack = '@max-[420px]:flex-col'
+  // labels. Under 820px: icons only (labelled, the corner groups and the
+  // centred switch need about 810px side by side). Under 460px: the corner
+  // groups turn into columns so they never run into the Breadboard |
+  // Schematic switch.
+  const noLabel = '@max-[820px]:hidden'
+  const iconOnly = '@max-[820px]:w-8 @max-[820px]:justify-center @max-[820px]:px-0'
+  const stack = '@max-[460px]:flex-col'
 
   return (
     <div className="size-full relative flex bg-bg overflow-hidden pb-7">
@@ -1039,7 +1077,7 @@ export function CircuitViewV2({
           {/* left toolbar: edit toggle + undo/redo */}
           <div className={`absolute top-3 left-3 z-10 flex gap-1.5 ${stack}`}>
             <button
-              className={`${tool} ${iconOnly} ${editable ? 'text-brand' : ''}`}
+              className={`${toolToggle(editable)} ${iconOnly}`}
               onClick={() => {
                 const next = !editable
                 // editing is Build mode: leave Simulate
@@ -1087,7 +1125,7 @@ export function CircuitViewV2({
             )}
             {view === 'bb' && (
               <button
-                className={`${tool} ${iconOnly} ${bbSide === 'back' ? 'text-brand' : ''}`}
+                className={`${toolToggle(bbSide === 'back')} ${iconOnly}`}
                 onClick={() => {
                   setBbSide((s) => (s === 'back' ? 'front' : 'back'))
                   setSel(emptySel())
@@ -1105,9 +1143,11 @@ export function CircuitViewV2({
               </button>
             )}
             <button
-              className={`${tool} w-8 justify-center px-0 ${grid ? 'text-brand' : ''}`}
+              className={`${toolToggle(grid)} w-8 justify-center px-0`}
               onClick={() => setGrid((g) => !g)}
-              title="Toggle grid"
+              aria-pressed={grid}
+              aria-label="Grid"
+              title={grid ? 'Hide the grid' : 'Show the grid'}
             >
               <Grip size={15} />
             </button>
@@ -1125,14 +1165,14 @@ export function CircuitViewV2({
                 key={v}
                 title={label}
                 aria-label={label}
-                className={`h-8 px-3 flex items-center text-xs font-medium @max-[700px]:w-9 @max-[700px]:justify-center @max-[700px]:px-0 ${
+                className={`h-8 px-3 flex items-center text-xs font-medium @max-[820px]:w-9 @max-[820px]:justify-center @max-[820px]:px-0 ${
                   view === v
                     ? 'bg-brand/15 text-brand'
                     : 'bg-surface-card text-text-muted hover:text-text-body'
                 }`}
                 onClick={() => switchView(v)}
               >
-                <Icon size={15} className="hidden @max-[700px]:block" />
+                <Icon size={15} className="hidden @max-[820px]:block" />
                 <span className={noLabel}>{label}</span>
               </button>
             ))}

@@ -37,6 +37,7 @@ import {
 import type { NetModel } from '../../core/nets'
 import { isHoleBoard } from '../../parts/breadboard'
 import { netLabelVisualOf, snapNetLabel } from '../../parts/netLabels'
+import { INK } from '../../parts/style'
 import {
   clampOntoSegment,
   dragSegment,
@@ -64,6 +65,7 @@ import {
   seatedPartsOn,
   snapBB,
   viewBounds,
+  pinWorldOf,
   visualFor,
   wireGeometry,
   type FrozenWire,
@@ -72,6 +74,9 @@ import {
 } from '../partsAdapter'
 import { emptySel, type Selection } from './selection'
 import { NetLabelLayer } from './NetLabelLayer'
+import { SolderLayer } from './SolderLayer'
+import { solderJoints } from '../solder'
+import { isTinyHeaderBoard } from '../../parts/boardSymbols'
 import { Overlays } from './Overlays'
 import { PartLayer } from './PartLayer'
 import type { Armed, HandleKind } from './types'
@@ -219,7 +224,9 @@ export function Canvas({
   // schematic wires bend on the fine grid; parts still snap pins to major
   const wireGrid = view === 'sch' ? GRID_SCH : GRID_BB
   const snap = (v: number): number => Math.round(v / wireGrid) * wireGrid
-  const ink = 'var(--text-strong)'
+  // schematic wires are drawn in the symbols' own ink, so a wire reads as the
+  // continuation of the lead it ends on (and matches the image export)
+  const ink = INK
   const viewRef = React.useRef<HTMLDivElement>(null)
   const innerRef = React.useRef<HTMLDivElement>(null)
 
@@ -1347,6 +1354,34 @@ export function Canvas({
           }
         : null
 
+  // The front of the breadboard is drawn in depth (PartLayer): wires lie on
+  // the board under the parts standing on it, show through them faintly, and
+  // are solid again where they cross a connection point. The schematic is
+  // flat ink, and from the back every wire is on the near side: one layer.
+  const layered = view === 'bb' && side === 'front'
+  const joints = React.useMemo(
+    () => (view === 'bb' ? solderJoints(doc, seats) : []),
+    [view, doc, seats]
+  )
+  const soldered = React.useMemo(() => new Set(joints.map((j) => j.key)), [joints])
+  const connPts = React.useMemo(() => {
+    if (!layered) return []
+    const out: { key: string; pt: Pt }[] = joints.map((j) => ({ key: j.key, pt: j.pos }))
+    for (const p of doc.parts) {
+      // boards sit under the wires already; their holes aren't crossings
+      if (!p.bb || isHoleBoard(p.type) || isTinyHeaderBoard(p.type)) continue
+      const vis = visualFor(p.type, 'bb')
+      if (!vis) continue
+      for (const pin of Object.keys(vis.v.pins)) {
+        const pt = pinWorldOf(p, pin)
+        if (pt) out.push({ key: `${p.id}:${pin}`, pt })
+      }
+    }
+    return out
+    // defsTick: a part's geometry arrives after its def loads
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layered, doc, joints, defsTick])
+
   return (
     <div className="flex-1 relative min-w-0 overflow-hidden">
       <div
@@ -1364,7 +1399,14 @@ export function Canvas({
               ? 'linear-gradient(var(--sch-grid) 1px, transparent 1px), linear-gradient(90deg, var(--sch-grid) 1px, transparent 1px)'
               : 'radial-gradient(var(--dot-color) 1.1px, transparent 1.1px)',
           backgroundSize: `${GRID_BB * scale}px ${GRID_BB * scale}px`,
-          backgroundPosition: `${cam.tx}px ${cam.ty}px`
+          // on the grid points themselves: a schematic line is the first
+          // pixel of its cell (centred on the point by -0.5 px), a breadboard
+          // dot sits mid-cell (pulled back half a cell). Uncorrected, the dots
+          // fell between the holes and the lines half a pixel off every pin.
+          backgroundPosition:
+            view === 'sch'
+              ? `${cam.tx - 0.5}px ${cam.ty - 0.5}px`
+              : `${cam.tx - (GRID_BB * scale) / 2}px ${cam.ty - (GRID_BB * scale) / 2}px`
         }}
         onWheel={(e) => {
           const r = viewRef.current!.getBoundingClientRect()
@@ -1389,7 +1431,39 @@ export function Canvas({
             transformOrigin: '0 0'
           }}
         >
+          {layered && (
+            <WireLayer
+              mode="base"
+              view={view}
+              side={side}
+              editable={editable}
+              pickNets={pickNets}
+              scale={scale}
+              ink={ink}
+              wireColor={wireColor}
+              sel={sel}
+              netModel={netModel}
+              highlightNet={highlightNet}
+              rats={rats}
+              wireGeom={wireGeom}
+              soloWire={soloWire}
+              editPts={editPts}
+              junctionDots={junctionDots}
+              previewPts={previewPts}
+              seats={seats}
+              hoverHole={hoverHole}
+              marquee={marquee}
+              setHoverWire={setHoverWire}
+              onWireClick={onWireClick}
+              onWireDoubleClick={onWireDoubleClick}
+              startHandleDrag={startHandleDrag}
+            />
+          )}
+
           <WireLayer
+            mode={layered ? 'top' : 'all'}
+            connPts={layered ? connPts : undefined}
+            soldered={soldered}
             view={view}
             side={side}
             editable={editable}
@@ -1447,6 +1521,8 @@ export function Canvas({
             operable={operable}
             leds={leds}
           />
+
+          {view === 'bb' && <SolderLayer doc={doc} seats={seats} zIndex={4} />}
 
           <NetLabelLayer
             doc={doc}

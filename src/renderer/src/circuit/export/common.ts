@@ -16,6 +16,8 @@ export interface ExportContext {
   pinsOf?: (type: string) => string[]
   /** ISO date stamped into file headers; injectable so tests are stable */
   date?: string
+  /** a part's pin in the breadboard view (px), for placing footprints on an exported board */
+  pinAt?: (partId: string, pin: string) => { x: number; y: number } | null
 }
 
 /**

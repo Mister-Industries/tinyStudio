@@ -3,7 +3,7 @@
 import { fileSystem } from '@renderer/lib/fileSystem'
 import { notify as toast } from '@renderer/lib/notify'
 import { useAppDispatch, useAppSelector } from '@renderer/redux'
-import { setEditorView } from '@renderer/redux/editorSlice'
+import { selectPanelState, setEditorView, setPanelOpen } from '@renderer/redux/editorSlice'
 import { revealFile, updateFileContent, type Workspace } from '@renderer/redux/fileSlice'
 import { CircuitBoard, FileClock, History } from 'lucide-react'
 import React from 'react'
@@ -128,6 +128,43 @@ function CircuitFileEditor(): React.JSX.Element {
     }
   }, [])
 
+  // Editing puts Properties on the right edge of the circuit, where the docs
+  // side panel would squeeze it: Edit hides the panel and Done brings it back.
+  // Only a panel this hid comes back, and reopening it yourself from the
+  // Panels menu while editing keeps it open.
+  const docsOpen = useAppSelector(selectPanelState).isDocsPanelOpen
+  const docsOpenRef = React.useRef(docsOpen)
+  docsOpenRef.current = docsOpen
+  const hidDocs = React.useRef(false)
+  const onEditChange = React.useCallback(
+    (editing: boolean) => {
+      if (editing) {
+        if (docsOpenRef.current) {
+          hidDocs.current = true
+          dispatch(setPanelOpen({ panel: 'docs', isOpen: false }))
+        }
+        return
+      }
+      if (hidDocs.current && !docsOpenRef.current)
+        dispatch(setPanelOpen({ panel: 'docs', isOpen: true }))
+      hidDocs.current = false
+    },
+    [dispatch]
+  )
+  // reopened by hand while editing: it's the user's now, leave it alone on Done
+  const wasDocsOpen = React.useRef(docsOpen)
+  React.useEffect(() => {
+    if (docsOpen && !wasDocsOpen.current) hidDocs.current = false
+    wasDocsOpen.current = docsOpen
+  }, [docsOpen])
+  // leaving the circuit (Code/Visual tab) mid-edit gives the panel back too
+  React.useEffect(
+    () => () => {
+      if (hidDocs.current) dispatch(setPanelOpen({ panel: 'docs', isOpen: true }))
+    },
+    [dispatch]
+  )
+
   if (!file) return <LoadingHint label="Loading circuit…" />
 
   return (
@@ -140,6 +177,7 @@ function CircuitFileEditor(): React.JSX.Element {
           dispatch(setEditorView('code'))
         }}
         projectName={workspace?.name}
+        onEditChange={onEditChange}
         onSaveKiCad={workspace ? (hat) => saveKiCadProject(workspace, hat) : undefined}
       />
       {offer && (

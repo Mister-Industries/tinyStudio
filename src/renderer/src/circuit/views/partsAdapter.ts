@@ -24,6 +24,7 @@ import { labelLayout, visibleBox } from '../parts/labels'
 import {
   GRID_BB,
   GRID_SCH,
+  LEADS_VERSION,
   isJunction,
   isPendingJunction,
   splitPinRef,
@@ -73,6 +74,167 @@ function blackenLegs(svg: string): string {
   return out
 }
 
+// ── leads ────────────────────────────────────────────────────────────────────
+//
+// A Fritzing part with bendable legs (LEDs, capacitors, a thermistor, an LDR)
+// puts its connector where the leg meets the body, and draws the leg itself as
+// `<line id="connectorNleg">` running on past the bottom of the art, where the
+// box cuts it off. Taken as is, the pin sits on the body with a stub of lead
+// hanging below it ("the pins are too high"). So for each leg with a real stub
+// past its pin, the breadboard view drops the clipped leg and draws its own
+// lead from the body down to a tip a whole number of grid squares further on,
+// grows the box to hold it, and puts the pin at the tip: what you plug in is
+// the end of the lead, and the pins stay on the grid. Parts whose pins already
+// sit at the end of their leads (a resistor, a diode, a TO-92) are untouched.
+// Circuits saved before this keep their parts in the same holes:
+// `migrateLeads` moves each part by the change, once (doc.meta.leads).
+
+const num = (s: string | undefined): number => (s === undefined ? NaN : parseFloat(s))
+function attrOf(tag: string, name: string): string | undefined {
+  const m = new RegExp(`\\s${name}\\s*=\\s*"([^"]*)"`, 'i').exec(tag)
+  return m?.[1]
+}
+
+/** viewBox of an svg string, or its width/height when it has none. */
+function viewBoxOf(svg: string): [number, number, number, number] | null {
+  const open = /<svg\b[^>]*>/i.exec(svg)?.[0]
+  if (!open) return null
+  const vb = attrOf(open, 'viewBox')
+    ?.trim()
+    .split(/[\s,]+/)
+    .map(Number)
+  if (vb && vb.length === 4 && vb.every(Number.isFinite) && vb[2] > 0 && vb[3] > 0)
+    return vb as [number, number, number, number]
+  return null
+}
+
+const leadCache = new Map<PartView, PartView>()
+
+/**
+ * A breadboard view with its Fritzing legs turned into leads that end on their
+ * pins (see above). Returns the view unchanged when no leg needs it.
+ */
+export function withLeads(v: PartView): PartView {
+  const hit = leadCache.get(v)
+  if (hit) return hit
+  const out = computeLeads(v)
+  leadCache.set(v, out)
+  return out
+}
+
+function computeLeads(v: PartView): PartView {
+  if (!v.svg.includes('leg"')) return v
+  const vb = viewBoxOf(v.svg)
+  if (!vb) return v
+  const [vx, vy, vw, vh] = vb
+  const sx = v.w / vw
+  const sy = v.h / vh
+  const pins = Object.entries(v.pins)
+  // pin positions in the drawing's own units
+  const unitsOf = ([px, py]: [number, number]): [number, number] => [px / sx + vx, py / sy + vy]
+
+  interface Lead {
+    tag: string
+    pin: string
+    from: [number, number] // units
+    to: [number, number] // units
+    stroke: string
+    width: number
+  }
+  const leads: Lead[] = []
+  const legRe = /<line\b[^>]*\bid="connector\d+leg"[^>]*?(?:\/>|>\s*<\/line>)/gi
+  for (const m of v.svg.matchAll(legRe)) {
+    const tag = m[0]
+    const x1 = num(attrOf(tag, 'x1'))
+    const y1 = num(attrOf(tag, 'y1'))
+    const x2 = num(attrOf(tag, 'x2'))
+    const y2 = num(attrOf(tag, 'y2'))
+    if (![x1, y1, x2, y2].every(Number.isFinite)) continue
+    // the leg's direction, squared up to an axis so the tip stays on the grid
+    const horiz = Math.abs(x2 - x1) > Math.abs(y2 - y1)
+    const d: [number, number] = horiz ? [Math.sign(x2 - x1), 0] : [0, Math.sign(y2 - y1)]
+    if (!d[0] && !d[1]) continue
+    // only a leg that leaves the part: an axial part (a resistor, a diode)
+    // draws short leg stubs pointing back in from its ends, where its pins
+    // already are
+    const cx = vx + vw / 2
+    const cy = vy + vh / 2
+    if ((x2 - cx) * d[0] + (y2 - cy) * d[1] <= 0) continue
+    // its pin: in line with the leg, at or just before its start
+    let best: { pin: string; u: [number, number]; score: number } | null = null
+    for (const [pin, pos] of pins) {
+      const u = unitsOf(pos)
+      const lateral = Math.abs(horiz ? u[1] - y1 : u[0] - x1)
+      const along = (x1 - u[0]) * d[0] + (y1 - u[1]) * d[1]
+      if (lateral > 1.5 || along < -1.5 || along > 20) continue
+      const score = lateral + Math.abs(along)
+      if (!best || score < best.score) best = { pin, u, score }
+    }
+    if (!best) continue
+    // how much lead shows past the pin: to the leg's end, or the box edge
+    const legLen = Math.hypot(x2 - x1, y2 - y1)
+    const toEdge = d[0] > 0 ? vx + vw - x1 : d[0] < 0 ? x1 - vx : d[1] > 0 ? vy + vh - y1 : y1 - vy
+    const end: [number, number] = [
+      x1 + d[0] * Math.min(legLen, Math.max(0, toEdge)),
+      y1 + d[1] * Math.min(legLen, Math.max(0, toEdge))
+    ]
+    const scale = horiz ? sx : sy
+    const stubPx = ((end[0] - best.u[0]) * d[0] + (end[1] - best.u[1]) * d[1]) * scale
+    // the pin is already at (or within a hair of) the end of what's drawn: a
+    // TO-92's legs, the 7805's, the piezo's
+    if (stubPx < 3) continue
+    const leadPx = Math.max(1, Math.ceil((stubPx - 1) / GRID_BB)) * GRID_BB
+    const leadU = leadPx / scale
+    leads.push({
+      tag,
+      pin: best.pin,
+      from: best.u,
+      to: [best.u[0] + d[0] * leadU, best.u[1] + d[1] * leadU],
+      stroke: attrOf(tag, 'stroke') ?? '#8C8C8C',
+      width: num(attrOf(tag, 'stroke-width')) || 1 / Math.min(sx, sy)
+    })
+  }
+  if (!leads.length) return v
+
+  // grow the drawing to hold the tips, then size the box to match
+  let [x0, y0, x1, y1] = [vx, vy, vx + vw, vy + vh]
+  for (const l of leads) {
+    const r = l.width / 2
+    x0 = Math.min(x0, l.to[0] - r)
+    y0 = Math.min(y0, l.to[1] - r)
+    x1 = Math.max(x1, l.to[0] + r)
+    y1 = Math.max(y1, l.to[1] + r)
+  }
+  const r4 = (n: number): number => Math.round(n * 1e4) / 1e4
+  const r2 = (n: number): number => Math.round(n * 100) / 100
+  // drawn first, so the body covers where the lead leaves it
+  const drawn = leads
+    .map(
+      (l) =>
+        `<line x1="${r4(l.from[0])}" y1="${r4(l.from[1])}" x2="${r4(l.to[0])}" y2="${r4(l.to[1])}" ` +
+        `stroke="${l.stroke}" stroke-width="${r4(l.width)}" stroke-linecap="round" fill="none"/>`
+    )
+    .join('')
+  let svg = v.svg
+  for (const l of leads) svg = svg.replace(l.tag, '')
+  svg = svg.replace(/<svg\b[^>]*>/i, (open) => {
+    const sized = /\sviewBox\s*=/i.test(open)
+      ? open.replace(
+          /viewBox\s*=\s*"[^"]*"/i,
+          `viewBox="${r4(x0)} ${r4(y0)} ${r4(x1 - x0)} ${r4(y1 - y0)}"`
+        )
+      : open
+    return `${sized}${drawn}`
+  })
+  const tipOf = new Map(leads.map((l) => [l.pin, l.to]))
+  const newPins: Record<string, [number, number]> = {}
+  for (const [pin, pos] of pins) {
+    const u = tipOf.get(pin) ?? unitsOf(pos)
+    newPins[pin] = [r2((u[0] - x0) * sx), r2((u[1] - y0) * sy)]
+  }
+  return { ...v, svg, w: r2((x1 - x0) * sx), h: r2((y1 - y0) * sy), pins: newPins }
+}
+
 /** Visual for a part type in a view, or null while its def is still loading.
  * Schematic falls back to a generated IC-box symbol (spec §5.1). */
 export function visualFor(type: string, view: ViewId): PartVisual | null {
@@ -80,7 +242,57 @@ export function visualFor(type: string, view: ViewId): PartVisual | null {
   if (!def) return null
   if (view === 'sch') return { def, v: schematicVisual(def) }
   const v = viewFor(def, 'breadboard')
-  return v ? { def, v: { ...v, svg: blackenLegs(v.svg) } } : null
+  return v ? { def, v: leadsView(v) } : null
+}
+
+const shownCache = new Map<PartView, PartView>()
+/** The breadboard art as drawn: leads to the pins, other legs in ink. */
+function leadsView(v: PartView): PartView {
+  const hit = shownCache.get(v)
+  if (hit) return hit
+  const led = withLeads(v)
+  const out = { ...led, svg: blackenLegs(led.svg) }
+  shownCache.set(v, out)
+  return out
+}
+
+/**
+ * Circuits saved before parts had leads (doc.meta.leads unset) placed each
+ * part by its old box, with its pins on the body. Move every part whose pins
+ * have since moved to the ends of its leads so those pins land where they did,
+ * in the same holes, and mark the doc. Returns the moves (empty when there's
+ * nothing to do) and whether every part's definition was available to check.
+ */
+export function leadMigration(doc: CircuitDoc): {
+  moves: { id: string; placement: Placement }[]
+  complete: boolean
+} {
+  const moves: { id: string; placement: Placement }[] = []
+  // already current: moving its parts again would push them off their holes
+  if ((doc.meta?.leads ?? 0) >= LEADS_VERSION) return { moves, complete: true }
+  let complete = true
+  for (const part of doc.parts) {
+    const pl = part.bb
+    if (!pl) continue
+    const def = getPart(part.type)
+    if (!def) {
+      complete = false
+      continue
+    }
+    const raw = viewFor(def, 'breadboard')
+    if (!raw) continue
+    const now = withLeads(raw)
+    if (now === raw) continue
+    const pin = Object.keys(raw.pins)[0]
+    if (!pin) continue
+    const leg = pl.legs?.[pin]
+    const was = pinWorld(raw.pins[pin], pl, raw.w, raw.h, leg)
+    const is = pinWorld(now.pins[pin], pl, now.w, now.h, leg)
+    const dx = Math.round((was.x - is.x) * 1e4) / 1e4
+    const dy = Math.round((was.y - is.y) * 1e4) / 1e4
+    if (dx || dy) moves.push({ id: part.id, placement: { ...pl, x: pl.x + dx, y: pl.y + dy } })
+  }
+  return { moves, complete }
 }
 
 /** Breadboard visual (bb-fixed callers: seats, breadboard holes, exports). */

@@ -3,7 +3,11 @@
 What changed in each tinyStudio release. Dates are when the version was
 finished; versions follow [semantic versioning](https://semver.org).
 
-## 0.5.0 (2026-11-12)
+## 1.0.0 beta (2026-11-12)
+
+The first beta. It includes everything that was being finished as 0.5.0,
+which was never released on its own. The status bar and README now say
+**beta**.
 
 ### Boards
 
@@ -45,6 +49,9 @@ finished; versions follow [semantic versioning](https://semver.org).
   get their own coloured line and legend entry. **Create visual.js** in an
   existing project gives the same sketch. See
   [docs/visual-default-plotter.md](docs/visual-default-plotter.md).
+- While `visual.js` is still the stock plotter, the Visual toolbar says
+  **Create your own visuals with p5.js**, with an **Edit** button that opens
+  the sketch in the code editor. It goes away once the sketch is edited.
 - The starter sketch prints `led:1` / `led:0` instead of `LED ON` / `LED OFF`,
   so the Visual view graphs the blink straight away.
 
@@ -68,35 +75,101 @@ finished; versions follow [semantic versioning](https://semver.org).
 - A demo project, **tinyProto_Demo**, walks through the whole flow: two buttons
   and two LEDs on a tinyProto, wired front and back, laid out as a schematic
   and exported to KiCad.
+- **Solder joints on a tinyProto.** Every hole a part's lead is seated in, a
+  stacked board's header pin comes through, or a wire ends in gets a joint: a
+  concave fillet of solder around the lead, with the lead's tip (a header's
+  square post, a wire's copper end) poking up out of it, on both faces of the
+  board. Breadboards are plug-in and get none. Purely visual: the connection
+  is the seat or the wire, as before.
+- **Pins at the ends of the leads.** LEDs, capacitors, the thermistor and the
+  photocell had their pins up on the body, with a stub of lead hanging below
+  that you couldn't plug in. Their leads are now drawn down to the pin, one
+  grid square long, so what goes in the hole is the end of the lead. Circuits
+  saved before this keep these parts in the same holes: the first time one
+  opens, its parts are moved to match (the file gets `meta.leads`).
+- **Wires go under parts.** On the front of the breadboard, a wire running
+  under a part is drawn under it and shows through faintly; it's solid again
+  where it crosses a pin or a joint, and still clickable everywhere. Solder
+  sits on top of the parts it holds.
+- **Edit makes room for Properties.** Editing a circuit hides the Docs /
+  Examples / Studio AI side panel, which used to squeeze the Properties rail,
+  and **Done** brings it back. Reopen the panel from the Panels menu while
+  editing and it stays open.
+- The **Edit**, **Front/Back** and **Grid** buttons show when they're on: a
+  blue border, ledge and tint. The grid button looked the same either way.
+- **Schematic symbols sit on the grid.** The 6 mm and 12 mm tactile buttons
+  drew their leads 2.4 px off their pins, so wires met them with a jog: any
+  symbol nudged onto the grid by half a square was letterboxed off its pins.
+  Generated box symbols (the 7-segment display, servo, IR receiver, 7805) are
+  a whole number of grid squares wide, so their right-hand pins are on the
+  grid too; on a schematic you already drew, those pins move up to half a
+  square and their wires follow. The LED's envelope circle is no longer
+  clipped at the bottom.
+- Schematic wires are drawn in the same ink as the symbols, as the image
+  export already did (they were near-black against slate symbols). The
+  schematic grid lines and the breadboard dots sit on the grid points; the
+  dots were half a square off, between the holes.
+- Part captions are easier to read: on the breadboard, a small card behind the
+  name (it was grey text straight on the board); on the schematic, a halo of
+  paper.
+- The circuit toolbar no longer runs into the Breadboard | Schematic switch on
+  a laptop screen with the Files panel open: the buttons drop their labels
+  sooner, and stack sooner on very narrow windows.
 
 ### KiCad export
 
 - **Export → KiCad HAT project** now writes a **schematic** (`.kicad_sch`) as
-  well as the board, netlist and project. It uses KiCad's own symbols (embedded
-  in the file, so it opens without any library installed), the parts where you
-  put them on tinyStudio's schematic, net labels on every connection, ground
-  symbols, and no-connect flags on unused pins. It passes KiCad's ERC with no
-  errors, and **Tools → Update PCB from Schematic** brings every part onto the
-  HAT with its ratsnest to the tinyCore headers, which are already linked to
-  their symbols.
+  well as the board, netlist and project, laid out to the sheet and layout
+  standards in [docs/hardware-standards.md](docs/hardware-standards.md): US
+  Letter with a filled-in title block (title, revision, designer), the tinyCore
+  headers in their own block, parts grouped into titled blocks (LEDs, Buttons,
+  Decoupling, …) separated by dashed lines, supplies pointing up and ground
+  down, global labels for signals that leave a block, and `PWR_FLAG`s on every
+  rail. It passes KiCad's ERC with no errors or warnings.
+- Parts use **SparkFun's KiCad libraries** where SparkFun has the part: their
+  symbols (embedded in the schematic, so it opens without the library
+  installed) and footprints. A part whose value matches the stocked SparkFun
+  part carries its `PROD_ID`; one that doesn't (a 330 Ω resistor on the 10k
+  symbol) gets an export note instead.
+- **The parts are on the board.** Each footprint is placed on the HAT where the
+  part sits on your tinyProto, legs in the same holes, already on its nets and
+  linked to its schematic symbol, so the board shows the ratsnest straight
+  away. Parts that aren't on a tinyProto line up below the board.
+- The board comes with GND pours on both sides, the title in silkscreen and
+  the revision in bottom copper, and design rules to match the standards:
+  6 mil signal and 10 mil power tracks (a Power net class for GND, 3V3, VBUS,
+  …), 24/12 mil vias.
+- The schematic, board and netlist agree net for net and field for field: KiCad's
+  **Schematic Parity** check finds nothing. Unused tinyCore pins are no-connects
+  with their name (A5, SDA) beside them, and unnamed nets are named the way
+  KiCad names them (`Net-(LED1-A)`).
 - In the desktop app the project goes into a **KiCad** folder in your project
   instead of a zip download. Exporting again rewrites the schematic, netlist
   and README but never the board or project file, so a layout you've started
-  is kept: run Update PCB from Schematic again to pick up the changes.
+  is kept: run Update PCB from Schematic to pick up the changes.
 - The KiCad files are named after your project, and the project file points at
   this schematic (it used to name tinyMove's).
 - The project carries `fp-lib-table` and `sym-lib-table` entries for the
   KiCad stock libraries it uses, so footprints like the radial capacitor and
   6 mm button resolve even where the global library tables leave them out.
-- The 12 mm button uses SparkFun's `Push_PTH_12x12mm` footprint. A few parts
-  pointed at KiCad symbols that have since moved (3-pin header, BJTs, MOSFET);
-  they use the current names.
+- Fixed footprints: the 6 mm button pointed at a SparkFun footprint that doesn't
+  exist (it uses KiCad's `SW_PUSH_6mm`), the fuse at a fuse holder KiCad no
+  longer ships, and parts whose footprint pads carry no uuid (the radial
+  capacitor) came out with their pads on no net.
 - Values come out right for parts without one: a button is "Tactile Button
   6mm", not "false".
 - See [docs/kicad-export.md](docs/kicad-export.md).
 
+### App
+
+- On macOS the window has the system's red, yellow and green buttons, at the
+  left of the header bar, and they hide in full screen. Windows and Linux keep
+  minimize, maximize and close at the right.
+
 ### Fixed
 
+- **Escape** closes the Panels and notifications popups in the status bar;
+  only a click outside used to.
 - **Save** (and ⌘S / Ctrl+S) saves the circuit in the Circuit view and the
   sketch in the Visual view. It only ever saved the file open in the code
   editor, so circuit edits were lost unless you switched back to the code first.
@@ -134,6 +207,15 @@ finished; versions follow [semantic versioning](https://semver.org).
   settings, so compiling against it failed inside arduino-cli with no
   diagnostics. Detected placeholders are now mapped to the real board, and a
   build against an unmapped one fails with an explanation instead.
+
+### Not in this beta yet
+
+The 1.0 beta list in [docs/release-plan.md](docs/release-plan.md) still has
+open items, most importantly: the macOS app is ad-hoc signed and not notarized
+(Gatekeeper warns on first launch) and there are no automatic updates; Save As,
+Archive and Include Library from Arduino IDE parity; ERC pin-type checks;
+Wokwi and Fritzing import; first-run onboarding; and an end-to-end Electron
+test in CI.
 
 ## 0.4.0 (2026-09-19)
 

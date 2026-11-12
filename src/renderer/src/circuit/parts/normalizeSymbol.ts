@@ -38,15 +38,22 @@ function round(n: number, places = 4): number {
   return Math.round(n * f) / f
 }
 
-/** viewBox width of an SVG string, if it declares one. */
-function viewBoxWidth(svg: string): number | null {
+/** An SVG string's viewBox as [x, y, w, h], if it declares a usable one. */
+function viewBoxOf(svg: string): [number, number, number, number] | null {
   const m = /viewBox\s*=\s*"([^"]+)"/i.exec(svg)
   if (!m) return null
   const parts = m[1]
     .trim()
     .split(/[\s,]+/)
     .map(Number)
-  return parts.length === 4 && Number.isFinite(parts[2]) && parts[2] > 0 ? parts[2] : null
+  return parts.length === 4 && parts.every(Number.isFinite) && parts[2] > 0 && parts[3] > 0
+    ? (parts as [number, number, number, number])
+    : null
+}
+
+/** viewBox width of an SVG string, if it declares one. */
+function viewBoxWidth(svg: string): number | null {
+  return viewBoxOf(svg)?.[2] ?? null
 }
 
 /**
@@ -133,11 +140,21 @@ export function normalizeAuthoredSymbol(v: PartView): PartView {
     pins[name] = [round(x + dx, 2), round(y + dy, 2)]
   }
 
-  return {
-    ...v,
-    svg: closed,
-    w: round(v.w + Math.max(0, dx), 2),
-    h: round(v.h + Math.max(0, dy), 2),
-    pins
-  }
+  // A nudge down or right grows the box to keep the art inside it, and the
+  // viewBox has to grow with it. Left alone, the browser fits the old viewBox
+  // into the taller box and centres it (preserveAspectRatio), sliding the art
+  // half the nudge away from its pins: the 6 mm button's leads ended 2.4 px
+  // below the pins wires attach to.
+  const w = round(v.w + Math.max(0, dx), 2)
+  const h = round(v.h + Math.max(0, dy), 2)
+  const vb = viewBoxOf(closed)
+  const sized =
+    vb && (w !== v.w || h !== v.h)
+      ? closed.replace(
+          /viewBox\s*=\s*"[^"]*"/i,
+          `viewBox="${vb[0]} ${vb[1]} ${round((vb[2] * w) / v.w, 4)} ${round((vb[3] * h) / v.h, 4)}"`
+        )
+      : closed
+
+  return { ...v, svg: sized, w, h, pins }
 }

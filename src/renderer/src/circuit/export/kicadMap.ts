@@ -1,9 +1,12 @@
 /**
  * circuit/export/kicadMap: part type → KiCad symbol, footprint and pad numbers.
  *
- * SparkFun's KiCad library comes first, because MR.INDUSTRIES boards are drawn
- * with it; KiCad's stock libraries fill in where SparkFun has no through-hole
- * equivalent. Pads are keyed by the part's OWN pin names (the names wires and
+ * SparkFun's KiCad library comes first, symbols and footprints both, because
+ * MR.INDUSTRIES boards are drawn with it; KiCad's stock libraries fill in only
+ * where SparkFun has no through-hole equivalent (the 6 mm button, ceramic and
+ * radial capacitors, diodes, 3 mm LEDs…). SparkFun's symbols are per stocked
+ * part ("10k_Axial_1/6W", PROD_ID RES-08375): a part whose value differs keeps
+ * the symbol and footprint but not the PROD_ID (export/kicadLibInfo). Pads are keyed by the part's OWN pin names (the names wires and
  * nets use), so a mapping can't drift from the circuit it exports.
  *
  * tinyStudio boards export as black boxes: one MR-INDUSTRIES footprint whose
@@ -30,7 +33,11 @@ const BUZZER = 'Buzzer_Beeper:Buzzer_12x9.5RM7.6'
 
 /** Core-pack parts. LED and diode pads follow KiCad and SparkFun: 1 = K, 2 = A. */
 export const KICAD_MAP: Record<string, KicadMapping> = {
-  resistor: { symbol: 'Device:R', footprint: AXIAL_R, pads: two('Pin 0', 'Pin 1') },
+  resistor: {
+    symbol: 'SparkFun-Resistor:10k_Axial_1/6W',
+    footprint: AXIAL_R,
+    pads: two('Pin 0', 'Pin 1')
+  },
   'capacitor-ceramic-100mil': {
     symbol: 'Device:C',
     footprint: 'Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P2.50mm',
@@ -57,7 +64,7 @@ export const KICAD_MAP: Record<string, KicadMapping> = {
     pads: two('cathode', 'anode')
   },
   'led-generic-5mm': {
-    symbol: 'Device:LED',
+    symbol: 'SparkFun-LED:LED_Red_5mm_PTH_Silk',
     footprint: 'SparkFun-LED:LED_5mm_PTH_Red_Silk',
     pads: two('cathode', 'anode')
   },
@@ -77,7 +84,7 @@ export const KICAD_MAP: Record<string, KicadMapping> = {
     pads: two('pin 0', 'pin 1')
   },
   'potentiometer-trimmer-6mm-5': {
-    symbol: 'Device:R_Potentiometer',
+    symbol: 'SparkFun-Resistor:10k_Trimpot_3386U',
     footprint: 'SparkFun-Resistor:Trimpot_PTH_3386U',
     pads: { leg1: '1', wiper: '2', leg2: '3' }
   },
@@ -86,9 +93,10 @@ export const KICAD_MAP: Record<string, KicadMapping> = {
     footprint: 'Potentiometer_THT:Potentiometer_Alps_RK163_Single_Horizontal',
     pads: { leg1: '1', wiper: '2', leg2: '3' }
   },
+  // SparkFun's KiCad library has no through-hole 6 mm button
   pushbutton: {
     symbol: 'Switch:SW_Push',
-    footprint: 'SparkFun-Switch:Push_PTH_6x6mm',
+    footprint: 'Button_Switch_THT:SW_PUSH_6mm',
     pads: two('leg0', 'leg1')
   },
   // SparkFun's 6 mm (COM-00097) and 12 mm (COM-09190) tactile buttons. KiCad's
@@ -100,7 +108,7 @@ export const KICAD_MAP: Record<string, KicadMapping> = {
     pads: { '1a': '1', '1b': '1', '2a': '2', '2b': '2' }
   },
   'tactile-button-12mm': {
-    symbol: 'Switch:SW_Push',
+    symbol: 'SparkFun-Switch:SPST_Push_PTH_12x12mm_h8.0mm',
     footprint: 'SparkFun-Switch:Push_PTH_12x12mm',
     pads: { '1a': '1', '1b': '1', '2a': '2', '2b': '2' }
   },
@@ -127,7 +135,7 @@ export const KICAD_MAP: Record<string, KicadMapping> = {
     pads: { E: '1', B: '2', C: '3' }
   },
   'sparkfun-discretesemi-mosfet-nchannel-pth': {
-    symbol: 'Transistor_FET:Q_NMOS_GDS',
+    symbol: 'SparkFun-DiscreteSemi:Q_NMOS_30A_55V_Vertical',
     footprint: TO220,
     pads: { G: '1', D: '2', S: '3' }
   },
@@ -138,16 +146,16 @@ export const KICAD_MAP: Record<string, KicadMapping> = {
   },
   'sparkfun-passives-fuse-x20mm': {
     symbol: 'Device:Fuse',
-    footprint: 'Fuse:Fuseholder_Cylinder-5x20mm_Schurter_0031_8201_Horizontal_OpenType',
+    footprint: 'Fuse:Fuseholder_Cylinder-5x20mm_Bulgin_FX0457_Horizontal_Closed',
     pads: two('1', '2')
   },
   'smd-inductor-0805': {
-    symbol: 'Device:L',
+    symbol: 'SparkFun-Coil:1.0uH_0805_1.45A',
     footprint: 'SparkFun-Coil:0805',
     pads: two('pin 0', 'pin 1')
   },
   servo: {
-    symbol: 'Connector_Generic:Conn_01x03',
+    symbol: 'SparkFun-Connector:Conn_01x03_P2.54mm',
     footprint: 'SparkFun-Connector:1x03_P2.54mm',
     pads: { gnd: '1', vcc: '2', pulse: '3' }
   },

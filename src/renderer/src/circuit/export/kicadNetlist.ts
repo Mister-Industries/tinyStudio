@@ -12,6 +12,7 @@ import type { CircuitDoc } from '../core/model'
 import type { NetModel } from '../core/nets'
 import { compareRefs, exportValue, today, type ExportContext } from './common'
 import { isExportedPart, kicadMappingFor, type ResolvedMapping } from './kicadMap'
+import { libInfo, pinName, sameValue } from './kicadLibInfo'
 
 export interface ExportResult {
   text: string
@@ -28,6 +29,7 @@ export interface StandIn {
   /** lib:symbol */
   symbol: string
   value: string
+  description?: string
   /** the replaced part's pin name → this component's pad number */
   pads: Record<string, string>
   /**
@@ -56,6 +58,10 @@ export interface ExportComponent {
   partId: string
   /** the part's pin name → pad number */
   pads: Record<string, string>
+  /** SparkFun production id, when the part is that stocked part */
+  prodId?: string
+  /** datasheet link from the library symbol */
+  datasheet?: string
 }
 
 export interface NetlistExport extends ExportResult {
@@ -63,7 +69,18 @@ export interface NetlistExport extends ExportResult {
   padNets: Map<string, string>
   /** every component, in refdes order */
   components: ExportComponent[]
+  /**
+   * "<ref>:<pad>" → the name a pin's net would have had, for pins on nothing
+   * else: the schematic marks them no-connect, so KiCad (and these files) call
+   * their net "unconnected-(J1-Pin_3-Pad3)"; the schematic notes the old name
+   */
+  unusedNames: Map<string, string>
 }
+
+export const GROUND = /^(GND|AGND|DGND|GND\d*)$/i
+export const SUPPLY = /^(\+?3V3|\+?3\.3V|\+?5V|VCC|VDD|VBUS|VIN|VBAT|PWR|\+?12V)$/i
+/** a ground or supply net: always connected, never a no-connect */
+export const isRail = (name: string): boolean => GROUND.test(name) || SUPPLY.test(name)
 
 /** KiCad s-expression string. */
 export function q(s: string): string {
@@ -111,13 +128,13 @@ export function kicadNetlist(
   const components: ExportComponent[] = []
   for (const [partId, list] of standIn)
     for (const c of list) {
-      comps.push(compLine(c.ref, c.value, c.footprint, c.symbol, ''))
+      comps.push(compLine(c.ref, c.value, c.footprint, c.symbol, c.description ?? ''))
       components.push({
         ref: c.ref,
         value: c.value,
         footprint: c.footprint,
         symbol: c.symbol,
-        description: '',
+        description: c.description ?? '',
         partId,
         pads: c.pads
       })
@@ -128,10 +145,22 @@ export function kicadNetlist(
     mapping.set(part.id, m)
     if (m.generic)
       warnings.push(`${part.id} (${part.type}) has no KiCad footprint; assign one in pcbnew`)
+    // a part with no value of its own (an LED, a button) takes the library
+    // part's ("Red", "PTH_12x12mm_h8.0mm"); the PROD_ID only goes with that value
+    const label = ctx.labelOf?.(part.type) ?? part.type
+    const own = exportValue(part, ctx)
+    const lib = libInfo(m.symbol)
+    const hasOwn = own !== label && own !== part.type
+    const value = !hasOwn && lib?.value && m.symbol.startsWith('SparkFun-') ? lib.value : own
+    const stocked = !!lib?.prodId && (!hasOwn || sameValue(own, lib.value))
+    if (lib?.prodId && !stocked)
+      warnings.push(
+        `${part.id}: ${m.symbol.split(':')[1]} is the ${lib.value} part; ${own} has no SparkFun PROD_ID`
+      )
     comps.push(
       compLine(
         part.id,
-        exportValue(part, ctx),
+        value,
         m.footprint,
         splitLib(m.symbol)[1] ? m.symbol : `${splitLib(m.symbol)[0]}:${part.type}`,
         ctx.labelOf?.(part.type) ?? ''
@@ -139,12 +168,14 @@ export function kicadNetlist(
     )
     components.push({
       ref: part.id,
-      value: exportValue(part, ctx),
+      value,
       footprint: m.footprint,
       symbol: m.symbol,
       description: ctx.labelOf?.(part.type) ?? '',
       partId: part.id,
-      pads: m.pads
+      pads: m.pads,
+      prodId: stocked ? lib!.prodId : '',
+      datasheet: lib?.datasheet ?? ''
     })
   }
   comps.sort((a, b) => compareRefs(refOfComp(a), refOfComp(b)))
@@ -185,7 +216,11 @@ export function kicadNetlist(
         return c?.fixed?.[nd.pad] ?? c?.names?.[nd.pad]
       })
       .find(Boolean)
-    const name = net.netNames[i] ?? standName ?? `Net-(${nodes[0].ref}-Pad${nodes[0].pad})`
+    // KiCad's own name for an unlabelled net, so schematic and board agree
+    const first = nodes[0]
+    const sym = standInByRef.get(first.ref)?.symbol ?? mapping.get(first.ref)?.symbol ?? ''
+    const pinLabel = pinName(sym, first.pad) || `Pad${first.pad}`
+    const name = net.netNames[i] ?? standName ?? `Net-(${first.ref}-${pinLabel})`
     nets.push({ name, nodes })
   })
   // pads that always carry a net (a header's GND, 3V3) join it even unwired
@@ -205,6 +240,26 @@ export function kicadNetlist(
         nets[a].nodes.push(...nets[b].nodes)
         nets.splice(b, 1)
       }
+  // every pad is on a net, as in KiCad: an unwired one is alone on its own
+  const onNet = new Set(nets.flatMap((n) => n.nodes.map((nd) => `${nd.ref}:${nd.pad}`)))
+  const loose = new Set<string>()
+  for (const c of components)
+    for (const pad of new Set(Object.values(c.pads))) {
+      if (onNet.has(`${c.ref}:${pad}`)) continue
+      const named = standInByRef.get(c.ref)?.names?.[pad]
+      if (!named) loose.add(`${c.ref}:${pad}`)
+      nets.push({ name: named ?? `${c.ref}:${pad}`, nodes: [{ ref: c.ref, pad }] })
+    }
+  // a pin alone on its net is a no-connect: name it as KiCad does
+  const unusedNames = new Map<string, string>()
+  for (const n of nets) {
+    if (n.nodes.length !== 1 || isRail(n.name)) continue
+    const nd = n.nodes[0]
+    const sym = standInByRef.get(nd.ref)?.symbol ?? mapping.get(nd.ref)?.symbol ?? ''
+    const pin = pinName(sym, nd.pad)
+    if (!loose.has(`${nd.ref}:${nd.pad}`)) unusedNames.set(`${nd.ref}:${nd.pad}`, n.name)
+    n.name = `unconnected-(${nd.ref}-${pin ? `${pin}-` : ''}Pad${nd.pad})`
+  }
   for (const n of nets)
     n.nodes.sort((a, b) => compareRefs(a.ref, b.ref) || Number(a.pad) - Number(b.pad))
   nets.sort((a, b) => a.name.localeCompare(b.name))
@@ -233,5 +288,5 @@ export function kicadNetlist(
     ')',
     ''
   ].join('\n')
-  return { text, warnings, padNets, components }
+  return { text, warnings, padNets, components, unusedNames }
 }

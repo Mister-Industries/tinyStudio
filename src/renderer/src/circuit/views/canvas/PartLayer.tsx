@@ -182,7 +182,7 @@ export function PartLayer({
           return (
             <div
               key={part.id}
-              style={{ position: 'absolute', left: pl.x, top: pl.y, zIndex: 2 }}
+              style={{ position: 'absolute', left: pl.x, top: pl.y, zIndex: 3 }}
               className="px-2 py-1 rounded bg-surface-card border border-border-default text-[10px] text-text-faint"
             >
               {part.type}…
@@ -206,9 +206,12 @@ export function PartLayer({
                 top: pl.y,
                 width: vis.v.w,
                 height: vis.v.h,
-                // boards sit under every other part (and under the z5 wire
-                // layer); a tinyCore or HAT sits under a tinyProto stacked on it
-                zIndex: isHoleBoard(part.type) ? 1 : isTinyHeaderBoard(part.type) ? 0 : 2,
+                // The breadboard is a 1.5D scene, bottom to top: a tinyCore or
+                // HAT (0), the breadboard or tinyProto on it (1), the wires
+                // lying on the board (2), components standing on it (3),
+                // solder on their leads (4), captions (5), then the same wires
+                // again, faint, over everything (Canvas, WireLayer `top`)
+                zIndex: isHoleBoard(part.type) ? 1 : isTinyHeaderBoard(part.type) ? 0 : 3,
                 // from the back, boards stay readable and components fade
                 opacity: backside
                   ? isBreadboard(part.type) || /^tiny/.test(part.type)
@@ -472,11 +475,23 @@ export function PartLayer({
                   view === 'sch'
                     ? pl.y + lay.refdes[1] + labelOff[1]
                     : pl.y + lay.box.top + lay.box.h + 4 + labelOff[1],
-                zIndex: 4,
-                fontSize: view === 'sch' ? FONT_REFDES : 11,
+                zIndex: 5,
+                fontSize: view === 'sch' ? FONT_REFDES : 10,
                 fontFamily: 'var(--font-sans)',
-                fontWeight: view === 'sch' ? 600 : 400,
-                color: selected ? 'var(--brand)' : view === 'sch' ? INK : 'var(--text-muted)',
+                fontWeight: 600,
+                color: selected ? 'var(--brand)' : view === 'sch' ? INK : 'var(--text-body)',
+                // readable over anything: on the schematic a halo of paper; on
+                // the breadboard, where it sits on a green board or a wire, a
+                // small card (it was muted grey text straight on the board)
+                ...(view === 'sch'
+                  ? { textShadow: '0 0 2px var(--sch-paper), 0 0 2px var(--sch-paper)' }
+                  : {
+                      lineHeight: '13px',
+                      padding: '0 3px',
+                      borderRadius: 3,
+                      background: 'color-mix(in srgb, var(--surface-card) 88%, transparent)',
+                      boxShadow: '0 0 0 0.5px var(--border-default), 0 1px 2px rgba(0,0,0,0.18)'
+                    }),
                 cursor: editable ? 'move' : 'default',
                 pointerEvents: editable ? 'auto' : 'none'
               }}
@@ -490,11 +505,12 @@ export function PartLayer({
                 style={{
                   left: pl.x + lay.value[0] + labelOff[0],
                   top: pl.y + lay.value[1] + labelOff[1],
-                  zIndex: 4,
+                  zIndex: 5,
                   fontSize: FONT_VALUE,
                   fontFamily: 'var(--font-sans)',
                   fontWeight: 600,
-                  color: selected ? 'var(--brand)' : INK
+                  color: selected ? 'var(--brand)' : INK,
+                  textShadow: '0 0 2px var(--sch-paper), 0 0 2px var(--sch-paper)'
                 }}
               >
                 {valueText}

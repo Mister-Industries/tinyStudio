@@ -85,6 +85,18 @@ export class CircuitStore {
     this.notify()
   }
 
+  /**
+   * A repair made on load (an older file brought up to date), not an edit:
+   * applied without an undo entry, so Undo can't put the file back into a
+   * state the editor would only repair again. Still saved like any change.
+   */
+  repair(cmd: Command): void {
+    const next = cmd.apply(this.doc)
+    if (next === this.doc) return
+    this.doc = next
+    this.notify()
+  }
+
   canUndo(): boolean {
     return this.undoStack.length > 0
   }

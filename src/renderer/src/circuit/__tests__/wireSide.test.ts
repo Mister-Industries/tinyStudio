@@ -5,13 +5,7 @@
 import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
 import { buildNets } from '../core/nets'
-import {
-  emptyDoc,
-  parseCircuitFile,
-  serializeDoc,
-  wireSide,
-  type CircuitDoc
-} from '../core/model'
+import { emptyDoc, parseCircuitFile, serializeDoc, wireSide, type CircuitDoc } from '../core/model'
 
 function doc(partial: Partial<CircuitDoc>): CircuitDoc {
   return { ...emptyDoc(), ...partial }

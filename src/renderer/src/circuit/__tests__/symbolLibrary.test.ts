@@ -173,3 +173,66 @@ test('the schematic palette can draw a symbol for every catalogue part', async (
     assert.ok(Object.keys(symbol.pins).length > 0, `${meta.type} symbol has no pins`)
   }
 })
+
+test('a symbol nudged down onto the grid keeps its art on its pins', () => {
+  // pins on the half grid (4.8, 24) move down 4.8 to the major grid; the box
+  // grows by the same 4.8, and so must the viewBox, or the browser centres the
+  // old one in the taller box and the art lands 2.4 px off its pins
+  const v: PartView = {
+    svg: '<svg viewBox="0 0 39.3 28.8"><line x1="0" y1="4.8" x2="9.6" y2="4.8" stroke="#000"/></svg>',
+    w: 39.3,
+    h: 28.8,
+    pins: { a: [0, 4.8], b: [0, 24] }
+  }
+  const out = normalizeAuthoredSymbol(v)
+  assert.deepEqual(out.pins.a, [0, 9.6])
+  assert.equal(out.h, 33.6)
+  assert.match(out.svg, /viewBox="0 0 39.3 33.6"/)
+})
+
+test('every catalogue symbol draws at one scale: its viewBox has the shape of its box', async () => {
+  const types = PART_MANIFEST.map((m) => m.type)
+  await ensureParts(types)
+  for (const meta of PART_MANIFEST) {
+    const def = getPart(meta.type)
+    if (!def) continue
+    const v = schematicVisual(def)
+    const m = /viewBox\s*=\s*"([^"]+)"/i.exec(v.svg)
+    if (!m) continue
+    const [, , vw, vh] = m[1]
+      .trim()
+      .split(/[\s,]+/)
+      .map(Number)
+    const sx = v.w / vw
+    const sy = v.h / vh
+    assert.ok(
+      Math.abs(sx - sy) / sx < 0.01,
+      `${meta.type}: box ${v.w}x${v.h} vs viewBox ${vw}x${vh} would letterbox the art off its pins`
+    )
+  }
+})
+
+test('every catalogue symbol has its pins a whole number of grid squares apart', async () => {
+  // parts snap by their first pin, so every other pin is on the grid only if
+  // it is a whole number of squares from that one (the 7-segment's right-hand
+  // pins were 2.56 px off: its generated box took the title's width)
+  const types = PART_MANIFEST.map((m) => m.type)
+  await ensureParts(types)
+  for (const meta of PART_MANIFEST) {
+    const def = getPart(meta.type)
+    if (!def) continue
+    const pins = Object.entries(schematicVisual(def).pins)
+    const [x0, y0] = pins[0]?.[1] ?? [0, 0]
+    for (const [pin, [x, y]] of pins)
+      assert.ok(
+        onGrid(x - x0) && onGrid(y - y0),
+        `${meta.type}.${pin} is ${(x - x0).toFixed(2)}, ${(y - y0).toFixed(2)} from its first pin`
+      )
+  }
+})
+
+test('symbol art may reach past its box without being cut off', () => {
+  // the LED's envelope circle overhangs its 3-square box by a couple of px
+  const v = bindWithGenericPins('led')
+  assert.match(v.svg, /<svg\b[^>]*\boverflow="visible"/)
+})

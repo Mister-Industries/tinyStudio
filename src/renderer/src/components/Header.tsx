@@ -65,6 +65,20 @@ export function Header(): React.JSX.Element {
     setTimeout(action, 0)
   }
 
+  // macOS draws its own red/yellow/green buttons at the left of this bar
+  // (main/index.ts, titleBarStyle 'hidden'); the bar leaves them room, except
+  // in full screen, where macOS hides them
+  const macWindow = isElectron() && window.electron?.process?.platform === 'darwin'
+  const [fullScreen, setFullScreen] = useState(false)
+  useEffect(() => {
+    if (!macWindow) return
+    const onFullScreen = (_e: unknown, on: boolean): void => setFullScreen(on)
+    window.electron.ipcRenderer.on('window:fullscreen', onFullScreen)
+    return () => {
+      window.electron.ipcRenderer.removeListener('window:fullscreen', onFullScreen)
+    }
+  }, [macWindow])
+
   useEffect(() => {
     if (!isElectron()) return
 
@@ -93,7 +107,9 @@ export function Header(): React.JSX.Element {
       className="h-[38px] w-full shrink-0 flex items-center justify-between bg-[var(--bar-accent)] shadow-[inset_0_-1px_0_0_rgba(0,0,0,0.18)] dark:bg-[var(--bg-raised)] dark:border-b dark:border-[var(--border-default)] dark:shadow-none"
       style={isElectron() ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : {}}
     >
-      <div className="flex items-center gap-2 pl-3 min-w-0">
+      <div
+        className={`flex items-center gap-2 min-w-0 ${macWindow && !fullScreen ? 'pl-[80px]' : 'pl-3'}`}
+      >
         {/* Wordmark doubles as a "File"-style menu for workspace actions. */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -203,7 +219,7 @@ export function Header(): React.JSX.Element {
           <TooltipContent side="bottom">{isDark ? 'Light mode' : 'Dark mode'}</TooltipContent>
         </Tooltip>
         <GitHubAccountButton />
-        {isElectron() && (
+        {isElectron() && !macWindow && (
           <div className="h-full flex items-center">
             <Button
               variant="ghost"

@@ -129,7 +129,10 @@ export function generateBoxSymbol(def: PartDef): PartView {
   const inner = textWidth(widest(left), FONT_PIN) + textWidth(widest(right), FONT_PIN) + P * 2
   const bodyW = Math.max(P * 4, Math.ceil(inner / P) * P)
   const bodyH = P * (rows + 1)
-  const w = Math.max(bodyW + stub * 2, textWidth(title, FONT_SYMBOL) + gutter * 2)
+  // a whole number of grid squares wide, even when the title sets the width,
+  // or the right-hand pins land off the grid (the 7-segment's were 2.56 px off)
+  const w =
+    Math.ceil(Math.max(bodyW + stub * 2, textWidth(title, FONT_SYMBOL) + gutter * 2) / P) * P
   const h = bodyH + P // headroom for the label
 
   const pins: Record<string, [number, number]> = {}

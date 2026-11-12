@@ -6,7 +6,8 @@ import { emptyDoc, type CircuitPart, type CircuitWire } from '../core/model'
 import { buildNets } from '../core/nets'
 import { kicadHatProject } from '../export/kicadHat'
 import { crc32, zipFiles } from '../export/zip'
-import { circuitBuses } from '../views/partsAdapter'
+import { circuitBuses, implicitSeats, pinWorldOf } from '../views/partsAdapter'
+import { ensureParts } from '../../lib/partsLibrary'
 
 let wid = 0
 const wire = (from: string, to: string): CircuitWire => ({ id: `w${++wid}`, from, to, view: 'bb' })
@@ -56,10 +57,12 @@ test('HAT: the tinyCore becomes J1-J3 and its nets reach the header pads', () =>
     'Blinky-HAT/fp-lib-table',
     'Blinky-HAT/sym-lib-table'
   ])
+  // only KiCad's own libraries go in the table: SparkFun's are the user's install
   assert.match(
     hat.files['Blinky-HAT/sym-lib-table'],
-    /\(lib \(name "Device"\) \(type "KiCad"\) \(uri "\$\{KICAD10_SYMBOL_DIR\}\/Device\.kicad_sym"\)/
+    /\(lib \(name "power"\) \(type "KiCad"\) \(uri "\$\{KICAD10_SYMBOL_DIR\}\/power\.kicad_sym"\)/
   )
+  assert.doesNotMatch(hat.files['Blinky-HAT/sym-lib-table'], /SparkFun/)
   const net = hat.files['Blinky-HAT/Blinky-HAT.net']
   // the board itself is not a component; its headers are
   assert.doesNotMatch(net, /\(ref "U1"\)/)
@@ -97,11 +100,32 @@ test('HAT: the tinyCore becomes J1-J3 and its nets reach the header pads', () =>
   // each header footprint is linked to its schematic symbol
   for (const j of ['J1', 'J2', 'J3']) {
     const symUuid = new RegExp(
-      `\\(lib_id "Connector_Generic:Conn_01x0\\d"\\)[\\s\\S]*?\\(uuid "([^"]+)"\\)\\s*\\(property "Reference" "${j}"`
+      `\\(lib_id "SparkFun-Connector:Conn_01x0\\d_P2\\.54mm"\\)[\\s\\S]*?\\(uuid "([^"]+)"\\)\\s*\\(property "Reference" "${j}"`
     ).exec(sch)![1]
     assert.ok(pcb.includes(`(path "/${symUuid}")`), `${j} linked`)
   }
-  assert.equal((pcb.match(/\(sheetfile "Blinky-HAT\.kicad_sch"\)/g) ?? []).length, 3)
+  // the three headers and the two parts, each linked to its symbol
+  assert.equal((pcb.match(/\(sheetfile "Blinky-HAT\.kicad_sch"\)/g) ?? []).length, 5)
+  // the parts come on the board, on their nets, fields hidden (SLK-406)
+  assert.match(pcb, /\(footprint "SparkFun-Resistor:R_Axial_DIN0207[^"]*"/)
+  assert.match(pcb, /\(footprint "SparkFun-LED:LED_5mm_PTH_Red_Silk"/)
+  assert.match(
+    pcb,
+    /\(property "Reference" "R1"\n\t\t\t\(at [^\n]*\n\t\t\t\(layer "F\.Fab"\)\n\t\t\t\(hide yes\)/
+  )
+  assert.match(pcb, /\(pad "1" thru_hole[\s\S]*?\(net "D8"\)/)
+  // GND pours on both sides, the name on the silk, the version in bottom copper
+  assert.equal((pcb.match(/\(zone\n\t\t\(net "GND"\)/g) ?? []).length, 2)
+  assert.match(pcb, /\(gr_text "Blinky HAT"[\s\S]*?\(layer "F\.SilkS"\)/)
+  assert.match(pcb, /\(gr_text "v0\.1"[\s\S]*?\(layer "B\.Cu" knockout\)/)
+  assert.match(pcb, /\(rev "v0\.1"\)/)
+  // design rules: 6/10/22/50 mil tracks, 24/12 mil vias, power nets 10 mil
+  assert.deepEqual(pro.board.design_settings.track_widths, [0, 0.1524, 0.254, 0.5588, 1.27])
+  assert.deepEqual(pro.board.design_settings.via_dimensions[1], { diameter: 0.6096, drill: 0.3048 })
+  assert.ok(
+    pro.net_settings.netclass_patterns.some((p: { pattern: string }) => p.pattern === 'GND')
+  )
+  assert.deepEqual(pro.board.design_settings.drc_exclusions, [])
 })
 
 test('HAT: a circuit already using J1 pushes the headers to free refs', () => {
@@ -139,4 +163,77 @@ test('HAT: stock KiCad footprints get a project fp-lib-table; SparkFun ones do n
   )
   assert.doesNotMatch(table, /SparkFun/)
   assert.match(hat.files['b/b.net'], /SparkFun-Switch:Push_PTH_12x12mm/)
+})
+
+test('HAT: a part on a tinyProto lands on the board across the holes its legs are in', async () => {
+  await ensureParts(['tinycore', 'tinyproto', 'resistor'])
+  const core: CircuitPart = { id: 'U1', type: 'tinycore', bb: { x: 96, y: 96 } }
+  const proto: CircuitPart = { id: 'P1', type: 'tinyproto', bb: { x: 96, y: 96 } }
+  // a resistor across H.5 to L.5, four holes (10.16 mm) apart
+  const r: CircuitPart = {
+    id: 'R1',
+    type: 'resistor',
+    attrs: { resistance: '10k' },
+    bb: { x: 0, y: 0 }
+  }
+  const p0 = pinWorldOf(r, 'Pin 0')!
+  const h = pinWorldOf(proto, 'H.5')!
+  r.bb = { x: h.x - p0.x, y: h.y - p0.y }
+  const doc = emptyDoc()
+  doc.parts = [core, proto, r]
+  doc.wires = [
+    { id: 'a', from: 'P1:D8', to: 'P1:H.5', view: 'bb', side: 'back' },
+    { id: 'b', from: 'P1:GND', to: 'P1:L.5', view: 'bb', side: 'back' }
+  ]
+  const seats = implicitSeats(doc)
+  const nets = buildNets(doc, {
+    busesFor: circuitBuses,
+    implicit: seats.map((s): [string, string] => [s.pin, s.hole])
+  })
+  // as the app does: a leg seated in a hole is at that hole
+  const seatAt = new Map(seats.map((s) => [s.pin, s.pos]))
+  const pinAt = (id: string, pin: string): { x: number; y: number } | null => {
+    const p = doc.parts.find((q) => q.id === id)
+    return seatAt.get(`${id}:${pin}`) ?? (p ? pinWorldOf(p, pin) : null)
+  }
+  const hat = kicadHatProject(doc, nets, { pinAt }, 'onboard')
+  const pcb = hat.files['onboard/onboard.kicad_pcb']
+  assert.ok(!hat.warnings.some((w) => /below the board/.test(w)), hat.warnings.join('; '))
+  const at =
+    /\(footprint "SparkFun-Resistor:[^"]*"[\s\S]*?\(at ([-\d.]+) ([-\d.]+)(?: (\d+))?\)/.exec(pcb)!
+  // H.5 is 7 holes right of J1 pin 1 (GND, 126.26, 96.14): the resistor is
+  // centred between H.5 and L.5, on the row, lying flat
+  const holeX = (col: number): number => 126.26 + (24 + col * 9.6 - 7.2) * (25.4 / 96)
+  assert.ok(Math.abs(+at[1] - (holeX(7) + holeX(11)) / 2) < 0.1, `x ${at[1]}`)
+  assert.ok(Math.abs(+at[2] - 96.13) < 0.1, `y ${at[2]}`)
+  assert.ok(!at[3] || +at[3] % 180 === 0, `rotation ${at[3]}`)
+  // its pads are on the nets of the holes it sits in
+  assert.match(pcb, /\(footprint "SparkFun-Resistor:[\s\S]*?\(net "D8"\)[\s\S]*?\(net "GND"\)/)
+})
+
+test('HAT: every placed pad carries its net, even in footprints whose pads have no uuid', () => {
+  const doc = emptyDoc()
+  doc.parts = [part('U1', 'tinycore'), part('C1', 'capacitor-electrolytic-medium')]
+  doc.wires = [wire('U1:3V3', 'C1:+'), wire('C1:-', 'U1:GND.2')]
+  const hat = kicadHatProject(doc, buildNets(doc, { busesFor: circuitBuses }), {}, 'Cap HAT')
+  const pcb = hat.files['Cap-HAT/Cap-HAT.kicad_pcb'] as string
+  const c1 = pcb.slice(pcb.indexOf('(property "Reference" "C1"'))
+  const pads = c1.slice(0, c1.indexOf('\n\t)\n')).match(/\(pad "[^"]*"[\s\S]*?\n\t\t\)/g) ?? []
+  assert.equal(pads.length, 2)
+  assert.match(pads.join(), /\(net "3V3"\)/)
+  assert.match(pads.join(), /\(net "GND"\)/)
+})
+
+test('HAT: an unused header pin is a no-connect named as KiCad names it, its pin name noted', () => {
+  const doc = ledCircuit()
+  const hat = kicadHatProject(doc, buildNets(doc, { busesFor: circuitBuses }), {}, 'Blinky HAT')
+  const pcb = hat.files['Blinky-HAT/Blinky-HAT.kicad_pcb'] as string
+  const sch = hat.files['Blinky-HAT/Blinky-HAT.kicad_sch'] as string
+  // A5 is J1 pin 3 and nothing uses it
+  assert.match(pcb, /\(net "unconnected-\(J1-Pin_3-Pad3\)"\)/)
+  assert.doesNotMatch(pcb, /\(net "A5"\)/)
+  assert.match(sch, /\(text "A5"/)
+  assert.doesNotMatch(sch, /\(global_label "A5"/)
+  // D8 is wired: it keeps its name
+  assert.match(pcb, /\(net "D8"\)/)
 })

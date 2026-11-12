@@ -78,7 +78,14 @@ function createWindow(): void {
     center: true,
     show: false,
     autoHideMenuBar: true,
-    frame: false,
+    // The header bar is the title bar. On macOS it keeps the system's red,
+    // yellow and green buttons, inset into the bar where a Mac user looks
+    // for them (the header leaves room, Header.tsx); elsewhere the window is
+    // frameless and the header draws its own minimize/maximize/close on the
+    // right, where Windows and Linux put them.
+    ...(process.platform === 'darwin'
+      ? { titleBarStyle: 'hidden' as const, trafficLightPosition: { x: 13, y: 12 } }
+      : { frame: false }),
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -92,6 +99,9 @@ function createWindow(): void {
   mainWindow.on('ready-to-show', () => mainWindow.show())
   mainWindow.on('maximize', () => mainWindow.webContents.send('window:maximized'))
   mainWindow.on('unmaximize', () => mainWindow.webContents.send('window:unmaximized'))
+  // macOS full screen hides the traffic lights: the header takes their room back
+  mainWindow.on('enter-full-screen', () => mainWindow.webContents.send('window:fullscreen', true))
+  mainWindow.on('leave-full-screen', () => mainWindow.webContents.send('window:fullscreen', false))
 
   // Links open in the user's browser. The app window only ever shows the app:
   // a plain link click in a README must not replace it with a website that has

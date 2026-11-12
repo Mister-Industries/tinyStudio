@@ -9,8 +9,9 @@ import { buildVisualExportHtml } from '@renderer/lib/visualExport'
 import { useAppDispatch, useAppSelector } from '@renderer/redux'
 import { setEditorView } from '@renderer/redux/editorSlice'
 import { revealFile } from '@renderer/redux/fileSlice'
-import { CodeXml, ExternalLink, Loader2, Plus, Sparkles, UploadCloud } from 'lucide-react'
+import { CodeXml, ExternalLink, Loader2, Pencil, Plus, Sparkles, UploadCloud } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { Button } from '../ui/Button'
 import { IconButton } from '../ui/IconButton'
 import { VisualPreview } from '../VisualPreview'
 import { LoadingHint } from './LoadingHint'
@@ -155,6 +156,15 @@ export function VisualPane(): React.JSX.Element | null {
     }
   }
 
+  const editSketch = (): void => {
+    if (!file) return
+    dispatch(revealFile(file.id))
+    dispatch(setEditorView('code'))
+  }
+  // the stock Serial Plotter, untouched: invite people to make it their own.
+  // Gone as soon as the sketch is edited or another one is open.
+  const isStockPlotter = file?.name === 'visual.js' && file.content.trim() === DEFAULT_VISUAL.trim()
+
   return (
     <div className="size-full flex flex-col bg-[var(--bg)]">
       {/* Sketch picker + view actions. Tabs let you keep several p5.js renders
@@ -193,15 +203,19 @@ export function VisualPane(): React.JSX.Element | null {
             name={file.name}
             actions={
               <>
-                <IconButton
-                  label="Edit code"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    dispatch(revealFile(file.id))
-                    dispatch(setEditorView('code'))
-                  }}
-                >
+                {isStockPlotter && (
+                  <div className="flex items-center gap-2 mr-2 pr-3 border-r-[1.5px] border-[var(--border-soft)]">
+                    <Sparkles size={14} className="text-[var(--brand)] shrink-0" />
+                    <span className="text-[13px] text-[var(--text-body)] whitespace-nowrap">
+                      Create your own visuals with p5.js
+                    </span>
+                    <Button size="sm" onClick={editSketch}>
+                      <Pencil size={14} />
+                      Edit
+                    </Button>
+                  </div>
+                )}
+                <IconButton label="Edit code" variant="ghost" size="sm" onClick={editSketch}>
                   <CodeXml size={16} />
                 </IconButton>
                 <IconButton label="Preview in browser" variant="ghost" size="sm" onClick={preview}>

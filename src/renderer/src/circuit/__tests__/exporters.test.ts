@@ -101,7 +101,7 @@ test('KiCad netlist: named nets keep their name, LED pads are K=1 A=2, board pad
   // unnamed net: KiCad-style name from its first node; D8 is pin 9
   assert.match(
     text,
-    /\(name "Net-\(LED1-Pad2\)"\)\n {6}\(node \(ref "LED1"\) \(pin "2"\)\)\n {6}\(node \(ref "R1"\) \(pin "2"\)\)/
+    /\(name "Net-\(LED1-A\)"\)\n {6}\(node \(ref "LED1"\) \(pin "2"\)\)\n {6}\(node \(ref "R1"\) \(pin "2"\)\)/
   )
   assert.match(text, /\(node \(ref "U1"\) \(pin "9"\)\)/)
 })

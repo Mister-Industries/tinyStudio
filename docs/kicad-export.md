@@ -5,24 +5,25 @@ tinyCore into a KiCad 10 project for a HAT: a board that plugs onto the tinyCore
 by its headers. In the desktop app the files go into a `KiCad/` folder in the
 project; in the browser they download as a zip.
 
-| File                  | What it is                                                                                                                                                                         | Written                   |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `<project>.kicad_sch` | The schematic: KiCad stock symbols, net labels, ground symbols, no-connect flags. The tinyCore is drawn as its three headers, J1–J3.                                               | Every export              |
-| `<project>.kicad_pcb` | The blank HAT from tinyMove: octagon outline, no mounting holes, the J1–J3 headers in place on their nets and linked to their schematic symbols, tinyMove's board setup and rules. | First export only         |
-| `<project>.kicad_pro` | The project, with tinyMove's design rules, pointing at this schematic.                                                                                                             | First export only         |
-| `<project>.net`       | The netlist, for importing into the board without the schematic.                                                                                                                   | Every export              |
-| `fp-lib-table`        | Project entries for KiCad's stock footprint libraries the parts use (`Capacitor_THT`, `Button_Switch_THT`, …).                                                                     | First export, when needed |
-| `sym-lib-table`       | The same for the stock symbol libraries (`Device`, `Switch`, `power`, …).                                                                                                          | First export, when needed |
-| `README.txt`          | The steps below, and any export notes.                                                                                                                                             | Every export              |
+| File                  | What it is                                                                                                                                                                                   | Written                   |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `<project>.kicad_sch` | The schematic, to [hardware-standards.md](hardware-standards.md): title block, the tinyCore as its three headers (J1–J3), parts in titled blocks, power symbols, global labels, no-connects. | Every export              |
+| `<project>.kicad_pcb` | The HAT: octagon outline, J1–J3 in place, every part placed where it sits on the tinyProto, on its nets and linked to its symbol, GND pours on both sides, title and revision.               | First export only         |
+| `<project>.kicad_pro` | The project, with tinyMove's design rules, pointing at this schematic.                                                                                                                       | First export only         |
+| `<project>.net`       | The netlist, for importing into the board without the schematic.                                                                                                                             | Every export              |
+| `fp-lib-table`        | Project entries for KiCad's stock footprint libraries the parts use (`Capacitor_THT`, `Button_Switch_THT`, …).                                                                               | First export, when needed |
+| `sym-lib-table`       | The same for the stock symbol libraries (`Device`, `Switch`, `power`, …).                                                                                                                    | First export, when needed |
+| `README.txt`          | The steps below, and any export notes.                                                                                                                                                       | Every export              |
 
 ## In KiCad
 
 1. Open `KiCad/<project>.kicad_pro`.
-2. Open the schematic. Run **Inspect → Electrical Rules Checker** if you like:
-   an export passes with no errors.
-3. **Tools → Update PCB from Schematic → Update PCB.** Every part appears beside
-   the HAT with its ratsnest to the headers.
-4. Place, route, run DRC.
+2. Open the schematic. **Inspect → Electrical Rules Checker**: an export passes
+   with no errors or warnings.
+3. Open the board. The parts are already placed, with their ratsnest. Route,
+   fill the zones (**B**), and run **Inspect → Design Rules Checker** with
+   _Test for parity between PCB and schematic_ on: an export has nothing to
+   report under Schematic Parity.
 
 Exporting again after changing the circuit rewrites the schematic, netlist and
 README and leaves the board, project and library tables alone. Run Update PCB
@@ -36,26 +37,45 @@ same part keeps linking to the same footprint.
 (`export/kicadNetlist.ts`), so the two always agree.
 
 - **Symbols.** A part's KiCad symbol and footprint come from
-  `export/kicadMap.ts`. The symbol definitions are copied into the file's
+  `export/kicadMap.ts`: SparkFun's where SparkFun has the part, KiCad's stock
+  ones otherwise. The symbol definitions are copied into the file's
   `lib_symbols`, so it opens without any library installed; they live in
-  `export/kicadSymbols.gen.ts`, generated from KiCad's own libraries by
-  `node scripts/kicad-symbols.mjs --kicad <KiCad symbols folder>` (add a symbol
-  to the script's list and re-run it). A part with no KiCad symbol gets a
-  generated box with its pins, under `tinyStudio:`, and an export note.
-- **Placement.** Each symbol goes where the part sits on tinyStudio's schematic
-  view, scaled up to KiCad's larger symbols, snapped to the 50 mil grid and
-  nudged down until it overlaps nothing. Unplaced parts form a row underneath.
-  Reference and value go where KiCad's library puts them. The sheet is the
-  smallest of A4–A1 that fits, portrait when the layout is tall.
-- **Connections.** Every connected pin gets a short wire and a net label; KiCad
-  joins pins by label name. A pin on `GND` gets a ground symbol, and one
-  `PWR_FLAG` marks ground as driven (every tinyStudio pin is passive, so ERC
-  would otherwise report it undriven). A pin alone on its net gets a
-  no-connect flag.
+  `export/kicadSymbols.gen.ts`, generated by
+  `node scripts/kicad-symbols.mjs --kicad <KiCad symbols> --sparkfun <SparkFun-KiCad-Libraries/symbols>`
+  (add a symbol to the script's list and re-run it). A part with no symbol gets
+  a generated box with its pins, under `tinyStudio:`, and an export note.
+- **Values and PROD_IDs.** SparkFun's symbols are one per stocked part. A part
+  with no value of its own takes the symbol's (an LED is "Red"); the symbol's
+  `PROD_ID` goes on the part only when its value is the stocked part's
+  (`export/kicadLibInfo.ts`).
+- **Layout.** Parts joined by their own signals form a block, titled by what
+  they are (LEDs, Buttons, Decoupling); a block that is a chain of two-pin
+  parts is drawn as one, vertical when it runs between rails. Blocks are packed
+  onto the smallest sheet that holds them (US Letter first), beside and above
+  the title block, with dashed dividers between them.
+- **Connections.** Supplies point up and ground down. A signal that leaves its
+  block gets a global label; one inside a block, a wire. Every rail gets a
+  `PWR_FLAG` (tinyStudio's pins are all passive, so ERC would otherwise report
+  it undriven). A pin alone on its net is a no-connect; on the headers, its pin
+  name is written beside it.
+- **Net names.** The netlist, schematic and board use the same names: the
+  circuit's, a header pin's (D8), KiCad's own for an unnamed net
+  (`Net-(LED1-A)`), and `unconnected-(J1-Pin_3-Pad3)` for a no-connect.
 - **Linking to the board.** The HAT's header footprints carry
   `(path "/<symbol uuid>")`, and the project's one top-level sheet has the
   schematic's UUID, so Update PCB from Schematic updates J1–J3 instead of
   adding a second set.
+
+## Placement on the board
+
+`export/kicadPlace.ts`. The tinyCore's GND and D8 pins fix where the tinyProto
+sits over the HAT template (J1 pad 1 and J2 pad 8), which gives a transform from
+the circuit view to board millimetres. Each part's footprint is then turned
+(0/90/180/270°) and moved so its pads land on the holes its legs are in. The
+footprints come from `export/kicadFootprints.gen.ts`, generated by
+`node scripts/kicad-footprints.mjs --kicad <KiCad footprints> --sparkfun <SparkFun-KiCad-Libraries/Footprints>`
+for every footprint `kicadMap.ts` names. Reference and value move to the fab
+layer, hidden; the silkscreen keeps the outline.
 
 ## Footprints
 
@@ -71,6 +91,8 @@ libraries, which the project's `fp-lib-table` points at through
 `circuit/__tests__/kicadSch.test.ts` and `kicadHat.test.ts`: the file is
 well-formed, every label sits on the end of a wire from its pin, wires are on
 the grid, the same circuit exports byte-identical files, and the headers link
-to their symbols. The format itself was checked in KiCad 10.0 with the
-`tinyProto_Demo` project: ERC with no errors or warnings, and Update PCB from
-Schematic with no errors.
+to their symbols, every pad carries its net, and a part on a tinyProto lands
+across the holes its legs are in. The format itself was checked in KiCad 10.0
+with the `tinyProto_Demo` project: ERC with no errors or warnings, no
+Schematic Parity or unconnected items in DRC, and Update PCB from Schematic with
+nothing but KiCad's own bookkeeping to add.

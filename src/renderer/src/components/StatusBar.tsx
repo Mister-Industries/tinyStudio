@@ -24,7 +24,15 @@ import { PackageJobStatus } from './arduino/PackageJobProgress'
 import { StatusPill } from './ui/StatusPill'
 
 /** Shared dismiss-on-outside-click backdrop for the status-bar popovers. */
+/** Closes a status-bar popup on a click outside it, or on Escape. */
 function Backdrop({ onClose }: { onClose: () => void }): React.JSX.Element {
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
   return <div className="fixed inset-0 z-40" onClick={onClose} />
 }
 
@@ -269,7 +277,7 @@ export function StatusBar(): React.JSX.Element {
           {/* Matches the "Try an example" lightning tile: pale yellow, deep-yellow text.
               `!` because ds-components.css is unlayered and outranks utilities. */}
           <Badge tone="yellow" variant="soft" className="!text-[var(--yellow-deep)]">
-            alpha
+            beta
           </Badge>
         </span>
         <span className="w-[1.5px] h-[15px] bg-[var(--sb-border)] mx-2.5" />
