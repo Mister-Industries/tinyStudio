@@ -7,7 +7,7 @@
 // when the binaries are missing the app runs exactly as before, minus LSP.
 //
 // Uses the same artifact hosting the Arduino IDE uses:
-//   https://downloads.arduino.cc/arduino-language-server/nightly/arduino-language-server_<SUFFIX>
+//   https://downloads.arduino.cc/arduino-language-server/arduino-language-server_<LS_VERSION>_<SUFFIX>
 //   https://downloads.arduino.cc/tools/clangd_<VERSION>_<SUFFIX>.tar.bz2
 //
 // Idempotent: skips any platform whose binaries already exist.
@@ -34,6 +34,9 @@ import { fileURLToPath } from 'node:url'
 // clangd version published on downloads.arduino.cc/tools (same one the
 // Arduino IDE 2.x bundles). Bump deliberately.
 const CLANGD_VERSION = '14.0.0'
+// arduino-language-server release. The old nightly/ URLs now 404, so pin a
+// released version (the one the Arduino IDE 2.x bundles). Bump deliberately.
+const LS_VERSION = '0.7.7'
 const LS_BASE = 'https://downloads.arduino.cc/arduino-language-server'
 const TOOLS_BASE = 'https://downloads.arduino.cc/tools'
 
@@ -97,11 +100,11 @@ async function fetchOne(platform) {
 
   const tmp = mkdtempSync(join(tmpdir(), 'arduino-ls-'))
   try {
-    // ── arduino-language-server (nightly channel, like fresh IDE builds) ──
+    // ── arduino-language-server (pinned release) ──
     if (!existsSync(outLs)) {
-      const asset = `arduino-language-server_${target.suffix}.${target.archive}`
+      const asset = `arduino-language-server_${LS_VERSION}_${target.suffix}.${target.archive}`
       console.log(`↓ ${platform}: downloading ${asset} ...`)
-      await download(`${LS_BASE}/nightly/${asset}`, join(tmp, asset))
+      await download(`${LS_BASE}/${asset}`, join(tmp, asset))
       execFileSync(tarExe(), ['-xf', asset], { cwd: tmp, stdio: 'inherit' })
       const extracted = findFile(tmp, lsBin)
       if (!extracted) throw new Error(`${lsBin} not found inside ${asset}`)
@@ -149,7 +152,7 @@ async function main() {
     .map((a) => (a === 'current' || a === '--current' ? hostPlatform() : a))
   const platforms = requested.length ? requested : Object.keys(TARGETS)
   console.log(
-    `Fetching arduino-language-server (nightly) + clangd ${CLANGD_VERSION} for: ${platforms.join(', ')}`
+    `Fetching arduino-language-server ${LS_VERSION} + clangd ${CLANGD_VERSION} for: ${platforms.join(', ')}`
   )
   for (const p of platforms) {
     await fetchOne(p)
